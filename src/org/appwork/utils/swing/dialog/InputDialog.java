@@ -34,6 +34,7 @@ import org.appwork.utils.StringUtils;
 import org.appwork.utils.logging.Log;
 import org.appwork.utils.os.CrossSystem;
 import org.appwork.utils.swing.EDTHelper;
+import org.appwork.utils.swing.EDTRunner;
 
 public class InputDialog extends AbstractDialog<String> implements KeyListener, MouseListener, InputDialogInterface {
 
@@ -80,33 +81,33 @@ public class InputDialog extends AbstractDialog<String> implements KeyListener, 
      */
     @Override
     protected String createReturnValue() {
-        return getReturnID();
+        return this.getReturnID();
     }
 
     public String getDefaultMessage() {
-        return defaultMessage;
+        return this.defaultMessage;
     }
 
     public String getMessage() {
-        return message;
+        return this.message;
     }
 
     public String getReturnID() {
-        if ((getReturnmask() & (Dialog.RETURN_OK | Dialog.RETURN_TIMEOUT)) == 0) { return null; }
+        if ((this.getReturnmask() & (Dialog.RETURN_OK | Dialog.RETURN_TIMEOUT)) == 0) { return null; }
 
-        if (input == null) {
-            if (bigInput == null || bigInput.getText() == null) { return null; }
+        if (this.input == null) {
+            if (this.bigInput == null || this.bigInput.getText() == null) { return null; }
 
-            return bigInput.getText();
+            return this.bigInput.getText();
         } else {
-            if (input == null || input.getText() == null) { return null; }
-            if (input instanceof JPasswordField) { return new String(((JPasswordField) input).getPassword()); }
-            return input.getText();
+            if (this.input == null || this.input.getText() == null) { return null; }
+            if (this.input instanceof JPasswordField) { return new String(((JPasswordField) this.input).getPassword()); }
+            return this.input.getText();
         }
     }
 
     public void keyPressed(final KeyEvent e) {
-        cancel();
+        this.cancel();
     }
 
     public void keyReleased(final KeyEvent e) {
@@ -118,24 +119,25 @@ public class InputDialog extends AbstractDialog<String> implements KeyListener, 
     @Override
     public JComponent layoutDialogContent() {
         final JPanel contentpane = new MigPanel("ins 0,wrap 1", "[grow,fill]", "[][]");
-        if (!StringUtils.isEmpty(message)) {
-            textField = new JTextPane() {
+        if (!StringUtils.isEmpty(this.message)) {
+            this.textField = new JTextPane() {
                 private static final long serialVersionUID = 1L;
 
                 @Override
                 public boolean getScrollableTracksViewportWidth() {
 
-                    return !BinaryLogic.containsAll(flagMask, Dialog.STYLE_LARGE);
+                    return !BinaryLogic.containsAll(InputDialog.this.flagMask, Dialog.STYLE_LARGE);
                 }
 
+                @Override
                 public boolean getScrollableTracksViewportHeight() {
                     return true;
                 }
             };
 
-            if (BinaryLogic.containsAll(flagMask, Dialog.STYLE_HTML)) {
-                textField.setContentType("text/html");
-                textField.addHyperlinkListener(new HyperlinkListener() {
+            if (BinaryLogic.containsAll(this.flagMask, Dialog.STYLE_HTML)) {
+                this.textField.setContentType("text/html");
+                this.textField.addHyperlinkListener(new HyperlinkListener() {
 
                     public void hyperlinkUpdate(final HyperlinkEvent e) {
                         if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
@@ -145,44 +147,44 @@ public class InputDialog extends AbstractDialog<String> implements KeyListener, 
 
                 });
             } else {
-                textField.setContentType("text");
+                this.textField.setContentType("text");
                 // this.textField.setMaximumSize(new Dimension(450, 600));
             }
 
-            textField.setText(message);
-            textField.setEditable(false);
-            textField.setBackground(null);
-            textField.setOpaque(false);
-            textField.putClientProperty("Synthetica.opaque", Boolean.FALSE);
-            textField.setCaretPosition(0);
+            this.textField.setText(this.message);
+            this.textField.setEditable(false);
+            this.textField.setBackground(null);
+            this.textField.setOpaque(false);
+            this.textField.putClientProperty("Synthetica.opaque", Boolean.FALSE);
+            this.textField.setCaretPosition(0);
 
-            if (BinaryLogic.containsAll(flagMask, Dialog.STYLE_LARGE)) {
+            if (BinaryLogic.containsAll(this.flagMask, Dialog.STYLE_LARGE)) {
 
-                contentpane.add(new JScrollPane(textField));
+                contentpane.add(new JScrollPane(this.textField));
             } else {
 
-                contentpane.add(textField);
+                contentpane.add(this.textField);
 
             }
             // inout dialog can become too large(height) if we do not limit the
             // prefered textFIled size here.
-            textField.setPreferredSize(textField.getPreferredSize());
+            this.textField.setPreferredSize(this.textField.getPreferredSize());
 
         }
 
-        if (BinaryLogic.containsAll(flagMask, Dialog.STYLE_LARGE)) {
-            bigInput = getLargeInputComponent();
+        if (BinaryLogic.containsAll(this.flagMask, Dialog.STYLE_LARGE)) {
+            this.bigInput = this.getLargeInputComponent();
 
-            bigInput.setText(defaultMessage);
-            bigInput.addKeyListener(this);
-            bigInput.addMouseListener(this);
-            contentpane.add(new JScrollPane(bigInput), "height 20:60:n,pushy,growy,w 450");
+            this.bigInput.setText(this.defaultMessage);
+            this.bigInput.addKeyListener(this);
+            this.bigInput.addMouseListener(this);
+            contentpane.add(new JScrollPane(this.bigInput), "height 20:60:n,pushy,growy,w 450");
         } else {
-            input = getSmallInputComponent();
+            this.input = this.getSmallInputComponent();
             // this.input.setBorder(BorderFactory.createEtchedBorder());
-            input.setText(defaultMessage);
+            this.input.setText(this.defaultMessage);
 
-            contentpane.add((JComponent) input, "w 450");
+            contentpane.add((JComponent) this.input, "w 450");
         }
 
         return contentpane;
@@ -200,7 +202,7 @@ public class InputDialog extends AbstractDialog<String> implements KeyListener, 
      * @return
      */
     protected TextComponentInterface getSmallInputComponent() {
-        if (BinaryLogic.containsAll(flagMask, Dialog.STYLE_PASSWORD)) {
+        if (BinaryLogic.containsAll(this.flagMask, Dialog.STYLE_PASSWORD)) {
             final ExtPasswordField pw = new ExtPasswordField();
             pw.addKeyListener(this);
             pw.addMouseListener(this);
@@ -214,13 +216,14 @@ public class InputDialog extends AbstractDialog<String> implements KeyListener, 
         }
     }
 
+    @Override
     protected boolean isResizable() {
 
         return true;
     }
 
     public void mouseClicked(final MouseEvent e) {
-        cancel();
+        this.cancel();
     }
 
     public void mouseEntered(final MouseEvent e) {
@@ -240,24 +243,33 @@ public class InputDialog extends AbstractDialog<String> implements KeyListener, 
 
     }
 
+    @Override
     protected void initFocus(final JComponent focus) {
-
-        if (input != null) {
-            input.selectAll();
-            input.requestFocusInWindow();
+        if (this.input != null) {
+            this.input.selectAll();
+            this.input.requestFocusInWindow();
         }
-        if (bigInput != null) {
-            bigInput.selectAll();
-            bigInput.requestFocusInWindow();
+        if (this.bigInput != null) {
+            this.bigInput.selectAll();
+            this.bigInput.requestFocusInWindow();
         }
 
     }
 
     public void setDefaultMessage(final String defaultMessage) {
         this.defaultMessage = defaultMessage;
-        if (input != null) {
-            input.setText(defaultMessage);
-        }
+        new EDTRunner() {
+
+            @Override
+            protected void runInEDT() {
+                if (InputDialog.this.input != null) {
+                    InputDialog.this.input.setText(defaultMessage);
+                }
+                if (InputDialog.this.bigInput != null) {
+                    InputDialog.this.bigInput.setText(defaultMessage);
+                }
+            }
+        };
     }
 
     public void setMessage(final String message) {
@@ -276,8 +288,9 @@ public class InputDialog extends AbstractDialog<String> implements KeyListener, 
 
             @Override
             public String edtRun() {
-                if (input == null) { return null; }
-                return input.getText();
+                if (InputDialog.this.input != null) { return InputDialog.this.input.getText(); }
+                if (InputDialog.this.bigInput != null) { return InputDialog.this.bigInput.getText(); }
+                return null;
             }
         }.getReturnValue();
     }

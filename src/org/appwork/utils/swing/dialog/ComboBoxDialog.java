@@ -180,8 +180,8 @@ public class ComboBoxDialog extends AbstractDialog<Integer> implements ComboBoxD
     public String[] getLabels() {
         String[] ret = new String[options.length];
         for (int i = 0; i < ret.length; i++) {
-            ret[i] = JSonStorage.toString(options[i]);
-
+            ret[i] = String.valueOf(options[i]);
+            
         }
         return ret;
     }

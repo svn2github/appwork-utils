@@ -40,9 +40,9 @@ public class TreeModelStateSaver {
     private TreePath                       treePath;
 
     /**
-     * Stores all selected Pathes
+     * Stores all selected Paths
      */
-    protected TreePath[]                   selectedPathes;
+    protected TreePath[]                   selectedPaths;
 
     /**
      * @param tree
@@ -60,11 +60,11 @@ public class TreeModelStateSaver {
     }
 
     /**
-     * @return the {@link TreeModelStateSaver#selectedPathes}
-     * @see TreeModelStateSaver#selectedPathes
+     * @return the {@link TreeModelStateSaver#selectedPaths}
+     * @see TreeModelStateSaver#selectedPaths
      */
-    public TreePath[] getSelectedPathes() {
-        return this.selectedPathes;
+    public TreePath[] getSelectedPaths() {
+        return this.selectedPaths;
     }
 
     /**
@@ -77,18 +77,18 @@ public class TreeModelStateSaver {
             @Override
             public Object edtRun() {
                 try {
-                    if (TreeModelStateSaver.this.tree.getModel() == null) { 
-                        
-                        return null;};
-                        
-                     
-                        TreeModelStateSaver.this.restoreState(TreeModelStateSaver.this.tree.getModel().getRoot(), new ArrayList<Object>());
-                    
-                    final TreePath[] selectedPathes = TreeModelStateSaver.this.getSelectedPathes();
+                    if (TreeModelStateSaver.this.tree.getModel() == null) {
+
+                    return null; }
+                    ;
+
+                    TreeModelStateSaver.this.restoreState(TreeModelStateSaver.this.tree.getModel().getRoot(), new ArrayList<Object>());
+
+                    final TreePath[] selectedPathes = TreeModelStateSaver.this.getSelectedPaths();
                     if (selectedPathes != null && selectedPathes.length > 0) {
                         TreeModelStateSaver.this.tree.getSelectionModel().clearSelection();
                         TreeModelStateSaver.this.tree.getSelectionModel().setSelectionPaths(selectedPathes);
-                
+
                     }
                 } catch (final Throwable e) {
                     Log.exception(Level.WARNING, e);
@@ -106,7 +106,7 @@ public class TreeModelStateSaver {
             public Object edtRun() {
                 if (node == null) { return null; }
                 path.add(node);
-       
+
                 TreeModelStateSaver.this.treePath = new TreePath(path.toArray(new Object[] {}));
                 final Boolean bo = TreeModelStateSaver.this.expandCache.get(node);
                 try {
@@ -138,7 +138,7 @@ public class TreeModelStateSaver {
         if (this.tree.getModel() != null) {
             this.saveState(this.tree.getModel().getRoot(), new ArrayList<Object>());
         }
-        this.selectedPathes = this.tree.getSelectionPaths();
+        this.selectedPaths = this.tree.getSelectionPaths();
     }
 
     /**
@@ -171,8 +171,8 @@ public class TreeModelStateSaver {
      * @param selectedPathes
      *            the selectedPathes to set
      */
-    public void setSelectedPathes(final TreePath[] selectedPathes) {
-        this.selectedPathes = selectedPathes;
+    public void setSelectedPaths(final TreePath[] selectedPathes) {
+        this.selectedPaths = selectedPathes;
     }
 
 }

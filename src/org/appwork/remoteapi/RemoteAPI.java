@@ -215,7 +215,7 @@ public class RemoteAPI implements HttpRequestHandler {
         return false;
     }
 
-    /* hashmap that holds all registered interfaces and their pathes */
+    /* hashmap that holds all registered interfaces and their paths */
     private HashMap<String, InterfaceHandler<RemoteAPIInterface>> interfaces = new HashMap<String, InterfaceHandler<RemoteAPIInterface>>();
 
     public RemoteAPI() {

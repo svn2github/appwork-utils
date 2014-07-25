@@ -23,6 +23,17 @@ public class KeyValuePair {
         this.value = value;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        // TODO Auto-generated method stub
+        return key + "=" + value;
+    }
+
     /**
      * @param string
      */

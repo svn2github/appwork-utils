@@ -256,7 +256,7 @@ public class Application {
         try {
 
             if (relative == null) { return null; }
-            if (relative.startsWith("/") || relative.startsWith("\\")) { throw new WTFException("getRessourceURL only works with relative pathes."); }
+            if (relative.startsWith("/") || relative.startsWith("\\")) { throw new WTFException("getRessourceURL only works with relative paths."); }
             if (preferClasspath) {
 
                 final URL res = Application.class.getClassLoader().getResource(relative);

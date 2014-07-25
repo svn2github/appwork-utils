@@ -102,13 +102,9 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
 
     protected void repaint() {
         final ExtTableModel<E> model = getModel();
-        if (model == null) {
-            return;
-        }
+        if (model == null) { return; }
         final ExtTable<E> table = model.getTable();
-        if (table == null) {
-            return;
-        }
+        if (table == null) { return; }
         final Rectangle visibleRect = table.getVisibleRect();
 
         final Rectangle first = table.getCellRect(0, getIndex(), true);
@@ -668,10 +664,10 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
     }
 
     /**
-     * return true if you dont want to forward to following onDoubleClick
+     * return true if you don't want to forward to following onDoubleClick
      * listener
      * 
-     * This method will be called when a doubleclick is performed on the object
+     * This method will be called when a doubleClick is performed on the object
      * <code>obj</code>
      * 
      * @param obj

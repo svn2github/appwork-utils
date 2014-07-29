@@ -320,7 +320,7 @@ abstract public class Graph extends JPanel implements ToolTipHandler {
                     g2.drawString(speedString, xText, 12);
                 }
                 // average speed
-                if (this.averageColor != null) {
+                if (this.getAverageTextColor() != null) {
                     speedString = this.getAverageSpeedString();
                     if (speedString != null && thread != null) {
                         g2.setColor(this.getAverageTextColor());
@@ -362,6 +362,9 @@ abstract public class Graph extends JPanel implements ToolTipHandler {
      */
     public void setAverageColor(final Color averageColor) {
         this.averageColor = averageColor;
+        if (averageColor.getAlpha() == 0) {
+            this.averageColor = null;
+        }
     }
 
     /**
@@ -370,6 +373,10 @@ abstract public class Graph extends JPanel implements ToolTipHandler {
      */
     public void setAverageTextColor(final Color averageTextColor) {
         this.averageTextColor = averageTextColor;
+
+        if (averageTextColor.getAlpha() == 0) {
+            this.averageTextColor = null;
+        }
     }
 
     /**
@@ -396,6 +403,7 @@ abstract public class Graph extends JPanel implements ToolTipHandler {
      */
     public void setCurrentColorBottom(final Color colorB) {
         this.currentColorBottom = colorB;
+
     }
 
     /**

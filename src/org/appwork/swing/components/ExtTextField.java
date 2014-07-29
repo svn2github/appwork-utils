@@ -24,7 +24,7 @@ public class ExtTextField extends JTextField implements CaretListener, FocusList
      */
     private static final long serialVersionUID     = -3625278218179478516L;
     protected Color           defaultColor;
-    private Color             helpColor;
+    protected Color           helpColor;
 
     {
         addCaretListener(this);
@@ -37,7 +37,7 @@ public class ExtTextField extends JTextField implements CaretListener, FocusList
         getDocument().addDocumentListener(this);
 
     }
-    private String            helpText             = null;
+    protected String          helpText             = null;
     private boolean           setting;
     private boolean           clearHelpTextOnFocus = true;
     private boolean           helperEnabled        = true;
@@ -125,14 +125,14 @@ public class ExtTextField extends JTextField implements CaretListener, FocusList
         return menu;
     }
 
-
     public void replaceSelection(final String content) {
-        if (isHelperEnabled() && super.getText().equals(helpText)&&StringUtils.isNotEmpty(content)) {
+        if (isHelperEnabled() && super.getText().equals(helpText) && StringUtils.isNotEmpty(content)) {
             super.setText("");
         }
         super.replaceSelection(content);
         setForeground(defaultColor);
     }
+
     @Override
     public String getText() {
         String ret = super.getText();
@@ -229,7 +229,7 @@ public class ExtTextField extends JTextField implements CaretListener, FocusList
 
     @Override
     public void setText(String t) {
-        if(setting)return;
+        if (setting) { return; }
         if (!isHelperEnabled()) {
             super.setText(t);
             return;

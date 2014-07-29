@@ -89,6 +89,22 @@ public class PathChooser extends MigPanel {
              */
             private static final long serialVersionUID = 3243788323043431841L;
 
+            /*
+             * (non-Javadoc)
+             * 
+             * @see org.appwork.swing.components.ExtTextField#getText()
+             */
+            @Override
+            public String getText() {
+
+                String ret = super.getText();
+
+                if (ret.equals(helpText) && getForeground() == helpColor) {
+                    ret = "";
+                }
+                return ret;
+            }
+
             @Override
             public JPopupMenu getPopupMenu(final AbstractAction cutAction, final AbstractAction copyAction, final AbstractAction pasteAction, final AbstractAction deleteAction, final AbstractAction selectAction) {
                 final JPopupMenu self = PathChooser.this.getPopupMenu(PathChooser.this.txt, cutAction, copyAction, pasteAction, deleteAction, selectAction);

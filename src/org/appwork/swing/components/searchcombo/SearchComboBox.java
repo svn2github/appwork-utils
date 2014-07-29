@@ -42,6 +42,8 @@ import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.plaf.basic.BasicComboBoxUI;
 import javax.swing.plaf.basic.ComboPopup;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
 
 import org.appwork.app.gui.BasicGui;
 import org.appwork.resources.AWUTheme;
@@ -924,7 +926,15 @@ public abstract class SearchComboBox<T> extends JComboBox {
      */
     private void updateHelpText() {
         if (this.getEditor() == null || this.helptext == null) { return; }
-        final String txt = this.getTextField().getText();
+
+        Document doc = this.getTextField().getDocument();
+        String txt;
+        try {
+            txt = doc.getText(0, doc.getLength());
+        } catch (BadLocationException e) {
+            txt = "";
+        }
+
         final boolean hasHelpText = txt.equals(this.helptext);
         if (StringUtils.isEmpty(txt) || hasHelpText) {
             if (hasHelpText == false) {

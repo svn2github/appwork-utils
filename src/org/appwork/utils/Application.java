@@ -40,6 +40,8 @@ import org.appwork.utils.os.CrossSystem;
  */
 public class Application {
 
+    private static Boolean IS_JARED    = null;
+
     static {
         Application.redirectOutputStreams();
     }
@@ -428,6 +430,11 @@ public class Application {
      * @return
      */
     public static boolean isJared(Class<?> rootOfClazz) {
+        if (IS_JARED != null) {
+
+        return IS_JARED == Boolean.TRUE;
+
+        }
         if (rootOfClazz == null) {
             rootOfClazz = Application.class;
         }
@@ -435,6 +442,7 @@ public class Application {
         final ClassLoader cll = Application.class.getClassLoader();
         if (cll == null) {
             Log.L.severe("getContextClassLoader() is null");
+            IS_JARED = Boolean.TRUE;
             return true;
         }
         // System.out.println(name);
@@ -445,8 +453,13 @@ public class Application {
          * caller is null in case the ressource is not found or not enough
          * rights, in that case we assume its not jared
          */
-        if (caller == null) { return false; }
-        return caller.toString().matches("jar\\:.*\\.(jar|exe)\\!.*");
+        if (caller == null) {
+            IS_JARED = false;
+            return false;
+        }
+        boolean ret = caller.toString().matches("jar\\:.*\\.(jar|exe)\\!.*");
+        IS_JARED = ret;
+        return ret;
     }
 
     /**

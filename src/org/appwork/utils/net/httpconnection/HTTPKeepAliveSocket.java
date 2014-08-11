@@ -9,7 +9,10 @@
  */
 package org.appwork.utils.net.httpconnection;
 
+import java.net.InetAddress;
 import java.net.Socket;
+
+import org.appwork.utils.StringUtils;
 
 /**
  * @author daniel
@@ -17,10 +20,53 @@ import java.net.Socket;
  */
 public class HTTPKeepAliveSocket {
 
-    private final Socket socket;
+    private final Socket      socket;
+    private final InetAddress localIP;
+    private final String      host;
+
+    public InetAddress getLocalIP() {
+        return this.localIP;
+    }
+
+    public InetAddress[] getRemoteIPs() {
+        return this.remoteIPs;
+    }
+
+    private final InetAddress[] remoteIPs;
 
     public Socket getSocket() {
         return this.socket;
+    }
+
+    public boolean sameLocalIP(final InetAddress otherIP) {
+        return otherIP == null && this.getLocalIP() == null || otherIP != null && this.getLocalIP() != null && this.getLocalIP().equals(otherIP);
+    }
+
+    public boolean sameHost(final String otherHost) {
+        return StringUtils.equalsIgnoreCase(this.getHost(), otherHost);
+    }
+
+    public boolean sameRemoteIPs(final InetAddress remoteIPs[]) {
+        if (remoteIPs != null && remoteIPs.length > 0) {
+            final InetAddress socketRemoteIP = this.getSocket().getInetAddress();
+            for (final InetAddress remoteIP : remoteIPs) {
+                if (socketRemoteIP.equals(remoteIP)) {
+                    //
+                    return true;
+                }
+            }
+            if (this.getRemoteIPs() != null) {
+                for (final InetAddress knownRemoteIP : this.getRemoteIPs()) {
+                    for (final InetAddress remoteIP : remoteIPs) {
+                        if (knownRemoteIP.equals(remoteIP)) {
+                            //
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     public long getKeepAliveTimeout() {
@@ -43,11 +89,6 @@ public class HTTPKeepAliveSocket {
     private final long    maxRequests;
     private volatile long keepAliveTimestamp = -1;
     private volatile long requests           = 0;
-    private final String  ID;
-
-    public String getID() {
-        return this.ID;
-    }
 
     public long getKeepAliveTimestamp() {
         return this.keepAliveTimestamp;
@@ -57,10 +98,16 @@ public class HTTPKeepAliveSocket {
         this.keepAliveTimestamp = System.currentTimeMillis() + this.getKeepAliveTimeout();
     }
 
-    public HTTPKeepAliveSocket(final String ID, final Socket socket, final long keepAliveTimeout, final long maxRequests) {
-        this.ID = ID;
+    public HTTPKeepAliveSocket(final String host, final Socket socket, final long keepAliveTimeout, final long maxRequests, final InetAddress localIP, final InetAddress[] remoteIPs) {
+        this.host = host;
         this.socket = socket;
+        this.localIP = localIP;
+        this.remoteIPs = remoteIPs;
         this.keepAliveTimeout = Math.max(0, keepAliveTimeout);
         this.maxRequests = Math.max(0, maxRequests);
+    }
+
+    public String getHost() {
+        return this.host;
     }
 }

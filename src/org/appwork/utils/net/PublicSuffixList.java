@@ -31,6 +31,19 @@ import org.appwork.utils.Regex;
  */
 public class PublicSuffixList {
 
+    private static PublicSuffixList INSTANCE;
+    static {
+        try {
+            PublicSuffixList.INSTANCE = new PublicSuffixList();
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static PublicSuffixList getInstance() {
+        return PublicSuffixList.INSTANCE;
+    }
+
     /**
      * Implementation for https://publicsuffix.org/list/
      */
@@ -39,8 +52,8 @@ public class PublicSuffixList {
 
     public static void main(String[] args) throws Throwable {
         PublicSuffixList test = new PublicSuffixList();
-        System.out.println(test.getTopLevelDomain("test.takahama.aichi.jp"));
-        System.out.println(test.getDomain("test.takahama.aichi.jp"));
+        System.out.println(test.getTopLevelDomain("test.teledata.mz"));
+        System.out.println(test.getDomain("test.teledata.mz"));
         System.out.println(test.getTopLevelDomain("jdownloader.org"));
         System.out.println(test.getDomain("jdownloader.org"));
     }
@@ -49,7 +62,7 @@ public class PublicSuffixList {
         this.map = this.parse(publicSuffixList);
     }
 
-    public PublicSuffixList() throws IOException {
+    private PublicSuffixList() throws IOException {
         this(Application.getRessourceURL("org/appwork/utils/net/effective_tld_names.dat"));
     }
 

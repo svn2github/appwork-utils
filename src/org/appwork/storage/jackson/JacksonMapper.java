@@ -38,13 +38,11 @@ public class JacksonMapper implements JSONMapper {
 
     private final ObjectMapper mapper;
 
-
     public JacksonMapper() {
 
         mapper = new ObjectMapper(new ExtJsonFactory());
 
         mapper.getDeserializationConfig().set(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    
 
     }
 
@@ -66,7 +64,7 @@ public class JacksonMapper implements JSONMapper {
         }
 
         );
-      
+
         mapper.registerModule(mod);
     }
 
@@ -130,6 +128,23 @@ public class JacksonMapper implements JSONMapper {
         } catch (final IOException e) {
             throw new JSonMapperException(e);
         }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.appwork.storage.JSONMapper#convert(java.lang.Object,
+     * org.appwork.storage.TypeRef)
+     */
+    @Override
+    public <T> T convert(Object jsonString, final TypeRef<T> type) throws JSonMapperException {
+        final TypeReference<T> tr = new TypeReference<T>() {
+            @Override
+            public Type getType() {
+                return type.getType();
+            }
+        };
+        return mapper.convertValue(jsonString, tr);
     }
 
 }

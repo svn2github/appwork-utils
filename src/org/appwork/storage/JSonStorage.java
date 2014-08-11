@@ -534,4 +534,16 @@ public class JSonStorage {
         }
     }
 
+    /**
+     * @param <E>
+     * @param o
+     * @param typeRef
+     * @return
+     */
+    public static <E> E convert(Object o, TypeRef<E> typeRef) {
+        // TODO Auto-generated method stub SimpleMapper m = new SimpleMapper();
+
+        return JSON_MAPPER.convert(o, typeRef);
+    }
+
 }

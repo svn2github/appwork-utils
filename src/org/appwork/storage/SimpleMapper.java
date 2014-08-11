@@ -37,10 +37,10 @@ public class SimpleMapper implements JSONMapper {
             @Override
             public JSonNode create(final Object obj) throws MapperException {
                 for (final JsonSerializerEntry se : serializer) {
-                    if (obj!=null&&se.clazz.isAssignableFrom(obj.getClass())) { return new JSonNode() {
-                     
+                    if (obj != null && se.clazz.isAssignableFrom(obj.getClass())) { return new JSonNode() {
+
                         @Override
-                        public String toString() {                     
+                        public String toString() {
                             return se.serializer.toJSonString(obj);
                         }
                     }; }
@@ -94,7 +94,7 @@ public class SimpleMapper implements JSONMapper {
     @Override
     public String objectToString(final Object o) throws JSonMapperException {
         try {
-        
+
             return mapper.create(o).toString();
         } catch (final MapperException e) {
             throw new JSonMapperException(e);
@@ -136,6 +136,22 @@ public class SimpleMapper implements JSONMapper {
             throw new JSonMapperException(e);
 
         } catch (final MapperException e) {
+            throw new JSonMapperException(e);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.appwork.storage.JSONMapper#convert(java.lang.Object,
+     * org.appwork.storage.TypeRef)
+     */
+    @Override
+    public <T> T convert(Object object, TypeRef<T> type) throws JSonMapperException {
+
+        try {
+            return mapper.jsonToObject(mapper.create(object), type);
+        } catch (MapperException e) {
             throw new JSonMapperException(e);
         }
     }

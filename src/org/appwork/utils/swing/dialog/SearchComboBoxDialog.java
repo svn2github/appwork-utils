@@ -9,6 +9,9 @@
  */
 package org.appwork.utils.swing.dialog;
 
+import java.awt.Component;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowFocusListener;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -178,7 +181,26 @@ public class SearchComboBoxDialog<Type> extends AbstractDialog<Type> implements 
         // this.box.setMaximumSize(new Dimension(450, 600));
         // }
         contentpane.add(box, "pushy,growy,height 24!");
+        getDialog().addWindowFocusListener(new WindowFocusListener() {
 
+            @Override
+            public void windowLostFocus(final WindowEvent windowevent) {
+                // TODO Auto-generated method stub
+
+            }
+
+            @Override
+            public void windowGainedFocus(final WindowEvent windowevent) {
+                final Component focusOwner = getDialog().getFocusOwner();
+                if (focusOwner != null) {
+                    // dialog component has already focus...
+                    return;
+                }
+                /* we only want to force focus on first window open */
+                getDialog().removeWindowFocusListener(this);
+                box.requestFocus();
+            }
+        });
         return contentpane;
     }
 

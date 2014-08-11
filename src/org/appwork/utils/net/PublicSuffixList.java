@@ -39,8 +39,8 @@ public class PublicSuffixList {
 
     public static void main(String[] args) throws Throwable {
         PublicSuffixList test = new PublicSuffixList();
-        System.out.println(test.getTopLevelDomain("test.city2.kawasaki.jp"));
-        System.out.println(test.getDomain("test.city2.kawasaki.jp"));
+        System.out.println(test.getTopLevelDomain("test.takahama.aichi.jp"));
+        System.out.println(test.getDomain("test.takahama.aichi.jp"));
         System.out.println(test.getTopLevelDomain("jdownloader.org"));
         System.out.println(test.getDomain("jdownloader.org"));
     }
@@ -94,7 +94,7 @@ public class PublicSuffixList {
 
                         @Override
                         public int compare(String o1, String o2) {
-                            return this.compare(o1.split("\\.").length, o2.split("\\.").length);
+                            return this.compare(o1.length(), o2.length());
                         }
 
                     });

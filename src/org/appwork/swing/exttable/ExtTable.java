@@ -1068,6 +1068,10 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
 
     }
 
+    protected boolean isWrapAroundEnabled() {
+        return true;
+    }
+
     /**
      * @param selectedObjects
      * @param evt
@@ -1255,7 +1259,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
                 return this.onShortcutSearch(this.getModel().getSelectedObjects(), evt);
             }
 
-            if (this.isSelectionUpTrigger(ks)) {
+            if (this.isSelectionUpTrigger(ks) && this.isWrapAroundEnabled()) {
                 if (this.getSelectedRow() == 0) {
                     if (this.getCellEditor() != null) {
                         this.getCellEditor().stopCellEditing();
@@ -1264,7 +1268,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
                     return true;
                 }
             }
-            if (this.isSelectionDownTrigger(ks)) {
+            if (this.isSelectionDownTrigger(ks) && this.isWrapAroundEnabled()) {
                 if (this.getSelectedRow() == this.getRowCount() - 1) {
                     if (this.getCellEditor() != null) {
                         this.getCellEditor().stopCellEditing();

@@ -192,6 +192,11 @@ public class HTTPConnectionImpl implements HTTPConnection {
         return 60 * 1000l;
     }
 
+    protected boolean isKeepAliveOK() {
+        final int code = this.getResponseCode();
+        return this.isOK() || code == 404 || code == 403 || code == 416;
+    }
+
     protected boolean putKeepAliveSocket(final Socket socket) throws IOException {
         /**
          * only keep-Alive sockets if
@@ -208,7 +213,7 @@ public class HTTPConnectionImpl implements HTTPConnection {
          * 5.) available outputstream has written all data
          * 
          */
-        if (socket != null && this.isKeepAlivedEnabled() && this.isOK() && socket.isConnected() && !socket.isClosed() && socket.isInputShutdown() == false && socket.isOutputShutdown() == false) {
+        if (socket != null && this.isKeepAlivedEnabled() && this.isKeepAliveOK() && socket.isConnected() && !socket.isClosed() && socket.isInputShutdown() == false && socket.isOutputShutdown() == false) {
             if (this.inputStream != null && this.inputStream instanceof StreamValidEOF && ((StreamValidEOF) this.inputStream).isValidEOF()) {
                 if (!this.requiresOutputStream() || ((CountingOutputStream) this.outputStream).transferedBytes() == this.postTodoLength) {
                     socket.setKeepAlive(true);
@@ -583,15 +588,19 @@ public class HTTPConnectionImpl implements HTTPConnection {
             } else {
                 wrappedInputStream = connectionSocket.getInputStream();
             }
-            final boolean isChunked = StringUtils.containsIgnoreCase(this.getHeaderField(HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING), HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING_CHUNKED);
-            if (isChunked) {
-                /* wrap chunkedInputStream */
-                wrappedInputStream = new ChunkedInputStream(wrappedInputStream);
+            if (RequestMethod.HEAD.equals(this.getRequestMethod())) {
+                wrappedInputStream = new LimitedInputStream(wrappedInputStream, 0);
             } else {
-                final long contentLength = this.getContentLength();
-                if (contentLength >= 0) {
-                    /* wrap limitedInputStream */
-                    wrappedInputStream = new LimitedInputStream(wrappedInputStream, contentLength);
+                final boolean isChunked = StringUtils.containsIgnoreCase(this.getHeaderField(HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING), HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING_CHUNKED);
+                if (isChunked) {
+                    /* wrap chunkedInputStream */
+                    wrappedInputStream = new ChunkedInputStream(wrappedInputStream);
+                } else {
+                    final long contentLength = this.getContentLength();
+                    if (contentLength >= 0) {
+                        /* wrap limitedInputStream */
+                        wrappedInputStream = new LimitedInputStream(wrappedInputStream, contentLength);
+                    }
                 }
             }
             this.inputStream = wrappedInputStream;

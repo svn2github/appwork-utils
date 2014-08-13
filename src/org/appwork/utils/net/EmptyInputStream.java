@@ -16,7 +16,7 @@ import java.io.InputStream;
  * @author daniel
  * 
  */
-public final class EmptyInputStream extends InputStream {
+public final class EmptyInputStream extends InputStream implements StreamValidEOF {
 
     @Override
     public final int read() throws IOException {
@@ -31,5 +31,10 @@ public final class EmptyInputStream extends InputStream {
     @Override
     public final int read(final byte[] b, final int off, final int len) throws IOException {
         return -1;
+    }
+
+    @Override
+    public boolean isValidEOF() {
+        return true;
     };
 }

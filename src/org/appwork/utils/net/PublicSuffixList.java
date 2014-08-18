@@ -120,9 +120,11 @@ public class PublicSuffixList {
     }
 
     protected Map<String, List<String>> parse(URL publicSuffixList) throws IOException {
+        final HashMap<String, List<String>> map = new HashMap<String, List<String>>();
+        if (publicSuffixList == null) { return map; }
         final InputStream is = publicSuffixList.openStream();
         try {
-            final HashMap<String, List<String>> map = new HashMap<String, List<String>>();
+
             final BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
             final List<String> emptyList = new ArrayList<String>(0);
             String line = null;

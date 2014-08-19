@@ -25,6 +25,14 @@ public class HttpServerController {
     public HttpServerController() {
     }
 
+    public synchronized HttpServer getServer(final int port) {
+
+        for (final HttpServer s : servers) {
+            if (s.getPort() == port) { return s; }
+        }
+        return null;
+    }
+
     public synchronized HttpHandlerInfo registerRequestHandler(final int port, final boolean localhost, final HttpRequestHandler handler) throws IOException {
         HttpServer server = null;
         for (final HttpServer s : servers) {

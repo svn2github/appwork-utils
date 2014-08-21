@@ -34,6 +34,7 @@ import org.appwork.storage.config.annotations.DescriptionForConfigEntry;
 import org.appwork.storage.config.annotations.DevConfig;
 import org.appwork.storage.config.annotations.HexColorString;
 import org.appwork.storage.config.annotations.LookUpKeys;
+import org.appwork.storage.config.annotations.NoHeadless;
 import org.appwork.storage.config.annotations.PlainStorage;
 import org.appwork.storage.config.annotations.RequiresRestart;
 import org.appwork.storage.config.annotations.ValidatorFactory;
@@ -98,7 +99,7 @@ public abstract class KeyHandler<RawClass> {
      */
     private void checkBadAnnotations(final Method m, final Class<? extends Annotation>... classes) {
 
-        final Class<?>[] okForAll = new Class<?>[] { HexColorString.class, CustomValueGetter.class, ValidatorFactory.class, DefaultJsonObject.class, DefaultFactory.class, AboutConfig.class, DevConfig.class, RequiresRestart.class, AllowStorage.class, DescriptionForConfigEntry.class, CryptedStorage.class, PlainStorage.class };
+        final Class<?>[] okForAll = new Class<?>[] { HexColorString.class, CustomValueGetter.class, ValidatorFactory.class, DefaultJsonObject.class, DefaultFactory.class, AboutConfig.class, NoHeadless.class, DevConfig.class, RequiresRestart.class, AllowStorage.class, DescriptionForConfigEntry.class, CryptedStorage.class, PlainStorage.class };
         final Class<?>[] clazzes = new Class<?>[classes.length + okForAll.length];
         System.arraycopy(classes, 0, clazzes, 0, classes.length);
         System.arraycopy(okForAll, 0, clazzes, classes.length, okForAll.length);

@@ -55,9 +55,6 @@ public abstract class EDTHelper<T> implements Runnable {
      */
     public abstract T edtRun();
 
-  
-
-
     public InterruptedException getInterruptException() {
         return this.interruptException;
     }
@@ -70,6 +67,7 @@ public abstract class EDTHelper<T> implements Runnable {
      * @return
      */
     public T getReturnValue() {
+
         this.waitForEDT();
         return this.returnValue;
     }
@@ -123,13 +121,15 @@ public abstract class EDTHelper<T> implements Runnable {
         // long c = -1;
         try {
             if (this.done) { return; }
-            this.start(false);           
+            this.start(false);
             // The following loop will never be reached if the edthelper has
             // been called from within the edt.
             // interruptException will never be set in this case
-            //Workaround:
-            //a pretty dirty workaround would be to read the EventDispatchThread.class.shutdown field. if it is true, the edt has been interrupted and will be shut down.
-            //I guess it would be best practise not ti interrupt the edt
+            // Workaround:
+            // a pretty dirty workaround would be to read the
+            // EventDispatchThread.class.shutdown field. if it is true, the edt
+            // has been interrupted and will be shut down.
+            // I guess it would be best practise not ti interrupt the edt
             if (this.done) { return; }
             // c = System.currentTimeMillis();
             try {

@@ -1,10 +1,12 @@
 package org.appwork.uio;
 
+import java.awt.GraphicsEnvironment;
+
 import org.appwork.utils.swing.dialog.Dialog;
 
 public class UIOManager {
 
-    private static UserIOHandlerInterface USERIO = new BasicDialogHandler();
+    private static UserIOHandlerInterface USERIO = GraphicsEnvironment.isHeadless() ? new HeadlessDialogHandler() : new BasicDialogHandler();
 
     public static void setUserIO(final UserIOHandlerInterface io) {
         USERIO = io;

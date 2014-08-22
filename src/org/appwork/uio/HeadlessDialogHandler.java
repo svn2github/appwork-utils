@@ -11,6 +11,11 @@ package org.appwork.uio;
 
 import javax.swing.ImageIcon;
 
+import org.appwork.console.AbstractConsole;
+import org.appwork.console.ConsoleDialog;
+import org.appwork.utils.swing.dialog.DialogCanceledException;
+import org.appwork.utils.swing.dialog.DialogClosedException;
+
 /**
  * @author Thomas
  * 
@@ -37,8 +42,24 @@ public class HeadlessDialogHandler implements UserIOHandlerInterface {
      */
     @Override
     public boolean showConfirmDialog(int flag, String title, String message) {
-        // TODO Auto-generated method stub
-        return false;
+        synchronized (AbstractConsole.LOCK) {
+            ConsoleDialog cd = new ConsoleDialog(title);
+            cd.start();
+            cd.printLines(message);
+            try {
+                cd.waitYesOrNo(flag, "ok", "cancel");
+                return true;
+            } catch (DialogCanceledException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (DialogClosedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } finally {
+                cd.end();
+            }
+            return false;
+        }
     }
 
     /*
@@ -50,7 +71,24 @@ public class HeadlessDialogHandler implements UserIOHandlerInterface {
      */
     @Override
     public boolean showConfirmDialog(int flags, String title, String message, ImageIcon icon, String ok, String cancel) {
-        // TODO Auto-generated method stub
+        synchronized (AbstractConsole.LOCK) {
+            ConsoleDialog cd = new ConsoleDialog(title);
+            cd.start();
+            cd.printLines(message);
+            try {
+                cd.waitYesOrNo(flags, ok, cancel);
+                return true;
+            } catch (DialogCanceledException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (DialogClosedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } finally {
+                cd.end();
+            }
+
+        }
         return false;
     }
 
@@ -62,7 +100,23 @@ public class HeadlessDialogHandler implements UserIOHandlerInterface {
      */
     @Override
     public void showErrorMessage(String message) {
-        System.err.println("Dialog ->Error: " + message);
+        synchronized (AbstractConsole.LOCK) {
+            ConsoleDialog cd = new ConsoleDialog("Error!");
+            cd.printLines(message);
+            cd.start();
+            try {
+                cd.waitYesOrNo(UIOManager.BUTTONS_HIDE_OK, null, null);
+
+            } catch (DialogCanceledException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (DialogClosedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } finally {
+                cd.end();
+            }
+        }
 
     }
 
@@ -75,7 +129,18 @@ public class HeadlessDialogHandler implements UserIOHandlerInterface {
      */
     @Override
     public void showMessageDialog(String message) {
-        System.err.println("Dialog ->Message: " + message);
+        ConsoleDialog cd = new ConsoleDialog("Message");
+        cd.printLines(message);
+        try {
+            cd.waitYesOrNo(UIOManager.BUTTONS_HIDE_OK, null, null);
+
+        } catch (DialogCanceledException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (DialogClosedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
     }
 

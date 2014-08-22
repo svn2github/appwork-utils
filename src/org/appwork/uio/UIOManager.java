@@ -6,7 +6,7 @@ import org.appwork.utils.swing.dialog.Dialog;
 
 public class UIOManager {
 
-    private static UserIOHandlerInterface USERIO = GraphicsEnvironment.isHeadless() ? new HeadlessDialogHandler() : new BasicDialogHandler();
+    private static UserIOHandlerInterface USERIO = org.appwork.utils.Application.isHeadless() ? new HeadlessDialogHandler() : new BasicDialogHandler();
 
     public static void setUserIO(final UserIOHandlerInterface io) {
         USERIO = io;

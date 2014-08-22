@@ -36,6 +36,74 @@ public class ConfirmDialog extends AbstractDialog<Integer> implements ConfirmDia
         return true;
     }
 
+    // /*
+    // * (non-Javadoc)
+    // *
+    // * @see org.appwork.utils.swing.dialog.AbstractDialog#_initHeadless()
+    // */
+    // @Override
+    // protected void _initHeadless(AbstractConsole console) {
+    //
+    // boolean stdBefore = false;
+    // boolean errBefore = false;
+    // try {
+    // stdBefore = Application.STD_OUT.setBufferEnabled(true);
+    // errBefore = Application.ERR_OUT.setBufferEnabled(true);
+    // } catch (IOException e) {
+    // e.printStackTrace();
+    // // cannot happen for parameter=true;
+    // }
+    //
+    // try {
+    //
+    // console.println("|--------------------------INPUT REQUIRED-------------------------------");
+    //
+    // console.println("|Dialog> " + getTitle());
+    // console.println("|Dialog> " + getMessage());
+    // if ((this.flagMask & UIOManager.BUTTONS_HIDE_OK) == 0 || (this.flagMask &
+    // UIOManager.BUTTONS_HIDE_CANCEL) == 0) {
+    // console.println("|Dialog> Press any key to continue");
+    // console.print("|Input > ");
+    // console.readLine();
+    // if ((this.flagMask & UIOManager.BUTTONS_HIDE_OK) != 0) {
+    // this.setReturnmask(true);
+    // } else if ((this.flagMask & UIOManager.BUTTONS_HIDE_CANCEL) != 0) {
+    // this.setReturnmask(false);
+    // } else {
+    // this.returnBitMask |= Dialog.RETURN_CLOSED;
+    // }
+    //
+    // } else {
+    // console.println("|Dialog>  Enter y for " + ((getOKButtonText() == null) ?
+    // "OK" : getOKButtonText()));
+    // console.println("|Dialog>  Enter n for " + ((getCancelButtonText() ==
+    // null) ? "CANCEL" : getCancelButtonText()));
+    // console.print("|Input > ");
+    // if (console.readLine().trim().equalsIgnoreCase("y")) {
+    // console.println("|Dialog> OK");
+    // this.setReturnmask(true);
+    // } else {
+    // console.println("|Dialog> Cancel");
+    // this.setReturnmask(false);
+    // }
+    // }
+    //
+    // console.println("|-----------------------------------------------------------------------");
+    // } finally {
+    // try {
+    // Application.STD_OUT.setBufferEnabled(stdBefore);
+    // } catch (Throwable e) {
+    // e.printStackTrace();
+    // }
+    // try {
+    // Application.ERR_OUT.setBufferEnabled(errBefore);
+    // } catch (Throwable e) {
+    // e.printStackTrace();
+    //
+    // }
+    // }
+    // }
+
     private JTextPane textField;
 
     public ConfirmDialog(final int flag, final String title, final String message, final Icon icon, final String okOption, final String cancelOption) {

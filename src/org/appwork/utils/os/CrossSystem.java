@@ -35,6 +35,7 @@ import org.appwork.shutdown.ShutdownRequest;
 import org.appwork.storage.JSonStorage;
 import org.appwork.storage.StorageException;
 import org.appwork.uio.UIOManager;
+import org.appwork.utils.Application;
 import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.locale._AWU;
@@ -95,7 +96,7 @@ public class CrossSystem {
         WINDOWS
     }
 
-    private static final boolean   __HEADLESS                = java.awt.GraphicsEnvironment.isHeadless();
+    private static final boolean   __HEADLESS                = Application.isHeadless();
 
     private static String[]        BROWSER_COMMANDLINE       = null;
 

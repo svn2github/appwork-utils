@@ -9,11 +9,11 @@
  */
 package org.appwork.utils.swing;
 
-import java.awt.GraphicsEnvironment;
 import java.awt.HeadlessException;
 
 import javax.swing.SwingUtilities;
 
+import org.appwork.utils.Application;
 import org.appwork.utils.logging.Log;
 
 /**
@@ -87,6 +87,11 @@ public abstract class EDTHelper<T> implements Runnable {
     public void run() {
         this.started = true;
         try {
+            if (Application.isHeadless()) {
+                if (caller != null) {
+                    Log.exception(caller);
+                }
+            }
             this.returnValue = this.edtRun();
         } catch (HeadlessException e) {
             this.exception = e;
@@ -117,7 +122,7 @@ public abstract class EDTHelper<T> implements Runnable {
      */
     public void start(final boolean invokeLater) {
         if (this.started) { return; }
-        if (GraphicsEnvironment.isHeadless()) {
+        if (org.appwork.utils.Application.isHeadless()) {
             caller = new Exception();
         }
         this.started = true;

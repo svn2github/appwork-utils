@@ -11,16 +11,8 @@ package org.appwork.utils.swing.dialog;
 
 import java.awt.Dimension;
 import java.awt.Image;
-import java.awt.Window;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowFocusListener;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.swing.JFrame;
-import javax.swing.Timer;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -41,10 +33,10 @@ public class InternDialog<T> extends ExtJDialog {
     private static final long       serialVersionUID = 1L;
 
     public void setVisible(boolean b) {
-     
+
         super.setVisible(b);
-        
-//        ((JFrame) owner).setVisible(true);
+
+        // ((JFrame) owner).setVisible(true);
     }
 
     public InternDialog(final AbstractDialog<T> abstractDialog, final ModalityType modality) {
@@ -75,7 +67,6 @@ public class InternDialog<T> extends ExtJDialog {
 
             application.requestUserAttention(true);
         }
-        
 
     }
 

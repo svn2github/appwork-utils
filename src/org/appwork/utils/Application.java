@@ -9,10 +9,13 @@
  */
 package org.appwork.utils;
 
+import java.awt.GraphicsEnvironment;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
@@ -40,21 +43,23 @@ import org.appwork.utils.os.CrossSystem;
  */
 public class Application {
 
-    private static Boolean IS_JARED    = null;
+    private static Boolean              IS_JARED    = null;
 
     static {
         Application.redirectOutputStreams();
     }
-    private static String  APP_FOLDER  = ".appwork";
-    private static String  ROOT;
-    private static long    javaVersion = 0;
-    public static long     JAVA15      = 15000000;
-    public static long     JAVA16      = 16000000;
-    public static long     JAVA17      = 17000000;
-    public static long     JAVA18      = 18000000;
-    private static Boolean JVM64BIT    = null;
+    private static String               APP_FOLDER  = ".appwork";
+    private static String               ROOT;
+    private static long                 javaVersion = 0;
+    public static long                  JAVA15      = 15000000;
+    public static long                  JAVA16      = 16000000;
+    public static long                  JAVA17      = 17000000;
+    public static long                  JAVA18      = 18000000;
+    private static Boolean              JVM64BIT    = null;
 
-    private static boolean REDIRECTED  = false;
+    private static boolean              REDIRECTED  = false;
+    public static PauseableOutputStream STD_OUT;
+    public static PauseableOutputStream ERR_OUT;
 
     /**
      * Adds a folder to the System classloader classpath this might fail if
@@ -533,6 +538,115 @@ public class Application {
 
     }
 
+    public static class PauseableOutputStream extends OutputStream {
+
+        private PrintStream           _out;
+        private ByteArrayOutputStream buffer;
+
+        /**
+         * @param out
+         */
+        public PauseableOutputStream(PrintStream out) {
+            this._out = out;
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.io.OutputStream#write(int)
+         */
+        @Override
+        public void write(int paramInt) throws IOException {
+            if (buffer != null) {
+                buffer.write(paramInt);
+                return;
+            }
+            _out.write(paramInt);
+
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.io.OutputStream#write(byte[])
+         */
+        @Override
+        public void write(byte[] b) throws IOException {
+            if (buffer != null) {
+                buffer.write(b);
+                return;
+            }
+            _out.write(b);
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.io.OutputStream#write(byte[], int, int)
+         */
+        @Override
+        public void write(byte[] buff, int off, int len) throws IOException {
+            if (buffer != null) {
+                buffer.write(buff, off, len);
+                return;
+            }
+            _out.write(buff, off, len);
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.io.OutputStream#flush()
+         */
+        @Override
+        public void flush() throws IOException {
+            if (buffer != null) {
+                buffer.flush();
+                return;
+            }
+            _out.flush();
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.io.OutputStream#close()
+         */
+        @Override
+        public void close() throws IOException {
+            if (buffer != null) {
+                buffer.close();
+                setBufferEnabled(false);
+            }
+            _out.close();
+        }
+
+        /**
+         * @param b
+         * @throws IOException
+         */
+        public boolean setBufferEnabled(boolean b) throws IOException {
+            synchronized (this) {
+                if (b) {
+
+                    if (buffer != null) { return true; }
+                    buffer = new ByteArrayOutputStream();
+                    return false;
+                } else {
+                    if (buffer != null) {
+                        buffer.writeTo(_out);
+                        buffer = null;
+                        return true;
+                    } else {
+                        return false;
+                    }
+
+                }
+            }
+        }
+
+    }
+
     /**
      * 
      */
@@ -556,6 +670,13 @@ public class Application {
                 e.printStackTrace();
             }
         }
+        if (STD_OUT == null) {
+            STD_OUT = new PauseableOutputStream(System.out);
+
+            ERR_OUT = new PauseableOutputStream(System.err);
+            System.setOut(new PrintStream(STD_OUT));
+            System.setErr(new PrintStream(ERR_OUT));
+        }
     }
 
     /**
@@ -568,6 +689,15 @@ public class Application {
     public synchronized static void setApplication(final String newAppFolder) {
         Application.ROOT = null;
         Application.APP_FOLDER = newAppFolder;
+    }
+
+    /**
+     * @return
+     */
+    public static boolean isHeadless() {
+
+        return GraphicsEnvironment.isHeadless();
+
     }
 
 }

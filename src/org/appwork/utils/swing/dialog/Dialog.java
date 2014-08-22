@@ -9,6 +9,8 @@
  */
 package org.appwork.utils.swing.dialog;
 
+import java.awt.GraphicsEnvironment;
+import java.awt.HeadlessException;
 import java.awt.Image;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -429,7 +431,9 @@ public class Dialog {
     }
 
     /**
-     * Keep this method for webinstaller compatibility reasons. People cannot uninstall if this method is missing
+     * Keep this method for webinstaller compatibility reasons. People cannot
+     * uninstall if this method is missing
+     * 
      * @param flag
      * @param title
      * @param message
@@ -441,7 +445,7 @@ public class Dialog {
      * @throws DialogCanceledException
      */
     public int showConfirmDialog(final int flag, final String title, final String message, final ImageIcon tmpicon, final String okOption, final String cancelOption) throws DialogClosedException, DialogCanceledException {
-        return showConfirmDialog(flag, title, message, (Icon)tmpicon, okOption, cancelOption);
+        return showConfirmDialog(flag, title, message, (Icon) tmpicon, okOption, cancelOption);
     }
 
     /**
@@ -514,6 +518,7 @@ public class Dialog {
     }
 
     protected <T> T showDialogRawInEDT(final AbstractDialog<T> dialog) throws DialogClosedException, DialogCanceledException {
+        if (org.appwork.utils.Application.isHeadless()) { throw new HeadlessException("No Dialogs in Headless Mode!"); }
         dialog.setCallerIsEDT(true);
         dialog.displayDialog();
         final T ret = dialog.getReturnValue();
@@ -527,56 +532,60 @@ public class Dialog {
     protected <T> T showDialogRawOutsideEDT(final AbstractDialog<T> dialog) throws DialogClosedException, DialogCanceledException {
         dialog.setCallerIsEDT(false);
         if (Thread.interrupted()) { throw new DialogClosedException(Dialog.RETURN_INTERRUPT, new InterruptedException()); }
-        final AtomicBoolean waitingLock = new AtomicBoolean(false);
 
-        final EDTRunner edth = new EDTRunner() {
-            @Override
-            protected void runInEDT() {
-                dialog.setDisposedCallback(new DisposeCallBack() {
+        if (org.appwork.utils.Application.isHeadless()) {
+            throw new HeadlessException("No Dialogs in Headless Mode!");
+        } else {
+            final AtomicBoolean waitingLock = new AtomicBoolean(false);
 
-                    @Override
-                    public void dialogDisposed(final AbstractDialog<?> dialog) {
-                        synchronized (waitingLock) {
-                            waitingLock.set(true);
-                            waitingLock.notifyAll();
-                        }
-                    }
-                });
-                dialog.displayDialog();
-            }
-
-        };
-
-        try {
-            if (Thread.interrupted()) { throw new InterruptedException(); }
-            synchronized (waitingLock) {
-                if (waitingLock.get() == false) {
-                    waitingLock.wait();
-                }
-            }
-        } catch (final InterruptedException e) {
-            // Use a edtrunner here. AbstractCaptcha.dispose is edt save...
-            // however there may be several CaptchaDialog classes with
-            // overriddden unsave dispose methods...
-            new EDTRunner() {
-
+            final EDTRunner edth = new EDTRunner() {
                 @Override
                 protected void runInEDT() {
-                    try {
-                        // close dialog if open
-                        dialog.interrupt();
-                    } catch (final Exception e) {
+                    dialog.setDisposedCallback(new DisposeCallBack() {
+
+                        @Override
+                        public void dialogDisposed(final AbstractDialog<?> dialog) {
+                            synchronized (waitingLock) {
+                                waitingLock.set(true);
+                                waitingLock.notifyAll();
+                            }
+                        }
+                    });
+                    dialog.displayDialog();
+                }
+
+            };
+
+            try {
+                if (Thread.interrupted()) { throw new InterruptedException(); }
+                synchronized (waitingLock) {
+                    if (waitingLock.get() == false) {
+                        waitingLock.wait();
                     }
                 }
-            };
-            try {
-                throw new DialogClosedException(dialog.getReturnmask() | Dialog.RETURN_INTERRUPT, e);
-            } catch (final IllegalStateException e1) {
-                // if we cannot get the returnmask from the dialog
-                throw new DialogClosedException(Dialog.RETURN_INTERRUPT, e);
+            } catch (final InterruptedException e) {
+                // Use a edtrunner here. AbstractCaptcha.dispose is edt save...
+                // however there may be several CaptchaDialog classes with
+                // overriddden unsave dispose methods...
+                new EDTRunner() {
+
+                    @Override
+                    protected void runInEDT() {
+                        try {
+                            // close dialog if open
+                            dialog.interrupt();
+                        } catch (final Exception e) {
+                        }
+                    }
+                };
+                try {
+                    throw new DialogClosedException(dialog.getReturnmask() | Dialog.RETURN_INTERRUPT, e);
+                } catch (final IllegalStateException e1) {
+                    // if we cannot get the returnmask from the dialog
+                    throw new DialogClosedException(Dialog.RETURN_INTERRUPT, e);
+                }
             }
         }
-
         final T ret = dialog.getReturnValue();
         final int mask = dialog.getReturnmask();
         if (BinaryLogic.containsSome(mask, Dialog.RETURN_CLOSED)) { throw new DialogClosedException(mask); }

@@ -509,7 +509,7 @@ public class IconIO {
     public static BufferedImage toBufferedImage(final Icon icon) {
         final int w = icon.getIconWidth();
         final int h = icon.getIconHeight();
-        if (GraphicsEnvironment.isHeadless()) {
+        if (org.appwork.utils.Application.isHeadless()) {
 
             final BufferedImage image = new BufferedImage(w, h, Transparency.TRANSLUCENT);
             final Graphics2D g = image.createGraphics();

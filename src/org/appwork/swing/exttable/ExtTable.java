@@ -131,19 +131,19 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
     private Runnable                                       clickDelayerRunable;
     private String                                         columnSaveID         = ExtTable.DEFAULT_COLUMN_STORE;
 
-    private static final KeyStroke                         KEY_STROKE_CTRL_HOME = GraphicsEnvironment.isHeadless() ? null : KeyStroke.getKeyStroke(KeyEvent.VK_HOME, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
+    private static final KeyStroke                         KEY_STROKE_CTRL_HOME = org.appwork.utils.Application.isHeadless() ? null : KeyStroke.getKeyStroke(KeyEvent.VK_HOME, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
 
     /**
     * 
     */
-    private static final KeyStroke                         KEY_STROKE_END       = GraphicsEnvironment.isHeadless() ? null : KeyStroke.getKeyStroke(KeyEvent.VK_END, 0);
+    private static final KeyStroke                         KEY_STROKE_END       = org.appwork.utils.Application.isHeadless() ? null : KeyStroke.getKeyStroke(KeyEvent.VK_END, 0);
 
-    private static final KeyStroke                         KEY_STROKE_HOME      = GraphicsEnvironment.isHeadless() ? null : KeyStroke.getKeyStroke(KeyEvent.VK_HOME, 0);
+    private static final KeyStroke                         KEY_STROKE_HOME      = org.appwork.utils.Application.isHeadless() ? null : KeyStroke.getKeyStroke(KeyEvent.VK_HOME, 0);
 
     /**
     * 
     */
-    private static final KeyStroke                         KEY_STROKE_CTRL_END  = GraphicsEnvironment.isHeadless() ? null : KeyStroke.getKeyStroke(KeyEvent.VK_END, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
+    private static final KeyStroke                         KEY_STROKE_CTRL_END  = org.appwork.utils.Application.isHeadless() ? null : KeyStroke.getKeyStroke(KeyEvent.VK_END, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
 
     /**
      * Create an Extended Table instance

@@ -17,6 +17,7 @@ public class ConsoleDialog {
 
     public ConsoleDialog(String string) {
         console = AbstractConsole.newInstance();
+        if (console == null) { throw new RuntimeException("No Console Available!"); }
         this.title = string;
 
     }

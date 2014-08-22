@@ -9,6 +9,9 @@
  */
 package org.appwork.utils.swing;
 
+import java.awt.GraphicsEnvironment;
+import java.awt.HeadlessException;
+
 import javax.swing.SwingUtilities;
 
 import org.appwork.utils.logging.Log;
@@ -48,6 +51,8 @@ public abstract class EDTHelper<T> implements Runnable {
 
     private Error                error;
 
+    private Exception            caller;
+
     /**
      * Implement this method. Gui code should be used ONLY in this Method.
      * 
@@ -83,6 +88,13 @@ public abstract class EDTHelper<T> implements Runnable {
         this.started = true;
         try {
             this.returnValue = this.edtRun();
+        } catch (HeadlessException e) {
+            this.exception = e;
+            Log.exception(e);
+            Log.L.severe("Unhandled Headless Exception in EDT");
+            if (caller != null) {
+                Log.exception(caller);
+            }
         } catch (final RuntimeException e) {
             this.exception = e;
             Log.exception(e);
@@ -105,6 +117,9 @@ public abstract class EDTHelper<T> implements Runnable {
      */
     public void start(final boolean invokeLater) {
         if (this.started) { return; }
+        if (GraphicsEnvironment.isHeadless()) {
+            caller = new Exception();
+        }
         this.started = true;
         if (!invokeLater && SwingUtilities.isEventDispatchThread()) {
             this.run();

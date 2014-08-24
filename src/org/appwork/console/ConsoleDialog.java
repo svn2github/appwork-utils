@@ -4,12 +4,14 @@ import java.io.IOException;
 
 import org.appwork.uio.UIOManager;
 import org.appwork.utils.Application;
+import org.appwork.utils.Exceptions;
 import org.appwork.utils.Regex;
 import org.appwork.utils.swing.dialog.Dialog;
 import org.appwork.utils.swing.dialog.DialogCanceledException;
 import org.appwork.utils.swing.dialog.DialogClosedException;
 
 public class ConsoleDialog {
+
     private AbstractConsole console;
     private boolean         stdBefore;
     private boolean         errBefore;
@@ -99,11 +101,12 @@ public class ConsoleDialog {
     }
 
     public void waitToContinue() {
-        waitToContinue("vontinue");
+        waitToContinue("continue");
 
     }
 
     public void waitToContinue(String string) {
+        if (string == null) string = "continue";
         println("Press Enter to " + string);
 
         console.readLine();
@@ -122,5 +125,31 @@ public class ConsoleDialog {
         println(string);
 
         return console.readLine();
+    }
+
+    /**
+     * @param string
+     * @param string2
+     * @param e
+     * @return
+     */
+    public static boolean showExceptionDialog(String title, String message, Throwable e) {
+        if (!Application.isHeadless()) return false;
+        synchronized (AbstractConsole.LOCK) {
+
+            ConsoleDialog cd = new ConsoleDialog("Exception occured");
+            cd.start();
+            try {
+                cd.println(title);
+                cd.printLines(message);
+                cd.printLines(Exceptions.getStackTrace(e));
+                cd.waitToContinue();
+
+                return true;
+            } finally {
+                cd.end();
+            }
+
+        }
     }
 }

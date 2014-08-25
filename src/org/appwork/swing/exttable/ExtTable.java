@@ -1279,10 +1279,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
             }
 
             if (this.isSelectionAllTrigger(ks)) {
-                if (this.getCellEditor() != null) {
-                    this.getCellEditor().stopCellEditing();
-                }
-                this.getSelectionModel().setSelectionInterval(0, this.getRowCount() - 1);
+                onShortcutSelectAll();
                 return true;
 
             }
@@ -1330,6 +1327,13 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
         }
 
         return super.processKeyBinding(stroke, evt, condition, pressed);
+    }
+
+    public void onShortcutSelectAll() {
+        if (this.getCellEditor() != null) {
+            this.getCellEditor().stopCellEditing();
+        }
+        this.getSelectionModel().setSelectionInterval(0, this.getRowCount() - 1);
     }
 
     // /**

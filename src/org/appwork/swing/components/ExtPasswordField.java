@@ -111,6 +111,7 @@ public class ExtPasswordField extends MigPanel implements FocusListener, Documen
         // this.renderer.setBackground(Color.RED);
         renderer.setText("");
         editor.getDocument().addDocumentListener(this);
+
         renderer.setHelpText("");
         setRendererMode(true);
 
@@ -172,7 +173,8 @@ public class ExtPasswordField extends MigPanel implements FocusListener, Documen
             setRendererMode(false);
             editor.requestFocus();
         } else {
-            setEditorText(renderer.getText());
+            // http://svn.jdownloader.org/issues/49542
+            setEditorText("");
             editor.selectAll();
         }
     }
@@ -247,13 +249,14 @@ public class ExtPasswordField extends MigPanel implements FocusListener, Documen
      */
     @Override
     public void insertUpdate(final DocumentEvent e) {
+
         if (modifier.get() > 0) { return; }
         if (!equal(editor.getPassword(), getMask().toCharArray())) {
             onChanged();
         }
-        if(editor.getPassword().length>0&&!equal(editor.getPassword(), getMask().toCharArray())){
+        if (editor.getPassword().length > 0 && !equal(editor.getPassword(), getMask().toCharArray())) {
             renderer.setText(getMask());
-        }else{
+        } else {
             renderer.setText("");
         }
 

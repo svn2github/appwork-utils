@@ -159,6 +159,14 @@ public class Hash {
         return HexFormatter.byteArrayToHex(digest);
     }
 
+    /**
+     * @param download
+     * @return
+     */
+    public static String getMD5(final byte[] download) {
+        return Hash.getBytesHash(download, Hash.HASH_TYPE_MD5);
+    }
+
     public static String getMD5(final File arg) {
         return Hash.getFileHash(arg, Hash.HASH_TYPE_MD5);
     }

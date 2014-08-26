@@ -24,6 +24,7 @@ import java.awt.image.ImageFilter;
 import java.awt.image.ImageProducer;
 import java.awt.image.Kernel;
 import java.awt.image.RGBImageFilter;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -36,6 +37,7 @@ import javax.swing.ImageIcon;
 
 import org.appwork.utils.ImageProvider.ImageProvider;
 import org.appwork.utils.logging.Log;
+import org.appwork.utils.net.Base64OutputStream;
 
 public class IconIO {
 
@@ -565,6 +567,36 @@ public class IconIO {
             return (ImageIcon) icon;
         } else {
             return new ImageIcon(IconIO.toBufferedImage(icon));
+
+        }
+    }
+
+    /**
+     * @param icon
+     * @return
+     * @throws IOException
+     */
+    public static String toDataUrl(Icon icon) throws IOException {
+        Base64OutputStream b64os = null;
+        ByteArrayOutputStream bos = null;
+
+        try {
+            bos = new ByteArrayOutputStream();
+            b64os = new Base64OutputStream(bos);
+            ImageIO.write(IconIO.convertIconToBufferedImage(icon), "png", b64os);
+            b64os.flush(true);
+            final String ret = "png;base64," + bos.toString("UTF-8");
+            return ret;
+
+        } finally {
+            try {
+                b64os.close();
+            } catch (final Throwable e) {
+            }
+            try {
+                bos.close();
+            } catch (final Throwable e) {
+            }
 
         }
     }

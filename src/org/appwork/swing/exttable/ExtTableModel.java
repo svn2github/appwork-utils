@@ -1045,13 +1045,20 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
                 }
                 if (selections == null || selections.size() == 0 || ExtTableModel.this.getTableData().size() == 0) { return new int[] { -1, -1 }; }
                 // Transform to rowindex list
-                final int[] selectedRows = new int[selections.size()];
+
+                int[] selectedRows = new int[selections.size()];
                 int selectedRowsIndex = 0;
                 for (final E obj : selections) {
                     final int rowIndex = ExtTableModel.this.getRowforObject(obj);
                     if (rowIndex >= 0) {
                         selectedRows[selectedRowsIndex++] = rowIndex;
                     }
+                }
+                if (selectedRowsIndex < selectedRows.length) {
+                    // if some objects are not in the table
+                    int[] newArray = new int[selectedRowsIndex];
+                    System.arraycopy(selectedRows, 0, newArray, 0, selectedRowsIndex);
+                    selectedRows = newArray;
                 }
                 if (selectedRowsIndex == 0) { return new int[] { -1, -1 }; }
                 Arrays.sort(selectedRows);

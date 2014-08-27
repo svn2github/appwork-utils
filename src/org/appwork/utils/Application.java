@@ -24,7 +24,9 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -557,6 +559,15 @@ public class Application {
          */
         @Override
         public void write(int paramInt) throws IOException {
+            if (branches != null) {
+                for (OutputStream os : branches) {
+                    try {
+                        os.write(paramInt);
+                    } catch (Throwable e) {
+
+                    }
+                }
+            }
             if (buffer != null) {
                 buffer.write(paramInt);
                 return;
@@ -572,6 +583,15 @@ public class Application {
          */
         @Override
         public void write(byte[] b) throws IOException {
+            if (branches != null) {
+                for (OutputStream os : branches) {
+                    try {
+                        os.write(b);
+                    } catch (Throwable e) {
+
+                    }
+                }
+            }
             if (buffer != null) {
                 buffer.write(b);
                 return;
@@ -586,6 +606,16 @@ public class Application {
          */
         @Override
         public void write(byte[] buff, int off, int len) throws IOException {
+
+            if (branches != null) {
+                for (OutputStream os : branches) {
+                    try {
+                        os.write(buff, off, len);
+                    } catch (Throwable e) {
+
+                    }
+                }
+            }
             if (buffer != null) {
                 buffer.write(buff, off, len);
                 return;
@@ -604,6 +634,15 @@ public class Application {
                 buffer.flush();
                 return;
             }
+            if (branches != null) {
+                for (OutputStream os : branches) {
+                    try {
+                        os.flush();
+                    } catch (Throwable e) {
+
+                    }
+                }
+            }
             _out.flush();
         }
 
@@ -617,6 +656,15 @@ public class Application {
             if (buffer != null) {
                 buffer.close();
                 setBufferEnabled(false);
+            }
+            if (branches != null) {
+                for (OutputStream os : branches) {
+                    try {
+                        os.close();
+                    } catch (Throwable e) {
+
+                    }
+                }
             }
             _out.close();
         }
@@ -643,6 +691,19 @@ public class Application {
 
                 }
             }
+        }
+
+        private List<OutputStream> branches = null;
+
+        /**
+         * @param bufferedOutputStream
+         */
+        public void addBranch(OutputStream os) {
+            if (branches == null) {
+                branches = new ArrayList<OutputStream>();
+            }
+            branches.add(os);
+
         }
 
     }

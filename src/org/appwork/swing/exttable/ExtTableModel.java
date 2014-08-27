@@ -13,7 +13,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
 import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.TableModelEvent;
@@ -82,8 +81,8 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
     private volatile java.util.List<ExtComponentRowHighlighter<E>> extComponentRowHighlighters;
     private final Object                                           highlighterLock        = new Object();
 
-    private final ImageIcon                                        iconAsc;
-    private final ImageIcon                                        iconDesc;
+    private final Icon                                             iconAsc;
+    private final Icon                                             iconDesc;
     private final PropertyChangeListener                           replaceDelayer;
     private volatile boolean                                       replaceDelayerSet      = false;
     private volatile List<E>                                       delayedNewTableData    = null;

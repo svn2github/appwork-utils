@@ -5,6 +5,7 @@ import java.awt.Composite;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Shape;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.TreeSet;
 
@@ -13,7 +14,7 @@ import javax.swing.ImageIcon;
 
 import org.appwork.utils.ImageProvider.ImageProvider;
 
-public class ExtMergedIcon implements Icon {
+public class ExtMergedIcon implements Icon, IdentifierInterface {
     private class Entry {
 
         private final Icon      icon;
@@ -48,6 +49,7 @@ public class ExtMergedIcon implements Icon {
     private ImageIcon            internalIcon;
 
     private boolean              caching;
+    private Object               internalID;
 
     public ExtMergedIcon() {
 
@@ -102,25 +104,27 @@ public class ExtMergedIcon implements Icon {
         width = Math.max(width, entry.x + entry.icon.getIconWidth());
         height = Math.max(height, entry.y + entry.icon.getIconHeight());
         entries.add(entry);
+
     }
 
     public void cache() {
         caching = true;
         try {
             internalIcon = ImageProvider.toImageIcon(this);
+            internalID = toIdentifier();
             entries.clear();
         } finally {
             caching = false;
         }
     }
 
-//    /**
-//     * @return
-//     */
-//    public Icon crop() {
-//        // TODO Auto-generated method stub
-//        return null;
-//    }
+    // /**
+    // * @return
+    // */
+    // public Icon crop() {
+    // // TODO Auto-generated method stub
+    // return null;
+    // }
 
     public ExtMergedIcon crop(final int width, final int height) {
         cropedWidth = width;
@@ -174,6 +178,27 @@ public class ExtMergedIcon implements Icon {
 
         }
         g2.setClip(oldClip);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.appwork.swing.components.IdentifierInterface#toIdentifier()
+     */
+    @Override
+    public Object toIdentifier() {
+        if (internalID != null) { return internalID; }
+
+        ArrayList<Object> lst = new ArrayList<Object>();
+        for (Entry e : entries) {
+            if (e.icon instanceof IdentifierInterface) {
+                lst.add(((IdentifierInterface) e.icon).toIdentifier());
+            } else {
+                lst.add(e.icon.toString());
+            }
+        }
+        if (lst.size() == 1) { return lst.get(0); }
+        return lst;
     }
 
 }

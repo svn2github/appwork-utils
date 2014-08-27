@@ -37,18 +37,18 @@ import org.appwork.utils.logging.Log;
  * 
  */
 public class Theme implements MinTimeWeakReferenceCleanup {
-    private String                                                   path;
+    private String                                              path;
 
     // private final HashMap<String, MinTimeWeakReference<BufferedImage>>
     // imageCache = new HashMap<String, MinTimeWeakReference<BufferedImage>>();
 
     protected final HashMap<String, MinTimeWeakReference<Icon>> imageIconCache = new HashMap<String, MinTimeWeakReference<Icon>>();
 
-    private long                                                     cacheLifetime  = 20000l;
+    private long                                                cacheLifetime  = 20000l;
 
-    private String                                                   theme;
+    private String                                              theme;
 
-    private String                                                   nameSpace;
+    private String                                              nameSpace;
 
     public Theme(final String namespace) {
         setNameSpace(namespace);
@@ -90,6 +90,7 @@ public class Theme implements MinTimeWeakReferenceCleanup {
             if (sb.length() > 0) {
                 sb.append("_");
             }
+
             sb.append(o.toString());
         }
         return sb.toString();
@@ -119,13 +120,14 @@ public class Theme implements MinTimeWeakReferenceCleanup {
             ico.paintIcon(null, g2, 0, 0);
             g2.dispose();
             ret = new ImageIcon(dest);
+            modify(ret, key);
             cache(ret, key);
         }
         return ret;
 
     }
 
-    public ImageIcon getIcon(final String relativePath, final int size) {
+    public Icon getIcon(final String relativePath, final int size) {
         return this.getIcon(relativePath, size, true);
 
     }
@@ -136,7 +138,7 @@ public class Theme implements MinTimeWeakReferenceCleanup {
      * @param b
      * @return
      */
-    public ImageIcon getIcon(final String relativePath, final int size, final boolean useCache) {
+    public Icon getIcon(final String relativePath, final int size, final boolean useCache) {
         Icon ret = null;
         String key = null;
         if (useCache) {
@@ -146,6 +148,7 @@ public class Theme implements MinTimeWeakReferenceCleanup {
         if (ret == null) {
             final URL url = getURL("images/", relativePath, ".png");
             ret = IconIO.getImageIcon(url, size);
+            ret = modify(ret, relativePath);
             if (url == null) {
 
                 Log.exception(new Exception("Icon missing: " + this.getPath("images/", relativePath, ".png")));
@@ -167,25 +170,35 @@ public class Theme implements MinTimeWeakReferenceCleanup {
                 cache(ret, key);
             }
         }
-        return (ImageIcon) ret;
+        return ret;
     }
-//
-//    public ImageIcon getIcon(final URL ressourceURL) {
-//        final String key = getCacheKey(ressourceURL);
-//        ImageIcon ret = getCached(key);
-//        if (ret == null) {
-//            ret = IconIO.getImageIcon(ressourceURL);
-//            cache(ret, key);
-//        }
-//        return ret;
-//    }
+
+    //
+    // public ImageIcon getIcon(final URL ressourceURL) {
+    // final String key = getCacheKey(ressourceURL);
+    // ImageIcon ret = getCached(key);
+    // if (ret == null) {
+    // ret = IconIO.getImageIcon(ressourceURL);
+    // cache(ret, key);
+    // }
+    // return ret;
+    // }
+
+    /**
+     * @param ret
+     * @param relativePath
+     */
+    protected Icon modify(Icon ret, String relativePath) {
+        return ret;
+
+    }
 
     public Image getImage(final String relativePath, final int size) {
         return this.getImage(relativePath, size, false);
     }
 
     public Image getImage(final String key, final int size, final boolean useCache) {
-        return this.getIcon(key, size, useCache).getImage();
+        return IconIO.toBufferedImage(this.getIcon(key, size, useCache));
     }
 
     public URL getImageUrl(final String relativePath) {

@@ -3,7 +3,7 @@ package org.appwork.swing.components.tooltips;
 import java.awt.Color;
 
 import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
+import javax.swing.Icon;
 import javax.swing.JLabel;
 
 import org.appwork.swing.components.ExtTextPane;
@@ -16,7 +16,7 @@ public class BasicTooltipFactory implements TooltipFactory {
      * @param editScriptAction_EditScriptAction_tt
      * @param icon2
      */
-    public BasicTooltipFactory(String name, String tooltip, ImageIcon icon2) {
+    public BasicTooltipFactory(String name, String tooltip, Icon icon2) {
         this.header = name;
         this.text = tooltip;
         this.icon = icon2;
@@ -60,14 +60,14 @@ public class BasicTooltipFactory implements TooltipFactory {
         this.text = text;
     }
 
-    public ImageIcon getIcon() {
+    public Icon getIcon() {
         return icon;
     }
 
-    public void setIcon(ImageIcon icon) {
+    public void setIcon(Icon icon) {
         this.icon = icon;
     }
 
-    private String    text;
-    private ImageIcon icon;
+    private String text;
+    private Icon   icon;
 }

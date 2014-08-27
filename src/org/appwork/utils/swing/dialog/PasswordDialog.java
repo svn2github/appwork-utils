@@ -15,7 +15,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
 import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
+import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -31,13 +31,13 @@ import org.appwork.utils.locale._AWU;
 
 public class PasswordDialog extends AbstractDialog<String> implements KeyListener, MouseListener {
 
-    private String            message;
-    private JTextPane         messageArea;
-    private JTextComponent    input1;
-    private JTextComponent    input2;
-    private JTextComponent    input3;
+    private String         message;
+    private JTextPane      messageArea;
+    private JTextComponent input1;
+    private JTextComponent input2;
+    private JTextComponent input3;
 
-    public PasswordDialog(final int flag, final String title, final String message, final ImageIcon icon, final String okOption, final String cancelOption) {
+    public PasswordDialog(final int flag, final String title, final String message, final Icon icon, final String okOption, final String cancelOption) {
         super(flag, title, icon, okOption, cancelOption);
         this.message = message;
     }
@@ -96,12 +96,12 @@ public class PasswordDialog extends AbstractDialog<String> implements KeyListene
 
         return contentpane;
     }
+
     @Override
     protected void initFocus(final JComponent focus) {
-        input1.selectAll();  
+        input1.selectAll();
         input1.requestFocusInWindow();
     }
-
 
     public void keyPressed(final KeyEvent e) {
         cancel();

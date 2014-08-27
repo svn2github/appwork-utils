@@ -11,14 +11,13 @@ package org.appwork.utils.swing.dialog;
 
 import java.util.Arrays;
 
-import javax.swing.ImageIcon;
+import javax.swing.Icon;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JTextPane;
 import javax.swing.ListCellRenderer;
 
-import org.appwork.storage.JSonStorage;
 import org.appwork.swing.MigPanel;
 import org.appwork.uio.ComboBoxDialogInterface;
 import org.appwork.utils.logging.Log;
@@ -56,10 +55,10 @@ public class ComboBoxDialog extends AbstractDialog<Integer> implements ComboBoxD
 
     /**
      * 
-     * @see Dialog#showComboDialog(int, String, String, Object[], int,
-     *      ImageIcon, String, String, ListCellRenderer)
+     * @see Dialog#showComboDialog(int, String, String, Object[], int, Icon,
+     *      String, String, ListCellRenderer)
      */
-    public ComboBoxDialog(final int flag, final String title, final String question, final Object[] options, final int defaultSelection, final ImageIcon icon, final String okText, final String cancelText, final ListCellRenderer renderer) {
+    public ComboBoxDialog(final int flag, final String title, final String question, final Object[] options, final int defaultSelection, final Icon icon, final String okText, final String cancelText, final ListCellRenderer renderer) {
         super(flag, title, icon, okText, cancelText);
         Log.L.fine("Dialog    [" + okText + "][" + cancelText + "]\r\nflag:  " + Integer.toBinaryString(flag) + "\r\ntitle: " + title + "\r\nmsg:   \r\n" + question + "\r\noptions:   \r\n" + Arrays.toString(options) + "\r\ndef:" + defaultSelection);
 
@@ -181,7 +180,7 @@ public class ComboBoxDialog extends AbstractDialog<Integer> implements ComboBoxD
         String[] ret = new String[options.length];
         for (int i = 0; i < ret.length; i++) {
             ret[i] = String.valueOf(options[i]);
-            
+
         }
         return ret;
     }

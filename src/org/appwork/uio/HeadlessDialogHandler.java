@@ -9,7 +9,7 @@
  */
 package org.appwork.uio;
 
-import javax.swing.ImageIcon;
+import javax.swing.Icon;
 
 import org.appwork.console.AbstractConsole;
 import org.appwork.console.ConsoleDialog;
@@ -66,11 +66,11 @@ public class HeadlessDialogHandler implements UserIOHandlerInterface {
      * (non-Javadoc)
      * 
      * @see org.appwork.uio.UserIOHandlerInterface#showConfirmDialog(int,
-     * java.lang.String, java.lang.String, javax.swing.ImageIcon,
-     * java.lang.String, java.lang.String)
+     * java.lang.String, java.lang.String, javax.swing.Icon, java.lang.String,
+     * java.lang.String)
      */
     @Override
-    public boolean showConfirmDialog(int flags, String title, String message, ImageIcon icon, String ok, String cancel) {
+    public boolean showConfirmDialog(int flags, String title, String message, Icon icon, String ok, String cancel) {
         synchronized (AbstractConsole.LOCK) {
             ConsoleDialog cd = new ConsoleDialog(title);
             cd.start();

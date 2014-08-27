@@ -12,7 +12,7 @@ package org.appwork.utils.swing.dialog;
 import java.awt.Color;
 import java.awt.event.ActionListener;
 
-import javax.swing.ImageIcon;
+import javax.swing.Icon;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -59,7 +59,7 @@ public class LoginDialog extends AbstractDialog<LoginData> implements ActionList
         }
     }
 
-    public static final int   DISABLE_REMEMBER = 1 << 20;
+    public static final int DISABLE_REMEMBER = 1 << 20;
 
     public static void main(final String[] args) {
         try {
@@ -87,7 +87,7 @@ public class LoginDialog extends AbstractDialog<LoginData> implements ActionList
     private boolean        preSave = false;
     private JCheckBox      save;
     private final boolean  rememberDisabled;
-    private  String   message;
+    private String         message;
 
     public void setMessage(final String message) {
         this.message = message;
@@ -97,14 +97,14 @@ public class LoginDialog extends AbstractDialog<LoginData> implements ActionList
         this(flag, _AWU.T.AccountNew_AccountNew_title(), _AWU.T.AccountNew_AccountNew_message(), AWUTheme.I().getIcon("dialog/login", 32));
     }
 
-    public LoginDialog(final int flag, final String title, final String message, final ImageIcon icon) {
+    public LoginDialog(final int flag, final String title, final String message, final Icon icon) {
         super(flag & 0xffffffff & ~Dialog.STYLE_SHOW_DO_NOT_DISPLAY_AGAIN, title, icon, null, null);
         rememberDisabled = BinaryLogic.containsAll(flag, LoginDialog.DISABLE_REMEMBER);
         this.message = message;
     }
 
     private JLabel addSettingName(final String name) {
-        final JLabel lbl = new JLabel(name); 
+        final JLabel lbl = new JLabel(name);
         lbl.setForeground(titleColor);
         return lbl;
     }
@@ -159,16 +159,16 @@ public class LoginDialog extends AbstractDialog<LoginData> implements ActionList
     protected void packed() {
         super.packed();
         setResizable(false);
-      
+
     }
 
-    
     @Override
     protected void initFocus(final JComponent focus) {
         accid.selectAll();
-        
+
         accid.requestFocusInWindow();
     }
+
     public void setPasswordDefault(final String password) {
         prePass = password;
     }

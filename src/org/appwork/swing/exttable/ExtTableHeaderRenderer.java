@@ -16,7 +16,6 @@ import java.awt.Graphics2D;
 
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.JTable;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
@@ -43,7 +42,8 @@ public class ExtTableHeaderRenderer extends DefaultTableCellRenderer implements 
 
     private Color              focusForeground;
     private Color              focusBackground;
-    private  Color        foregroundC;
+    private Color              foregroundC;
+
     public Color getFocusForeground() {
         return focusForeground;
     }
@@ -60,8 +60,9 @@ public class ExtTableHeaderRenderer extends DefaultTableCellRenderer implements 
         this.foregroundC = foregroundC;
     }
 
-    private  Color        backgroundC;
-    private Border             focusBorder;
+    private Color  backgroundC;
+    private Border focusBorder;
+
     public Color getFocusBackground() {
         return focusBackground;
     }
@@ -78,8 +79,8 @@ public class ExtTableHeaderRenderer extends DefaultTableCellRenderer implements 
         this.backgroundC = backgroundC;
     }
 
-    private Border             cellBorder;
-    private final ImageIcon    lockedWidth;
+    private Border     cellBorder;
+    private final Icon lockedWidth;
 
     /**
      * @param extColumn
@@ -162,7 +163,6 @@ public class ExtTableHeaderRenderer extends DefaultTableCellRenderer implements 
         setText(value == null ? "" : value.toString());
         setBorder(hasFocus ? focusBorder : cellBorder);
 
-
         // this.setBackground(Color.RED);
         // this.setOpaque(true);
         // System.out.println(this.getPreferredSize());
@@ -178,7 +178,7 @@ public class ExtTableHeaderRenderer extends DefaultTableCellRenderer implements 
         final Border orgBorder = getBorder();
         final int widthDif = column.getWidth() - getPreferredSize().width;
         final boolean smallLockIcon = widthDif < lockedWidth.getIconWidth();
-      
+
         try {
             if (paintLock && !smallLockIcon) {
                 setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(0, 0, 0, lockedWidth.getIconWidth()), orgBorder));
@@ -211,9 +211,9 @@ public class ExtTableHeaderRenderer extends DefaultTableCellRenderer implements 
                 // 0.5f));
                 if (smallLockIcon) {
                     g2.setColor(getBackground().darker());
-//                    g2.setColor(Color.RED);
+                    // g2.setColor(Color.RED);
                     final int size = 6;
-                    g2.fillPolygon(new int[] { getWidth(), getWidth()-size, getWidth() , getWidth() }, new int[] { getHeight(),getHeight(),getHeight()-size, getHeight() }, 4);
+                    g2.fillPolygon(new int[] { getWidth(), getWidth() - size, getWidth(), getWidth() }, new int[] { getHeight(), getHeight(), getHeight() - size, getHeight() }, 4);
                 } else {
                     lockedWidth.paintIcon(this, g2, getWidth() - lockedWidth.getIconWidth() - 2, (getHeight() - lockedWidth.getIconHeight()) / 2);
                 }

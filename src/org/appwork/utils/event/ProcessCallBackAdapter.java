@@ -1,6 +1,6 @@
 package org.appwork.utils.event;
 
-import javax.swing.ImageIcon;
+import javax.swing.Icon;
 
 import org.appwork.uio.UIOManager;
 import org.appwork.utils.swing.dialog.Dialog;
@@ -28,7 +28,7 @@ public class ProcessCallBackAdapter implements ProcessCallBack {
     }
 
     @Override
-    public void showDialog(final Object caller, final String title, final String message, final ImageIcon icon) {
+    public void showDialog(final Object caller, final String title, final String message, final Icon icon) {
         try {
             Dialog.getInstance().showConfirmDialog(UIOManager.BUTTONS_HIDE_CANCEL, title, message, icon, null, null);
         } catch (final DialogClosedException e) {

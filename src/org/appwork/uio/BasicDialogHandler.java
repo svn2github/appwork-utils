@@ -1,6 +1,6 @@
 package org.appwork.uio;
 
-import javax.swing.ImageIcon;
+import javax.swing.Icon;
 
 import org.appwork.exceptions.WTFException;
 import org.appwork.utils.swing.dialog.AbstractDialog;
@@ -11,7 +11,7 @@ import org.appwork.utils.swing.dialog.DialogClosedException;
 public class BasicDialogHandler implements UserIOHandlerInterface {
     private static final Dialog D = Dialog.I();
 
-    public boolean showConfirmDialog(final int flags, final String title, final String message, final ImageIcon icon, final String ok, final String cancel) {
+    public boolean showConfirmDialog(final int flags, final String title, final String message, final Icon icon, final String ok, final String cancel) {
         try {
             D.showConfirmDialog(flags, title, message, icon, ok, cancel);
             return true;
@@ -32,7 +32,7 @@ public class BasicDialogHandler implements UserIOHandlerInterface {
     public void showMessageDialog(final String message) {
         D.showMessageDialog(message);
     }
-   
+
     // @SuppressWarnings("unchecked")
     public <T extends UserIODefinition> T show(final Class<T> class1, final T impl) {
         try {
@@ -53,6 +53,5 @@ public class BasicDialogHandler implements UserIOHandlerInterface {
     public void showErrorMessage(final String message) {
         D.showErrorDialog(message);
     }
-
 
 }

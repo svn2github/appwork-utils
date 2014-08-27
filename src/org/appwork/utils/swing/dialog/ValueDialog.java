@@ -17,7 +17,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
 import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
+import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
@@ -40,7 +40,7 @@ public class ValueDialog extends AbstractDialog<Long> implements KeyListener, Mo
     private final long           defaultValue;
     private JTextField           editable;
     // faktor to downscale long to integervalues
-    private int                  faktor           = 1;
+    private int                  faktor = 1;
     private final long           max;
     private final String         message;
     private JTextPane            messageArea;
@@ -49,7 +49,7 @@ public class ValueDialog extends AbstractDialog<Long> implements KeyListener, Mo
     private final long           step;
     private final ValueConverter valueconverter;
 
-    public ValueDialog(final int flag, final String title, final String message, final ImageIcon icon, final String okOption, final String cancelOption, long defaultValue, long min, long max, long step, ValueConverter valueConverter) {
+    public ValueDialog(final int flag, final String title, final String message, final Icon icon, final String okOption, final String cancelOption, long defaultValue, long min, long max, long step, ValueConverter valueConverter) {
         super(flag, title, icon, okOption, cancelOption);
 
         Log.L.fine("Dialog    [" + okOption + "][" + cancelOption + "]\r\nflag:  " + Integer.toBinaryString(flag) + "\r\ntitle: " + title + "\r\nmsg:   \r\n" + message + " \r\n" + min + "<=" + defaultValue + "<=" + max + " [" + step + "]");
@@ -206,18 +206,17 @@ public class ValueDialog extends AbstractDialog<Long> implements KeyListener, Mo
     public void mouseReleased(final MouseEvent e) {
     }
 
-
-
     @Override
     protected void initFocus(final JComponent focus) {
         slider.requestFocusInWindow();
     }
+
     private void updateSlider() {
         // new Thread() {
         // public void run() {
         // new EDTHelper<Object>() {
         //
-        // 
+        //
         // public Object edtRun() {
         try {
             final long value = Long.parseLong(editable.getText());

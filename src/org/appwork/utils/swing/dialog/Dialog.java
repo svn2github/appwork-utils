@@ -9,7 +9,6 @@
  */
 package org.appwork.utils.swing.dialog;
 
-import java.awt.GraphicsEnvironment;
 import java.awt.HeadlessException;
 import java.awt.Image;
 import java.util.List;
@@ -46,29 +45,29 @@ public class Dialog {
     /**
      * Icon Key for Error Icons
      * 
-     * @see org.appwork.utils.ImageProvider.ImageProvider#getImageIcon(String,
-     *      int, int, boolean)
+     * @see org.appwork.utils.ImageProvider.ImageProvider#getIcon(String, int,
+     *      int, boolean)
      */
     public static final String  ICON_ERROR                          = "dialog/error";
     /**
      * Icon Key for Information Icons
      * 
-     * @see org.appwork.utils.ImageProvider.ImageProvider#getImageIcon(String,
-     *      int, int, boolean)
+     * @see org.appwork.utils.ImageProvider.ImageProvider#getIcon(String, int,
+     *      int, boolean)
      */
     public static final String  ICON_INFO                           = "dialog/info";
     /**
      * Icon Key for Question Icons
      * 
-     * @see org.appwork.utils.ImageProvider.ImageProvider#getImageIcon(String,
-     *      int, int, boolean)
+     * @see org.appwork.utils.ImageProvider.ImageProvider#getIcon(String, int,
+     *      int, boolean)
      */
     public static final String  ICON_QUESTION                       = "dialog/help";
     /**
      * Icon Key for Warning Icons
      * 
-     * @see org.appwork.utils.ImageProvider.ImageProvider#getImageIcon(String,
-     *      int, int, boolean)
+     * @see org.appwork.utils.ImageProvider.ImageProvider#getIcon(String, int,
+     *      int, boolean)
      */
     public static final String  ICON_WARNING                        = "dialog/warning";
     /**
@@ -179,7 +178,7 @@ public class Dialog {
      * @param text
      * @return
      */
-    public static ImageIcon getIconByText(final String text) {
+    public static Icon getIconByText(final String text) {
         try {
             if (text != null && text.contains("?")) {
                 return AWUTheme.I().getIcon(Dialog.ICON_QUESTION, 32);
@@ -351,7 +350,7 @@ public class Dialog {
      * @throws DialogCanceledException
      * @throws DialogClosedException
      */
-    public int showComboDialog(final int flag, final String title, final String question, final Object[] options, final int defaultSelectedIndex, final ImageIcon icon, final String okOption, final String cancelOption, final ListCellRenderer renderer) throws DialogClosedException, DialogCanceledException {
+    public int showComboDialog(final int flag, final String title, final String question, final Object[] options, final int defaultSelectedIndex, final Icon icon, final String okOption, final String cancelOption, final ListCellRenderer renderer) throws DialogClosedException, DialogCanceledException {
 
         return this.showDialog(new ComboBoxDialog(flag, title, question, options, defaultSelectedIndex, icon, okOption, cancelOption, renderer));
     }
@@ -383,7 +382,7 @@ public class Dialog {
      * @throws DialogCanceledException
      * @throws DialogClosedException
      */
-    public Object showComboDialog(final int flag, final String title, final String question, final Object[] options, final Object defaultSelectedItem, final ImageIcon icon, final String okOption, final String cancelOption, final ListCellRenderer renderer) throws DialogClosedException, DialogCanceledException {
+    public Object showComboDialog(final int flag, final String title, final String question, final Object[] options, final Object defaultSelectedItem, final Icon icon, final String okOption, final String cancelOption, final ListCellRenderer renderer) throws DialogClosedException, DialogCanceledException {
 
         int def = 0;
         for (int i = 0; i < options.length; i++) {
@@ -681,7 +680,7 @@ public class Dialog {
      * @throws DialogCanceledException
      * @throws DialogClosedException
      */
-    public String showInputDialog(final int flag, final String title, final String message, final String defaultMessage, final ImageIcon icon, final String okOption, final String cancelOption) throws DialogClosedException, DialogCanceledException {
+    public String showInputDialog(final int flag, final String title, final String message, final String defaultMessage, final Icon icon, final String okOption, final String cancelOption) throws DialogClosedException, DialogCanceledException {
 
         return this.showDialog(new InputDialog(flag, title, message, defaultMessage, icon, okOption, cancelOption));
     }
@@ -801,7 +800,7 @@ public class Dialog {
      * @throws DialogCanceledException
      * @throws DialogClosedException
      */
-    protected String showPasswordDialog(final int flag, final String title, final String message, final String defaultMessage, final ImageIcon icon, final String okOption, final String cancelOption) throws DialogClosedException, DialogCanceledException {
+    protected String showPasswordDialog(final int flag, final String title, final String message, final String defaultMessage, final Icon icon, final String okOption, final String cancelOption) throws DialogClosedException, DialogCanceledException {
 
         return this.showDialog(new PasswordDialog(flag, title, message, icon, okOption, cancelOption));
     }
@@ -888,7 +887,7 @@ public class Dialog {
      * @throws DialogCanceledException
      * @throws DialogClosedException
      */
-    protected long showValueDialog(final int flag, final String title, final String message, final long defaultMessage, final ImageIcon icon, final String okOption, final String cancelOption, final long min, final long max, final long step, final ValueConverter valueConverter) throws DialogClosedException, DialogCanceledException {
+    protected long showValueDialog(final int flag, final String title, final String message, final long defaultMessage, final Icon icon, final String okOption, final String cancelOption, final long min, final long max, final long step, final ValueConverter valueConverter) throws DialogClosedException, DialogCanceledException {
 
         return this.showDialog(new ValueDialog(flag, title, message, icon, okOption, cancelOption, defaultMessage, min, max, step, valueConverter));
     }

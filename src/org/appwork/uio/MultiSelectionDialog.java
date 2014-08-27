@@ -1,6 +1,6 @@
 package org.appwork.uio;
 
-import javax.swing.ImageIcon;
+import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -26,7 +26,7 @@ public class MultiSelectionDialog extends AbstractDialog<int[]> implements Multi
     private JTextPane        textpane;
     private JList            listComponent;
 
-    public MultiSelectionDialog(int flag, String title, String question, Object[] options, ImageIcon icon, String okText, String cancelText, ListCellRenderer renderer) {
+    public MultiSelectionDialog(int flag, String title, String question, Object[] options, Icon icon, String okText, String cancelText, ListCellRenderer renderer) {
         super(flag, title, icon, okText, cancelText);
         this.message = question;
         this.renderer = renderer;

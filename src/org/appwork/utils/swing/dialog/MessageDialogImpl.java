@@ -1,6 +1,6 @@
 package org.appwork.utils.swing.dialog;
 
-import javax.swing.ImageIcon;
+import javax.swing.Icon;
 
 import org.appwork.uio.MessageDialogInterface;
 import org.appwork.uio.UIOManager;
@@ -12,7 +12,7 @@ public class MessageDialogImpl extends ConfirmDialog implements MessageDialogInt
         this(UIOManager.BUTTONS_HIDE_CANCEL | flags, _AWU.T.DIALOG_MESSAGE_TITLE(), msg, null, null);
     }
 
-    public MessageDialogImpl(final int flag, final String title, final String msg, final ImageIcon icon, final String okText) {
+    public MessageDialogImpl(final int flag, final String title, final String msg, final Icon icon, final String okText) {
         super(flag, title, msg, icon == null ? Dialog.getIconByText(title + msg) : icon, okText, null);
 
     }

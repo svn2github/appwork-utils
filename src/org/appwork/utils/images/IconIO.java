@@ -35,13 +35,14 @@ import javax.imageio.ImageIO;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
+import org.appwork.swing.components.IdentifierInterface;
 import org.appwork.utils.ImageProvider.ImageProvider;
 import org.appwork.utils.logging.Log;
 import org.appwork.utils.net.Base64OutputStream;
 
 public class IconIO {
 
-    public static class ScaledIcon implements Icon {
+    public static class ScaledIcon implements Icon, IdentifierInterface {
 
         private final Icon          source;
         private final int           width;
@@ -102,6 +103,17 @@ public class IconIO {
             this.source.paintIcon(c, g, 0, 0);
             g2.setTransform(old);
 
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see org.appwork.swing.components.IdentifierInterface#toIdentifier()
+         */
+        @Override
+        public Object toIdentifier() {
+            if (source instanceof IdentifierInterface) { return ((IdentifierInterface) source).toIdentifier(); }
+            return source.toString();
         }
     }
 
@@ -509,6 +521,10 @@ public class IconIO {
      * @return
      */
     public static BufferedImage toBufferedImage(final Icon icon) {
+        if (icon instanceof ImageIcon) {
+            Image img = ((ImageIcon) icon).getImage();
+            if (img instanceof BufferedImage) { return (BufferedImage) img; }
+        }
         final int w = icon.getIconWidth();
         final int h = icon.getIconHeight();
         if (org.appwork.utils.Application.isHeadless()) {

@@ -137,7 +137,7 @@ public class RenderLabel extends JLabel {
         if (b == isEnabled()) { return; }
         _enabled = b;
         if (!b && getIcon() != null) {
-            setDisabledIcon(ImageProvider.getDisabledIcon(getIcon()));
+            setDisabledIcon(org.appwork.resources.AWUTheme.I().getDisabledIcon(getIcon()));
         }
     }
 
@@ -150,7 +150,7 @@ public class RenderLabel extends JLabel {
     public void setIcon(final Icon icon) {
         if (icon == getIcon()) { return; }
         if (!isEnabled()) {
-            setDisabledIcon(ImageProvider.getDisabledIcon(icon));
+            setDisabledIcon(org.appwork.resources.AWUTheme.I().getDisabledIcon(icon));
         }
         if (icon == null) {
             setDisabledIcon(null);

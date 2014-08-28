@@ -76,12 +76,12 @@ public class MultipleRenderLabel extends JPanel {
     public void setEnabled(final boolean b) {
         if (this.left == null) { return; }
         if (b == false) {
-            this.left.setDisabledIcon(ImageProvider.getDisabledIcon(this.left.getIcon()));
+            this.left.setDisabledIcon(org.appwork.resources.AWUTheme.I().getDisabledIcon(this.left.getIcon()));
         }
         this.left.setEnabled(b);
         for (int i = 0; i < this.ICONCOUNT; i++) {
             if (b == false) {
-                this.rights[i].setDisabledIcon(ImageProvider.getDisabledIcon(this.rights[i].getIcon()));
+                this.rights[i].setDisabledIcon(org.appwork.resources.AWUTheme.I().getDisabledIcon(this.rights[i].getIcon()));
             }
             this.rights[i].setEnabled(b);
         }

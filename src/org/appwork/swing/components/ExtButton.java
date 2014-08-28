@@ -234,7 +234,7 @@ public void setEnabled(final boolean b) {
     public Icon getDisabledIcon() {
         if (disabledIcon == null) {
            
-            disabledIcon =  ImageProvider.getDisabledIcon(getIcon());
+            disabledIcon =  org.appwork.resources.AWUTheme.I().getDisabledIcon(getIcon());
             if (disabledIcon != null) {
                 firePropertyChange(DISABLED_ICON_CHANGED_PROPERTY, null, disabledIcon);
             }

@@ -102,6 +102,10 @@ public class ExtMergedIcon implements Icon, IDIcon {
         if (internalIcon != null) { throw new IllegalStateException("internalIcon is set"); }
         width = Math.max(width, entry.x + entry.icon.getIconWidth());
         height = Math.max(height, entry.y + entry.icon.getIconHeight());
+        if (!(entry.icon instanceof IDIcon)) {
+            System.out.println(getClass() + ": Warning. Not an  IDIcon");
+            new Exception().printStackTrace();
+        }
         entries.add(entry);
 
     }

@@ -6,6 +6,7 @@ import java.awt.Graphics;
 import javax.swing.Icon;
 import javax.swing.JCheckBox;
 
+import org.appwork.resources.AWUTheme;
 import org.appwork.utils.ImageProvider.ImageProvider;
 
 public final class CheckBoxIcon implements Icon {
@@ -42,13 +43,15 @@ public final class CheckBoxIcon implements Icon {
         ;
         cb.setSelected(selected);
         // we need this workaround.
-        // if we would use cb.paint(g); for every paintIcon call, this might habe sideeffects on the LAF painter.
+        // if we would use cb.paint(g); for every paintIcon call, this might
+        // habe sideeffects on the LAF painter.
         this.size = 14;
 
         internalIcon = ImageProvider.toImageIcon(this);
 
         if (!enabled) {
-            internalIcon = ImageProvider.getDisabledIcon(internalIcon);
+
+            internalIcon = AWUTheme.getInstance().getDisabledIcon(this);
         }
 
     }

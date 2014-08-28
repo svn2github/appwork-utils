@@ -48,7 +48,7 @@ public final class RadioBoxIcon implements Icon {
         internalIcon = ImageProvider.toImageIcon(this);
 
         if (!enabled) {
-            internalIcon = ImageProvider.getDisabledIcon(internalIcon);
+            internalIcon = org.appwork.resources.AWUTheme.I().getDisabledIcon(internalIcon);
         }
 
     }

@@ -9,6 +9,7 @@
  */
 package org.appwork.resources;
 
+
 /**
  * @author thomas
  * 
@@ -35,7 +36,6 @@ public class AWUTheme extends Theme {
      */
     private AWUTheme() {
         super("org/appwork/");
-
     }
 
 }

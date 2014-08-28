@@ -9,10 +9,7 @@
  */
 package org.appwork.resources;
 
-import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.Transparency;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -20,13 +17,12 @@ import java.net.URL;
 import java.util.HashMap;
 
 import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.UIManager;
 
 import org.appwork.storage.config.MinTimeWeakReference;
 import org.appwork.storage.config.MinTimeWeakReferenceCleanup;
 import org.appwork.utils.Application;
 import org.appwork.utils.IO;
+import org.appwork.utils.ImageProvider.ImageProvider;
 import org.appwork.utils.images.IconIO;
 import org.appwork.utils.images.Interpolation;
 import org.appwork.utils.logging.Log;
@@ -59,6 +55,16 @@ public class Theme implements MinTimeWeakReferenceCleanup {
         synchronized (imageIconCache) {
             imageIconCache.put(key, new MinTimeWeakReference<Icon>(ret, getCacheLifetime(), key, this));
         }
+    }
+
+    private Theme delegate;
+
+    /**
+     * @param i
+     */
+    public void setDelegate(Theme i) {
+        this.delegate = i;
+
     }
 
     /**
@@ -110,17 +116,23 @@ public class Theme implements MinTimeWeakReferenceCleanup {
     }
 
     public Icon getDisabledIcon(final Icon _getIcon) {
+        if (delegate != null) {
+            delegate.getDisabledIcon(_getIcon);
+        }
         final String key = getCacheKey(_getIcon, "disabled");
         Icon ret = getCached(key);
         if (ret == null) {
-            final Icon ico = UIManager.getLookAndFeel().getDisabledIcon(null, _getIcon);
-            final BufferedImage dest = new BufferedImage(_getIcon.getIconWidth(), _getIcon.getIconHeight(), Transparency.TRANSLUCENT);
-            final Graphics2D g2 = dest.createGraphics();
-
-            ico.paintIcon(null, g2, 0, 0);
-            g2.dispose();
-            ret = new ImageIcon(dest);
-            modify(ret, key);
+            final Icon ico = ImageProvider.getDisabledIcon(_getIcon);
+            // final BufferedImage dest = new
+            // BufferedImage(_getIcon.getIconWidth(), _getIcon.getIconHeight(),
+            // Transparency.TRANSLUCENT);
+            // final Graphics2D g2 = dest.createGraphics();
+            //
+            // ico.paintIcon(null, g2, 0, 0);
+            // g2.dispose();
+            // ret = new ImageIcon(dest);
+            ret = ico;
+            ret = modify(ret, key);
             cache(ret, key);
         }
         return ret;
@@ -139,6 +151,9 @@ public class Theme implements MinTimeWeakReferenceCleanup {
      * @return
      */
     public Icon getIcon(final String relativePath, final int size, final boolean useCache) {
+        if (delegate != null) {
+            delegate.getIcon(relativePath, size, useCache);
+        }
         Icon ret = null;
         String key = null;
         if (useCache) {
@@ -194,14 +209,21 @@ public class Theme implements MinTimeWeakReferenceCleanup {
     }
 
     public Image getImage(final String relativePath, final int size) {
+
         return this.getImage(relativePath, size, false);
     }
 
     public Image getImage(final String key, final int size, final boolean useCache) {
+        if (delegate != null) {
+            delegate.getImage(key, size, useCache);
+        }
         return IconIO.toBufferedImage(this.getIcon(key, size, useCache));
     }
 
     public URL getImageUrl(final String relativePath) {
+        if (delegate != null) {
+            delegate.getImageUrl(relativePath);
+        }
         return getURL("images/", relativePath, ".png");
     }
 
@@ -227,6 +249,9 @@ public class Theme implements MinTimeWeakReferenceCleanup {
     }
 
     public Icon getScaledInstance(final Icon imageIcon, final int size) {
+        if (delegate != null) {
+            delegate.getScaledInstance(imageIcon, size);
+        }
         final String key = getCacheKey(imageIcon, size);
         Icon ret = getCached(key);
         if (ret == null) {
@@ -237,6 +262,9 @@ public class Theme implements MinTimeWeakReferenceCleanup {
     }
 
     public String getText(final String string) {
+        if (delegate != null) {
+            delegate.getText(string);
+        }
         final URL url = getURL("", string, "");
         if (url == null) { return null; }
         try {
@@ -263,6 +291,9 @@ public class Theme implements MinTimeWeakReferenceCleanup {
      * @return
      */
     public URL getURL(final String pre, final String relativePath, final String ext) {
+        if (delegate != null) {
+            delegate.getURL(pre, relativePath, ext);
+        }
         final String path = this.getPath(pre, relativePath, ext);
         try {
 
@@ -281,6 +312,9 @@ public class Theme implements MinTimeWeakReferenceCleanup {
     }
 
     public boolean hasIcon(final String string) {
+        if (delegate != null) {
+            delegate.hasIcon(string);
+        }
         return getURL("images/", string, ".png") != null;
     }
 

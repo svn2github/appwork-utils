@@ -47,13 +47,13 @@ public class Theme implements MinTimeWeakReferenceCleanup {
     private String                                              nameSpace;
 
     public Theme(final String namespace) {
-        setNameSpace(namespace);
-        setTheme("standard");
+        this.setNameSpace(namespace);
+        this.setTheme("standard");
     }
 
     public void cache(final Icon ret, final String key) {
-        synchronized (imageIconCache) {
-            imageIconCache.put(key, new MinTimeWeakReference<Icon>(ret, getCacheLifetime(), key, this));
+        synchronized (this.imageIconCache) {
+            this.imageIconCache.put(key, new MinTimeWeakReference<Icon>(ret, this.getCacheLifetime(), key, this));
         }
     }
 
@@ -71,14 +71,14 @@ public class Theme implements MinTimeWeakReferenceCleanup {
      * 
      */
     public void clearCache() {
-        synchronized (imageIconCache) {
-            imageIconCache.clear();
+        synchronized (this.imageIconCache) {
+            this.imageIconCache.clear();
         }
     }
 
     public Icon getCached(final String key) {
-        synchronized (imageIconCache) {
-            final MinTimeWeakReference<Icon> cache = imageIconCache.get(key);
+        synchronized (this.imageIconCache) {
+            final MinTimeWeakReference<Icon> cache = this.imageIconCache.get(key);
             if (cache != null) { return cache.get(); }
             return null;
         }
@@ -103,7 +103,7 @@ public class Theme implements MinTimeWeakReferenceCleanup {
     }
 
     public long getCacheLifetime() {
-        return cacheLifetime;
+        return this.cacheLifetime;
     }
 
     private String getDefaultPath(final String pre, final String path, final String ext) {
@@ -116,27 +116,21 @@ public class Theme implements MinTimeWeakReferenceCleanup {
     }
 
     public Icon getDisabledIcon(final Icon _getIcon) {
-        if (delegate != null) {
-            delegate.getDisabledIcon(_getIcon);
+        if (_getIcon != null) {
+            if (this.delegate != null) {
+                this.delegate.getDisabledIcon(_getIcon);
+            }
+            final String key = this.getCacheKey(_getIcon, "disabled");
+            Icon ret = this.getCached(key);
+            if (ret == null) {
+                final Icon ico = ImageProvider.getDisabledIcon(_getIcon);
+                ret = ico;
+                ret = this.modify(ret, key);
+                this.cache(ret, key);
+            }
+            return ret;
         }
-        final String key = getCacheKey(_getIcon, "disabled");
-        Icon ret = getCached(key);
-        if (ret == null) {
-            final Icon ico = ImageProvider.getDisabledIcon(_getIcon);
-            // final BufferedImage dest = new
-            // BufferedImage(_getIcon.getIconWidth(), _getIcon.getIconHeight(),
-            // Transparency.TRANSLUCENT);
-            // final Graphics2D g2 = dest.createGraphics();
-            //
-            // ico.paintIcon(null, g2, 0, 0);
-            // g2.dispose();
-            // ret = new ImageIcon(dest);
-            ret = ico;
-            ret = modify(ret, key);
-            cache(ret, key);
-        }
-        return ret;
-
+        return null;
     }
 
     public Icon getIcon(final String relativePath, final int size) {
@@ -151,19 +145,19 @@ public class Theme implements MinTimeWeakReferenceCleanup {
      * @return
      */
     public Icon getIcon(final String relativePath, final int size, final boolean useCache) {
-        if (delegate != null) {
-            delegate.getIcon(relativePath, size, useCache);
+        if (this.delegate != null) {
+            this.delegate.getIcon(relativePath, size, useCache);
         }
         Icon ret = null;
         String key = null;
         if (useCache) {
-            key = getCacheKey(relativePath, size);
-            ret = getCached(key);
+            key = this.getCacheKey(relativePath, size);
+            ret = this.getCached(key);
         }
         if (ret == null) {
-            final URL url = getURL("images/", relativePath, ".png");
+            final URL url = this.getURL("images/", relativePath, ".png");
             ret = IconIO.getImageIcon(url, size);
-            ret = modify(ret, relativePath);
+            ret = this.modify(ret, relativePath);
             if (url == null) {
 
                 Log.exception(new Exception("Icon missing: " + this.getPath("images/", relativePath, ".png")));
@@ -182,7 +176,7 @@ public class Theme implements MinTimeWeakReferenceCleanup {
 
             }
             if (useCache) {
-                cache(ret, key);
+                this.cache(ret, key);
             }
         }
         return ret;
@@ -214,21 +208,21 @@ public class Theme implements MinTimeWeakReferenceCleanup {
     }
 
     public Image getImage(final String key, final int size, final boolean useCache) {
-        if (delegate != null) {
-            delegate.getImage(key, size, useCache);
+        if (this.delegate != null) {
+            this.delegate.getImage(key, size, useCache);
         }
         return IconIO.toBufferedImage(this.getIcon(key, size, useCache));
     }
 
     public URL getImageUrl(final String relativePath) {
-        if (delegate != null) {
-            delegate.getImageUrl(relativePath);
+        if (this.delegate != null) {
+            this.delegate.getImageUrl(relativePath);
         }
-        return getURL("images/", relativePath, ".png");
+        return this.getURL("images/", relativePath, ".png");
     }
 
     public String getNameSpace() {
-        return nameSpace;
+        return this.nameSpace;
     }
 
     /**
@@ -236,7 +230,7 @@ public class Theme implements MinTimeWeakReferenceCleanup {
      */
     public String getPath() {
 
-        return path;
+        return this.path;
     }
 
     private String getPath(final String pre, final String path, final String ext) {
@@ -249,23 +243,23 @@ public class Theme implements MinTimeWeakReferenceCleanup {
     }
 
     public Icon getScaledInstance(final Icon imageIcon, final int size) {
-        if (delegate != null) {
-            delegate.getScaledInstance(imageIcon, size);
+        if (this.delegate != null) {
+            this.delegate.getScaledInstance(imageIcon, size);
         }
-        final String key = getCacheKey(imageIcon, size);
-        Icon ret = getCached(key);
+        final String key = this.getCacheKey(imageIcon, size);
+        Icon ret = this.getCached(key);
         if (ret == null) {
             ret = IconIO.getScaledInstance(imageIcon, size, size, Interpolation.BILINEAR);
-            cache(ret, key);
+            this.cache(ret, key);
         }
         return ret;
     }
 
     public String getText(final String string) {
-        if (delegate != null) {
-            delegate.getText(string);
+        if (this.delegate != null) {
+            this.delegate.getText(string);
         }
-        final URL url = getURL("", string, "");
+        final URL url = this.getURL("", string, "");
         if (url == null) { return null; }
         try {
             return IO.readURLToString(url);
@@ -276,7 +270,7 @@ public class Theme implements MinTimeWeakReferenceCleanup {
     }
 
     public String getTheme() {
-        return theme;
+        return this.theme;
     }
 
     /**
@@ -291,8 +285,8 @@ public class Theme implements MinTimeWeakReferenceCleanup {
      * @return
      */
     public URL getURL(final String pre, final String relativePath, final String ext) {
-        if (delegate != null) {
-            delegate.getURL(pre, relativePath, ext);
+        if (this.delegate != null) {
+            this.delegate.getURL(pre, relativePath, ext);
         }
         final String path = this.getPath(pre, relativePath, ext);
         try {
@@ -306,16 +300,16 @@ public class Theme implements MinTimeWeakReferenceCleanup {
         // afterwards, we lookup in classpath. jar or bin folders
         URL url = Theme.class.getResource(path);
         if (url == null) {
-            url = Theme.class.getResource(getDefaultPath(pre, relativePath, ext));
+            url = Theme.class.getResource(this.getDefaultPath(pre, relativePath, ext));
         }
         return url;
     }
 
     public boolean hasIcon(final String string) {
-        if (delegate != null) {
-            delegate.hasIcon(string);
+        if (this.delegate != null) {
+            this.delegate.hasIcon(string);
         }
-        return getURL("images/", string, ".png") != null;
+        return this.getURL("images/", string, ".png") != null;
     }
 
     /*
@@ -327,8 +321,8 @@ public class Theme implements MinTimeWeakReferenceCleanup {
      */
     @Override
     public void onMinTimeWeakReferenceCleanup(final MinTimeWeakReference<?> minTimeWeakReference) {
-        synchronized (imageIconCache) {
-            imageIconCache.remove(minTimeWeakReference.getID());
+        synchronized (this.imageIconCache) {
+            this.imageIconCache.remove(minTimeWeakReference.getID());
         }
     }
 
@@ -338,15 +332,15 @@ public class Theme implements MinTimeWeakReferenceCleanup {
 
     public void setNameSpace(final String nameSpace) {
         this.nameSpace = nameSpace;
-        path = "/themes/" + getTheme() + "/" + getNameSpace();
-        clearCache();
+        this.path = "/themes/" + this.getTheme() + "/" + this.getNameSpace();
+        this.clearCache();
     }
 
     public void setPath(final String path) {
         this.path = path;
-        nameSpace = null;
-        theme = null;
-        clearCache();
+        this.nameSpace = null;
+        this.theme = null;
+        this.clearCache();
     }
 
     /**
@@ -354,9 +348,9 @@ public class Theme implements MinTimeWeakReferenceCleanup {
      */
     public void setTheme(final String theme) {
         this.theme = theme;
-        path = "/themes/" + getTheme() + "/" + getNameSpace();
+        this.path = "/themes/" + this.getTheme() + "/" + this.getNameSpace();
 
-        clearCache();
+        this.clearCache();
     }
 
 }

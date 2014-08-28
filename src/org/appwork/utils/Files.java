@@ -147,7 +147,7 @@ public class Files {
         if (StringUtils.isEmpty(name)) { return null; }
 
         final int index = name.lastIndexOf(".");
-        if (index < 0) { return null; }
+        if (index < 0 || index + 1 >= name.length()) { return null; }
         return name.substring(index + 1).toLowerCase(Locale.ENGLISH);
     }
 
@@ -293,15 +293,6 @@ public class Files {
 
     }
 
-    public static void main(final String[] args) {
-        System.out.println(Files.getRelativePath(new File("C:/Test/"), new File("c:/Test/")));
-        System.out.println(Files.getRelativePath(new File("C:/Test/"), new File("c:/test/eins/zwei/drei.vier")));
-        System.out.println(Files.getRelativePath(new File("C:/"), new File("c:/test/eins/zwei/drei.vier")));
-        System.out.println(Files.getRelativePath("C:\\test/", "c:/test/eins\\zwei\\drei.vier\\"));
-        System.out.println(Files.getRelativePath("/home/Daniel", "/home/Daniel/testfl"));
-
-    }
-
     public static <T extends Exception> void walkThroughStructure(final Handler<T> handler, final File f) throws T {
         handler.intro(f);
         try {
@@ -330,8 +321,8 @@ public class Files {
     public static File getCommonParent(File a, File b) {
         List<File> filesA = new LinkedList<File>();
         List<File> filesB = new LinkedList<File>();
-        fill(filesA, a);
-        fill(filesB, b);
+        Files.fill(filesA, a);
+        Files.fill(filesB, b);
         File last = null;
         String nameA, nameB;
         for (int i = 0; i < Math.min(filesA.size(), filesB.size()); i++) {

@@ -751,7 +751,19 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
                         continue;
                     }
                     try {
-                        JSonStorage.canStore(m.getGenericReturnType(), false);
+                        final AllowStorage allow = m.getAnnotation(AllowStorage.class);
+                        boolean found = false;
+                        if (allow != null) {
+                            for (final Class<?> c : allow.value()) {
+                                if (m.getReturnType() == c) {
+                                    found = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (!found) {
+                            JSonStorage.canStore(m.getGenericReturnType(), false);
+                        }
                     } catch (final InvalidTypeException e) {
                         final AllowStorage allow = m.getAnnotation(AllowStorage.class);
                         boolean found = false;

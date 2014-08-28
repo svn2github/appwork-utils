@@ -5,7 +5,6 @@ import java.awt.Composite;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Shape;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.TreeSet;
 
@@ -14,14 +13,14 @@ import javax.swing.ImageIcon;
 
 import org.appwork.utils.ImageProvider.ImageProvider;
 
-public class ExtMergedIcon implements Icon, IdentifierInterface {
-    private class Entry {
+public class ExtMergedIcon implements Icon, IDIcon {
+    protected class Entry {
 
-        private final Icon      icon;
-        private final int       x;
-        private final int       y;
-        private final Composite composite;
-        private final int       z;
+        public final Icon      icon;
+        public final int       x;
+        public final int       y;
+        public final Composite composite;
+        public final int       z;
 
         public Entry(final Icon icon, final int x, final int y, final int z, final Composite c) {
             this.icon = icon;
@@ -33,23 +32,23 @@ public class ExtMergedIcon implements Icon, IdentifierInterface {
 
     }
 
-    private int                  cropedWidth  = -1;
-    private int                  cropedHeight = -1;
+    private int                    cropedWidth  = -1;
+    private int                    cropedHeight = -1;
 
-    private final TreeSet<Entry> entries      = new TreeSet<Entry>(new Comparator<Entry>() {
+    protected final TreeSet<Entry> entries      = new TreeSet<Entry>(new Comparator<Entry>() {
 
-                                                  @Override
-                                                  public int compare(final Entry o1, final Entry o2) {
-                                                      return new Integer(o1.z).compareTo(new Integer(o2.z));
-                                                  }
-                                              });
+                                                    @Override
+                                                    public int compare(final Entry o1, final Entry o2) {
+                                                        return new Integer(o1.z).compareTo(new Integer(o2.z));
+                                                    }
+                                                });
 
-    private int                  width        = 0;
-    private int                  height       = 0;
-    private ImageIcon            internalIcon;
+    private int                    width        = 0;
+    private int                    height       = 0;
+    private ImageIcon              internalIcon;
 
-    private boolean              caching;
-    private Object               internalID;
+    private boolean                caching;
+    protected IconIdentifier       internalID;
 
     public ExtMergedIcon() {
 
@@ -111,7 +110,7 @@ public class ExtMergedIcon implements Icon, IdentifierInterface {
         caching = true;
         try {
             internalIcon = ImageProvider.toImageIcon(this);
-            internalID = toIdentifier();
+            internalID = getIdentifier();
             entries.clear();
         } finally {
             caching = false;
@@ -186,19 +185,39 @@ public class ExtMergedIcon implements Icon, IdentifierInterface {
      * @see org.appwork.swing.components.IdentifierInterface#toIdentifier()
      */
     @Override
-    public Object toIdentifier() {
-        if (internalID != null) { return internalID; }
+    public IconIdentifier getIdentifier() {
 
-        ArrayList<Object> lst = new ArrayList<Object>();
+        if (internalID != null) { return internalID; }
+        IconIdentifier t = new IconIdentifier("Merge");
+        if (cropedHeight > 0) {
+            t.addProperty("cropedHeight", cropedHeight);
+        }
+        if (cropedWidth > 0) {
+            t.addProperty("cropedWidth", cropedWidth);
+        }
+        t.addProperty("height", getIconHeight());
+        t.addProperty("width", getIconWidth());
+
         for (Entry e : entries) {
-            if (e.icon instanceof IdentifierInterface) {
-                lst.add(((IdentifierInterface) e.icon).toIdentifier());
+            if (e.icon instanceof IDIcon) {
+                IconIdentifier id = ((IDIcon) e.icon).getIdentifier();
+                if (e.x != 0) {
+                    id.addProperty("x", e.x);
+                }
+                if (e.y != 0) {
+                    id.addProperty("y", e.y);
+                }
+                id.addProperty("height", e.icon.getIconHeight());
+                id.addProperty("width", e.icon.getIconWidth());
+                t.add(id);
+                //
+
             } else {
-                lst.add(e.icon.toString());
+                t.add(new IconIdentifier("unknown", e.icon.toString()));
+
             }
         }
-        if (lst.size() == 1) { return lst.get(0); }
-        return lst;
-    }
 
+        return t;
+    }
 }

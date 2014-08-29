@@ -1,7 +1,5 @@
 package org.appwork.uio;
 
-import java.awt.GraphicsEnvironment;
-
 import org.appwork.utils.swing.dialog.Dialog;
 
 public class UIOManager {
@@ -51,5 +49,6 @@ public class UIOManager {
      */
 
     public static final int LOGIC_DONT_SHOW_AGAIN_IGNORES_OK     = 1 << 10;
+    public static final int STYLE_SHOW_DO_NOT_DISPLAY_AGAIN      = Dialog.STYLE_SHOW_DO_NOT_DISPLAY_AGAIN;
 
 }

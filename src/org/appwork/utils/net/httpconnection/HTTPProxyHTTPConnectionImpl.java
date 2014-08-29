@@ -134,7 +134,7 @@ public class HTTPProxyHTTPConnectionImpl extends HTTPConnectionImpl {
                     while (true) {
                         /*
                          * read line by line until we reach the single empty
-                         * line as seperator
+                         * line as separator
                          */
                         header = HTTPConnectionUtils.readheader(this.connectionSocket.getInputStream(), true);
                         if (header.limit() <= 2) {

@@ -218,7 +218,7 @@ public class CrossSystem {
     /**
      * use this method to make pathPart safe to use in a full absoluePath.
      * 
-     * it will remove driveletters/path seperators and all known chars that are
+     * it will remove driveletters/path separators and all known chars that are
      * forbidden in a path
      * 
      * @param pathPart
@@ -244,13 +244,13 @@ public class CrossSystem {
         return pathPart.trim();
     }
 
-    public static String fixPathSeperators(String path) {
+    public static String fixPathSeparators(String path) {
         if (StringUtils.isEmpty(path)) {
             if (path != null) { return path; }
             return null;
         }
         if (CrossSystem.isWindows()) {
-            /* windows uses \ as path seperator */
+            /* windows uses \ as path separator */
             final boolean network = path.startsWith("\\\\");
             path = path.replaceAll("[/]+", "\\\\");
             path = path.replaceAll("[\\\\]+", "\\\\");
@@ -258,7 +258,7 @@ public class CrossSystem {
                 path = "\\" + path;
             }
         } else {
-            /* mac/linux uses / as path seperator */
+            /* mac/linux uses / as path separator */
             path = path.replaceAll("[\\\\]+", "/");
             path = path.replaceAll("[/]+", "/");
         }
@@ -443,9 +443,9 @@ public class CrossSystem {
              * evaluated
              */
             File file = input.getCanonicalFile();
-            final String seperator = File.separatorChar + "";
+            final String separator = File.separatorChar + "";
             while (file != null) {
-                if (file.getPath().endsWith(seperator)) {
+                if (file.getPath().endsWith(separator)) {
                     // for example c:\ file.getName() would be "" in this case.
                     ret.add(0, file.getPath());
                     break;

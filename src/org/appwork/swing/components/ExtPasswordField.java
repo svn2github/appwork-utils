@@ -2,6 +2,7 @@ package org.appwork.swing.components;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyListener;
@@ -19,7 +20,7 @@ import javax.swing.event.DocumentListener;
 import org.appwork.app.gui.BasicGui;
 import org.appwork.swing.MigPanel;
 
-public class ExtPasswordField extends MigPanel implements FocusListener, DocumentListener, TextComponentInterface {
+public class ExtPasswordField extends MigPanel implements FocusListener, DocumentListener, TextComponentInterface, ActionListener {
 
     /**
      * 
@@ -111,7 +112,7 @@ public class ExtPasswordField extends MigPanel implements FocusListener, Documen
         // this.renderer.setBackground(Color.RED);
         renderer.setText("");
         editor.getDocument().addDocumentListener(this);
-
+editor.addActionListener(this);
         renderer.setHelpText("");
         setRendererMode(true);
 
@@ -369,6 +370,14 @@ public class ExtPasswordField extends MigPanel implements FocusListener, Documen
     @Override
     public void setText(final String text) {
         setPassword(text == null ? null : text.toCharArray());
+    }
+
+    /* (non-Javadoc)
+     * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+     */
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        onChanged();
     }
 
 }

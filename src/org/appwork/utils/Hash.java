@@ -87,7 +87,7 @@ public class Hash {
         }
     }
 
-    public static String getFileHash(final File arg, final String type) {
+    public static byte[] getFileHashBytes(final File arg, final String type) {
         if (arg == null || !arg.exists() || arg.isDirectory()) { return null; }
         FileInputStream fis = null;
         MessageDigest md = null;
@@ -95,7 +95,6 @@ public class Hash {
             md = MessageDigest.getInstance(type);
             // if (true) { throw new IOException("Any IOEXCeption"); }
             final byte[] b = new byte[32767];
-
             fis = new FileInputStream(arg);
             int n = 0;
             while ((n = fis.read(b)) >= 0) {
@@ -112,8 +111,11 @@ public class Hash {
             } catch (final Throwable e) {
             }
         }
-        final byte[] digest = md.digest();
-        return HexFormatter.byteArrayToHex(digest);
+        return md.digest();
+    }
+
+    public static String getFileHash(final File arg, final String type) {
+        return HexFormatter.byteArrayToHex(Hash.getFileHashBytes(arg, type));
     }
 
     public static String getFileHash(final File arg, final String type, final long maxHash) {

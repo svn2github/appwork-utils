@@ -45,7 +45,7 @@ public class IO {
     }
 
     public static void copyFile(final File in, final File out, final SYNC sync) throws IOException {
-        copyFile(null, in, out, sync);
+        IO.copyFile(null, in, out, sync);
     }
 
     public static void copyFile(ProgressFeedback progress, final File in, final File out, final SYNC sync) throws IOException {

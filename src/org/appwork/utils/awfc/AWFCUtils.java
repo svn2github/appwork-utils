@@ -105,7 +105,12 @@ public class AWFCUtils {
     }
 
     public String readString(final int size) throws IOException {
-        return new String(this.ensureRead(size, null), "UTF-8");
+        return new String(this.ensureRead(size, null), 0, size, "UTF-8");
+    }
+
+    public String readString(byte[] tempBuffer) throws IOException {
+        final int size = this.readShort();
+        return new String(this.ensureRead(size, tempBuffer), 0, size, "UTF-8");
     }
 
     public void writeBoolean(final boolean b) throws IOException {
@@ -125,7 +130,10 @@ public class AWFCUtils {
     }
 
     public void writeLongOptimized(final long value) throws IOException {
-        if (value < 0) { throw new NumberFormatException("value must be >=0"); }
+        if (value < 0) {
+            //
+            throw new NumberFormatException("value must be >=0");
+        }
         long rest = value;
         int bufferPosition = 0;
         while (true) {

@@ -15,6 +15,6 @@ import java.util.List;
  * @author daniel
  * 
  */
-public interface EventsSender {
+public interface RemoteAPIEventsSender {
     public List<Long> publishEvent(final EventObject event, final List<Long> subscriptionids);
 }

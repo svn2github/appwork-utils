@@ -24,6 +24,8 @@ import org.appwork.remoteapi.events.json.EventObjectStorable;
 import org.appwork.remoteapi.events.json.PublisherResponse;
 import org.appwork.remoteapi.events.json.SubscriptionResponse;
 import org.appwork.remoteapi.events.json.SubscriptionStatusResponse;
+import org.appwork.remoteapi.events.local.LocalEventsAPIEvent;
+import org.appwork.remoteapi.events.local.LocalEventsAPIEventSender;
 import org.appwork.remoteapi.exceptions.APIFileNotFoundException;
 import org.appwork.remoteapi.exceptions.InternalApiException;
 
@@ -31,7 +33,19 @@ import org.appwork.remoteapi.exceptions.InternalApiException;
  * @author daniel
  * 
  */
-public class EventsAPI implements EventsAPIInterface, EventsSender {
+public class EventsAPI implements EventsAPIInterface, RemoteAPIEventsSender {
+    private LocalEventsAPIEventSender localEventSender;
+
+    /**
+     * 
+     */
+    public EventsAPI() {
+        localEventSender = new LocalEventsAPIEventSender();
+    }
+
+    public LocalEventsAPIEventSender getLocalEventSender() {
+        return localEventSender;
+    }
 
     protected final ConcurrentHashMap<Long, Subscriber> subscribers            = new ConcurrentHashMap<Long, Subscriber>(8, 0.9f, 1);
     protected CopyOnWriteArrayList<EventPublisher>      publishers             = new CopyOnWriteArrayList<EventPublisher>();
@@ -58,6 +72,7 @@ public class EventsAPI implements EventsAPIInterface, EventsSender {
             }
             final SubscriptionResponse ret = new SubscriptionResponse(subscriber);
             ret.setSubscribed(true);
+            localEventSender.fireEvent(new LocalEventsAPIEvent(this, LocalEventsAPIEvent.Type.CHANNEL_UPDATE, subscriber));
             return ret;
         }
     }
@@ -73,6 +88,7 @@ public class EventsAPI implements EventsAPIInterface, EventsSender {
             subscriber.notifyListener();
             final SubscriptionResponse ret = new SubscriptionResponse(subscriber);
             ret.setSubscribed(true);
+            localEventSender.fireEvent(new LocalEventsAPIEvent(this, LocalEventsAPIEvent.Type.CHANNEL_UPDATE, subscriber));
             return ret;
         }
     }
@@ -205,6 +221,7 @@ public class EventsAPI implements EventsAPIInterface, EventsSender {
             }
             final SubscriptionResponse ret = new SubscriptionResponse(subscriber);
             ret.setSubscribed(true);
+            localEventSender.fireEvent(new LocalEventsAPIEvent(this, LocalEventsAPIEvent.Type.CHANNEL_UPDATE, subscriber));
             return ret;
         }
     }
@@ -230,6 +247,7 @@ public class EventsAPI implements EventsAPIInterface, EventsSender {
             }
             final SubscriptionResponse ret = new SubscriptionResponse(subscriber);
             ret.setSubscribed(true);
+            localEventSender.fireEvent(new LocalEventsAPIEvent(this, LocalEventsAPIEvent.Type.CHANNEL_UPDATE, subscriber));
             return ret;
         }
     }
@@ -241,6 +259,8 @@ public class EventsAPI implements EventsAPIInterface, EventsSender {
         this.subscribersCleanupThread();
         final SubscriptionResponse ret = new SubscriptionResponse(subscriber);
         ret.setSubscribed(true);
+        localEventSender.fireEvent(new LocalEventsAPIEvent(this, LocalEventsAPIEvent.Type.CHANNEL_OPENED, subscriber));
+
         return ret;
     }
 
@@ -272,9 +292,8 @@ public class EventsAPI implements EventsAPIInterface, EventsSender {
                                         it.remove();
                                         final long subscriptionid = subscriber.getSubscriptionID();
                                         try {
-                                            for (final EventPublisher publisher : EventsAPI.this.publishers) {
-                                                publisher.terminatedSubscription(EventsAPI.this, subscriptionid);
-                                            }
+                                            localEventSender.fireEvent(new LocalEventsAPIEvent(EventsAPI.this, LocalEventsAPIEvent.Type.CHANNEL_CLOSED, subscriber));
+
                                         } catch (final Throwable e) {
                                             e.printStackTrace();
                                         }
@@ -316,9 +335,8 @@ public class EventsAPI implements EventsAPIInterface, EventsSender {
         if (subscriber != null) {
             subscriber.notifyListener();
             try {
-                for (final EventPublisher publisher : this.publishers) {
-                    publisher.terminatedSubscription(this, subscriptionid);
-                }
+                localEventSender.fireEvent(new LocalEventsAPIEvent(this, LocalEventsAPIEvent.Type.CHANNEL_CLOSED, subscriber));
+
             } catch (final Throwable e) {
                 e.printStackTrace();
             }

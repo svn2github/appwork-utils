@@ -327,7 +327,9 @@ public class InterfaceHandler<T> {
                 if (methodname != null) {
                     name = methodname.value();
                 }
-                if (this.methods.put(name + paramCounter, m) != null) { throw new ParseException(interfaceClass + " already contains method: \r\n" + name + "\r\n"); }
+                if (this.methods.put(name + paramCounter, m) != null) {
+
+                throw new ParseException(interfaceClass + " already contains method: \r\n" + name + "\r\n"); }
 
                 if (m.getAnnotation(ApiRawMethod.class) != null) {
                     this.methods.put(name, m);

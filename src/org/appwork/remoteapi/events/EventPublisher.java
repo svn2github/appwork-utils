@@ -19,10 +19,8 @@ public interface EventPublisher {
 
     public abstract String getPublisherName();
 
-    public abstract void register(EventsSender eventsAPI);
+    public abstract void register(RemoteAPIEventsSender eventsAPI);
 
-    public abstract void terminatedSubscription(EventsSender eventsSender, long subscriptionid);
-
-    public abstract void unregister(EventsSender eventsAPI);
+    public abstract void unregister(RemoteAPIEventsSender eventsAPI);
 
 }

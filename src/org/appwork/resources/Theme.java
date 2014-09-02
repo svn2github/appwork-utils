@@ -293,6 +293,7 @@ public class Theme implements MinTimeWeakReferenceCleanup {
 
             // first lookup in home dir. .jd_home or installdirectory
             final File file = Application.getResource(path);
+
             if (file.exists()) { return file.toURI().toURL(); }
         } catch (final MalformedURLException e) {
             e.printStackTrace();

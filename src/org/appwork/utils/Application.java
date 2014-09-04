@@ -761,4 +761,49 @@ public class Application {
 
     }
 
+    /**
+     * returns a file that does not exists. thus it ads a counter to the path
+     * until the resulting file does not exist
+     * 
+     * @param string
+     * @return
+     */
+    public static File generateNumberedTempResource(String string) {
+        return generateNumbered(getTempResource(string));
+    }
+
+    /**
+     * returns a file that does not exists. thus it ads a counter to the path
+     * until the resulting file does not exist
+     * 
+     * @param string
+     * @return
+     */
+    public static File generateNumberedResource(String string) {
+        return generateNumbered(getResource(string));
+
+    }
+
+    /**
+     * @param resource
+     */
+    private static File generateNumbered(File orgFile) {
+        int i = 0;
+
+        String extension = Files.getExtension(orgFile.getName());
+        File file = null;
+        while (file == null || file.exists()) {
+            i++;
+
+            if (extension != null) {
+                file = new File(orgFile.getParentFile(), orgFile.getName().substring(0, orgFile.getName().length() - extension.length() - 1) + "." + i + "." + extension);
+            } else {
+                file = new File(orgFile.getParentFile(), orgFile.getName() + "." + i);
+            }
+
+        }
+        return file;
+
+    }
+
 }

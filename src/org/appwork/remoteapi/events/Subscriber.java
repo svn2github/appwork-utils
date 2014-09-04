@@ -80,6 +80,10 @@ public class Subscriber {
             return false;
         }
         final String eventID = event.getPublisher().getPublisherName() + "." + event.getEventid();
+        return isSubscribed(eventID);
+    }
+
+    public boolean isSubscribed(final String eventID) {
         for (final String subscription : this.subscriptions) {
             try {
                 if (new Regex(eventID, subscription).matches()) {

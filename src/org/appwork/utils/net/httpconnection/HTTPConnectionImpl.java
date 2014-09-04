@@ -473,14 +473,14 @@ public class HTTPConnectionImpl implements HTTPConnection {
     protected synchronized void connectInputStream() throws IOException {
         final Socket connectionSocket = this.getConnectionSocket();
         try {
-            if (this.requiresOutputStream()) {
-                final long done = ((CountingOutputStream) this.getOutputStream()).transferedBytes();
+            if (this.requiresOutputStream() && this.postTodoLength >= 0) {
+                final long done = ((CountingOutputStream) this.outputStream).transferedBytes();
                 if (done != this.postTodoLength) { throw new IllegalStateException("Content-Length " + this.postTodoLength + " does not match send " + done + " bytes"); }
             }
             if (this.inputStreamConnected) { return; }
             if (this.requiresOutputStream()) {
                 /* flush outputstream in case some buffers are not flushed yet */
-                this.getOutputStream().flush();
+                this.outputStream.flush();
             }
             this.inputStreamConnected = true;
             /* first read http header */
@@ -744,9 +744,8 @@ public class HTTPConnectionImpl implements HTTPConnection {
     }
 
     public OutputStream getOutputStream() throws IOException {
-        this.connect();
-        if (this.outputStream == null) { throw new IOException("OutputStream no longer available"); }
-        return this.outputStream;
+        if (this.outputStream != null && this.requiresOutputStream()) { return this.outputStream; }
+        throw new IOException("OutputStream is not available");
     }
 
     public long[] getRange() {

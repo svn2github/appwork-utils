@@ -132,6 +132,17 @@ public class Subscriber {
         }
     }
 
+    /**
+     * @param filtered
+     */
+    public void push(List<EventObject> filtered) {
+        synchronized (this.events) {
+            for (EventObject event : filtered) {
+                push(event);
+            }
+        }
+    }
+
     protected void push(final EventObject event) {
         if (event == null) { return; }
         synchronized (this.events) {

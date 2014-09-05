@@ -47,10 +47,15 @@ public class EventsAPI implements EventsAPIInterface, RemoteAPIEventsSender {
         return localEventSender;
     }
 
-    protected final ConcurrentHashMap<Long, Subscriber> subscribers            = new ConcurrentHashMap<Long, Subscriber>(8, 0.9f, 1);
-    protected CopyOnWriteArrayList<EventPublisher>      publishers             = new CopyOnWriteArrayList<EventPublisher>();
-    protected final Object                              subscribersCleanupLock = new Object();
-    protected Thread                                    cleanupThread          = null;
+    protected final ConcurrentHashMap<Long, Subscriber> subscribers = new ConcurrentHashMap<Long, Subscriber>(8, 0.9f, 1);
+
+    public ArrayList<Subscriber> getSubscribers() {
+        return new ArrayList<Subscriber>(this.subscribers.values());
+    }
+
+    protected CopyOnWriteArrayList<EventPublisher> publishers             = new CopyOnWriteArrayList<EventPublisher>();
+    protected final Object                         subscribersCleanupLock = new Object();
+    protected Thread                               cleanupThread          = null;
 
     @Override
     public SubscriptionResponse addsubscription(final long subscriptionid, final String[] subscriptions, final String[] exclusions) {
@@ -179,10 +184,9 @@ public class EventsAPI implements EventsAPIInterface, RemoteAPIEventsSender {
             publishTo = new ArrayList<Subscriber>(this.subscribers.values());
         }
         for (final Subscriber subscriber : publishTo) {
-            if (subscriber.isSubscribed(event)) {
+
+            if (push(subscriber, event)) {
                 ret.add(subscriber.getSubscriptionID());
-                subscriber.push(event);
-                subscriber.notifyListener();
             }
         }
         return ret;
@@ -343,5 +347,39 @@ public class EventsAPI implements EventsAPIInterface, RemoteAPIEventsSender {
             return new SubscriptionResponse(subscriber);
         }
         return new SubscriptionResponse();
+    }
+
+    /**
+     * @param subscriber
+     * @param eventObject
+     */
+    public boolean push(Subscriber subscriber, EventObject eventObject) {
+        if (subscriber.isSubscribed(eventObject)) {
+            subscriber.push(eventObject);
+            subscriber.notifyListener();
+            return true;
+        }
+        return false;
+
+    }
+
+    /**
+     * @param key
+     * @param value
+     */
+    public void push(Subscriber subscriber, List<EventObject> value) {
+        ArrayList<EventObject> filtered = new ArrayList<EventObject>();
+
+        for (EventObject o : value) {
+            if (subscriber.isSubscribed(o)) {
+                filtered.add(o);
+            }
+        }
+        if (filtered.size() > 0) {
+            subscriber.push(filtered);
+            subscriber.notifyListener();
+
+        }
+
     }
 }

@@ -17,7 +17,7 @@ import java.io.Console;
  */
 public class ConsoleWrapper extends AbstractConsole {
 
-    private Console _console;
+    private final Console _console;
 
     /**
      * @param console
@@ -34,7 +34,7 @@ public class ConsoleWrapper extends AbstractConsole {
      */
     @Override
     public void println(String string) {
-        _console.writer().println(string);
+        this._console.writer().println(string);
 
     }
 
@@ -45,8 +45,7 @@ public class ConsoleWrapper extends AbstractConsole {
      */
     @Override
     public String readLine() {
-
-        return _console.readLine();
+        return this._console.readLine();
     }
 
     /*
@@ -58,8 +57,19 @@ public class ConsoleWrapper extends AbstractConsole {
      */
     @Override
     public void print(String string) {
-        _console.writer().println(string);
+        this._console.writer().println(string);
+    }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.appwork.console.AbstractConsole#readPassword()
+     */
+    @Override
+    public String readPassword() {
+        final char[] ret = this._console.readPassword();
+        if (ret == null || ret.length == 0) { return ""; }
+        return new String(ret);
     }
 
 }

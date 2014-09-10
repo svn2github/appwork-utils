@@ -42,6 +42,11 @@ public abstract class AbstractConsole {
     abstract public String readLine();
 
     /**
+     * @return
+     */
+    abstract public String readPassword();
+
+    /**
      * @param returnStrPos
      */
     abstract public void print(String string);

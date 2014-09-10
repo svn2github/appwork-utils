@@ -14,9 +14,6 @@ import java.awt.Composite;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.GraphicsConfiguration;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
 import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.Transparency;
@@ -229,7 +226,8 @@ public class ImageProvider {
             Icon ret = cache == null ? null : cache.get();
             if (ret != null) {
                 //
-                return ret; }
+                return ret;
+            }
             if (!(icon instanceof ImageIcon)) {
                 // getDisabledIcon only works for imageicons
                 icon = ImageProvider.toImageIcon(icon);
@@ -450,11 +448,11 @@ public class ImageProvider {
 
     public static BufferedImage merge(final Icon back, final Icon front, final int xoffsetBack, final int yoffsetBack, final int xoffsetFront, final int yoffsetFront) {
 
-        return merge(back, front, xoffsetBack, yoffsetBack, xoffsetFront, yoffsetFront, null, null);
+        return ImageProvider.merge(back, front, xoffsetBack, yoffsetBack, xoffsetFront, yoffsetFront, null, null);
     }
 
     public static BufferedImage merge(final Image back, final Image front, final int xoffsetBack, final int yoffsetBack, final int xoffsetFront, final int yoffsetFront) {
-        return merge(new ImageIcon(back), new ImageIcon(front), xoffsetBack, yoffsetBack, xoffsetFront, yoffsetFront);
+        return ImageProvider.merge(new ImageIcon(back), new ImageIcon(front), xoffsetBack, yoffsetBack, xoffsetFront, yoffsetFront);
     }
 
     /* copied from ImageIO, to close the inputStream */
@@ -466,7 +464,9 @@ public class ImageProvider {
             return ImageIO.read(is);
         } finally {
             try {
-                is.close();
+                if (is != null) {
+                    is.close();
+                }
             } catch (final Throwable e) {
             }
         }
@@ -487,7 +487,9 @@ public class ImageProvider {
             bi = ImageIO.read(is);
         } finally {
             try {
-                is.close();
+                if (is != null) {
+                    is.close();
+                }
             } catch (final Throwable e) {
             }
         }
@@ -582,11 +584,7 @@ public class ImageProvider {
         } else {
             final int w = icon.getIconWidth();
             final int h = icon.getIconHeight();
-            final GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-            final GraphicsDevice gd = ge.getDefaultScreenDevice();
-            final GraphicsConfiguration gc = gd.getDefaultConfiguration();
-            final BufferedImage image = gc.createCompatibleImage(w, h, Transparency.TRANSLUCENT);
-
+            final BufferedImage image = new BufferedImage(w, h, Transparency.TRANSLUCENT);
             final Graphics2D g = image.createGraphics();
             g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
             // g.setColor(Color.RED);

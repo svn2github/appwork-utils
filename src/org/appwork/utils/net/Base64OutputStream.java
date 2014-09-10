@@ -78,6 +78,7 @@ public class Base64OutputStream extends FilterOutputStream {
         /* put byte into base64Buffer */
         this.base64buffer[this.index++] = b;
         if (this.index == 3) {
+            this.index = 0;
             /* first 6 bits, &0xFC returns bit 7-2 and >>2 shifts down */
             this.writebuffer[0] = (byte) Base64OutputStream.BASE64[(this.base64buffer[0] & 0xFC) >> 2];
             /*
@@ -93,7 +94,6 @@ public class Base64OutputStream extends FilterOutputStream {
             /* last 6 bits, 0x3F returns bit 5-0 */
             this.writebuffer[3] = (byte) Base64OutputStream.BASE64[this.base64buffer[2] & 0x3F];
             this.out.write(this.writebuffer);
-            this.index = 0;
         }
     }
 }

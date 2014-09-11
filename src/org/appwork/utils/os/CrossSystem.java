@@ -96,6 +96,14 @@ public class CrossSystem {
         WINDOWS
     }
 
+    public static enum ARCHFamily {
+        X86,
+        ARM,
+        PPC,
+        SPARC,
+        IA64
+    }
+
     private static final boolean   __HEADLESS                = Application.isHeadless();
 
     private static String[]        BROWSER_COMMANDLINE       = null;
@@ -163,18 +171,23 @@ public class CrossSystem {
     private static final Mime      MIME;
 
     public static OperatingSystem  OS;
+    public static ARCHFamily       ARCH;
 
     /**
      * Cache to store the OS string in
      */
     private final static String    OS_STRING;
 
+    private final static String    ARCH_STRING;
+
     private static Boolean         OS64BIT                   = null;
 
     static {
         /* Init OS_ID */
         OS_STRING = System.getProperty("os.name");
+        ARCH_STRING = System.getProperty("os.arch");
         CrossSystem.OS = CrossSystem.getOSByString(CrossSystem.OS_STRING);
+        CrossSystem.ARCH = CrossSystem.getARCHByString(CrossSystem.ARCH_STRING);
 
         /* Init MIME */
         if (CrossSystem.isWindows()) {
@@ -422,6 +435,26 @@ public class CrossSystem {
         }
     }
 
+    private static ARCHFamily getARCHByString(final String archString) {
+        if (archString != null) {
+            final String arch = archString.toLowerCase(Locale.ENGLISH);
+            if (arch.contains("amd64")) {
+                return ARCHFamily.X86;
+            } else if (arch.contains("i386")) {
+                return ARCHFamily.X86;
+            } else if (arch.contains("x86")) {
+                return ARCHFamily.X86;
+            } else if (arch.contains("ppc")) {
+                return ARCHFamily.PPC;
+            } else if (arch.contains("sparc")) {
+                return ARCHFamily.SPARC;
+            } else if (arch.contains("arm")) {
+                return ARCHFamily.ARM;
+            } else if (arch.contains("ia64")) { return ARCHFamily.IA64; }
+        }
+        return ARCHFamily.X86;
+    }
+
     /**
      * Returns true if the OS is a linux system
      * 
@@ -429,6 +462,14 @@ public class CrossSystem {
      */
     public static OSFamily getOSFamily() {
         return CrossSystem.OS.getFamily();
+    }
+
+    public static ARCHFamily getARCHFamily() {
+        return CrossSystem.ARCH;
+    }
+
+    public static String getARCHString() {
+        return CrossSystem.ARCH_STRING;
     }
 
     public static String getOSString() {

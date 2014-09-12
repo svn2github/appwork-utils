@@ -97,6 +97,7 @@ public class CrossSystem {
     }
 
     public static enum ARCHFamily {
+        NA,
         X86,
         ARM,
         PPC,
@@ -104,91 +105,90 @@ public class CrossSystem {
         IA64
     }
 
-    private static final boolean   __HEADLESS                = Application.isHeadless();
+    private static final boolean        __HEADLESS                = Application.isHeadless();
 
-    private static String[]        BROWSER_COMMANDLINE       = null;
+    private static String[]             BROWSER_COMMANDLINE       = null;
 
-    private static DesktopSupport  DESKTOP_SUPPORT           = null;
+    private static DesktopSupport       DESKTOP_SUPPORT           = null;
 
-    private static String[]        FILE_COMMANDLINE          = null;
-    private static String          JAVAINT                   = null;
-
-    /**
-     * 
-     */
-    private static final KeyStroke KEY_STROKE_BACKSPACE_CTRL = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
-    /**
-     * 
-     */
-    private static final KeyStroke KEY_STROKE_COPY           = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_C, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
-    /**
-     * 
-     */
-    private static final KeyStroke KEY_STROKE_CUT            = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_X, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
-    /**
-     * 
-     */
-    private static final KeyStroke KEY_STROKE_DELETE         = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
+    private static String[]             FILE_COMMANDLINE          = null;
+    private static String               JAVAINT                   = null;
 
     /**
      * 
      */
-    private static final KeyStroke KEY_STROKE_DOWN           = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0);
+    private static final KeyStroke      KEY_STROKE_BACKSPACE_CTRL = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
+    /**
+     * 
+     */
+    private static final KeyStroke      KEY_STROKE_COPY           = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_C, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
+    /**
+     * 
+     */
+    private static final KeyStroke      KEY_STROKE_CUT            = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_X, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
+    /**
+     * 
+     */
+    private static final KeyStroke      KEY_STROKE_DELETE         = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
 
     /**
      * 
      */
-    private static final KeyStroke KEY_STROKE_ESCAPE         = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
+    private static final KeyStroke      KEY_STROKE_DOWN           = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0);
 
     /**
      * 
      */
-    private static final KeyStroke KEY_STROKE_FORCE_DELETE   = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, ActionEvent.SHIFT_MASK);
+    private static final KeyStroke      KEY_STROKE_ESCAPE         = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 
     /**
      * 
      */
-    private static final KeyStroke KEY_STROKE_PASTE          = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_V, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
+    private static final KeyStroke      KEY_STROKE_FORCE_DELETE   = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, ActionEvent.SHIFT_MASK);
 
     /**
      * 
      */
-    private static final KeyStroke KEY_STROKE_SEARCH         = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_F, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
+    private static final KeyStroke      KEY_STROKE_PASTE          = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_V, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
 
     /**
      * 
      */
-    private static final KeyStroke KEY_STROKE_SELECT_ALL     = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_A, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
+    private static final KeyStroke      KEY_STROKE_SEARCH         = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_F, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
 
     /**
      * 
      */
-    private static final KeyStroke KEY_STROKE_UP             = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0);
+    private static final KeyStroke      KEY_STROKE_SELECT_ALL     = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_A, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
+
+    /**
+     * 
+     */
+    private static final KeyStroke      KEY_STROKE_UP             = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0);
 
     /**
      * Cache to store the Mime Class in
      */
-    private static final Mime      MIME;
+    private static final Mime           MIME;
 
-    public static OperatingSystem  OS;
-    public static ARCHFamily       ARCH;
+    public static final OperatingSystem OS;
+    public static final ARCHFamily      ARCH;
 
     /**
      * Cache to store the OS string in
      */
-    private final static String    OS_STRING;
+    private final static String         OS_STRING;
 
-    private final static String    ARCH_STRING;
+    private final static String         ARCH_STRING;
 
-    private static Boolean         OS64BIT                   = null;
+    private static Boolean              OS64BIT                   = null;
 
     static {
         /* Init OS_ID */
         OS_STRING = System.getProperty("os.name");
         ARCH_STRING = System.getProperty("os.arch");
-        CrossSystem.OS = CrossSystem.getOSByString(CrossSystem.OS_STRING);
-        CrossSystem.ARCH = CrossSystem.getARCHByString(CrossSystem.ARCH_STRING);
-
+        OS = CrossSystem.getOSByString(CrossSystem.OS_STRING);
+        ARCH = CrossSystem.getARCHByString(CrossSystem.ARCH_STRING);
         /* Init MIME */
         if (CrossSystem.isWindows()) {
             MIME = new MimeWindows();
@@ -401,38 +401,37 @@ public class CrossSystem {
      * @return
      */
     private static OperatingSystem getOSByString(final String osString) {
-        if (osString == null) {
-            /* fallback to latest Windows */
-            return OperatingSystem.WINDOWS_8;
+        if (osString != null) {
+            final String os = osString.toLowerCase(Locale.ENGLISH);
+            if (os.contains("windows 8")) {
+                return OperatingSystem.WINDOWS_8;
+            } else if (os.contains("windows 7")) {
+                return OperatingSystem.WINDOWS_7;
+            } else if (os.contains("windows xp")) {
+                return OperatingSystem.WINDOWS_XP;
+            } else if (os.contains("windows vista")) {
+                return OperatingSystem.WINDOWS_VISTA;
+            } else if (os.contains("windows 2000")) {
+                return OperatingSystem.WINDOWS_2000;
+            } else if (os.contains("windows 2003")) {
+                return OperatingSystem.WINDOWS_2003;
+            } else if (os.contains("windows server 2008")) {
+                return OperatingSystem.WINDOWS_SERVER_2008;
+            } else if (os.contains("windows server 2012")) {
+                return OperatingSystem.WINDOWS_SERVER_2012;
+            } else if (os.contains("nt")) {
+                return OperatingSystem.WINDOWS_NT;
+            } else if (os.contains("windows")) {
+                return OperatingSystem.WINDOWS_OTHERS;
+            } else if (os.contains("mac")) {
+                return OperatingSystem.MAC;
+            } else if (os.contains("OS/2")) {
+                return OperatingSystem.OS2;
+            } else {
+                return OperatingSystem.LINUX;
+            }
         }
-        final String os = osString.toLowerCase(Locale.ENGLISH);
-        if (os.contains("windows 8")) {
-            return OperatingSystem.WINDOWS_8;
-        } else if (os.contains("windows 7")) {
-            return OperatingSystem.WINDOWS_7;
-        } else if (os.contains("windows xp")) {
-            return OperatingSystem.WINDOWS_XP;
-        } else if (os.contains("windows vista")) {
-            return OperatingSystem.WINDOWS_VISTA;
-        } else if (os.contains("windows 2000")) {
-            return OperatingSystem.WINDOWS_2000;
-        } else if (os.contains("windows 2003")) {
-            return OperatingSystem.WINDOWS_2003;
-        } else if (os.contains("windows server 2008")) {
-            return OperatingSystem.WINDOWS_SERVER_2008;
-        } else if (os.contains("windows server 2012")) {
-            return OperatingSystem.WINDOWS_SERVER_2012;
-        } else if (os.contains("nt")) {
-            return OperatingSystem.WINDOWS_NT;
-        } else if (os.contains("windows")) {
-            return OperatingSystem.WINDOWS_OTHERS;
-        } else if (os.contains("mac")) {
-            return OperatingSystem.MAC;
-        } else if (os.contains("OS/2")) {
-            return OperatingSystem.OS2;
-        } else {
-            return OperatingSystem.LINUX;
-        }
+        return OperatingSystem.WINDOWS_8;
     }
 
     private static ARCHFamily getARCHByString(final String archString) {
@@ -452,7 +451,8 @@ public class CrossSystem {
                 return ARCHFamily.ARM;
             } else if (arch.contains("ia64")) { return ARCHFamily.IA64; }
         }
-        return ARCHFamily.X86;
+        new Exception("Unknown CPU Architecture " + archString).printStackTrace();
+        return ARCHFamily.NA;
     }
 
     /**

@@ -10,9 +10,11 @@
 package org.appwork.utils;
 
 import java.awt.GraphicsEnvironment;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -62,6 +64,28 @@ public class Application {
     private static boolean              REDIRECTED  = false;
     public static PauseableOutputStream STD_OUT;
     public static PauseableOutputStream ERR_OUT;
+
+    public static void addStreamCopy(File file, org.appwork.utils.Application.PauseableOutputStream stream) {
+        int i = 0;
+        File orgFile = file;
+        while (true) {
+
+            try {
+                if (file.exists()) { throw new FileNotFoundException("Exists"); }
+                stream.addBranch(new BufferedOutputStream(new FileOutputStream(file)));
+                break;
+            } catch (FileNotFoundException e1) {
+                i++;
+                e1.printStackTrace();
+                String extension = org.appwork.utils.Files.getExtension(orgFile.getName());
+                if (extension != null) {
+                    file = new File(orgFile.getParentFile(), orgFile.getName().substring(0, orgFile.getName().length() - extension.length() - 1) + "." + i + "." + extension);
+                } else {
+                    file = new File(orgFile.getParentFile(), orgFile.getName() + "." + i);
+                }
+            }
+        }
+    }
 
     /**
      * Adds a folder to the System classloader classpath this might fail if

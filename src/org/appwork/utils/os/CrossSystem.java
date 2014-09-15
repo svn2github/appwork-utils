@@ -15,6 +15,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
@@ -103,6 +104,41 @@ public class CrossSystem {
         PPC,
         SPARC,
         IA64
+    }
+
+    private static Boolean ISRASPBERRYPI = null;
+
+    public static boolean isRaspberryPi() {
+        if (CrossSystem.ISRASPBERRYPI != null) { return CrossSystem.ISRASPBERRYPI; }
+        boolean isRaspberryPi = false;
+        if (CrossSystem.isLinux() && ARCHFamily.ARM.equals(CrossSystem.getARCHFamily())) {
+            FileInputStream fis = null;
+            try {
+                fis = new FileInputStream("/proc/cpuinfo");
+                final BufferedReader is = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
+                String line = null;
+                int raspberryPiMatches = 0;
+                while ((line = is.readLine()) != null) {
+                    if (line.contains("ARMv6")) {
+                        raspberryPiMatches++;
+                    } else if (line.contains("BCM2708")) {
+                        raspberryPiMatches++;
+                    }
+                }
+                isRaspberryPi = raspberryPiMatches == 2;
+            } catch (final Throwable e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    if (fis != null) {
+                        fis.close();
+                    }
+                } catch (final Throwable e) {
+                }
+            }
+        }
+        CrossSystem.ISRASPBERRYPI = isRaspberryPi;
+        return isRaspberryPi;
     }
 
     private static final boolean        __HEADLESS                = Application.isHeadless();

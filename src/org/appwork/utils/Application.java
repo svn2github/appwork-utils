@@ -759,8 +759,13 @@ public class Application {
             STD_OUT = new PauseableOutputStream(System.out);
 
             ERR_OUT = new PauseableOutputStream(System.err);
-            System.setOut(new PrintStream(STD_OUT));
-            System.setErr(new PrintStream(ERR_OUT));
+
+            PrintStream o;
+            System.setOut(o = new PrintStream(STD_OUT));
+            PrintStream e;
+            System.setErr(e = new PrintStream(ERR_OUT));
+            System.out.println("SetOut " + o);
+            System.out.println("SetErr " + e);
         }
     }
 

@@ -13,7 +13,8 @@ import org.appwork.storage.Storable;
 
 /**
  * @author daniel
- * 
+ *         {"password":null,"address":null,"connectMethodPrefered":false,"port"
+ *         :-1,"type":null,"preferNativeImplementation":false,"username":null}
  */
 public class HTTPProxyStorable implements Storable {
 

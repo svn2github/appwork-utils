@@ -85,11 +85,11 @@ public class KeyUtils {
     // ⏏ Eject U+23CF
     // ⌽ Power 3 U+233D
     public static final String  MAC_META                     = "\u2318";
-   
+
     public static final String  MAC_CTRL                     = "\u2303";
- 
+
     public static final String  MAC_ALT                      = "\u2325";
-  
+
     public static final String  MAC_SHIFT                    = "\u21E7";
 
     public static String getShortcutString(final KeyEvent event, final boolean translated) {
@@ -97,7 +97,7 @@ public class KeyUtils {
     }
 
     public static void main(final String[] args) {
-        final KeyStroke ks = KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.SHIFT_MASK);
+        final KeyStroke ks = KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0);
         System.out.println(ks);
         System.out.println(getShortcutString(ks, false));
         System.out.println(getShortcutString(ks, true));

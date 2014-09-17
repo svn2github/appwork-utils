@@ -17,7 +17,17 @@ import org.appwork.storage.Storable;
  */
 public class DataObject implements Storable {
     private Object data;
-    private long   rid = -1; ;
+    private String diffType;
+
+    public String getDiffType() {
+        return diffType;
+    }
+
+    public void setDiffType(String diffType) {
+        this.diffType = diffType;
+    }
+
+    private long rid = -1; ;
 
     public long getRid() {
         return rid;
@@ -54,6 +64,16 @@ public class DataObject implements Storable {
 
     public void setData(final Object data) {
         this.data = data;
+    }
+
+    private String diffID;
+
+    public String getDiffID() {
+        return diffID;
+    }
+
+    public void setDiffID(String diffID) {
+        this.diffID = diffID;
     }
 
 }

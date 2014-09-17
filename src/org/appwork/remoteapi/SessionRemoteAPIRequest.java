@@ -40,6 +40,17 @@ public class SessionRemoteAPIRequest<T extends HttpSession> extends RemoteAPIReq
 
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        // TODO Auto-generated method stub
+        return "SessionAPIRequest_" + session.getSessionID() + "\r\n" + apiRequest;
+    }
+
     public RemoteAPIRequest getApiRequest() {
         return this.apiRequest;
     }

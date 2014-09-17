@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import org.appwork.storage.JSonStorage;
 import org.appwork.utils.net.HeaderCollection;
 import org.appwork.utils.net.httpserver.requests.GetRequest;
 import org.appwork.utils.net.httpserver.requests.HeadRequest;
@@ -47,6 +48,17 @@ public class RemoteAPIRequest implements HttpRequestInterface {
     private final String              jqueryCallback;
 
     private final String              methodName;
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        // TODO Auto-generated method stub
+        return request + "\r\n" + "Method: " + method + "\r\nParameters:" + JSonStorage.serializeToJson(parameters);
+    }
 
     public RemoteAPIRequest(final InterfaceHandler<?> iface, final String methodName, final String[] parameters, final HttpRequest request, final String jqueryCallback) {
         this.iface = iface;

@@ -35,6 +35,11 @@ public class RemoteAPIResponse implements HttpResponseInterface {
     private final HttpResponse response;
     private final RemoteAPI    remoteAPI;
 
+    @Override
+    public String toString() {
+        return super.toString();
+    }
+
     public RemoteAPIResponse(final HttpResponse response, final RemoteAPI remoteAPI) {
         this.response = response;
         // Remote API requests are available via CORS by default.

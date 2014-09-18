@@ -189,7 +189,7 @@ public abstract class KeyHandler<RawClass> {
             final DefaultFactory df = this.getAnnotation(DefaultFactory.class);
             if (df != null) { return (RawClass) df.value().newInstance().getDefaultValue(); }
             final DefaultJsonObject defaultJson = this.getAnnotation(DefaultJsonObject.class);
-            if (defaultJson != null) { return (RawClass) JSonStorage.restoreFromString(defaultJson.value(), new TypeRef<Object>(this.getRawClass()) {
+            if (defaultJson != null) { return (RawClass) JSonStorage.restoreFromString(defaultJson.value(), new TypeRef<Object>(this.getRawType()) {
             }, null); }
             final Annotation ann = this.getAnnotation(this.getDefaultAnnotation());
             if (ann != null) { return (RawClass) ann.annotationType().getMethod("value", new Class[] {}).invoke(ann, new Object[] {}); }

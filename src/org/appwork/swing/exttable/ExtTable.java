@@ -1278,7 +1278,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
             }
 
             if (this.isSelectionAllTrigger(ks)) {
-                onShortcutSelectAll();
+                this.onShortcutSelectAll();
                 return true;
 
             }

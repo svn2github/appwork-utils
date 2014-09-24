@@ -30,7 +30,7 @@ public class AWFCOutputStream extends OutputStream {
     private CountingOutputStream currentCountingOutputStream = null;
     private final MessageDigest  md;
     protected boolean            headerWritten               = false;
-    private final AWFCUtils      utils;
+    protected final AWFCUtils    utils;
     private boolean              closing                     = false;
 
     public AWFCOutputStream(final OutputStream os, final MessageDigest md) {
@@ -162,7 +162,7 @@ public class AWFCOutputStream extends OutputStream {
         this.getCurrentOutputStream().write(b);
     }
 
-    private void writeAWFCEntry(final AWFCEntryOptions awfcEntryOptions) throws IOException {
+    protected void writeAWFCEntry(final AWFCEntryOptions awfcEntryOptions) throws IOException {
         final AWFCEntry entry = awfcEntryOptions.getEntry();
         /* write filePath */
         this.utils.writeString(entry.getPath());

@@ -242,10 +242,14 @@ public class TranslationFactory {
      * @return
      */
     public static Locale stringToLocale(final String lng) {
-        try {
-            if (Application.getJavaVersion() >= Application.JAVA17) { return Locale.forLanguageTag(lng.replace("_", "-")); }
-        } catch (final Throwable e) {
-        }
+        // try {
+        // if (Application.getJavaVersion() >= Application.JAVA17) {
+        // //
+        // Locale ret = Locale.forLanguageTag(lng.replace("_", "-"));
+        // return ret;
+        // }
+        // } catch (final Throwable e) {
+        // }
         final String[] split = lng.split("[\\-\\_]");
         switch (split.length) {
         case 1:

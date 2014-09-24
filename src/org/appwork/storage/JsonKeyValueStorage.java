@@ -132,26 +132,28 @@ public class JsonKeyValueStorage extends Storage {
             }
         }
         // put entry if we have no entry
-        if (!contains && this.autoPutValues) {
+        if (!contains) {
             ret = def;
-            if (def instanceof Boolean) {
-                this.put(key, (Boolean) def);
-            } else if (def instanceof Long) {
-                this.put(key, (Long) def);
-            } else if (def instanceof Integer) {
-                this.put(key, (Integer) def);
-            } else if (def instanceof Byte) {
-                this.put(key, (Byte) def);
-            } else if (def instanceof String || def == null) {
-                this.put(key, (String) def);
-            } else if (def instanceof Enum<?>) {
-                this.put(key, (Enum<?>) def);
-            } else if (def instanceof Double) {
-                this.put(key, (Double) def);
-            } else if (def instanceof Float) {
-                this.put(key, (Float) def);
-            } else {
-                throw new StorageException("Invalid datatype: " + (def != null ? def.getClass() : "null"));
+            if (this.autoPutValues) {
+                if (def instanceof Boolean) {
+                    this.put(key, (Boolean) def);
+                } else if (def instanceof Long) {
+                    this.put(key, (Long) def);
+                } else if (def instanceof Integer) {
+                    this.put(key, (Integer) def);
+                } else if (def instanceof Byte) {
+                    this.put(key, (Byte) def);
+                } else if (def instanceof String || def == null) {
+                    this.put(key, (String) def);
+                } else if (def instanceof Enum<?>) {
+                    this.put(key, (Enum<?>) def);
+                } else if (def instanceof Double) {
+                    this.put(key, (Double) def);
+                } else if (def instanceof Float) {
+                    this.put(key, (Float) def);
+                } else {
+                    throw new StorageException("Invalid datatype: " + (def != null ? def.getClass() : "null"));
+                }
             }
         }
 

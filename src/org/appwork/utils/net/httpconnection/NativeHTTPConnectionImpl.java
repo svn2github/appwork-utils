@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.WeakHashMap;
+import java.util.zip.GZIPInputStream;
 
 import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
@@ -51,6 +52,7 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
     protected RequestMethod                       httpMethod           = RequestMethod.GET;
     protected OutputStream                        outputStream         = null;
     protected InputStream                         inputStream          = null;
+    protected InputStream                         convertedInputStream = null;
     protected boolean                             inputStreamConnected = false;
     protected boolean                             outputClosed         = false;
     protected int                                 httpResponseCode     = -1;
@@ -58,7 +60,7 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
     protected String                              customcharset        = null;
     protected long                                requestTime          = -1;
     protected long[]                              ranges;
-    private final boolean                         contentDecoded       = false;
+    private boolean                               contentDecoded       = false;
     private Proxy                                 nativeProxy;
     private boolean                               connected            = false;
     private boolean                               wasConnected         = false;
@@ -326,14 +328,52 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
     public InputStream getInputStream() throws IOException {
         this.connect();
         this.connectInputStream();
-        return this.inputStream;
+        final int code = this.getResponseCode();
+        if (this.isOK() || code == 404 || code == 403 || code == 416) {
+            if (this.convertedInputStream != null) { return this.convertedInputStream; }
+            if (this.contentDecoded) {
+                /**
+                 * disabled because it is unknown if httpurlconnection
+                 * transparently handles transfer-encoding as it already handles
+                 * chunked transfer-encoding
+                 * 
+                 */
+                // final String encodingTransfer =
+                // this.getHeaderField("Content-Transfer-Encoding");
+                // if ("base64".equalsIgnoreCase(encodingTransfer)) {
+                // /* base64 encoded content */
+                // this.inputStream = new Base64InputStream(this.inputStream);
+                // }
+                /* we convert different content-encodings to normal inputstream */
+                final String encoding = this.getHeaderField("Content-Encoding");
+                if (encoding == null || encoding.length() == 0 || "none".equalsIgnoreCase(encoding)) {
+                    /* no encoding */
+                    this.convertedInputStream = this.inputStream;
+                } else if ("gzip".equalsIgnoreCase(encoding)) {
+                    /* gzip encoding */
+                    this.convertedInputStream = new GZIPInputStream(this.inputStream);
+                } else if ("deflate".equalsIgnoreCase(encoding)) {
+                    /* deflate encoding */
+                    this.convertedInputStream = new java.util.zip.InflaterInputStream(this.inputStream, new java.util.zip.Inflater(true));
+                } else {
+                    /* unsupported */
+                    this.contentDecoded = false;
+                    this.convertedInputStream = this.inputStream;
+                }
+            } else {
+                /* use original inputstream */
+                this.convertedInputStream = this.inputStream;
+            }
+            return this.convertedInputStream;
+        } else {
+            throw new IOException(this.getResponseCode() + " " + this.getResponseMessage());
+        }
     }
 
     @Override
     public OutputStream getOutputStream() throws IOException {
-        this.connect();
-        if (this.outputClosed) { throw new IOException("OutputStream no longer available"); }
-        return this.outputStream;
+        if (this.outputStream != null && this.requiresOutputStream()) { return this.outputStream; }
+        throw new IOException("OutputStream is not available");
     }
 
     @Override
@@ -559,10 +599,8 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
 
     @Override
     public void setContentDecoded(final boolean b) {
-        /* TODO: how to do this with httpurlconnection */
-        // if (this.convertedInputStream != null) { throw new
-        // IllegalStateException("InputStream already in use!"); }
-        // this.contentDecoded = b;
+        if (this.convertedInputStream != null) { throw new IllegalStateException("InputStream already in use!"); }
+        this.contentDecoded = b;
     };
 
     @Override

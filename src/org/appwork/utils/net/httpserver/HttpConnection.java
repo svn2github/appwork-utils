@@ -245,7 +245,7 @@ public class HttpConnection implements Runnable {
             remoteAddress.add(this.clientSocket.getInetAddress().getHostAddress());
         }
         final HTTPHeader forwardedFor = requestHeaders.get("X-Forwarded-For");
-        if (!StringUtils.isEmpty(forwardedFor.getValue())) {
+        if (forwardedFor != null && !StringUtils.isEmpty(forwardedFor.getValue())) {
             final String addresses[] = forwardedFor.getValue().split(", ");
             for (final String ip : addresses) {
                 remoteAddress.add(ip.trim());

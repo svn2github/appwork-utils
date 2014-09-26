@@ -57,7 +57,11 @@ public class HeaderCollection implements Iterable<HTTPHeader> {
     public HTTPHeader get(final String key) {
         if (key == null) { return null; }
         for (final HTTPHeader header : this.collection) {
-            if (header.getKey().equalsIgnoreCase(key)) { return header; }
+            if (header.getKey() == null) {
+                if (key == null) return header;
+            } else {
+                if (header.getKey().equalsIgnoreCase(key)) { return header; }
+            }
         }
         return null;
     }

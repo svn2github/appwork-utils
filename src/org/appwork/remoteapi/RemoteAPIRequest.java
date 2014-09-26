@@ -146,9 +146,18 @@ public class RemoteAPIRequest implements HttpRequestInterface {
     }
 
     /**
-     * @return
+     * @see http://en.wikipedia.org/wiki/X-Forwarded-For There may be several
+     *      Remote Addresses if the connection is piped through several proxies.<br>
+     *      [0] is always the direct address.<br>
+     *      if remoteAdresses.size>1 then<br>
+     *      [1] is the actuall clients ip.<br>
+     *      [2] is the proxy next to him..<br>
+     *      [3] is the proxy next to [2]<br>
+     *      ..<br>
+     *      [size-1] should be the address next to [0]<br>
+     * @param inetAddress
      */
-    public List<String> getRemoteAdress() {
+    public List<String> getRemoteAddresses() {
         return this.request.getRemoteAddress();
     }
 

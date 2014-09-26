@@ -98,9 +98,9 @@ public class SessionRemoteAPIRequest<T extends HttpSession> extends RemoteAPIReq
     // }
 
     @Override
-    public List<String> getRemoteAdress() {
+    public List<String> getRemoteAddresses() {
 
-        return this.apiRequest.getRemoteAdress();
+        return this.apiRequest.getRemoteAddresses();
     }
 
     @Override

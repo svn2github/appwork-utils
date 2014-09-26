@@ -55,7 +55,7 @@ public class HttpConnection implements Runnable {
         final List<KeyValuePair> requestedURLParameters = new LinkedList<KeyValuePair>();
         if (!StringUtils.isEmpty(requestedParameters)) {
             /* build requestedParamters */
-            final String[] parameters = requestedParameters.split("&(?!#)");
+            final String[] parameters = requestedParameters.split("\\&(?!#)", -1);
             for (final String parameter : parameters) {
                 /* we only want the first = be parsed */
                 final String params[] = parameter.split("=", 2);
@@ -245,7 +245,7 @@ public class HttpConnection implements Runnable {
             remoteAddress.add(this.clientSocket.getInetAddress().getHostAddress());
         }
         final HTTPHeader forwardedFor = requestHeaders.get("X-Forwarded-For");
-        if (forwardedFor != null && !StringUtils.isEmpty(forwardedFor.getValue())) {
+        if (!StringUtils.isEmpty(forwardedFor.getValue())) {
             final String addresses[] = forwardedFor.getValue().split(", ");
             for (final String ip : addresses) {
                 remoteAddress.add(ip.trim());

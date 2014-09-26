@@ -329,6 +329,10 @@ public class IO {
     }
 
     public static byte[] readStream(final int maxSize, final InputStream input, final ByteArrayOutputStream baos) throws IOException {
+        return readStream(maxSize, input, baos, true);
+    }
+
+    public static byte[] readStream(final int maxSize, final InputStream input, final ByteArrayOutputStream baos, boolean closeInput) throws IOException {
         try {
             final byte[] buffer = new byte[32767];
             int len;
@@ -360,9 +364,11 @@ public class IO {
             }
             throw e;
         } finally {
-            try {
-                input.close();
-            } catch (final Exception e) {
+            if (closeInput) {
+                try {
+                    input.close();
+                } catch (final Exception e) {
+                }
             }
             try {
                 baos.close();

@@ -285,6 +285,21 @@ public class AWSign {
         return KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(Base64.decode(privateKey)));
     }
 
+    public static PrivateKey getPrivateKey(final byte[] bytes) throws InvalidKeySpecException, NoSuchAlgorithmException {
+
+        return KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(bytes));
+    }
+
+    public static PublicKey getPublicKey(final byte[] bytes) throws SignatureViolationException {
+        try {
+            return KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(bytes));
+        } catch (final InvalidKeySpecException e) {
+            throw new SignatureViolationException(e);
+        } catch (final NoSuchAlgorithmException e) {
+            throw new SignatureViolationException(e);
+        }
+    }
+
     public static PublicKey getPublicKey(final String base64Encoded) throws SignatureViolationException {
         try {
             return KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(Base64.decode(base64Encoded)));

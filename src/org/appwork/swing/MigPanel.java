@@ -16,17 +16,24 @@ public class MigPanel extends JPanel {
      */
     public MigPanel(final String constraints, final String columns, final String rows) {
         super(new MigLayout(constraints, columns, rows));
-        
-        
+
     }
 
     /**
      * @param migLayout
      */
     public MigPanel(MigLayout migLayout) {
-      super(migLayout);
+        super(migLayout);
     }
 
-   
+    /**
+     * @param constraints
+     * @param columns
+     * @param rows
+     */
+    public void setLayout(final String constraints, final String columns, final String rows) {
+        setLayout(new MigLayout(constraints, columns, rows));
+
+    }
 
 }

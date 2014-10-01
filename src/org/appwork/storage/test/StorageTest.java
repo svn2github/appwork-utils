@@ -37,7 +37,7 @@ public class StorageTest {
             final long mytinylong = s.get("TINYLONG", 0l);
             Assert.assertTrue("Restore error", mytinylong == 100l);
             // tiny long to int conversions should work
-            final long mytinyint = s.get("TINYLONG", 0);
+            final long mytinyint = s.get("TINYLONG", (long) 0);
             Assert.assertTrue("Restore error", mytinyint == 100l);
         } catch (final Exception e) {
             Log.exception(e);

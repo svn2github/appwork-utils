@@ -12,6 +12,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
@@ -333,6 +334,11 @@ public class IO {
     }
 
     public static byte[] readStream(final int maxSize, final InputStream input, final ByteArrayOutputStream baos, boolean closeInput) throws IOException {
+        readStreamToOutputStream(maxSize, input, baos, closeInput);
+        return baos.toByteArray();
+    }
+
+    public static void readStreamToOutputStream(final int maxSize, final InputStream input, final OutputStream baos, boolean closeInput) throws IOException, Error {
         try {
             final byte[] buffer = new byte[32767];
             int len;
@@ -344,7 +350,7 @@ public class IO {
                     if (maxSize > 0 && done >= maxSize) {
                         break;
                     }
-                    if (maxSize > 0 && baos.size() > maxSize) { throw new IOException("Max size exeeded!"); }
+                    if (maxSize > 0 && done > maxSize) { throw new IOException("Max size exeeded!"); }
                 }
             }
         } catch (final IOException e) {
@@ -375,7 +381,6 @@ public class IO {
             } catch (final Throwable e) {
             }
         }
-        return baos.toByteArray();
     }
 
     /**

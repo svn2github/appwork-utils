@@ -44,6 +44,7 @@ import org.appwork.utils.logging.Log;
 import org.appwork.utils.os.mime.Mime;
 import org.appwork.utils.os.mime.MimeDefault;
 import org.appwork.utils.os.mime.MimeLinux;
+import org.appwork.utils.os.mime.MimeMac;
 import org.appwork.utils.os.mime.MimeWindows;
 import org.appwork.utils.processes.ProcessBuilderFactory;
 import org.appwork.utils.swing.dialog.Dialog;
@@ -232,6 +233,9 @@ public class CrossSystem {
         } else if (CrossSystem.isLinux()) {
             CrossSystem.DESKTOP_SUPPORT = new DesktopSupportLinux();
             MIME = new MimeLinux();
+        } else if (CrossSystem.isMac()) {
+            CrossSystem.DESKTOP_SUPPORT = new DesktopSupportMac();
+            MIME = new MimeMac();
         } else {
             CrossSystem.DESKTOP_SUPPORT = new DesktopSupportJavaDesktop();
             MIME = new MimeDefault();

@@ -47,7 +47,6 @@ public class JSonUtils {
             case '\t':
                 sb.append("\\t");
                 continue;
-
             }
 
             if (ch >= '\u0000' && ch <= '\u001F' || ch >= '\u007F' && ch <= '\u009F' || ch >= '\u2000' && ch <= '\u20FF') {

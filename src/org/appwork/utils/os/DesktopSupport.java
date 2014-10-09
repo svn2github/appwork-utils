@@ -27,5 +27,11 @@ public interface DesktopSupport {
     boolean isOpenFileSupported();
 
     public void openFile(File file) throws IOException;
+    
+    public boolean shutdown(boolean force);
+    
+    public boolean standby();
+    
+    public boolean hibernate();
 
 }

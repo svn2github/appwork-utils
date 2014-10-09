@@ -73,4 +73,31 @@ public class DesktopSupportJavaDesktop implements DesktopSupport {
         }
     }
 
+    /* (non-Javadoc)
+     * @see org.appwork.utils.os.DesktopSupport#shutdown()
+     */
+    @Override
+    public boolean shutdown(boolean force) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    /* (non-Javadoc)
+     * @see org.appwork.utils.os.DesktopSupport#standby()
+     */
+    @Override
+    public boolean standby() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    /* (non-Javadoc)
+     * @see org.appwork.utils.os.DesktopSupport#hibernate()
+     */
+    @Override
+    public boolean hibernate() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
 }

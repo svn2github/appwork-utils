@@ -1011,4 +1011,37 @@ public class CrossSystem {
         final String name = new Regex(filename, "(.*?)(\\.+[^\\.]*$|$)").getMatch(0);
         return new String[] { name, extension };
     }
+    
+    public static void standbySystem(){
+        Runnable run = new Runnable() {
+            @Override
+            public void run() {
+                DESKTOP_SUPPORT.standby();
+            }
+        };
+        new Thread(run).start();
+    }
+    
+    public static void hibernateSystem(){
+        Runnable run = new Runnable() {
+            @Override
+            public void run() {
+                DESKTOP_SUPPORT.hibernate();
+            }
+        };
+        new Thread(run).start();
+        
+    }
+
+    public static void shutdownSystem(final boolean force) {
+        Runnable run = new Runnable() {
+            @Override
+            public void run() {
+                DESKTOP_SUPPORT.shutdown(force);
+            }
+        };
+        new Thread(run).start();
+        
+        
+    }
 }

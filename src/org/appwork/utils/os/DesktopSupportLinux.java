@@ -16,6 +16,9 @@ import java.net.URL;
 import java.util.ArrayList;
 
 import org.appwork.utils.StringUtils;
+import org.appwork.utils.logging.Log;
+import org.appwork.utils.processes.ProcessBuilderFactory;
+import org.appwork.utils.processes.ProcessOutput;
 
 /**
  * @author daniel
@@ -153,5 +156,69 @@ public class DesktopSupportLinux implements DesktopSupport {
         if (this.openCustom(this.customFile, file.getAbsolutePath())) { return; }
         this.fallBack.openFile(file);
     }
+
+    @Override
+    public boolean shutdown(boolean force) {
+        try {
+            dbusPowerState("Shutdown");
+        } catch (Exception e) {
+            Log.exception(e);
+        }
+        try {
+            ProcessBuilderFactory.runCommand(new String[] {"dcop", "--all-sessions", "--all-users", "ksmserver", "ksmserver", "logout", "0", "2", "0" });
+        } catch (Exception e) {
+            Log.exception(e);
+        }
+        try {
+            ProcessBuilderFactory.runCommand("poweroff");
+        } catch (Exception e) {
+            Log.exception(e);
+        }
+        try {
+            ProcessBuilderFactory.runCommand(new String[] {"sudo", "shutdown", "-P", "now" });
+        } catch (Exception e) {
+            Log.exception(e);
+        }
+        return true;
+    }
+    
+    private void dbusPowerState(String command) {
+        try {
+            ProcessOutput output = ProcessBuilderFactory.runCommand(new String[] {"dbus-send", "--session", "--dest=org.freedesktop.PowerManagement", "--type=method_call", "--print-reply", "--reply-timeout=2000", "/org/freedesktop/PowerManagement", "org.freedesktop.PowerManagement." + command });
+            if(output.getErrOutString("UTF-8").contains("org.freedesktop.DBus.Error.ServiceUnknown")){
+                // compatible to newer dbus versions
+                ProcessBuilderFactory.runCommand("dbus-send", "--system","--print-reply","--dest=org.freedesktop.login1","/org/freedesktop/login1","org.freedesktop.login1.Manager."+command,"boolean:true");
+            }
+        } catch (Exception e) {
+            Log.exception(e);
+        }
+    }
+
+    @Override
+    public boolean standby() {
+        try{
+            dbusPowerState("Suspend");
+            return true;
+        }catch(Exception e){
+            Log.exception(e);
+            Log.L.info("no standby support, use shutdown");
+            return false;
+        }
+    }
+
+    @Override
+    public boolean hibernate() {
+        try{
+            dbusPowerState("Hibernate");
+            return true;
+        }catch(Exception e){
+            Log.exception(e);
+            Log.L.info("no hibernate support, use shutdown");
+            return false;
+        }
+        
+    }
+    
+    
 
 }

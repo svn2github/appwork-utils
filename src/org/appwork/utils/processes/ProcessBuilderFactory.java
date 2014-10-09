@@ -58,7 +58,7 @@ public class ProcessBuilderFactory {
         reader2.start();
         reader1.join();
         reader2.join();
-        return new ProcessOutput(process.waitFor(), sdtStream.toByteArray(), sdtStream.toByteArray());
+        return new ProcessOutput(process.waitFor(), sdtStream.toByteArray(), errorStream.toByteArray());
     }
 
     public static ProcessBuilder create(final java.util.List<String> splitCommandString) {

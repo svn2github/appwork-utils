@@ -9,10 +9,60 @@
  */
 package org.appwork.utils.os;
 
+
+import org.appwork.utils.logging.Log;
+import org.appwork.utils.processes.ProcessBuilderFactory;
+
+
+
 /**
  * @author Thomas
  *
  */
 public class DesktopSupportMac extends DesktopSupportJavaDesktop {
 
+    @Override
+    public boolean shutdown(boolean force) {
+        if (force) {
+            /* force shutdown */
+            try {
+                ProcessBuilderFactory.runCommand(new String[] { "sudo","shutdown", "-p", "now" });
+            } catch (Exception e) {
+                Log.exception(e);
+            }
+            try {
+                ProcessBuilderFactory.runCommand(new String[] { "sudo","shutdown", "-h", "now" });
+            } catch (Exception e) {
+                Log.exception(e);
+            }
+            return true;
+        } else {
+            /* normal shutdown */
+            try {
+                ProcessBuilderFactory.runCommand(new String[] {"/usr/bin/osascript", "-e", "tell application \"Finder\" to shut down" });
+            return true;
+            } catch (Exception e) {
+                Log.exception(e);
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean standby() {
+        try {
+            ProcessBuilderFactory.runCommand(new String[] { "/usr/bin/osascript","-e", "tell application \"Finder\" to sleep" });
+            return true;
+        } catch (Exception e) {
+            Log.exception(e);
+        }
+        Log.L.info("no standby support, use shutdown");
+        return false;
+    }
+
+    @Override
+    public boolean hibernate() {
+        Log.L.info("no hibernate support, use shutdown");
+        return false;
+    }
 }

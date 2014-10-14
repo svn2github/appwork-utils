@@ -244,6 +244,10 @@ public class ExtFileSystemView extends FileSystemView {
 
             this.mount(new File("/Volumes"), unique);
             this.mount(new File("/media"), unique);
+            String userName = System.getProperty("user.name");
+            if (userName != null) {
+                this.mount(new File("/run/media/" + userName), unique);
+            }
 
             final HomeFolder[] homeFolders = new HomeFolder[] { new HomeFolder(HomeFolder.HOME_ROOT, ExtFileChooserDialog.ICON_KEY_HOME), new HomeFolder(HomeFolder.DOCUMENTS, ExtFileChooserDialog.ICON_KEY_DOCUMENTS), new HomeFolder(HomeFolder.DROPBOX, ExtFileChooserDialog.ICON_KEY_BOX), new HomeFolder(HomeFolder.PICTURES, ExtFileChooserDialog.ICON_KEY_IMAGES), new HomeFolder(HomeFolder.VIDEOS, ExtFileChooserDialog.ICON_KEY_VIDEO), new HomeFolder(HomeFolder.DOWNLOADS, ExtFileChooserDialog.ICON_KEY_DOWNLOADS), new HomeFolder(HomeFolder.MUSIC, ExtFileChooserDialog.ICON_KEY_MUSIC) };
             for (final HomeFolder hf : homeFolders) {

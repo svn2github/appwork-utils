@@ -115,7 +115,9 @@ public class Hash {
     }
 
     public static String getFileHash(final File arg, final String type) {
-        return HexFormatter.byteArrayToHex(Hash.getFileHashBytes(arg, type));
+        byte[] bytes = Hash.getFileHashBytes(arg, type);
+        if (bytes == null) { return null; }
+        return HexFormatter.byteArrayToHex(bytes);
     }
 
     public static String getFileHash(final File arg, final String type, final long maxHash) {

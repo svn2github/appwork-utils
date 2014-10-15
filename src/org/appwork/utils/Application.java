@@ -461,9 +461,9 @@ public class Application {
      * @return
      */
     public static boolean isJared(Class<?> rootOfClazz) {
-        if (IS_JARED != null) {
+        if (Application.IS_JARED != null) {
 
-        return IS_JARED == Boolean.TRUE;
+        return Application.IS_JARED == Boolean.TRUE;
 
         }
         if (rootOfClazz == null) {
@@ -473,7 +473,7 @@ public class Application {
         final ClassLoader cll = Application.class.getClassLoader();
         if (cll == null) {
             Log.L.severe("getContextClassLoader() is null");
-            IS_JARED = Boolean.TRUE;
+            Application.IS_JARED = Boolean.TRUE;
             return true;
         }
         // System.out.println(name);
@@ -485,11 +485,11 @@ public class Application {
          * rights, in that case we assume its not jared
          */
         if (caller == null) {
-            IS_JARED = false;
+            Application.IS_JARED = false;
             return false;
         }
         boolean ret = caller.toString().matches("jar\\:.*\\.(jar|exe)\\!.*");
-        IS_JARED = ret;
+        Application.IS_JARED = ret;
         return ret;
     }
 
@@ -530,9 +530,19 @@ public class Application {
             return true;
         }
         if (CrossSystem.isMac() && java >= Application.JAVA17 && java < 17006000l) {
+            Log.L.warning("leaking semaphores bug");
             /*
              * leaking semaphores
              * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7166379
+             */
+            return true;
+        }
+        if (CrossSystem.isMac() && java >= 17250000l && java < 17550000l) {
+            Log.L.warning("freezing AppKit thread bug");
+            /*
+             * http://bugs.java.com/view_bug.do?bug_id=8025588
+             * 
+             * Frozen AppKit thread
              */
             return true;
         }
@@ -583,8 +593,8 @@ public class Application {
          */
         @Override
         public void write(int paramInt) throws IOException {
-            if (branches != null) {
-                for (OutputStream os : branches) {
+            if (this.branches != null) {
+                for (OutputStream os : this.branches) {
                     try {
                         os.write(paramInt);
                     } catch (Throwable e) {
@@ -592,11 +602,11 @@ public class Application {
                     }
                 }
             }
-            if (buffer != null) {
-                buffer.write(paramInt);
+            if (this.buffer != null) {
+                this.buffer.write(paramInt);
                 return;
             }
-            _out.write(paramInt);
+            this._out.write(paramInt);
 
         }
 
@@ -607,8 +617,8 @@ public class Application {
          */
         @Override
         public void write(byte[] b) throws IOException {
-            if (branches != null) {
-                for (OutputStream os : branches) {
+            if (this.branches != null) {
+                for (OutputStream os : this.branches) {
                     try {
                         os.write(b);
                     } catch (Throwable e) {
@@ -616,11 +626,11 @@ public class Application {
                     }
                 }
             }
-            if (buffer != null) {
-                buffer.write(b);
+            if (this.buffer != null) {
+                this.buffer.write(b);
                 return;
             }
-            _out.write(b);
+            this._out.write(b);
         }
 
         /*
@@ -631,8 +641,8 @@ public class Application {
         @Override
         public void write(byte[] buff, int off, int len) throws IOException {
 
-            if (branches != null) {
-                for (OutputStream os : branches) {
+            if (this.branches != null) {
+                for (OutputStream os : this.branches) {
                     try {
                         os.write(buff, off, len);
                     } catch (Throwable e) {
@@ -640,11 +650,11 @@ public class Application {
                     }
                 }
             }
-            if (buffer != null) {
-                buffer.write(buff, off, len);
+            if (this.buffer != null) {
+                this.buffer.write(buff, off, len);
                 return;
             }
-            _out.write(buff, off, len);
+            this._out.write(buff, off, len);
         }
 
         /*
@@ -654,12 +664,12 @@ public class Application {
          */
         @Override
         public void flush() throws IOException {
-            if (buffer != null) {
-                buffer.flush();
+            if (this.buffer != null) {
+                this.buffer.flush();
                 return;
             }
-            if (branches != null) {
-                for (OutputStream os : branches) {
+            if (this.branches != null) {
+                for (OutputStream os : this.branches) {
                     try {
                         os.flush();
                     } catch (Throwable e) {
@@ -667,7 +677,7 @@ public class Application {
                     }
                 }
             }
-            _out.flush();
+            this._out.flush();
         }
 
         /*
@@ -677,12 +687,12 @@ public class Application {
          */
         @Override
         public void close() throws IOException {
-            if (buffer != null) {
-                buffer.close();
-                setBufferEnabled(false);
+            if (this.buffer != null) {
+                this.buffer.close();
+                this.setBufferEnabled(false);
             }
-            if (branches != null) {
-                for (OutputStream os : branches) {
+            if (this.branches != null) {
+                for (OutputStream os : this.branches) {
                     try {
                         os.close();
                     } catch (Throwable e) {
@@ -690,7 +700,7 @@ public class Application {
                     }
                 }
             }
-            _out.close();
+            this._out.close();
         }
 
         /**
@@ -701,13 +711,13 @@ public class Application {
             synchronized (this) {
                 if (b) {
 
-                    if (buffer != null) { return true; }
-                    buffer = new ByteArrayOutputStream();
+                    if (this.buffer != null) { return true; }
+                    this.buffer = new ByteArrayOutputStream();
                     return false;
                 } else {
-                    if (buffer != null) {
-                        buffer.writeTo(_out);
-                        buffer = null;
+                    if (this.buffer != null) {
+                        this.buffer.writeTo(this._out);
+                        this.buffer = null;
                         return true;
                     } else {
                         return false;
@@ -723,10 +733,10 @@ public class Application {
          * @param bufferedOutputStream
          */
         public void addBranch(OutputStream os) {
-            if (branches == null) {
-                branches = new ArrayList<OutputStream>();
+            if (this.branches == null) {
+                this.branches = new ArrayList<OutputStream>();
             }
-            branches.add(os);
+            this.branches.add(os);
 
         }
 
@@ -755,15 +765,15 @@ public class Application {
                 e.printStackTrace();
             }
         }
-        if (STD_OUT == null) {
-            STD_OUT = new PauseableOutputStream(System.out);
+        if (Application.STD_OUT == null) {
+            Application.STD_OUT = new PauseableOutputStream(System.out);
 
-            ERR_OUT = new PauseableOutputStream(System.err);
+            Application.ERR_OUT = new PauseableOutputStream(System.err);
 
             PrintStream o;
-            System.setOut(o = new PrintStream(STD_OUT));
+            System.setOut(o = new PrintStream(Application.STD_OUT));
             PrintStream e;
-            System.setErr(e = new PrintStream(ERR_OUT));
+            System.setErr(e = new PrintStream(Application.ERR_OUT));
             System.out.println("SetOut " + o);
             System.out.println("SetErr " + e);
         }
@@ -798,7 +808,7 @@ public class Application {
      * @return
      */
     public static File generateNumberedTempResource(String string) {
-        return generateNumbered(getTempResource(string));
+        return Application.generateNumbered(Application.getTempResource(string));
     }
 
     /**
@@ -809,7 +819,7 @@ public class Application {
      * @return
      */
     public static File generateNumberedResource(String string) {
-        return generateNumbered(getResource(string));
+        return Application.generateNumbered(Application.getResource(string));
 
     }
 

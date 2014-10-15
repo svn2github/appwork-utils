@@ -16,10 +16,11 @@ import java.lang.annotation.Target;
 
 /**
  * @author thomas
- * 
+ * @deprecated use the LabelInterface instead
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.FIELD })
+@Deprecated
 public @interface EnumLabel {
 
     String value();

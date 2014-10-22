@@ -290,7 +290,12 @@ public class CrossSystem {
          */
         pathPart = pathPart.replaceFirst("\\.+$", "");
         if (CrossSystem.isWindows() || CrossSystem.isOS2()) {
-            if (new Regex(pathPart, "^(CON|PRN|AUX|NUL|COM\\d+|LPT\\d+|CLOCK\\$)$").matches()) {
+            /**
+             * http://msdn.microsoft.com/en-us/library/windows/desktop/aa365247%
+             * 28v=vs.85%29.aspx
+             */
+            pathPart = pathPart.trim();
+            if (new Regex(pathPart, "^(CON|PRN|AUX|NUL|COM\\d+|LPT\\d+|CLOCK)\\s*?(\\.|$)").matches()) {
                 pathPart = "_" + pathPart;
             }
         }

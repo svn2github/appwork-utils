@@ -295,11 +295,22 @@ public class CrossSystem {
              * 28v=vs.85%29.aspx
              */
             pathPart = pathPart.trim();
-            if (new Regex(pathPart, "^(CON|PRN|AUX|NUL|COM\\d+|LPT\\d+|CLOCK)\\s*?(\\.|$)").matches()) {
+            if (CrossSystem.isForbiddenFilename(pathPart)) {
                 pathPart = "_" + pathPart;
             }
         }
         return pathPart.trim();
+    }
+
+    public static boolean isForbiddenFilename(String name) {
+        if (CrossSystem.isWindows() || CrossSystem.isOS2()) {
+            /**
+             * http://msdn.microsoft.com/en-us/library/windows/desktop/aa365247%
+             * 28v=vs.85%29.aspx
+             */
+            return new Regex(name, "^(CON|PRN|AUX|NUL|COM\\d+|LPT\\d+|CLOCK)\\s*?(\\.|$)").matches();
+        }
+        return false;
     }
 
     public static String fixPathSeparators(String path) {
@@ -413,7 +424,7 @@ public class CrossSystem {
     public static long getMacOSVersion() {
         if (CrossSystem.isMac()) {
             final String str = System.getProperty("os.version");
-            return getMacOSVersion(str);
+            return CrossSystem.getMacOSVersion(str);
         }
         return -1l;
     }
@@ -525,24 +536,33 @@ public class CrossSystem {
         return CrossSystem.OS_STRING;
     }
 
-    public static String[] getPathComponents(final File input) throws IOException {
+    public static String[] getPathComponents(File path) throws IOException {
         final LinkedList<String> ret = new LinkedList<String>();
-        if (input != null) {
+        if (path != null) {
             /*
              * getCanonicalFile once, so we are sure all .././symlinks are
              * evaluated
              */
-            File file = input.getCanonicalFile();
+            try {
+                if (!CrossSystem.isForbiddenFilename(path.getName())) {
+                    path = path.getCanonicalFile();
+                }
+            } catch (final IOException e) {
+                /**
+                 * can happen when drive is not mounted, no cd in drive...
+                 */
+                e.printStackTrace();
+            }
             final String separator = File.separatorChar + "";
-            while (file != null) {
-                if (file.getPath().endsWith(separator)) {
+            while (path != null) {
+                if (path.getPath().endsWith(separator)) {
                     // for example c:\ file.getName() would be "" in this case.
-                    ret.add(0, file.getPath());
+                    ret.add(0, path.getPath());
                     break;
                 } else {
-                    ret.add(0, file.getName());
+                    ret.add(0, path.getName());
                 }
-                file = file.getParentFile();
+                path = path.getParentFile();
             }
         }
         return ret.toArray(new String[] {});

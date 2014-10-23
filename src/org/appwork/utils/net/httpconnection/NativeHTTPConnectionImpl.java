@@ -30,6 +30,10 @@ import java.util.Map.Entry;
 import java.util.WeakHashMap;
 import java.util.zip.GZIPInputStream;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSession;
+
 import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.net.CountingOutputStream;
@@ -64,6 +68,7 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
     private Proxy                                 nativeProxy;
     private boolean                               connected            = false;
     private boolean                               wasConnected         = false;
+    private boolean                               sslTrustALL          = false;
 
     private static WeakHashMap<Thread, HTTPProxy> availableProxies     = new WeakHashMap<Thread, HTTPProxy>();
 
@@ -135,6 +140,9 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
             case SOCKS5:
                 this.nativeProxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(this.proxy.getHost(), this.proxy.getPort()));
                 break;
+            case NONE:
+                this.nativeProxy = Proxy.NO_PROXY;
+                break;
             case DIRECT:
                 this.nativeProxy = null;
                 break;
@@ -163,7 +171,17 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
             }
             this.con = (HttpURLConnection) this.httpURL.openConnection();
         }
+        if (this.con instanceof HttpsURLConnection) {
+            final HttpsURLConnection scon = (HttpsURLConnection) this.con;
+            scon.setSSLSocketFactory(HTTPConnectionImpl.getSSLSocketFactory(this));
+            scon.setHostnameVerifier(new HostnameVerifier() {
 
+                @Override
+                public boolean verify(String host, SSLSession sslSession) {
+                    return NativeHTTPConnectionImpl.this.isSSLTrustALL();
+                }
+            });
+        }
         this.con.setConnectTimeout(this.connectTimeout);
         this.con.setReadTimeout(this.readTimeout);
         this.con.setRequestMethod(this.httpMethod.name());
@@ -638,6 +656,16 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
      */
     private boolean wasConnected() {
         return this.wasConnected;
+    }
+
+    @Override
+    public void setSSLTrustALL(boolean trustALL) {
+        this.sslTrustALL = trustALL;
+    }
+
+    @Override
+    public boolean isSSLTrustALL() {
+        return this.sslTrustALL;
     }
 
 }

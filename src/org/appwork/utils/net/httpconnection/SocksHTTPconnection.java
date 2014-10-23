@@ -58,7 +58,6 @@ public abstract class SocksHTTPconnection extends HTTPConnectionImpl {
     @Override
     public void connect() throws IOException {
         boolean sslSNIWorkAround = false;
-        boolean sslV3Workaround = false;
         InetAddress hosts[] = null;
         connect: while (true) {
             if (this.isConnectionSocketValid()) { return;/* oder fehler */
@@ -114,32 +113,26 @@ public abstract class SocksHTTPconnection extends HTTPConnectionImpl {
                 final Socket establishedConnection = this.establishConnection();
                 if (this.httpURL.getProtocol().startsWith("https")) {
                     /* we need to lay ssl over normal socks5 connection */
-                    SSLSocket sslSocket = null;
                     try {
+                        final SSLSocket sslSocket;
                         if (sslSNIWorkAround) {
                             /* wrong configured SNI at serverSide */
-                            sslSocket = (SSLSocket) TrustALLSSLFactory.getSSLFactoryTrustALL().createSocket(this.sockssocket, "", this.httpPort, true);
+                            sslSocket = (SSLSocket) HTTPConnectionImpl.getSSLSocketFactory(this).createSocket(this.sockssocket, "", this.httpPort, true);
                         } else {
-                            sslSocket = (SSLSocket) TrustALLSSLFactory.getSSLFactoryTrustALL().createSocket(this.sockssocket, this.httpURL.getHost(), this.httpPort, true);
-                        }
-                        if (sslV3Workaround && sslSocket != null) {
-                            /* workaround for SSLv3 only hosts */
-                            sslSocket.setEnabledProtocols(new String[] { "SSLv3" });
+                            sslSocket = (SSLSocket) HTTPConnectionImpl.getSSLSocketFactory(this).createSocket(this.sockssocket, this.httpURL.getHost(), this.httpPort, true);
                         }
                         sslSocket.startHandshake();
+                        this.verifySSLHostname(sslSocket);
+                        this.connectionSocket = sslSocket;
                     } catch (final IOException e) {
                         this.connectExceptions.add(this.sockssocket + "|" + e.getMessage());
                         this.disconnect();
                         if (sslSNIWorkAround == false && e.getMessage().contains("unrecognized_name")) {
                             sslSNIWorkAround = true;
                             continue connect;
-                        } else if (sslV3Workaround == false && e.getMessage().contains("bad_record_mac")) {
-                            sslV3Workaround = true;
-                            continue connect;
                         }
                         throw new ProxyConnectException(e, this.proxy);
                     }
-                    this.connectionSocket = sslSocket;
                 } else {
                     /* we can continue to use the socks connection */
                     this.connectionSocket = establishedConnection;
@@ -159,9 +152,6 @@ public abstract class SocksHTTPconnection extends HTTPConnectionImpl {
                 this.disconnect();
                 if (sslSNIWorkAround == false && e.getMessage().contains("unrecognized_name")) {
                     sslSNIWorkAround = true;
-                    continue connect;
-                } else if (sslV3Workaround == false && e.getMessage().contains("bad_record_mac")) {
-                    sslV3Workaround = true;
                     continue connect;
                 }
                 throw new ProxyConnectException(e, this.proxy);

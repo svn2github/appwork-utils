@@ -12,8 +12,14 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.Socket;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateParsingException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -25,7 +31,10 @@ import java.util.WeakHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.zip.GZIPInputStream;
 
+import javax.net.ssl.SSLHandshakeException;
+import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 
 import org.appwork.net.protocol.http.HTTPConstants;
 import org.appwork.scheduler.DelayedRunnable;
@@ -105,6 +114,7 @@ public class HTTPConnectionImpl implements HTTPConnection {
     protected final CopyOnWriteArrayList<String> connectExceptions    = new CopyOnWriteArrayList<String>();
     protected volatile KEEPALIVE                 keepAlive            = KEEPALIVE.DISABLED;
     protected volatile InetAddress               remoteIPs[]          = null;
+    protected boolean                            sslTrustALL          = false;
 
     private final static PublicSuffixList        PSL                  = PublicSuffixList.getInstance();
 
@@ -356,9 +366,125 @@ public class HTTPConnectionImpl implements HTTPConnection {
         this.ranges = null;
     }
 
+    protected static SSLSocketFactory getSSLSocketFactory(HTTPConnection httpConnection) throws IOException {
+        final SSLSocketFactory factory;
+        if (httpConnection.isSSLTrustALL()) {
+            factory = TrustALLSSLFactory.getSSLFactoryTrustALL();
+        } else {
+            factory = (SSLSocketFactory) SSLSocketFactory.getDefault();
+        }
+        return new SSLSocketFactory() {
+            /**
+             * remove SSL because of POODLE Vulnerability
+             * 
+             * https://www.us-cert.gov/ncas/alerts/TA14-290A
+             * 
+             * @param socket
+             */
+            private Socket removeSSLProtocol(final Socket socket) {
+                if (socket != null && socket instanceof SSLSocket) {
+                    final SSLSocket sslSocket = (SSLSocket) socket;
+                    final ArrayList<String> protocols = new ArrayList<String>(Arrays.asList(sslSocket.getEnabledProtocols()));
+                    final Iterator<String> it = protocols.iterator();
+                    while (it.hasNext()) {
+                        final String next = it.next();
+                        if (StringUtils.containsIgnoreCase(next, "ssl")) {
+                            it.remove();
+                        }
+                    }
+                    sslSocket.setEnabledProtocols(protocols.toArray(new String[] {}));
+                }
+                return socket;
+            }
+
+            @Override
+            public Socket createSocket(Socket arg0, String arg1, int arg2, boolean arg3) throws IOException {
+                return this.removeSSLProtocol(factory.createSocket(arg0, arg1, arg2, arg3));
+            }
+
+            @Override
+            public String[] getDefaultCipherSuites() {
+                return factory.getDefaultCipherSuites();
+            }
+
+            @Override
+            public String[] getSupportedCipherSuites() {
+                return factory.getSupportedCipherSuites();
+
+            }
+
+            @Override
+            public Socket createSocket(String arg0, int arg1) throws IOException, UnknownHostException {
+                return this.removeSSLProtocol(factory.createSocket(arg0, arg1));
+
+            }
+
+            @Override
+            public Socket createSocket(InetAddress arg0, int arg1) throws IOException {
+                return this.removeSSLProtocol(factory.createSocket(arg0, arg1));
+            }
+
+            @Override
+            public Socket createSocket(String arg0, int arg1, InetAddress arg2, int arg3) throws IOException, UnknownHostException {
+                return this.removeSSLProtocol(factory.createSocket(arg0, arg1, arg2, arg3));
+            }
+
+            @Override
+            public Socket createSocket(InetAddress arg0, int arg1, InetAddress arg2, int arg3) throws IOException {
+                return this.removeSSLProtocol(factory.createSocket(arg0, arg1, arg2, arg3));
+            }
+
+        };
+    }
+
+    protected void verifySSLHostname(final SSLSocket sslSocket) throws IOException {
+        if (!this.isSSLTrustALL()) {
+            final SSLSession sslSession = sslSocket.getSession();
+            if (sslSession != null && sslSession.getPeerCertificates().length > 0) {
+                final Certificate certificate = sslSession.getPeerCertificates()[0];
+                if (certificate instanceof X509Certificate) {
+                    final String hostname = this.getURL().getHost().toLowerCase(Locale.ENGLISH);
+                    final ArrayList<String> subjects = new ArrayList<String>();
+                    final X509Certificate x509 = (X509Certificate) certificate;
+                    subjects.add(new Regex(x509.getSubjectX500Principal().getName(), "CN=(.*?)(,| |$)").getMatch(0));
+                    try {
+                        final Collection<List<?>> subjectAlternativeNames = x509.getSubjectAlternativeNames();
+                        if (subjectAlternativeNames != null) {
+                            for (final List<?> subjectAlternativeName : subjectAlternativeNames) {
+                                final Integer generalNameType = (Integer) subjectAlternativeName.get(0);
+                                switch (generalNameType) {
+                                case 1:// rfc822Name
+                                case 2:// dNSName
+                                    subjects.add(subjectAlternativeName.get(1).toString());
+                                    break;
+                                }
+                            }
+                        }
+                    } catch (CertificateParsingException e) {
+                        e.printStackTrace();
+                    }
+                    for (String subject : subjects) {
+                        if (subject != null) {
+                            subject = subject.toLowerCase(Locale.ENGLISH);
+                            if (StringUtils.equals(subject, hostname)) {
+                                return;
+                            } else if (subject.startsWith("*.") && hostname.length() > subject.length() - 1 && hostname.endsWith(subject.substring(1)) && hostname.substring(0, hostname.length() - subject.length() + 1).indexOf('.') < 0) {
+                                /**
+                                 * http://en.wikipedia.org/wiki/
+                                 * Wildcard_certificate
+                                 */
+                                return;
+                            }
+                        }
+                    }
+                    throw new SSLHandshakeException("HTTPS hostname wrong:  hostname is <" + hostname + ">");
+                }
+            }
+        }
+    }
+
     public void connect() throws IOException {
         boolean sslSNIWorkAround = false;
-        boolean sslV3Workaround = false;
         connect: while (true) {
             if (this.isConnectionSocketValid()) { return;/* oder fehler */
             }
@@ -395,24 +521,21 @@ public class HTTPConnectionImpl implements HTTPConnection {
                     } else if (this.proxy != null && this.proxy.isNone()) {
                         /* none is also allowed here */
                     } else if (this.proxy != null) { throw new RuntimeException("Invalid Direct Proxy"); }
-                    SSLSocket sslSocket = null;
                     InetSocketAddress connectedInetSocketAddress = null;
                     try {
                         /* try to connect to given host now */
                         connectedInetSocketAddress = new InetSocketAddress(host, port);
                         this.connectionSocket.connect(connectedInetSocketAddress, this.connectTimeout);
                         if (this.httpURL.getProtocol().startsWith("https")) {
+                            final SSLSocket sslSocket;
                             if (sslSNIWorkAround) {
                                 /* wrong configured SNI at serverSide */
-                                sslSocket = (SSLSocket) TrustALLSSLFactory.getSSLFactoryTrustALL().createSocket(this.connectionSocket, "", port, true);
+                                sslSocket = (SSLSocket) HTTPConnectionImpl.getSSLSocketFactory(this).createSocket(this.connectionSocket, "", port, true);
                             } else {
-                                sslSocket = (SSLSocket) TrustALLSSLFactory.getSSLFactoryTrustALL().createSocket(this.connectionSocket, this.httpURL.getHost(), port, true);
-                            }
-                            if (sslV3Workaround && sslSocket != null) {
-                                /* workaround for SSLv3 only hosts */
-                                sslSocket.setEnabledProtocols(new String[] { "SSLv3" });
+                                sslSocket = (SSLSocket) HTTPConnectionImpl.getSSLSocketFactory(this).createSocket(this.connectionSocket, this.httpURL.getHost(), port, true);
                             }
                             sslSocket.startHandshake();
+                            this.verifySSLHostname(sslSocket);
                             this.connectionSocket = sslSocket;
                         }
                         this.requestTime = System.currentTimeMillis() - startTime;
@@ -423,9 +546,6 @@ public class HTTPConnectionImpl implements HTTPConnection {
                         this.disconnect();
                         if (sslSNIWorkAround == false && e.getMessage().contains("unrecognized_name")) {
                             sslSNIWorkAround = true;
-                            continue connect;
-                        } else if (sslV3Workaround == false && e.getMessage().contains("bad_record_mac")) {
-                            sslV3Workaround = true;
                             continue connect;
                         }
                         ee = e;
@@ -443,9 +563,6 @@ public class HTTPConnectionImpl implements HTTPConnection {
                 this.disconnect();
                 if (sslSNIWorkAround == false && e.getMessage().contains("unrecognized_name")) {
                     sslSNIWorkAround = true;
-                    continue connect;
-                } else if (sslV3Workaround == false && e.getMessage().contains("bad_record_mac")) {
-                    sslV3Workaround = true;
                     continue connect;
                 }
                 throw e;
@@ -1124,6 +1241,16 @@ public class HTTPConnectionImpl implements HTTPConnection {
         sb.append(this.getRequestInfo());
         sb.append(this.getResponseInfo());
         return sb.toString();
+    }
+
+    @Override
+    public void setSSLTrustALL(boolean trustALL) {
+        this.sslTrustALL = trustALL;
+    }
+
+    @Override
+    public boolean isSSLTrustALL() {
+        return this.sslTrustALL;
     }
 
 }

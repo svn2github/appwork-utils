@@ -107,4 +107,9 @@ public interface HTTPConnection {
     void setRequestMethod(RequestMethod method);
 
     void setRequestProperty(String key, String string);
+
+    void setSSLTrustALL(boolean trustALL);
+
+    boolean isSSLTrustALL();
+
 }

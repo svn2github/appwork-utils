@@ -5,6 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseListener;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -14,6 +15,7 @@ import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPasswordField;
+import javax.swing.KeyStroke;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
@@ -102,7 +104,15 @@ public class ExtPasswordField extends MigPanel implements FocusListener, Documen
     public ExtPasswordField() {
         super("ins 0", "[grow,fill]", "[grow,fill]");
         renderer = new ExtTextField();
-        editor = new JPasswordField();
+        editor = new JPasswordField() {
+            protected boolean processKeyBinding(KeyStroke ks, KeyEvent e, int condition, boolean pressed) {
+                // forward events
+                // this will cause to trigger a pressed event on enter. this
+                // will the trigger the default action of dialogs - for example
+                ExtPasswordField.this.dispatchEvent(e);
+                return false;
+            };
+        };
 
         renderer.addFocusListener(this);
         editor.addFocusListener(this);
@@ -112,10 +122,16 @@ public class ExtPasswordField extends MigPanel implements FocusListener, Documen
         // this.renderer.setBackground(Color.RED);
         renderer.setText("");
         editor.getDocument().addDocumentListener(this);
-editor.addActionListener(this);
+        editor.addActionListener(this);
         renderer.setHelpText("");
         setRendererMode(true);
 
+    }
+
+    @Override
+    protected boolean processKeyBinding(KeyStroke ks, KeyEvent e, int condition, boolean pressed) {
+
+        return super.processKeyBinding(ks, e, condition, pressed);
     }
 
     @Override
@@ -372,8 +388,11 @@ editor.addActionListener(this);
         setPassword(text == null ? null : text.toCharArray());
     }
 
-    /* (non-Javadoc)
-     * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
      */
     @Override
     public void actionPerformed(ActionEvent e) {

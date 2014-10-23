@@ -44,33 +44,33 @@ import org.appwork.utils.net.NullOutputStream;
  * 
  */
 public class NativeHTTPConnectionImpl implements HTTPConnection {
-    protected URL                                 httpURL              = null;
-    protected HTTPProxy                           proxy                = null;
-    protected HTTPHeaderMap<String>               requestProperties    = null;
-    protected HTTPHeaderMap<List<String>>         headers              = null;
-    private HttpURLConnection                     con;
-    protected int                                 readTimeout          = 30000;
-    protected int                                 connectTimeout       = 30000;
-    private int[]                                 allowedResponseCodes = new int[0];
-    protected long                                postTodoLength       = -1;
-    protected RequestMethod                       httpMethod           = RequestMethod.GET;
-    protected OutputStream                        outputStream         = null;
-    protected InputStream                         inputStream          = null;
-    protected InputStream                         convertedInputStream = null;
-    protected boolean                             inputStreamConnected = false;
-    protected boolean                             outputClosed         = false;
-    protected int                                 httpResponseCode     = -1;
-    protected String                              httpResponseMessage  = "";
-    protected String                              customcharset        = null;
-    protected long                                requestTime          = -1;
-    protected long[]                              ranges;
-    private boolean                               contentDecoded       = false;
-    private Proxy                                 nativeProxy;
-    private boolean                               connected            = false;
-    private boolean                               wasConnected         = false;
-    private boolean                               sslTrustALL          = false;
+    protected final URL                                 httpURL;
+    protected final HTTPProxy                           proxy;
+    protected final HTTPHeaderMap<String>               requestProperties;
+    protected final HTTPHeaderMap<List<String>>         headers;
+    private HttpURLConnection                           con;
+    protected int                                       readTimeout          = 30000;
+    protected int                                       connectTimeout       = 30000;
+    private int[]                                       allowedResponseCodes = new int[0];
+    protected long                                      postTodoLength       = -1;
+    protected RequestMethod                             httpMethod           = RequestMethod.GET;
+    protected OutputStream                              outputStream         = null;
+    protected InputStream                               inputStream          = null;
+    protected InputStream                               convertedInputStream = null;
+    protected boolean                                   inputStreamConnected = false;
+    protected boolean                                   outputClosed         = false;
+    protected int                                       httpResponseCode     = -1;
+    protected String                                    httpResponseMessage  = "";
+    protected String                                    customcharset        = null;
+    protected long                                      requestTime          = -1;
+    protected long[]                                    ranges;
+    private boolean                                     contentDecoded       = false;
+    private Proxy                                       nativeProxy;
+    private boolean                                     connected            = false;
+    private boolean                                     wasConnected         = false;
+    private boolean                                     sslTrustALL          = false;
 
-    private static WeakHashMap<Thread, HTTPProxy> availableProxies     = new WeakHashMap<Thread, HTTPProxy>();
+    private final static WeakHashMap<Thread, HTTPProxy> availableProxies     = new WeakHashMap<Thread, HTTPProxy>();
 
     static {
         try {

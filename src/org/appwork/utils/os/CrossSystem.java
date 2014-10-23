@@ -413,15 +413,19 @@ public class CrossSystem {
     public static long getMacOSVersion() {
         if (CrossSystem.isMac()) {
             final String str = System.getProperty("os.version");
-            long l = 0;
-            long faktor = 1000000;
-            for (final String s : str.split("\\.")) {
-                l += Integer.parseInt(s) + faktor;
-                faktor /= 1000;
-            }
-            return l;
+            return getMacOSVersion(str);
         }
         return -1l;
+    }
+
+    public static long getMacOSVersion(final String osVersionProperty) {
+        long l = 0;
+        long faktor = 1000000;
+        for (final String s : osVersionProperty.split("\\.")) {
+            l += Integer.parseInt(s) * faktor;
+            faktor /= 1000;
+        }
+        return l;
     }
 
     /**
@@ -445,7 +449,7 @@ public class CrossSystem {
      * @param osString
      * @return
      */
-    private static OperatingSystem getOSByString(final String osString) {
+    public static OperatingSystem getOSByString(final String osString) {
         if (osString != null) {
             final String os = osString.toLowerCase(Locale.ENGLISH);
             if (os.contains("windows 8")) {

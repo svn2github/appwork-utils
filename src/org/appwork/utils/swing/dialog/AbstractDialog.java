@@ -448,7 +448,11 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
 
             // some dialogs may have autowrapping textfields. these textfields
             // need a few resizing rounds to find it's final dimension
-            if (CrossSystem.isWindows()) {
+            Dimension preferedDimensionByDimensor = null;
+            if (this.dimensor != null) {
+                preferedDimensionByDimensor = this.dimensor.getDimension(AbstractDialog.this);
+            }
+            if (preferedDimensionByDimensor == null && CrossSystem.isWindows()) {
                 AbstractDialog.this.getDialog().getContentPane().addComponentListener(new ComponentListener() {
 
                     @Override
@@ -475,11 +479,10 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
                 });
             }
             this.pack();
-            if (this.dimensor != null) {
-                final Dimension ret = this.dimensor.getDimension(AbstractDialog.this);
-                if (ret != null) {
-                    this.getDialog().setSize(ret);
-                }
+
+            if (preferedDimensionByDimensor != null) {
+
+                this.getDialog().setSize(preferedDimensionByDimensor);
 
             }// register an escape listener to cancel the dialog
             this.focusButton = focus;

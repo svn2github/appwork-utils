@@ -418,6 +418,49 @@ public class CrossSystem {
         return CrossSystem.JAVAINT;
     }
 
+    
+
+    public static boolean caseSensitiveFileExists(File file) {
+        if (file != null) {
+            if (CrossSystem.isWindows()) {
+                if (Application.getJavaVersion() >= Application.JAVA17) {
+                    try {
+                        /**
+                         * this is very fast
+                         */
+                        return CrossSystem17.caseSensitiveFileExists(file);
+                    } catch (java.nio.file.NoSuchFileException e) {
+                        return false;
+                    } catch (Throwable e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (file.exists()) {
+                    /** this can be slow **/
+                    File current = file;
+                    String currentName = current.getName();
+                    loop: while ((current = current.getParentFile()) != null) {
+                        final String[] list = current.list();
+                        if (list != null) {
+                            for (String listItem : list) {
+                                if (currentName.equals(listItem)) {
+                                    currentName = current.getName();
+                                    continue loop;
+                                }
+                            }
+                        }
+                        return false;
+                    }
+                    return true;
+                }
+                return false;
+            } else {
+                return file.exists();
+            }
+        }
+        return false;
+    }
+
     /**
      * @return e.g. 10006004 for 10.6.4
      */

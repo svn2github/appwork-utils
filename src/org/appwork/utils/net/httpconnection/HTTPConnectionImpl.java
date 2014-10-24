@@ -114,7 +114,7 @@ public class HTTPConnectionImpl implements HTTPConnection {
     protected final CopyOnWriteArrayList<String> connectExceptions    = new CopyOnWriteArrayList<String>();
     protected volatile KEEPALIVE                 keepAlive            = KEEPALIVE.DISABLED;
     protected volatile InetAddress               remoteIPs[]          = null;
-    protected boolean                            sslTrustALL          = false;
+    protected boolean                            sslTrustALL          = true;
 
     private final static PublicSuffixList        PSL                  = PublicSuffixList.getInstance();
 

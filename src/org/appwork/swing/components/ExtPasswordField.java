@@ -110,7 +110,7 @@ public class ExtPasswordField extends MigPanel implements FocusListener, Documen
                 // this will cause to trigger a pressed event on enter. this
                 // will the trigger the default action of dialogs - for example
                 ExtPasswordField.this.dispatchEvent(e);
-                return false;
+                return super.processKeyBinding(ks, e, condition, pressed);
             };
         };
 

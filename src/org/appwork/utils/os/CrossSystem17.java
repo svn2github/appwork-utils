@@ -12,19 +12,21 @@ package org.appwork.utils.os;
 import java.io.File;
 import java.io.IOException;
 
-
-
 /**
  * @author daniel
- *
+ * 
  */
 public class CrossSystem17 {
 
     public static boolean caseSensitiveFileExists(File file) throws IOException {
-        final java.nio.file.Path filePath = file.toPath().toRealPath(java.nio.file.LinkOption.NOFOLLOW_LINKS);
-        final String filePathString = filePath.toString();
-        final String fileString = file.getAbsolutePath();
-        return filePathString.equals(fileString);
+        try {
+            final java.nio.file.Path filePath = file.toPath().toRealPath(java.nio.file.LinkOption.NOFOLLOW_LINKS);
+            final String filePathString = filePath.toString();
+            final String fileString = file.getAbsolutePath();
+            return filePathString.equals(fileString);
+        } catch (java.nio.file.NoSuchFileException e) {
+            return false;
+        }
     }
 
 }

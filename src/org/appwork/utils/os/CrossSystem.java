@@ -418,8 +418,6 @@ public class CrossSystem {
         return CrossSystem.JAVAINT;
     }
 
-    
-
     public static boolean caseSensitiveFileExists(File file) {
         if (file != null) {
             if (CrossSystem.isWindows()) {
@@ -429,8 +427,6 @@ public class CrossSystem {
                          * this is very fast
                          */
                         return CrossSystem17.caseSensitiveFileExists(file);
-                    } catch (java.nio.file.NoSuchFileException e) {
-                        return false;
                     } catch (Throwable e) {
                         e.printStackTrace();
                     }

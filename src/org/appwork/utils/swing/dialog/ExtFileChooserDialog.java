@@ -14,7 +14,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.Locale;
-import java.util.logging.Level;
 
 import javax.swing.AbstractAction;
 import javax.swing.DefaultListSelectionModel;
@@ -168,22 +167,12 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
 
     public static void main(final String[] args) {
         try {
-            Log.L.setLevel(Level.ALL);
-            // FileDialog dd = new FileDialog((java.awt.Dialog) null, "TEST",
-            // FileDialog.LOAD);
-            // dd.show(true);
-            ExtFileChooserDialog d;
-            d = new ExtFileChooserDialog(0, "Title", null, null);
+            File paramFile = new File("g:");
+            File localFile = paramFile.getCanonicalFile();
+            File ab = paramFile.getAbsoluteFile();
+            System.out.println(paramFile.exists());
 
-            d.setFileSelectionMode(FileChooserSelectionMode.FILES_AND_DIRECTORIES);
-
-            Dialog.getInstance().showDialog(d);
-            final File[] sel = d.getSelection();
-            System.out.println(d.getSelection()[0].getAbsolutePath());
-        } catch (final DialogClosedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (final DialogCanceledException e) {
+        } catch (final Throwable e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
@@ -908,6 +897,20 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
                         }
                         final String txt = getText();
                         System.out.println(txt);
+                        if (CrossSystem.getOSFamily() == org.appwork.utils.os.CrossSystem.OSFamily.WINDOWS && txt.length() <= 2 && !txt.startsWith("\\")) {
+                            // c:
+                            // g: but not c:\ and not \\nas
+                            // problem: under windows, the filesystem converts
+                            // c: to <current_process_dir> if the root of
+                            // current process dir is c.
+                            // result: if the current dir is c:\ and the user
+                            // presses backspace, the new dir becomes for
+                            // example c:\program files\JDownloader instead of
+                            // c:
+                            // solution: break the auto completion for this
+                            // special case
+                            return;
+                        }
                         SwingUtilities.invokeLater(new Runnable() {
 
                             private File getFile(final String txt) {
@@ -951,7 +954,6 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
                                                         selecting = oldSelecting;
                                                     }
                                                 });
-
                                             } else {
                                                 if (f.isDirectory()) {
                                                     // ||(txt.endsWith("\\") ||

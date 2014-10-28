@@ -333,14 +333,12 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
                         f = new File(path);
 
                     } else {
-                      switch( getFileSelectionMode()){
-                      case DIRECTORIES_ONLY:
-                      case FILES_AND_DIRECTORIES:
-                         f= fc.getCurrentDirectory();
-                         if(f!=null){
-                             return new File[] { f };
-                         }
-                      }
+                        switch (getFileSelectionMode()) {
+                        case DIRECTORIES_ONLY:
+                        case FILES_AND_DIRECTORIES:
+                            f = fc.getCurrentDirectory();
+                            if (f != null) { return new File[] { f }; }
+                        }
                         return null;
                     }
                 }
@@ -555,6 +553,7 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
         if (newValue) {
 
             System.out.println("Busy TRUE");
+            // new Exception().printStackTrace();
             // setCursor(BUSY_CURSOR);
             if (parentGlassPane != null) {
                 parentGlassPane.setCursor(BUSY_CURSOR);
@@ -562,6 +561,7 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
             }
         } else {
             System.out.println("Busy FALSE");
+            // new Exception().printStackTrace();
             // setCursor(null);
             if (parentGlassPane != null) {
                 parentGlassPane.setCursor(null);
@@ -654,7 +654,7 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
                     super.setCurrentDirectory(dir);
                 } finally {
                     selecting = oldSelecting;
-                    // setBusy(false);
+
                 }
 
             }
@@ -662,7 +662,7 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
             @Override
             public void setCurrentDirectory(final File dir) {
                 if (!initComplete) { return; }
-                setBusy(true);
+
                 if (duringInit) {
                     // synch during init. else preselection will fail
                     setCurrentDirectoryInternal(dir);
@@ -708,6 +708,7 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
                 super.updateUI();
                 final FileChooserUI myUi = getUI();
                 if (myUi instanceof BasicFileChooserUI) {
+
                     ((BasicFileChooserUI) myUi).getModel().addPropertyChangeListener(new PropertyChangeListener() {
 
                         @Override
@@ -922,7 +923,7 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
 
                             @Override
                             public void run() {
-                                 String txt = getText();
+                                String txt = getText();
                                 try {
 
                                     File f = getFile(txt);
@@ -934,19 +935,46 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
                                             if (f.getParentFile() == null || !f.getParentFile().exists() || parent) {
                                                 fc.setCurrentDirectory(f);
                                                 fc.setSelectedFile(null);
-                                                final boolean oldSelecting = selecting;
-                                                selecting = true;
-                                                setText(txt);
-                                                selecting = oldSelecting;
+                                                final String finalTxt = txt;
+                                                // we have to delay these calls,
+                                                // else they conflict with the
+                                                // internal delayed
+                                                // fc.setCurrentDirectory(f);
+                                                // above
+                                                SwingUtilities.invokeLater(new Runnable() {
+
+                                                    @Override
+                                                    public void run() {
+                                                        final boolean oldSelecting = selecting;
+                                                        selecting = true;
+                                                        setText(finalTxt);
+                                                        selecting = oldSelecting;
+                                                    }
+                                                });
+
                                             } else {
-                                                if (f.isDirectory() ) {
-                                                    //||(txt.endsWith("\\") || txt.endsWith("/") && f.isDirectory())
+                                                if (f.isDirectory()) {
+                                                    // ||(txt.endsWith("\\") ||
+                                                    // txt.endsWith("/") &&
+                                                    // f.isDirectory())
                                                     fc.setCurrentDirectory(f);
                                                     fc.setSelectedFile(null);
-                                                    final boolean oldSelecting = selecting;
-                                                    selecting = true;
-                                                    setText(txt);
-                                                    selecting = oldSelecting;
+                                                    final String finalTxt = txt;
+                                                    // we have to delay these
+                                                    // calls, else they conflict
+                                                    // with the internal delayed
+                                                    // fc.setCurrentDirectory(f);
+                                                    // above
+                                                    SwingUtilities.invokeLater(new Runnable() {
+
+                                                        @Override
+                                                        public void run() {
+                                                            final boolean oldSelecting = selecting;
+                                                            selecting = true;
+                                                            setText(finalTxt);
+                                                            selecting = oldSelecting;
+                                                        }
+                                                    });
                                                 } else {
 
                                                     fc.setSelectedFile(f);

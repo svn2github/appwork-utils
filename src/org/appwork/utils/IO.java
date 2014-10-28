@@ -156,18 +156,12 @@ public class IO {
         IO.copyFolderRecursive(src, dest, overwriteFiles, SYNC.NONE);
     }
 
-    /**
-     * @param overwriteFiles
-     *            TODO
-     * @param dist
-     * @param dist2
-     * @throws IOException
-     */
-    public static void copyFolderRecursive(final File src, final File dest, final boolean overwriteFiles, final SYNC sync) throws IOException {
+    public static void copyFolderRecursive(final File src, final File dest, final boolean overwriteFiles, final FileFilter filter, final SYNC sync) throws IOException {
         Files.walkThroughStructure(new AbstractHandler<IOException>() {
 
             @Override
             public void onFile(final File f) throws IOException {
+                if (filter != null && !filter.accept(f)) { return; }
                 final String path = Files.getRelativePath(src, f);
                 if (path == null) { throw new IOException("No rel Path " + src + "-" + f); }
                 if (f.isDirectory()) {
@@ -187,6 +181,17 @@ public class IO {
             }
         }, src);
 
+    }
+
+    /**
+     * @param overwriteFiles
+     *            TODO
+     * @param dist
+     * @param dist2
+     * @throws IOException
+     */
+    public static void copyFolderRecursive(final File src, final File dest, final boolean overwriteFiles, final SYNC sync) throws IOException {
+        copyFolderRecursive(src, dest, overwriteFiles, null, sync);
     }
 
     public static IOErrorHandler getErrorHandler() {

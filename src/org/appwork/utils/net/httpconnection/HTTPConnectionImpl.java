@@ -18,7 +18,6 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -38,6 +37,7 @@ import javax.net.ssl.SSLSocketFactory;
 
 import org.appwork.net.protocol.http.HTTPConstants;
 import org.appwork.scheduler.DelayedRunnable;
+import org.appwork.utils.Application;
 import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.net.Base64InputStream;
@@ -384,15 +384,23 @@ public class HTTPConnectionImpl implements HTTPConnection {
             private Socket removeSSLProtocol(final Socket socket) {
                 if (socket != null && socket instanceof SSLSocket) {
                     final SSLSocket sslSocket = (SSLSocket) socket;
-                    final ArrayList<String> protocols = new ArrayList<String>(Arrays.asList(sslSocket.getEnabledProtocols()));
-                    final Iterator<String> it = protocols.iterator();
-                    while (it.hasNext()) {
-                        final String next = it.next();
-                        if (StringUtils.containsIgnoreCase(next, "ssl")) {
-                            it.remove();
-                        }
+                    // final ArrayList<String> protocols = new
+                    // ArrayList<String>(Arrays.asList(sslSocket.getEnabledProtocols()));
+                    // final Iterator<String> it = protocols.iterator();
+                    // while (it.hasNext()) {
+                    // final String next = it.next();
+                    // if (StringUtils.containsIgnoreCase(next, "ssl")) {
+                    // it.remove();
+                    // }
+                    // }
+                    final long javaVersion = Application.getJavaVersion();
+                    if (javaVersion >= Application.JAVA18) {
+                        sslSocket.setEnabledProtocols(new String[] { "TLSv1", "TLSv1.1", "TLSv1.2" });
+                    } else if (javaVersion >= Application.JAVA17) {
+                        sslSocket.setEnabledProtocols(new String[] { "TLSv1", "TLSv1.1", "TLSv1.2" });
+                    } else {
+                        sslSocket.setEnabledProtocols(new String[] { "TLSv1" });
                     }
-                    sslSocket.setEnabledProtocols(protocols.toArray(new String[] {}));
                 }
                 return socket;
             }

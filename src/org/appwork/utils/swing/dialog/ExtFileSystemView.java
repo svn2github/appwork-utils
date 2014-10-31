@@ -204,7 +204,6 @@ public class ExtFileSystemView extends FileSystemView {
 
     @Override
     public File getParentDirectory(final File dir) {
-
         return this.org.getParentDirectory(dir);
     }
 

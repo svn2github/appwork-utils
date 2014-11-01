@@ -225,7 +225,7 @@ public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> impl
      * @param row
      * @return
      */
-    private long       lastHide = 0;
+    protected long       lastHide = 0;
     private E          editing  = null;
     private JPopupMenu popup;
 
@@ -241,21 +241,7 @@ public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> impl
 
         }
         editing = value;
-        popup = new JPopupMenu() {
-            public void setVisible(final boolean b) {
-
-                super.setVisible(b);
-                if (!b) {
-                    lastHide = System.currentTimeMillis();
-                    // editing = null;
-                    // updateIcon(true);
-                } else {
-                    // updateIcon(false);
-                }
-
-            };
-
-        };
+        popup = createPopupMenu();
 
         try {
             final ModelType selected = getSelectedItem(value);
@@ -271,6 +257,27 @@ public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> impl
             e1.printStackTrace();
         }
         return false;
+    }
+
+    /**
+     * @return
+     */
+    public JPopupMenu createPopupMenu() {
+        return new JPopupMenu() {
+            public void setVisible(final boolean b) {
+
+                super.setVisible(b);
+                if (!b) {
+                    lastHide = System.currentTimeMillis();
+                    // editing = null;
+                    // updateIcon(true);
+                } else {
+                    // updateIcon(false);
+                }
+
+            };
+
+        };
     }
 
     protected void fillPopup(final JPopupMenu popup, final E value, final ModelType selected, final ComboBoxModel<ModelType> dm) {

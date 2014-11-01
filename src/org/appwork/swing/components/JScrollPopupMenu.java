@@ -30,7 +30,7 @@ import org.appwork.swing.MigPanel;
  */
 
 public class JScrollPopupMenu extends JPopupMenu {
-    protected int maximumVisibleRows = 15;
+    protected int maximumVisibleRows = 30;
 
     public static void main(String[] args) {
         new BasicGui(JScrollPopupMenu.class.getName()) {

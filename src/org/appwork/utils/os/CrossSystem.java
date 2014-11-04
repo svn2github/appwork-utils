@@ -458,7 +458,8 @@ public class CrossSystem {
     }
 
     /**
-     * @return e.g. 10006004 for 10.6.4
+     * @return e.g. MacOsXVersion.MAC_OSX_10p6_SNOW_LEOPARD.getVersionID() for
+     *         10.6.4
      */
     public static long getMacOSVersion() {
         if (CrossSystem.isMac()) {

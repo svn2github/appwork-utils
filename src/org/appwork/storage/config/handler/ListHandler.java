@@ -60,7 +60,7 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
     }
 
     protected Object getCachedValue() {
-        if (this.useObjectCache && getStorageHandler().isObjectCacheEnabled()) {
+        if (this.useObjectCache && this.getStorageHandler().isObjectCacheEnabled()) {
             final MinTimeWeakReference<Object> lCache = this.cache;
             if (lCache != null) { return lCache.get(); }
         }
@@ -69,19 +69,21 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
 
     @Override
     public T getValue() {
-        Object value = this.getCachedValue();
-        if (value == null) {
-            try {
-                value = this.read();
-            } catch (final Throwable e) {
-                throw new WTFException(e);
+        synchronized (this) {
+            Object value = this.getCachedValue();
+            if (value == null) {
+                try {
+                    value = this.read();
+                } catch (final Throwable e) {
+                    throw new WTFException(e);
+                }
+                this.putCachedValue(value);
             }
-            this.putCachedValue(value);
-        }
-        if (ListHandler.NULL == value) {
-            return null;
-        } else {
-            return (T) value;
+            if (ListHandler.NULL == value) {
+                return null;
+            } else {
+                return (T) value;
+            }
         }
     }
 
@@ -91,12 +93,12 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
 
     @Override
     protected void initHandler() throws Throwable {
-        this.path = new File(storageHandler.getPath() + "." + getKey() + "." + (this.cryptKey != null ? "ejs" : "json"));
-        if (storageHandler.getRelativCPPath() != null && !this.path.exists()) {
-            this.url = Application.getRessourceURL(storageHandler.getRelativCPPath() + "." + getKey() + "." + (this.cryptKey != null ? "ejs" : "json"));
+        this.path = new File(this.storageHandler.getPath() + "." + this.getKey() + "." + (this.cryptKey != null ? "ejs" : "json"));
+        if (this.storageHandler.getRelativCPPath() != null && !this.path.exists()) {
+            this.url = Application.getRessourceURL(this.storageHandler.getRelativCPPath() + "." + this.getKey() + "." + (this.cryptKey != null ? "ejs" : "json"));
         }
-    
-        this.useObjectCache =  this.getAnnotation(DisableObjectCache.class)== null;
+
+        this.useObjectCache = this.getAnnotation(DisableObjectCache.class) == null;
         final CryptedStorage cryptedStorage = this.getAnnotation(CryptedStorage.class);
         if (cryptedStorage != null) {
             /* use key from CryptedStorage */
@@ -104,7 +106,7 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
         } else {
             if (this.getAnnotation(PlainStorage.class) == null) {
                 /* we use key from primitiveStorage */
-                this.cryptKey = storageHandler.getPrimitiveStorage().getCryptKey();
+                this.cryptKey = this.storageHandler.getPrimitiveStorage().getCryptKey();
             } else {
                 /* we enforce no key! */
                 this.cryptKey = null;
@@ -113,19 +115,21 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
     }
 
     protected void putCachedValue(Object value) {
-      
-        if (this.useObjectCache && getStorageHandler().isObjectCacheEnabled()) {
+
+        if (this.useObjectCache && this.getStorageHandler().isObjectCacheEnabled()) {
             if (value == null) {
                 value = ListHandler.NULL;
             }
-            this.cache = new MinTimeWeakReference<Object>(value, ListHandler.MIN_LIFETIME, "Storage " + getKey());
+            this.cache = new MinTimeWeakReference<Object>(value, ListHandler.MIN_LIFETIME, "Storage " + this.getKey());
         }
     }
 
     @Override
     protected void putValue(final T value) {
-        this.putCachedValue(value);
-        this.write(value);
+        synchronized (this) {
+            this.putCachedValue(value);
+            this.write(value);
+        }
     }
 
     /**
@@ -147,23 +151,23 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
                 ret = JSonStorage.restoreFrom(this.path, this.cryptKey == null, this.cryptKey, this.typeRef, dummy);
             }
             if (ret == dummy) {
-                if (getDefaultValue() != null) { return getDefaultValue(); }
+                if (this.getDefaultValue() != null) { return this.getDefaultValue(); }
                 Annotation ann;
                 final DefaultJsonObject defaultJson = this.getAnnotation(DefaultJsonObject.class);
                 final DefaultFactory df = this.getAnnotation(DefaultFactory.class);
                 if (defaultJson != null) {
-                    setDefaultValue((T) JSonStorage.restoreFromString(defaultJson.value(), this.typeRef, null));
-                    return getDefaultValue();
+                    this.setDefaultValue((T) JSonStorage.restoreFromString(defaultJson.value(), this.typeRef, null));
+                    return this.getDefaultValue();
                 } else if (df != null) {
-                    setDefaultValue((T) df.value().newInstance().getDefaultValue());
-                    return getDefaultValue();
-                } else if ((ann = this.getAnnotation(getDefaultAnnotation())) != null) {
+                    this.setDefaultValue((T) df.value().newInstance().getDefaultValue());
+                    return this.getDefaultValue();
+                } else if ((ann = this.getAnnotation(this.getDefaultAnnotation())) != null) {
                     try {
-                        setDefaultValue((T) ann.annotationType().getMethod("value", new Class[] {}).invoke(ann, new Object[] {}));
+                        this.setDefaultValue((T) ann.annotationType().getMethod("value", new Class[] {}).invoke(ann, new Object[] {}));
                     } catch (final Throwable e) {
                         e.printStackTrace();
                     }
-                    return getDefaultValue();
+                    return this.getDefaultValue();
                 } else {
                     return null;
                 }
@@ -171,7 +175,7 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
             return ret;
         } finally {
             if (!this.path.exists() && this.url == null) {
-                this.write(getDefaultValue());
+                this.write(this.getDefaultValue());
             }
         }
     }

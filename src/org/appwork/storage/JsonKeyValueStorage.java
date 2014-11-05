@@ -55,8 +55,7 @@ public class JsonKeyValueStorage extends Storage {
         if (resource != null) {
             Log.L.info("Load JSon Storage from Classpath url: " + resource);
             try {
-                final HashMap<String, Object> load = JSonStorage.restoreFromString(IO.readURL(resource), plain, key, new TypeRef<HashMap<String, Object>>() {
-                }, new HashMap<String, Object>());
+                final HashMap<String, Object> load = JSonStorage.restoreFromString(IO.readURL(resource), plain, key, TypeRef.HASHMAP, new HashMap<String, Object>());
                 this.putAll(load);
             } catch (final IOException e) {
                 throw new WTFException(e);
@@ -64,8 +63,7 @@ public class JsonKeyValueStorage extends Storage {
         }
         if (file.exists()) {
             Log.L.info("Prefer (merged) JSon Storage from File: " + file);
-            final HashMap<String, Object> load = JSonStorage.restoreFrom(file, plain, key, new TypeRef<HashMap<String, Object>>() {
-            }, new HashMap<String, Object>());
+            final HashMap<String, Object> load = JSonStorage.restoreFrom(file, plain, key, TypeRef.HASHMAP, new HashMap<String, Object>());
             this.putAll(load);
         }
     }
@@ -85,8 +83,7 @@ public class JsonKeyValueStorage extends Storage {
         this.file = Application.getResource("cfg/" + name + (plain ? ".json" : ".ejs"));
         Log.L.finer("Read Config: " + this.file.getAbsolutePath());
         this.key = key;
-        final HashMap<String, Object> load = JSonStorage.restoreFrom(this.file, plain, key, new TypeRef<HashMap<String, Object>>() {
-        }, new HashMap<String, Object>());
+        final HashMap<String, Object> load = JSonStorage.restoreFrom(this.file, plain, key, TypeRef.HASHMAP, new HashMap<String, Object>());
         this.putAll(load);
     }
 
@@ -206,6 +203,7 @@ public class JsonKeyValueStorage extends Storage {
     }
 
     private Object internal_put(final String key, final Object value) {
+
         if (key == null) { throw new WTFException("key ==null is forbidden!"); }
         final Object ret;
         if (value != null) {
@@ -214,6 +212,7 @@ public class JsonKeyValueStorage extends Storage {
             /* not possible to save null values in concurrenthashmap */
             ret = this.map.remove(key);
         }
+
         this.requestSave();
         return ret;
     }

@@ -16,7 +16,6 @@ import java.util.List;
 
 import org.appwork.net.protocol.http.HTTPConstants;
 import org.appwork.storage.JSonStorage;
-import org.appwork.storage.TypeRef;
 import org.appwork.storage.simplejson.JSonObject;
 import org.appwork.utils.IO;
 import org.appwork.utils.Regex;
@@ -182,8 +181,7 @@ public class PostRequest extends HttpRequest {
             case JSON: {
                 final byte[] jsonBytes = IO.readStream(-1, this.getInputStream());
                 final String json = new String(jsonBytes, charSet);
-                jsonRequest = JSonStorage.restoreFromString(json, new TypeRef<JSonRequest>() {
-                });
+                jsonRequest = JSonStorage.restoreFromString(json, JSonRequest.TYPE_REF);
             }
                 break;
             case X_WWW_FORM_URLENCODED: {

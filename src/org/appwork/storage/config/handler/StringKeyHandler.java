@@ -56,6 +56,7 @@ public class StringKeyHandler extends KeyHandler<String> {
      */
     @Override
     protected void putValue(final String object) {
+
         this.storageHandler.getPrimitiveStorage().put(this.getKey(), object);
     }
 

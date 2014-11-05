@@ -11,6 +11,7 @@ package org.appwork.storage;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.HashMap;
 
 import org.appwork.storage.simplejson.mapper.CompiledTypeRef;
 
@@ -20,7 +21,19 @@ import org.appwork.storage.simplejson.mapper.CompiledTypeRef;
  */
 public abstract class TypeRef<T> {
 
-    private final Type type;
+    public static final TypeRef<String>                  STRING     = new TypeRef<String>() {
+                                                                        public Type getType() {
+                                                                            return String.class;
+                                                                        };
+                                                                    };
+    public static final TypeRef<byte[]>                  BYTE_ARRAY = new TypeRef<byte[]>() {
+                                                                        public Type getType() {
+                                                                            return byte[].class;
+                                                                        };
+                                                                    };
+    public static final TypeRef<HashMap<String, Object>> HASHMAP    = new TypeRef<HashMap<String, Object>>() {
+                                                                    };
+    private final Type                                   type;
 
     public TypeRef() {
         final Type superClass = this.getClass().getGenericSuperclass();
@@ -44,7 +57,7 @@ public abstract class TypeRef<T> {
      * @return
      */
     public CompiledTypeRef compile() {
-     final CompiledTypeRef ret = new CompiledTypeRef(getType());
+        final CompiledTypeRef ret = new CompiledTypeRef(getType());
         return ret;
     }
 

@@ -667,6 +667,7 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
                 if (handler.isGetter(m)) {
                     return handler.getValue();
                 } else {
+
                     ((KeyHandler<Object>) handler).setValue(parameter[0]);
                     if (this.writeStrategy != null) {
                         this.writeStrategy.write(this, handler);

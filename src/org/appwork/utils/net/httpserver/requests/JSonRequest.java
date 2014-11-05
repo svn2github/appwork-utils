@@ -10,6 +10,7 @@
 package org.appwork.utils.net.httpserver.requests;
 
 import org.appwork.storage.Storable;
+import org.appwork.storage.TypeRef;
 
 /**
  * @author daniel
@@ -17,9 +18,14 @@ import org.appwork.storage.Storable;
  */
 public class JSonRequest implements Storable {
 
-    private String   url;
-    private long     rid;
-    private Object[] params;
+    public static final TypeRef<JSonRequest> TYPE_REF = new TypeRef<JSonRequest>() {
+                                                          public java.lang.reflect.Type getType() {
+                                                              return JSonRequest.class;
+                                                          };
+                                                      };
+    private String                           url;
+    private long                             rid;
+    private Object[]                         params;
 
     public JSonRequest(/* Storable */) {
     }

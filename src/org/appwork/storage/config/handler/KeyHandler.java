@@ -295,7 +295,7 @@ public abstract class KeyHandler<RawClass> {
             if (Clazz.isShort(ret)) { return AbstractTypeDefinition.SHORT; }
             if (Clazz.isString(ret)) {
 
-                if (getAnnotation(HexColorString.class) != null) { return AbstractTypeDefinition.HEX_COLOR; }
+                if (this.getAnnotation(HexColorString.class) != null) { return AbstractTypeDefinition.HEX_COLOR; }
                 return AbstractTypeDefinition.STRING;
             }
 
@@ -313,7 +313,7 @@ public abstract class KeyHandler<RawClass> {
                 if (Clazz.isLong(aType)) { return AbstractTypeDefinition.LONG_LIST; }
                 if (Clazz.isShort(aType)) { return AbstractTypeDefinition.SHORT_LIST; }
                 if (Clazz.isString(aType)) {
-                    if (getAnnotation(HexColorString.class) != null) { return AbstractTypeDefinition.HEX_COLOR_LIST; }
+                    if (this.getAnnotation(HexColorString.class) != null) { return AbstractTypeDefinition.HEX_COLOR_LIST; }
                     return AbstractTypeDefinition.STRING_LIST;
                 }
 
@@ -343,7 +343,7 @@ public abstract class KeyHandler<RawClass> {
                         if (Clazz.isLong(acutal[0])) { return AbstractTypeDefinition.LONG_LIST; }
                         if (Clazz.isShort(acutal[0])) { return AbstractTypeDefinition.SHORT_LIST; }
                         if (Clazz.isString(acutal[0])) {
-                            if (getAnnotation(HexColorString.class) != null) { return AbstractTypeDefinition.HEX_COLOR_LIST; }
+                            if (this.getAnnotation(HexColorString.class) != null) { return AbstractTypeDefinition.HEX_COLOR_LIST; }
 
                             return AbstractTypeDefinition.STRING_LIST;
                         }
@@ -377,9 +377,11 @@ public abstract class KeyHandler<RawClass> {
     }
 
     public RawClass getValue() {
-        final RawClass value = this.getValueStorage();
-        if (this.customValueGetter != null) { return this.customValueGetter.getValue(value); }
-        return value;
+        synchronized (this) {
+            final RawClass value = this.getValueStorage();
+            if (this.customValueGetter != null) { return this.customValueGetter.getValue(value); }
+            return value;
+        }
     }
 
     public RawClass getValueStorage() {
@@ -553,35 +555,35 @@ public abstract class KeyHandler<RawClass> {
      */
     public void setValue(final RawClass newValue) throws ValidationException {
         try {
-            final RawClass oldValue = this.getValue();
-            if (oldValue == null && newValue == null) {
-                /* everything is null */
-                return;
-            }
-            boolean changed = false;
-            if (newValue != null && oldValue == null) {
-                /* old is null, but new is not */
-                changed = true;
-            } else if (oldValue != null && newValue == null) {
-                /* new is null, but old is not */
-                changed = true;
+            synchronized (this) {
+                final RawClass oldValue = this.getValue();
+                if (oldValue == null && newValue == null) {
+                    /* everything is null */
+                    return;
+                }
+                boolean changed = false;
+                if (newValue != null && oldValue == null) {
+                    /* old is null, but new is not */
+                    changed = true;
+                } else if (oldValue != null && newValue == null) {
+                    /* new is null, but old is not */
+                    changed = true;
 
-            } else if (!Clazz.isPrimitive(this.getRawClass()) && !Clazz.isEnum(this.getRawClass()) && this.getRawClass() != String.class) {
-                /* no primitive, we cannot detect changes 100% */
-                changed = true;
-            } else if (!newValue.equals(oldValue)) {
-                /* does not equal */
-                changed = true;
+                } else if (!Clazz.isPrimitive(this.getRawClass()) && !Clazz.isEnum(this.getRawClass()) && this.getRawClass() != String.class) {
+                    /* no primitive, we cannot detect changes 100% */
+                    changed = true;
+                } else if (!newValue.equals(oldValue)) {
+                    /* does not equal */
+                    changed = true;
+                }
+                if (changed == false) { return; }
+                if (this.validatorFactory != null) {
+                    this.validatorFactory.validate(newValue);
+                }
+                this.validateValue(newValue);
+                this.putValue(newValue);
             }
-            if (changed == false) { return; }
-            if (this.validatorFactory != null) {
-                this.validatorFactory.validate(newValue);
-            }
-            this.validateValue(newValue);
-            this.putValue(newValue);
-
             this.fireEvent(ConfigEvent.Types.VALUE_UPDATED, this, newValue);
-
         } catch (final ValidationException e) {
             e.setValue(newValue);
             this.fireEvent(ConfigEvent.Types.VALIDATOR_ERROR, this, e);

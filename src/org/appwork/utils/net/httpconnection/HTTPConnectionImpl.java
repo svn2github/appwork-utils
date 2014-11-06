@@ -115,7 +115,8 @@ public class HTTPConnectionImpl implements HTTPConnection {
     protected volatile KEEPALIVE                 keepAlive            = KEEPALIVE.DISABLED;
     protected volatile InetAddress               remoteIPs[]          = null;
     protected boolean                            sslTrustALL          = true;
-
+    protected InetAddress                        lastConnection       = null;
+    protected int                                lastConnectionPort   = -1;
     private final static PublicSuffixList        PSL                  = PublicSuffixList.getInstance();
 
     public KEEPALIVE getKeepAlive() {
@@ -364,6 +365,8 @@ public class HTTPConnectionImpl implements HTTPConnection {
         this.requestTime = -1;
         this.headers.clear();
         this.ranges = null;
+        this.lastConnection = null;
+        this.lastConnectionPort = -1;
     }
 
     protected static SSLSocketFactory getSSLSocketFactory(HTTPConnection httpConnection) throws IOException {
@@ -564,6 +567,8 @@ public class HTTPConnectionImpl implements HTTPConnection {
             this.setReadTimeout(this.readTimeout);
             /* now send Request */
             try {
+                this.lastConnection = this.connectionSocket.getInetAddress();
+                this.lastConnectionPort = this.connectionSocket.getPort();
                 this.sendRequest();
                 return;
             } catch (final javax.net.ssl.SSLException e) {
@@ -925,8 +930,12 @@ public class HTTPConnectionImpl implements HTTPConnection {
         sb.append("----------------Request Information-------------\r\n");
         sb.append("URL: ").append(this.getURL()).append("\r\n");
         final Socket lhttpSocket = this.connectionSocket;
+        final InetAddress lLastConnection = this.lastConnection;
         if (lhttpSocket != null && lhttpSocket.isConnected()) {
-            sb.append("HostIP: ").append(lhttpSocket.getInetAddress()).append("\r\n");
+            sb.append("HostIP: ").append(lhttpSocket.getInetAddress()).append(":").append(lhttpSocket.getPort()).append("\r\n");
+            sb.append("HostPort: ").append(lhttpSocket.getPort()).append("\r\n");
+        } else if (lLastConnection != null) {
+            sb.append("HostIP: ").append(lLastConnection).append(":").append(this.lastConnectionPort).append("\r\n");
         } else {
             sb.append("Host: ").append(this.getURL().getHost()).append("\r\n");
         }

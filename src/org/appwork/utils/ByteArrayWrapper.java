@@ -45,7 +45,6 @@ public final class ByteArrayWrapper {
         for (int index = offset; index < length; index++) {
             result = 31 * result + byteArray[index];
         }
-
         return result;
     }
 
@@ -55,6 +54,7 @@ public final class ByteArrayWrapper {
         if (obj == this) { return true; }
         final ByteArrayWrapper other = (ByteArrayWrapper) obj;
         if (other.getLength() != this.getLength()) { return false; }
+        if (other.hashCode() != this.hashCode()) { return false; }
         int index2 = other.getOffset();
         for (int index = this.getOffset(); index < this.getLength(); index++) {
             if (this.getByteArray()[index] != other.getByteArray()[index2]) { return false; }

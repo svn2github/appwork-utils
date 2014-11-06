@@ -23,11 +23,10 @@ import javax.swing.Icon;
 import javax.swing.filechooser.FileSystemView;
 
 import org.appwork.resources.AWUTheme;
+import org.appwork.sunwrapper.sun.awt.shell.ShellFolderWrapper;
 import org.appwork.utils.locale._AWU;
 import org.appwork.utils.logging.Log;
 import org.appwork.utils.os.CrossSystem;
-
-import sun.awt.shell.ShellFolder;
 
 /**
  * 
@@ -164,22 +163,25 @@ public class ExtFileSystemView extends FileSystemView {
                 break;
             }
 
-            if (!(f instanceof ShellFolder)) {
+            if (!ShellFolderWrapper.isInstanceof(f)) {
                 if (this.isFileSystemRoot(f)) {
                     f = this.createFileSystemRoot(f);
                 }
                 try {
-                    f = ShellFolder.getShellFolder(f);
+                    f = ShellFolderWrapper.getShellFolderIfAvailable(f);
                 } catch (final FileNotFoundException e) {
-                    // Not a valid file (wouldn't show in native file chooser)
+                    // Not a valid file (wouldn't show in native file
+                    // chooser)
                     // Example: C:\pagefile.sys
                     continue;
                 } catch (final InternalError e) {
-                    // Not a valid file (wouldn't show in native file chooser)
+                    // Not a valid file (wouldn't show in native file
+                    // chooser)
                     // Example C:\Winnt\Profiles\joe\history\History.IE5
                     continue;
                 }
             }
+
             if (!useFileHiding || !this.isHiddenFile(f)) {
                 files.add(f);
             }
@@ -218,7 +220,7 @@ public class ExtFileSystemView extends FileSystemView {
             // this may take a long time on some systems.
             final File[] baseFolders = AccessController.doPrivileged(new PrivilegedAction<File[]>() {
                 public File[] run() {
-                    return (File[]) ShellFolder.get("fileChooserComboBoxFolders");
+                    return (File[]) ShellFolderWrapper.get("fileChooserComboBoxFolders");
                 }
             });
 
@@ -254,34 +256,37 @@ public class ExtFileSystemView extends FileSystemView {
                     unique.add(hf);
                 }
             }
-            for (final File f : baseFolders) {
-                // Win32ShellFolder2.class
-                if (f.getName().equals("Recent")) {
-                    continue;
-                }
-                if (f.getName().equals(ExtFileSystemView.VIRTUAL_NETWORKFOLDER)) {
-                    this.networkFolder = new NetWorkFolder(f);
-                    break;
-                } else if (f.getName().equals(ExtFileSystemView.VIRTUAL_NETWORKFOLDER_XP)) {
-                    this.networkFolder = new NetWorkFolder(f);
-                    break;
-                }
+            if (baseFolders != null) {
+                for (final File f : baseFolders) {
+                    // Win32ShellFolder2.class
+                    if (f.getName().equals("Recent")) {
+                        continue;
+                    }
+                    if (f.getName().equals(ExtFileSystemView.VIRTUAL_NETWORKFOLDER)) {
+                        this.networkFolder = new NetWorkFolder(f);
+                        break;
+                    } else if (f.getName().equals(ExtFileSystemView.VIRTUAL_NETWORKFOLDER_XP)) {
+                        this.networkFolder = new NetWorkFolder(f);
+                        break;
+                    }
 
+                }
             }
             if (this.networkFolder != null) {
                 unique.add(this.networkFolder);
             }
             final File home = this.getHomeDirectory();
-
-            for (final File f : baseFolders) {
-                // Win32ShellFolder2.class
-                if (f.getName().equals("Recent")) {
-                    continue;
+            if (baseFolders != null) {
+                for (final File f : baseFolders) {
+                    // Win32ShellFolder2.class
+                    if (f.getName().equals("Recent")) {
+                        continue;
+                    }
+                    if (f.getParentFile() == null || !f.getParentFile().equals(home)) {
+                        unique.add(f);
+                    }
+                    Log.L.info("Basefolder: " + f.getName() + " - " + f + " - " + CrossSystem.getOSString());
                 }
-                if (f.getParentFile() == null || !f.getParentFile().equals(home)) {
-                    unique.add(f);
-                }
-                Log.L.info("Basefolder: " + f.getName() + " - " + f + " - " + CrossSystem.getOSString());
             }
             final File[] nroots = unique.toArray(new File[] {});
             final HashMap<File, File> nspecialsMap = new HashMap<File, File>();

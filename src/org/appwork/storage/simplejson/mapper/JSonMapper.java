@@ -11,7 +11,9 @@ package org.appwork.storage.simplejson.mapper;
 
 import java.io.File;
 import java.lang.reflect.Array;
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.net.URL;
@@ -32,10 +34,6 @@ import org.appwork.storage.simplejson.JSonObject;
 import org.appwork.storage.simplejson.JSonValue;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.reflection.Clazz;
-
-import sun.reflect.generics.reflectiveObjects.GenericArrayTypeImpl;
-import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
-import sun.reflect.generics.reflectiveObjects.TypeVariableImpl;
 
 /**
  * @author thomas
@@ -105,7 +103,6 @@ public class JSonMapper {
 
     private final HashMap<Class<?>, TypeMapper<?>> typeMapper;
 
-   
     public JSonMapper() {
 
         typeMapper = new HashMap<Class<?>, TypeMapper<?>>();
@@ -250,15 +247,18 @@ public class JSonMapper {
         try {
 
             Class<?> clazz = null;
-            if (type instanceof ParameterizedTypeImpl) {
-                clazz = ((ParameterizedTypeImpl) type).getRawType();
+            if (type instanceof ParameterizedType) {
+                Type typ = ((ParameterizedType) type).getRawType();
+                if (typ instanceof Class) {
+                    clazz = (Class<?>) typ;
+                }
             } else if (type instanceof Class) {
                 clazz = (Class) type;
-            } else if (type instanceof GenericArrayTypeImpl) {
+            } else if (type instanceof GenericArrayType) {
                 // this is for 1.6
                 // for 1.7 we do not get GenericArrayTypeImpl here but the
                 // actual array class
-                type = clazz = Array.newInstance((Class<?>) ((GenericArrayTypeImpl) type).getGenericComponentType(), 0).getClass();
+                type = clazz = Array.newInstance((Class<?>) ((GenericArrayType) type).getGenericComponentType(), 0).getClass();
             }
 
             if (clazz == null || clazz == Object.class) {
@@ -326,17 +326,18 @@ public class JSonMapper {
 
                 }
             }
-            if (type instanceof ParameterizedTypeImpl) {
-                final ParameterizedTypeImpl pType = (ParameterizedTypeImpl) type;
-                if (Collection.class.isAssignableFrom(pType.getRawType())) {
-                    final Collection<Object> inst = (Collection<Object>) mapClasses(pType.getRawType()).newInstance();
+            if (type instanceof ParameterizedType) {
+                final ParameterizedType pType = (ParameterizedType) type;
+                Type raw = pType.getRawType();
+                if (raw instanceof Class && Collection.class.isAssignableFrom((Class) raw)) {
+                    final Collection<Object> inst = (Collection<Object>) mapClasses((Class) raw).newInstance();
                     final JSonArray obj = (JSonArray) json;
                     for (final JSonNode n : obj) {
                         inst.add(this.jsonToObject(n, pType.getActualTypeArguments()[0]));
                     }
                     return inst;
-                } else if (Map.class.isAssignableFrom(pType.getRawType())) {
-                    final Map<String, Object> inst = (Map<String, Object>) mapClasses(pType.getRawType()).newInstance();
+                } else if (raw instanceof Class && Map.class.isAssignableFrom((Class) raw)) {
+                    final Map<String, Object> inst = (Map<String, Object>) mapClasses((Class) raw).newInstance();
                     final JSonObject obj = (JSonObject) json;
                     Entry<String, JSonNode> next;
                     for (final Iterator<Entry<String, JSonNode>> it = obj.entrySet().iterator(); it.hasNext();) {
@@ -362,8 +363,8 @@ public class JSonMapper {
                     final JSonArray obj = (JSonArray) json;
                     final Type gs = clazz.getGenericSuperclass();
                     final Type gType;
-                    if (gs instanceof ParameterizedTypeImpl) {
-                        gType = ((ParameterizedTypeImpl) gs).getActualTypeArguments()[0];
+                    if (gs instanceof ParameterizedType) {
+                        gType = ((ParameterizedType) gs).getActualTypeArguments()[0];
                     } else {
                         gType = void.class;
                     }
@@ -376,8 +377,8 @@ public class JSonMapper {
                     final JSonObject obj = (JSonObject) json;
                     final Type gs = clazz.getGenericSuperclass();
                     final Type gType;
-                    if (gs instanceof ParameterizedTypeImpl) {
-                        gType = ((ParameterizedTypeImpl) gs).getActualTypeArguments()[1];
+                    if (gs instanceof ParameterizedType) {
+                        gType = ((ParameterizedType) gs).getActualTypeArguments()[1];
                     } else {
                         gType = void.class;
                     }
@@ -408,8 +409,8 @@ public class JSonMapper {
                         final JSonArray obj = (JSonArray) json;
                         final Type gs = clazz.getGenericSuperclass();
                         final Type gType;
-                        if (gs instanceof ParameterizedTypeImpl) {
-                            gType = ((ParameterizedTypeImpl) gs).getActualTypeArguments()[0];
+                        if (gs instanceof ParameterizedType) {
+                            gType = ((ParameterizedType) gs).getActualTypeArguments()[0];
                         } else {
                             gType = Object.class;
                         }
@@ -443,11 +444,11 @@ public class JSonMapper {
                             //
                             Type fieldType = s.getType();
                             // special handling for generic fields
-                            if (fieldType instanceof TypeVariableImpl) {
-                                final Type[] actualTypes = ((ParameterizedTypeImpl) type).getActualTypeArguments();
+                            if (fieldType instanceof TypeVariable) {
+                                final Type[] actualTypes = ((ParameterizedType) type).getActualTypeArguments();
                                 final TypeVariable<?>[] genericTypes = clazz.getTypeParameters();
                                 for (int i = 0; i < genericTypes.length; i++) {
-                                    if (StringUtils.equals(((TypeVariableImpl) fieldType).getName(), genericTypes[i].getName())) {
+                                    if (StringUtils.equals(((TypeVariable) fieldType).getName(), genericTypes[i].getName())) {
 
                                         fieldType = actualTypes[i];
                                         break;
@@ -532,5 +533,4 @@ public class JSonMapper {
         ignorePrimitiveNullMapping = ignoreIllegalNullArguments;
     }
 
- 
 }

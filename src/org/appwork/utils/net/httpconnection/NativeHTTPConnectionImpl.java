@@ -154,16 +154,14 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
             synchronized (NativeHTTPConnectionImpl.availableProxies) {
                 NativeHTTPConnectionImpl.availableProxies.put(Thread.currentThread(), this.proxy);
             }
-            try {
-                /** http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6626700 **/
-                /**
-                 * Request for ability to turn off authentication caching in
-                 * HttpURLConnection
-                 **/
-                sun.net.www.protocol.http.AuthCacheValue.setAuthCache(new sun.net.www.protocol.http.AuthCacheImpl());
-            } catch (final Throwable e) {
-                /* sun/oracle java only? */
-            }
+
+            /** http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6626700 **/
+            /**
+             * Request for ability to turn off authentication caching in
+             * HttpURLConnection
+             **/
+            org.appwork.sunwrapper.sun.net.www.protocol.http.AuthCacheValueWrapper.setAuthCacheImpl();
+
             this.con = (HttpURLConnection) this.httpURL.openConnection(this.nativeProxy);
         } else {
             synchronized (NativeHTTPConnectionImpl.availableProxies) {

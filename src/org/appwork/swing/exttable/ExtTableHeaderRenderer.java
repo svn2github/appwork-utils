@@ -17,15 +17,13 @@ import java.awt.Graphics2D;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JTable;
-import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 
 import org.appwork.resources.AWUTheme;
+import org.appwork.sunwrapper.sun.swing.DefaultLookupWrapper;
 import org.appwork.utils.logging.Log;
-
-import sun.swing.DefaultLookup;
 
 /**
  * @author thomas
@@ -92,17 +90,8 @@ public class ExtTableHeaderRenderer extends DefaultTableCellRenderer implements 
         lockedWidth = AWUTheme.I().getIcon("exttable/widthLocked", -1);
         try {
 
-            try {
-                focusForeground = DefaultLookup.getColor(this, ui, "TableHeader.focusCellForeground");
-                focusBackground = DefaultLookup.getColor(this, ui, "TableHeader.focusCellBackground");
-            } catch (final NoSuchMethodError e) {
-                // DefaultLookup is sun.swing, any may not be
-                // available
-                // e.gh. in 1.6.0_01-b06
-                focusForeground = (Color) UIManager.get("TableHeader.focusCellForeground", getLocale());
-                focusBackground = (Color) UIManager.get("TableHeader.focusCellBackground", getLocale());
-
-            }
+            focusForeground = DefaultLookupWrapper.getColor(this, ui, "TableHeader.focusCellForeground");
+            focusBackground = DefaultLookupWrapper.getColor(this, ui, "TableHeader.focusCellBackground");
 
         } catch (final Throwable e) {
             Log.exception(e);
@@ -118,21 +107,11 @@ public class ExtTableHeaderRenderer extends DefaultTableCellRenderer implements 
         backgroundC = header.getBackground();
 
         try {
-            try {
 
-                focusBorder = DefaultLookup.getBorder(this, ui, "TableHeader.focusCellBorder");
+            focusBorder = DefaultLookupWrapper.getBorder(this, ui, "TableHeader.focusCellBorder");
 
-                cellBorder = DefaultLookup.getBorder(this, ui, "TableHeader.cellBorder");
+            cellBorder = DefaultLookupWrapper.getBorder(this, ui, "TableHeader.cellBorder");
 
-            } catch (final NoSuchMethodError e) {
-                // DefaultLookup is sun.swing, any may not be available
-                // e.gh. in 1.6.0_01-b06
-
-                focusBorder = (Border) UIManager.get("TableHeader.focusCellBorder", getLocale());
-
-                cellBorder = (Border) UIManager.get("TableHeader.focusCellBackground", getLocale());
-
-            }
         } catch (final Throwable e) {
             Log.exception(e);
             // avoid that the block above kills edt

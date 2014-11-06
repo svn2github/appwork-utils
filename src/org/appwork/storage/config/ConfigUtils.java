@@ -1,6 +1,8 @@
 package org.appwork.storage.config;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -11,8 +13,6 @@ import org.appwork.storage.config.handler.ListHandler;
 import org.appwork.utils.swing.dialog.Dialog;
 import org.appwork.utils.swing.dialog.DialogCanceledException;
 import org.appwork.utils.swing.dialog.DialogClosedException;
-
-import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 
 public class ConfigUtils {
 
@@ -55,7 +55,7 @@ public class ConfigUtils {
                 continue;
             }
             strBuild.append("\r\n");
-        
+
             // String key = kh.getKey();
             final String methodname = kh.getGetter().getMethod().getName().startsWith("is") ? kh.getGetter().getMethod().getName().substring(2) : kh.getGetter().getMethod().getName().substring(3);
             final StringBuilder sb = new StringBuilder();
@@ -89,13 +89,17 @@ public class ConfigUtils {
             strBuild.append("\r\n");
             if (kh.getClass().getName().contains("$")) {
                 if (ListHandler.class.isAssignableFrom(kh.getClass())) {
-                    final ParameterizedTypeImpl sc = (ParameterizedTypeImpl) kh.getClass().getGenericSuperclass();
+                    final ParameterizedType sc = (ParameterizedType) kh.getClass().getGenericSuperclass();
                     final Class type = (Class) sc.getActualTypeArguments()[0];
                     final String sn = type.getSimpleName();
-                    final Class<?> raw = sc.getRawType();
+                    final Type raw = sc.getRawType();
+                    if (raw instanceof Class) {
+                        strBuild.append("public static final " + ((Class) raw).getSimpleName() + "<" + sn + ">" + " " + sb + " = (" + ((Class) raw).getSimpleName() + "<" + sn + ">" + ")SH.getKeyHandler(\"" + methodname + "\", " + ((Class) raw).getSimpleName() + ".class);");
 
-                    strBuild.append("public static final " + raw.getSimpleName() + "<" + sn + ">" + " " + sb + " = (" + raw.getSimpleName() + "<" + sn + ">" + ")SH.getKeyHandler(\"" + methodname + "\", " + raw.getSimpleName() + ".class);");
-continue;
+                    } else {
+                        throw new WTFException(raw + " - isNoClass");
+                    }
+                    continue;
                 }
                 throw new WTFException("Unsupported Keyhanlder");
             } else {

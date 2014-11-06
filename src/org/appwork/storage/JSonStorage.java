@@ -2,7 +2,9 @@ package org.appwork.storage;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,9 +26,6 @@ import org.appwork.utils.logging.Log;
 import org.appwork.utils.reflection.Clazz;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
-
-import sun.reflect.generics.reflectiveObjects.GenericArrayTypeImpl;
-import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 
 public class JSonStorage {
     /* hash map contains file location as string and the storage instance */
@@ -143,10 +142,10 @@ public class JSonStorage {
                 }
 
             }
-        } else if (gType instanceof ParameterizedTypeImpl) {
-            final ParameterizedTypeImpl ptype = (ParameterizedTypeImpl) gType;
+        } else if (gType instanceof ParameterizedType) {
+            final ParameterizedType ptype = (ParameterizedType) gType;
 
-            final Class<?> raw = ((ParameterizedTypeImpl) gType).getRawType();
+            final Type raw = ((ParameterizedType) gType).getRawType();
             JSonStorage.canStoreIntern(raw, path, allowNonStorableObjects, dupeID);
             for (final Type t : ptype.getActualTypeArguments()) {
                 JSonStorage.canStoreIntern(t, path + "(" + t + ")", allowNonStorableObjects, dupeID);
@@ -154,8 +153,8 @@ public class JSonStorage {
 
             return;
 
-        } else if (gType instanceof GenericArrayTypeImpl) {
-            final GenericArrayTypeImpl atype = (GenericArrayTypeImpl) gType;
+        } else if (gType instanceof GenericArrayType) {
+            final GenericArrayType atype = (GenericArrayType) gType;
             final Type t = atype.getGenericComponentType();
             JSonStorage.canStoreIntern(t, path + "[" + t + "]", allowNonStorableObjects, dupeID);
 

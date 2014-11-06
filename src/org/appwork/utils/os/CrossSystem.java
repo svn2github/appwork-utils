@@ -426,6 +426,7 @@ public class CrossSystem {
                         /**
                          * this is very fast
                          */
+
                         return CrossSystem17.caseSensitiveFileExists(file);
                     } catch (Throwable e) {
                         e.printStackTrace();

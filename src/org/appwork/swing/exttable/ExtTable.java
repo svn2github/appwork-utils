@@ -69,8 +69,6 @@ import org.appwork.utils.os.CrossSystem;
 import org.appwork.utils.swing.EDTHelper;
 import org.appwork.utils.swing.EDTRunner;
 
-import sun.swing.SwingUtilities2;
-
 /**
  * The ExtTable package is a tableframework that follows two main tasks:<br>
  * 1. Easy creating of tables<br>
@@ -1736,7 +1734,9 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
             final Point p2 = SwingUtilities.convertPoint(this, p, editorComponent);
             final Component dispatchComponent = SwingUtilities.getDeepestComponentAt(editorComponent, p2.x, p2.y);
             if (dispatchComponent != null) {
-                SwingUtilities2.setSkipClickCount(dispatchComponent, e.getClickCount() - 1);
+
+                org.appwork.sunwrapper.sun.swing.SwingUtilities2Wrapper.setSkipClickCount(dispatchComponent, e.getClickCount() - 1);
+
                 final MouseEvent e2 = SwingUtilities.convertMouseEvent(this, e, dispatchComponent);
                 dispatchComponent.dispatchEvent(e2);
             }

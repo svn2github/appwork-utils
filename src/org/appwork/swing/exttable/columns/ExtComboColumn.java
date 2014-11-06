@@ -22,8 +22,6 @@ import org.appwork.swing.components.RadioBoxIcon;
 import org.appwork.swing.exttable.ExtTableModel;
 import org.appwork.utils.swing.renderer.RendererMigPanel;
 
-import sun.swing.SwingUtilities2;
-
 public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> implements ActionListener {
 
     /**
@@ -173,7 +171,14 @@ public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> impl
         }
 
         if (getTableColumn() != null) {
-            rendererField.setText(SwingUtilities2.clipStringIfNecessary(rendererField, rendererField.getFontMetrics(rendererField.getFont()), str, getTableColumn().getWidth() - 18 - 5));
+            try {
+
+                rendererField.setText(org.appwork.sunwrapper.sun.swing.SwingUtilities2Wrapper.clipStringIfNecessary(rendererField, rendererField.getFontMetrics(rendererField.getFont()), str, getTableColumn().getWidth() - 18 - 5));
+            } catch (Throwable e) {
+                // fallback if org.appwork.swing.sunwrapper.SwingUtilities2 disappears someday
+                e.printStackTrace();
+                rendererField.setText(str);
+            }
         } else {
             rendererField.setText(str);
         }
@@ -225,7 +230,7 @@ public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> impl
      * @param row
      * @return
      */
-    protected long       lastHide = 0;
+    protected long     lastHide = 0;
     private E          editing  = null;
     private JPopupMenu popup;
 

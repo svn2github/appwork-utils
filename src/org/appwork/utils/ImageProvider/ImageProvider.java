@@ -36,10 +36,9 @@ import javax.swing.ImageIcon;
 
 import org.appwork.storage.config.MinTimeWeakReference;
 import org.appwork.storage.config.MinTimeWeakReferenceCleanup;
+import org.appwork.sunwrapper.sun.awt.image.ToolkitImageWrapper;
 import org.appwork.utils.Application;
 import org.appwork.utils.logging.Log;
-
-import sun.awt.image.ToolkitImage;
 
 /**
  * This class grants easy access to images stored in APPROOT/images/**.png
@@ -557,8 +556,9 @@ public class ImageProvider {
         if (img.getIconHeight() == h && img.getIconWidth() == w) { return img; }
 
         BufferedImage dest;
+        boolean sunToolkitImage = false;
 
-        if (img.getImage() instanceof ToolkitImage) {
+        if (ToolkitImageWrapper.isInstanceOf(img.getImage())) {
             dest = new BufferedImage(w, h, Transparency.TRANSLUCENT);
             final Graphics2D g2 = dest.createGraphics();
             g2.drawImage(img.getImage(), 0, 0, null);

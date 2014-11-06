@@ -20,11 +20,10 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.filechooser.FileSystemView;
 
+import org.appwork.sunwrapper.sun.awt.shell.ShellFolderWrapper;
 import org.appwork.utils.Application;
 import org.appwork.utils.ImageProvider.ImageProvider;
 import org.appwork.utils.images.IconIO;
-
-import sun.awt.shell.ShellFolder;
 
 public class MimeWindows extends MimeDefault {
 
@@ -50,12 +49,14 @@ public class MimeWindows extends MimeDefault {
                     FileOutputStream fos = null;
                     try {
                         file = File.createTempFile("icon", "." + extension);
-                        final ShellFolder shellFolder = ShellFolder.getShellFolder(file);
-                        final Image image = shellFolder.getIcon(true);
-                        ret=new ImageIcon(image);
+
+                        Image image = ShellFolderWrapper.getIcon(file);
+                        ret = new ImageIcon(image);
                         fos = new FileOutputStream(path);
                         ImageIO.write((RenderedImage) image, "png", fos);
                     } catch (final Throwable e) {
+                        e.printStackTrace();
+                        // http://www.oracle.com/technetwork/java/faq-sun-packages-142232.html
                         ret = ImageProvider.toImageIcon(FileSystemView.getFileSystemView().getSystemIcon(file));
                     } finally {
                         try {

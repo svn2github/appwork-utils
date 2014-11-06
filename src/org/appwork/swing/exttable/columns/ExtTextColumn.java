@@ -27,8 +27,6 @@ import org.appwork.utils.swing.SwingUtils;
 import org.appwork.utils.swing.renderer.RenderLabel;
 import org.appwork.utils.swing.renderer.RendererMigPanel;
 
-import sun.swing.SwingUtilities2;
-
 public abstract class ExtTextColumn<E> extends ExtColumn<E> implements ActionListener, FocusListener {
 
     private static final long serialVersionUID = 2114805529462086691L;
@@ -201,7 +199,13 @@ public abstract class ExtTextColumn<E> extends ExtColumn<E> implements ActionLis
         }
 
         if (this.getTableColumn() != null) {
-            this.rendererField.setText(SwingUtilities2.clipStringIfNecessary(this.rendererField, this.rendererField.getFontMetrics(this.rendererField.getFont()), str, this.getTableColumn().getWidth() - this.rendererIcon.getPreferredSize().width - 5));
+            try {
+                this.rendererField.setText(org.appwork.sunwrapper.sun.swing.SwingUtilities2Wrapper.clipStringIfNecessary(this.rendererField, this.rendererField.getFontMetrics(this.rendererField.getFont()), str, this.getTableColumn().getWidth() - this.rendererIcon.getPreferredSize().width - 5));
+            } catch (Throwable e) {
+                // fallback if org.appwork.swing.sunwrapper.SwingUtilities2 disappears someday
+                e.printStackTrace();
+                this.rendererField.setText(str);
+            }
         } else {
             this.rendererField.setText(str);
         }

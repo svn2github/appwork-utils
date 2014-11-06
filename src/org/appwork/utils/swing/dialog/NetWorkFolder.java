@@ -19,7 +19,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.HashMap;
 
-import sun.awt.shell.ShellFolder;
+import org.appwork.sunwrapper.sun.awt.shell.ShellFolderWrapper;
 
 /**
  * @author Thomas
@@ -235,7 +235,7 @@ public class NetWorkFolder extends File {
      */
     public File[] listFiles(final boolean useFileHiding) {
 
-        this.fileList = ((ShellFolder) this.networkFolder).listFiles(!useFileHiding);
+        this.fileList = ShellFolderWrapper.listFiles(networkFolder, !useFileHiding);
 
         if (this.fileList != null) {
             final HashMap<String, File> map = new HashMap<String, File>();

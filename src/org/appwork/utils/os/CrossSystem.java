@@ -624,56 +624,94 @@ public class CrossSystem {
         }
     }
 
+    public static boolean is64BitArch() {
+        final String osArch = System.getProperty("os.arch");
+        final boolean is64bit;
+        if (osArch != null) {
+            if ("i386".equals(osArch)) {
+                is64bit = false;
+            } else if ("x86".equals(osArch)) {
+                is64bit = false;
+            } else if ("sparc".equals(osArch)) {
+                is64bit = false;
+            } else if ("amd64".equals(osArch)) {
+                is64bit = true;
+            } else if ("ppc64".equals(osArch)) {
+                is64bit = true;
+            } else if ("amd_64".equals(osArch)) {
+                is64bit = true;
+            } else if ("x86_64".equals(osArch)) {
+                is64bit = true;
+            } else if ("sparcv9".equals(osArch)) {
+                is64bit = true;
+            } else {
+                is64bit = false;
+            }
+        } else {
+            is64bit = false;
+        }
+        return is64bit;
+    }
+
     public static boolean is64BitOperatingSystem() {
         if (CrossSystem.OS64BIT != null) { return CrossSystem.OS64BIT; }
-        boolean ret = false;
         if (org.appwork.utils.Application.is64BitJvm()) {
             /*
              * we are running a 64bit jvm, so the underlying os must be 64bit
              * too
              */
-            ret = true;
-        } else if (CrossSystem.isMac()) {
-            /* mac is always 64bit os */
-            ret = true;
-        } else if (CrossSystem.isLinux()) {
-            Process p = null;
-            Boolean ret2 = null;
-            try {
-                final Runtime r = Runtime.getRuntime();
-                p = r.exec("uname -m");
-                p.waitFor();
-                final BufferedReader b = new BufferedReader(new InputStreamReader(p.getInputStream()));
-                final String arch = b.readLine();
-                if (arch != null && arch.contains("x86_64")) {
-                    ret2 = true;
+            CrossSystem.OS64BIT = true;
+            return true;
+        } else {
+            switch (CrossSystem.getOSFamily()) {
+            case LINUX:
+                if (CrossSystem.is64BitArch()) {
+                    CrossSystem.OS64BIT = true;
+                    return true;
                 }
-            } catch (final Throwable e) {
-            } finally {
-                try {
-                    p.destroy();
-                } catch (final Throwable e2) {
-                }
-            }
-            if (ret2 == null) {
                 final String hostType = System.getenv("HOSTTYPE");
                 if (hostType != null && hostType.contains("x86_64")) {
-                    ret2 = true;
+                    CrossSystem.OS64BIT = true;
+                    return true;
                 }
-            }
-            if (ret2 != null) {
-                ret = ret2;
-            }
-        } else if (CrossSystem.isWindows()) {
-            if (System.getenv("ProgramFiles(x86)") != null) {
-                ret = true;
-            }
-            if (System.getenv("ProgramW6432") != null) {
-                ret = true;
+                Process p = null;
+                try {
+                    final Runtime r = Runtime.getRuntime();
+                    p = r.exec("uname -m");
+                    p.waitFor();
+                    final BufferedReader b = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                    final String arch = b.readLine();
+                    if (arch != null && arch.contains("x86_64")) {
+                        CrossSystem.OS64BIT = true;
+                        return true;
+                    }
+                } catch (final Throwable e) {
+                } finally {
+                    try {
+                        if (p != null) {
+                            p.destroy();
+                        }
+                    } catch (final Throwable e2) {
+                    }
+                }
+                break;
+            case WINDOWS:
+                if (System.getenv("ProgramFiles(x86)") != null || System.getenv("ProgramW6432") != null) {
+                    CrossSystem.OS64BIT = true;
+                    return true;
+                }
+
+                break;
+            default:
+                if (CrossSystem.is64BitArch()) {
+                    CrossSystem.OS64BIT = true;
+                    return true;
+                }
+                break;
             }
         }
-        CrossSystem.OS64BIT = ret;
-        return ret;
+        CrossSystem.OS64BIT = false;
+        return false;
     }
 
     /**

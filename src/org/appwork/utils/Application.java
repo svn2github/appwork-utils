@@ -417,40 +417,22 @@ public class Application {
 
     public static boolean is64BitJvm() {
         if (Application.JVM64BIT != null) { return Application.JVM64BIT; }
-        boolean ret = false;
-        String prop = System.getProperty("sun.arch.data.model");
+        final String archDataModel = System.getProperty("sun.arch.data.model");
         try {
-            if (Integer.parseInt(prop) == 64) {
-                ret = true;
-            } else {
-                ret = false;
-            }
-        } catch (final Throwable e) {
-            prop = System.getProperty("os.arch");
-            if (prop != null) {
-                if ("i386".equals(prop)) {
-                    ret = false;
-                } else if ("x86".equals(prop)) {
-                    ret = false;
-                } else if ("sparc".equals(prop)) {
-                    ret = false;
-                } else if ("amd64".equals(prop)) {
-                    ret = true;
-                } else if ("ppc64".equals(prop)) {
-                    ret = true;
-                } else if ("amd_64".equals(prop)) {
-                    ret = true;
-                } else if ("x86_64".equals(prop)) {
-                    ret = true;
-                } else if ("sparcv9".equals(prop)) {
-                    ret = true;
+            if (archDataModel != null) {
+                if (Integer.parseInt(archDataModel) == 64) {
+                    Application.JVM64BIT = true;
+                    return true;
                 } else {
-                    ret = false;
+                    Application.JVM64BIT = false;
+                    return false;
                 }
             }
+        } catch (final Throwable e) {
         }
-        Application.JVM64BIT = ret;
-        return ret;
+        final boolean is64BitJVM = CrossSystem.is64BitArch();
+        Application.JVM64BIT = is64BitJVM;
+        return is64BitJVM;
     }
 
     /**

@@ -85,7 +85,31 @@ public abstract class ExtSpinnerColumn<E> extends ExtTextColumn<E> {
             }
         };
         this.intModel = new SpinnerNumberModel(0, Integer.MIN_VALUE, Integer.MAX_VALUE, 1);
-        this.longModel = new SpinnerNumberModel(0l, Long.MIN_VALUE, Long.MAX_VALUE, 1l);
+        this.longModel = new SpinnerNumberModel(0l, Long.MIN_VALUE, Long.MAX_VALUE, 1l) {
+            /*
+             * (non-Javadoc)
+             * 
+             * @see
+             * javax.swing.SpinnerNumberModel#setMaximum(java.lang.Comparable)
+             */
+            @Override
+            public void setMaximum(Comparable maximum) {
+                // TODO Auto-generated method stub
+                super.setMaximum(maximum);
+            }
+
+            /*
+             * (non-Javadoc)
+             * 
+             * @see
+             * javax.swing.SpinnerNumberModel#setMinimum(java.lang.Comparable)
+             */
+            @Override
+            public void setMinimum(Comparable minimum) {
+                // TODO Auto-generated method stub
+                super.setMinimum(minimum);
+            }
+        };
         this.byteModel = new SpinnerNumberModel((byte) 0, Byte.MIN_VALUE, Byte.MAX_VALUE, (byte) 1);
         this.shortModel = new SpinnerNumberModel((short) 0, Short.MIN_VALUE, Short.MAX_VALUE, (short) 1);
         this.doubleModel = new SpinnerNumberModel(0.0d, Long.MIN_VALUE, Long.MAX_VALUE, 1.0d);
@@ -205,6 +229,7 @@ public abstract class ExtSpinnerColumn<E> extends ExtTextColumn<E> {
     }
 
     public NumberEditor getLongEditor() {
+
         return this.longEditor;
     }
 
@@ -266,8 +291,9 @@ public abstract class ExtSpinnerColumn<E> extends ExtTextColumn<E> {
     @Override
     public boolean isEditable(final E obj) {
         if (tableFocusLost != null) {
-            //spinner buttons to not throw a focus lost event, so we stop ediing if table los focus
-            
+            // spinner buttons to not throw a focus lost event, so we stop
+            // ediing if table los focus
+
             getModel().getTable().addFocusListener(tableFocusLost);
             tableFocusLost = null;
         }

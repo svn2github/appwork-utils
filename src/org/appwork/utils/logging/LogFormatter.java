@@ -42,10 +42,10 @@ public class LogFormatter extends SimpleFormatter {
         final String message = this.formatMessage(record);
         final int th = record.getThreadID();
 
-        // new Thread.
         if (th != this.lastThreadID) {
             sb.append("\r\n THREAD: ");
             sb.append(th);
+
             sb.append("\r\n");
         }
         this.lastThreadID = th;

@@ -48,7 +48,7 @@ public class SessionRemoteAPIRequest<T extends HttpSession> extends RemoteAPIReq
     @Override
     public String toString() {
         // TODO Auto-generated method stub
-        return "SessionAPIRequest_" + session.getSessionID() + "\r\n" + apiRequest;
+        return "SessionAPIRequest_" + (session == null ? null : session.getSessionID()) + "\r\n" + apiRequest;
     }
 
     public RemoteAPIRequest getApiRequest() {

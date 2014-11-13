@@ -18,6 +18,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -622,6 +626,40 @@ public class CrossSystem {
         } catch (final Throwable e) {
             return -1;
         }
+    }
+
+    public static long getPID() {
+        final RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
+        try {
+            final String jvmName = runtimeMXBean.getName();
+            final int index = jvmName.indexOf('@');
+            /**
+             * http://www.golesny.de/p/code/javagetpid
+             * 
+             * @return
+             */
+            if (index >= 1) { return Long.parseLong(jvmName.substring(0, index)); }
+        } catch (Throwable e) {
+        }
+        try {
+            /**
+             * http://blog.philippheckel.com/2014/06/14/getting-the-java-process
+             * -pid-and-managing-pid-files-linux-windows/
+             */
+            final Field jvmField = runtimeMXBean.getClass().getDeclaredField("jvm");
+            jvmField.setAccessible(true);
+            final Object vmManagement = jvmField.get(runtimeMXBean);
+            final Method getProcessIdMethod = vmManagement.getClass().getDeclaredMethod("getProcessId");
+            getProcessIdMethod.setAccessible(true);
+            return (Integer) getProcessIdMethod.invoke(vmManagement);
+        } catch (final Throwable e) {
+        }
+        return -1;
+    }
+
+    public static void main(String[] args) throws Exception {
+        System.out.println(CrossSystem.getPID());
+        Thread.sleep(30000);
     }
 
     public static boolean is64BitArch() {

@@ -29,8 +29,10 @@ public class Exceptions {
      * @return
      */
     public static boolean containsInstanceOf(final Throwable e, final Class<? extends Throwable>... classes) {
-        for (final Class<? extends Throwable> class1 : classes) {
-            if (Exceptions.getInstanceof(e, class1) != null) { return true; }
+        if (classes != null) {
+            for (final Class<? extends Throwable> class1 : classes) {
+                if (Exceptions.getInstanceof(e, class1) != null) { return true; }
+            }
         }
         return false;
 
@@ -43,6 +45,7 @@ public class Exceptions {
      * @return
      */
     public static <T extends Throwable> T getInstanceof(Throwable e, final Class<T> class1) {
+        if (e == null || class1 == null) { return null; }
         Throwable cause;
         final HashSet<Throwable> dupe = new HashSet<Throwable>();
         while (true) {

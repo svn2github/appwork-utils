@@ -149,7 +149,6 @@ public abstract class SearchComboBox<T> extends JComboBox {
                     Editor.this.autoComplete(true);
                 }
             });
-
         }
 
         /**
@@ -171,11 +170,10 @@ public abstract class SearchComboBox<T> extends JComboBox {
 
             final T lValue = this.value;
             if (lValue != null && SearchComboBox.this.getTextForValue(lValue).equals(txt)) { return true; }
-            String text = null;
             final java.util.List<T> found = new ArrayList<T>();
             for (int i = 0; i < SearchComboBox.this.getModel().getSize(); i++) {
-                text = SearchComboBox.this.getTextForValue((T) SearchComboBox.this.getModel().getElementAt(i));
-                if (text != null && (text.startsWith(txt) || this.searchComboBox.isSearchCaseSensitive() == false && text.toLowerCase(Locale.ENGLISH).startsWith(txt))) {
+                final String text = SearchComboBox.this.getTextForValue((T) SearchComboBox.this.getModel().getElementAt(i));
+                if (this.searchComboBox.matches(text, txt)) {
                     found.add((T) SearchComboBox.this.getModel().getElementAt(i));
                 }
             }
@@ -474,6 +472,13 @@ public abstract class SearchComboBox<T> extends JComboBox {
             }
         };
 
+    }
+
+    /**
+     * @return
+     */
+    protected boolean matches(String a, String b) {
+        return a != null && b != null && (a.startsWith(b) || this.isSearchCaseSensitive() == false && a.toLowerCase(Locale.ENGLISH).startsWith(b));
     }
 
     private int               actualMaximumRowCount  = 8;
@@ -892,7 +897,7 @@ public abstract class SearchComboBox<T> extends JComboBox {
      * @param txt
      * @return
      */
-    private boolean textMatchesEntry(String txt) {
+    protected boolean textMatchesEntry(String txt) {
         if (txt == null) { return false; }
         txt = txt.toLowerCase(Locale.ENGLISH);
         String text;

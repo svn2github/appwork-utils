@@ -34,12 +34,13 @@ public class ProcessBuilderFactory {
                 } else if (len > 0) {
                     wait = false;
                     baos.write(buffer, 0, len);
-                    System.out.println("> " + new String(buffer, 0, len, "UTF-8"));
+                    // System.out.println("> " + new String(buffer, 0, len,
+                    // "UTF-8"));
                 } else {
                     try {
                         if (wait == false) {
                             wait = true;
-                            System.out.println("Reader Wait");
+                            // System.out.println("Reader Wait");
                         }
                         Thread.sleep(10);
                     } catch (InterruptedException e) {
@@ -74,10 +75,11 @@ public class ProcessBuilderFactory {
      * @throws InterruptedException
      */
     private static ProcessOutput runCommand(ProcessBuilder pb) throws IOException, InterruptedException {
-        System.out.println("Start Process " + pb.command());
-        if (System.getProperty("altprocess") != null) { return runCommandAlt(pb); }
+        // System.out.println("Start Process " + pb.command());
+
         //
         final Process process = pb.start();
+        process.getOutputStream().close();
         final ByteArrayOutputStream errorStream = new ByteArrayOutputStream();
         final ByteArrayOutputStream sdtStream = new ByteArrayOutputStream();
         final AtomicReference<IOException> exception = new AtomicReference<IOException>();
@@ -85,7 +87,7 @@ public class ProcessBuilderFactory {
             @Override
             public void run() {
                 try {
-                    System.out.println("Start Process-Reader-Std");
+                    // System.out.println("Start Process-Reader-Std");
                     ProcessBuilderFactory.readStreamToOutputStream(process.getInputStream(), sdtStream);
                 } catch (IOException e) {
                     exception.compareAndSet(null, e);
@@ -93,11 +95,11 @@ public class ProcessBuilderFactory {
                     try {
                         process.exitValue();
                     } catch (IllegalThreadStateException e2) {
-                        System.out.println("Process still running. Killing it");
+                        // System.out.println("Process still running. Killing it");
                         process.destroy();
                     }
                 } finally {
-                    System.out.println("Stop Process-Reader-Std");
+                    // System.out.println("Stop Process-Reader-Std");
                 }
             }
         };
@@ -106,7 +108,7 @@ public class ProcessBuilderFactory {
             @Override
             public void run() {
                 try {
-                    System.out.println("Start Process-Reader-Error");
+                    // System.out.println("Start Process-Reader-Error");
                     ProcessBuilderFactory.readStreamToOutputStream(process.getErrorStream(), errorStream);
                 } catch (IOException e) {
                     exception.compareAndSet(null, e);
@@ -114,11 +116,11 @@ public class ProcessBuilderFactory {
                     try {
                         process.exitValue();
                     } catch (IllegalThreadStateException e2) {
-                        System.out.println("Process still running. Killing it");
+                        // System.out.println("Process still running. Killing it");
                         process.destroy();
                     }
                 } finally {
-                    System.out.println("Stop Process-Reader-Error");
+                    // System.out.println("Stop Process-Reader-Error");
                 }
             }
         };
@@ -130,64 +132,26 @@ public class ProcessBuilderFactory {
         reader2.setDaemon(true);
         reader1.start();
         reader2.start();
-        System.out.println("Wait for Process");
+        // System.out.println("Wait for Process");
         final int returnCode = process.waitFor();
-        System.out.println("Process returned: " + returnCode);
+        // System.out.println("Process returned: " + returnCode);
         if (reader1.isAlive()) {
-            System.out.println("Wait for Process-Reader-Std");
+            // System.out.println("Wait for Process-Reader-Std");
             reader1.join(5000);
             if (reader1.isAlive()) {
-                System.out.println("Process-Reader-Std still alive!");
+                // System.out.println("Process-Reader-Std still alive!");
                 reader1.interrupt();
             }
         }
         if (reader2.isAlive()) {
-            System.out.println("Wait fo Process-Reader-Error");
+            // System.out.println("Wait fo Process-Reader-Error");
             reader2.join(5000);
             if (reader2.isAlive()) {
-                System.out.println("Process-Reader-Error still alive!");
+                // System.out.println("Process-Reader-Error still alive!");
                 reader2.interrupt();
             }
         }
         return new ProcessOutput(returnCode, sdtStream.toByteArray(), errorStream.toByteArray());
-    }
-
-    /**
-     * @param pb
-     * @return
-     * @throws IOException
-     * @throws InterruptedException
-     */
-    private static ProcessOutput runCommandAlt(ProcessBuilder pb) throws IOException, InterruptedException {
-        System.out.println("Start Process " + pb.command());
-        pb.redirectErrorStream(true);
-
-        final Process process = pb.start();
-        process.getOutputStream().close();
-
-        final ByteArrayOutputStream sdtStream = new ByteArrayOutputStream();
-        final AtomicReference<IOException> exception = new AtomicReference<IOException>();
-
-        try {
-            System.out.println("Start Process-Reader-Std");
-            ProcessBuilderFactory.readStreamToOutputStream(process.getInputStream(), sdtStream);
-        } catch (IOException e) {
-            exception.compareAndSet(null, e);
-            e.printStackTrace();
-            try {
-                process.exitValue();
-            } catch (IllegalThreadStateException e2) {
-                System.out.println("Process still running. Killing it");
-                process.destroy();
-            }
-        } finally {
-            System.out.println("Stop Process-Reader-Std");
-        }
-        System.out.println("Wait for Process");
-        final int returnCode = process.waitFor();
-        System.out.println("Process returned: " + returnCode);
-        byte[] data = sdtStream.toByteArray();
-        return new ProcessOutput(returnCode, data, data);
     }
 
     public static ProcessBuilder create(final java.util.List<String> splitCommandString) {

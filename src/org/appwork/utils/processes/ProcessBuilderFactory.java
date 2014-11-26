@@ -78,7 +78,6 @@ public class ProcessBuilderFactory {
         if (System.getProperty("altprocess") != null) { return runCommandAlt(pb); }
         //
         final Process process = pb.start();
-
         final ByteArrayOutputStream errorStream = new ByteArrayOutputStream();
         final ByteArrayOutputStream sdtStream = new ByteArrayOutputStream();
         final AtomicReference<IOException> exception = new AtomicReference<IOException>();
@@ -165,6 +164,7 @@ public class ProcessBuilderFactory {
 
         final Process process = pb.start();
 
+        Thread.sleep(1000);
         final ByteArrayOutputStream sdtStream = new ByteArrayOutputStream();
         final AtomicReference<IOException> exception = new AtomicReference<IOException>();
 

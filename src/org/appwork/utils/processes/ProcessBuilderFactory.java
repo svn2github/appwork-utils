@@ -75,8 +75,10 @@ public class ProcessBuilderFactory {
      */
     private static ProcessOutput runCommand(ProcessBuilder pb) throws IOException, InterruptedException {
         System.out.println("Start Process " + pb.command());
+        if (System.getProperty("altprocess") != null) { return runCommandAlt(pb); }
         //
         final Process process = pb.start();
+
         final ByteArrayOutputStream errorStream = new ByteArrayOutputStream();
         final ByteArrayOutputStream sdtStream = new ByteArrayOutputStream();
         final AtomicReference<IOException> exception = new AtomicReference<IOException>();
@@ -149,6 +151,43 @@ public class ProcessBuilderFactory {
             }
         }
         return new ProcessOutput(returnCode, sdtStream.toByteArray(), errorStream.toByteArray());
+    }
+
+    /**
+     * @param pb
+     * @return
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    private static ProcessOutput runCommandAlt(ProcessBuilder pb) throws IOException, InterruptedException {
+        System.out.println("Start Process " + pb.command());
+        pb.redirectErrorStream(true);
+
+        final Process process = pb.start();
+
+        final ByteArrayOutputStream sdtStream = new ByteArrayOutputStream();
+        final AtomicReference<IOException> exception = new AtomicReference<IOException>();
+
+        try {
+            System.out.println("Start Process-Reader-Std");
+            ProcessBuilderFactory.readStreamToOutputStream(process.getInputStream(), sdtStream);
+        } catch (IOException e) {
+            exception.compareAndSet(null, e);
+            e.printStackTrace();
+            try {
+                process.exitValue();
+            } catch (IllegalThreadStateException e2) {
+                System.out.println("Process still running. Killing it");
+                process.destroy();
+            }
+        } finally {
+            System.out.println("Stop Process-Reader-Std");
+        }
+        System.out.println("Wait for Process");
+        final int returnCode = process.waitFor();
+        System.out.println("Process returned: " + returnCode);
+        byte[] data = sdtStream.toByteArray();
+        return new ProcessOutput(returnCode, data, data);
     }
 
     public static ProcessBuilder create(final java.util.List<String> splitCommandString) {

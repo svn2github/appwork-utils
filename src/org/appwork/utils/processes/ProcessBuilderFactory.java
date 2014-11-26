@@ -163,8 +163,8 @@ public class ProcessBuilderFactory {
         pb.redirectErrorStream(true);
 
         final Process process = pb.start();
+        process.getOutputStream().close();
 
-        Thread.sleep(1000);
         final ByteArrayOutputStream sdtStream = new ByteArrayOutputStream();
         final AtomicReference<IOException> exception = new AtomicReference<IOException>();
 

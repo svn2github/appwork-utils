@@ -12,46 +12,41 @@ public class ProcessBuilderFactory {
 
     public static ProcessOutput runCommand(final java.util.List<String> commands) throws IOException, InterruptedException {
 
-        return runCommand(create(commands));
+        return ProcessBuilderFactory.runCommand(ProcessBuilderFactory.create(commands));
     }
 
     public static ProcessOutput runCommand(String... commands) throws IOException, InterruptedException {
 
-        return runCommand(create(commands));
+        return ProcessBuilderFactory.runCommand(ProcessBuilderFactory.create(commands));
     }
 
     public static void readStreamToOutputStream(final InputStream input, final OutputStream baos) throws IOException, Error {
         try {
             final byte[] buffer = new byte[32767];
-            int len;
-            int done = 0;
+            int len = 0;
             while ((len = input.read(buffer)) != -1) {
                 if (len > 0) {
-                    done += len;
                     baos.write(buffer, 0, len);
-
-                    byte[] str = new byte[len];
-                    System.arraycopy(buffer, 0, str, 0, len);
-                    System.out.println("> " + new String(str, "UTF-8"));
-
+                    System.out.println("> " + new String(buffer, 0, len, "UTF-8"));
+                } else {
+                    try {
+                        Thread.sleep(1);
+                    } catch (InterruptedException e) {
+                        throw new IOException(e);
+                    }
                 }
             }
         } catch (final IOException e) {
-
             throw e;
         } catch (final RuntimeException e) {
-
             throw e;
         } catch (final Error e) {
-
             throw e;
         } finally {
-
             try {
                 input.close();
             } catch (final Exception e) {
             }
-
             try {
                 baos.close();
             } catch (final Throwable e) {
@@ -74,25 +69,44 @@ public class ProcessBuilderFactory {
         final ByteArrayOutputStream errorStream = new ByteArrayOutputStream();
         final ByteArrayOutputStream sdtStream = new ByteArrayOutputStream();
         final AtomicReference<IOException> exception = new AtomicReference<IOException>();
-
         final Thread reader1 = new Thread("Process-Reader-Std") {
+            @Override
             public void run() {
                 try {
-                    readStreamToOutputStream(process.getInputStream(), sdtStream);
+                    System.out.println("Start Process-Reader-Std");
+                    ProcessBuilderFactory.readStreamToOutputStream(process.getInputStream(), sdtStream);
                 } catch (IOException e) {
                     exception.compareAndSet(null, e);
                     e.printStackTrace();
+                    try {
+                        process.exitValue();
+                    } catch (IllegalThreadStateException e2) {
+                        System.out.println("Process still running. Killing it");
+                        process.destroy();
+                    }
+                } finally {
+                    System.out.println("Stop Process-Reader-Std");
                 }
             }
         };
 
         final Thread reader2 = new Thread("Process-Reader-Error") {
+            @Override
             public void run() {
                 try {
-                    readStreamToOutputStream(process.getErrorStream(), errorStream);
+                    System.out.println("Start Process-Reader-Error");
+                    ProcessBuilderFactory.readStreamToOutputStream(process.getErrorStream(), errorStream);
                 } catch (IOException e) {
                     exception.compareAndSet(null, e);
                     e.printStackTrace();
+                    try {
+                        process.exitValue();
+                    } catch (IllegalThreadStateException e2) {
+                        System.out.println("Process still running. Killing it");
+                        process.destroy();
+                    }
+                } finally {
+                    System.out.println("Stop Process-Reader-Error");
                 }
             }
         };
@@ -100,13 +114,30 @@ public class ProcessBuilderFactory {
             reader1.setPriority(Thread.NORM_PRIORITY + 1);
             reader2.setPriority(Thread.NORM_PRIORITY + 1);
         }
+        reader1.setDaemon(true);
+        reader2.setDaemon(true);
         reader1.start();
         reader2.start();
-        System.out.println("Start Reader.Joining");
-        reader1.join();
-        reader2.join();
-        System.out.println("Stopped Reader.Joining");
-        return new ProcessOutput(process.waitFor(), sdtStream.toByteArray(), errorStream.toByteArray());
+        System.out.println("Wait for Process");
+        final int returnCode = process.waitFor();
+        System.out.println("Process returned: " + returnCode);
+        if (reader1.isAlive()) {
+            System.out.println("Wait for Process-Reader-Std");
+            reader1.join(5000);
+            if (reader1.isAlive()) {
+                System.out.println("Process-Reader-Std still alive!");
+                reader1.interrupt();
+            }
+        }
+        if (reader2.isAlive()) {
+            System.out.println("Wait fo Process-Reader-Error");
+            reader2.join(5000);
+            if (reader2.isAlive()) {
+                System.out.println("Process-Reader-Error still alive!");
+                reader2.interrupt();
+            }
+        }
+        return new ProcessOutput(returnCode, sdtStream.toByteArray(), errorStream.toByteArray());
     }
 
     public static ProcessBuilder create(final java.util.List<String> splitCommandString) {

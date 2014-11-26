@@ -24,13 +24,24 @@ public class ProcessBuilderFactory {
         try {
             final byte[] buffer = new byte[32767];
             int len = 0;
-            while ((len = input.read(buffer)) != -1) {
-                if (len > 0) {
+            boolean wait = false;
+            while (true) {
+                synchronized (input) {
+                    len = input.read(buffer);
+                }
+                if (len == -1) {
+                    break;
+                } else if (len > 0) {
+                    wait = false;
                     baos.write(buffer, 0, len);
                     System.out.println("> " + new String(buffer, 0, len, "UTF-8"));
                 } else {
                     try {
-                        Thread.sleep(1);
+                        if (wait == false) {
+                            wait = true;
+                            System.out.println("Reader Wait");
+                        }
+                        Thread.sleep(10);
                     } catch (InterruptedException e) {
                         throw new IOException(e);
                     }

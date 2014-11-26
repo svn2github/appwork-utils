@@ -17,9 +17,14 @@ import java.awt.Color;
  */
 public class Limiter {
 
-    private int   value;
-    private Color colorA;
-    private Color colorB;
+    private int    value;
+    private Color  colorA;
+    private Color  colorB;
+    private String string;
+
+    public void setString(String string) {
+        this.string = string;
+    }
 
     /**
      * @param red
@@ -55,6 +60,14 @@ public class Limiter {
 
     public void setValue(final int value) {
         this.value = value;
+    }
+
+    /**
+     * @return
+     */
+    public String getString() {
+
+        return string;
     }
 
 }

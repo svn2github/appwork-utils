@@ -32,6 +32,7 @@ import org.appwork.swing.components.tooltips.ToolTipController;
 import org.appwork.swing.components.tooltips.ToolTipHandler;
 import org.appwork.swing.components.tooltips.TooltipTextDelegateFactory;
 import org.appwork.utils.NullsafeAtomicReference;
+import org.appwork.utils.StringUtils;
 import org.appwork.utils.formatter.SizeFormatter;
 import org.appwork.utils.locale._AWU;
 import org.appwork.utils.swing.graph.Limiter;
@@ -291,14 +292,29 @@ abstract public class Graph extends JPanel implements ToolTipHandler {
                 g2.draw(apoly);
             }
 
+            int textHeight = 12;
             if (limitertmp != null) {
                 int h;
                 for (final Limiter l : limitertmp) {
                     if (l.getValue() > 0) {
 
                         h = this.getHeight() - (int) (height * l.getValue() * 0.9) / max;
+                        h = Math.min(getHeight() - 2, h);
                         g2.setPaint(new GradientPaint(this.getWidth() / 2, h, l.getColorA(), this.getWidth() / 2, h + height / 10, l.getColorB()));
                         g2.fillRect(0, h, this.getWidth(), height / 10);
+                        String str = l.getString();
+                        if (this.textFont != null) {
+                            g2.setFont(this.textFont);
+                        }
+                        if (StringUtils.isNotEmpty(str)) {
+                            g2.setColor(l.getColorA());
+                            if (h > getHeight() / 2) {
+                                g2.drawString(str, 2, textHeight = h);
+                            } else {
+                                g2.drawString(str, 2, textHeight = h + h / 10 + 12);
+                            }
+
+                        }
                         // g2.drawRect(0, h, this.getWidth(), height / 5);
                     }
                 }
@@ -317,7 +333,7 @@ abstract public class Graph extends JPanel implements ToolTipHandler {
                     g2.setColor(this.getTextColor());
                     // align right. move left
                     xText = xText - 3 - g2.getFontMetrics().stringWidth(speedString);
-                    g2.drawString(speedString, xText, 12);
+                    g2.drawString(speedString, xText, textHeight);
                 }
                 // average speed
                 if (this.getAverageTextColor() != null) {
@@ -325,7 +341,7 @@ abstract public class Graph extends JPanel implements ToolTipHandler {
                     if (speedString != null && thread != null) {
                         g2.setColor(this.getAverageTextColor());
                         xText = xText - 3 - g2.getFontMetrics().stringWidth(speedString);
-                        g2.drawString(speedString, xText, 12);
+                        g2.drawString(speedString, xText, textHeight);
                     }
                 }
             }

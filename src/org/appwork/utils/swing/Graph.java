@@ -291,8 +291,12 @@ abstract public class Graph extends JPanel implements ToolTipHandler {
                 g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
                 g2.draw(apoly);
             }
-
-            int textHeight = 12;
+            if (this.textFont != null) {
+                g2.setFont(this.textFont);
+            }
+            int fontHeight = g2.getFontMetrics().getHeight();
+            int textHeight = fontHeight;
+            // g2.drawRect(0, 0, getWidth(), getHeight());
             if (limitertmp != null) {
                 int h;
                 for (final Limiter l : limitertmp) {
@@ -300,22 +304,31 @@ abstract public class Graph extends JPanel implements ToolTipHandler {
 
                         h = this.getHeight() - (int) (height * l.getValue() * 0.9) / max;
                         h = Math.min(getHeight() - 2, h);
+                        // h += (System.currentTimeMillis() / 20) % 20;
                         g2.setPaint(new GradientPaint(this.getWidth() / 2, h, l.getColorA(), this.getWidth() / 2, h + height / 10, l.getColorB()));
                         g2.fillRect(0, h, this.getWidth(), height / 10);
                         String str = l.getString();
-                        if (this.textFont != null) {
-                            g2.setFont(this.textFont);
-                        }
+
                         if (StringUtils.isNotEmpty(str)) {
+                            int xText = getWidth() - 3 - g2.getFontMetrics().stringWidth(str);
                             g2.setColor(l.getColorA());
-                            if (h > getHeight() / 2) {
-                                g2.drawString(str, 2, textHeight = h);
+
+                            if (getHeight() - h < fontHeight - 3) {
+
+                                g2.drawString(str, xText, h - fontHeight + 5);
+                                textHeight = h - 1;
+                            } else if (h > fontHeight - 6) {
+                                g2.drawString(str, xText, h - 1);
+                                textHeight = h + fontHeight - 4;
+
                             } else {
-                                g2.drawString(str, 2, textHeight = h + h / 10 + 12);
+                                g2.drawString(str, xText, h + fontHeight + 5);
+                                textHeight = h + fontHeight - 4;
+
                             }
 
                         }
-                        // g2.drawRect(0, h, this.getWidth(), height / 5);
+
                     }
                 }
             }

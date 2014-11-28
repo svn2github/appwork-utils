@@ -355,7 +355,6 @@ public class IO {
                     if (maxSize > 0 && done >= maxSize) {
                         break;
                     }
-                    if (maxSize > 0 && done > maxSize) { throw new IOException("Max size exeeded!"); }
                 }
             }
         } catch (final IOException e) {

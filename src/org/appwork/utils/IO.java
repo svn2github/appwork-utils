@@ -191,7 +191,7 @@ public class IO {
      * @throws IOException
      */
     public static void copyFolderRecursive(final File src, final File dest, final boolean overwriteFiles, final SYNC sync) throws IOException {
-        copyFolderRecursive(src, dest, overwriteFiles, null, sync);
+        IO.copyFolderRecursive(src, dest, overwriteFiles, null, sync);
     }
 
     public static IOErrorHandler getErrorHandler() {
@@ -335,11 +335,11 @@ public class IO {
     }
 
     public static byte[] readStream(final int maxSize, final InputStream input, final ByteArrayOutputStream baos) throws IOException {
-        return readStream(maxSize, input, baos, true);
+        return IO.readStream(maxSize, input, baos, true);
     }
 
     public static byte[] readStream(final int maxSize, final InputStream input, final ByteArrayOutputStream baos, boolean closeInput) throws IOException {
-        readStreamToOutputStream(maxSize, input, baos, closeInput);
+        IO.readStreamToOutputStream(maxSize, input, baos, closeInput);
         return baos.toByteArray();
     }
 
@@ -380,10 +380,6 @@ public class IO {
                     input.close();
                 } catch (final Exception e) {
                 }
-            }
-            try {
-                baos.close();
-            } catch (final Throwable e) {
             }
         }
     }

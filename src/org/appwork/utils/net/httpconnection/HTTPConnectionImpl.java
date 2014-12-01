@@ -841,7 +841,7 @@ public class HTTPConnectionImpl implements HTTPConnection {
         final int code = this.getResponseCode();
         if (this.isOK() || code == 404 || code == 403 || code == 416) {
             if (this.convertedInputStream != null) { return this.convertedInputStream; }
-            if (this.contentDecoded) {
+            if (this.contentDecoded && !RequestMethod.HEAD.equals(this.getRequestMethod())) {
                 final String encodingTransfer = this.getHeaderField("Content-Transfer-Encoding");
                 if ("base64".equalsIgnoreCase(encodingTransfer)) {
                     /* base64 encoded content */
@@ -864,7 +864,10 @@ public class HTTPConnectionImpl implements HTTPConnection {
                     this.convertedInputStream = this.inputStream;
                 }
             } else {
-                /* use original inputstream */
+                /*
+                 * use original inputstream OR LimitedInputStream from
+                 * HeadRequest
+                 */
                 this.convertedInputStream = this.inputStream;
             }
             return this.convertedInputStream;

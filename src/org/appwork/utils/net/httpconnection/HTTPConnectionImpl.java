@@ -936,7 +936,6 @@ public class HTTPConnectionImpl implements HTTPConnection {
         final InetAddress lLastConnection = this.lastConnection;
         if (lhttpSocket != null && lhttpSocket.isConnected()) {
             sb.append("HostIP: ").append(lhttpSocket.getInetAddress()).append(":").append(lhttpSocket.getPort()).append("\r\n");
-            sb.append("HostPort: ").append(lhttpSocket.getPort()).append("\r\n");
         } else if (lLastConnection != null) {
             sb.append("HostIP: ").append(lLastConnection).append(":").append(this.lastConnectionPort).append("\r\n");
         } else {

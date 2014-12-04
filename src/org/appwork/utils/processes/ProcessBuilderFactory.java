@@ -74,7 +74,7 @@ public class ProcessBuilderFactory {
      * @throws IOException
      * @throws InterruptedException
      */
-    private static ProcessOutput runCommand(ProcessBuilder pb) throws IOException, InterruptedException {
+    public static ProcessOutput runCommand(ProcessBuilder pb) throws IOException, InterruptedException {
         // System.out.println("Start Process " + pb.command());
 
         //

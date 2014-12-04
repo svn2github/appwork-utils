@@ -25,7 +25,9 @@ import org.appwork.utils.os.CrossSystem;
 
 public class ConfirmDialog extends AbstractDialog<Integer> implements ConfirmDialogInterface {
 
-    private String message;
+    public static final int STYLE_HTML       = Dialog.STYLE_HTML;
+    public static final int STYLE_SCROLLPANE = Dialog.STYLE_LARGE;
+    private String          message;
 
     public void setMessage(final String message) {
         this.message = message;
@@ -104,8 +106,6 @@ public class ConfirmDialog extends AbstractDialog<Integer> implements ConfirmDia
     // }
     // }
 
-    private JTextPane textField;
-
     public ConfirmDialog(final int flag, final String title, final String message, final Icon icon, final String okOption, final String cancelOption) {
         super(flag, title, icon, okOption, cancelOption);
         Log.L.fine("Dialog    [" + okOption + "][" + cancelOption + "]\r\nflag:  " + Integer.toBinaryString(flag) + "\r\ntitle: " + title + "\r\nmsg:   \r\n" + message);
@@ -151,7 +151,8 @@ public class ConfirmDialog extends AbstractDialog<Integer> implements ConfirmDia
     }
 
     protected void addMessageComponent(final MigPanel p) {
-        textField = new JTextPane() {
+
+        JTextPane textField = new JTextPane() {
             private static final long serialVersionUID = 1L;
 
             @Override
@@ -160,6 +161,7 @@ public class ConfirmDialog extends AbstractDialog<Integer> implements ConfirmDia
                 return !BinaryLogic.containsAll(ConfirmDialog.this.flagMask, Dialog.STYLE_LARGE);
             }
         };
+        modifyTextPane(textField);
         if (BinaryLogic.containsAll(flagMask, Dialog.STYLE_HTML)) {
             textField.setContentType("text/html");
             textField.addHyperlinkListener(new HyperlinkListener() {
@@ -193,6 +195,14 @@ public class ConfirmDialog extends AbstractDialog<Integer> implements ConfirmDia
             p.add(textField);
 
         }
+
+    }
+
+    /**
+     * @param textField
+     */
+    protected void modifyTextPane(JTextPane textField) {
+        // TODO Auto-generated method stub
 
     }
 

@@ -25,14 +25,15 @@ public class StringUtils {
     }
 
     /**
-     * @param pass
-     * @param pass2
+     * @param x
+     * @param y
      * @return
      */
-    public static boolean equals(final String pass, final String pass2) {
-        if (pass == pass2) { return true; }
-        if (pass == null && pass2 != null) { return false; }
-        return pass.equals(pass2);
+    public static boolean equals(final String x, final String y) {
+        if (x == y) { return true; }
+        if (x == null && y != null) { return false; }
+        if (y == null && x != null) { return false; }
+        return x.equals(y);
     }
 
     /**

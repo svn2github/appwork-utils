@@ -54,6 +54,7 @@ public class DesktopSupportJavaDesktop implements DesktopSupport {
         if (this.openFileSupported != null) { return this.openFileSupported; }
         if (!Desktop.isDesktopSupported()) {
             this.openFileSupported = false;
+            return false;
         }
         final Desktop desktop = Desktop.getDesktop();
         if (!desktop.isSupported(Desktop.Action.OPEN)) {
@@ -73,7 +74,9 @@ public class DesktopSupportJavaDesktop implements DesktopSupport {
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.appwork.utils.os.DesktopSupport#shutdown()
      */
     @Override
@@ -82,7 +85,9 @@ public class DesktopSupportJavaDesktop implements DesktopSupport {
         return false;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.appwork.utils.os.DesktopSupport#standby()
      */
     @Override
@@ -91,7 +96,9 @@ public class DesktopSupportJavaDesktop implements DesktopSupport {
         return false;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.appwork.utils.os.DesktopSupport#hibernate()
      */
     @Override

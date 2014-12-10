@@ -145,7 +145,6 @@ public class Files {
      */
     public static String getExtension(final String name) {
         if (StringUtils.isEmpty(name)) { return null; }
-
         final int index = name.lastIndexOf(".");
         if (index < 0 || index + 1 >= name.length()) { return null; }
         return name.substring(index + 1).toLowerCase(Locale.ENGLISH);

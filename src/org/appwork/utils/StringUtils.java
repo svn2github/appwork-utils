@@ -24,6 +24,10 @@ public class StringUtils {
         return input.toLowerCase(Locale.ENGLISH).contains(contains.toLowerCase(Locale.ENGLISH));
     }
 
+    /**
+     * taken from
+     * http://stackoverflow.com/questions/4731055/whitespace-matching-regex-java
+     */
     final private static String whitespace_chars = "[" /*
                                                         * dummy empty string for
                                                         * homogeneity

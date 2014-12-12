@@ -184,6 +184,8 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
                             final ListSelectionModel s = ltable.getSelectionModel();
                             final boolean adjusting = s.getValueIsAdjusting();
                             int leadIndex = -1;
+                            int min = -1;
+
                             int anchorIndex = -1;
                             E leadObject = null;
                             E anchorObject = null;
@@ -191,6 +193,8 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
                             try {
                                 if (newtableData.size() > 0) {
                                     selectedObjects = ExtTableModel.this.getSelectedObjects();
+
+                                    min = s.getMinSelectionIndex();
                                     leadIndex = s.getLeadSelectionIndex();
                                     anchorIndex = s.getAnchorSelectionIndex();
                                     leadObject = adjusting && leadIndex >= 0 ? ExtTableModel.this.getObjectbyRow(leadIndex) : null;
@@ -216,65 +220,77 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
                                          * remaining ones
                                          */
                                         selection.retainAll(newtableData);
+
+                                        if (selection.size() == 0 && selectedObjects.size() > 0) {
+                                            // selection has been removed
+
+                                            if (min > 0) {
+                                                selection.add(getObjectbyRow(min - 1));
+                                            }
+
+                                        }
                                         ExtTableModel.this.setSelectedObjects(selection);
-                                        if (selection.size() > 0 && adjusting) {
-                                            if (leadObject != null) {
-                                                /*
-                                                 * check if our leadObject does
-                                                 * still exist
-                                                 */
-                                                leadIndex = ExtTableModel.this.getRowforObject(leadObject);
-                                            } else {
-                                                leadIndex = -1;
-                                            }
-                                            if (anchorObject != null) {
-                                                /*
-                                                 * check if our anchorObject
-                                                 * does still exist
-                                                 */
-                                                anchorIndex = ExtTableModel.this.getRowforObject(anchorObject);
-                                            } else {
-                                                anchorIndex = -1;
-                                            }
-                                            if (ExtTableModel.this.isDebugTableModel()) {
-                                                System.out.println("after:leadIndex=" + leadIndex + "->" + leadObject + "|anchorIndex=" + anchorIndex + "->" + anchorObject);
-                                            }
-                                            if (leadIndex >= 0 && anchorIndex >= 0) {
-                                                s.setValueIsAdjusting(true);
-                                                /*
-                                                 * sort begin/end so we can loop
-                                                 * through the items
-                                                 */
-                                                int begin = leadIndex;
-                                                int end = anchorIndex;
-                                                if (end < begin) {
-                                                    begin = anchorIndex;
-                                                    end = leadIndex;
+                                        if (adjusting) {
+
+                                            if (selection.size() > 0) {
+                                                if (leadObject != null) {
+                                                    /*
+                                                     * check if our leadObject
+                                                     * does still exist
+                                                     */
+                                                    leadIndex = ExtTableModel.this.getRowforObject(leadObject);
+                                                } else {
+                                                    leadIndex = -1;
                                                 }
-                                                /*
-                                                 * check if we have holes in our
-                                                 * Selection
-                                                 */
-                                                boolean selectionHole = false;
-                                                for (int index = begin; index <= end; index++) {
-                                                    if (s.isSelectedIndex(index) == false) {
-                                                        selectionHole = true;
-                                                        break;
-                                                    }
+                                                if (anchorObject != null) {
+                                                    /*
+                                                     * check if our anchorObject
+                                                     * does still exist
+                                                     */
+                                                    anchorIndex = ExtTableModel.this.getRowforObject(anchorObject);
+                                                } else {
+                                                    anchorIndex = -1;
                                                 }
-                                                /*
-                                                 * only set adjusting if we have
-                                                 * a lead/anchor
-                                                 */
                                                 if (ExtTableModel.this.isDebugTableModel()) {
-                                                    if (selectionHole == false) {
-                                                        System.out.println("No holes in selection: from " + begin + " to " + end);
-                                                    } else {
-                                                        System.out.println("Holes in selection: from " + begin + " to " + end);
-                                                    }
+                                                    System.out.println("after:leadIndex=" + leadIndex + "->" + leadObject + "|anchorIndex=" + anchorIndex + "->" + anchorObject);
                                                 }
-                                                s.setAnchorSelectionIndex(anchorIndex);
-                                                s.setLeadSelectionIndex(leadIndex);
+                                                if (leadIndex >= 0 && anchorIndex >= 0) {
+                                                    s.setValueIsAdjusting(true);
+                                                    /*
+                                                     * sort begin/end so we can
+                                                     * loop through the items
+                                                     */
+                                                    int begin = leadIndex;
+                                                    int end = anchorIndex;
+                                                    if (end < begin) {
+                                                        begin = anchorIndex;
+                                                        end = leadIndex;
+                                                    }
+                                                    /*
+                                                     * check if we have holes in
+                                                     * our Selection
+                                                     */
+                                                    boolean selectionHole = false;
+                                                    for (int index = begin; index <= end; index++) {
+                                                        if (s.isSelectedIndex(index) == false) {
+                                                            selectionHole = true;
+                                                            break;
+                                                        }
+                                                    }
+                                                    /*
+                                                     * only set adjusting if we
+                                                     * have a lead/anchor
+                                                     */
+                                                    if (ExtTableModel.this.isDebugTableModel()) {
+                                                        if (selectionHole == false) {
+                                                            System.out.println("No holes in selection: from " + begin + " to " + end);
+                                                        } else {
+                                                            System.out.println("Holes in selection: from " + begin + " to " + end);
+                                                        }
+                                                    }
+                                                    s.setAnchorSelectionIndex(anchorIndex);
+                                                    s.setLeadSelectionIndex(leadIndex);
+                                                }
                                             }
                                         }
                                     }

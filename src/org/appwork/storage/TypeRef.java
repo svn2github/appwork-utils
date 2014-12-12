@@ -11,6 +11,7 @@ package org.appwork.storage;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.appwork.storage.simplejson.mapper.CompiledTypeRef;
@@ -32,6 +33,8 @@ public abstract class TypeRef<T> {
                                                                         };
                                                                     };
     public static final TypeRef<HashMap<String, Object>> HASHMAP    = new TypeRef<HashMap<String, Object>>() {
+                                                                    };
+    public static final TypeRef<ArrayList<Object>>       LIST       = new TypeRef<ArrayList<Object>>() {
                                                                     };
     private final Type                                   type;
 

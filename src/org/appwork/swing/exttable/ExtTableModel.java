@@ -193,8 +193,9 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
                             try {
                                 if (newtableData.size() > 0) {
                                     selectedObjects = ExtTableModel.this.getSelectedObjects();
-
-                                    min = s.getMinSelectionIndex();
+                                    // we only need this variable to restore
+                                    // selection after removing elements.
+                                    min = newtableData.size() < getTableData().size() ? findFirstSelectedRow(s) : -1;
 
                                     leadIndex = s.getLeadSelectionIndex();
                                     anchorIndex = s.getAnchorSelectionIndex();
@@ -1230,6 +1231,12 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
             }
         }
         return data;
+    }
+
+    protected int findFirstSelectedRow(final ListSelectionModel s) {
+        int min;
+        min = s.getMinSelectionIndex();
+        return min;
     }
 
 }

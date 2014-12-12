@@ -49,6 +49,12 @@ public class JSonUtils {
                 continue;
             }
 
+            // '\u0000' && ch <= '\u001F' are controll characters )(
+            // http://www.ietf.org/rfc/rfc4627.txt 5.2 Strings)
+            // the text says U+0000 >>> to U+001F but the syntax diagram just
+            // says control character, which in >>> Unicode 6.3 also includes
+            // U+007F to U+009F
+            // http://www.unicode.org/charts/PDF/U2000.pdf
             if (ch >= '\u0000' && ch <= '\u001F' || ch >= '\u007F' && ch <= '\u009F' || ch >= '\u2000' && ch <= '\u20FF') {
                 ss = Integer.toHexString(ch);
                 sb.append("\\u");
@@ -66,14 +72,14 @@ public class JSonUtils {
     }
 
     public static void main(final String[] args) {
-        final String str = "\\\r\t\b\n\f\"abc\u2011\u0026";
+        final String str = "\\\r\t\b\n\f\"abc\u2011\u0026\uFFFF";
         for (int i = 0; i < str.length(); i++) {
             final String s = str.substring(i, i + 1);
 
             final String str2 = JSonUtils.escape(s);
             final String str3 = JSonUtils.unescape(str2);
             System.out.println(str3);
-            System.err.println(s + " - " + HexFormatter.byteArrayToHex(s.getBytes()));
+            System.out.println(s + " - " + HexFormatter.byteArrayToHex(s.getBytes()));
             System.out.println("OK: " + s + "|" + str3.equals(s));
         }
 
@@ -82,9 +88,11 @@ public class JSonUtils {
         final String str2 = JSonUtils.escape(s);
         final String str3 = JSonUtils.unescape(str2);
         System.out.println(HexFormatter.byteArrayToHex(str3.getBytes()));
-        System.err.println(HexFormatter.byteArrayToHex(s.getBytes()));
+        System.out.println(HexFormatter.byteArrayToHex(s.getBytes()));
         System.out.println("OK: |" + str3.equals(s));
-        // System.err.println(str3);
+
+        System.out.println("Max Value: " + (0xffff == JSonUtils.unescape("\\uFFFF").charAt(0)));
+        // System.out.println(str3);
     }
 
     /**
@@ -137,7 +145,7 @@ public class JSonUtils {
                         }
                     }
                     i--;
-                    sb.append((char) Short.parseShort(sb2.toString(), 16));
+                    sb.append((char) Integer.parseInt(sb2.toString(), 16));
                     continue;
                 default:
                     sb.append(ch);

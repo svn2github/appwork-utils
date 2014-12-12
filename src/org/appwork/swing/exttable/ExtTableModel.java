@@ -195,6 +195,7 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
                                     selectedObjects = ExtTableModel.this.getSelectedObjects();
 
                                     min = s.getMinSelectionIndex();
+
                                     leadIndex = s.getLeadSelectionIndex();
                                     anchorIndex = s.getAnchorSelectionIndex();
                                     leadObject = adjusting && leadIndex >= 0 ? ExtTableModel.this.getObjectbyRow(leadIndex) : null;
@@ -224,8 +225,12 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
                                         if (selection.size() == 0 && selectedObjects.size() > 0) {
                                             // selection has been removed
 
-                                            if (min > 0) {
-                                                selection.add(getObjectbyRow(min - 1));
+                                            if (min >= 0) {
+                                                if (min >= getRowCount()) {
+                                                    selection.add(getObjectbyRow(getRowCount() - 1));
+                                                } else {
+                                                    selection.add(getObjectbyRow(min));
+                                                }
                                             }
 
                                         }

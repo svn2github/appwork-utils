@@ -165,7 +165,7 @@ public abstract class ExtCheckColumn<E> extends ExtColumn<E> implements ActionLi
     }
 
     @Override
-    protected int getMaxWidth() {
+    public int getMaxWidth() {
         return 70;
     }
 

@@ -101,7 +101,7 @@ public abstract class ExtIconColumn<E> extends ExtColumn<E> {
      * Sets max width to 30. overwrite to set other maxsizes
      */
     @Override
-    protected int getMaxWidth() {
+    public int getMaxWidth() {
         return this.getDefaultWidth();
     }
 

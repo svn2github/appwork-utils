@@ -96,7 +96,7 @@ public abstract class ExtRadioColumn<E> extends ExtColumn<E> implements ActionLi
     }
 
     @Override
-    protected int getMaxWidth() {
+    public int getMaxWidth() {
         return 70;
     }
 

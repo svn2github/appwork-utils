@@ -202,7 +202,8 @@ public abstract class ExtTextColumn<E> extends ExtColumn<E> implements ActionLis
             try {
                 this.rendererField.setText(org.appwork.sunwrapper.sun.swing.SwingUtilities2Wrapper.clipStringIfNecessary(this.rendererField, this.rendererField.getFontMetrics(this.rendererField.getFont()), str, this.getTableColumn().getWidth() - this.rendererIcon.getPreferredSize().width - 5));
             } catch (Throwable e) {
-                // fallback if org.appwork.swing.sunwrapper.SwingUtilities2 disappears someday
+                // fallback if org.appwork.swing.sunwrapper.SwingUtilities2
+                // disappears someday
                 e.printStackTrace();
                 this.rendererField.setText(str);
             }
@@ -223,7 +224,7 @@ public abstract class ExtTextColumn<E> extends ExtColumn<E> implements ActionLis
         };
     }
 
-    protected RendererMigPanel createRendererPanel() {
+    protected MigPanel createRendererPanel() {
         return new RendererMigPanel("ins 0", "[]0[grow,fill]", "[grow,fill]");
     }
 

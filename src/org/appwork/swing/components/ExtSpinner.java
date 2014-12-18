@@ -38,17 +38,21 @@ public class ExtSpinner extends JSpinner {
 
             @Override
             public void mouseWheelMoved(MouseWheelEvent e) {
-                e.consume();
-                if (e.getPreciseWheelRotation() <= 0) {
-                    final Object newValue = ExtSpinner.this.getNextValue();
-                    if (newValue != null) {
-                        ExtSpinner.this.setValue(newValue);
+                if (ExtSpinner.this.isFocusOwner()) {
+                    e.consume();
+                    if (e.getPreciseWheelRotation() <= 0) {
+                        final Object newValue = ExtSpinner.this.getNextValue();
+                        if (newValue != null) {
+                            ExtSpinner.this.setValue(newValue);
+                        }
+                    } else {
+                        final Object newValue = ExtSpinner.this.getPreviousValue();
+                        if (newValue != null) {
+                            ExtSpinner.this.setValue(newValue);
+                        }
                     }
                 } else {
-                    final Object newValue = ExtSpinner.this.getPreviousValue();
-                    if (newValue != null) {
-                        ExtSpinner.this.setValue(newValue);
-                    }
+                    ExtSpinner.this.getParent().dispatchEvent(e);
                 }
             }
         });
@@ -58,7 +62,6 @@ public class ExtSpinner extends JSpinner {
     public synchronized void addMouseListener(MouseListener l) {
         super.addMouseListener(l);
         ((JSpinner.DefaultEditor) this.getEditor()).getTextField().addMouseListener(l);
-
     }
 
     @Override

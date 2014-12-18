@@ -40,9 +40,15 @@ public class ExtSpinner extends JSpinner {
             public void mouseWheelMoved(MouseWheelEvent e) {
                 e.consume();
                 if (e.getPreciseWheelRotation() <= 0) {
-                    ExtSpinner.this.setValue(ExtSpinner.this.getNextValue());
+                    final Object newValue = ExtSpinner.this.getNextValue();
+                    if (newValue != null) {
+                        ExtSpinner.this.setValue(newValue);
+                    }
                 } else {
-                    ExtSpinner.this.setValue(ExtSpinner.this.getPreviousValue());
+                    final Object newValue = ExtSpinner.this.getPreviousValue();
+                    if (newValue != null) {
+                        ExtSpinner.this.setValue(newValue);
+                    }
                 }
             }
         });

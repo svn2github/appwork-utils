@@ -85,7 +85,7 @@ public class SyntheticaHelper {
 
     public static void init(final String laf) throws IOException {
 
-        init(laf, readLicense());
+        SyntheticaHelper.init(laf, SyntheticaHelper.readLicense());
     }
 
     /**
@@ -115,17 +115,16 @@ public class SyntheticaHelper {
      */
     public static void init(final String laf, String license) throws IOException {
 
-  
         if (CrossSystem.isMac()) {
 
-            if (checkIfMacInitWillFail()) {
+            if (SyntheticaHelper.checkIfMacInitWillFail()) {
                 System.runFinalization();
                 System.gc();
-                if (checkIfMacInitWillFail()) { throw new IOException("Cannot Init LookAndFeel. Windows Are Open"); }
+                if (SyntheticaHelper.checkIfMacInitWillFail()) { throw new IOException("Cannot Init LookAndFeel. Windows Are Open"); }
             }
         }
         if (StringUtils.isEmpty(license)) {
-            license = readLicense();
+            license = SyntheticaHelper.readLicense();
         }
         Log.L.info("LaF init: " + laf);
         final long start = System.currentTimeMillis();
@@ -143,6 +142,12 @@ public class SyntheticaHelper {
                 Log.L.warning("If you are a developer, and want to do some gui work on the offical JDownloader Look And Feel, write e-mail@appwork.org to get a developer Look And Feel Key");
                 throw new WTFException("No Synthetica License Found!");
             }
+            /*
+             * NOTE: This Licensee Information may only be used by AppWork UG.
+             * If you like to create derived creation based on this sourcecode,
+             * you have to remove this license key. Instead you may use the FREE
+             * Version of synthetica found on javasoft.de
+             */
             String[] licenseLines = Regex.getLines(license);
             // final String[] li = { };
             final ArrayList<String> valids = new ArrayList<String>();
@@ -151,9 +156,16 @@ public class SyntheticaHelper {
                     valids.add(s);
                 }
             }
+            licenseLines = valids.toArray(new String[] {});
+            final String key = licenseLines[0];
+            final String[] li = new String[licenseLines.length - 1];
+            System.arraycopy(licenseLines, 1, li, 0, li.length);
+            if (key != null) {
+                UIManager.put("Synthetica.license.info", li);
+                UIManager.put("Synthetica.license.key", key);
+            }
 
             JFrame.setDefaultLookAndFeelDecorated(false);
-
             JDialog.setDefaultLookAndFeelDecorated(false);
             final LanguageFileSetup locale = TranslationFactory.create(LanguageFileSetup.class);
             final SyntheticaSettings config = JsonConfig.create(SyntheticaSettings.class);
@@ -185,21 +197,6 @@ public class SyntheticaHelper {
             }
             UIManager.put("Synthetica.menu.toolTipEnabled", true);
             UIManager.put("Synthetica.menuItem.toolTipEnabled", true);
-            /*
-             * NOTE: This Licensee Information may only be used by AppWork UG.
-             * If you like to create derived creation based on this sourcecode,
-             * you have to remove this license key. Instead you may use the FREE
-             * Version of synthetica found on javasoft.de
-             */
-
-            licenseLines = valids.toArray(new String[] {});
-            final String key = licenseLines[0];
-            final String[] li = new String[licenseLines.length - 1];
-            System.arraycopy(licenseLines, 1, li, 0, li.length);
-            if (key != null) {
-                UIManager.put("Synthetica.license.info", li);
-                UIManager.put("Synthetica.license.key", key);
-            }
 
             de.javasoft.plaf.synthetica.SyntheticaLookAndFeel.setLookAndFeel(laf);
             de.javasoft.plaf.synthetica.SyntheticaLookAndFeel.setExtendedFileChooserEnabled(false);

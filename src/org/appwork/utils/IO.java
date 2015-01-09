@@ -347,13 +347,19 @@ public class IO {
         try {
             final byte[] buffer = new byte[32767];
             int len;
-            int done = 0;
-            while ((len = input.read(buffer)) != -1) {
-                if (len > 0) {
-                    done += len;
-                    baos.write(buffer, 0, len);
-                    if (maxSize > 0 && done >= maxSize) {
-                        break;
+            if (maxSize > 0) {
+                int done = 0;
+                while (done < maxSize && (len = input.read(buffer)) != -1) {
+                    len = Math.min(len, maxSize - done);
+                    if (len > 0) {
+                        baos.write(buffer, 0, len);
+                        done += len;
+                    }
+                }
+            } else {
+                while ((len = input.read(buffer)) != -1) {
+                    if (len > 0) {
+                        baos.write(buffer, 0, len);
                     }
                 }
             }

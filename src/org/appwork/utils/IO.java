@@ -349,8 +349,7 @@ public class IO {
             int len;
             if (maxSize > 0) {
                 int done = 0;
-                while (done < maxSize && (len = input.read(buffer)) != -1) {
-                    len = Math.min(len, maxSize - done);
+                while (done < maxSize && (len = input.read(buffer, 0, Math.min(buffer.length, maxSize - done))) != -1) {
                     if (len > 0) {
                         baos.write(buffer, 0, len);
                         done += len;

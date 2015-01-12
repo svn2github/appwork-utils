@@ -1393,16 +1393,21 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
      */
 
     public void resetDummyInit() {
-        new EDTRunner() {
+        if (org.appwork.utils.Application.isHeadless()) {
+            Log.L.info("Reset Dummy Info");
+            AbstractDialog.this.initialized = false;
+            AbstractDialog.this.dummyInit = false;
+        } else {
+            new EDTRunner() {
 
-            @Override
-            protected void runInEDT() {
-                Log.L.info("Reset Dummy Info");
-                AbstractDialog.this.initialized = false;
-                AbstractDialog.this.dummyInit = false;
-            }
-        }.waitForEDT();
-
+                @Override
+                protected void runInEDT() {
+                    Log.L.info("Reset Dummy Info");
+                    AbstractDialog.this.initialized = false;
+                    AbstractDialog.this.dummyInit = false;
+                }
+            }.waitForEDT();
+        }
     }
 
     public void resetTimer() {

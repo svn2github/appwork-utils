@@ -88,8 +88,8 @@ public abstract class EDTHelper<T> implements Runnable {
         this.started = true;
         try {
             if (Application.isHeadless()) {
-                if (caller != null) {
-                    Log.exception(caller);
+                if (this.caller != null) {
+                    Log.exception(this.caller);
                 }
             }
             this.returnValue = this.edtRun();
@@ -97,8 +97,8 @@ public abstract class EDTHelper<T> implements Runnable {
             this.exception = e;
             Log.exception(e);
             Log.L.severe("Unhandled Headless Exception in EDT");
-            if (caller != null) {
-                Log.exception(caller);
+            if (this.caller != null) {
+                Log.exception(this.caller);
             }
         } catch (final RuntimeException e) {
             this.exception = e;
@@ -123,7 +123,7 @@ public abstract class EDTHelper<T> implements Runnable {
     public void start(final boolean invokeLater) {
         if (this.started) { return; }
         if (org.appwork.utils.Application.isHeadless()) {
-            caller = new Exception();
+            this.caller = new Exception("EventDispatchThread in headless mode!?");
         }
         this.started = true;
         if (!invokeLater && SwingUtilities.isEventDispatchThread()) {

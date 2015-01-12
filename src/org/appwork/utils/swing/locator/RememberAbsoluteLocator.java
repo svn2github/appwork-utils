@@ -7,7 +7,6 @@ import org.appwork.storage.config.JsonConfig;
 import org.appwork.utils.Application;
 import org.appwork.utils.Hash;
 import org.appwork.utils.swing.dialog.LocationStorage;
-import org.appwork.utils.swing.dimensor.RememberLastDimensor;
 
 public class RememberAbsoluteLocator extends AbstractLocator {
 
@@ -17,8 +16,90 @@ public class RememberAbsoluteLocator extends AbstractLocator {
      * @param string
      */
     public RememberAbsoluteLocator(final String id) {
-        this.id = id;
+        this.id = cleanId(id);
         if (id == null) { throw new IllegalArgumentException("id ==null"); }
+    }
+
+    /**
+     * @param id2
+     * @return
+     */
+    private String cleanId(String id) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < id.length(); i++) {
+            char c = id.charAt(i);
+            switch (c) {
+            case 'a':
+            case 'b':
+            case 'c':
+            case 'd':
+            case 'e':
+            case 'g':
+            case 'h':
+            case 'i':
+            case 'j':
+            case 'k':
+            case 'l':
+            case 'm':
+            case 'n':
+            case 'o':
+            case 'p':
+            case 'q':
+            case 'r':
+            case 's':
+            case 't':
+            case 'u':
+            case 'v':
+            case 'w':
+            case 'x':
+            case 'y':
+            case 'z':
+            case 'A':
+            case 'B':
+            case 'C':
+            case 'D':
+            case 'E':
+            case 'F':
+            case 'G':
+            case 'H':
+            case 'J':
+            case 'K':
+            case 'L':
+            case 'M':
+            case 'N':
+            case 'O':
+            case 'P':
+            case 'Q':
+            case 'R':
+            case 'S':
+            case 'T':
+            case 'U':
+            case 'V':
+            case 'W':
+            case 'X':
+            case 'Y':
+            case 'Z':
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+            case '-':
+            case '_':
+            case '.':
+                sb.append(c);
+
+            default:
+                continue;
+
+            }
+        }
+        return sb.toString();
     }
 
     /**

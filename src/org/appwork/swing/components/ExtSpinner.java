@@ -13,6 +13,8 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 
+import javax.swing.JComponent;
+import javax.swing.JFormattedTextField;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
@@ -27,6 +29,21 @@ public class ExtSpinner extends JSpinner {
      */
     private static final long serialVersionUID = -885721913501063289L;
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.awt.Component#hasFocus()
+     */
+    @Override
+    public boolean hasFocus() {
+        JComponent ed = getEditor();
+        if (ed != null && ed instanceof DefaultEditor) {
+            JFormattedTextField tf = ((DefaultEditor) ed).getTextField();
+            if (tf != null) { return tf.hasFocus(); }
+        }
+        return super.hasFocus();
+    }
+
     /**
      * @param spinnerNumberModel
      * @param maximum
@@ -38,8 +55,8 @@ public class ExtSpinner extends JSpinner {
 
             @Override
             public void mouseWheelMoved(MouseWheelEvent e) {
-                if (ExtSpinner.this.isFocusOwner()) {
-                    e.consume();
+             
+                if (ExtSpinner.this.isFocusOwner()) {                  
                     if (e.getPreciseWheelRotation() <= 0) {
                         final Object newValue = ExtSpinner.this.getNextValue();
                         if (newValue != null) {

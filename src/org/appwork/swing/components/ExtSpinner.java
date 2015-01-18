@@ -56,7 +56,9 @@ public class ExtSpinner extends JSpinner {
             @Override
             public void mouseWheelMoved(MouseWheelEvent e) {
              
-                if (ExtSpinner.this.isFocusOwner()) {                  
+                if (ExtSpinner.this.isFocusOwner()) {  
+                    //consume the event to avoid the JMenu to close
+                    e.consume();
                     if (e.getPreciseWheelRotation() <= 0) {
                         final Object newValue = ExtSpinner.this.getNextValue();
                         if (newValue != null) {

@@ -69,7 +69,8 @@ public class JSonFactory {
                     if (escaped) {
                         switch (c) {
                         case '"':
-                            sb.append('"');
+                        case '/':
+                            sb.append(c);
                             continue;
                         case 'r':
                             sb.append('\r');
@@ -86,6 +87,7 @@ public class JSonFactory {
                         case 'b':
                             sb.append('\b');
                             continue;
+
                         case 'u':
                             sb2.delete(0, sb2.length());
 

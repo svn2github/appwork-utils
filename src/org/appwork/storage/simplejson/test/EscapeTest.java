@@ -9,6 +9,11 @@
  */
 package org.appwork.storage.simplejson.test;
 
+import java.util.HashMap;
+
+import org.appwork.storage.SimpleMapper;
+import org.appwork.storage.TypeRef;
+import org.appwork.storage.jackson.JacksonMapper;
 import org.appwork.storage.simplejson.JSonFactory;
 import org.appwork.storage.simplejson.JSonValue;
 import org.appwork.storage.simplejson.ParserException;
@@ -20,11 +25,14 @@ import org.appwork.storage.simplejson.ParserException;
 public class EscapeTest {
     public static void main(String[] args) {
         try {
-            JSonValue value = new JSonValue("c:\\bla\\blabla");
+            String str;
+            JSonValue value = new JSonValue(str = "{\"target\":\"http:\\/\\/uploaded.net\\/register\",\"banner\":\"http:\\/\\/uploaded.net\\/img\\/e\\/jdownloader\\/en\\/jd-banner-2.png\"}");
+            HashMap<String, Object> map = new JacksonMapper().stringToObject(str, TypeRef.HASHMAP);
+            map = new SimpleMapper().stringToObject(str, TypeRef.HASHMAP);
             String toString = value.toString();
             JSonValue paresed;
             paresed = (JSonValue) new JSonFactory(toString).parse();
-            System.out.println("Test OK: "+paresed.getValue().equals(value.getValue()));
+            System.out.println("Test OK: " + paresed.getValue().equals(value.getValue()));
         } catch (ParserException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

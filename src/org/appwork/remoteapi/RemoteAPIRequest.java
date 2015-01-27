@@ -67,6 +67,7 @@ public class RemoteAPIRequest implements HttpRequestInterface {
         this.methodName = methodName;
         this.jqueryCallback = jqueryCallback;
         this.method = this.iface.getMethod(methodName, this.parameters.length);
+
     }
 
     public HttpRequest getHttpRequest() {

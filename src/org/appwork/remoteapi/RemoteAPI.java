@@ -387,6 +387,7 @@ public class RemoteAPI implements HttpRequestHandler {
     public RemoteAPIMethod getRemoteAPIMethod(final HttpRequest request) throws BasicRemoteAPIException {
         final String path = request.getRequestedPath();
         final String[] intf = new Regex(path, RemoteAPI.INTF).getRow(0);
+
         if (intf == null || intf.length != 3) { return null; }
         /* intf=unimportant,namespace,method */
         if (intf[2] != null && intf[2].endsWith("/")) {
@@ -403,7 +404,9 @@ public class RemoteAPI implements HttpRequestHandler {
         if (intf[1] == null) {
             intf[1] = "";
         }
+
         final InterfaceHandler<RemoteAPIInterface> ret = this.interfaces.get(intf[1]);
+
         if (ret != null) { return new RemoteAPIMethod(intf[1], ret, intf[2]); }
         return null;
     }

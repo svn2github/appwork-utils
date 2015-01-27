@@ -187,14 +187,14 @@ public class HTTPConstants {
      * The length of the request body in octets (8-bit bytes) Content-Length:
      * 348
      */
-    public static final String HEADER_REQUEST_CONTENT_LENGTH                = "Content-Length";
+    public static final String HEADER_RESPONSE_CONTENT_LENGTH               = "Content-Length";
     /**
      * The mime type of the body of the request (used with POST and PUT
      * requests) Content-Type: application/x-www-form-urlencoded
      */
     public static final String HEADER_REQUEST_CONTENT_TYPE                  = "Content-Type";
 
-    public static final String HEADER_REQUEST_CONTENT_RANGE                 = "Content-Range";
+    public static final String HEADER_RESPONSE_CONTENT_RANGE                = "Content-Range";
 
     public static final String HEADER_RESPONSE_CONTENT_DISPOSITION          = "Content-Disposition";
 
@@ -311,7 +311,7 @@ public class HTTPConstants {
      */
     public static final String HEADER_RESPONSE_TRANSFER_ENCODING            = "Transfer-Encoding";
     public static final String HEADER_RESPONSE_TRANSFER_ENCODING_CHUNKED    = "chunked";
-    public static final String HEADER_REQUEST_ACCEPT_RANGES                 = "Accept-Ranges";
+    public static final String HEADER_RESPONSE_ACCEPT_RANGES                = "Accept-Ranges";
     public static final String HEADER_RESPONSE_CONTENT_ENCODING             = "Content-Encoding";
     public static final String HEADER_RESPONSE_LOCATION                     = "Location";
     public static final String HEADER_RESPONSE_SERVER                       = "Server";
@@ -319,4 +319,5 @@ public class HTTPConstants {
     public static final String HEADER_RESPONSE_ACCESS_CONTROL_ALLOW_METHODS = "Access-Control-Allow-Methods";
     public static final String HEADER_RESPONSE_ACCESS_CONTROL_ALLOW_HEADERS = "Access-Control-Allow-Headers";
     public static final String HEADER_RESPONSE_ACCESS_CONTROL_MAX_AGE       = "Access-Control-Max-Age";
+
 }

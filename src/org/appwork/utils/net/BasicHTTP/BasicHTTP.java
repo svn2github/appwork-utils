@@ -549,7 +549,7 @@ public class BasicHTTP {
                 if (byteData == null) {
                     byteData = new byte[0];
                 }
-                this.connection.setRequestProperty(HTTPConstants.HEADER_REQUEST_CONTENT_LENGTH, byteData.length + "");
+                this.connection.setRequestProperty(HTTPConstants.HEADER_RESPONSE_CONTENT_LENGTH, byteData.length + "");
                 for (final Entry<String, String> next : this.requestHeader.entrySet()) {
                     this.connection.setRequestProperty(next.getKey(), next.getValue());
                 }

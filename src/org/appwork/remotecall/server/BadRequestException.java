@@ -18,11 +18,13 @@ public class BadRequestException extends RuntimeException implements Storable {
 
     private static final long serialVersionUID = -5299365199355353239L;
 
+    @Deprecated
     @SuppressWarnings("unused")
     private BadRequestException() {
         // we need this for serial.
     }
 
+    @Deprecated
     public BadRequestException(final String string) {
         super(string);
     }

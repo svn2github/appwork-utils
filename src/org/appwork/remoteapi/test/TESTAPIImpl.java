@@ -42,7 +42,7 @@ public class TESTAPIImpl implements TESTAPI, TestApiInterface, bla, JSONP {
         // response.getResponseHeaders().add(new
         // HTTPHeader(HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING,
         // HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING_CHUNKED));
-        response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_REQUEST_CONTENT_TYPE, "text/html"));
+        response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_TYPE, "text/html"));
         // response.getResponseHeaders().add(new
         // HTTPHeader(HTTPConstants.HEADER_REQUEST_CONNECTION, "keep-alive"));
         // final ChunkedOutputStream cos = new
@@ -112,8 +112,8 @@ public class TESTAPIImpl implements TESTAPI, TestApiInterface, bla, JSONP {
         final String text = "You called god?" + b + "-" + a + "-" + c;
 
         final int length = text.getBytes().length;
-        response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_REQUEST_CONTENT_LENGTH, length + ""));
-        response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_REQUEST_CONTENT_TYPE, "text"));
+        response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_LENGTH, length + ""));
+        response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_TYPE, "text"));
         response.getOutputStream(true).write(text.getBytes("UTF-8"));
 
     }
@@ -172,7 +172,7 @@ public class TESTAPIImpl implements TESTAPI, TestApiInterface, bla, JSONP {
         // response.getResponseHeaders().add(new
         // HTTPHeader(HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING,
         // HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING_CHUNKED));
-        response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_REQUEST_CONTENT_TYPE, "application/javascript"));
+        response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_TYPE, "application/javascript"));
         // response.getResponseHeaders().add(new
         // HTTPHeader(HTTPConstants.HEADER_REQUEST_CONNECTION, "keep-alive"));
 

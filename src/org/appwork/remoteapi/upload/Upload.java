@@ -90,9 +90,9 @@ public abstract class Upload {
             if (eTag != null) {
                 header.put(HTTPConstants.HEADER_REQUEST_IF_MATCH, eTag);
             }
-            header.put(HTTPConstants.HEADER_REQUEST_CONTENT_LENGTH, "0");
+            header.put(HTTPConstants.HEADER_RESPONSE_CONTENT_LENGTH, "0");
             if (this.file.exists() == false) { throw new FileNotFoundException("Local file does not exist: " + this.file); }
-            header.put(HTTPConstants.HEADER_REQUEST_CONTENT_RANGE, "bytes */" + this.file.length());
+            header.put(HTTPConstants.HEADER_RESPONSE_CONTENT_RANGE, "bytes */" + this.file.length());
             this.checkInterrupted();
             con = shttp.openPostConnection(this.getUploadURL(), null, new ByteArrayInputStream(new byte[0]), header);
             this.parseResponse(con);
@@ -261,8 +261,8 @@ public abstract class Upload {
             };
             final DigestInputStream is = new DigestInputStream(new LimitedInputStream(fis, uploadSize), md);
             header.put(HTTPConstants.HEADER_REQUEST_IF_MATCH, this.getQuotedEtag());
-            header.put(HTTPConstants.HEADER_REQUEST_CONTENT_LENGTH, "" + uploadSize);
-            header.put(HTTPConstants.HEADER_REQUEST_CONTENT_RANGE, "bytes " + remoteSize + "-" + rangeEnd + "/" + this.file.length());
+            header.put(HTTPConstants.HEADER_RESPONSE_CONTENT_LENGTH, "" + uploadSize);
+            header.put(HTTPConstants.HEADER_RESPONSE_CONTENT_RANGE, "bytes " + remoteSize + "-" + rangeEnd + "/" + this.file.length());
             this.checkInterrupted();
             con = shttp.openPostConnection(this.getUploadURL(), uploadProgress, is, header);
             this.parseResponse(con);

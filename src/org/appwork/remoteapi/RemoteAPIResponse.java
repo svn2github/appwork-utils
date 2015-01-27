@@ -95,13 +95,13 @@ public class RemoteAPIResponse implements HttpResponseInterface {
         if (this.getResponseHeaders().get(HTTPConstants.HEADER_REQUEST_CACHE_CONTROL) == null) {
             this.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_REQUEST_CACHE_CONTROL, "no-store, no-cache"));
         }
-        if (this.getResponseHeaders().get(HTTPConstants.HEADER_REQUEST_CONTENT_TYPE) == null) {
-            this.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_REQUEST_CONTENT_TYPE, "application/json"));
+        if (this.getResponseHeaders().get(HTTPConstants.HEADER_RESPONSE_CONTENT_TYPE) == null) {
+            this.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_TYPE, "application/json"));
         }
         final boolean gzip = RemoteAPI.gzip(request);
         final boolean deflate = RemoteAPI.gzip(request) && Application.getJavaVersion() >= Application.JAVA16;
         if (gzip == false && deflate == false || bytes.length <= this.MAXUNCOMPRESSED) {
-            this.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_REQUEST_CONTENT_LENGTH, bytes.length + ""));
+            this.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_LENGTH, bytes.length + ""));
             this.getOutputStream(true).write(bytes);
         } else {
             if (deflate) {

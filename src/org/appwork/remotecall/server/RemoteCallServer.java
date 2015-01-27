@@ -11,10 +11,12 @@ import org.appwork.storage.JSonStorage;
 import org.appwork.storage.TypeRef;
 import org.appwork.utils.logging.Log;
 
+@Deprecated
 public class RemoteCallServer {
 
     private final HashMap<String, RemoteCallServiceWrapper> servicesMap;
 
+    @Deprecated
     public RemoteCallServer() {
 
         servicesMap = new HashMap<String, RemoteCallServiceWrapper>();

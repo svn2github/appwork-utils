@@ -93,7 +93,7 @@ public class PostRequest extends HttpRequest {
                     throw new IOException("Unknown Transfer-Encoding " + transferEncoding.getValue());
                 }
             } else {
-                final HTTPHeader contentLength = this.getRequestHeaders().get(HTTPConstants.HEADER_REQUEST_CONTENT_LENGTH);
+                final HTTPHeader contentLength = this.getRequestHeaders().get(HTTPConstants.HEADER_RESPONSE_CONTENT_LENGTH);
                 if (contentLength == null) { throw new IOException("No Content-Length given!"); }
                 this.inputStream = new LimitedInputStream(this.connection.getInputStream(), Long.parseLong(contentLength.getValue())) {
 
@@ -164,7 +164,7 @@ public class PostRequest extends HttpRequest {
      */
     public synchronized List<KeyValuePair> getPostParameter() throws IOException {
         if (this.postParameterParsed) { return this.postParameters; }
-        final String type = this.getRequestHeaders().getValue(HTTPConstants.HEADER_REQUEST_CONTENT_TYPE);
+        final String type = this.getRequestHeaders().getValue(HTTPConstants.HEADER_RESPONSE_CONTENT_TYPE);
         CONTENT_TYPE content_type = null;
         if (new Regex(type, "(application/x-www-form-urlencoded)").matches()) {
             content_type = CONTENT_TYPE.X_WWW_FORM_URLENCODED;

@@ -272,8 +272,8 @@ public class HttpConnection implements Runnable {
         e.printStackTrace();
         this.response.setResponseCode(ResponseCode.SERVERERROR_INTERNAL);
         final byte[] bytes = Exceptions.getStackTrace(e).getBytes("UTF-8");
-        this.response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_REQUEST_CONTENT_TYPE, "text; charset=UTF-8"));
-        this.response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_REQUEST_CONTENT_LENGTH, bytes.length + ""));
+        this.response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_TYPE, "text; charset=UTF-8"));
+        this.response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_LENGTH, bytes.length + ""));
         this.response.getOutputStream(true).write(bytes);
         this.response.getOutputStream(true).flush();
         return true;

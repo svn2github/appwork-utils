@@ -103,8 +103,8 @@ public class RemoteAPIUpload implements RemoteUploadAPIInterface {
         try {
             synchronized (uploadUnits) {
                 final HTTPHeader ifMatch = request.getRequestHeaders().get(HTTPConstants.HEADER_REQUEST_IF_MATCH);
-                final HTTPHeader contentLength = request.getRequestHeaders().get(HTTPConstants.HEADER_REQUEST_CONTENT_LENGTH);
-                contentRange = request.getRequestHeaders().get(HTTPConstants.HEADER_REQUEST_CONTENT_RANGE);
+                final HTTPHeader contentLength = request.getRequestHeaders().get(HTTPConstants.HEADER_RESPONSE_CONTENT_LENGTH);
+                contentRange = request.getRequestHeaders().get(HTTPConstants.HEADER_RESPONSE_CONTENT_RANGE);
                 long contentLengthLong = -1;
                 long contentSize = -1;
                 if (contentLength != null) {

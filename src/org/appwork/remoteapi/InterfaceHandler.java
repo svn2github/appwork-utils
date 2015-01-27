@@ -164,14 +164,14 @@ public class InterfaceHandler<T> {
                 bytes = this.helpJSON(request, response).getBytes("UTF-8");
                 this.helpBytesJson = new SoftReference<byte[]>(bytes);
             }
-            response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_REQUEST_CONTENT_TYPE, "application/json"));
+            response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_TYPE, "application/json"));
         } else {
             bytes = this.helpBytes.get();
             if (bytes == null) {
                 bytes = this.helpText().getBytes("UTF-8");
                 this.helpBytes = new SoftReference<byte[]>(bytes);
             }
-            response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_REQUEST_CONTENT_TYPE, "text/plain"));
+            response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_TYPE, "text/plain"));
         }
         response.setResponseCode(ResponseCode.SUCCESS_OK);
         response.sendBytes(request, bytes);

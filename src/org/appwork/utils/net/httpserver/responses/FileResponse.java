@@ -166,7 +166,7 @@ public class FileResponse {
             final long length = this.getContentLength(knownLength);
             if (length >= 0 && !gzip) {
                 /* we know content length, send it */
-                this.response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_REQUEST_CONTENT_LENGTH, length + ""));
+                this.response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_LENGTH, length + ""));
             } else {
                 /*
                  * content length is unknown or we use gzipped coding, let us
@@ -176,7 +176,7 @@ public class FileResponse {
                 this.response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING, "chunked"));
             }
             /* set content-type */
-            this.response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_REQUEST_CONTENT_TYPE, this.getMimeType()));
+            this.response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_TYPE, this.getMimeType()));
             if (this.useContentDisposition()) {
                 /* offer file to download */
                 this.response.getResponseHeaders().add(new HTTPHeader("Content-Disposition", "attachment;filename*=UTF-8''" + URLEncoder.encode(this.getFileName(), "UTF-8")));

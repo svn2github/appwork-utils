@@ -19,6 +19,10 @@ public class URLEncode {
 
     private static final String RFC2396CHARS = "0123456789" + "abcdefghijklmnopqrstuvwxyz" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ" + "-_.!~*'()";
 
+    public static void main(String[] args) throws UnsupportedEncodingException {
+        System.out.println(encodeRFC2396("\r\n"));
+    }
+
     /* http://www.ietf.org/rfc/rfc2396.txt */
     public static String encodeRFC2396(final String input) throws UnsupportedEncodingException {
         final StringBuilder sb = new StringBuilder();
@@ -35,7 +39,11 @@ public class URLEncode {
                 } else {
                     /* hex formatted */
                     sb.append("%");
-                    sb.append(Integer.toHexString(ch));
+                    String append = Integer.toHexString(ch);
+                    if (append.length() < 2) {
+                        sb.append("0");
+                    }
+                    sb.append(append);
 
                 }
             }

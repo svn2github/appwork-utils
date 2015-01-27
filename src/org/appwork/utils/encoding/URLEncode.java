@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2013 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.utils.encoding
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -13,14 +13,14 @@ import java.io.UnsupportedEncodingException;
 
 /**
  * @author daniel
- * 
+ *
  */
 public class URLEncode {
 
     private static final String RFC2396CHARS = "0123456789" + "abcdefghijklmnopqrstuvwxyz" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ" + "-_.!~*'()";
 
     public static void main(String[] args) throws UnsupportedEncodingException {
-        System.out.println(encodeRFC2396("\r\n"));
+        System.out.println(URLEncode.encodeRFC2396("\r\n"));
     }
 
     /* http://www.ietf.org/rfc/rfc2396.txt */
@@ -39,7 +39,7 @@ public class URLEncode {
                 } else {
                     /* hex formatted */
                     sb.append("%");
-                    String append = Integer.toHexString(ch);
+                    final String append = Integer.toHexString(ch);
                     if (append.length() < 2) {
                         sb.append("0");
                     }

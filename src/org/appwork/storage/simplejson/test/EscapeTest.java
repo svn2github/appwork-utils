@@ -25,6 +25,7 @@ import org.appwork.storage.simplejson.ParserException;
 public class EscapeTest {
     public static void main(String[] args) {
         try {
+
             String str;
             JSonValue value = new JSonValue(str = "{\"target\":\"http:\\/\\/uploaded.net\\/register\",\"banner\":\"http:\\/\\/uploaded.net\\/img\\/e\\/jdownloader\\/en\\/jd-banner-2.png\"}");
             HashMap<String, Object> map = new JacksonMapper().stringToObject(str, TypeRef.HASHMAP);

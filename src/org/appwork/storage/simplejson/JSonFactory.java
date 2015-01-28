@@ -310,4 +310,89 @@ public class JSonFactory {
         return global;
     }
 
+    /**
+     * @param jsonString
+     * @return
+     * @throws ParserException
+     */
+    public static String decodeJavaScriptString(String str) throws ParserException {
+        if (str == null) { return null; }
+        StringBuilder sb = new StringBuilder();
+        StringBuilder sb2 = new StringBuilder();
+        boolean escaped = false;
+        char c;
+        int global = 0;
+        int counter = 0;
+        c = str.charAt(global++);
+        if (c != '\"') { throw new ParserException("'\"' expected"); }
+        sb.append("\"");
+        while (global < str.length()) {
+            c = str.charAt(global++);
+            switch (c) {
+            case '\"':
+                sb.append("\"");
+                return sb.toString();
+            case '\\':
+                escaped = true;
+                while ((c = str.charAt(global++)) == '\\') {
+                    escaped = !escaped;
+                    if (!escaped) {
+                        sb.append("\\");
+                    }
+                }
+                if (escaped) {
+                    switch (c) {
+                    // case '"':
+                    // case '/':
+                    // sb.append(c);
+                    // continue;
+                    // case 'r':
+                    // sb.append('\r');
+                    // continue;
+                    // case 'n':
+                    // sb.append('\n');
+                    // continue;
+                    // case 't':
+                    // sb.append('\t');
+                    // continue;
+                    // case 'f':
+                    // sb.append('\f');
+                    // continue;
+                    // case 'b':
+                    // sb.append('\b');
+                    // continue;
+
+                    case 'x':
+                        sb2.delete(0, sb2.length());
+
+                        // this.global++;
+                        counter = global + 2;
+                        for (; global < counter; global++) {
+                            c = str.charAt(global);
+                            if (sb2.length() > 0 || c != '0') {
+                                sb2.append(c);
+                            }
+                        }
+                        // this.global--;
+
+                        if (sb2.length() == 0) {
+                            sb.append((char) 0);
+                        } else {
+                            sb.append("\\").append((char) Short.parseShort(sb2.toString(), 16));
+                        }
+                        continue;
+                    default:
+
+                    }
+                } else {
+                    global--;
+                }
+                break;
+            default:
+                sb.append(c);
+            }
+        }
+        throw new ParserException("Unfinished String");
+    }
+
 }

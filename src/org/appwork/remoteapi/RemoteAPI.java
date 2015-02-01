@@ -230,6 +230,7 @@ public class RemoteAPI implements HttpRequestHandler {
         try {
             if (method == null) {
                 //
+                System.out.println("No API Method Found: "+request.getRequestedURL()+" Parameter: "+request.getParameters().length);
                 throw new ApiCommandNotAvailable(request.getRequestedURL());
             }
 

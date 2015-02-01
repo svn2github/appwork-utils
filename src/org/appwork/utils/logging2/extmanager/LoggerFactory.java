@@ -15,7 +15,7 @@ import java.lang.reflect.Method;
 import java.util.Enumeration;
 import java.util.logging.Handler;
 import java.util.logging.Level;
-import java.util.logging.LogManager;
+
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
@@ -28,6 +28,9 @@ import org.appwork.utils.logging2.LogSourceProvider;
  * 
  */
 public class LoggerFactory extends LogSourceProvider {
+    static{
+        System.setProperty("java.util.logging.manager", ExtLogManager.class.getName());
+    }
     private static final LoggerFactory INSTANCE = new LoggerFactory();
     static {
 
@@ -35,12 +38,12 @@ public class LoggerFactory extends LogSourceProvider {
             // the logmanager should not be initialized here. so setting the
             // property should tell the logmanager to init a ExtLogManager
             // instance.
-            System.setProperty("java.util.logging.manager", LoggerFactory.class.getName());
+            System.setProperty("java.util.logging.manager", ExtLogManager.class.getName());
 
-            ((ExtLogManager) LogManager.getLogManager()).setLoggerFactory(INSTANCE);
+            ((ExtLogManager) java.util.logging.LogManager.getLogManager()).setLoggerFactory(INSTANCE);
         } catch (final Throwable e) {
             e.printStackTrace();
-            final LogManager lm = LogManager.getLogManager();
+            final java.util.logging.LogManager lm = java.util.logging.LogManager.getLogManager();
             System.err.println("Logmanager: " + lm);
             try {
                 if (lm != null) {
@@ -54,12 +57,12 @@ public class LoggerFactory extends LogSourceProvider {
                     // well.
                     // seems like 4xeej sets a logger before our main is
                     // reached.
-                    final Field field = LogManager.class.getDeclaredField("manager");
+                    final Field field = java.util.logging.LogManager.class.getDeclaredField("manager");
                     field.setAccessible(true);
                     final ExtLogManager manager = new ExtLogManager();
 
                     field.set(null, manager);
-                    final Field rootLogger = LogManager.class.getDeclaredField("rootLogger");
+                    final Field rootLogger = java.util.logging.LogManager.class.getDeclaredField("rootLogger");
                     rootLogger.setAccessible(true);
                     final Logger rootLoggerInstance = (Logger) rootLogger.get(lm);
                     rootLogger.set(manager, rootLoggerInstance);
@@ -68,7 +71,7 @@ public class LoggerFactory extends LogSourceProvider {
                     // Adding the global Logger. Doing so in the Logger.<clinit>
                     // would deadlock with the LogManager.<clinit>.
 
-                    final Method setLogManager = Logger.class.getDeclaredMethod("setLogManager", new Class[] { LogManager.class });
+                    final Method setLogManager = Logger.class.getDeclaredMethod("setLogManager", new Class[] { java.util.logging.LogManager.class });
                     setLogManager.setAccessible(true);
                     setLogManager.invoke(Logger.global, manager);
 
@@ -91,7 +94,7 @@ public class LoggerFactory extends LogSourceProvider {
 
     private LogSource defaultLogger;
 
-    private LoggerFactory() {
+    public LoggerFactory() {
         super(System.currentTimeMillis());
         try {
             Log.closeLogfile();

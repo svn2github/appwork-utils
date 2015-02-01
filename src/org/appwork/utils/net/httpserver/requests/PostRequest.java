@@ -180,13 +180,15 @@ public class PostRequest extends HttpRequest {
             switch (content_type) {
             case JSON: {
                 final byte[] jsonBytes = IO.readStream(-1, this.getInputStream());
-                final String json = new String(jsonBytes, charSet);
+                 String json = new String(jsonBytes, charSet);
+                 json=modifyByContentType(content_type,json);
                 jsonRequest = JSonStorage.restoreFromString(json, JSonRequest.TYPE_REF);
             }
                 break;
             case X_WWW_FORM_URLENCODED: {
                 final byte[] jsonBytes = IO.readStream(-1, this.getInputStream());
-                final String params = new String(jsonBytes, charSet);
+                 String params = new String(jsonBytes, charSet);
+                params=modifyByContentType(content_type,params);
                 this.postParameters = HttpConnection.parseParameterList(params);
             }
                 break;
@@ -209,6 +211,16 @@ public class PostRequest extends HttpRequest {
         }
         this.postParameterParsed = true;
         return this.postParameters;
+    }
+
+    /**
+     * @param content_type
+     * @param json
+     * @return
+     */
+    protected String modifyByContentType(CONTENT_TYPE content_type, String json) {
+        // TODO Auto-generated method stub
+        return json;
     }
 
     /**

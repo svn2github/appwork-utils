@@ -120,13 +120,18 @@ public class RemoteAPI implements HttpRequestHandler {
             // "\\\"") + "\"";
             string = JSonStorage.serializeToJson(string);
         }
-        @SuppressWarnings({ "unchecked", "rawtypes" })
-        final Object v = JSonStorage.restoreFromString(string, new TypeRef(type) {
-        });
-        if (type instanceof Class && Clazz.isPrimitive(type)) {
-            return RemoteAPI.cast(v, (Class<?>) type);
-        } else {
-            return v;
+        try {
+            @SuppressWarnings({ "unchecked", "rawtypes" })
+            final Object v = JSonStorage.restoreFromString(string, new TypeRef(type) {
+            });
+
+            if (type instanceof Class && Clazz.isPrimitive(type)) {
+                return RemoteAPI.cast(v, (Class<?>) type);
+            } else {
+                return v;
+            }
+        } catch (RuntimeException e) {
+            throw e;
         }
     }
 
@@ -230,7 +235,7 @@ public class RemoteAPI implements HttpRequestHandler {
         try {
             if (method == null) {
                 //
-                System.out.println("No API Method Found: "+request.getRequestedURL()+" Parameter: "+request.getParameters().length);
+                System.out.println("No API Method Found: " + request.getRequestedURL() + " Parameter: " + request.getParameters().length);
                 throw new ApiCommandNotAvailable(request.getRequestedURL());
             }
 

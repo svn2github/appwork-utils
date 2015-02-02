@@ -28,7 +28,7 @@ import org.appwork.utils.processes.ProcessOutput;
  * @author daniel
  * 
  */
-public class DesktopSupportWindows implements DesktopSupport {
+public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
 
     @Override
     public void browseURL(final URL url) throws IOException, URISyntaxException {
@@ -278,5 +278,7 @@ public class DesktopSupportWindows implements DesktopSupport {
 
         return true;
     }
+
+   
 
 }

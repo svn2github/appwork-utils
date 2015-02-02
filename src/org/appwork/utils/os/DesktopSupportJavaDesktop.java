@@ -16,6 +16,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
+import org.appwork.utils.Application;
+
 /**
  * @author daniel
  * 
@@ -105,6 +107,14 @@ public class DesktopSupportJavaDesktop implements DesktopSupport {
     public boolean hibernate() {
         // TODO Auto-generated method stub
         return false;
+    }
+
+    /* (non-Javadoc)
+     * @see org.appwork.utils.os.DesktopSupport#getDefaultDownloadDirectory()
+     */
+    @Override
+    public String getDefaultDownloadDirectory() {
+        return null;
     }
 
 }

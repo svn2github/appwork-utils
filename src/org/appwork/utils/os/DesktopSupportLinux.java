@@ -165,7 +165,7 @@ public class DesktopSupportLinux implements DesktopSupport {
             Log.exception(e);
         }
         try {
-            ProcessBuilderFactory.runCommand(new String[] {"dcop", "--all-sessions", "--all-users", "ksmserver", "ksmserver", "logout", "0", "2", "0" });
+            ProcessBuilderFactory.runCommand(new String[] { "dcop", "--all-sessions", "--all-users", "ksmserver", "ksmserver", "logout", "0", "2", "0" });
         } catch (Exception e) {
             Log.exception(e);
         }
@@ -175,19 +175,19 @@ public class DesktopSupportLinux implements DesktopSupport {
             Log.exception(e);
         }
         try {
-            ProcessBuilderFactory.runCommand(new String[] {"sudo", "shutdown", "-P", "now" });
+            ProcessBuilderFactory.runCommand(new String[] { "sudo", "shutdown", "-P", "now" });
         } catch (Exception e) {
             Log.exception(e);
         }
         return true;
     }
-    
+
     private void dbusPowerState(String command) {
         try {
-            ProcessOutput output = ProcessBuilderFactory.runCommand(new String[] {"dbus-send", "--session", "--dest=org.freedesktop.PowerManagement", "--type=method_call", "--print-reply", "--reply-timeout=2000", "/org/freedesktop/PowerManagement", "org.freedesktop.PowerManagement." + command });
-            if(output.getErrOutString("UTF-8").contains("org.freedesktop.DBus.Error.ServiceUnknown")){
+            ProcessOutput output = ProcessBuilderFactory.runCommand(new String[] { "dbus-send", "--session", "--dest=org.freedesktop.PowerManagement", "--type=method_call", "--print-reply", "--reply-timeout=2000", "/org/freedesktop/PowerManagement", "org.freedesktop.PowerManagement." + command });
+            if (output.getErrOutString("UTF-8").contains("org.freedesktop.DBus.Error.ServiceUnknown")) {
                 // compatible to newer dbus versions
-                ProcessBuilderFactory.runCommand("dbus-send", "--system","--print-reply","--dest=org.freedesktop.login1","/org/freedesktop/login1","org.freedesktop.login1.Manager."+command,"boolean:true");
+                ProcessBuilderFactory.runCommand("dbus-send", "--system", "--print-reply", "--dest=org.freedesktop.login1", "/org/freedesktop/login1", "org.freedesktop.login1.Manager." + command, "boolean:true");
             }
         } catch (Exception e) {
             Log.exception(e);
@@ -196,10 +196,10 @@ public class DesktopSupportLinux implements DesktopSupport {
 
     @Override
     public boolean standby() {
-        try{
+        try {
             dbusPowerState("Suspend");
             return true;
-        }catch(Exception e){
+        } catch (Exception e) {
             Log.exception(e);
             Log.L.info("no standby support, use shutdown");
             return false;
@@ -208,17 +208,44 @@ public class DesktopSupportLinux implements DesktopSupport {
 
     @Override
     public boolean hibernate() {
-        try{
+        try {
             dbusPowerState("Hibernate");
             return true;
-        }catch(Exception e){
+        } catch (Exception e) {
             Log.exception(e);
             Log.L.info("no hibernate support, use shutdown");
             return false;
         }
-        
+
     }
-    
-    
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.appwork.utils.os.DesktopSupport#getDefaultDownloadDirectory()
+     */
+    @Override
+    public String getDefaultDownloadDirectory() {
+        /**
+         * http://freedesktop.org/wiki/Software/xdg-user-dirs/
+         */
+        final String XDG_DOWNLOAD_DIR = System.getenv("XDG_DOWNLOAD_DIR");
+        if (StringUtils.isNotEmpty(XDG_DOWNLOAD_DIR)) {
+            if (XDG_DOWNLOAD_DIR.startsWith("/") && !XDG_DOWNLOAD_DIR.contains("$")) {
+                return XDG_DOWNLOAD_DIR;
+            } else if (XDG_DOWNLOAD_DIR.contains("$")) {
+                final String HOME = System.getenv("HOME");
+                String downloadDirectory = null;
+                if (StringUtils.isNotEmpty(HOME) && XDG_DOWNLOAD_DIR.contains("$HOME")) {
+                    downloadDirectory = XDG_DOWNLOAD_DIR.replaceFirst("\\$HOME", HOME);
+                }
+                if (downloadDirectory != null && !downloadDirectory.contains("$")) {
+                    //
+                    return downloadDirectory;
+                }
+            }
+        }
+        return null;
+    }
 
 }

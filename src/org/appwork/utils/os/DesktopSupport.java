@@ -33,5 +33,7 @@ public interface DesktopSupport {
     public boolean standby();
     
     public boolean hibernate();
+    
+    public String getDefaultDownloadDirectory();
 
 }

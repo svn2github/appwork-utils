@@ -246,6 +246,24 @@ public class CrossSystem {
         }
     }
 
+    public static String getDefaultDownloadDirectory() {
+        try {
+            final String defaultDownloadDirectory = CrossSystem.DESKTOP_SUPPORT.getDefaultDownloadDirectory();
+            if (StringUtils.isNotEmpty(defaultDownloadDirectory)) {
+                //
+                return defaultDownloadDirectory;
+            }
+        } catch (final Throwable e) {
+            e.printStackTrace();
+        }
+        final String userHome = System.getProperty("user.home");
+        if (userHome != null && new File(userHome).exists() && new File(userHome).isDirectory()) {
+            return new File(userHome, "Downloads").getAbsolutePath();
+        } else {
+            return Application.getResource("Downloads").getAbsolutePath();
+        }
+    }
+
     /**
      * internal function to open a file/folder
      * 

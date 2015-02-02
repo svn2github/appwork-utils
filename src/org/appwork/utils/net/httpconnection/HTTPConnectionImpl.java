@@ -403,7 +403,7 @@ public class HTTPConnectionImpl implements HTTPConnection {
                         sslSocket.setEnabledProtocols(new String[] { "TLSv1", "TLSv1.1", "TLSv1.2" });
                     } else {
                         sslSocket.setEnabledProtocols(new String[] { "TLSv1" });
-                    }
+                    }                    
                 }
                 return socket;
             }

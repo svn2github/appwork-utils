@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2010 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.utils.os
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -61,7 +61,7 @@ import org.appwork.utils.swing.dialog.FileChooserType;
 
 /**
  * This class provides a few native features.
- * 
+ *
  * @author $Author: unknown$
  */
 
@@ -156,54 +156,54 @@ public class CrossSystem {
     private static String               JAVAINT                   = null;
 
     /**
-     * 
+     *
      */
     private static final KeyStroke      KEY_STROKE_BACKSPACE_CTRL = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
     /**
-     * 
+     *
      */
     private static final KeyStroke      KEY_STROKE_COPY           = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_C, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
     /**
-     * 
+     *
      */
     private static final KeyStroke      KEY_STROKE_CUT            = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_X, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
     /**
-     * 
+     *
      */
     private static final KeyStroke      KEY_STROKE_DELETE         = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
 
     /**
-     * 
+     *
      */
     private static final KeyStroke      KEY_STROKE_DOWN           = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0);
 
     /**
-     * 
+     *
      */
     private static final KeyStroke      KEY_STROKE_ESCAPE         = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 
     /**
-     * 
+     *
      */
     private static final KeyStroke      KEY_STROKE_FORCE_DELETE   = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, ActionEvent.SHIFT_MASK);
 
     /**
-     * 
+     *
      */
     private static final KeyStroke      KEY_STROKE_PASTE          = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_V, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
 
     /**
-     * 
+     *
      */
     private static final KeyStroke      KEY_STROKE_SEARCH         = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_F, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
 
     /**
-     * 
+     *
      */
     private static final KeyStroke      KEY_STROKE_SELECT_ALL     = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_A, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
 
     /**
-     * 
+     *
      */
     private static final KeyStroke      KEY_STROKE_UP             = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0);
 
@@ -266,7 +266,7 @@ public class CrossSystem {
 
     /**
      * internal function to open a file/folder
-     * 
+     *
      * @param file
      * @throws IOException
      */
@@ -279,7 +279,7 @@ public class CrossSystem {
 
     /**
      * internal function to open an URL in a browser
-     * 
+     *
      * @param _url
      * @throws IOException
      * @throws URISyntaxException
@@ -292,10 +292,10 @@ public class CrossSystem {
 
     /**
      * use this method to make pathPart safe to use in a full absoluePath.
-     * 
+     *
      * it will remove driveletters/path separators and all known chars that are
      * forbidden in a path
-     * 
+     *
      * @param pathPart
      * @return
      */
@@ -504,7 +504,7 @@ public class CrossSystem {
 
     /**
      * Returns the Mime Class for the current OS
-     * 
+     *
      * @return
      * @see Mime
      */
@@ -580,7 +580,7 @@ public class CrossSystem {
 
     /**
      * Returns true if the OS is a linux system
-     * 
+     *
      * @return
      */
     public static OSFamily getOSFamily() {
@@ -653,7 +653,7 @@ public class CrossSystem {
             final int index = jvmName.indexOf('@');
             /**
              * http://www.golesny.de/p/code/javagetpid
-             * 
+             *
              * @return
              */
             if (index >= 1) { return Long.parseLong(jvmName.substring(0, index)); }
@@ -673,11 +673,6 @@ public class CrossSystem {
         } catch (final Throwable e) {
         }
         return -1;
-    }
-
-    public static void main(String[] args) throws Exception {
-        System.out.println(CrossSystem.getPID());
-        Thread.sleep(30000);
     }
 
     public static boolean is64BitArch() {
@@ -772,7 +767,7 @@ public class CrossSystem {
 
     /**
      * checks if given path is absolute or relative
-     * 
+     *
      * @param path
      * @return
      */
@@ -794,9 +789,9 @@ public class CrossSystem {
     }
 
     /**
-     * 
+     *
      /**
-     * 
+     *
      * @param e
      * @return
      */
@@ -867,7 +862,7 @@ public class CrossSystem {
 
     /**
      * Returns true if the OS is a MAC System
-     * 
+     *
      * @return
      */
 
@@ -877,7 +872,7 @@ public class CrossSystem {
 
     /**
      * returns true in case of "open an URL in a browser" is supported
-     * 
+     *
      * @return
      */
     public static boolean isOpenBrowserSupported() {
@@ -886,7 +881,7 @@ public class CrossSystem {
 
     /**
      * returns true in case of "open a File" is supported
-     * 
+     *
      * @return
      */
     public static boolean isOpenFileSupported() {
@@ -944,7 +939,7 @@ public class CrossSystem {
 
     /**
      * Returns true if the OS is a Windows System
-     * 
+     *
      * @return
      */
     public static boolean isWindows() {
@@ -971,7 +966,7 @@ public class CrossSystem {
 
     /**
      * Opens a file or directory
-     * 
+     *
      * @see java.awt.Desktop#open(File)
      * @param file
      * @throws IOException
@@ -1002,7 +997,7 @@ public class CrossSystem {
 
     /**
      * Open an url in the systems default browser
-     * 
+     *
      * @param url
      */
     public static void openURL(final String url) {
@@ -1130,7 +1125,7 @@ public class CrossSystem {
 
     /**
      * Set commandline to open the browser use %s as wildcard for the url
-     * 
+     *
      * @param commands
      */
     public static void setBrowserCommandLine(final String[] commands) {
@@ -1166,7 +1161,7 @@ public class CrossSystem {
 
     /**
      * splits filename into name,extension
-     * 
+     *
      * @param filename
      * @return
      */

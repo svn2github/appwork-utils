@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import org.appwork.remoteapi.exceptions.ApiCommandNotAvailable;
 import org.appwork.utils.net.HeaderCollection;
 import org.appwork.utils.net.httpserver.requests.HttpRequest;
 import org.appwork.utils.net.httpserver.requests.KeyValuePair;
@@ -32,8 +33,9 @@ public class SessionRemoteAPIRequest<T extends HttpSession> extends RemoteAPIReq
      * @param apiRequest
      * @param session
      * @return
+     * @throws ApiCommandNotAvailable
      */
-    public SessionRemoteAPIRequest(final HttpRequest request, final RemoteAPIRequest apiRequest, final T session) {
+    public SessionRemoteAPIRequest(final HttpRequest request, final RemoteAPIRequest apiRequest, final T session) throws ApiCommandNotAvailable {
         super(apiRequest.getIface(), apiRequest.getMethodName(), apiRequest.getParameters(), request, apiRequest.getJqueryCallback());
         this.apiRequest = apiRequest;
         this.session = session;

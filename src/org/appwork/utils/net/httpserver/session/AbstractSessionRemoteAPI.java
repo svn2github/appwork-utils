@@ -19,6 +19,7 @@ import org.appwork.remoteapi.RemoteAPI;
 import org.appwork.remoteapi.RemoteAPIRequest;
 import org.appwork.remoteapi.RemoteAPIResponse;
 import org.appwork.remoteapi.SessionRemoteAPIRequest;
+import org.appwork.remoteapi.exceptions.ApiCommandNotAvailable;
 import org.appwork.remoteapi.exceptions.ApiInterfaceNotAvailable;
 import org.appwork.remoteapi.exceptions.AuthException;
 import org.appwork.remoteapi.exceptions.BasicRemoteAPIException;
@@ -44,7 +45,7 @@ public abstract class AbstractSessionRemoteAPI<T extends HttpSession> extends Re
         this.register(this);
     }
 
-    protected SessionRemoteAPIRequest<T> createSessionRemoteAPIRequest(final T session, final HttpRequest request, final RemoteAPIRequest apiRequest) {
+    protected SessionRemoteAPIRequest<T> createSessionRemoteAPIRequest(final T session, final HttpRequest request, final RemoteAPIRequest apiRequest) throws ApiCommandNotAvailable {
         return new SessionRemoteAPIRequest<T>(request, apiRequest, session);
     }
 

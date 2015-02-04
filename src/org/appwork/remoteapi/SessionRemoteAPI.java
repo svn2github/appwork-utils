@@ -11,6 +11,7 @@ package org.appwork.remoteapi;
 
 import java.io.IOException;
 
+import org.appwork.remoteapi.exceptions.ApiCommandNotAvailable;
 import org.appwork.remoteapi.exceptions.BasicRemoteAPIException;
 import org.appwork.remoteapi.exceptions.SessionException;
 import org.appwork.utils.net.httpserver.handler.HttpSessionRequestHandler;
@@ -30,7 +31,7 @@ public class SessionRemoteAPI<T extends HttpSession> extends RemoteAPI implement
         super();
     }
 
-    protected SessionRemoteAPIRequest<T> createSessionRemoteAPIRequest(final T session, final HttpRequest request, final RemoteAPIRequest apiRequest) {
+    protected SessionRemoteAPIRequest<T> createSessionRemoteAPIRequest(final T session, final HttpRequest request, final RemoteAPIRequest apiRequest) throws ApiCommandNotAvailable {
         return new SessionRemoteAPIRequest<T>(request, apiRequest, session);
     }
 

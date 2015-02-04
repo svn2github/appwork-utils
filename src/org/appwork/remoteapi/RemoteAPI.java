@@ -382,7 +382,7 @@ public class RemoteAPI implements HttpRequestHandler {
         return ret;
     }
 
-    protected RemoteAPIRequest createRemoteAPIRequestObject(final HttpRequest request, final String method, final InterfaceHandler<?> interfaceHandler, final java.util.List<String> parameters, final String jqueryCallback) throws IOException {
+    protected RemoteAPIRequest createRemoteAPIRequestObject(final HttpRequest request, final String method, final InterfaceHandler<?> interfaceHandler, final java.util.List<String> parameters, final String jqueryCallback) throws IOException, ApiCommandNotAvailable {
         return new RemoteAPIRequest(interfaceHandler, method, parameters.toArray(new String[] {}), request, jqueryCallback);
     }
 

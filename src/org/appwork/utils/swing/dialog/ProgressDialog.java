@@ -109,11 +109,14 @@ public class ProgressDialog extends AbstractDialog<Integer> implements ProgressI
         executer.interrupt();
 
         try {
-            executer.join(waitForTermination);
+            if (getWaitForTermination() > 0) {
+                executer.join(getWaitForTermination());
+            }
 
         } catch (final InterruptedException e) {
 
         }
+
         super.dispose();
 
     }

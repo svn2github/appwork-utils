@@ -675,6 +675,28 @@ public class CrossSystem {
         return -1;
     }
 
+    public static String getNewLine() {
+        String newLine = null;
+        try {
+            if (Application.getJavaVersion() >= Application.JAVA17) {
+                newLine = System.lineSeparator();
+            }
+        } catch (final Throwable e) {
+        }
+        if (StringUtils.isNotEmpty(newLine)) {
+            newLine = System.getProperty("line.separator");
+        }
+        if (StringUtils.isNotEmpty(newLine)) {
+            switch (CrossSystem.getOSFamily()) {
+            case WINDOWS:
+                return "\r\n";
+            default:
+                return "\n";
+            }
+        }
+        return newLine;
+    }
+
     public static boolean is64BitArch() {
         final String osArch = System.getProperty("os.arch");
         final boolean is64bit;

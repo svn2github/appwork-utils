@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2010 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.utils.swing.dialog
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -34,7 +34,7 @@ import org.appwork.utils.swing.EDTHelper;
 
 /**
  * @author thomas
- * 
+ *
  */
 public class ProgressDialog extends AbstractDialog<Integer> implements ProgressInterface {
     public interface ProgressGetter {
@@ -82,41 +82,40 @@ public class ProgressDialog extends AbstractDialog<Integer> implements ProgressI
         super(flags | UIOManager.BUTTONS_HIDE_OK, title, icon, ok, cancel);
         this.message = message;
         if (progressGetter == null && this instanceof ProgressGetter) {
-            getter = (ProgressGetter) this;
+            this.getter = (ProgressGetter) this;
         } else {
-            getter = progressGetter;
+            this.getter = progressGetter;
         }
-        setReturnmask(true);
+        this.setReturnmask(true);
 
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.utils.swing.dialog.AbstractDialog#getRetValue()
      */
     @Override
     protected Integer createReturnValue() {
         // TODO Auto-generated method stub
-        return getReturnmask();
+        return this.getReturnmask();
     }
 
     @Override
     public void dispose() {
-        if (disposed) { return; }
+        if (this.disposed) { return; }
         System.out.println("Dispose Progressdialog");
-        disposed = true;
-        executer.interrupt();
-
-        try {
-            if (getWaitForTermination() > 0) {
-                executer.join(getWaitForTermination());
+        this.disposed = true;
+        if (this.executer.isAlive()) {
+            this.executer.interrupt();
+            final long waitFor = this.getWaitForTermination();
+            if (waitFor > 0) {
+                try {
+                    this.executer.join(waitFor);
+                } catch (final InterruptedException e) {
+                }
             }
-
-        } catch (final InterruptedException e) {
-
         }
-
         super.dispose();
 
     }
@@ -128,10 +127,10 @@ public class ProgressDialog extends AbstractDialog<Integer> implements ProgressI
             @Override
             public boolean getScrollableTracksViewportWidth() {
 
-                return !BinaryLogic.containsAll(flagMask, Dialog.STYLE_LARGE);
+                return !BinaryLogic.containsAll(ProgressDialog.this.flagMask, Dialog.STYLE_LARGE);
             }
         };
-        if (BinaryLogic.containsAll(flagMask, Dialog.STYLE_HTML)) {
+        if (BinaryLogic.containsAll(this.flagMask, Dialog.STYLE_HTML)) {
             textField.setContentType("text/html");
             textField.addHyperlinkListener(new HyperlinkListener() {
 
@@ -147,7 +146,7 @@ public class ProgressDialog extends AbstractDialog<Integer> implements ProgressI
             // this.textField.setMaximumSize(new Dimension(450, 600));
         }
 
-        textField.setText(message);
+        textField.setText(this.message);
         textField.setEditable(false);
         textField.setBackground(null);
         textField.setOpaque(false);
@@ -162,67 +161,67 @@ public class ProgressDialog extends AbstractDialog<Integer> implements ProgressI
      * @return the throwable
      */
     public Throwable getThrowable() {
-        return throwable;
+        return this.throwable;
     }
 
     public long getWaitForTermination() {
-        return waitForTermination;
+        return this.waitForTermination;
     }
 
     @Override
     public JComponent layoutDialogContent() {
-        getDialog().setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+        this.getDialog().setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         final JPanel p = new JPanel(new MigLayout("ins 0,wrap 2", "[][]", "[][]"));
 
-        textField = getTextfield();
+        this.textField = this.getTextfield();
 
-        textField.setText(message);
-        extendLayout(p);
-        if (BinaryLogic.containsAll(flagMask, Dialog.STYLE_LARGE)) {
+        this.textField.setText(this.message);
+        this.extendLayout(p);
+        if (BinaryLogic.containsAll(this.flagMask, Dialog.STYLE_LARGE)) {
 
-            p.add(new JScrollPane(textField), "pushx,growx,spanx");
+            p.add(new JScrollPane(this.textField), "pushx,growx,spanx");
 
         } else {
             // avoids that the textcomponent's height is calculated too big
-            p.add(textField, "growx,pushx,spanx,wmin 350");
+            p.add(this.textField, "growx,pushx,spanx,wmin 350");
 
         }
-        extendLayout(p);
+        this.extendLayout(p);
         final JProgressBar bar;
-        p.add(bar = new JProgressBar(0, 100), "growx,pushx" + (isLabelEnabled() ? "" : ",spanx"));
+        p.add(bar = new JProgressBar(0, 100), "growx,pushx" + (this.isLabelEnabled() ? "" : ",spanx"));
         bar.setStringPainted(true);
-        if (isLabelEnabled()) {
-            lbl = new JLabel();
-            lbl.setHorizontalAlignment(SwingConstants.RIGHT);
-            p.add(lbl, "wmin 30");
+        if (this.isLabelEnabled()) {
+            this.lbl = new JLabel();
+            this.lbl.setHorizontalAlignment(SwingConstants.RIGHT);
+            p.add(this.lbl, "wmin 30");
         }
 
-        updater = new Timer(50, new ActionListener() {
+        this.updater = new Timer(50, new ActionListener() {
 
             public void actionPerformed(final ActionEvent e) {
-                if (getter != null) {
-                    final int prg = updateProgress(bar, getter);
-                    updateText(bar, getter);
-                    updateLabel();
+                if (ProgressDialog.this.getter != null) {
+                    final int prg = ProgressDialog.this.updateProgress(bar, ProgressDialog.this.getter);
+                    ProgressDialog.this.updateText(bar, ProgressDialog.this.getter);
+                    ProgressDialog.this.updateLabel();
                     if (prg >= 100) {
-                        updater.stop();
+                        ProgressDialog.this.updater.stop();
                         ProgressDialog.this.dispose();
                         return;
                     }
                 }
             }
         });
-        updater.setRepeats(true);
-        updater.setInitialDelay(50);
-        updater.start();
-        executer = new Thread("ProgressDialogExecuter") {
+        this.updater.setRepeats(true);
+        this.updater.setInitialDelay(50);
+        this.updater.start();
+        this.executer = new Thread("ProgressDialogExecuter") {
 
             @Override
             public void run() {
                 try {
-                    getter.run();
+                    ProgressDialog.this.getter.run();
                 } catch (final Throwable e) {
-                    throwable = e;
+                    ProgressDialog.this.throwable = e;
                     e.printStackTrace();
                     ProgressDialog.this.setReturnmask(false);
                 } finally {
@@ -235,13 +234,12 @@ public class ProgressDialog extends AbstractDialog<Integer> implements ProgressI
                         }
 
                     }.start();
-
-                    updater.stop();
+                    ProgressDialog.this.updater.stop();
                 }
 
             }
         };
-        executer.start();
+        this.executer.start();
 
         return p;
     }
@@ -291,31 +289,31 @@ public class ProgressDialog extends AbstractDialog<Integer> implements ProgressI
     }
 
     protected void updateLabel() {
-        if (lbl != null) {
-            lbl.setText(getter.getLabelString());
+        if (this.lbl != null) {
+            this.lbl.setText(this.getter.getLabelString());
         }
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.utils.swing.dialog.ProgressInterface#getMessage()
      */
     @Override
     public String getMessage() {
         // TODO Auto-generated method stub
-        return message;
+        return this.message;
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.utils.swing.dialog.ProgressInterface#getValue()
      */
     @Override
     public int getProgress() {
         // TODO Auto-generated method stub
-        return getter.getProgress();
+        return this.getter.getProgress();
     }
 
 }

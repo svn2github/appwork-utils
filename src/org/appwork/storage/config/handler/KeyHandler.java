@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2011 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.storage.config
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -26,6 +26,7 @@ import org.appwork.storage.config.annotations.AboutConfig;
 import org.appwork.storage.config.annotations.AbstractCustomValueGetter;
 import org.appwork.storage.config.annotations.AbstractValidator;
 import org.appwork.storage.config.annotations.AllowStorage;
+import org.appwork.storage.config.annotations.ConfigEntryKeywords;
 import org.appwork.storage.config.annotations.CryptedStorage;
 import org.appwork.storage.config.annotations.CustomValueGetter;
 import org.appwork.storage.config.annotations.DefaultFactory;
@@ -45,7 +46,7 @@ import org.appwork.utils.reflection.Clazz;
 
 /**
  * @author thomas
- * 
+ *
  */
 public abstract class KeyHandler<RawClass> {
 
@@ -99,7 +100,7 @@ public abstract class KeyHandler<RawClass> {
      */
     private void checkBadAnnotations(final Method m, final Class<? extends Annotation>... classes) {
 
-        final Class<?>[] okForAll = new Class<?>[] { HexColorString.class, CustomValueGetter.class, ValidatorFactory.class, DefaultJsonObject.class, DefaultFactory.class, AboutConfig.class, NoHeadless.class, DevConfig.class, RequiresRestart.class, AllowStorage.class, DescriptionForConfigEntry.class, CryptedStorage.class, PlainStorage.class };
+        final Class<?>[] okForAll = new Class<?>[] { HexColorString.class, CustomValueGetter.class, ValidatorFactory.class, DefaultJsonObject.class, DefaultFactory.class, AboutConfig.class, NoHeadless.class, DevConfig.class, RequiresRestart.class, AllowStorage.class, DescriptionForConfigEntry.class, ConfigEntryKeywords.class, CryptedStorage.class, PlainStorage.class };
         final Class<?>[] clazzes = new Class<?>[classes.length + okForAll.length];
         System.arraycopy(classes, 0, clazzes, 0, classes.length);
         System.arraycopy(okForAll, 0, clazzes, classes.length, okForAll.length);
@@ -202,7 +203,7 @@ public abstract class KeyHandler<RawClass> {
     /**
      * Lazy initialiser of the eventsender. we do not wnat to create an
      * eventsender if nowbody uses it
-     * 
+     *
      * @return
      */
     public synchronized ConfigEventSender<RawClass> getEventSender() {
@@ -421,7 +422,7 @@ public abstract class KeyHandler<RawClass> {
 
     /**
      * @throws Throwable
-     * 
+     *
      */
     @SuppressWarnings("unchecked")
     protected void init() throws Throwable {
@@ -499,13 +500,13 @@ public abstract class KeyHandler<RawClass> {
 
     /**
      * @throws Throwable
-     * 
+     *
      */
     protected abstract void initHandler() throws Throwable;
 
     /**
      * returns true of this keyhandler belongs to ConfigInterface
-     * 
+     *
      * @param settings
      * @return
      */

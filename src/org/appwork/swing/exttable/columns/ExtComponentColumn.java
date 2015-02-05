@@ -13,7 +13,7 @@ import org.appwork.utils.swing.EDTHelper;
 public abstract class ExtComponentColumn<T> extends ExtColumn<T> {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 1L;
 
@@ -35,18 +35,45 @@ public abstract class ExtComponentColumn<T> extends ExtColumn<T> {
             public void mouseMoved(final MouseEvent e) {
 
                 final ExtTable<T> table = ExtComponentColumn.this.getModel().getTable();
-                final int col = table.columnAtPoint(e.getPoint());
-                final int row = table.getRowIndexByPoint(e.getPoint());
+                if (table.getColumnModel().getColumnCount() > 0) {
+                    final int col = table.columnAtPoint(e.getPoint());
+                    final int row = table.getRowIndexByPoint(e.getPoint());
 
-                int modelIndex = table.getColumnModel().getColumn(col).getModelIndex();
-                final int editing = table.getEditingColumn();
-                if (col != this.col || row != this.row) {
-                    if (ExtComponentColumn.this.getModel().getExtColumnByModelIndex(modelIndex) == ExtComponentColumn.this) {
-                        if (editing == col && table.getEditingRow() == row) {
-                            /*
-                             * we are still in same cell, no need to change
-                             * anything
-                             */
+                    int modelIndex = table.getColumnModel().getColumn(col).getModelIndex();
+                    final int editing = table.getEditingColumn();
+                    if (col != this.col || row != this.row) {
+                        if (ExtComponentColumn.this.getModel().getExtColumnByModelIndex(modelIndex) == ExtComponentColumn.this) {
+                            if (editing == col && table.getEditingRow() == row) {
+                                /*
+                                 * we are still in same cell, no need to change
+                                 * anything
+                                 */
+                            } else {
+                                modelIndex = table.getColumnModel().getColumn(editing).getModelIndex();
+                                if (ExtComponentColumn.this.getModel().getExtColumnByModelIndex(modelIndex) == ExtComponentColumn.this) {
+                                    /*
+                                     * we are no longer in our editing column,
+                                     * stop cell editing
+                                     */
+                                    ExtComponentColumn.this.stopCellEditing();
+                                } else if (editing > 0) {
+                                    /* stop another column from editing */
+                                    ExtComponentColumn.this.getModel().getExtColumnByModelIndex(modelIndex).stopCellEditing();
+                                }
+                                /*
+                                 * invoke later is important as we first have to
+                                 * stopCellEditing and then put new cell into
+                                 * editing mode
+                                 */
+                                new EDTHelper<Void>() {
+
+                                    @Override
+                                    public Void edtRun() {
+                                        ExtComponentColumn.this.onCellUpdate(col, row);
+                                        return null;
+                                    }
+                                }.start(true);
+                            }
                         } else {
                             modelIndex = table.getColumnModel().getColumn(editing).getModelIndex();
                             if (ExtComponentColumn.this.getModel().getExtColumnByModelIndex(modelIndex) == ExtComponentColumn.this) {
@@ -55,36 +82,11 @@ public abstract class ExtComponentColumn<T> extends ExtColumn<T> {
                                  * cell editing
                                  */
                                 ExtComponentColumn.this.stopCellEditing();
-                            } else if (editing > 0) {
-                                /* stop another column from editing */
-                                ExtComponentColumn.this.getModel().getExtColumnByModelIndex(modelIndex).stopCellEditing();
                             }
-                            /*
-                             * invoke later is important as we first have to
-                             * stopCellEditing and then put new cell into
-                             * editing mode
-                             */
-                            new EDTHelper<Void>() {
-
-                                @Override
-                                public Void edtRun() {
-                                    ExtComponentColumn.this.onCellUpdate(col, row);
-                                    return null;
-                                }
-                            }.start(true);
                         }
-                    } else {
-                        modelIndex = table.getColumnModel().getColumn(editing).getModelIndex();
-                        if (ExtComponentColumn.this.getModel().getExtColumnByModelIndex(modelIndex) == ExtComponentColumn.this) {
-                            /*
-                             * we are no longer in our editing column, stop cell
-                             * editing
-                             */
-                            ExtComponentColumn.this.stopCellEditing();
-                        }
+                        this.col = col;
+                        this.row = row;
                     }
-                    this.col = col;
-                    this.row = row;
                 }
             }
         };
@@ -92,7 +94,7 @@ public abstract class ExtComponentColumn<T> extends ExtColumn<T> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.utils.swing.table.ExtColumn#getCellEditorValue()
      */
     @Override
@@ -150,7 +152,7 @@ public abstract class ExtComponentColumn<T> extends ExtColumn<T> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.utils.swing.table.ExtColumn#isEditable(java.lang.Object)
      */
     @Override
@@ -161,7 +163,7 @@ public abstract class ExtComponentColumn<T> extends ExtColumn<T> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.utils.swing.table.ExtColumn#isEnabled(java.lang.Object)
      */
     @Override
@@ -172,7 +174,7 @@ public abstract class ExtComponentColumn<T> extends ExtColumn<T> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.utils.swing.table.ExtColumn#isSortable(java.lang.Object)
      */
     @Override
@@ -192,7 +194,7 @@ public abstract class ExtComponentColumn<T> extends ExtColumn<T> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.utils.swing.table.ExtColumn#setValue(java.lang.Object,
      * java.lang.Object)
      */

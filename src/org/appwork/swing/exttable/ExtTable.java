@@ -74,13 +74,13 @@ import org.appwork.utils.swing.EDTRunner;
  * 1. Easy creating of tables<br>
  * 2. Implement extended features like column selection, database connection,
  * editing, easy rendering, sorting etc.
- * 
+ *
  * @author $Author: unknown$
  */
 public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChangeListener {
 
     /**
-     * 
+     *
      */
     private static final String                            DEFAULT_COLUMN_STORE = "";
     private static final long                              serialVersionUID     = 2822230056021924679L;
@@ -131,20 +131,20 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
     private static final KeyStroke                         KEY_STROKE_CTRL_HOME = org.appwork.utils.Application.isHeadless() ? null : KeyStroke.getKeyStroke(KeyEvent.VK_HOME, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
 
     /**
-    * 
-    */
+     *
+     */
     private static final KeyStroke                         KEY_STROKE_END       = org.appwork.utils.Application.isHeadless() ? null : KeyStroke.getKeyStroke(KeyEvent.VK_END, 0);
 
     private static final KeyStroke                         KEY_STROKE_HOME      = org.appwork.utils.Application.isHeadless() ? null : KeyStroke.getKeyStroke(KeyEvent.VK_HOME, 0);
 
     /**
-    * 
-    */
+     *
+     */
     private static final KeyStroke                         KEY_STROKE_CTRL_END  = org.appwork.utils.Application.isHeadless() ? null : KeyStroke.getKeyStroke(KeyEvent.VK_END, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
 
     /**
      * Create an Extended Table instance
-     * 
+     *
      * @param model
      *            Databsemodel
      * @param database
@@ -191,7 +191,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
         this.setTableHeader(new JTableHeader(this.getColumnModel()) {
 
             /**
-             * 
+             *
              */
             private static final long serialVersionUID = 6099615257824836337L;
 
@@ -359,7 +359,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
 
     /**
      * adds a row highlighter
-     * 
+     *
      * @param highlighter
      */
     public void addRowHighlighter(final ExtOverlayRowHighlighter highlighter) {
@@ -370,9 +370,9 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
     /**
      * create Columnselection popupmenu. It contains all available columns and
      * let's the user select. The menu does not autoclose on click.
-     * 
+     *
      * @param extColumn
-     * 
+     *
      * @return
      */
     protected JPopupMenu columnControlMenu(final ExtColumn<E> extColumn) {
@@ -444,7 +444,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
             tableColumn.setHeaderRenderer(customRenderer != null ? customRenderer : this.createDefaultHeaderRenderer(column));
             // Save column width
 
-            if (!this.model.isVisible(i)) {
+            if (!this.model.isVisible(i) && column.isHidable()) {
                 continue;
             }
             columns.put(this.model.getExtColumnByModelIndex(j).getID(), tableColumn);
@@ -527,7 +527,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.appwork.swing.components.tooltips.ToolTipHandler#createExtTooltip()
      */
@@ -648,7 +648,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
     }
 
     /**
-     * 
+     *
      */
     protected void fireColumnModelUpdate() {
         ExtTable.this.eventSender.fireEvent(new ExtTableEvent<MouseEvent>(ExtTable.this, ExtTableEvent.Types.COLUMN_MODEL_UPDATE));
@@ -774,7 +774,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
 
     /**
      * Returns the real column index at this point
-     * 
+     *
      * @param point
      */
     public ExtColumn<E> getExtColumnAtPoint(final Point point) {
@@ -783,7 +783,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
     }
 
     /**
-     * 
+     *
      * @param point
      * @return columnModel Index. use
      *         {@link ExtTableModel#getExtColumnByModelIndex(int)} to get the
@@ -798,7 +798,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
     /**
      * Returns the original Celleditor given by the current LAF UI. Used to have
      * an reference to the LAF's default editor
-     * 
+     *
      * @param row
      * @param column
      * @return
@@ -817,7 +817,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
     /**
      * Returns the original Cellrenderer given bei the current LAF UI Used to
      * have an reference to the LAF's default renderer
-     * 
+     *
      * @param row
      * @param column
      * @return
@@ -860,7 +860,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.appwork.swing.components.tooltips.ToolTipHandler#updateTooltip(org
      * .appwork.swing.components.tooltips.ExtTooltip, java.awt.event.MouseEvent)
@@ -994,7 +994,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.swing.components.tooltips.ToolTipHandler#
      * isTooltipDisabledUntilNextRefocus()
      */
@@ -1007,7 +1007,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.swing.components.tooltips.ToolTipHandler#
      * isTooltipWithoutFocusEnabled()
      */
@@ -1024,7 +1024,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
     /**
      * This method will be called when a doubleclick is performed on the object
      * <code>obj</code>
-     * 
+     *
      * @param obj
      */
     protected boolean onDoubleClick(final MouseEvent e, final E obj) {
@@ -1033,7 +1033,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
 
     /**
      * Override this to handle header sort clicks
-     * 
+     *
      * @param e
      * @param oldIdentifier
      * @param oldColumn
@@ -1049,7 +1049,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
     /**
      * This method will be called if the user does a windows typic rename click
      * order. Means: click on a already selected single row
-     * 
+     *
      * @param e
      * @param obj
      * @return
@@ -1059,7 +1059,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
     }
 
     /**
-     * 
+     *
      */
     protected void onSelectionChanged() {
 
@@ -1559,7 +1559,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
 
     /**
      * Removes a rowhilighter
-     * 
+     *
      * @param highlighter
      */
     public void removeRowHighlighter(final ExtOverlayRowHighlighter highlighter) {

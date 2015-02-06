@@ -218,7 +218,7 @@ public class Subversion implements ISVNEventHandler {
     }
 
     public long downloadFile(final String url, final File resource, final SVNRevision head) throws SVNException {
-       return getUpdateClient().doExport(SVNURL.parseURIDecoded(url), resource, head, head, null, true, null);
+        return getUpdateClient().doExport(SVNURL.parseURIDecoded(url), resource, head, head, null, true, null);
 
     }
 
@@ -348,6 +348,7 @@ public class Subversion implements ISVNEventHandler {
 
     public long getRevision(final File resource) throws SVNException {
         final long[] ret = new long[] { -1 };
+
         getWCClient().doInfo(resource, SVNRevision.UNDEFINED, SVNRevision.WORKING, SVNDepth.EMPTY, null, new ISVNInfoHandler() {
 
             @Override
@@ -768,9 +769,18 @@ public class Subversion implements ISVNEventHandler {
 
         try {
 
+            // getWCClient().doAdd(path, force, mkdir, climbUnversionedParents,
+            // depth, includeIgnored, makeParents);
+            // long ret = updateClient.doCheckout(svnurl, file, revision,
+            // revision, i, true);
             Log.L.info("SVN Update at " + file + " to Revision " + revision + " depths:" + i + "  " + svnurl);
-            return updateClient.doUpdate(file, revision, i, false, true);
+            long ret = updateClient.doUpdate(file, revision, i, false, true);
+            if (ret < 0) {
+                // no working copy?
+                ret = updateClient.doCheckout(svnurl, file, revision, revision, i, true);
 
+            }
+            return ret;
         } catch (final Exception e) {
             Log.L.info(e.getMessage());
             Log.L.info("SVN Checkout at " + file + "  " + svnurl);

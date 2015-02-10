@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PushbackInputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -66,7 +67,7 @@ public class HTTPConnectionImpl implements HTTPConnection {
     }
 
     /**
-     * 
+     *
      */
     public static final String      UNKNOWN_HTTP_RESPONSE = "unknown HTTP response";
 
@@ -211,18 +212,18 @@ public class HTTPConnectionImpl implements HTTPConnection {
     protected boolean putKeepAliveSocket(final Socket socket) throws IOException {
         /**
          * only keep-Alive sockets if
-         * 
+         *
          * 1.) keepAliveEnabled, HTTP Request/Response signals Keep-Alive and
          * keep-Alive feature is enabled
-         * 
+         *
          * 2.) responseCode is ok
-         * 
+         *
          * 3.) socket is open/not closed/input and output open
-         * 
+         *
          * 4.) used inputstream has reached valid EOF
-         * 
+         *
          * 5.) available outputstream has written all data
-         * 
+         *
          */
         if (socket != null && this.isKeepAlivedEnabled() && this.isKeepAliveOK() && socket.isConnected() && !socket.isClosed() && socket.isInputShutdown() == false && socket.isOutputShutdown() == false) {
             if (this.inputStream != null && this.inputStream instanceof StreamValidEOF && ((StreamValidEOF) this.inputStream).isValidEOF()) {
@@ -379,9 +380,9 @@ public class HTTPConnectionImpl implements HTTPConnection {
         return new SSLSocketFactory() {
             /**
              * remove SSL because of POODLE Vulnerability
-             * 
+             *
              * https://www.us-cert.gov/ncas/alerts/TA14-290A
-             * 
+             *
              * @param socket
              */
             private Socket removeSSLProtocol(final Socket socket) {
@@ -403,7 +404,7 @@ public class HTTPConnectionImpl implements HTTPConnection {
                         sslSocket.setEnabledProtocols(new String[] { "TLSv1", "TLSv1.1", "TLSv1.2" });
                     } else {
                         sslSocket.setEnabledProtocols(new String[] { "TLSv1" });
-                    }                    
+                    }
                 }
                 return socket;
             }
@@ -536,7 +537,41 @@ public class HTTPConnectionImpl implements HTTPConnection {
                     try {
                         /* try to connect to given host now */
                         connectedInetSocketAddress = new InetSocketAddress(host, port);
-                        this.connectionSocket.connect(connectedInetSocketAddress, this.connectTimeout);
+                        int connectTimeout = this.getConnectTimeout();
+                        if (connectTimeout == 0) {
+                            /** no workaround for infinite connect timeouts **/
+                            this.connectionSocket.connect(connectedInetSocketAddress, connectTimeout);
+                        } else {
+                            /**
+                             * workaround for too early connect timeouts
+                             */
+                            while (true) {
+                                final long beforeConnect = System.currentTimeMillis();
+                                try {
+                                    this.connectionSocket.connect(connectedInetSocketAddress, connectTimeout);
+                                    break;
+                                } catch (final ConnectException e) {
+                                    if (StringUtils.containsIgnoreCase(e.getMessage(), "timed out")) {
+                                        int timeout = (int) (System.currentTimeMillis() - beforeConnect);
+                                        if (timeout < 1000) {
+                                            System.out.println("Too Fast ConnectTimeout: " + timeout + "->Wait " + (2000 - timeout));
+                                            try {
+                                                Thread.sleep(2000 - timeout);
+                                            } catch (final InterruptedException ie) {
+                                                throw e;
+                                            }
+                                            timeout = (int) (System.currentTimeMillis() - beforeConnect);
+                                        }
+                                        final int lastConnectTimeout = connectTimeout;
+                                        connectTimeout = Math.max(0, connectTimeout - timeout);
+                                        if (connectTimeout == 0 || Thread.currentThread().isInterrupted()) { throw e; }
+                                        System.out.println("Workaround for ConnectTimeout: " + lastConnectTimeout + ">" + timeout);
+                                    } else {
+                                        throw e;
+                                    }
+                                }
+                            }
+                        }
                         if (this.httpURL.getProtocol().startsWith("https")) {
                             final SSLSocket sslSocket;
                             if (sslSNIWorkAround) {

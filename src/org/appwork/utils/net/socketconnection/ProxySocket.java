@@ -31,8 +31,36 @@ import org.appwork.utils.net.httpconnection.ProxyConnectException;
  */
 public abstract class ProxySocket extends Socket {
 
+    protected static int ensureRead(final InputStream is) throws IOException {
+        final int read = is.read();
+        if (read == -1) { throw new EOFException(); }
+        return read;
+    }
+
+    protected static byte[] ensureRead(final InputStream is, final int size, final byte[] buffer) throws IOException {
+        if (size <= 0) { throw new IllegalArgumentException("size <=0"); }
+        final byte[] buf;
+        if (buffer == null) {
+            buf = new byte[size];
+        } else {
+            buf = buffer;
+        }
+        if (size > buf.length) { throw new IOException("buffer too small"); }
+        int done = 0;
+        int read = 0;
+        while (done < size && (read = is.read(buf, done, size - done)) != -1) {
+            done += read;
+        }
+        if (done != size) { throw new EOFException(); }
+        return buf;
+    }
+
+    private SocketAddress   bindPoint         = null;
+
     private Boolean         keepAlive         = null;
+
     private Boolean         oobInline         = null;
+
     private final HTTPProxy proxy;
 
     private Socket          proxySocket       = null;
@@ -40,13 +68,15 @@ public abstract class ProxySocket extends Socket {
     private Integer         receiveBufferSize = null;
 
     private Boolean         reuseAddress      = null;
+    private Integer         sendBufferSize    = null;
 
     private Integer         soLinger          = null;
+
+    private Integer         soTimeout         = null;
 
     private Boolean         tcpNoDelay        = null;
 
     private Integer         trafficClass      = null;
-    private SocketAddress   bindPoint         = null;
 
     public ProxySocket(HTTPProxy proxy) {
         this.proxy = proxy;
@@ -82,6 +112,7 @@ public abstract class ProxySocket extends Socket {
             for (final InetAddress proxyHost : proxyHosts) {
                 final InetSocketAddress proxySocketAddress = new InetSocketAddress(proxyHost, this.proxy.getPort());
                 connectSocket = new Socket(Proxy.NO_PROXY);
+                this.setSocketOptions(connectSocket);
                 connectSocket.setSoTimeout(connectTimeout);
                 try {
                     connectSocket.connect(proxySocketAddress, connectTimeout);
@@ -110,30 +141,6 @@ public abstract class ProxySocket extends Socket {
     }
 
     protected abstract Socket connectProxySocket(Socket proxySocket, SocketAddress endpoint) throws IOException;
-
-    protected static int ensureRead(final InputStream is) throws IOException {
-        final int read = is.read();
-        if (read == -1) { throw new EOFException(); }
-        return read;
-    }
-
-    protected static byte[] ensureRead(final InputStream is, final int size, final byte[] buffer) throws IOException {
-        if (size <= 0) { throw new IllegalArgumentException("size <=0"); }
-        final byte[] buf;
-        if (buffer == null) {
-            buf = new byte[size];
-        } else {
-            buf = buffer;
-        }
-        if (size > buf.length) { throw new IOException("buffer too small"); }
-        int done = 0;
-        int read = 0;
-        while (done < size && (read = is.read(buf, done, size - done)) != -1) {
-            done += read;
-        }
-        if (done != size) { throw new EOFException(); }
-        return buf;
-    }
 
     @Override
     public SocketChannel getChannel() {
@@ -221,8 +228,6 @@ public abstract class ProxySocket extends Socket {
         throw new SocketException("Socket is not connected");
     }
 
-    private Integer sendBufferSize = null;
-
     @Override
     public synchronized int getSendBufferSize() throws SocketException {
         if (this.proxySocket != null) { return this.proxySocket.getSendBufferSize(); }
@@ -235,8 +240,6 @@ public abstract class ProxySocket extends Socket {
         if (this.proxySocket != null) { return this.proxySocket.getSoLinger(); }
         return this.soLinger == null ? -1 : this.soLinger;
     }
-
-    private Integer soTimeout = null;
 
     @Override
     public synchronized int getSoTimeout() throws SocketException {
@@ -345,6 +348,41 @@ public abstract class ProxySocket extends Socket {
             this.proxySocket.setSendBufferSize(size);
         } else {
             this.sendBufferSize = size;
+        }
+    }
+
+    private void setSocketOptions(final Socket connectSocket) throws IOException {
+        if (connectSocket != null) {
+            if (this.bindPoint != null) {
+                connectSocket.bind(this.bindPoint);
+            }
+            if (this.keepAlive != null) {
+                connectSocket.setKeepAlive(this.keepAlive);
+            }
+            if (this.receiveBufferSize != null) {
+                connectSocket.setReceiveBufferSize(this.receiveBufferSize);
+            }
+            if (this.reuseAddress != null) {
+                connectSocket.setReuseAddress(this.reuseAddress);
+            }
+            if (this.sendBufferSize != null) {
+                connectSocket.setSendBufferSize(this.sendBufferSize);
+            }
+            if (this.soLinger != null) {
+                connectSocket.setSoLinger(true, this.soLinger);
+            }
+            if (this.tcpNoDelay != null) {
+                connectSocket.setTcpNoDelay(this.tcpNoDelay);
+            }
+            if (this.trafficClass != null) {
+                connectSocket.setTrafficClass(this.trafficClass);
+            }
+            if (this.oobInline != null) {
+                connectSocket.setOOBInline(this.oobInline);
+            }
+            if (this.soTimeout != null) {
+                connectSocket.setSoTimeout(this.soTimeout);
+            }
         }
     }
 

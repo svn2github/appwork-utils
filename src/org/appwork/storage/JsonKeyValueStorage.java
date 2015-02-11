@@ -160,7 +160,15 @@ public class JsonKeyValueStorage extends Storage {
                 if (this.isEnumCacheEnabled()) {
                     this.put(key, (Enum<?>) ret);
                 }
+            } catch (final IllegalArgumentException e) {
+                Log.L.info("Could not restore the enum. There is no value for " + ret + " in " + ((Enum<?>) def).getDeclaringClass());
+                Log.exception(e);
+                if (this.autoPutValues) {
+                    this.put(key, (Enum<?>) def);
+                }
+                ret = def;
             } catch (final Throwable e) {
+
                 Log.exception(e);
                 if (this.autoPutValues) {
                     this.put(key, (Enum<?>) def);

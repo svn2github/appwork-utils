@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2011 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.utils.net.httpserver
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -39,7 +39,7 @@ import org.appwork.utils.net.httpserver.responses.HttpResponse;
 
 /**
  * @author daniel
- * 
+ *
  */
 public class HttpConnection implements Runnable {
 
@@ -126,7 +126,7 @@ public class HttpConnection implements Runnable {
     /**
      * parses the request and creates a GET/POST-Request Object and fills it
      * with all received data
-     * 
+     *
      * @return
      * @throws IOException
      */
@@ -218,7 +218,7 @@ public class HttpConnection implements Runnable {
     /**
      * return the outputStream for this connection. send response headers if
      * they have not been sent yet send yet
-     * 
+     *
      * @return
      * @throws IOException
      */
@@ -405,7 +405,7 @@ public class HttpConnection implements Runnable {
 
     /**
      * this function sends the response headers
-     * 
+     *
      * @throws IOException
      */
     protected void sendResponseHeaders() throws IOException {

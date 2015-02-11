@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2012 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.utils.net.httpconnection
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -23,16 +23,26 @@ import javax.net.ssl.SSLSocket;
 
 /**
  * @author daniel
- * 
+ *
  */
 public abstract class SocksHTTPconnection extends HTTPConnectionImpl {
 
-    protected static enum AUTH {
+    public static enum AUTH {
         PLAIN,
         NONE
     }
 
-    protected Socket      sockssocket      = null;
+    public static enum DESTTYPE {
+        IPV4,
+        DOMAIN
+    }
+
+    protected Socket sockssocket = null;
+
+    protected Socket getSocksSocket() {
+        return this.sockssocket;
+    }
+
     protected InputStream socksinputstream = null;
 
     protected InputStream getSocksInputStream() {

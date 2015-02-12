@@ -22,24 +22,26 @@ import org.appwork.storage.simplejson.mapper.CompiledTypeRef;
  */
 public abstract class TypeRef<T> {
 
-    public static final TypeRef<String>                  STRING         = new TypeRef<String>() {
-                                                                            public Type getType() {
-                                                                                return String.class;
-                                                                            };
-                                                                        };
-    public static final TypeRef<byte[]>                  BYTE_ARRAY     = new TypeRef<byte[]>() {
-                                                                            public Type getType() {
-                                                                                return byte[].class;
-                                                                            };
-                                                                        };
-    public static final TypeRef<HashMap<String, Object>> HASHMAP        = new TypeRef<HashMap<String, Object>>() {
-                                                                        };
-    public static final TypeRef<ArrayList<Object>>       LIST           = new TypeRef<ArrayList<Object>>() {
-                                                                        };
-    public static final TypeRef<HashMap<String, String>> HASHMAP_STRING = new TypeRef<HashMap<String, String>>() {
-                                                                        };
+    public static final TypeRef<String>                   STRING          = new TypeRef<String>() {
+                                                                              public Type getType() {
+                                                                                  return String.class;
+                                                                              };
+                                                                          };
+    public static final TypeRef<byte[]>                   BYTE_ARRAY      = new TypeRef<byte[]>() {
+                                                                              public Type getType() {
+                                                                                  return byte[].class;
+                                                                              };
+                                                                          };
+    public static final TypeRef<HashMap<String, Object>>  HASHMAP         = new TypeRef<HashMap<String, Object>>() {
+                                                                          };
+    public static final TypeRef<ArrayList<Object>>        LIST            = new TypeRef<ArrayList<Object>>() {
+                                                                          };
+    public static final TypeRef<HashMap<String, String>>  HASHMAP_STRING  = new TypeRef<HashMap<String, String>>() {
+                                                                          };
 
-    private final Type                                   type;
+    public static final TypeRef<HashMap<String, Integer>> HASHMAP_INTEGER = new TypeRef<HashMap<String, Integer>>() {
+                                                                          };
+    private final Type                                    type;
 
     public TypeRef() {
         final Type superClass = this.getClass().getGenericSuperclass();

@@ -9,4 +9,9 @@ public class ProxyAuthException extends HTTPProxyException {
         this.proxy = proxy;
     }
 
+    public ProxyAuthException(final Throwable e, final HTTPProxy proxy) {
+        super(e);
+        this.proxy = proxy;
+    }
+
 }

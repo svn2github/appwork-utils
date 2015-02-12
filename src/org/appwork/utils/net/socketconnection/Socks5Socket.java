@@ -18,9 +18,12 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
+import java.nio.ByteBuffer;
 
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.net.httpconnection.HTTPProxy;
+import org.appwork.utils.net.httpconnection.ProxyAuthException;
+import org.appwork.utils.net.httpconnection.ProxyConnectException;
 import org.appwork.utils.net.httpconnection.SocksHTTPconnection.AUTH;
 import org.appwork.utils.net.httpconnection.SocksHTTPconnection.DESTTYPE;
 
@@ -50,15 +53,28 @@ public class Socks5Socket extends ProxySocket {
         } else {
             authOffer = AUTH.NONE;
         }
-        final AUTH authRequest = Socks5Socket.sayHello(proxySocket, authOffer, null);
+        final AUTH authRequest;
+        try {
+            authRequest = Socks5Socket.sayHello(proxySocket, authOffer, null);
+        } catch (final IOException e) {
+            throw new ProxyConnectException(e, this.getProxy());
+        }
         switch (authRequest) {
         case PLAIN:
-            Socks5Socket.authPlain(proxySocket, this.getProxy().getUser(), this.getProxy().getPass(), null);
+            try {
+                Socks5Socket.authPlain(proxySocket, this.getProxy().getUser(), this.getProxy().getPass(), null);
+            } catch (final IOException e) {
+                throw new ProxyAuthException(e, this.getProxy());
+            }
             break;
         default:
             break;
         }
-        return Socks5Socket.establishConnection(proxySocket, endpoint, this.destType, null);
+        try {
+            return Socks5Socket.establishConnection(proxySocket, endpoint, this.destType, null);
+        } catch (final IOException e) {
+            throw new ProxyConnectException(e, this.getProxy());
+        }
     }
 
     public static Socket establishConnection(final Socket proxySocket, final SocketAddress endpoint, DESTTYPE destType, final StringBuffer logger) throws IOException {
@@ -79,7 +95,7 @@ public class Socks5Socket extends ProxySocket {
                 os.write((byte) 1);
                 /* send domain name */
                 if (logger != null) {
-                    logger.append("->SEND tcp connect request by ipv4\r\n");
+                    logger.append("->SEND tcp connect request by ipv4:" + address.getHostAddress() + "\r\n");
                 }
                 os.write(address.getAddress());
                 break;
@@ -93,7 +109,7 @@ public class Socks5Socket extends ProxySocket {
             os.write((byte) 3);
             /* send domain name */
             if (logger != null) {
-                logger.append("->SEND tcp connect request by domain\r\n");
+                logger.append("->SEND tcp connect request by domain:" + endPointAddress.getHostString() + "\r\n");
             }
             os.write((byte) domainBytes.length);
             os.write(domainBytes);
@@ -130,22 +146,25 @@ public class Socks5Socket extends ProxySocket {
         }
         if (resp[3] == 1) {
             /* ip4v response */
-            final byte[] ip = ProxySocket.ensureRead(is, 4, null);
+            final byte[] connectedIP = ProxySocket.ensureRead(is, 4, null);
+            /* port */
+            final byte[] connectedPort = ProxySocket.ensureRead(is, 2, null);
             if (logger != null) {
-                logger.append("<-CONNECT IP:" + InetAddress.getByAddress(ip) + "\r\n");
+                logger.append("<-BOUND IP:" + InetAddress.getByAddress(connectedIP) + ":" + ByteBuffer.wrap(connectedPort).getShort() + "\r\n");
             }
         } else if (resp[3] == 3) {
             /* domain name response */
             final byte[] length = ProxySocket.ensureRead(is, 1, null);
-            final byte[] domain = ProxySocket.ensureRead(is, length[0], null);
+            final byte[] connectedDomain = ProxySocket.ensureRead(is, length[0], null);
+            /* port */
+            final byte[] connectedPort = ProxySocket.ensureRead(is, 2, null);
             if (logger != null) {
-                logger.append("<-CONNECT Domain:" + new String(domain) + "\r\n");
+                logger.append("<-BOUND Domain:" + new String(connectedDomain) + ":" + ByteBuffer.wrap(connectedPort).getShort() + "\r\n");
             }
         } else {
             throw new IOException("Socks5 unsupported address Type " + resp[3]);
         }
-        /* port */
-        ProxySocket.ensureRead(is, 2, null);
+
         return proxySocket;
     }
 

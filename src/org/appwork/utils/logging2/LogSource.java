@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2012 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.utils.logging2
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -31,7 +31,6 @@ public class LogSource extends Logger implements LogInterface {
         if (logger instanceof LogSource) {
             ((LogSource) logger).log(e);
         } else {
-            logger.severe(e.getMessage());
             logger.severe(Exceptions.getStackTrace(e));
         }
     }
@@ -79,14 +78,14 @@ public class LogSource extends Logger implements LogInterface {
 
     /*
      * creates a LogCollector with given name
-     * 
+     *
      * maxLogRecordsInMemory defines how many log records this logger will
      * buffer in memory before logging to parent's handlers
-     * 
+     *
      * <0 = unlimited in memory, manual flush needed
-     * 
+     *
      * 0 = forward directly to parent's handlers
-     * 
+     *
      * >0 = limited
      */
     public LogSource(final String name, final int maxLogRecordsInMemory) {

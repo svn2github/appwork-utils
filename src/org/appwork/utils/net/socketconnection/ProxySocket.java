@@ -13,14 +13,18 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.nio.channels.SocketChannel;
+import java.util.concurrent.atomic.AtomicReference;
 
+import org.appwork.utils.StringUtils;
 import org.appwork.utils.net.httpconnection.HTTPConnectionUtils;
 import org.appwork.utils.net.httpconnection.HTTPProxy;
 import org.appwork.utils.net.httpconnection.ProxyConnectException;
@@ -55,28 +59,30 @@ public abstract class ProxySocket extends Socket {
         return buf;
     }
 
-    private SocketAddress   bindPoint         = null;
+    private SocketAddress                 bindPoint            = null;
 
-    private Boolean         keepAlive         = null;
+    private Boolean                       keepAlive            = null;
 
-    private Boolean         oobInline         = null;
+    private Boolean                       oobInline            = null;
 
-    private final HTTPProxy proxy;
+    private final HTTPProxy               proxy;
 
-    private Socket          proxySocket       = null;
+    private Socket                        proxySocket          = null;
 
-    private Integer         receiveBufferSize = null;
+    private Integer                       receiveBufferSize    = null;
 
-    private Boolean         reuseAddress      = null;
-    private Integer         sendBufferSize    = null;
+    private Boolean                       reuseAddress         = null;
+    private Integer                       sendBufferSize       = null;
 
-    private Integer         soLinger          = null;
+    private Integer                       soLinger             = null;
 
-    private Integer         soTimeout         = null;
+    private Integer                       soTimeout            = null;
 
-    private Boolean         tcpNoDelay        = null;
+    private Boolean                       tcpNoDelay           = null;
 
-    private Integer         trafficClass      = null;
+    private Integer                       trafficClass         = null;
+
+    private final AtomicReference<Socket> pendingConnectSocket = new AtomicReference<Socket>(null);
 
     public ProxySocket(HTTPProxy proxy) {
         this.proxy = proxy;
@@ -95,6 +101,11 @@ public abstract class ProxySocket extends Socket {
     public synchronized void close() throws IOException {
         if (this.proxySocket != null) {
             this.proxySocket.close();
+        } else {
+            final Socket socket = this.pendingConnectSocket.get();
+            if (socket != null) {
+                socket.close();
+            }
         }
     }
 
@@ -103,39 +114,118 @@ public abstract class ProxySocket extends Socket {
         this.connect(endpoint, 0);
     }
 
+    private Socket createConnectSocket(int connectTimeout) throws IOException {
+        this.closeConnectSocket();
+        final Socket connectSocket = new Socket(Proxy.NO_PROXY);
+        try {
+            this.pendingConnectSocket.set(connectSocket);
+            this.setSocketOptions(connectSocket);
+        } catch (final IOException e) {
+            connectSocket.close();
+            throw e;
+        }
+        return connectSocket;
+    }
+
+    private boolean closeConnectSocket() throws IOException {
+        final Socket socket = this.pendingConnectSocket.getAndSet(null);
+        if (socket != null) {
+            socket.close();
+            return true;
+        }
+        return false;
+    }
+
+    private Socket getConnectSocket() throws IOException {
+        final Socket socket = this.pendingConnectSocket.get();
+        if (socket == null) { throw new SocketException("Socket is not connecting"); }
+        return socket;
+    }
+
     @Override
-    public void connect(SocketAddress endpoint, int connectTimeout) throws IOException {
+    public void connect(SocketAddress endpoint, final int connectTimeout) throws IOException {
         final InetAddress[] proxyHosts = HTTPConnectionUtils.resolvHostIP(this.getProxy().getHost());
-        Socket connectSocket = null;
         try {
             IOException ioE = null;
             for (final InetAddress proxyHost : proxyHosts) {
-                final InetSocketAddress proxySocketAddress = new InetSocketAddress(proxyHost, this.proxy.getPort());
-                connectSocket = new Socket(Proxy.NO_PROXY);
-                this.setSocketOptions(connectSocket);
-                connectSocket.setSoTimeout(connectTimeout);
+                final InetSocketAddress proxySocketAddress = new InetSocketAddress(proxyHost, this.getProxy().getPort());
                 try {
-                    connectSocket.connect(proxySocketAddress, connectTimeout);
+                    if (connectTimeout == 0) {
+                        /** no workaround for infinite connect timeouts **/
+                        final Socket connectSocket = this.createConnectSocket(connectTimeout);
+                        connectSocket.connect(proxySocketAddress, connectTimeout);
+                    } else {
+                        /**
+                         * workaround for too early connect timeouts
+                         */
+                        int connectTimeoutWorkaround = connectTimeout;
+                        while (true) {
+                            final long beforeConnect = System.currentTimeMillis();
+                            try {
+                                final Socket connectSocket = this.createConnectSocket(connectTimeout);
+                                connectSocket.connect(proxySocketAddress, connectTimeoutWorkaround);
+                                break;
+                            } catch (final ConnectException cE) {
+                                if (StringUtils.containsIgnoreCase(cE.getMessage(), "timed out")) {
+                                    int timeout = (int) (System.currentTimeMillis() - beforeConnect);
+                                    if (timeout < 1000) {
+                                        System.out.println("Too Fast ConnectTimeout(Normal): " + timeout + "->Wait " + (2000 - timeout));
+                                        try {
+                                            Thread.sleep(2000 - timeout);
+                                        } catch (final InterruptedException ie) {
+                                            throw cE;
+                                        }
+                                        timeout = (int) (System.currentTimeMillis() - beforeConnect);
+                                    }
+                                    final int lastConnectTimeout = connectTimeoutWorkaround;
+                                    connectTimeoutWorkaround = Math.max(0, connectTimeoutWorkaround - timeout);
+                                    if (connectTimeoutWorkaround == 0 || Thread.currentThread().isInterrupted()) { throw cE; }
+                                    System.out.println("Workaround for ConnectTimeout(Normal): " + lastConnectTimeout + ">" + timeout);
+                                } else {
+                                    throw cE;
+                                }
+                            } catch (final SocketTimeoutException sTE) {
+                                if (StringUtils.containsIgnoreCase(sTE.getMessage(), "timed out")) {
+                                    int timeout = (int) (System.currentTimeMillis() - beforeConnect);
+                                    if (timeout < 1000) {
+                                        System.out.println("Too Fast ConnectTimeout(Interrupted): " + timeout + "->Wait " + (2000 - timeout));
+                                        try {
+                                            Thread.sleep(2000 - timeout);
+                                        } catch (final InterruptedException ie) {
+                                            throw sTE;
+                                        }
+                                        timeout = (int) (System.currentTimeMillis() - beforeConnect);
+                                    }
+                                    final int lastConnectTimeout = connectTimeoutWorkaround;
+                                    connectTimeoutWorkaround = Math.max(0, connectTimeoutWorkaround - timeout);
+                                    if (connectTimeoutWorkaround == 0 || Thread.currentThread().isInterrupted()) { throw sTE; }
+                                    System.out.println("Workaround for ConnectTimeout(Interrupted): " + lastConnectTimeout + ">" + timeout);
+                                } else {
+                                    throw sTE;
+                                }
+                            }
+                        }
+                    }
                     ioE = null;
                     break;
                 } catch (final IOException e) {
-                    connectSocket.close();
                     ioE = e;
+                    this.closeConnectSocket();
                 }
             }
-            if (ioE != null) { throw new ProxyConnectException(ioE, this.proxy); }
-            final Socket connectedSocket = this.connectProxySocket(connectSocket, endpoint);
+            if (ioE != null) { throw new ProxyConnectException(ioE, this.getProxy()); }
+            final Socket connectedSocket = this.connectProxySocket(this.getConnectSocket(), endpoint);
             if (connectedSocket != null) {
                 this.proxySocket = connectedSocket;
                 return;
             }
-            throw new ProxyConnectException(this.proxy);
+            throw new ProxyConnectException(this.getProxy());
         } catch (final IOException e) {
             if (e instanceof ProxyConnectException) { throw e; }
-            throw new ProxyConnectException(e, this.proxy);
+            throw new ProxyConnectException(e, this.getProxy());
         } finally {
-            if (this.proxySocket == null && connectSocket != null) {
-                connectSocket.close();
+            if (this.proxySocket == null) {
+                this.closeConnectSocket();
             }
         }
     }

@@ -17,14 +17,11 @@ public class Socks5HTTPConnectionImpl extends SocksHTTPconnection {
     @Override
     protected void authenticateProxyPlain() throws IOException {
         try {
-            Socks5Socket.authPlain(this.getSocksSocket(), this.proxy.getUser(), this.proxy.getPass(), this.proxyRequest);
+            Socks5Socket.authPlain(this.getSocksSocket(), this.getProxy().getUser(), this.getProxy().getPass(), this.proxyRequest);
         } catch (final IOException e) {
-            try {
-                this.sockssocket.close();
-            } catch (final Throwable e2) {
-            }
+            this.disconnect();
             if (e instanceof HTTPProxyException) { throw e; }
-            throw new ProxyConnectException(e, this.proxy);
+            throw new ProxyAuthException(e, this.getProxy());
         }
     }
 
@@ -35,7 +32,7 @@ public class Socks5HTTPConnectionImpl extends SocksHTTPconnection {
         } catch (final IOException e) {
             this.disconnect();
             if (e instanceof HTTPProxyException) { throw e; }
-            throw new ProxyConnectException(e, this.proxy);
+            throw new ProxyConnectException(e, this.getProxy());
         }
     }
 
@@ -43,7 +40,7 @@ public class Socks5HTTPConnectionImpl extends SocksHTTPconnection {
     protected AUTH sayHello() throws IOException {
         try {
             final AUTH authOffer;
-            if (!StringUtils.isEmpty(this.proxy.getUser()) || !StringUtils.isEmpty(this.proxy.getPass())) {
+            if (!StringUtils.isEmpty(this.getProxy().getUser()) || !StringUtils.isEmpty(this.getProxy().getPass())) {
                 authOffer = AUTH.PLAIN;
             } else {
                 authOffer = AUTH.NONE;
@@ -52,12 +49,12 @@ public class Socks5HTTPConnectionImpl extends SocksHTTPconnection {
         } catch (final IOException e) {
             this.disconnect();
             if (e instanceof HTTPProxyException) { throw e; }
-            throw new ProxyConnectException(e, this.proxy);
+            throw new ProxyConnectException(e, this.getProxy());
         }
     }
 
     @Override
     protected void validateProxy() throws IOException {
-        if (this.proxy == null || !HTTPProxy.TYPE.SOCKS5.equals(this.proxy.getType())) { throw new ProxyConnectException("Socks5HTTPConnection: invalid Socks5 Proxy!", this.proxy); }
+        if (this.getProxy() == null || !HTTPProxy.TYPE.SOCKS5.equals(this.getProxy().getType())) { throw new ProxyConnectException("Socks5HTTPConnection: invalid Socks5 Proxy!", this.getProxy()); }
     }
 }

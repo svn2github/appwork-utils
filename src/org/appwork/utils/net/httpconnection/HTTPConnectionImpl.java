@@ -83,8 +83,12 @@ public class HTTPConnectionImpl implements HTTPConnection {
         return this.connectionSocket;
     }
 
-    protected final URL                   httpURL;
-    protected final HTTPProxy             proxy;
+    protected final URL       httpURL;
+    protected final HTTPProxy proxy;
+
+    public HTTPProxy getProxy() {
+        return this.proxy;
+    }
 
     protected String                      httpPath;
     protected RequestMethod               httpMethod          = RequestMethod.GET;
@@ -990,9 +994,9 @@ public class HTTPConnectionImpl implements HTTPConnection {
         final Socket lhttpSocket = this.connectionSocket;
         final InetAddress lLastConnection = this.lastConnection;
         if (lhttpSocket != null && lhttpSocket.isConnected()) {
-            sb.append("HostIP: ").append(lhttpSocket.getInetAddress()).append(":").append(lhttpSocket.getPort()).append("\r\n");
+            sb.append("ConnectIP: ").append(lhttpSocket.getInetAddress()).append(":").append(lhttpSocket.getPort()).append("\r\n");
         } else if (lLastConnection != null) {
-            sb.append("HostIP: ").append(lLastConnection).append(":").append(this.lastConnectionPort).append("\r\n");
+            sb.append("ConnectIP: ").append(lLastConnection).append(":").append(this.lastConnectionPort).append("\r\n");
         } else {
             sb.append("Host: ").append(this.getURL().getHost()).append("\r\n");
         }

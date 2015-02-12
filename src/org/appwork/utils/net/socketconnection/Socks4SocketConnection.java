@@ -28,7 +28,7 @@ import org.appwork.utils.net.httpconnection.SocksHTTPconnection.DESTTYPE;
  * @author daniel
  *
  */
-public class Socks4Socket extends ProxySocket {
+public class Socks4SocketConnection extends SocketConnection {
 
     private final DESTTYPE destType;
 
@@ -36,7 +36,7 @@ public class Socks4Socket extends ProxySocket {
         return this.destType;
     }
 
-    public Socks4Socket(HTTPProxy proxy, DESTTYPE destType) {
+    public Socks4SocketConnection(HTTPProxy proxy, DESTTYPE destType) {
         super(proxy);
         if (proxy == null || !HTTPProxy.TYPE.SOCKS4.equals(proxy.getType())) { throw new IllegalArgumentException("proxy must be of type socks4"); }
         this.destType = destType;
@@ -45,12 +45,12 @@ public class Socks4Socket extends ProxySocket {
     @Override
     protected Socket connectProxySocket(final Socket proxySocket, final SocketAddress endpoint, final StringBuffer logger) throws IOException {
         try {
-            Socks4Socket.sayHello(proxySocket, logger);
+            Socks4SocketConnection.sayHello(proxySocket, logger);
         } catch (final IOException e) {
             throw new ProxyConnectException(e, this.getProxy());
         }
         try {
-            return Socks4Socket.establishConnection(proxySocket, this.getProxy().getUser(), endpoint, this.getDestType(), logger);
+            return Socks4SocketConnection.establishConnection(proxySocket, this.getProxy().getUser(), endpoint, this.getDestType(), logger);
         } catch (final IOException e) {
             throw new ProxyConnectException(e, this.getProxy());
         }
@@ -110,7 +110,7 @@ public class Socks4Socket extends ProxySocket {
         os.flush();
         /* read response, 8 bytes */
         final InputStream is = proxySocket.getInputStream();
-        final byte[] resp = ProxySocket.ensureRead(is, 2, null);
+        final byte[] resp = SocketConnection.ensureRead(is, 2, null);
         if (resp[0] != 0) { throw new IOException("Invalid response:" + resp[0]); }
         switch (resp[1]) {
         case 0x5a:
@@ -125,9 +125,9 @@ public class Socks4Socket extends ProxySocket {
             throw new IOException("Socks4 could not establish connection, status=" + resp[1]);
         }
         /* port */
-        final byte[] connectedPort = ProxySocket.ensureRead(is, 2, null);
+        final byte[] connectedPort = SocketConnection.ensureRead(is, 2, null);
         /* ip4v response */
-        final byte[] connectedIP = ProxySocket.ensureRead(is, 4, null);
+        final byte[] connectedIP = SocketConnection.ensureRead(is, 4, null);
         if (logger != null) {
             logger.append("<-BOUND IP:" + InetAddress.getByAddress(connectedIP) + ":" + ByteBuffer.wrap(connectedPort).getShort() + "\r\n");
         }

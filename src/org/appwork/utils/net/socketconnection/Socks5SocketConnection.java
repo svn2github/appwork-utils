@@ -31,7 +31,7 @@ import org.appwork.utils.net.httpconnection.SocksHTTPconnection.DESTTYPE;
  * @author daniel
  *
  */
-public class Socks5Socket extends ProxySocket {
+public class Socks5SocketConnection extends SocketConnection {
 
     private final DESTTYPE destType;
 
@@ -39,7 +39,7 @@ public class Socks5Socket extends ProxySocket {
         return this.destType;
     }
 
-    public Socks5Socket(HTTPProxy proxy, DESTTYPE destType) {
+    public Socks5SocketConnection(HTTPProxy proxy, DESTTYPE destType) {
         super(proxy);
         if (proxy == null || !HTTPProxy.TYPE.SOCKS5.equals(proxy.getType())) { throw new IllegalArgumentException("proxy must be of type socks5"); }
         this.destType = destType;
@@ -55,14 +55,14 @@ public class Socks5Socket extends ProxySocket {
         }
         final AUTH authRequest;
         try {
-            authRequest = Socks5Socket.sayHello(proxySocket, authOffer, logger);
+            authRequest = Socks5SocketConnection.sayHello(proxySocket, authOffer, logger);
         } catch (final IOException e) {
             throw new ProxyConnectException(e, this.getProxy());
         }
         switch (authRequest) {
         case PLAIN:
             try {
-                Socks5Socket.authPlain(proxySocket, this.getProxy().getUser(), this.getProxy().getPass(), logger);
+                Socks5SocketConnection.authPlain(proxySocket, this.getProxy().getUser(), this.getProxy().getPass(), logger);
             } catch (final IOException e) {
                 throw new ProxyAuthException(e, this.getProxy());
             }
@@ -71,7 +71,7 @@ public class Socks5Socket extends ProxySocket {
             break;
         }
         try {
-            return Socks5Socket.establishConnection(proxySocket, endpoint, this.getDestType(), logger);
+            return Socks5SocketConnection.establishConnection(proxySocket, endpoint, this.getDestType(), logger);
         } catch (final IOException e) {
             throw new ProxyConnectException(e, this.getProxy());
         }
@@ -124,7 +124,7 @@ public class Socks5Socket extends ProxySocket {
         os.flush();
         /* read response, 4 bytes and then read rest of response */
         final InputStream is = proxySocket.getInputStream();
-        final byte[] resp = ProxySocket.ensureRead(is, 4, null);
+        final byte[] resp = SocketConnection.ensureRead(is, 4, null);
         if (resp[0] != 5) { throw new IOException("Invalid response:" + resp[0]); }
         switch (resp[1]) {
         case 0:
@@ -145,18 +145,18 @@ public class Socks5Socket extends ProxySocket {
         }
         if (resp[3] == 1) {
             /* ip4v response */
-            final byte[] connectedIP = ProxySocket.ensureRead(is, 4, null);
+            final byte[] connectedIP = SocketConnection.ensureRead(is, 4, null);
             /* port */
-            final byte[] connectedPort = ProxySocket.ensureRead(is, 2, null);
+            final byte[] connectedPort = SocketConnection.ensureRead(is, 2, null);
             if (logger != null) {
                 logger.append("<-BOUND IP:" + InetAddress.getByAddress(connectedIP) + ":" + ByteBuffer.wrap(connectedPort).getShort() + "\r\n");
             }
         } else if (resp[3] == 3) {
             /* domain name response */
-            final byte[] length = ProxySocket.ensureRead(is, 1, null);
-            final byte[] connectedDomain = ProxySocket.ensureRead(is, length[0], null);
+            final byte[] length = SocketConnection.ensureRead(is, 1, null);
+            final byte[] connectedDomain = SocketConnection.ensureRead(is, length[0], null);
             /* port */
-            final byte[] connectedPort = ProxySocket.ensureRead(is, 2, null);
+            final byte[] connectedPort = SocketConnection.ensureRead(is, 2, null);
             if (logger != null) {
                 logger.append("<-BOUND Domain:" + new String(connectedDomain) + ":" + ByteBuffer.wrap(connectedPort).getShort() + "\r\n");
             }
@@ -190,7 +190,7 @@ public class Socks5Socket extends ProxySocket {
         }
         /* read response, 2 bytes */
         final InputStream is = proxySocket.getInputStream();
-        final byte[] resp = ProxySocket.ensureRead(is, 2, null);
+        final byte[] resp = SocketConnection.ensureRead(is, 2, null);
         if (resp[0] != 1) { throw new IOException("Invalid response:" + resp[0]); }
         if (resp[1] != 0) {
             if (logger != null) {
@@ -234,7 +234,7 @@ public class Socks5Socket extends ProxySocket {
         }
         /* read response, 2 bytes */
         final InputStream is = proxySocket.getInputStream();
-        final byte[] resp = ProxySocket.ensureRead(is, 2, null);
+        final byte[] resp = SocketConnection.ensureRead(is, 2, null);
         if (resp[0] != 5) { throw new IOException("Invalid response:" + resp[0]); }
         if (resp[1] == 255) {
             if (logger != null) {

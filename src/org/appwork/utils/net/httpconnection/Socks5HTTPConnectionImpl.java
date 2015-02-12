@@ -5,7 +5,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.URL;
 
-import org.appwork.utils.net.socketconnection.Socks5Socket;
+import org.appwork.utils.net.socketconnection.Socks5SocketConnection;
 
 public class Socks5HTTPConnectionImpl extends SocksHTTPconnection {
 
@@ -16,7 +16,7 @@ public class Socks5HTTPConnectionImpl extends SocksHTTPconnection {
 
     @Override
     protected Socket establishConnection() throws IOException {
-        final Socks5Socket socket = new Socks5Socket(this.getProxy(), DESTTYPE.DOMAIN);
+        final Socks5SocketConnection socket = new Socks5SocketConnection(this.getProxy(), DESTTYPE.DOMAIN);
         socket.connect(this.proxyInetSocketAddress = new InetSocketAddress(this.httpHost, this.httpPort), this.getConnectTimeout(), this.proxyRequest);
         return socket;
     }

@@ -14,7 +14,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.URL;
 
-import org.appwork.utils.net.socketconnection.Socks4Socket;
+import org.appwork.utils.net.socketconnection.Socks4SocketConnection;
 
 /**
  * @author daniel
@@ -29,7 +29,7 @@ public class Socks4HTTPConnectionImpl extends SocksHTTPconnection {
 
     @Override
     protected Socket establishConnection() throws IOException {
-        final Socks4Socket socket = new Socks4Socket(this.getProxy(), DESTTYPE.DOMAIN);
+        final Socks4SocketConnection socket = new Socks4SocketConnection(this.getProxy(), DESTTYPE.DOMAIN);
         socket.connect(this.proxyInetSocketAddress = new InetSocketAddress(this.httpHost, this.httpPort), this.getConnectTimeout(), this.proxyRequest);
         return socket;
     }

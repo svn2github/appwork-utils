@@ -33,7 +33,7 @@ import org.appwork.utils.net.httpconnection.ProxyConnectException;
  * @author daniel
  *
  */
-public abstract class ProxySocket extends Socket {
+public abstract class SocketConnection extends Socket {
 
     protected static int ensureRead(final InputStream is) throws IOException {
         final int read = is.read();
@@ -84,7 +84,7 @@ public abstract class ProxySocket extends Socket {
 
     private final AtomicReference<Socket> pendingConnectSocket = new AtomicReference<Socket>(null);
 
-    public ProxySocket(HTTPProxy proxy) {
+    public SocketConnection(HTTPProxy proxy) {
         this.proxy = proxy;
     }
 

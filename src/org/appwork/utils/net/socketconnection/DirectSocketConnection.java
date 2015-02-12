@@ -24,14 +24,14 @@ import org.appwork.utils.net.httpconnection.ProxyConnectException;
  * @author daniel
  *
  */
-public class DirectSocket extends ProxySocket {
+public class DirectSocketConnection extends SocketConnection {
 
-    public DirectSocket(HTTPProxy proxy) {
+    public DirectSocketConnection(HTTPProxy proxy) {
         super(proxy);
         if (proxy == null || !proxy.isLocal()) { throw new IllegalArgumentException("proxy must be of type none/direct"); }
     }
 
-    public DirectSocket() {
+    public DirectSocketConnection() {
         this(HTTPProxy.NONE);
     }
 

@@ -9,13 +9,8 @@
  */
 package org.appwork.utils.net.httpconnection;
 
-import java.io.EOFException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.Proxy;
 import java.net.Socket;
 import java.net.URL;
 
@@ -37,23 +32,8 @@ public abstract class SocksHTTPconnection extends HTTPConnectionImpl {
         DOMAIN
     }
 
-    protected Socket sockssocket = null;
+    protected Socket            sockssocket            = null;
 
-    protected Socket getSocksSocket() {
-        return this.sockssocket;
-    }
-
-    protected InputStream socksinputstream = null;
-
-    protected InputStream getSocksInputStream() {
-        return this.socksinputstream;
-    }
-
-    protected OutputStream getSocksOutputStream() {
-        return this.socksoutputstream;
-    }
-
-    protected OutputStream      socksoutputstream      = null;
     protected int               httpPort;
     protected String            httpHost;
     protected StringBuffer      proxyRequest           = null;
@@ -63,64 +43,23 @@ public abstract class SocksHTTPconnection extends HTTPConnectionImpl {
         super(url, proxy);
     }
 
-    abstract protected void authenticateProxyPlain() throws IOException;
-
     @Override
     public void connect() throws IOException {
+        /* establish to destination through socks */
+        this.httpPort = this.httpURL.getPort();
+        this.httpHost = this.httpURL.getHost();
+        if (this.httpPort == -1) {
+            this.httpPort = this.httpURL.getDefaultPort();
+        }
         boolean sslSNIWorkAround = false;
-        InetAddress hosts[] = null;
         connect: while (true) {
             if (this.isConnectionSocketValid()) { return;/* oder fehler */
             }
             this.resetConnection();
+            this.proxyRequest = new StringBuffer();
             try {
-                this.validateProxy();
-                IOException ee = null;
                 long startTime = System.currentTimeMillis();
-                if (hosts == null) {
-                    hosts = this.resolvHostIP(this.proxy.getHost());
-                }
-                for (final InetAddress host : hosts) {
-                    this.resetConnection();
-                    this.sockssocket = new Socket(Proxy.NO_PROXY);
-                    this.sockssocket.setSoTimeout(this.connectTimeout);
-                    try {
-                        /* create and connect to socks5 proxy */
-                        startTime = System.currentTimeMillis();
-                        this.sockssocket.connect(this.proxyInetSocketAddress = new InetSocketAddress(host, this.proxy.getPort()), this.connectTimeout);
-                        /* connection is okay */
-                        ee = null;
-                        break;
-                    } catch (final IOException e) {
-                        this.disconnect();
-                        /* connection failed, try next available ip */
-                        this.connectExceptions.add(this.proxyInetSocketAddress + "|" + e.getMessage());
-                        ee = e;
-                    }
-                }
-                if (ee != null) { throw new ProxyConnectException(ee, this.proxy); }
-                this.socksinputstream = this.sockssocket.getInputStream();
-                this.socksoutputstream = this.sockssocket.getOutputStream();
-                /* establish connection to socks */
-                this.proxyRequest = new StringBuffer();
-                final AUTH auth = this.sayHello();
-                switch (auth) {
-                case PLAIN:
-                    this.proxyRequest.append("<-PLAIN AUTH\r\n");
-                    /* username/password authentication */
-                    this.authenticateProxyPlain();
-                    break;
-                case NONE:
-                    this.proxyRequest.append("<-NONE AUTH\r\n");
-                    break;
-                }
-                /* establish to destination through socks */
-                this.httpPort = this.httpURL.getPort();
-                this.httpHost = this.httpURL.getHost();
-                if (this.httpPort == -1) {
-                    this.httpPort = this.httpURL.getDefaultPort();
-                }
-                final Socket establishedConnection = this.establishConnection();
+                this.sockssocket = this.establishConnection();
                 if (this.httpURL.getProtocol().startsWith("https")) {
                     /* we need to lay ssl over normal socks5 connection */
                     try {
@@ -145,7 +84,7 @@ public abstract class SocksHTTPconnection extends HTTPConnectionImpl {
                     }
                 } else {
                     /* we can continue to use the socks connection */
-                    this.connectionSocket = establishedConnection;
+                    this.connectionSocket = this.sockssocket;
                 }
                 this.setReadTimeout(this.readTimeout);
                 this.httpResponseCode = -1;
@@ -224,21 +163,4 @@ public abstract class SocksHTTPconnection extends HTTPConnectionImpl {
         return super.getRequestInfo();
     }
 
-    /* reads response with expLength bytes */
-    protected byte[] readResponse(final int expLength) throws IOException {
-        final byte[] response = new byte[expLength];
-        int index = 0;
-        int read = 0;
-        final InputStream inputStream = this.getSocksInputStream();
-        while (index < expLength && (read = inputStream.read()) != -1) {
-            response[index] = (byte) read;
-            index++;
-        }
-        if (index < expLength) { throw new EOFException("SocksHTTPConnection: not enough data read"); }
-        return response;
-    }
-
-    abstract protected AUTH sayHello() throws IOException;
-
-    abstract protected void validateProxy() throws IOException;
 }

@@ -67,7 +67,7 @@ public abstract class ProxySocket extends Socket {
 
     private final HTTPProxy               proxy;
 
-    private Socket                        proxySocket          = null;
+    protected Socket                      proxySocket          = null;
 
     private Integer                       receiveBufferSize    = null;
 
@@ -102,10 +102,7 @@ public abstract class ProxySocket extends Socket {
         if (this.proxySocket != null) {
             this.proxySocket.close();
         } else {
-            final Socket socket = this.pendingConnectSocket.get();
-            if (socket != null) {
-                socket.close();
-            }
+            this.closeConnectSocket();
         }
     }
 
@@ -114,7 +111,7 @@ public abstract class ProxySocket extends Socket {
         this.connect(endpoint, 0);
     }
 
-    private Socket createConnectSocket(int connectTimeout) throws IOException {
+    protected Socket createConnectSocket(int connectTimeout) throws IOException {
         this.closeConnectSocket();
         final Socket connectSocket = new Socket(Proxy.NO_PROXY);
         try {
@@ -127,7 +124,7 @@ public abstract class ProxySocket extends Socket {
         return connectSocket;
     }
 
-    private boolean closeConnectSocket() throws IOException {
+    protected boolean closeConnectSocket() throws IOException {
         final Socket socket = this.pendingConnectSocket.getAndSet(null);
         if (socket != null) {
             socket.close();
@@ -136,7 +133,7 @@ public abstract class ProxySocket extends Socket {
         return false;
     }
 
-    private Socket getConnectSocket() throws IOException {
+    protected Socket getConnectSocket() throws IOException {
         final Socket socket = this.pendingConnectSocket.get();
         if (socket == null) { throw new SocketException("Socket is not connecting"); }
         return socket;
@@ -144,16 +141,19 @@ public abstract class ProxySocket extends Socket {
 
     @Override
     public void connect(SocketAddress endpoint, final int connectTimeout) throws IOException {
-        final InetAddress[] proxyHosts = HTTPConnectionUtils.resolvHostIP(this.getProxy().getHost());
+        this.connect(endpoint, connectTimeout, null);
+    }
+
+    public void connect(SocketAddress endpoint, final int connectTimeout, final StringBuffer logger) throws IOException {
         try {
             IOException ioE = null;
-            for (final InetAddress proxyHost : proxyHosts) {
-                final InetSocketAddress proxySocketAddress = new InetSocketAddress(proxyHost, this.getProxy().getPort());
+            for (final InetAddress connectAddress : HTTPConnectionUtils.resolvHostIP(this.getProxy().getHost())) {
+                final InetSocketAddress connectSocketAddress = new InetSocketAddress(connectAddress, this.getProxy().getPort());
                 try {
                     if (connectTimeout == 0) {
                         /** no workaround for infinite connect timeouts **/
                         final Socket connectSocket = this.createConnectSocket(connectTimeout);
-                        connectSocket.connect(proxySocketAddress, connectTimeout);
+                        connectSocket.connect(connectSocketAddress, connectTimeout);
                     } else {
                         /**
                          * workaround for too early connect timeouts
@@ -163,7 +163,7 @@ public abstract class ProxySocket extends Socket {
                             final long beforeConnect = System.currentTimeMillis();
                             try {
                                 final Socket connectSocket = this.createConnectSocket(connectTimeout);
-                                connectSocket.connect(proxySocketAddress, connectTimeoutWorkaround);
+                                connectSocket.connect(connectSocketAddress, connectTimeout);
                                 break;
                             } catch (final ConnectException cE) {
                                 if (StringUtils.containsIgnoreCase(cE.getMessage(), "timed out")) {
@@ -214,7 +214,7 @@ public abstract class ProxySocket extends Socket {
                 }
             }
             if (ioE != null) { throw new ProxyConnectException(ioE, this.getProxy()); }
-            final Socket connectedSocket = this.connectProxySocket(this.getConnectSocket(), endpoint);
+            final Socket connectedSocket = this.connectProxySocket(this.getConnectSocket(), endpoint, logger);
             if (connectedSocket != null) {
                 this.proxySocket = connectedSocket;
                 return;
@@ -230,7 +230,7 @@ public abstract class ProxySocket extends Socket {
         }
     }
 
-    protected abstract Socket connectProxySocket(Socket proxySocket, SocketAddress endpoint) throws IOException;
+    protected abstract Socket connectProxySocket(Socket proxySocket, SocketAddress endpoint, final StringBuffer logger) throws IOException;
 
     @Override
     public SocketChannel getChannel() {
@@ -366,7 +366,7 @@ public abstract class ProxySocket extends Socket {
 
     @Override
     public boolean isConnected() {
-        if (this.proxySocket != null) { return this.proxySocket.isClosed(); }
+        if (this.proxySocket != null) { return this.proxySocket.isConnected(); }
         return false;
     }
 
@@ -439,6 +439,12 @@ public abstract class ProxySocket extends Socket {
         } else {
             this.sendBufferSize = size;
         }
+    }
+
+    @Override
+    public String toString() {
+        if (this.proxySocket != null) { return this.proxySocket.toString(); }
+        return super.toString();
     }
 
     private void setSocketOptions(final Socket connectSocket) throws IOException {

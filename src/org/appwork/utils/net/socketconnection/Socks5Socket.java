@@ -46,7 +46,7 @@ public class Socks5Socket extends ProxySocket {
     }
 
     @Override
-    protected Socket connectProxySocket(final Socket proxySocket, final SocketAddress endpoint) throws IOException {
+    protected Socket connectProxySocket(final Socket proxySocket, final SocketAddress endpoint, final StringBuffer logger) throws IOException {
         final AUTH authOffer;
         if (!StringUtils.isEmpty(this.getProxy().getUser()) || !StringUtils.isEmpty(this.getProxy().getPass())) {
             authOffer = AUTH.PLAIN;
@@ -55,14 +55,14 @@ public class Socks5Socket extends ProxySocket {
         }
         final AUTH authRequest;
         try {
-            authRequest = Socks5Socket.sayHello(proxySocket, authOffer, null);
+            authRequest = Socks5Socket.sayHello(proxySocket, authOffer, logger);
         } catch (final IOException e) {
             throw new ProxyConnectException(e, this.getProxy());
         }
         switch (authRequest) {
         case PLAIN:
             try {
-                Socks5Socket.authPlain(proxySocket, this.getProxy().getUser(), this.getProxy().getPass(), null);
+                Socks5Socket.authPlain(proxySocket, this.getProxy().getUser(), this.getProxy().getPass(), logger);
             } catch (final IOException e) {
                 throw new ProxyAuthException(e, this.getProxy());
             }
@@ -71,7 +71,7 @@ public class Socks5Socket extends ProxySocket {
             break;
         }
         try {
-            return Socks5Socket.establishConnection(proxySocket, endpoint, this.destType, null);
+            return Socks5Socket.establishConnection(proxySocket, endpoint, this.getDestType(), logger);
         } catch (final IOException e) {
             throw new ProxyConnectException(e, this.getProxy());
         }
@@ -86,14 +86,13 @@ public class Socks5Socket extends ProxySocket {
         os.write((byte) 1);
         /* reserved */
         os.write((byte) 0);
-        final byte[] domainBytes = endPointAddress.getHostString().getBytes("ISO-8859-1");
+        /* send ipv4/domain */
         switch (destType) {
         case IPV4:
             final InetAddress address = endPointAddress.getAddress();
             if (address != null) {
                 /* we use ipv4 */
                 os.write((byte) 1);
-                /* send domain name */
                 if (logger != null) {
                     logger.append("->SEND tcp connect request by ipv4:" + address.getHostAddress() + "\r\n");
                 }
@@ -107,10 +106,10 @@ public class Socks5Socket extends ProxySocket {
         case DOMAIN:
             /* we use domain */
             os.write((byte) 3);
-            /* send domain name */
             if (logger != null) {
                 logger.append("->SEND tcp connect request by domain:" + endPointAddress.getHostString() + "\r\n");
             }
+            final byte[] domainBytes = endPointAddress.getHostString().getBytes("ISO-8859-1");
             os.write((byte) domainBytes.length);
             os.write(domainBytes);
             break;

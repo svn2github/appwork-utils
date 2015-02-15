@@ -15,7 +15,7 @@ import java.io.IOException;
  * @author daniel
  * 
  */
-abstract class HTTPProxyException extends IOException {
+public abstract class HTTPProxyException extends IOException {
 
     protected HTTPProxy       proxy            = null;
 

@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2010 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.utils.event
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -31,19 +31,19 @@ import org.appwork.utils.swing.dialog.FileChooserType;
 /**
  * The Eventsenderclass is the core of the Eventsystem. it can be used to design
  * new Eventbroadcaster Systems easily.
- * 
+ *
  * Guidelines:<br>
  * 1. CReate a new MyEventSender extends
  * org.appwork.utils.event.Eventsender<ListenerType, EventType> <br>
  * 2. Create MyListenerType extends java.util.EventListener<br>
  * 3. CReate MyEvent extends org.appwork.utils.event.SimpleEvent<CallerType,
  * ParameterType, TypeEnumType><br>
- * 
+ *
  * <br>
  * TypeEnumType is usually a intern enum which defines all available eventtypes
- * 
+ *
  * @author $Author: unknown$
- * 
+ *
  */
 
 public abstract class Eventsender<ListenerType extends EventListener, EventType extends DefaultEvent> {
@@ -95,7 +95,6 @@ public abstract class Eventsender<ListenerType extends EventListener, EventType 
         sb.append("}");
         new File(file, eventName + ".java").delete();
         IO.writeStringToFile(new File(file, eventName + ".java"), sb.toString());
-
     }
 
     public static void main(final String[] args) throws DialogClosedException, DialogCanceledException, IOException, URISyntaxException {
@@ -136,7 +135,7 @@ public abstract class Eventsender<ListenerType extends EventListener, EventType 
 
     /**
      * List of Listeners that are requested for removal
-     * 
+     *
      */
 
     /**
@@ -149,7 +148,7 @@ public abstract class Eventsender<ListenerType extends EventListener, EventType 
 
     /**
      * Adds a list of listeners
-     * 
+     *
      * @param listener
      */
     public void addAllListener(final java.util.List<ListenerType> listener) {
@@ -174,7 +173,7 @@ public abstract class Eventsender<ListenerType extends EventListener, EventType 
 
     /**
      * Add a single Listener
-     * 
+     *
      * @param listener
      */
     public void addListener(final ListenerType t, final boolean weak) {
@@ -266,7 +265,7 @@ public abstract class Eventsender<ListenerType extends EventListener, EventType 
 
     /**
      * Abstract fire Event Method.
-     * 
+     *
      * @param listener
      * @param event
      */

@@ -259,7 +259,8 @@ public class HTTPConnectionImpl implements HTTPConnection {
                                  localIP = null;
                              }
                              final String host = this.httpURL.getHost().toLowerCase(Locale.ENGLISH);
-                             keepAliveSocket = new HTTPKeepAliveSocket(host, socket, maxKeepAliveTimeout, maxKeepAliveRequests, localIP, this.remoteIPs);
+                             final boolean ssl = StringUtils.equalsIgnoreCase("https", this.httpURL.getProtocol());
+                             keepAliveSocket = new HTTPKeepAliveSocket(host, ssl, socket, maxKeepAliveTimeout, maxKeepAliveRequests, localIP, this.remoteIPs);
                          }
                          keepAliveSocket.increaseRequests();
                          if (keepAliveSocket.getRequestsLeft() > 0) {
@@ -313,6 +314,7 @@ public class HTTPConnectionImpl implements HTTPConnection {
             port = this.httpURL.getPort();
         }
         final String host = this.httpURL.getHost().toLowerCase(Locale.ENGLISH);
+        final boolean ssl = StringUtils.equalsIgnoreCase("https", this.httpURL.getProtocol());
         String domain = null;
         if (HTTPConnectionImpl.PSL != null) {
             domain = HTTPConnectionImpl.PSL.getDomain(host);
@@ -335,7 +337,22 @@ public class HTTPConnectionImpl implements HTTPConnection {
                         it.remove();
                     } else if (socket.getPort() != port || !next.sameLocalIP(localIP)) {
                         continue;
-                    } else if (next.sameHost(host) || next.sameRemoteIPs(this.remoteIPs)) {
+                    } else if (next.isSsl() && ssl) {
+                        /**
+                         * ssl needs to have same hostname to avoid
+                         *
+                         * <p>
+                         * Your browser sent a request that this server could
+                         * not understand.<br />
+                         * Host name provided via SNI and via HTTP are different
+                         * </p>
+                         */
+                        if (next.sameHost(host)) {
+                            it.remove();
+                            HTTPConnectionImpl.KEEPALIVESOCKETS.put(socket, next);
+                            return socket;
+                        }
+                    } else if (next.isSsl() == false && ssl == false && next.sameRemoteIPs(this.remoteIPs)) {
                         it.remove();
                         HTTPConnectionImpl.KEEPALIVESOCKETS.put(socket, next);
                         return socket;

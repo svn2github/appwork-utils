@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2014 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.utils.net.httpconnection
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -16,7 +16,7 @@ import org.appwork.utils.StringUtils;
 
 /**
  * @author daniel
- * 
+ *
  */
 public class HTTPKeepAliveSocket {
 
@@ -89,6 +89,11 @@ public class HTTPKeepAliveSocket {
     private final long    maxRequests;
     private volatile long keepAliveTimestamp = -1;
     private volatile long requests           = 0;
+    private final boolean ssl;
+
+    public boolean isSsl() {
+        return this.ssl;
+    }
 
     public long getKeepAliveTimestamp() {
         return this.keepAliveTimestamp;
@@ -98,13 +103,14 @@ public class HTTPKeepAliveSocket {
         this.keepAliveTimestamp = System.currentTimeMillis() + this.getKeepAliveTimeout();
     }
 
-    public HTTPKeepAliveSocket(final String host, final Socket socket, final long keepAliveTimeout, final long maxRequests, final InetAddress localIP, final InetAddress[] remoteIPs) {
+    public HTTPKeepAliveSocket(final String host, final boolean ssl, final Socket socket, final long keepAliveTimeout, final long maxRequests, final InetAddress localIP, final InetAddress[] remoteIPs) {
         this.host = host;
         this.socket = socket;
         this.localIP = localIP;
         this.remoteIPs = remoteIPs;
         this.keepAliveTimeout = Math.max(0, keepAliveTimeout);
         this.maxRequests = Math.max(0, maxRequests);
+        this.ssl = ssl;
     }
 
     public String getHost() {

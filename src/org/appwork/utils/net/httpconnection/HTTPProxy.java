@@ -26,32 +26,32 @@ public class HTTPProxy {
 
     public static final HTTPProxy NONE = new HTTPProxy(TYPE.NONE) {
 
-                                           @Override
-                                           public void setConnectMethodPrefered(final boolean value) {
-                                           }
+        @Override
+        public void setConnectMethodPrefered(final boolean value) {
+        }
 
-                                           @Override
-                                           public void setLocalIP(final InetAddress localIP) {
-                                           }
+        @Override
+        public void setLocalIP(final InetAddress localIP) {
+        }
 
-                                           @Override
-                                           public void setPass(final String pass) {
-                                           }
+        @Override
+        public void setPass(final String pass) {
+        }
 
-                                           @Override
-                                           public void setPort(final int port) {
-                                           }
+        @Override
+        public void setPort(final int port) {
+        }
 
-                                           @Override
-                                           public void setType(final TYPE type) {
-                                               super.setType(TYPE.NONE);
-                                           }
+        @Override
+        public void setType(final TYPE type) {
+            super.setType(TYPE.NONE);
+        }
 
-                                           @Override
-                                           public void setUser(final String user) {
-                                           }
+        @Override
+        public void setUser(final String user) {
+        }
 
-                                       };
+    };
 
     public static List<HTTPProxy> getFromSystemProperties() {
         final java.util.List<HTTPProxy> ret = new ArrayList<HTTPProxy>();
@@ -123,6 +123,7 @@ public class HTTPProxy {
         case SOCKS4:
             ret = new HTTPProxy(TYPE.SOCKS4);
             ret.setHost(storable.getAddress());
+            break;
         case SOCKS5:
             ret = new HTTPProxy(TYPE.SOCKS5);
             ret.setHost(storable.getAddress());
@@ -386,7 +387,7 @@ public class HTTPProxy {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#clone()
      */
     @Override
@@ -469,7 +470,7 @@ public class HTTPProxy {
 
     /**
      * this proxy is DIRECT = using a local bound IP
-     * 
+     *
      * @return
      */
     public boolean isDirect() {
@@ -482,7 +483,7 @@ public class HTTPProxy {
 
     /**
      * this proxy is NONE = uses default gateway
-     * 
+     *
      * @return
      */
     public boolean isNone() {
@@ -498,7 +499,7 @@ public class HTTPProxy {
 
     /**
      * this proxy is REMOTE = using http,socks proxy
-     * 
+     *
      * @return
      */
     public boolean isRemote() {

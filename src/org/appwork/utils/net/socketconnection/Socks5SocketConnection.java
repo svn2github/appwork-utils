@@ -136,6 +136,7 @@ public class Socks5SocketConnection extends SocketConnection {
         case 5:
             throw new ConnectException("Connection refused");
         case 1:
+            throw new IOException("Socks5 general server failure");
         case 2:
             throw new IOException("Socks5 connection not allowed by ruleset");
         case 6:

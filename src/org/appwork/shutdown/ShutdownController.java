@@ -12,6 +12,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 
+import org.appwork.utils.Exceptions;
 import org.appwork.utils.logging.Log;
 import org.appwork.utils.logging2.LogSource;
 
@@ -45,7 +46,7 @@ public class ShutdownController extends Thread {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see org.appwork.shutdown.ShutdownEvent#run()
          */
         @Override
@@ -64,7 +65,7 @@ public class ShutdownController extends Thread {
 
     /**
      * get the only existing instance of ShutdownController. This is a singleton
-     * 
+     *
      * @return
      */
     public static ShutdownController getInstance() {
@@ -146,7 +147,7 @@ public class ShutdownController extends Thread {
 
             final IdentityHashMap<Thread, Thread> hookDelegater = new IdentityHashMap<Thread, Thread>() {
                 /**
-                 * 
+                 *
                  */
                 private static final long serialVersionUID = 8334628124340671103L;
 
@@ -305,7 +306,7 @@ public class ShutdownController extends Thread {
     /**
      * Same function as org.appwork.utils.Exceptions.getStackTrace(Throwable)<br>
      * <b>DO NOT REPLACE IT EITHER!</b> Exceptions.class my be unloaded. This would cause Initialize Exceptions during shutdown.
-     * 
+     *
      * @param thread
      * @return
      */
@@ -407,7 +408,11 @@ public class ShutdownController extends Thread {
                 }
                 if (this.shutDown.getAndSet(true) == false) {
                     Log.L.info("Create ExitThread");
-                    request.onShutdown();
+                    try {
+                        request.onShutdown();
+                    } catch (final Throwable e) {
+                        Log.L.severe(Exceptions.getStackTrace(e));
+                    }
                     this.exitThread = new Thread("ShutdownThread") {
 
                         @Override

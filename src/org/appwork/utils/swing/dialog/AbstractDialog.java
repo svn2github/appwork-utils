@@ -13,6 +13,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dialog.ModalityType;
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Toolkit;
@@ -191,6 +192,9 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
      * @param frame
      */
     public static void setDefaultRoot(final Window frame) {
+        if (frame != null && !(frame instanceof Frame) && !(frame instanceof Frame)) {
+            throw new IllegalStateException(frame + " is not a Frame or Dialog");
+        }
         AbstractDialog.getWindowStackByRoot(null).reset(frame);
     }
 

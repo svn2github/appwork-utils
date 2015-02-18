@@ -43,7 +43,7 @@ public class HTTPProxySocketConnection extends SocketConnection {
         final OutputStream os = proxySocket.getOutputStream();
         final StringBuilder connectRequest = new StringBuilder();
         connectRequest.append("CONNECT ");
-        connectRequest.append(endPointAddress.getHostString() + ":" + endPointAddress.getPort());
+        connectRequest.append(SocketConnection.getHostName(endPointAddress) + ":" + endPointAddress.getPort());
         connectRequest.append(" HTTP/1.1\r\n");
         final String username = this.getProxy().getUser() == null ? "" : this.getProxy().getUser();
         final String password = this.getProxy().getPass() == null ? "" : this.getProxy().getPass();

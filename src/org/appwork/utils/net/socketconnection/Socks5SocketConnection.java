@@ -106,10 +106,11 @@ public class Socks5SocketConnection extends SocketConnection {
         case DOMAIN:
             /* we use domain */
             os.write((byte) 3);
+            final String domainString = SocketConnection.getHostName(endPointAddress);
             if (logger != null) {
-                logger.append("->SEND tcp connect request by domain:" + endPointAddress.getHostString() + "\r\n");
+                logger.append("->SEND tcp connect request by domain:" + domainString + "\r\n");
             }
-            final byte[] domainBytes = endPointAddress.getHostString().getBytes("ISO-8859-1");
+            final byte[] domainBytes = domainString.getBytes("ISO-8859-1");
             os.write((byte) domainBytes.length);
             os.write(domainBytes);
             break;

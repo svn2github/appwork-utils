@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2010 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.utils
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -41,9 +41,9 @@ import org.appwork.utils.os.CrossSystem;
 /**
  * Application utils provide statis helper functions concerning the applications
  * System integration
- * 
+ *
  * @author $Author: unknown$
- * 
+ *
  */
 public class Application {
 
@@ -55,10 +55,10 @@ public class Application {
     private static String               APP_FOLDER  = ".appwork";
     private static String               ROOT;
     private static long                 javaVersion = 0;
-    public static long                  JAVA15      = 15000000;
-    public static long                  JAVA16      = 16000000;
-    public static long                  JAVA17      = 17000000;
-    public static long                  JAVA18      = 18000000;
+    public final static long            JAVA15      = 15000000;
+    public final static long            JAVA16      = 16000000;
+    public final static long            JAVA17      = 17000000;
+    public final static long            JAVA18      = 18000000;
     private static Boolean              JVM64BIT    = null;
 
     private static boolean              REDIRECTED  = false;
@@ -90,7 +90,7 @@ public class Application {
     /**
      * Adds a folder to the System classloader classpath this might fail if
      * there is a security manager
-     * 
+     *
      * @param file
      * @throws IOException
      */
@@ -111,7 +111,7 @@ public class Application {
     /**
      * Adds a url to the classloader classpath this might fail if there is a
      * security manager
-     * 
+     *
      * @param file
      * @throws IOException
      */
@@ -141,7 +141,7 @@ public class Application {
 
     /**
      * Returns the Path of appworkutils.jar
-     * 
+     *
      * @return
      */
     public static String getHome() {
@@ -245,7 +245,7 @@ public class Application {
 
     /**
      * Returns a ressourcefile relative to the instaldirectory
-     * 
+     *
      * @param relative
      * @return
      */
@@ -257,7 +257,7 @@ public class Application {
      * returns the url for the resource. if The resource can be found in
      * classpath, it will be returned. otherwise the function will return the
      * fileurl to current wprkingdirectory
-     * 
+     *
      * @param string
      * @return
      */
@@ -267,21 +267,21 @@ public class Application {
 
     /**
      * Returns the Resource url for relative.
-     * 
+     *
      * NOTE:this function only returns URL's that really exists!
-     * 
+     *
      * if preferClassPath is true:
-     * 
+     *
      * we first check if there is a ressource available inside current
      * classpath, for example inside the jar itself. if no such URL exists we
      * check for file in local filesystem
-     * 
+     *
      * if preferClassPath if false:
-     * 
+     *
      * first check local filesystem, then inside classpath
-     * 
-     * 
-     * 
+     *
+     *
+     *
      * @param string
      * @param b
      */
@@ -437,9 +437,9 @@ public class Application {
 
     /**
      * Detects if the Application runs out of a jar or not.
-     * 
+     *
      * @param rootOfClazz
-     * 
+     *
      * @return
      */
     public static boolean isJared(Class<?> rootOfClazz) {
@@ -477,7 +477,7 @@ public class Application {
 
     /**
      * checks current java version for known issues/bugs or unsupported ones
-     * 
+     *
      * @param support15
      * @return
      */
@@ -725,7 +725,7 @@ public class Application {
     }
 
     /**
-     * 
+     *
      */
     public static void redirectOutputStreams() {
         if (Application.REDIRECTED) { return; }
@@ -764,7 +764,7 @@ public class Application {
     /**
      * sets current Application Folder and Jar ID. MUST BE SET at startup! Can
      * only be set once!
-     * 
+     *
      * @param newAppFolder
      * @param newJar
      */
@@ -785,7 +785,7 @@ public class Application {
     /**
      * returns a file that does not exists. thus it ads a counter to the path
      * until the resulting file does not exist
-     * 
+     *
      * @param string
      * @return
      */
@@ -796,7 +796,7 @@ public class Application {
     /**
      * returns a file that does not exists. thus it ads a counter to the path
      * until the resulting file does not exist
-     * 
+     *
      * @param string
      * @return
      */

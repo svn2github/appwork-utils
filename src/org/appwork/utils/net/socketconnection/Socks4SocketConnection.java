@@ -88,7 +88,7 @@ public class Socks4SocketConnection extends SocketConnection {
             os.write((byte) 0);
             os.write((byte) 100);
             if (logger != null) {
-                logger.append("->SEND tcp connect request by domain:" + endPointAddress.getHostString() + "\r\n");
+                logger.append("->SEND tcp connect request by domain:" + SocketConnection.getHostName(endPointAddress) + "\r\n");
             }
             break;
         default:
@@ -101,7 +101,7 @@ public class Socks4SocketConnection extends SocketConnection {
         /* NULL/end */
         os.write((byte) 0);
         if (DESTTYPE.DOMAIN.equals(destType)) {
-            final byte[] domainBytes = endPointAddress.getHostString().getBytes("ISO-8859-1");
+            final byte[] domainBytes = SocketConnection.getHostName(endPointAddress).getBytes("ISO-8859-1");
             /* send domain as string,socks4a */
             os.write(domainBytes);
             /* NULL/end */

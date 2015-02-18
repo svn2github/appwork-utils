@@ -24,6 +24,7 @@ import java.net.SocketTimeoutException;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.appwork.utils.Application;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.net.httpconnection.HTTPConnectionUtils;
 import org.appwork.utils.net.httpconnection.HTTPProxy;
@@ -95,6 +96,27 @@ public abstract class SocketConnection extends Socket {
         } else {
             this.bindPoint = bindpoint;
         }
+    }
+
+    public static String getHostName(SocketAddress endpoint) {
+        if (endpoint != null && endpoint instanceof InetSocketAddress) {
+            final InetSocketAddress endPointAddress = (InetSocketAddress) endpoint;
+            if (Application.getJavaVersion() >= Application.JAVA17) {
+                return endPointAddress.getHostString();
+            } else {
+                final InetAddress address = endPointAddress.getAddress();
+                if (address != null) {
+                    if (address.getHostName() != null) {
+                        return address.getHostName();
+                    } else {
+                        return address.getHostAddress();
+                    }
+                } else {
+                    return endPointAddress.getHostName();
+                }
+            }
+        }
+        return null;
     }
 
     @Override

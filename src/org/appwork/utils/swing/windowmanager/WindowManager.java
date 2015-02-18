@@ -146,9 +146,7 @@ public abstract class WindowManager {
      */
     public boolean hasFocus() {
         for (final Window w : Window.getWindows()) {
-            if (hasFocus(w)) {
-                return true;
-            }
+            if (hasFocus(w)) { return true; }
         }
         return false;
     }

@@ -17,6 +17,28 @@ public class BasicShutdownRequest implements ShutdownRequest {
         vetos = new ArrayList<ShutdownVetoException>();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.appwork.shutdown.ShutdownRequest#onShutdown()
+     */
+    @Override
+    public void onShutdown() {
+        // TODO Auto-generated method stub
+
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.appwork.shutdown.ShutdownRequest#onShutdownVeto()
+     */
+    @Override
+    public void onShutdownVeto() {
+        // TODO Auto-generated method stub
+
+    }
+
     /**
      * 
      */

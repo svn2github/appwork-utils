@@ -19,7 +19,7 @@ public interface ShutdownRequest {
 
     public boolean askForVeto(ShutdownVetoListener listener);
 
-    public void addVeto( ShutdownVetoException e);
+    public void addVeto(ShutdownVetoException e);
 
     /**
      * @return
@@ -35,4 +35,14 @@ public interface ShutdownRequest {
      * @return
      */
     public boolean hasVetos();
+
+    /**
+     * 
+     */
+    public void onShutdownVeto();
+
+    /**
+     * 
+     */
+    public void onShutdown();
 }

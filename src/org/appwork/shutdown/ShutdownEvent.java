@@ -8,13 +8,17 @@ public abstract class ShutdownEvent {
         return false;
     }
 
+    /**
+     * The higher the priority, the earlier the hook will be called.
+     * 
+     * @param priority
+     */
     public int getHookPriority() {
         return hookPriority;
     }
 
     /**
-     * Waits at most <code>millis</code> milliseconds for this event to die. A
-     * timeout of <code>0</code> means to wait forever
+     * Waits at most <code>millis</code> milliseconds for this event to die. A timeout of <code>0</code> means to wait forever
      */
     public long getMaxDuration() {
 
@@ -34,8 +38,7 @@ public abstract class ShutdownEvent {
     }
 
     /**
-     * Waits at most <code>millis</code> milliseconds for this event to die. A
-     * timeout of <code>0</code> means to wait forever
+     * Waits at most <code>millis</code> milliseconds for this event to die. A timeout of <code>0</code> means to wait forever
      */
     public void setMaxDuration(final long maxDuration) {
         this.maxDuration = maxDuration;

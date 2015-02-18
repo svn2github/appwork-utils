@@ -18,8 +18,11 @@ public class ConsoleDialog {
     private String          title;
 
     public ConsoleDialog(String string) {
+
         this.console = AbstractConsole.newInstance();
-        if (this.console == null) { throw new RuntimeException("No Console Available!"); }
+        if (this.console == null) {
+            throw new RuntimeException("No Console Available!");
+        }
         this.title = string;
     }
 
@@ -86,7 +89,9 @@ public class ConsoleDialog {
                 if (c.trim().equalsIgnoreCase("y")) {
 
                     return;
-                } else if (c.trim().equalsIgnoreCase("n")) { throw new DialogCanceledException(Dialog.RETURN_CANCEL); }
+                } else if (c.trim().equalsIgnoreCase("n")) {
+                    throw new DialogCanceledException(Dialog.RETURN_CANCEL);
+                }
             }
 
         }
@@ -137,7 +142,9 @@ public class ConsoleDialog {
      * @return
      */
     public static boolean showExceptionDialog(String title, String message, Throwable e) {
-        if (!Application.isHeadless()) { return false; }
+        if (!Application.isHeadless()) {
+            return false;
+        }
         synchronized (AbstractConsole.LOCK) {
 
             ConsoleDialog cd = new ConsoleDialog("Exception occured");

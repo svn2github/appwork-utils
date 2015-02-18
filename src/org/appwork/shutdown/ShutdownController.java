@@ -31,7 +31,9 @@ public class ShutdownController extends Thread {
 
         @Override
         public boolean equals(final Object obj) {
-            if (obj instanceof ShutdownEventWrapper) { return this.orgThread == ((ShutdownEventWrapper) obj).orgThread; }
+            if (obj instanceof ShutdownEventWrapper) {
+                return this.orgThread == ((ShutdownEventWrapper) obj).orgThread;
+            }
             return false;
         }
 
@@ -125,8 +127,8 @@ public class ShutdownController extends Thread {
     protected ShutdownRequest                          shutdownRequest;
 
     /**
-     * Create a new instance of ShutdownController. This is a singleton class.
-     * Access the only existing instance by using {@link #getInstance()}.
+     * Create a new instance of ShutdownController. This is a singleton class. Access the only existing instance by using
+     * {@link #getInstance()}.
      */
     private ShutdownController() {
         super(ShutdownController.class.getSimpleName());
@@ -230,7 +232,9 @@ public class ShutdownController extends Thread {
 
     public void addShutdownVetoListener(final ShutdownVetoListener listener) {
         synchronized (this.vetoListeners) {
-            if (this.vetoListeners.contains(listener)) { return; }
+            if (this.vetoListeners.contains(listener)) {
+                return;
+            }
             Log.L.finest("ADD " + listener);
             this.vetoListeners.add(listener);
             try {
@@ -300,8 +304,7 @@ public class ShutdownController extends Thread {
 
     /**
      * Same function as org.appwork.utils.Exceptions.getStackTrace(Throwable)<br>
-     * <b>DO NOT REPLACE IT EITHER!</b> Exceptions.class my be unloaded. This
-     * would cause Initialize Exceptions during shutdown.
+     * <b>DO NOT REPLACE IT EITHER!</b> Exceptions.class my be unloaded. This would cause Initialize Exceptions during shutdown.
      * 
      * @param thread
      * @return
@@ -336,7 +339,9 @@ public class ShutdownController extends Thread {
     }
 
     public void removeShutdownEvent(final ShutdownEvent event) {
-        if (this.isAlive()) { throw new IllegalStateException("Cannot add hooks during shutdown"); }
+        if (this.isAlive()) {
+            throw new IllegalStateException("Cannot add hooks during shutdown");
+        }
         synchronized (this.hooks) {
             ShutdownEvent next;
 
@@ -370,7 +375,9 @@ public class ShutdownController extends Thread {
     }
 
     public boolean requestShutdown(final ShutdownRequest request) {
-        if (request == null) { throw new NullPointerException(); }
+        if (request == null) {
+            throw new NullPointerException();
+        }
         this.log("Request Shutdown: " + request);
         this.requestedShutDowns.incrementAndGet();
         try {
@@ -379,6 +386,7 @@ public class ShutdownController extends Thread {
             final java.util.List<ShutdownVetoException> vetos = request.getVetos();
 
             if (vetos.size() == 0) {
+
                 Log.L.info("No Vetos");
                 ShutdownVetoListener[] localList = null;
                 synchronized (this.vetoListeners) {
@@ -399,11 +407,13 @@ public class ShutdownController extends Thread {
                 }
                 if (this.shutDown.getAndSet(true) == false) {
                     Log.L.info("Create ExitThread");
+                    request.onShutdown();
                     this.exitThread = new Thread("ShutdownThread") {
 
                         @Override
                         public void run() {
                             ShutdownController.this.shutdownRequest = request;
+
                             Log.L.info("Exit Now: Code: " + ShutdownController.this.getExitCode());
                             System.exit(ShutdownController.this.getExitCode());
                         }
@@ -434,6 +444,7 @@ public class ShutdownController extends Thread {
                         Log.exception(e);
                     }
                 }
+                request.onShutdownVeto();
                 return false;
             }
         } finally {
@@ -470,8 +481,7 @@ public class ShutdownController extends Thread {
     @Override
     public void run() {
         /*
-         * Attention. This runs in shutdownhook. make sure, that we do not have
-         * to load previous unloaded classes here.
+         * Attention. This runs in shutdownhook. make sure, that we do not have to load previous unloaded classes here.
          */
 
         try {

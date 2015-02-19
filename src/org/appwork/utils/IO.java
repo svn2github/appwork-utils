@@ -56,8 +56,12 @@ public class IO {
             FileChannel inChannel = null;
             FileChannel outChannel = null;
             try {
-                if (out.exists()) { throw new IOException("Cannot overwrite " + out); }
-                if (!in.exists()) { throw new FileNotFoundException(in.getAbsolutePath()); }
+                if (out.exists()) {
+                    throw new IOException("Cannot overwrite " + out);
+                }
+                if (!in.exists()) {
+                    throw new FileNotFoundException(in.getAbsolutePath());
+                }
                 inChannel = (fis = new FileInputStream(in)).getChannel();
                 outChannel = (fos = new FileOutputStream(out)).getChannel();
                 if (progress != null) {
@@ -161,9 +165,13 @@ public class IO {
 
             @Override
             public void onFile(final File f) throws IOException {
-                if (filter != null && !filter.accept(f)) { return; }
+                if (filter != null && !filter.accept(f)) {
+                    return;
+                }
                 final String path = Files.getRelativePath(src, f);
-                if (path == null) { throw new IOException("No rel Path " + src + "-" + f); }
+                if (path == null) {
+                    throw new IOException("No rel Path " + src + "-" + f);
+                }
                 if (f.isDirectory()) {
                     new File(dest, path).mkdirs();
                 } else {
@@ -204,7 +212,9 @@ public class IO {
 
     public static String importFileToString(final File file, final int maxSize) throws IOException {
         final byte[] bytes = IO.readFile(file, maxSize);
-        if (bytes == null) { return null; }
+        if (bytes == null) {
+            return null;
+        }
         return new String(bytes, "UTF-8");
     }
 
@@ -219,7 +229,9 @@ public class IO {
             } else {
                 file.getParentFile().mkdirs();
                 System.out.println(src + " -> " + file);
-                if (!src.renameTo(file)) { throw new IOException("Could not move file " + src + " to " + file); }
+                if (!src.renameTo(file)) {
+                    throw new IOException("Could not move file " + src + " to " + file);
+                }
             }
         }
 
@@ -234,9 +246,8 @@ public class IO {
     }
 
     /*
-     * this function reads a line from a bufferedinputstream up to a maxLength.
-     * in case the line is longer than maxLength the rest of the line is read
-     * but not returned
+     * this function reads a line from a bufferedinputstream up to a maxLength. in case the line is longer than maxLength the rest of the
+     * line is read but not returned
      * 
      * this function skips emtpy lines
      */
@@ -261,8 +272,7 @@ public class IO {
                     ret.append(sep);
                 } else if (line.startsWith("\uFEFF")) {
                     /*
-                     * Workaround for this bug:
-                     * http://bugs.sun.com/view_bug.do?bug_id=4508058
+                     * Workaround for this bug: http://bugs.sun.com/view_bug.do?bug_id=4508058
                      * http://bugs.sun.com/view_bug.do?bug_id=6378911
                      */
 
@@ -452,12 +462,18 @@ public class IO {
         if (file.getParentFile().exists() == false) {
             file.getParentFile().mkdirs();
         }
-        if (bac.exists() && bac.delete() == false) { throw new IOException("could not remove " + bac); }
+        if (bac.exists() && bac.delete() == false) {
+            throw new IOException("could not remove " + bac);
+        }
         boolean deleteFile = true;
         try {
             IO.writeToFile(bac, bytes, sync);
-            if (file.exists() && file.delete() == false) { throw new IOException("could not remove " + file); }
-            if (!bac.renameTo(file)) { throw new IOException("COuld not rename " + bac + " to " + file); }
+            if (file.exists() && file.delete() == false) {
+                throw new IOException("could not remove " + file);
+            }
+            if (!bac.renameTo(file)) {
+                throw new IOException("COuld not rename " + bac + " to " + file);
+            }
             deleteFile = false;
         } finally {
             if (deleteFile) {
@@ -497,11 +513,19 @@ public class IO {
 
     public static void writeStringToFile(final File file, final String string, final boolean append, final SYNC sync) throws IOException {
         try {
-            if (file == null) { throw new IllegalArgumentException("File is null."); }
-            if (file.exists() && !append) { throw new IllegalArgumentException("File already exists: " + file); }
+            if (file == null) {
+                throw new IllegalArgumentException("File is null.");
+            }
+            if (file.exists() && !append) {
+                throw new IllegalArgumentException("File already exists: " + file);
+            }
             file.createNewFile();
-            if (!file.isFile()) { throw new IllegalArgumentException("Is not a file: " + file); }
-            if (!file.canWrite()) { throw new IllegalArgumentException("Cannot write to file: " + file); }
+            if (!file.isFile()) {
+                throw new IllegalArgumentException("Is not a file: " + file);
+            }
+            if (!file.canWrite()) {
+                throw new IllegalArgumentException("Cannot write to file: " + file);
+            }
 
             FileOutputStream fos = null;
             Writer output = null;
@@ -566,11 +590,23 @@ public class IO {
 
     public static void writeToFile(final File file, final byte[] data, final SYNC sync) throws IOException {
         try {
-            if (file == null) { throw new IllegalArgumentException("File is null."); }
-            if (file.exists()) { throw new IllegalArgumentException("File already exists: " + file); }
-            file.createNewFile();
-            if (!file.isFile()) { throw new IllegalArgumentException("Is not a file: " + file); }
-            if (!file.canWrite()) { throw new IllegalArgumentException("Cannot write to file: " + file); }
+            if (file == null) {
+                throw new IllegalArgumentException("File is null.");
+            }
+            if (file.exists()) {
+                throw new IllegalArgumentException("File already exists: " + file);
+            }
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                throw e;
+            }
+            if (!file.isFile()) {
+                throw new IllegalArgumentException("Is not a file: " + file);
+            }
+            if (!file.canWrite()) {
+                throw new IllegalArgumentException("Cannot write to file: " + file);
+            }
 
             FileOutputStream out = null;
             boolean deleteFile = true;

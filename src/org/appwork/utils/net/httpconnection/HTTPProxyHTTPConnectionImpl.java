@@ -2,7 +2,6 @@ package org.appwork.utils.net.httpconnection;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -13,6 +12,7 @@ import java.nio.ByteBuffer;
 import javax.net.ssl.SSLSocket;
 
 import org.appwork.utils.Regex;
+import org.appwork.utils.StringUtils;
 import org.appwork.utils.encoding.Base64;
 
 public class HTTPProxyHTTPConnectionImpl extends HTTPConnectionImpl {
@@ -30,19 +30,21 @@ public class HTTPProxyHTTPConnectionImpl extends HTTPConnectionImpl {
     }
 
     /*
-     * SSL over HTTP Proxy, see
-     * http://muffin.doit.org/docs/rfc/tunneling_ssl.html
+     * SSL over HTTP Proxy, see http://muffin.doit.org/docs/rfc/tunneling_ssl.html
      */
     @Override
     public void connect() throws IOException {
         boolean sslSNIWorkAround = false;
         InetAddress hosts[] = null;
         connect: while (true) {
-            if (this.isConnectionSocketValid()) { return;/* oder fehler */
+            if (this.isConnectionSocketValid()) {
+                return;/* oder fehler */
             }
             this.resetConnection();
             try {
-                if (this.proxy == null || !this.proxy.getType().equals(HTTPProxy.TYPE.HTTP)) { throw new IOException("HTTPProxyHTTPConnection: invalid HTTP Proxy!"); }
+                if (this.proxy == null || !this.proxy.getType().equals(HTTPProxy.TYPE.HTTP)) {
+                    throw new IOException("HTTPProxyHTTPConnection: invalid HTTP Proxy!");
+                }
                 if (this.proxy.getPass() != null && this.proxy.getPass().length() > 0 || this.proxy.getUser() != null && this.proxy.getUser().length() > 0) {
                     /* add proxy auth in case username/pw are set */
                     final String user = this.proxy.getUser() == null ? "" : this.proxy.getUser();
@@ -72,7 +74,9 @@ public class HTTPProxyHTTPConnectionImpl extends HTTPConnectionImpl {
                         ee = e;
                     }
                 }
-                if (ee != null) { throw new ProxyConnectException(ee, this.proxy); }
+                if (ee != null) {
+                    throw new ProxyConnectException(ee, this.proxy);
+                }
                 this.requestTime = System.currentTimeMillis() - startTime;
                 if (this.httpURL.getProtocol().startsWith("https") || this.isConnectMethodPrefered()) {
                     /* ssl via CONNECT method or because we prefer CONNECT */
@@ -124,16 +128,13 @@ public class HTTPProxyHTTPConnectionImpl extends HTTPConnectionImpl {
                     }
                     /* read rest of CONNECT headers */
                     /*
-                     * Again, the response follows the HTTP/1.0 protocol, so the
-                     * response line starts with the protocol version specifier,
-                     * and the response line is followed by zero or more
-                     * response headers, followed by an empty line. The line
-                     * separator is CR LF pair, or a single LF.
+                     * Again, the response follows the HTTP/1.0 protocol, so the response line starts with the protocol version specifier,
+                     * and the response line is followed by zero or more response headers, followed by an empty line. The line separator is
+                     * CR LF pair, or a single LF.
                      */
                     while (true) {
                         /*
-                         * read line by line until we reach the single empty
-                         * line as separator
+                         * read line by line until we reach the single empty line as separator
                          */
                         header = HTTPConnectionUtils.readheader(this.connectionSocket.getInputStream(), true);
                         if (header.limit() <= 2) {
@@ -173,8 +174,7 @@ public class HTTPProxyHTTPConnectionImpl extends HTTPConnectionImpl {
                         }
                     }
                     /*
-                     * httpPath needs to be like normal http request, eg
-                     * /index.html
+                     * httpPath needs to be like normal http request, eg /index.html
                      */
                     this.httpPath = new org.appwork.utils.Regex(this.httpURL.toString(), "https?://.*?(/.+)").getMatch(0);
                     if (this.httpPath == null) {
@@ -183,8 +183,7 @@ public class HTTPProxyHTTPConnectionImpl extends HTTPConnectionImpl {
                 } else {
                     /* direct connect via proxy */
                     /*
-                     * httpPath needs to include complete path here, eg
-                     * http://google.de/
+                     * httpPath needs to include complete path here, eg http://google.de/
                      */
                     this.proxyRequest = new StringBuilder("DIRECT\r\n");
                     this.httpPath = this.httpURL.toString();
@@ -205,7 +204,9 @@ public class HTTPProxyHTTPConnectionImpl extends HTTPConnectionImpl {
                     this.disconnect();
                 } catch (final Throwable e2) {
                 }
-                if (e instanceof HTTPProxyException) { throw e; }
+                if (e instanceof HTTPProxyException) {
+                    throw e;
+                }
                 this.connectExceptions.add(this.proxyInetSocketAddress + "|" + e.getMessage());
                 throw new ProxyConnectException(e, this.proxy);
             }
@@ -225,7 +226,13 @@ public class HTTPProxyHTTPConnectionImpl extends HTTPConnectionImpl {
             /* auth invalid/missing */
             throw new ProxyAuthException(this.proxy);
         }
-        if (this.getResponseCode() == 504) { throw new ConnectException(this.getResponseCode() + " " + this.getResponseMessage()); }
+        if (this.getResponseCode() == 502 && StringUtils.containsIgnoreCase(getResponseMessage(), "ISA Server denied the specified")) {
+            throw new ProxyConnectException(this.getResponseCode() + " " + this.getResponseMessage(), getProxy());
+
+        }
+        if (this.getResponseCode() == 504) {
+            throw new ProxyConnectException(this.getResponseCode() + " " + this.getResponseMessage(), getProxy());
+        }
         return super.getInputStream();
     }
 

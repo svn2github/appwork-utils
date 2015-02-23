@@ -27,6 +27,60 @@ import org.appwork.utils.StringUtils;
 public class ExtPasswordField extends MigPanel implements FocusListener, DocumentListener, TextComponentInterface, ActionListener {
 
     /**
+     * @author Thomas
+     * 
+     */
+    public final class CustomTextField extends ExtTextField {
+        /*
+         * (non-Javadoc)
+         * 
+         * @see org.appwork.swing.components.ExtTextField#replaceSelection(java.lang.String)
+         */
+        @Override
+        public void replaceSelection(String content) {
+            ExtPasswordField.this.setText(content);
+        }
+    }
+
+    /**
+     * @author Thomas
+     * 
+     */
+    public final class CustomPasswordField extends JPasswordField {
+        /*
+         * (non-Javadoc)
+         * 
+         * @see javax.swing.text.JTextComponent#replaceSelection(java.lang.String)
+         */
+        private boolean key = false;
+
+        @Override
+        public void replaceSelection(String content) {
+            if (key) {
+                // type on keyboard
+                super.replaceSelection(content);
+            } else {
+                // paste externaly. like contextmenu
+                ExtPasswordField.this.setText(content);
+            }
+        }
+
+        @Override
+        protected boolean processKeyBinding(KeyStroke ks, KeyEvent e, int condition, boolean pressed) {
+            // forward events
+            // this will cause to trigger a pressed event on enter. this
+            // will the trigger the default action of dialogs - for example
+            ExtPasswordField.this.dispatchEvent(e);
+            key = true;
+            try {
+                return super.processKeyBinding(ks, e, condition, pressed);
+            } finally {
+                key = false;
+            }
+        }
+    }
+
+    /**
      * 
      */
     private static final long serialVersionUID = 9035297840443317147L;
@@ -105,17 +159,8 @@ public class ExtPasswordField extends MigPanel implements FocusListener, Documen
      */
     public ExtPasswordField() {
         super("ins 0", "[grow,fill]", "[grow,fill]");
-        this.renderer = new ExtTextField();
-        this.editor = new JPasswordField() {
-            @Override
-            protected boolean processKeyBinding(KeyStroke ks, KeyEvent e, int condition, boolean pressed) {
-                // forward events
-                // this will cause to trigger a pressed event on enter. this
-                // will the trigger the default action of dialogs - for example
-                ExtPasswordField.this.dispatchEvent(e);
-                return super.processKeyBinding(ks, e, condition, pressed);
-            };
-        };
+        this.renderer = new CustomTextField();
+        this.editor = new CustomPasswordField();
         this.renderer.addFocusListener(this);
         this.editor.addFocusListener(this);
         this.add(this.renderer, "hidemode 3");
@@ -150,8 +195,7 @@ public class ExtPasswordField extends MigPanel implements FocusListener, Documen
     /*
      * (non-Javadoc)
      * 
-     * @see javax.swing.event.DocumentListener#changedUpdate(javax.swing.event.
-     * DocumentEvent)
+     * @see javax.swing.event.DocumentListener#changedUpdate(javax.swing.event. DocumentEvent)
      */
     @Override
     public void changedUpdate(final DocumentEvent e) {
@@ -244,8 +288,7 @@ public class ExtPasswordField extends MigPanel implements FocusListener, Documen
     /*
      * (non-Javadoc)
      * 
-     * @see javax.swing.event.DocumentListener#insertUpdate(javax.swing.event.
-     * DocumentEvent)
+     * @see javax.swing.event.DocumentListener#insertUpdate(javax.swing.event. DocumentEvent)
      */
     @Override
     public void insertUpdate(final DocumentEvent e) {
@@ -281,8 +324,7 @@ public class ExtPasswordField extends MigPanel implements FocusListener, Documen
     /*
      * (non-Javadoc)
      * 
-     * @see javax.swing.event.DocumentListener#removeUpdate(javax.swing.event.
-     * DocumentEvent)
+     * @see javax.swing.event.DocumentListener#removeUpdate(javax.swing.event. DocumentEvent)
      */
     @Override
     public void removeUpdate(final DocumentEvent e) {
@@ -345,6 +387,7 @@ public class ExtPasswordField extends MigPanel implements FocusListener, Documen
 
     public void setPassword(final char[] password) {
         this.password = password;
+        setEditorText(new String(password));
         this.setHelpText(this.getHelpText());
     }
 
@@ -362,23 +405,22 @@ public class ExtPasswordField extends MigPanel implements FocusListener, Documen
     /*
      * (non-Javadoc)
      * 
-     * @see
-     * org.appwork.utils.swing.dialog.TextComponentInterface#setText(java.lang
-     * .String)
+     * @see org.appwork.utils.swing.dialog.TextComponentInterface#setText(java.lang .String)
      */
     @Override
     public void setText(final String text) {
+
         this.setPassword(StringUtils.isEmpty(text) ? new char[0] : text.toCharArray());
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see
-     * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+     * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
      */
     @Override
     public void actionPerformed(ActionEvent e) {
+
         this.onChanged();
     }
 

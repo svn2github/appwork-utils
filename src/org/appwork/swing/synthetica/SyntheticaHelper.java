@@ -120,7 +120,9 @@ public class SyntheticaHelper {
             if (SyntheticaHelper.checkIfMacInitWillFail()) {
                 System.runFinalization();
                 System.gc();
-                if (SyntheticaHelper.checkIfMacInitWillFail()) { throw new IOException("Cannot Init LookAndFeel. Windows Are Open"); }
+                if (SyntheticaHelper.checkIfMacInitWillFail()) {
+                    throw new IOException("Cannot Init LookAndFeel. Windows Are Open");
+                }
             }
         }
         if (StringUtils.isEmpty(license)) {
@@ -143,10 +145,8 @@ public class SyntheticaHelper {
                 throw new WTFException("No Synthetica License Found!");
             }
             /*
-             * NOTE: This Licensee Information may only be used by AppWork UG.
-             * If you like to create derived creation based on this sourcecode,
-             * you have to remove this license key. Instead you may use the FREE
-             * Version of synthetica found on javasoft.de
+             * NOTE: This Licensee Information may only be used by AppWork UG. If you like to create derived creation based on this
+             * sourcecode, you have to remove this license key. Instead you may use the FREE Version of synthetica found on javasoft.de
              */
             String[] licenseLines = Regex.getLines(license);
             // final String[] li = { };
@@ -174,7 +174,7 @@ public class SyntheticaHelper {
             // String>();
             // dummy.put("defaultlaf","BlaBlaLeberLAF");
             // AppContext.getAppContext().put("swing.lafdata", dummy);
-            UIManager.put("Synthetica.window.decoration", false);
+            UIManager.put("Synthetica.window.decoration", config.isWindowDecorationEnabled());
             UIManager.put("Synthetica.text.antialias", config.isTextAntiAliasEnabled());
             UIManager.put("Synthetica.extendedFileChooser.rememberPreferences", Boolean.FALSE);
             UIManager.put("Synthetica.extendedFileChooser.rememberLastDirectory", Boolean.FALSE);
@@ -233,7 +233,9 @@ public class SyntheticaHelper {
             final Window window = awindow[i];
 
             final boolean flag = !(window instanceof JWindow) && !(window instanceof JFrame) && !(window instanceof JDialog);
-            if (!window.getClass().getName().contains("Popup$HeavyWeightWindow") && !flag) { return true; }
+            if (!window.getClass().getName().contains("Popup$HeavyWeightWindow") && !flag) {
+                return true;
+            }
 
         }
         return false;

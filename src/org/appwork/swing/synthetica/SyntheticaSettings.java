@@ -26,7 +26,6 @@ public interface SyntheticaSettings extends ConfigInterface {
     @AboutConfig
     void setLanguage(String lng);
 
-
     String getLanguage();
 
     @AboutConfig
@@ -53,8 +52,6 @@ public interface SyntheticaSettings extends ConfigInterface {
     @RequiresRestart("A JDownloader Restart is Required")
     boolean isFontRespectsSystemDPI();
 
-
-
     @AboutConfig
     @DescriptionForConfigEntry("Enable/disable window opacity on Java 6u10 and above. A value of 'false' disables window opacity which means that the window corner background which is visible for non-rectangular windows disappear. Furthermore the shadow for popupMenus makes use of real translucent window. Some themes like SyntheticaSimple2D support translucent titlePanes if opacity is disabled. The property is ignored on JRE's below 6u10. Note: It is recommended to activate this feature only if your graphics hardware acceleration is supported by the JVM - a value of 'false' can affect application performance. Default value is false which means the translucency feature is enabled")
     @DefaultBooleanValue(false)
@@ -70,11 +67,20 @@ public interface SyntheticaSettings extends ConfigInterface {
     void setFontRespectsSystemDPI(boolean b);
 
     void setFontScaleFactor(int b);
+
     @AboutConfig
     @DescriptionForConfigEntry("Paint all labels/text with or without antialias. Default value is false.")
     @DefaultBooleanValue(false)
     @RequiresRestart("A JDownloader Restart is Required")
     boolean isTextAntiAliasEnabled();
+
     void setTextAntiAliasEnabled(boolean b);
 
+    @AboutConfig
+    @DescriptionForConfigEntry("(JD09 style)Paint the window title bar.")
+    @DefaultBooleanValue(false)
+    @RequiresRestart("A JDownloader Restart is Required")
+    boolean isWindowDecorationEnabled();
+
+    void setWindowDecorationEnabled(boolean b);
 }

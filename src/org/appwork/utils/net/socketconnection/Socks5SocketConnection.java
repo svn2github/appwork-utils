@@ -41,14 +41,18 @@ public class Socks5SocketConnection extends SocketConnection {
 
     public Socks5SocketConnection(HTTPProxy proxy, DESTTYPE destType) {
         super(proxy);
-        if (proxy == null || !HTTPProxy.TYPE.SOCKS5.equals(proxy.getType())) { throw new IllegalArgumentException("proxy must be of type socks5"); }
+        if (proxy == null || !HTTPProxy.TYPE.SOCKS5.equals(proxy.getType())) {
+            throw new IllegalArgumentException("proxy must be of type socks5");
+        }
         this.destType = destType;
     }
 
     @Override
     protected Socket connectProxySocket(final Socket proxySocket, final SocketAddress endpoint, final StringBuffer logger) throws IOException {
         final AUTH authOffer;
-        if (!StringUtils.isEmpty(this.getProxy().getUser()) || !StringUtils.isEmpty(this.getProxy().getPass())) {
+        final String userName = this.getProxy().getUser();
+        final String passWord = this.getProxy().getPass();
+        if (!StringUtils.isEmpty(userName) || !StringUtils.isEmpty(passWord)) {
             authOffer = AUTH.PLAIN;
         } else {
             authOffer = AUTH.NONE;
@@ -61,10 +65,15 @@ public class Socks5SocketConnection extends SocketConnection {
         }
         switch (authRequest) {
         case PLAIN:
-            try {
-                Socks5SocketConnection.authPlain(proxySocket, this.getProxy().getUser(), this.getProxy().getPass(), logger);
-            } catch (final IOException e) {
-                throw new ProxyAuthException(e, this.getProxy());
+            switch (authOffer) {
+            case NONE:
+                throw new ProxyAuthException(this.getProxy());
+            case PLAIN:
+                try {
+                    Socks5SocketConnection.authPlain(proxySocket, userName, passWord, logger);
+                } catch (final IOException e) {
+                    throw new ProxyAuthException(e, this.getProxy());
+                }
             }
             break;
         default:
@@ -126,7 +135,9 @@ public class Socks5SocketConnection extends SocketConnection {
         /* read response, 4 bytes and then read rest of response */
         final InputStream is = proxySocket.getInputStream();
         final byte[] resp = SocketConnection.ensureRead(is, 4, null);
-        if (resp[0] != 5) { throw new IOException("Invalid response:" + resp[0]); }
+        if (resp[0] != 5) {
+            throw new IOException("Invalid response:" + resp[0]);
+        }
         switch (resp[1]) {
         case 0:
             break;
@@ -193,7 +204,9 @@ public class Socks5SocketConnection extends SocketConnection {
         /* read response, 2 bytes */
         final InputStream is = proxySocket.getInputStream();
         final byte[] resp = SocketConnection.ensureRead(is, 2, null);
-        if (resp[0] != 1) { throw new IOException("Invalid response:" + resp[0]); }
+        if (resp[0] != 1) {
+            throw new IOException("Invalid response:" + resp[0]);
+        }
         if (resp[1] != 0) {
             if (logger != null) {
                 logger.append("<-AUTH Invalid!\r\n");
@@ -206,6 +219,8 @@ public class Socks5SocketConnection extends SocketConnection {
         }
     }
 
+    private final static boolean SENDONLYSINGLEAUTHMETHOD = true;
+
     public static AUTH sayHello(final Socket proxySocket, AUTH auth, final StringBuffer logger) throws IOException {
         final OutputStream os = proxySocket.getOutputStream();
         if (logger != null) {
@@ -216,15 +231,23 @@ public class Socks5SocketConnection extends SocketConnection {
         /* only none ans password/username auth method */
         final boolean plainAuthPossible = AUTH.PLAIN.equals(auth);
         if (plainAuthPossible) {
-            os.write((byte) 2);
-            if (logger != null) {
-                logger.append("->SOCKS5 Offer None&Plain Authentication\r\n");
+            if (SENDONLYSINGLEAUTHMETHOD) {
+                os.write((byte) 1);
+                if (logger != null) {
+                    logger.append("->SOCKS5 Offer Plain Authentication\r\n");
+                }
+                /* username/password */
+                os.write((byte) 2);
+            } else {
+                os.write((byte) 2);
+                if (logger != null) {
+                    logger.append("->SOCKS5 Offer None&Plain Authentication\r\n");
+                }
+                /* none */
+                os.write((byte) 0);
+                /* username/password */
+                os.write((byte) 2);
             }
-            /* none */
-            os.write((byte) 0);
-            /* username/password */
-            os.write((byte) 2);
-            os.flush();
         } else {
             os.write((byte) 1);
             if (logger != null) {
@@ -232,12 +255,14 @@ public class Socks5SocketConnection extends SocketConnection {
             }
             /* none */
             os.write((byte) 0);
-            os.flush();
         }
+        os.flush();
         /* read response, 2 bytes */
         final InputStream is = proxySocket.getInputStream();
         final byte[] resp = SocketConnection.ensureRead(is, 2, null);
-        if (resp[0] != 5) { throw new IOException("Invalid response:" + resp[0]); }
+        if (resp[0] != 5) {
+            throw new IOException("Invalid response:" + resp[0]);
+        }
         if (resp[1] == 255) {
             if (logger != null) {
                 logger.append("<-SOCKS5 Authentication Denied\r\n");
@@ -245,12 +270,14 @@ public class Socks5SocketConnection extends SocketConnection {
             throw new IOException("Socks5HTTPConnection: no acceptable authentication method found");
         }
         if (resp[1] == 2) {
-            if (plainAuthPossible == false && logger != null) {
+            if (!plainAuthPossible && logger != null) {
                 logger.append("->SOCKS5 Plain auth required but not offered!\r\n");
             }
             return AUTH.PLAIN;
         }
-        if (resp[1] == 0) { return AUTH.NONE; }
+        if (resp[1] == 0) {
+            return AUTH.NONE;
+        }
         throw new IOException("Unsupported auth:" + resp[1]);
     }
 

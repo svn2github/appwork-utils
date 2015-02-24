@@ -85,7 +85,9 @@ public abstract class KeyHandler<RawClass> {
         if (this.getAnnotation(DefaultFactory.class) != null) {
             checker++;
         }
-        if (checker > 1) { throw new InterfaceParseException("Make sure that you use only one  of getDefaultAnnotation,DefaultObjectValue or DefaultValue "); }
+        if (checker > 1) {
+            throw new InterfaceParseException("Make sure that you use only one  of getDefaultAnnotation,DefaultObjectValue or DefaultValue ");
+        }
 
         this.checkBadAnnotations(this.getter.getMethod(), class1);
         if (this.setter != null) {
@@ -152,7 +154,9 @@ public abstract class KeyHandler<RawClass> {
      * @return
      */
     public <T extends Annotation> T getAnnotation(final Class<T> class1) {
-        if (class1 == null) { return null; }
+        if (class1 == null) {
+            return null;
+        }
         T ret = this.getter.getMethod().getAnnotation(class1);
         if (ret == null && this.setter != null) {
             ret = this.setter.getMethod().getAnnotation(class1);
@@ -188,12 +192,18 @@ public abstract class KeyHandler<RawClass> {
     public RawClass getDefaultValue() {
         try {
             final DefaultFactory df = this.getAnnotation(DefaultFactory.class);
-            if (df != null) { return (RawClass) df.value().newInstance().getDefaultValue(); }
+            if (df != null) {
+                return (RawClass) df.value().newInstance().getDefaultValue();
+            }
             final DefaultJsonObject defaultJson = this.getAnnotation(DefaultJsonObject.class);
-            if (defaultJson != null) { return (RawClass) JSonStorage.restoreFromString(defaultJson.value(), new TypeRef<Object>(this.getRawType()) {
-            }, null); }
+            if (defaultJson != null) {
+                return (RawClass) JSonStorage.restoreFromString(defaultJson.value(), new TypeRef<Object>(this.getRawType()) {
+                }, null);
+            }
             final Annotation ann = this.getAnnotation(this.getDefaultAnnotation());
-            if (ann != null) { return (RawClass) ann.annotationType().getMethod("value", new Class[] {}).invoke(ann, new Object[] {}); }
+            if (ann != null) {
+                return (RawClass) ann.annotationType().getMethod("value", new Class[] {}).invoke(ann, new Object[] {});
+            }
             return this.defaultValue;
         } catch (final Throwable e) {
             throw new RuntimeException(e);
@@ -201,8 +211,7 @@ public abstract class KeyHandler<RawClass> {
     }
 
     /**
-     * Lazy initialiser of the eventsender. we do not wnat to create an
-     * eventsender if nowbody uses it
+     * Lazy initialiser of the eventsender. we do not wnat to create an eventsender if nowbody uses it
      *
      * @return
      */
@@ -233,7 +242,9 @@ public abstract class KeyHandler<RawClass> {
      * @return
      */
     public Type getRawType() {
-        if (this.getter != null) { return this.getter.getRawType(); }
+        if (this.getter != null) {
+            return this.getter.getRawType();
+        }
         return this.setter.getRawType();
 
     }
@@ -285,18 +296,38 @@ public abstract class KeyHandler<RawClass> {
         if (ret instanceof Class) {
             final Class<?> clazz = (Class<?>) ret;
 
-            if (Clazz.isBoolean(ret)) { return AbstractTypeDefinition.BOOLEAN; }
-            if (Clazz.isByte(ret)) { return AbstractTypeDefinition.BYTE; }
-            if (Clazz.isCharacter(ret)) { return AbstractTypeDefinition.CHAR; }
-            if (Clazz.isDouble(ret)) { return AbstractTypeDefinition.DOUBLE; }
-            if (Clazz.isEnum(ret)) { return AbstractTypeDefinition.ENUM; }
-            if (Clazz.isFloat(ret)) { return AbstractTypeDefinition.FLOAT; }
-            if (Clazz.isInteger(ret)) { return AbstractTypeDefinition.INT; }
-            if (Clazz.isLong(ret)) { return AbstractTypeDefinition.LONG; }
-            if (Clazz.isShort(ret)) { return AbstractTypeDefinition.SHORT; }
+            if (Clazz.isBoolean(ret)) {
+                return AbstractTypeDefinition.BOOLEAN;
+            }
+            if (Clazz.isByte(ret)) {
+                return AbstractTypeDefinition.BYTE;
+            }
+            if (Clazz.isCharacter(ret)) {
+                return AbstractTypeDefinition.CHAR;
+            }
+            if (Clazz.isDouble(ret)) {
+                return AbstractTypeDefinition.DOUBLE;
+            }
+            if (Clazz.isEnum(ret)) {
+                return AbstractTypeDefinition.ENUM;
+            }
+            if (Clazz.isFloat(ret)) {
+                return AbstractTypeDefinition.FLOAT;
+            }
+            if (Clazz.isInteger(ret)) {
+                return AbstractTypeDefinition.INT;
+            }
+            if (Clazz.isLong(ret)) {
+                return AbstractTypeDefinition.LONG;
+            }
+            if (Clazz.isShort(ret)) {
+                return AbstractTypeDefinition.SHORT;
+            }
             if (Clazz.isString(ret)) {
 
-                if (this.getAnnotation(HexColorString.class) != null) { return AbstractTypeDefinition.HEX_COLOR; }
+                if (this.getAnnotation(HexColorString.class) != null) {
+                    return AbstractTypeDefinition.HEX_COLOR;
+                }
                 return AbstractTypeDefinition.STRING;
             }
 
@@ -304,17 +335,37 @@ public abstract class KeyHandler<RawClass> {
 
                 final Class aType = ((Class) ret).getComponentType();
 
-                if (Clazz.isBoolean(aType)) { return AbstractTypeDefinition.BOOLEAN_LIST; }
-                if (Clazz.isByte(aType)) { return AbstractTypeDefinition.BYTE_LIST; }
-                if (Clazz.isCharacter(aType)) { return AbstractTypeDefinition.CHAR_LIST; }
-                if (Clazz.isDouble(aType)) { return AbstractTypeDefinition.DOUBLE_LIST; }
-                if (Clazz.isEnum(aType)) { return AbstractTypeDefinition.ENUM_LIST; }
-                if (Clazz.isFloat(aType)) { return AbstractTypeDefinition.FLOAT_LIST; }
-                if (Clazz.isInteger(aType)) { return AbstractTypeDefinition.INT_LIST; }
-                if (Clazz.isLong(aType)) { return AbstractTypeDefinition.LONG_LIST; }
-                if (Clazz.isShort(aType)) { return AbstractTypeDefinition.SHORT_LIST; }
+                if (Clazz.isBoolean(aType)) {
+                    return AbstractTypeDefinition.BOOLEAN_LIST;
+                }
+                if (Clazz.isByte(aType)) {
+                    return AbstractTypeDefinition.BYTE_LIST;
+                }
+                if (Clazz.isCharacter(aType)) {
+                    return AbstractTypeDefinition.CHAR_LIST;
+                }
+                if (Clazz.isDouble(aType)) {
+                    return AbstractTypeDefinition.DOUBLE_LIST;
+                }
+                if (Clazz.isEnum(aType)) {
+                    return AbstractTypeDefinition.ENUM_LIST;
+                }
+                if (Clazz.isFloat(aType)) {
+                    return AbstractTypeDefinition.FLOAT_LIST;
+                }
+                if (Clazz.isInteger(aType)) {
+                    return AbstractTypeDefinition.INT_LIST;
+                }
+                if (Clazz.isLong(aType)) {
+                    return AbstractTypeDefinition.LONG_LIST;
+                }
+                if (Clazz.isShort(aType)) {
+                    return AbstractTypeDefinition.SHORT_LIST;
+                }
                 if (Clazz.isString(aType)) {
-                    if (this.getAnnotation(HexColorString.class) != null) { return AbstractTypeDefinition.HEX_COLOR_LIST; }
+                    if (this.getAnnotation(HexColorString.class) != null) {
+                        return AbstractTypeDefinition.HEX_COLOR_LIST;
+                    }
                     return AbstractTypeDefinition.STRING_LIST;
                 }
 
@@ -333,18 +384,38 @@ public abstract class KeyHandler<RawClass> {
                 if (raw instanceof Class) {
                     final Class<?> rawClazz = (Class<?>) raw;
                     if (List.class.isAssignableFrom(rawClazz)) {
-                        if (Clazz.isBoolean(acutal[0])) { return AbstractTypeDefinition.BOOLEAN_LIST; }
+                        if (Clazz.isBoolean(acutal[0])) {
+                            return AbstractTypeDefinition.BOOLEAN_LIST;
+                        }
 
-                        if (Clazz.isByte(acutal[0])) { return AbstractTypeDefinition.BYTE_LIST; }
-                        if (Clazz.isCharacter(acutal[0])) { return AbstractTypeDefinition.CHAR_LIST; }
-                        if (Clazz.isDouble(acutal[0])) { return AbstractTypeDefinition.DOUBLE_LIST; }
-                        if (Clazz.isEnum(acutal[0])) { return AbstractTypeDefinition.ENUM_LIST; }
-                        if (Clazz.isFloat(acutal[0])) { return AbstractTypeDefinition.FLOAT_LIST; }
-                        if (Clazz.isInteger(acutal[0])) { return AbstractTypeDefinition.INT_LIST; }
-                        if (Clazz.isLong(acutal[0])) { return AbstractTypeDefinition.LONG_LIST; }
-                        if (Clazz.isShort(acutal[0])) { return AbstractTypeDefinition.SHORT_LIST; }
+                        if (Clazz.isByte(acutal[0])) {
+                            return AbstractTypeDefinition.BYTE_LIST;
+                        }
+                        if (Clazz.isCharacter(acutal[0])) {
+                            return AbstractTypeDefinition.CHAR_LIST;
+                        }
+                        if (Clazz.isDouble(acutal[0])) {
+                            return AbstractTypeDefinition.DOUBLE_LIST;
+                        }
+                        if (Clazz.isEnum(acutal[0])) {
+                            return AbstractTypeDefinition.ENUM_LIST;
+                        }
+                        if (Clazz.isFloat(acutal[0])) {
+                            return AbstractTypeDefinition.FLOAT_LIST;
+                        }
+                        if (Clazz.isInteger(acutal[0])) {
+                            return AbstractTypeDefinition.INT_LIST;
+                        }
+                        if (Clazz.isLong(acutal[0])) {
+                            return AbstractTypeDefinition.LONG_LIST;
+                        }
+                        if (Clazz.isShort(acutal[0])) {
+                            return AbstractTypeDefinition.SHORT_LIST;
+                        }
                         if (Clazz.isString(acutal[0])) {
-                            if (this.getAnnotation(HexColorString.class) != null) { return AbstractTypeDefinition.HEX_COLOR_LIST; }
+                            if (this.getAnnotation(HexColorString.class) != null) {
+                                return AbstractTypeDefinition.HEX_COLOR_LIST;
+                            }
 
                             return AbstractTypeDefinition.STRING_LIST;
                         }
@@ -380,7 +451,9 @@ public abstract class KeyHandler<RawClass> {
     public RawClass getValue() {
         synchronized (this) {
             final RawClass value = this.getValueStorage();
-            if (this.customValueGetter != null) { return this.customValueGetter.getValue(value); }
+            if (this.customValueGetter != null) {
+                return this.customValueGetter.getValue(value);
+            }
             return value;
         }
     }
@@ -426,7 +499,9 @@ public abstract class KeyHandler<RawClass> {
      */
     @SuppressWarnings("unchecked")
     protected void init() throws Throwable {
-        if (this.getter == null) { throw new InterfaceParseException("Getter Method is Missing for " + this.setter.getMethod()); }
+        if (this.getter == null) {
+            throw new InterfaceParseException("Getter Method is Missing for " + this.setter.getMethod());
+        }
 
         // read local cryptinfos
         this.primitive = JSonStorage.canStorePrimitive(this.getter.getMethod().getReturnType());
@@ -577,7 +652,9 @@ public abstract class KeyHandler<RawClass> {
                     /* does not equal */
                     changed = true;
                 }
-                if (changed == false) { return; }
+                if (changed == false) {
+                    return;
+                }
                 if (this.validatorFactory != null) {
                     this.validatorFactory.validate(newValue);
                 }
@@ -606,8 +683,12 @@ public abstract class KeyHandler<RawClass> {
     }
 
     public void validateEncryptionKey(final byte[] key2) {
-        if (key2 == null) { throw new InterfaceParseException("Key missing in " + this); }
-        if (key2.length != JSonStorage.KEY.length) { throw new InterfaceParseException("Crypt key for " + this + " is invalid. required length: " + JSonStorage.KEY.length); }
+        if (key2 == null) {
+            throw new InterfaceParseException("Key missing in " + this);
+        }
+        if (key2.length != JSonStorage.KEY.length) {
+            throw new InterfaceParseException("Crypt key for " + this + " is invalid. required length: " + JSonStorage.KEY.length);
+        }
     }
 
     /**

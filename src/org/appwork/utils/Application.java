@@ -33,35 +33,37 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import javax.swing.UIManager;
+
 import org.appwork.exceptions.WTFException;
 import org.appwork.utils.logging.Log;
 import org.appwork.utils.logging2.LogInterface;
 import org.appwork.utils.os.CrossSystem;
 
 /**
- * Application utils provide statis helper functions concerning the applications
- * System integration
- *
+ * Application utils provide statis helper functions concerning the applications System integration
+ * 
  * @author $Author: unknown$
- *
+ * 
  */
 public class Application {
 
-    private static Boolean              IS_JARED    = null;
+    private static Boolean              IS_JARED      = null;
 
     static {
         Application.redirectOutputStreams();
     }
-    private static String               APP_FOLDER  = ".appwork";
+    private static String               APP_FOLDER    = ".appwork";
     private static String               ROOT;
-    private static long                 javaVersion = 0;
-    public final static long            JAVA15      = 15000000;
-    public final static long            JAVA16      = 16000000;
-    public final static long            JAVA17      = 17000000;
-    public final static long            JAVA18      = 18000000;
-    private static Boolean              JVM64BIT    = null;
+    private static long                 javaVersion   = 0;
+    public final static long            JAVA15        = 15000000;
+    public final static long            JAVA16        = 16000000;
+    public final static long            JAVA17        = 17000000;
+    public final static long            JAVA18        = 18000000;
+    private static Boolean              IS_SYNTHETICA = null;
+    private static Boolean              JVM64BIT      = null;
 
-    private static boolean              REDIRECTED  = false;
+    private static boolean              REDIRECTED    = false;
     public static PauseableOutputStream STD_OUT;
     public static PauseableOutputStream ERR_OUT;
 
@@ -71,7 +73,9 @@ public class Application {
         while (true) {
 
             try {
-                if (file.exists()) { throw new FileNotFoundException("Exists"); }
+                if (file.exists()) {
+                    throw new FileNotFoundException("Exists");
+                }
                 stream.addBranch(new BufferedOutputStream(new FileOutputStream(file)));
                 break;
             } catch (FileNotFoundException e1) {
@@ -88,9 +92,8 @@ public class Application {
     }
 
     /**
-     * Adds a folder to the System classloader classpath this might fail if
-     * there is a security manager
-     *
+     * Adds a folder to the System classloader classpath this might fail if there is a security manager
+     * 
      * @param file
      * @throws IOException
      */
@@ -109,9 +112,8 @@ public class Application {
     }
 
     /**
-     * Adds a url to the classloader classpath this might fail if there is a
-     * security manager
-     *
+     * Adds a url to the classloader classpath this might fail if there is a security manager
+     * 
      * @param file
      * @throws IOException
      */
@@ -141,7 +143,7 @@ public class Application {
 
     /**
      * Returns the Path of appworkutils.jar
-     *
+     * 
      * @return
      */
     public static String getHome() {
@@ -167,9 +169,13 @@ public class Application {
         final String prot = url.getProtocol();
         final String path = url.getPath();
         Log.L.info(url + "");
-        if (!"jar".equals(prot)) { throw new WTFException("Works in Jared mode only"); }
+        if (!"jar".equals(prot)) {
+            throw new WTFException("Works in Jared mode only");
+        }
         final int index = path.indexOf(".jar!");
-        if (index < 0) { throw new WTFException("Works in Jared mode only"); }
+        if (index < 0) {
+            throw new WTFException("Works in Jared mode only");
+        }
         try {
             return new File(new URL(path.substring(0, index + 4)).toURI());
         } catch (final MalformedURLException e) {
@@ -194,7 +200,9 @@ public class Application {
         final String url = Application.getRessourceURL(name).toString();
 
         final int index = url.indexOf(".jar!");
-        if (index < 0) { throw new IllegalStateException("No JarName Found"); }
+        if (index < 0) {
+            throw new IllegalStateException("No JarName Found");
+        }
         try {
             return new File(new URL(url.substring(4, index + 4)).toURI()).getName();
         } catch (final Exception e) {
@@ -204,7 +212,9 @@ public class Application {
     }
 
     public static long getJavaVersion() {
-        if (Application.javaVersion > 0) { return Application.javaVersion; }
+        if (Application.javaVersion > 0) {
+            return Application.javaVersion;
+        }
         try {
             /* this version info contains more information */
             String version = System.getProperty("java.runtime.version");
@@ -245,7 +255,7 @@ public class Application {
 
     /**
      * Returns a ressourcefile relative to the instaldirectory
-     *
+     * 
      * @param relative
      * @return
      */
@@ -254,10 +264,9 @@ public class Application {
     }
 
     /**
-     * returns the url for the resource. if The resource can be found in
-     * classpath, it will be returned. otherwise the function will return the
-     * fileurl to current wprkingdirectory
-     *
+     * returns the url for the resource. if The resource can be found in classpath, it will be returned. otherwise the function will return
+     * the fileurl to current wprkingdirectory
+     * 
      * @param string
      * @return
      */
@@ -267,43 +276,54 @@ public class Application {
 
     /**
      * Returns the Resource url for relative.
-     *
+     * 
      * NOTE:this function only returns URL's that really exists!
-     *
+     * 
      * if preferClassPath is true:
-     *
-     * we first check if there is a ressource available inside current
-     * classpath, for example inside the jar itself. if no such URL exists we
-     * check for file in local filesystem
-     *
+     * 
+     * we first check if there is a ressource available inside current classpath, for example inside the jar itself. if no such URL exists
+     * we check for file in local filesystem
+     * 
      * if preferClassPath if false:
-     *
+     * 
      * first check local filesystem, then inside classpath
-     *
-     *
-     *
+     * 
+     * 
+     * 
      * @param string
      * @param b
      */
     public static URL getRessourceURL(final String relative, final boolean preferClasspath) {
         try {
 
-            if (relative == null) { return null; }
-            if (relative.startsWith("/") || relative.startsWith("\\")) { throw new WTFException("getRessourceURL only works with relative paths."); }
+            if (relative == null) {
+                return null;
+            }
+            if (relative.startsWith("/") || relative.startsWith("\\")) {
+                throw new WTFException("getRessourceURL only works with relative paths.");
+            }
             if (preferClasspath) {
 
                 final URL res = Application.class.getClassLoader().getResource(relative);
-                if (res != null) { return res; }
+                if (res != null) {
+                    return res;
+                }
                 final File file = new File(Application.getHome(), relative);
-                if (!file.exists()) { return null; }
+                if (!file.exists()) {
+                    return null;
+                }
                 return file.toURI().toURL();
 
             } else {
                 final File file = new File(Application.getHome(), relative);
-                if (file.exists()) { return file.toURI().toURL(); }
+                if (file.exists()) {
+                    return file.toURI().toURL();
+                }
 
                 final URL res = Application.class.getClassLoader().getResource(relative);
-                if (res != null) { return res; }
+                if (res != null) {
+                    return res;
+                }
 
             }
         } catch (final MalformedURLException e) {
@@ -314,11 +334,12 @@ public class Application {
     }
 
     /**
-     * Detects the applications home directory. it is either the pass of the
-     * appworkutils.jar or HOME/
+     * Detects the applications home directory. it is either the pass of the appworkutils.jar or HOME/
      */
     public static String getRoot(final Class<?> rootOfClazz) {
-        if (Application.ROOT != null) { return Application.ROOT; }
+        if (Application.ROOT != null) {
+            return Application.ROOT;
+        }
         final String key = "awuhome" + Application.APP_FOLDER;
         final String sysProp = System.getProperty(key);
         if (sysProp != null) {
@@ -371,7 +392,9 @@ public class Application {
             if (appRoot.isFile()) {
                 appRoot = appRoot.getParentFile();
             }
-            if (subPaths != null) { return new File(appRoot, subPaths); }
+            if (subPaths != null) {
+                return new File(appRoot, subPaths);
+            }
             return appRoot;
         } catch (final URISyntaxException e) {
             Log.exception(e);
@@ -416,7 +439,9 @@ public class Application {
     }
 
     public static boolean is64BitJvm() {
-        if (Application.JVM64BIT != null) { return Application.JVM64BIT; }
+        if (Application.JVM64BIT != null) {
+            return Application.JVM64BIT;
+        }
         final String archDataModel = System.getProperty("sun.arch.data.model");
         try {
             if (archDataModel != null) {
@@ -437,15 +462,15 @@ public class Application {
 
     /**
      * Detects if the Application runs out of a jar or not.
-     *
+     * 
      * @param rootOfClazz
-     *
+     * 
      * @return
      */
     public static boolean isJared(Class<?> rootOfClazz) {
         if (Application.IS_JARED != null) {
 
-        return Application.IS_JARED == Boolean.TRUE;
+            return Application.IS_JARED == Boolean.TRUE;
 
         }
         if (rootOfClazz == null) {
@@ -463,8 +488,7 @@ public class Application {
 
         // System.out.println(caller);
         /*
-         * caller is null in case the ressource is not found or not enough
-         * rights, in that case we assume its not jared
+         * caller is null in case the ressource is not found or not enough rights, in that case we assume its not jared
          */
         if (caller == null) {
             Application.IS_JARED = false;
@@ -477,7 +501,7 @@ public class Application {
 
     /**
      * checks current java version for known issues/bugs or unsupported ones
-     *
+     * 
      * @param support15
      * @return
      */
@@ -496,8 +520,7 @@ public class Application {
         if (java >= 16018000l && java < 16019000l) {
             Log.L.warning("Java 1.6 Update 18 has a serious bug in garbage collector!");
             /*
-             * java 1.6 update 18 has a bug in garbage collector, causes java
-             * crashes
+             * java 1.6 update 18 has a bug in garbage collector, causes java crashes
              * 
              * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6847956
              */
@@ -506,16 +529,14 @@ public class Application {
         if (java >= 16010000l && java < 16011000l) {
             Log.L.warning("Java 1.6 Update 10 has a swing bug!");
             /*
-             * 16010.26
-             * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6657923
+             * 16010.26 http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6657923
              */
             return true;
         }
         if (CrossSystem.isMac() && java >= Application.JAVA17 && java < 17006000l) {
             Log.L.warning("leaking semaphores bug");
             /*
-             * leaking semaphores
-             * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7166379
+             * leaking semaphores http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7166379
              */
             return true;
         }
@@ -693,7 +714,9 @@ public class Application {
             synchronized (this) {
                 if (b) {
 
-                    if (this.buffer != null) { return true; }
+                    if (this.buffer != null) {
+                        return true;
+                    }
                     this.buffer = new ByteArrayOutputStream();
                     return false;
                 } else {
@@ -728,7 +751,9 @@ public class Application {
      *
      */
     public static void redirectOutputStreams() {
-        if (Application.REDIRECTED) { return; }
+        if (Application.REDIRECTED) {
+            return;
+        }
         if (Charset.defaultCharset() == Charset.forName("cp1252")) {
             Application.REDIRECTED = true;
             // workaround.
@@ -762,9 +787,8 @@ public class Application {
     }
 
     /**
-     * sets current Application Folder and Jar ID. MUST BE SET at startup! Can
-     * only be set once!
-     *
+     * sets current Application Folder and Jar ID. MUST BE SET at startup! Can only be set once!
+     * 
      * @param newAppFolder
      * @param newJar
      */
@@ -783,9 +807,8 @@ public class Application {
     }
 
     /**
-     * returns a file that does not exists. thus it ads a counter to the path
-     * until the resulting file does not exist
-     *
+     * returns a file that does not exists. thus it ads a counter to the path until the resulting file does not exist
+     * 
      * @param string
      * @return
      */
@@ -794,9 +817,8 @@ public class Application {
     }
 
     /**
-     * returns a file that does not exists. thus it ads a counter to the path
-     * until the resulting file does not exist
-     *
+     * returns a file that does not exists. thus it ads a counter to the path until the resulting file does not exist
+     * 
      * @param string
      * @return
      */
@@ -827,4 +849,25 @@ public class Application {
 
     }
 
+    /**
+     * check if the synthetica look and feel is used. make sure not to call this before you set the final look and feel! Else all calls will
+     * return the wrong results.
+     * 
+     * @return
+     */
+    public static boolean isSyntheticaLookAndFeel() {
+
+        if (IS_SYNTHETICA != null) {
+            return IS_SYNTHETICA;
+        }
+        Class<?> cls;
+        try {
+            cls = Class.forName("de.javasoft.plaf.synthetica.SyntheticaLookAndFeel");
+
+            IS_SYNTHETICA = cls.isAssignableFrom(UIManager.getLookAndFeel().getClass());
+        } catch (Throwable e) {
+            IS_SYNTHETICA = false;
+        }
+        return IS_SYNTHETICA;
+    }
 }

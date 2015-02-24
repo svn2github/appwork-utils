@@ -12,7 +12,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.text.JTextComponent;
 
-
 public class SwingUtils {
     /**
      * Calculates the position of a frame to be in the center of an other frame.
@@ -51,7 +50,9 @@ public class SwingUtils {
                     return (JComponent) c;
                 } else {
                     ret = SwingUtils.getComponentByName((JComponent) c, name);
-                    if (ret != null) { return ret; }
+                    if (ret != null) {
+                        return ret;
+                    }
 
                 }
             }
@@ -61,8 +62,12 @@ public class SwingUtils {
     }
 
     public static Window getWindowForComponent(final Component parentComponent) {
-        if (parentComponent == null) { return JOptionPane.getRootFrame(); }
-        if (parentComponent instanceof Frame || parentComponent instanceof java.awt.Dialog) { return (Window) parentComponent; }
+        if (parentComponent == null) {
+            return JOptionPane.getRootFrame();
+        }
+        if (parentComponent instanceof Frame || parentComponent instanceof java.awt.Dialog) {
+            return (Window) parentComponent;
+        }
         return SwingUtils.getWindowForComponent(parentComponent.getParent());
     }
 
@@ -147,7 +152,5 @@ public class SwingUtils {
         return parent;
 
     }
-
-  
 
 }

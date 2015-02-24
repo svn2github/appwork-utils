@@ -188,6 +188,26 @@ public abstract class KeyHandler<RawClass> {
         return null;
     }
 
+    public boolean hasDefaultValue() {
+        try {
+            final DefaultJsonObject defaultJson = this.getAnnotation(DefaultJsonObject.class);
+            if (defaultJson != null && defaultJson.value() != null) {
+                return true;
+            }
+            final Annotation ann = this.getAnnotation(this.getDefaultAnnotation());
+            if (ann != null) {
+                return true;
+            }
+            final DefaultFactory df = this.getAnnotation(DefaultFactory.class);
+            if (df != null) {
+                return true;
+            }
+            return false;
+        } catch (final Throwable e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @SuppressWarnings("unchecked")
     public RawClass getDefaultValue() {
         try {

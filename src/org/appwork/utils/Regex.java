@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2010 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.utils
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 
 /**
  * @author thomas
- * 
+ *
  */
 
 public class Regex {
@@ -32,7 +32,7 @@ public class Regex {
             final int tempLength = temp.length;
             final String[] output = new String[tempLength];
             for (int i = 0; i < tempLength; i++) {
-                output[i] = new String(temp[i].trim());
+                output[i] = temp[i].trim();
             }
             return output;
         }
@@ -103,7 +103,7 @@ public class Regex {
 
     /**
      * Gibt die Anzahl der Treffer zurück
-     * 
+     *
      * @return
      */
     public int count() {
@@ -176,7 +176,7 @@ public class Regex {
 
     /**
      * Gibt alle Treffer eines Matches in einem 2D array aus
-     * 
+     *
      * @return
      */
     public String[][] getMatches() {
@@ -241,7 +241,7 @@ public class Regex {
 
     /**
      * Setzt den Matcher
-     * 
+     *
      * @param matcher
      */
     public void setMatcher(final Matcher matcher) {

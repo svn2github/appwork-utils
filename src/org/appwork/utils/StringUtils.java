@@ -5,7 +5,9 @@ import java.util.Locale;
 public class StringUtils {
 
     public static boolean contains(final String input, final String contains) {
-        if (StringUtils.isEmpty(input) || StringUtils.isEmpty(contains)) { return false; }
+        if (StringUtils.isEmpty(input) || StringUtils.isEmpty(contains)) {
+            return false;
+        }
         return input.contains(contains);
     }
 
@@ -15,82 +17,93 @@ public class StringUtils {
      * @return
      */
     public static boolean endsWithCaseInsensitive(final String name, final String jdPkgRule) {
-        if (StringUtils.isEmpty(name) || StringUtils.isEmpty(jdPkgRule)) { return false; }
+        if (StringUtils.isEmpty(name) || StringUtils.isEmpty(jdPkgRule)) {
+            return false;
+        }
         return name.toLowerCase(Locale.ENGLISH).endsWith(jdPkgRule.toLowerCase(Locale.ENGLISH));
     }
 
+    public static boolean startsWithCaseInsensitive(final String name, final String jdPkgRule) {
+        if (StringUtils.isEmpty(name) || StringUtils.isEmpty(jdPkgRule)) {
+            return false;
+        }
+        return name.toLowerCase(Locale.ENGLISH).startsWith(jdPkgRule.toLowerCase(Locale.ENGLISH));
+    }
+
     public static boolean containsIgnoreCase(String input, String contains) {
-        if (input == null || contains == null) { return false; }
+        if (input == null || contains == null) {
+            return false;
+        }
         return input.toLowerCase(Locale.ENGLISH).contains(contains.toLowerCase(Locale.ENGLISH));
     }
 
     /**
-     * taken from
-     * http://stackoverflow.com/questions/4731055/whitespace-matching-regex-java
+     * taken from http://stackoverflow.com/questions/4731055/whitespace-matching-regex-java
      */
     final private static String whitespace_chars = "[" /*
-                                                        * dummy empty string for
-                                                        * homogeneity
-                                                        */
+     * dummy empty string for homogeneity
+     */
                                                          + "\\u0009" // CHARACTER
-                                                                     // TABULATION
+                                                         // TABULATION
                                                          + "\\u000A" // LINE
-                                                                     // FEED
-                                                                     // (LF)
+                                                         // FEED
+                                                         // (LF)
                                                          + "\\u000B" // LINE
-                                                                     // TABULATION
+                                                         // TABULATION
                                                          + "\\u000C" // FORM
-                                                                     // FEED
-                                                                     // (FF)
+                                                         // FEED
+                                                         // (FF)
                                                          + "\\u000D" // CARRIAGE
-                                                                     // RETURN
-                                                                     // (CR)
+                                                         // RETURN
+                                                         // (CR)
                                                          + "\\u0020" // SPACE
                                                          + "\\u0085" // NEXT
-                                                                     // LINE
-                                                                     // (NEL)
+                                                         // LINE
+                                                         // (NEL)
                                                          + "\\u00A0" // NO-BREAK
-                                                                     // SPACE
+                                                         // SPACE
                                                          + "\\u1680" // OGHAM
-                                                                     // SPACE
-                                                                     // MARK
+                                                         // SPACE
+                                                         // MARK
                                                          + "\\u180E" // MONGOLIAN
-                                                                     // VOWEL
-                                                                     // SEPARATOR
+                                                         // VOWEL
+                                                         // SEPARATOR
                                                          + "\\u2000" // EN QUAD
                                                          + "\\u2001" // EM QUAD
                                                          + "\\u2002" // EN SPACE
                                                          + "\\u2003" // EM SPACE
                                                          + "\\u2004" // THREE-PER-EM
-                                                                     // SPACE
+                                                         // SPACE
                                                          + "\\u2005" // FOUR-PER-EM
-                                                                     // SPACE
+                                                         // SPACE
                                                          + "\\u2006" // SIX-PER-EM
-                                                                     // SPACE
+                                                         // SPACE
                                                          + "\\u2007" // FIGURE
-                                                                     // SPACE
+                                                         // SPACE
                                                          + "\\u2008" // PUNCTUATION
-                                                                     // SPACE
+                                                         // SPACE
                                                          + "\\u2009" // THIN
-                                                                     // SPACE
+                                                         // SPACE
                                                          + "\\u200A" // HAIR
-                                                                     // SPACE
+                                                         // SPACE
                                                          + "\\u2028" // LINE
-                                                                     // SEPARATOR
+                                                         // SEPARATOR
                                                          + "\\u2029" // PARAGRAPH
-                                                                     // SEPARATOR
+                                                         // SEPARATOR
                                                          + "\\u202F" // NARROW
-                                                                     // NO-BREAK
-                                                                     // SPACE
+                                                         // NO-BREAK
+                                                         // SPACE
                                                          + "\\u205F" // MEDIUM
-                                                                     // MATHEMATICAL
-                                                                     // SPACE
+                                                         // MATHEMATICAL
+                                                         // SPACE
                                                          + "\\u3000" // IDEOGRAPHIC
-                                                                     // SPACE
+                                                         // SPACE
                                                          + "]";
 
     public static String trim(String input) {
-        if (input != null) { return input.replaceAll("^" + StringUtils.whitespace_chars + "+", "").replaceAll(StringUtils.whitespace_chars + "+$", ""); }
+        if (input != null) {
+            return input.replaceAll("^" + StringUtils.whitespace_chars + "+", "").replaceAll(StringUtils.whitespace_chars + "+$", "");
+        }
         return null;
     }
 
@@ -100,9 +113,15 @@ public class StringUtils {
      * @return
      */
     public static boolean equals(final String x, final String y) {
-        if (x == y) { return true; }
-        if (x == null && y != null) { return false; }
-        if (y == null && x != null) { return false; }
+        if (x == y) {
+            return true;
+        }
+        if (x == null && y != null) {
+            return false;
+        }
+        if (y == null && x != null) {
+            return false;
+        }
         return x.equals(y);
     }
 
@@ -112,13 +131,19 @@ public class StringUtils {
      * @return
      */
     public static boolean equalsIgnoreCase(final String pass, final String pass2) {
-        if (pass == pass2) { return true; }
-        if (pass == null && pass2 != null) { return false; }
+        if (pass == pass2) {
+            return true;
+        }
+        if (pass == null && pass2 != null) {
+            return false;
+        }
         return pass.equalsIgnoreCase(pass2);
     }
 
     public static String fillPost(final String string, final String filler, final int minCount) {
-        if (string.length() >= minCount) { return string; }
+        if (string.length() >= minCount) {
+            return string;
+        }
 
         final StringBuilder sb = new StringBuilder();
 
@@ -136,18 +161,24 @@ public class StringUtils {
      * @return
      */
     public static String getCommonalities(final String a, final String b) {
-        if (a == null) { return b; }
-        if (b == null) { return a; }
+        if (a == null) {
+            return b;
+        }
+        if (b == null) {
+            return a;
+        }
         int i = 0;
         for (i = 0; i < Math.min(a.length(), b.length()); i++) {
-            if (a.charAt(i) != b.charAt(i)) { return a.substring(0, i); }
+            if (a.charAt(i) != b.charAt(i)) {
+                return a.substring(0, i);
+            }
         }
         return a.substring(0, i);
     }
 
     /**
      * Returns wether a String is null,empty, or contains whitespace only
-     * 
+     *
      * @param ip
      * @return
      */

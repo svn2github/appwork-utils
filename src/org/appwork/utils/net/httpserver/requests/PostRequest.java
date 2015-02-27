@@ -73,19 +73,25 @@ public class PostRequest extends HttpRequest {
 
                         @Override
                         public int read() throws IOException {
-                            if (this.closed) { return -1; }
+                            if (this.closed) {
+                                return -1;
+                            }
                             return super.read();
                         }
 
                         @Override
                         public int read(final byte[] b) throws IOException {
-                            if (this.closed) { return -1; }
+                            if (this.closed) {
+                                return -1;
+                            }
                             return super.read(b);
                         }
 
                         @Override
                         public int read(final byte[] b, final int off, final int len) throws IOException {
-                            if (this.closed) { return -1; }
+                            if (this.closed) {
+                                return -1;
+                            }
                             return super.read(b, off, len);
                         }
                     };
@@ -94,7 +100,9 @@ public class PostRequest extends HttpRequest {
                 }
             } else {
                 final HTTPHeader contentLength = this.getRequestHeaders().get(HTTPConstants.HEADER_RESPONSE_CONTENT_LENGTH);
-                if (contentLength == null) { throw new IOException("No Content-Length given!"); }
+                if (contentLength == null) {
+                    throw new IOException("No Content-Length given!");
+                }
                 this.inputStream = new LimitedInputStream(this.connection.getInputStream(), Long.parseLong(contentLength.getValue())) {
 
                     volatile boolean closed = false;
@@ -109,19 +117,25 @@ public class PostRequest extends HttpRequest {
 
                     @Override
                     public int read() throws IOException {
-                        if (this.closed) { return -1; }
+                        if (this.closed) {
+                            return -1;
+                        }
                         return super.read();
                     }
 
                     @Override
                     public int read(final byte[] b) throws IOException {
-                        if (this.closed) { return -1; }
+                        if (this.closed) {
+                            return -1;
+                        }
                         return super.read(b);
                     }
 
                     @Override
                     public int read(final byte[] b, final int off, final int len) throws IOException {
-                        if (this.closed) { return -1; }
+                        if (this.closed) {
+                            return -1;
+                        }
                         return super.read(b, off, len);
                     }
 
@@ -134,21 +148,24 @@ public class PostRequest extends HttpRequest {
     /*
      * (non-Javadoc)
      * 
-     * @see org.appwork.utils.net.httpserver.requests.HttpRequestInterface#
-     * getParameterbyKey(java.lang.String)
+     * @see org.appwork.utils.net.httpserver.requests.HttpRequestInterface# getParameterbyKey(java.lang.String)
      */
     @Override
     public String getParameterbyKey(final String key) throws IOException {
         List<KeyValuePair> params = this.getRequestedURLParameters();
         if (params != null) {
             for (final KeyValuePair param : params) {
-                if (key.equalsIgnoreCase(param.key)) { return param.value; }
+                if (key.equalsIgnoreCase(param.key)) {
+                    return param.value;
+                }
             }
         }
         params = this.getPostParameter();
         if (params != null) {
             for (final KeyValuePair param : params) {
-                if (key.equalsIgnoreCase(param.key)) { return param.value; }
+                if (key.equalsIgnoreCase(param.key)) {
+                    return param.value;
+                }
             }
         }
 
@@ -163,7 +180,9 @@ public class PostRequest extends HttpRequest {
      * @throws IOException
      */
     public synchronized List<KeyValuePair> getPostParameter() throws IOException {
-        if (this.postParameterParsed) { return this.postParameters; }
+        if (this.postParameterParsed) {
+            return this.postParameters;
+        }
         final String type = this.getRequestHeaders().getValue(HTTPConstants.HEADER_RESPONSE_CONTENT_TYPE);
         CONTENT_TYPE content_type = null;
         if (new Regex(type, "(application/x-www-form-urlencoded)").matches()) {
@@ -180,15 +199,15 @@ public class PostRequest extends HttpRequest {
             switch (content_type) {
             case JSON: {
                 final byte[] jsonBytes = IO.readStream(-1, this.getInputStream());
-                 String json = new String(jsonBytes, charSet);
-                 json=modifyByContentType(content_type,json);
+                String json = new String(jsonBytes, charSet);
+                json = modifyByContentType(content_type, json);
                 jsonRequest = JSonStorage.restoreFromString(json, JSonRequest.TYPE_REF);
             }
                 break;
             case X_WWW_FORM_URLENCODED: {
                 final byte[] jsonBytes = IO.readStream(-1, this.getInputStream());
-                 String params = new String(jsonBytes, charSet);
-                params=modifyByContentType(content_type,params);
+                String params = new String(jsonBytes, charSet);
+                params = modifyByContentType(content_type, params);
                 this.postParameters = HttpConnection.parseParameterList(params);
             }
                 break;
@@ -199,8 +218,7 @@ public class PostRequest extends HttpRequest {
             for (final Object parameter : jsonRequest.getParams()) {
                 if (parameter instanceof JSonObject) {
                     /*
-                     * JSonObject has customized .toString which converts Map to
-                     * Json!
+                     * JSonObject has customized .toString which converts Map to Json!
                      */
                     this.postParameters.add(new KeyValuePair(null, parameter.toString()));
                 } else {
@@ -217,8 +235,9 @@ public class PostRequest extends HttpRequest {
      * @param content_type
      * @param json
      * @return
+     * @throws Exception
      */
-    protected String modifyByContentType(CONTENT_TYPE content_type, String json) {
+    protected String modifyByContentType(CONTENT_TYPE content_type, String json) throws IOException {
         // TODO Auto-generated method stub
         return json;
     }

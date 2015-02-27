@@ -41,12 +41,16 @@ public abstract class TypeRef<T> {
 
     public static final TypeRef<HashMap<String, Integer>> HASHMAP_INTEGER = new TypeRef<HashMap<String, Integer>>() {
                                                                           };
+    public static final TypeRef<Boolean>                  BOOLEAN         = new TypeRef<Boolean>() {
+                                                                          }; ;
     private final Type                                    type;
 
     public TypeRef() {
         final Type superClass = this.getClass().getGenericSuperclass();
 
-        if (superClass instanceof Class) { throw new IllegalArgumentException("Wrong TypeRef Construct"); }
+        if (superClass instanceof Class) {
+            throw new IllegalArgumentException("Wrong TypeRef Construct");
+        }
         this.type = ((ParameterizedType) superClass).getActualTypeArguments()[0];
 
     }

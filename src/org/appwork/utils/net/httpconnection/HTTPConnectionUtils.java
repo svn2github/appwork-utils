@@ -170,7 +170,7 @@ public class HTTPConnectionUtils {
     }
 
     public static InetAddress[] resolvHostIP(String host) throws IOException {
-        if (StringUtils.isEmpty(host)) { throw new UnknownHostException("Could not resolv: -empty host-"); }
+        if (StringUtils.isEmpty(host)) { throw new UnknownHostException("Could not resolve: -empty host-"); }
         /* remove spaces....so literal IP's work without resolving */
         host = host.trim();
         InetAddress hosts[] = null;
@@ -187,6 +187,6 @@ public class HTTPConnectionUtils {
                 }
             }
         }
-        throw new UnknownHostException("Could not resolv: -" + host + "-");
+        throw new UnknownHostException("Could not resolve: -" + host + "-");
     }
 }

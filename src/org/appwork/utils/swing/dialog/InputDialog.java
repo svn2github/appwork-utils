@@ -42,7 +42,7 @@ public class InputDialog extends AbstractDialog<String> implements KeyListener, 
     protected String                 message;
 
     protected TextComponentInterface input;
-    private JTextPane                bigInput;
+    protected JTextPane              bigInput;
     protected JTextPane              textField;
 
     @Override
@@ -93,15 +93,23 @@ public class InputDialog extends AbstractDialog<String> implements KeyListener, 
     }
 
     public String getReturnID() {
-        if ((this.getReturnmask() & (Dialog.RETURN_OK | Dialog.RETURN_TIMEOUT)) == 0) { return null; }
+        if ((this.getReturnmask() & (Dialog.RETURN_OK | Dialog.RETURN_TIMEOUT)) == 0) {
+            return null;
+        }
 
         if (this.input == null) {
-            if (this.bigInput == null || this.bigInput.getText() == null) { return null; }
+            if (this.bigInput == null || this.bigInput.getText() == null) {
+                return null;
+            }
 
             return this.bigInput.getText();
         } else {
-            if (this.input == null || this.input.getText() == null) { return null; }
-            if (this.input instanceof JPasswordField) { return new String(((JPasswordField) this.input).getPassword()); }
+            if (this.input == null || this.input.getText() == null) {
+                return null;
+            }
+            if (this.input instanceof JPasswordField) {
+                return new String(((JPasswordField) this.input).getPassword());
+            }
             return this.input.getText();
         }
     }
@@ -288,8 +296,12 @@ public class InputDialog extends AbstractDialog<String> implements KeyListener, 
 
             @Override
             public String edtRun() {
-                if (InputDialog.this.input != null) { return InputDialog.this.input.getText(); }
-                if (InputDialog.this.bigInput != null) { return InputDialog.this.bigInput.getText(); }
+                if (InputDialog.this.input != null) {
+                    return InputDialog.this.input.getText();
+                }
+                if (InputDialog.this.bigInput != null) {
+                    return InputDialog.this.bigInput.getText();
+                }
                 return null;
             }
         }.getReturnValue();

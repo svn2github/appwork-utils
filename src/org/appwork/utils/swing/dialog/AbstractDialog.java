@@ -1087,6 +1087,9 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
         return AbstractDialog.getGlobalOwnerFinder().findDialogOwner(this, AbstractDialog.getWindowStackByRoot(this.getDesiredRootFrame()));
     }
 
+    private int preferredHeight = -1;
+    private int preferredWidth  = -1;
+
     /**
      * override this if you want to set a special height
      * 
@@ -1094,7 +1097,21 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
      */
     protected int getPreferredHeight() {
         // TODO Auto-generated method stub
-        return -1;
+        return preferredHeight;
+    }
+
+    public AbstractDialog<T> setPreferredHeight(int i) {
+        preferredHeight = i;
+        return this;
+    }
+
+    /**
+     * @param i
+     * @return
+     */
+    public AbstractDialog<T> setPreferredWidth(int i) {
+        preferredWidth = i;
+        return this;
     }
 
     /**
@@ -1129,8 +1146,8 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
      * @return
      */
     protected int getPreferredWidth() {
-        // TODO Auto-generated method stub
-        return -1;
+
+        return preferredWidth;
     }
 
     /**

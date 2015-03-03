@@ -25,8 +25,7 @@ import javax.swing.WindowConstants;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 
-import net.miginfocom.swing.MigLayout;
-
+import org.appwork.swing.MigPanel;
 import org.appwork.uio.UIOManager;
 import org.appwork.utils.BinaryLogic;
 import org.appwork.utils.os.CrossSystem;
@@ -34,7 +33,7 @@ import org.appwork.utils.swing.EDTHelper;
 
 /**
  * @author thomas
- *
+ * 
  */
 public class ProgressDialog extends AbstractDialog<Integer> implements ProgressInterface {
     public interface ProgressGetter {
@@ -92,7 +91,7 @@ public class ProgressDialog extends AbstractDialog<Integer> implements ProgressI
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.utils.swing.dialog.AbstractDialog#getRetValue()
      */
     @Override
@@ -103,7 +102,9 @@ public class ProgressDialog extends AbstractDialog<Integer> implements ProgressI
 
     @Override
     public void dispose() {
-        if (this.disposed) { return; }
+        if (this.disposed) {
+            return;
+        }
         System.out.println("Dispose Progressdialog");
         this.disposed = true;
         if (this.executer.isAlive()) {
@@ -120,17 +121,19 @@ public class ProgressDialog extends AbstractDialog<Integer> implements ProgressI
 
     }
 
-    private JTextPane getTextfield() {
-        final JTextPane textField = new JTextPane() {
+    protected void addMessageComponent(final MigPanel p) {
+
+        textField = new JTextPane() {
             private static final long serialVersionUID = 1L;
 
             @Override
             public boolean getScrollableTracksViewportWidth() {
 
-                return !BinaryLogic.containsAll(ProgressDialog.this.flagMask, Dialog.STYLE_LARGE);
+                return !BinaryLogic.containsAll(flagMask, Dialog.STYLE_LARGE);
             }
         };
-        if (BinaryLogic.containsAll(this.flagMask, Dialog.STYLE_HTML)) {
+        modifyTextPane(textField);
+        if (BinaryLogic.containsAll(flagMask, Dialog.STYLE_HTML)) {
             textField.setContentType("text/html");
             textField.addHyperlinkListener(new HyperlinkListener() {
 
@@ -146,14 +149,31 @@ public class ProgressDialog extends AbstractDialog<Integer> implements ProgressI
             // this.textField.setMaximumSize(new Dimension(450, 600));
         }
 
-        textField.setText(this.message);
+        textField.setText(message);
         textField.setEditable(false);
         textField.setBackground(null);
         textField.setOpaque(false);
         textField.setFocusable(false);
         textField.putClientProperty("Synthetica.opaque", Boolean.FALSE);
         textField.setCaretPosition(0);
-        return textField;
+
+        if (BinaryLogic.containsAll(flagMask, Dialog.STYLE_LARGE)) {
+
+            p.add(new JScrollPane(textField), "pushx,growx,spanx");
+
+        } else {
+
+            p.add(textField, "pushx,growx,spanx");
+
+        }
+
+    }
+
+    /**
+     * @param textField2
+     */
+    private void modifyTextPane(JTextPane textField2) {
+        // TODO Auto-generated method stub
 
     }
 
@@ -171,21 +191,12 @@ public class ProgressDialog extends AbstractDialog<Integer> implements ProgressI
     @Override
     public JComponent layoutDialogContent() {
         this.getDialog().setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-        final JPanel p = new JPanel(new MigLayout("ins 0,wrap 2", "[][]", "[][]"));
-
-        this.textField = this.getTextfield();
-
-        this.textField.setText(this.message);
+        final MigPanel p = new MigPanel("ins 0,wrap 2", "[][]", "[][]");
         this.extendLayout(p);
-        if (BinaryLogic.containsAll(this.flagMask, Dialog.STYLE_LARGE)) {
 
-            p.add(new JScrollPane(this.textField), "pushx,growx,spanx");
+        addMessageComponent(p);
+        this.textField.setText(this.message);
 
-        } else {
-            // avoids that the textcomponent's height is calculated too big
-            p.add(this.textField, "growx,pushx,spanx,wmin 350");
-
-        }
         this.extendLayout(p);
         final JProgressBar bar;
         p.add(bar = new JProgressBar(0, 100), "growx,pushx" + (this.isLabelEnabled() ? "" : ",spanx"));
@@ -296,7 +307,7 @@ public class ProgressDialog extends AbstractDialog<Integer> implements ProgressI
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.utils.swing.dialog.ProgressInterface#getMessage()
      */
     @Override
@@ -307,7 +318,7 @@ public class ProgressDialog extends AbstractDialog<Integer> implements ProgressI
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.utils.swing.dialog.ProgressInterface#getValue()
      */
     @Override

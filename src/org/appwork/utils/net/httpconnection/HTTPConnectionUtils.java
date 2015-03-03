@@ -19,7 +19,9 @@ public class HTTPConnectionUtils {
 
     public static String getFileNameFromDispositionHeader(String header) {
         // http://greenbytes.de/tech/tc2231/
-        if (StringUtils.isEmpty(header)) { return null; }
+        if (StringUtils.isEmpty(header)) {
+            return null;
+        }
         final String orgheader = header;
         String contentdisposition = header;
 
@@ -29,8 +31,7 @@ public class HTTPConnectionUtils {
                 /* Codierung default */
                 /*
                  * Content-Disposition: attachment;filename==?UTF-8?B?
-                 * RGF2aWQgR3VldHRhIC0gSnVzdCBBIExpdHRsZSBNb3JlIExvdmUgW2FMYnlsb3ZlciBYLUNsdXNpdiBSZW1peF0uTVAz
-                 * ?=
+                 * RGF2aWQgR3VldHRhIC0gSnVzdCBBIExpdHRsZSBNb3JlIExvdmUgW2FMYnlsb3ZlciBYLUNsdXNpdiBSZW1peF0uTVAz ?=
                  */
                 /* remove fallback, in case RFC 2231/5987 appear */
                 contentdisposition = contentdisposition.replaceAll("filename=.*?;", "");
@@ -61,8 +62,7 @@ public class HTTPConnectionUtils {
                 }
             } else if (new Regex(contentdisposition, "=\\?.*?\\?.*?\\?.*?\\?=").matches()) {
                 /*
-                 * Codierung Encoded Words, TODO: Q-Encoding und mehrfach
-                 * tokens, aber noch nicht in freier Wildbahn gesehen
+                 * Codierung Encoded Words, TODO: Q-Encoding und mehrfach tokens, aber noch nicht in freier Wildbahn gesehen
                  */
                 final String tokens[][] = new Regex(contentdisposition, "=\\?(.*?)\\?(.*?)\\?(.*?)\\?=").getMatches();
                 if (tokens.length == 1 && tokens[0].length == 3 && tokens[0][1].trim().equalsIgnoreCase("B")) {
@@ -121,6 +121,7 @@ public class HTTPConnectionUtils {
         ByteBuffer bigbuffer = ByteBuffer.wrap(new byte[4096]);
         final byte[] minibuffer = new byte[1];
         int position;
+
         while (in.read(minibuffer) >= 0) {
             if (bigbuffer.remaining() < 1) {
                 final ByteBuffer newbuffer = ByteBuffer.wrap(new byte[bigbuffer.capacity() * 2]);
@@ -132,8 +133,7 @@ public class HTTPConnectionUtils {
             if (readSingleLine) {
                 if (bigbuffer.position() >= 1) {
                     /*
-                     * \n only line termination, for fucking buggy non rfc
-                     * servers
+                     * \n only line termination, for fucking buggy non rfc servers
                      */
                     position = bigbuffer.position();
                     if (bigbuffer.get(position - 1) == HTTPConnectionUtils.N) {
@@ -151,8 +151,7 @@ public class HTTPConnectionUtils {
                     position = bigbuffer.position();
                     if (bigbuffer.get(position - 2) == HTTPConnectionUtils.N && bigbuffer.get(position - 1) == HTTPConnectionUtils.N) {
                         /*
-                         * \n\n for header<->content divider, or fucking buggy
-                         * non rfc servers
+                         * \n\n for header<->content divider, or fucking buggy non rfc servers
                          */
                         break;
                     }
@@ -165,12 +164,15 @@ public class HTTPConnectionUtils {
                 }
             }
         }
+
         bigbuffer.flip();
         return bigbuffer;
     }
 
     public static InetAddress[] resolvHostIP(String host) throws IOException {
-        if (StringUtils.isEmpty(host)) { throw new UnknownHostException("Could not resolve: -empty host-"); }
+        if (StringUtils.isEmpty(host)) {
+            throw new UnknownHostException("Could not resolve: -empty host-");
+        }
         /* remove spaces....so literal IP's work without resolving */
         host = host.trim();
         InetAddress hosts[] = null;

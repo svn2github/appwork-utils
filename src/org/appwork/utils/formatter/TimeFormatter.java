@@ -16,6 +16,10 @@ import java.util.Locale;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
+
 import org.appwork.utils.BinaryLogic;
 import org.appwork.utils.Regex;
 
@@ -120,7 +124,9 @@ public class TimeFormatter {
      */
     public static long formatStringToMilliseconds(final String text) {
         final String[] found = new Regex(text, "(\\d+)\\w?:(\\d+)").getRow(0);
-        if (found == null) { return 0; }
+        if (found == null) {
+            return 0;
+        }
         int hours = Integer.parseInt(found[0]);
         int minutes = Integer.parseInt(found[1]);
         if (hours >= 24) {
@@ -140,7 +146,9 @@ public class TimeFormatter {
             matches = new Regex(wait, Pattern.compile("([\\d]+)")).getMatches();
         }
 
-        if (matches == null || matches.length == 0) { return -1; }
+        if (matches == null || matches.length == 0) {
+            return -1;
+        }
 
         double res = 0;
         if (matches[0].length == 1) {
@@ -173,7 +181,9 @@ public class TimeFormatter {
     }
 
     public static Date parseDateString(final String date) {
-        if (date == null) { return null; }
+        if (date == null) {
+            return null;
+        }
         Date expireDate = null;
         for (final SimpleDateFormat format : TimeFormatter.dateformats) {
             try {
@@ -182,7 +192,20 @@ public class TimeFormatter {
             } catch (final Throwable e2) {
             }
         }
-        if (expireDate == null) { return null; }
+        if (expireDate == null) {
+            return null;
+        }
         return expireDate;
+    }
+
+    /**
+     * @param date
+     * @return
+     * @throws DatatypeConfigurationException
+     */
+    public static long getTimestampByGregorianTime(String date) throws DatatypeConfigurationException {
+        DatatypeFactory f = DatatypeFactory.newInstance();
+        XMLGregorianCalendar xgc = f.newXMLGregorianCalendar(date);
+        return xgc.toGregorianCalendar().getTime().getTime();
     }
 }

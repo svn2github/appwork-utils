@@ -3,6 +3,7 @@ package org.appwork.uio;
 import javax.swing.Icon;
 
 import org.appwork.exceptions.WTFException;
+import org.appwork.utils.locale._AWU;
 import org.appwork.utils.swing.dialog.AbstractDialog;
 import org.appwork.utils.swing.dialog.Dialog;
 import org.appwork.utils.swing.dialog.DialogCanceledException;
@@ -52,6 +53,17 @@ public class BasicDialogHandler implements UserIOHandlerInterface {
 
     public void showErrorMessage(final String message) {
         D.showErrorDialog(message);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.appwork.uio.UserIOHandlerInterface#showException(java.lang.String, java.lang.Throwable)
+     */
+    @Override
+    public void showException(String message, Throwable e) {
+
+        D.showExceptionDialog(_AWU.T.DIALOG_ERROR_TITLE(), message, e);
     }
 
 }

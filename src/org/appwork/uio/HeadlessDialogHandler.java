@@ -14,6 +14,7 @@ import javax.swing.Icon;
 import org.appwork.console.AbstractConsole;
 import org.appwork.console.ConsoleDialog;
 import org.appwork.utils.BinaryLogic;
+import org.appwork.utils.Exceptions;
 import org.appwork.utils.swing.dialog.ConfirmDialog;
 import org.appwork.utils.swing.dialog.Dialog;
 import org.appwork.utils.swing.dialog.DialogCanceledException;
@@ -233,6 +234,33 @@ public class HeadlessDialogHandler implements UserIOHandlerInterface {
             e.printStackTrace();
         }
 
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.appwork.uio.UserIOHandlerInterface#showException(java.lang.String, java.lang.Throwable)
+     */
+    @Override
+    public void showException(String message, Throwable e1) {
+        synchronized (AbstractConsole.LOCK) {
+            ConsoleDialog cd = new ConsoleDialog(message);
+            cd.printLines(message);
+            cd.printLines(Exceptions.getStackTrace(e1));
+            cd.start();
+            try {
+                cd.waitYesOrNo(UIOManager.BUTTONS_HIDE_OK, null, null);
+
+            } catch (DialogCanceledException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (DialogClosedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } finally {
+                cd.end();
+            }
+        }
     }
 
 }

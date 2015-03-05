@@ -14,4 +14,10 @@ public interface UserIOHandlerInterface {
 
     void showMessageDialog(String message);
 
+    /**
+     * @param message
+     * @param e
+     */
+    void showException(String message, Throwable e);
+
 }

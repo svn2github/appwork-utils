@@ -5,7 +5,7 @@ import java.util.logging.Logger;
 
 public class ExtLogManager extends LogManager {
     public static String[] WHITELIST     = new String[] { "org.fourthline", "com.mongo" };
-    public static String[] BLACKLIST     = new String[] { "org.fourthline", "org.fourthline.cling.registry.Registry", "org.fourthline.cling.model.message.header", "org.fourthline.cling.model.message.UpnpHeaders", "org.fourthline.cling.transport" };
+    public static String[] BLACKLIST     = new String[] { "com.mongodb.driver.cluster", "org.fourthline", "org.fourthline.cling.registry.Registry", "org.fourthline.cling.model.message.header", "org.fourthline.cling.model.message.UpnpHeaders", "org.fourthline.cling.transport" };
 
     private LoggerFactory  LoggerFactory = null;
 

@@ -127,7 +127,8 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
 
     @Override
     public void connect() throws IOException {
-        if (this.isConnected()) { return;/* oder fehler */
+        if (this.isConnected()) {
+            return;/* oder fehler */
         }
         this.wasConnected = false;
         final long startTime = System.currentTimeMillis();
@@ -157,8 +158,7 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
 
             /** http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6626700 **/
             /**
-             * Request for ability to turn off authentication caching in
-             * HttpURLConnection
+             * Request for ability to turn off authentication caching in HttpURLConnection
              **/
             org.appwork.sunwrapper.sun.net.www.protocol.http.AuthCacheValueWrapper.setAuthCacheImpl();
 
@@ -219,9 +219,13 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
     protected synchronized void connectInputStream() throws IOException {
         if (this.requiresOutputStream()) {
             final long done = ((CountingOutputStream) this.outputStream).transferedBytes();
-            if (done != this.postTodoLength) { throw new IOException("Content-Length " + this.postTodoLength + " does not match send " + done + " bytes"); }
+            if (done != this.postTodoLength) {
+                throw new IOException("Content-Length " + this.postTodoLength + " does not match send " + done + " bytes");
+            }
         }
-        if (this.inputStreamConnected) { return; }
+        if (this.inputStreamConnected) {
+            return;
+        }
         if (this.requiresOutputStream()) {
             /* flush outputstream in case some buffers are not flushed yet */
             this.outputStream.flush();
@@ -296,35 +300,45 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
     @Override
     public String getCharset() {
         int i;
-        if (this.customcharset != null) { return this.customcharset; }
+        if (this.customcharset != null) {
+            return this.customcharset;
+        }
         return this.getContentType() != null && (i = this.getContentType().toLowerCase().indexOf("charset=")) > 0 ? this.getContentType().substring(i + 8).trim() : null;
     }
 
     @Override
     public long getCompleteContentLength() {
         this.getRange();
-        if (this.ranges != null) { return this.ranges[2]; }
+        if (this.ranges != null) {
+            return this.ranges[2];
+        }
         return this.getContentLength();
     }
 
     @Override
     public long getContentLength() {
         final String length = this.getHeaderField("Content-Length");
-        if (length != null) { return Long.parseLong(length.trim()); }
+        if (length != null) {
+            return Long.parseLong(length.trim());
+        }
         return -1;
     }
 
     @Override
     public String getContentType() {
         final String type = this.getHeaderField("Content-Type");
-        if (type == null) { return "unknown"; }
+        if (type == null) {
+            return "unknown";
+        }
         return type;
     }
 
     @Override
     public String getHeaderField(final String string) {
         final List<String> ret = this.headers.get(string);
-        if (ret == null || ret.size() == 0) { return null; }
+        if (ret == null || ret.size() == 0) {
+            return null;
+        }
         return ret.get(0);
     }
 
@@ -336,7 +350,9 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
     @Override
     public List<String> getHeaderFields(final String string) {
         final List<String> ret = this.headers.get(string);
-        if (ret == null || ret.size() == 0) { return null; }
+        if (ret == null || ret.size() == 0) {
+            return null;
+        }
         return ret;
     }
 
@@ -346,12 +362,13 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
         this.connectInputStream();
         final int code = this.getResponseCode();
         if (this.isOK() || code == 404 || code == 403 || code == 416) {
-            if (this.convertedInputStream != null) { return this.convertedInputStream; }
+            if (this.convertedInputStream != null) {
+                return this.convertedInputStream;
+            }
             if (this.contentDecoded) {
                 /**
-                 * disabled because it is unknown if httpurlconnection
-                 * transparently handles transfer-encoding as it already handles
-                 * chunked transfer-encoding
+                 * disabled because it is unknown if httpurlconnection transparently handles transfer-encoding as it already handles chunked
+                 * transfer-encoding
                  * 
                  */
                 // final String encodingTransfer =
@@ -388,15 +405,21 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
 
     @Override
     public OutputStream getOutputStream() throws IOException {
-        if (this.outputStream != null && this.requiresOutputStream()) { return this.outputStream; }
+        if (this.outputStream != null && this.requiresOutputStream()) {
+            return this.outputStream;
+        }
         throw new IOException("OutputStream is not available");
     }
 
     @Override
     public long[] getRange() {
-        if (this.ranges != null) { return this.ranges; }
+        if (this.ranges != null) {
+            return this.ranges;
+        }
         String contentRange = this.getHeaderField("Content-Range");
-        if ((contentRange = this.getHeaderField("Content-Range")) == null) { return null; }
+        if ((contentRange = this.getHeaderField("Content-Range")) == null) {
+            return null;
+        }
         String[] range = null;
         if (contentRange != null) {
             if ((range = new Regex(contentRange, ".*?(\\d+).*?-.*?(\\d+).*?/.*?(\\d+)").getRow(0)) != null) {
@@ -412,8 +435,7 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
                 /* only parse this when we have NO 416 (invalid range request) */
                 /* NON RFC-2616! STOP is missing */
                 /*
-                 * this happend for some stupid servers, seems to happen when
-                 * request is bytes=9500- (x till end)
+                 * this happend for some stupid servers, seems to happen when request is bytes=9500- (x till end)
                  */
                 /* START-/SIZE */
                 /* content-range: bytes 1020054729-/1073741824 */
@@ -546,7 +568,9 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
 
     @Override
     public boolean isConnected() {
-        if (this.con != null && this.connected) { return true; }
+        if (this.con != null && this.connected) {
+            return true;
+        }
         return false;
     }
 
@@ -563,14 +587,20 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
     @Override
     public boolean isOK() {
         final int code = this.getResponseCode();
-        if (code >= 200 && code < 400) { return true; }
-        if (this.isResponseCodeAllowed(code)) { return true; }
+        if (code >= 200 && code < 400) {
+            return true;
+        }
+        if (this.isResponseCodeAllowed(code)) {
+            return true;
+        }
         return false;
     }
 
     protected boolean isResponseCodeAllowed(final int code) {
         for (final int c : this.allowedResponseCodes) {
-            if (c == code) { return true; }
+            if (c == code || c == -1) {
+                return true;
+            }
         }
         return false;
     }
@@ -599,7 +629,9 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
 
     @Override
     public void setAllowedResponseCodes(final int[] codes) {
-        if (codes == null) { throw new IllegalArgumentException("codes==null"); }
+        if (codes == null) {
+            throw new IllegalArgumentException("codes==null");
+        }
         this.allowedResponseCodes = codes;
     }
 
@@ -615,7 +647,9 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
 
     @Override
     public void setContentDecoded(final boolean b) {
-        if (this.convertedInputStream != null) { throw new IllegalStateException("InputStream already in use!"); }
+        if (this.convertedInputStream != null) {
+            throw new IllegalStateException("InputStream already in use!");
+        }
         this.contentDecoded = b;
     };
 

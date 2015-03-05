@@ -6,7 +6,6 @@ import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 
-import org.appwork.swing.components.ExtTextPane;
 import org.appwork.utils.swing.SwingUtils;
 
 public class BasicTooltipFactory implements TooltipFactory {
@@ -32,10 +31,9 @@ public class BasicTooltipFactory implements TooltipFactory {
         headerLbl.setForeground(fg);
         JLabel iconLbl = new JLabel(getIcon());
 
-        ExtTextPane txt = new ExtTextPane();
-        txt.setLabelMode(true);
+        JLabel txt = new JLabel();
         txt.setForeground(fg);
-        txt.setText(getText());
+        txt.setText("<html>" + getText().replaceAll("[\r\n]+", "<br>") + "</html>");
         p.add(headerLbl, "hidemode 2,spanx,pushx,growx");
         p.add(iconLbl, "hidemode 2");
         p.add(txt);

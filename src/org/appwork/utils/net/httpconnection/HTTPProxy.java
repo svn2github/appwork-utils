@@ -22,36 +22,34 @@ public class HTTPProxy {
         HTTP
     }
 
-    // private static final int KEY_READ = 0x20019;
-
     public static final HTTPProxy NONE = new HTTPProxy(TYPE.NONE) {
 
-        @Override
-        public void setConnectMethodPrefered(final boolean value) {
-        }
+                                           @Override
+                                           public void setConnectMethodPrefered(final boolean value) {
+                                           }
 
-        @Override
-        public void setLocalIP(final InetAddress localIP) {
-        }
+                                           @Override
+                                           public void setLocal(final String local) {
+                                           }
 
-        @Override
-        public void setPass(final String pass) {
-        }
+                                           @Override
+                                           public void setPass(final String pass) {
+                                           }
 
-        @Override
-        public void setPort(final int port) {
-        }
+                                           @Override
+                                           public void setPort(final int port) {
+                                           }
 
-        @Override
-        public void setType(final TYPE type) {
-            super.setType(TYPE.NONE);
-        }
+                                           @Override
+                                           public void setType(final TYPE type) {
+                                               super.setType(TYPE.NONE);
+                                           }
 
-        @Override
-        public void setUser(final String user) {
-        }
+                                           @Override
+                                           public void setUser(final String user) {
+                                           }
 
-    };
+                                       };
 
     public static List<HTTPProxy> getFromSystemProperties() {
         final java.util.List<HTTPProxy> ret = new ArrayList<HTTPProxy>();
@@ -97,24 +95,16 @@ public class HTTPProxy {
     }
 
     public static HTTPProxy getHTTPProxy(final HTTPProxyStorable storable) {
-        if (storable == null || storable.getType() == null) { return null; }
+        if (storable == null || storable.getType() == null) {
+            return null;
+        }
         HTTPProxy ret = null;
         switch (storable.getType()) {
         case NONE:
             return HTTPProxy.NONE;
         case DIRECT:
             ret = new HTTPProxy(TYPE.DIRECT);
-            if (storable.getAddress() != null) {
-                try {
-                    final InetAddress ip = InetAddress.getByName(storable.getAddress());
-                    ret.setLocalIP(ip);
-                } catch (final Throwable e) {
-                    e.printStackTrace();
-                    return null;
-                }
-            } else {
-                return null;
-            }
+            ret.setLocal(storable.getAddress());
             break;
         case HTTP:
             ret = new HTTPProxy(TYPE.HTTP);
@@ -139,7 +129,9 @@ public class HTTPProxy {
 
     private static String[] getInfo(final String host, final String port) {
         final String[] info = new String[2];
-        if (host == null) { return info; }
+        if (host == null) {
+            return info;
+        }
         final String tmphost = host.replaceFirst("http://", "").replaceFirst("https://", "");
         String tmpport = new org.appwork.utils.Regex(host, ".*?:(\\d+)").getMatch(0);
         if (tmpport != null) {
@@ -160,7 +152,9 @@ public class HTTPProxy {
     }
 
     public static HTTPProxyStorable getStorable(final HTTPProxy proxy) {
-        if (proxy == null || proxy.getType() == null) { return null; }
+        if (proxy == null || proxy.getType() == null) {
+            return null;
+        }
         final HTTPProxyStorable ret = new HTTPProxyStorable();
         switch (proxy.getType()) {
         case NONE:
@@ -169,12 +163,7 @@ public class HTTPProxy {
             break;
         case DIRECT:
             ret.setType(HTTPProxyStorable.TYPE.DIRECT);
-            if (proxy.getLocalIP() != null) {
-                final String ip = proxy.getLocalIP().getHostAddress();
-                ret.setAddress(ip);
-            } else {
-                ret.setAddress(null);
-            }
+            ret.setAddress(proxy.getLocal());
             break;
         case HTTP:
             ret.setType(HTTPProxyStorable.TYPE.HTTP);
@@ -269,7 +258,9 @@ public class HTTPProxy {
     }
 
     public static HTTPProxy parseHTTPProxy(final String s) {
-        if (StringUtils.isEmpty(s)) { return null; }
+        if (StringUtils.isEmpty(s)) {
+            return null;
+        }
         final String type = new Regex(s, "(https?|socks(5|4)|direct)://").getMatch(0);
         final String auth = new Regex(s, "://(.+)@").getMatch(0);
         final String host = new Regex(s, "://(.+@)?(.*?)(/|$)").getMatch(1);
@@ -285,17 +276,7 @@ public class HTTPProxy {
             ret.setPort(1080);
         } else if ("direct".equalsIgnoreCase(type)) {
             ret = new HTTPProxy(TYPE.DIRECT);
-            final String hostname = new Regex(host, "(.*?)(:|$)").getMatch(0);
-            if (!StringUtils.isEmpty(hostname)) {
-                try {
-                    final InetAddress ip = InetAddress.getByName(hostname.trim());
-                    ret.setLocalIP(ip);
-                    return ret;
-                } catch (final Throwable e) {
-                    e.printStackTrace();
-                    return null;
-                }
-            }
+            ret.setLocal(host);
         }
         if (ret != null) {
             final String hostname = new Regex(host, "(.*?)(:|$)").getMatch(0);
@@ -314,34 +295,27 @@ public class HTTPProxy {
             if (!StringUtils.isEmpty(password)) {
                 ret.setPass(password);
             }
-            if (!StringUtils.isEmpty(ret.getHost())) { return ret; }
+            if (!StringUtils.isEmpty(ret.getHost())) {
+                return ret;
+            }
         }
         return null;
     }
 
-    private static byte[] toCstr(final String str) {
-        final byte[] result = new byte[str.length() + 1];
-        for (int i = 0; i < str.length(); i++) {
-            result[i] = (byte) str.charAt(i);
-        }
-        result[str.length()] = 0;
-        return result;
-    }
+    protected String  local                      = null;
 
-    protected InetAddress localIP                    = null;
+    protected String  user                       = null;
 
-    protected String      user                       = null;
+    protected String  pass                       = null;
 
-    protected String      pass                       = null;
+    protected int     port                       = 80;
 
-    protected int         port                       = 80;
+    protected String  host                       = null;
+    protected TYPE    type                       = TYPE.DIRECT;
 
-    protected String      host                       = null;
-    protected TYPE        type                       = TYPE.DIRECT;
+    protected boolean useConnectMethod           = false;
 
-    protected boolean     useConnectMethod           = false;
-
-    protected boolean     preferNativeImplementation = false;
+    protected boolean preferNativeImplementation = false;
 
     protected HTTPProxy() {
     }
@@ -352,7 +326,7 @@ public class HTTPProxy {
 
     public HTTPProxy(final InetAddress direct) {
         this.setType(TYPE.DIRECT);
-        this.setLocalIP(direct);
+        this.setLocal(direct.getHostAddress());
     }
 
     public HTTPProxy(final TYPE type) {
@@ -369,7 +343,7 @@ public class HTTPProxy {
         if (this.type == TYPE.NONE) {
             return _AWU.T.proxy_none();
         } else if (this.type == TYPE.DIRECT) {
-            return _AWU.T.proxy_direct(this.localIP.getHostAddress());
+            return _AWU.T.proxy_direct(getLocal());
         } else if (this.type == TYPE.HTTP) {
             String ret = _AWU.T.proxy_http(this.getHost(), this.getPort());
             if (this.isPreferNativeImplementation()) {
@@ -387,7 +361,7 @@ public class HTTPProxy {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see java.lang.Object#clone()
      */
     @Override
@@ -398,21 +372,27 @@ public class HTTPProxy {
     }
 
     protected void cloneProxy(final HTTPProxy proxy) {
-        if (proxy == null) { return; }
+        if (proxy == null) {
+            return;
+        }
         this.set(proxy);
     }
 
     @Override
     public boolean equals(final Object obj) {
-        if (this == obj) { return true; }
-        if (obj == null || !(obj instanceof HTTPProxy)) { return false; }
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || !(obj instanceof HTTPProxy)) {
+            return false;
+        }
         final HTTPProxy p = (HTTPProxy) obj;
-        if (this.getType() != p.getType()) { return false; }
+        if (this.getType() != p.getType()) {
+            return false;
+        }
         switch (this.getType()) {
         case DIRECT:
-            if (this.getLocalIP() == null && p.getLocalIP() == null) { return true; }
-            if (this.getLocalIP() != null && this.getLocalIP().equals(p.getLocalIP())) { return true; }
-            return false;
+            return StringUtils.equals(this.getLocal(), p.getLocal());
         case NONE:
             return true;
         default:
@@ -424,7 +404,9 @@ public class HTTPProxy {
         if (this.equals(proxy)) {
             switch (this.getType()) {
             case HTTP:
-                if (this.isConnectMethodPrefered() != proxy.isConnectMethodPrefered()) { return false; }
+                if (this.isConnectMethodPrefered() != proxy.isConnectMethodPrefered()) {
+                    return false;
+                }
             default:
                 return this.isPreferNativeImplementation() == proxy.isPreferNativeImplementation();
             }
@@ -436,11 +418,8 @@ public class HTTPProxy {
         return this.host;
     }
 
-    /**
-     * @return the localIP
-     */
-    public InetAddress getLocalIP() {
-        return this.localIP;
+    public String getLocal() {
+        return this.local;
     }
 
     public String getPass() {
@@ -507,10 +486,12 @@ public class HTTPProxy {
     }
 
     protected void set(final HTTPProxy proxy) {
-        if (proxy == null) { return; }
+        if (proxy == null) {
+            return;
+        }
         this.setUser(proxy.getUser());
         this.setHost(proxy.getHost());
-        this.setLocalIP(proxy.getLocalIP());
+        this.setLocal(proxy.getLocal());
         this.setPass(proxy.getPass());
         this.setPort(proxy.getPort());
         this.setType(proxy.getType());
@@ -533,8 +514,12 @@ public class HTTPProxy {
      * @param localIP
      *            the localIP to set
      */
-    public void setLocalIP(final InetAddress localIP) {
-        this.localIP = localIP;
+    public void setLocal(final String local) {
+        if (local != null) {
+            this.local = local.trim();
+        } else {
+            this.local = local;
+        }
     }
 
     public void setPass(final String pass) {

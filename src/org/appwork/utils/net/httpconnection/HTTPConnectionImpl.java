@@ -8,8 +8,10 @@ import java.io.OutputStream;
 import java.io.PushbackInputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.ConnectException;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.NetworkInterface;
 import java.net.Proxy;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
@@ -22,7 +24,9 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -217,17 +221,17 @@ public class HTTPConnectionImpl implements HTTPConnection {
     protected boolean putKeepAliveSocket(final Socket socket) throws IOException {
         /**
          * only keep-Alive sockets if
-         * 
+         *
          * 1.) keepAliveEnabled, HTTP Request/Response signals Keep-Alive and keep-Alive feature is enabled
-         * 
+         *
          * 2.) responseCode is ok
-         * 
+         *
          * 3.) socket is open/not closed/input and output open
-         * 
+         *
          * 4.) used inputstream has reached valid EOF
-         * 
+         *
          * 5.) available outputstream has written all data
-         * 
+         *
          */
         if (socket != null && this.isKeepAlivedEnabled() && this.isKeepAliveOK() && socket.isConnected() && !socket.isClosed() && socket.isInputShutdown() == false && socket.isOutputShutdown() == false) {
             if (this.inputStream != null && this.inputStream instanceof StreamValidEOF && ((StreamValidEOF) this.inputStream).isValidEOF()) {
@@ -252,8 +256,8 @@ public class HTTPConnectionImpl implements HTTPConnection {
                                 maxKeepAliveRequests = this.getDefaultKeepAliveMaxRequests();
                             }
                             final InetAddress localIP;
-                            if (this.proxy != null && this.proxy.isDirect() && this.proxy.getLocalIP() != null) {
-                                localIP = this.proxy.getLocalIP();
+                            if (this.proxy != null && this.proxy.isDirect()) {
+                                localIP = socket.getLocalAddress();
                             } else {
                                 localIP = null;
                             }
@@ -299,13 +303,8 @@ public class HTTPConnectionImpl implements HTTPConnection {
         return false;
     }
 
-    protected Socket getKeepAliveSocket() {
-        final InetAddress localIP;
-        if (this.proxy != null && this.proxy.isDirect() && this.proxy.getLocalIP() != null) {
-            localIP = this.proxy.getLocalIP();
-        } else {
-            localIP = null;
-        }
+    protected Socket getKeepAliveSocket() throws IOException {
+        final InetAddress localIP = getDirectInetAddress(getProxy());
         final int port;
         if (this.httpURL.getPort() == -1) {
             port = this.httpURL.getDefaultPort();
@@ -339,7 +338,7 @@ public class HTTPConnectionImpl implements HTTPConnection {
                     } else if (next.isSsl() && ssl) {
                         /**
                          * ssl needs to have same hostname to avoid (SNI)
-                         * 
+                         *
                          * <p>
                          * Your browser sent a request that this server could not understand.<br />
                          * Host name provided via SNI and via HTTP are different
@@ -400,9 +399,9 @@ public class HTTPConnectionImpl implements HTTPConnection {
         return new SSLSocketFactory() {
             /**
              * remove SSL because of POODLE Vulnerability
-             * 
+             *
              * https://www.us-cert.gov/ncas/alerts/TA14-290A
-             * 
+             *
              * @param socket
              */
             private Socket removeSSLProtocol(final Socket socket) {
@@ -537,6 +536,87 @@ public class HTTPConnectionImpl implements HTTPConnection {
         }
     }
 
+    public static InetAddress getDirectInetAddress(HTTPProxy proxy) throws IOException {
+        if (proxy != null && proxy.isDirect()) {
+            final String local = proxy.getLocal();
+            if (local != null && local.matches("^\\d+\\.\\d+\\.\\d+\\.\\d+\\$")) {
+                return InetAddress.getByName(local);
+            }
+            final String interfaceName = local;
+            if (interfaceName != null) {
+                final String ifName;
+                final boolean subInterface;
+                final int index = interfaceName.indexOf(":");
+                if (index != -1) {
+                    ifName = interfaceName.substring(0, index);
+                    subInterface = true;
+                } else {
+                    ifName = interfaceName;
+                    subInterface = false;
+                }
+                final NetworkInterface netif = NetworkInterface.getByName(ifName);
+                if (netif == null) {
+                    throw new ProxyConnectException("No such networkinterface: " + interfaceName, proxy);
+                }
+                if (!netif.isUp()) {
+                    throw new ProxyConnectException("Unconnected networkinterface: " + interfaceName, proxy);
+                }
+
+                if (subInterface) {
+                    final Enumeration<NetworkInterface> subif = netif.getSubInterfaces();
+                    while (subif.hasMoreElements()) {
+                        final NetworkInterface next = subif.nextElement();
+                        if (interfaceName.equals(next.getName())) {
+                            if (!next.isUp()) {
+                                throw new ProxyConnectException("Unconnected networkinterface: " + interfaceName, proxy);
+                            }
+                            final Enumeration<InetAddress> iaSub = next.getInetAddresses();
+                            while (iaSub.hasMoreElements()) {
+                                final InetAddress ia = iaSub.nextElement();
+                                if (ia instanceof Inet4Address) {
+                                    return ia;
+                                }
+                            }
+                            throw new ProxyConnectException("Unsupported networkinterface: " + interfaceName, proxy);
+                        }
+                    }
+                    throw new ProxyConnectException("No such networkinterface: " + interfaceName, proxy);
+                } else {
+                    /**
+                     * root.getInetAddresses contains all InetAddress (rootInterface+subInterfaces), so we have to filter out subInterfaces
+                     * first
+                     */
+                    final HashSet<InetAddress> inetAddresses = new HashSet<InetAddress>();
+                    final Enumeration<InetAddress> iaRoot = netif.getInetAddresses();
+                    while (iaRoot.hasMoreElements()) {
+                        final InetAddress ia = iaRoot.nextElement();
+                        if (ia instanceof Inet4Address) {
+                            inetAddresses.add(ia);
+                        }
+                    }
+                    final Enumeration<NetworkInterface> subif = netif.getSubInterfaces();
+                    while (subif.hasMoreElements()) {
+                        final NetworkInterface next = subif.nextElement();
+                        final Enumeration<InetAddress> iaSub = next.getInetAddresses();
+                        while (iaSub.hasMoreElements()) {
+                            final InetAddress ia = iaSub.nextElement();
+                            if (ia instanceof Inet4Address) {
+                                inetAddresses.remove(ia);
+                            }
+                        }
+                    }
+                    final Iterator<InetAddress> it = inetAddresses.iterator();
+                    if (it.hasNext()) {
+                        return it.next();
+                    }
+                }
+                throw new ProxyConnectException("Unsupported networkinterface: " + interfaceName, proxy);
+            }
+            throw new ProxyConnectException("Invalid Direct Proxy", proxy);
+        }
+        return null;
+    }
+
     public void connect() throws IOException {
         boolean sslSNIWorkAround = false;
         connect: while (true) {
@@ -562,23 +642,20 @@ public class HTTPConnectionImpl implements HTTPConnection {
                         port = this.httpURL.getDefaultPort();
                     }
                     final long startTime = System.currentTimeMillis();
-                    if (this.proxy != null && this.proxy.isDirect()) {
-                        /* bind socket to given interface */
-                        InetSocketAddress proxyInetSocketAddress = null;
-                        try {
-                            if (this.proxy.getLocalIP() == null) {
-                                throw new IOException("Invalid localIP");
+                    final HTTPProxy lProxy = getProxy();
+                    InetAddress bindInetAddress = null;
+                    if (lProxy != null) {
+                        if (lProxy.isDirect()) {
+                            bindInetAddress = getDirectInetAddress(lProxy);
+                            try {
+                                this.connectionSocket.bind(new InetSocketAddress(bindInetAddress, 0));
+                            } catch (final IOException e) {
+                                this.connectExceptions.add("Bind: " + bindInetAddress + "|" + e.getMessage());
+                                throw new ProxyConnectException(e, lProxy);
                             }
-                            proxyInetSocketAddress = new InetSocketAddress(this.proxy.getLocalIP(), 0);
-                            this.connectionSocket.bind(proxyInetSocketAddress);
-                        } catch (final IOException e) {
-                            this.connectExceptions.add(proxyInetSocketAddress + "|" + e.getMessage());
-                            throw new ProxyConnectException(e, this.proxy);
+                        } else if (!lProxy.isNone()) {
+                            throw new ProxyConnectException("Invalid Direct Proxy", lProxy);
                         }
-                    } else if (this.proxy != null && this.proxy.isNone()) {
-                        /* none is also allowed here */
-                    } else if (this.proxy != null) {
-                        throw new RuntimeException("Invalid Direct Proxy");
                     }
                     InetSocketAddress connectedInetSocketAddress = null;
                     try {
@@ -664,7 +741,11 @@ public class HTTPConnectionImpl implements HTTPConnection {
                             sslSNIWorkAround = true;
                             continue connect;
                         }
-                        ee = e;
+                        if (bindInetAddress != null) {
+                            ee = new ProxyConnectException(e, lProxy);
+                        } else {
+                            ee = e;
+                        }
                     }
                 }
                 if (ee != null) {
@@ -1074,7 +1155,11 @@ public class HTTPConnectionImpl implements HTTPConnection {
             sb.append("Host: ").append(this.getURL().getHost()).append("\r\n");
         }
         if (this.proxy != null && this.proxy.isDirect()) {
-            sb.append("LocalIP: ").append(this.proxy.getLocalIP()).append("\r\n");
+            if (lhttpSocket != null) {
+                sb.append("Local: ").append(this.proxy.getLocal()).append(lhttpSocket.getLocalAddress().toString()).append("\r\n");
+            } else {
+                sb.append("Local: ").append(this.proxy.getLocal()).append("\r\n");
+            }
         }
         sb.append("Connection-Timeout: ").append(this.connectTimeout + "ms").append("\r\n");
         sb.append("Read-Timeout: ").append(this.readTimeout + "ms").append("\r\n");

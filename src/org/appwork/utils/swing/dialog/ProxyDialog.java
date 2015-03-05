@@ -107,7 +107,9 @@ public class ProxyDialog extends AbstractDialog<HTTPProxy> implements CaretListe
 
     @Override
     protected DefaultButtonPanel createBottomButtonPanel() {
-        if (!isShowRemember()) { return super.createBottomButtonPanel(); }
+        if (!isShowRemember()) {
+            return super.createBottomButtonPanel();
+        }
         DefaultButtonPanel ret = new DefaultButtonPanel("ins 0", "[]", "0[grow,fill]0");
 
         remember = new JCheckBox();
@@ -205,8 +207,7 @@ public class ProxyDialog extends AbstractDialog<HTTPProxy> implements CaretListe
     }
 
     /**
-     * update okayButton enabled status, check if host/port(valid number) or
-     * host is given
+     * update okayButton enabled status, check if host/port(valid number) or host is given
      */
     public void caretUpdate(final CaretEvent e) {
         boolean enable = false;
@@ -237,8 +238,12 @@ public class ProxyDialog extends AbstractDialog<HTTPProxy> implements CaretListe
     @Override
     protected HTTPProxy createReturnValue() {
         final int mask = getReturnmask();
-        if (BinaryLogic.containsSome(mask, Dialog.RETURN_CLOSED)) { return null; }
-        if (BinaryLogic.containsSome(mask, Dialog.RETURN_CANCEL)) { return null; }
+        if (BinaryLogic.containsSome(mask, Dialog.RETURN_CLOSED)) {
+            return null;
+        }
+        if (BinaryLogic.containsSome(mask, Dialog.RETURN_CANCEL)) {
+            return null;
+        }
         try {
 
             HTTPProxy.TYPE type = null;
@@ -490,11 +495,13 @@ public class ProxyDialog extends AbstractDialog<HTTPProxy> implements CaretListe
      * @param proxy2
      */
     private void set(final HTTPProxy p) {
-        if (p == null) { return; }
+        if (p == null) {
+            return;
+        }
         new EDTRunner() {
             /*
              * (non-Javadoc)
-             * 
+             *
              * @see org.appwork.utils.swing.EDTRunner#runInEDT()
              */
             @Override
@@ -504,8 +511,7 @@ public class ProxyDialog extends AbstractDialog<HTTPProxy> implements CaretListe
                 case DIRECT:
                 case NONE:
                     cmbType.setSelectedIndex(3);
-                    txtHost.setText(p.getLocalIP() == null ? "" : p.getLocalIP().getHostAddress());
-
+                    txtHost.setText(p.getLocal());
                     break;
                 case HTTP:
                     cmbType.setSelectedIndex(0);
@@ -547,7 +553,9 @@ public class ProxyDialog extends AbstractDialog<HTTPProxy> implements CaretListe
 
         final int carPos = txtHost.getCaretPosition();
         String myText = text;
-        if (myText.endsWith(":")) { return; }
+        if (myText.endsWith(":")) {
+            return;
+        }
         for (int i = 0; i < 2; i++) {
             try {
                 final URL url = new URL(myText);

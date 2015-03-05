@@ -17,6 +17,7 @@ import java.net.SocketAddress;
 import java.net.SocketTimeoutException;
 
 import org.appwork.utils.StringUtils;
+import org.appwork.utils.net.httpconnection.HTTPConnectionImpl;
 import org.appwork.utils.net.httpconnection.HTTPProxy;
 import org.appwork.utils.net.httpconnection.ProxyConnectException;
 
@@ -28,7 +29,9 @@ public class DirectSocketConnection extends SocketConnection {
 
     public DirectSocketConnection(HTTPProxy proxy) {
         super(proxy);
-        if (proxy == null || !proxy.isLocal()) { throw new IllegalArgumentException("proxy must be of type none/direct"); }
+        if (proxy == null || !proxy.isLocal()) {
+            throw new IllegalArgumentException("proxy must be of type none/direct");
+        }
     }
 
     public DirectSocketConnection() {
@@ -68,7 +71,9 @@ public class DirectSocketConnection extends SocketConnection {
                                 }
                                 final int lastConnectTimeout = connectTimeoutWorkaround;
                                 connectTimeoutWorkaround = Math.max(0, connectTimeoutWorkaround - timeout);
-                                if (connectTimeoutWorkaround == 0 || Thread.currentThread().isInterrupted()) { throw cE; }
+                                if (connectTimeoutWorkaround == 0 || Thread.currentThread().isInterrupted()) {
+                                    throw cE;
+                                }
                                 System.out.println("Workaround for ConnectTimeout(Normal): " + lastConnectTimeout + ">" + timeout);
                             } else {
                                 throw cE;
@@ -87,7 +92,9 @@ public class DirectSocketConnection extends SocketConnection {
                                 }
                                 final int lastConnectTimeout = connectTimeoutWorkaround;
                                 connectTimeoutWorkaround = Math.max(0, connectTimeoutWorkaround - timeout);
-                                if (connectTimeoutWorkaround == 0 || Thread.currentThread().isInterrupted()) { throw sTE; }
+                                if (connectTimeoutWorkaround == 0 || Thread.currentThread().isInterrupted()) {
+                                    throw sTE;
+                                }
                                 System.out.println("Workaround for ConnectTimeout(Interrupted): " + lastConnectTimeout + ">" + timeout);
                             } else {
                                 throw sTE;
@@ -105,7 +112,9 @@ public class DirectSocketConnection extends SocketConnection {
             }
             throw new ProxyConnectException(this.getProxy());
         } catch (final IOException e) {
-            if (e instanceof ProxyConnectException) { throw e; }
+            if (e instanceof ProxyConnectException) {
+                throw e;
+            }
             throw new ProxyConnectException(e, this.getProxy());
         } finally {
             if (this.proxySocket == null) {
@@ -118,7 +127,7 @@ public class DirectSocketConnection extends SocketConnection {
     protected Socket createConnectSocket(int connectTimeout) throws IOException {
         final Socket socket = super.createConnectSocket(connectTimeout);
         if (this.getProxy().isDirect()) {
-            socket.bind(new InetSocketAddress(this.getProxy().getLocalIP(), 0));
+            socket.bind(new InetSocketAddress(HTTPConnectionImpl.getDirectInetAddress(getProxy()), 0));
         }
         return socket;
     }

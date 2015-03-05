@@ -46,7 +46,7 @@ public class JSonStorage {
 
             @Override
             public void onShutdown(final ShutdownRequest shutdownRequest) {
-                JSonStorage.save();
+                JSonStorage.close();
             }
 
             @Override
@@ -60,11 +60,11 @@ public class JSonStorage {
 
     /**
      * Cecks of the JSOn Mapper can map this Type
-     * 
+     *
      * @param allowNonStorableObjects
      *            TODO
      * @param genericReturnType
-     * 
+     *
      * @throws InvalidTypeException
      */
     public static void canStore(final Type gType, final boolean allowNonStorableObjects) throws InvalidTypeException {
@@ -81,19 +81,30 @@ public class JSonStorage {
      * @throws InvalidTypeException
      */
     private static void canStoreIntern(final Type gType, final String path, final boolean allowNonStorableObjects, HashSet<Object> dupeID) throws InvalidTypeException {
-        if (!dupeID.add(gType)) { return; }
+        if (!dupeID.add(gType)) {
+            return;
+        }
         if (gType == Object.class) {
-            if (allowNonStorableObjects) { return; }
+            if (allowNonStorableObjects) {
+                return;
+            }
             throw new InvalidTypeException(gType, "Cannot store Object: " + path);
         }
         if (gType instanceof Class) {
             final Class<?> type = (Class<?>) gType;
-            if (type == void.class) { throw new InvalidTypeException(gType, "Void is not accepted: " + path); }
+            if (type == void.class) {
+                throw new InvalidTypeException(gType, "Void is not accepted: " + path);
+            }
             if (type.isPrimitive()) {
 
-            return; }
-            if (type == Boolean.class || type == Long.class || type == Integer.class || type == Byte.class || type == Double.class || type == Float.class || type == String.class) { return; }
-            if (type.isEnum()) { return; }
+                return;
+            }
+            if (type == Boolean.class || type == Long.class || type == Integer.class || type == Byte.class || type == Double.class || type == Float.class || type == String.class) {
+                return;
+            }
+            if (type.isEnum()) {
+                return;
+            }
 
             if (type.isArray()) {
                 final Class<?> arrayType = type.getComponentType();
@@ -106,18 +117,18 @@ public class JSonStorage {
 
             if (List.class.isAssignableFrom(type)) {
 
-            return;
+                return;
 
             }
             if (Map.class.isAssignableFrom(type)) {
 
-            return;
+                return;
 
             }
 
             if (HashSet.class.isAssignableFrom(type)) {
 
-            return;
+                return;
 
             }
             if (Storable.class.isAssignableFrom(type) || allowNonStorableObjects) {
@@ -127,11 +138,15 @@ public class JSonStorage {
                     for (final Method m : type.getDeclaredMethods()) {
                         if (m.getName().startsWith("get")) {
 
-                            if (m.getParameterTypes().length > 0) { throw new InvalidTypeException(gType, "Getter " + path + "." + m + " has parameters."); }
+                            if (m.getParameterTypes().length > 0) {
+                                throw new InvalidTypeException(gType, "Getter " + path + "." + m + " has parameters.");
+                            }
                             JSonStorage.canStoreIntern(m.getGenericReturnType(), path + "->" + m.getGenericReturnType(), allowNonStorableObjects, dupeID);
 
                         } else if (m.getName().startsWith("set")) {
-                            if (m.getParameterTypes().length != 1) { throw new InvalidTypeException(gType, "Setter " + path + "." + m + " has != 1 Parameters."); }
+                            if (m.getParameterTypes().length != 1) {
+                                throw new InvalidTypeException(gType, "Setter " + path + "." + m + " has != 1 Parameters.");
+                            }
 
                         }
                     }
@@ -187,12 +202,16 @@ public class JSonStorage {
         Storage ret = null;
         synchronized (JSonStorage.MAP) {
             ret = JSonStorage.MAP.get(id);
-            if (ret != null) { return ret; }
+            if (ret != null) {
+                return ret;
+            }
         }
         ret = new JsonKeyValueStorage(name, true);
         synchronized (JSonStorage.MAP) {
             final Storage ret2 = JSonStorage.MAP.get(id);
-            if (ret2 != null) { return ret2; }
+            if (ret2 != null) {
+                return ret2;
+            }
             JSonStorage.MAP.put(id, ret);
         }
         return ret;
@@ -203,12 +222,16 @@ public class JSonStorage {
         Storage ret = null;
         synchronized (JSonStorage.MAP) {
             ret = JSonStorage.MAP.get(id);
-            if (ret != null) { return ret; }
+            if (ret != null) {
+                return ret;
+            }
         }
         ret = new JsonKeyValueStorage(name);
         synchronized (JSonStorage.MAP) {
             final Storage ret2 = JSonStorage.MAP.get(id);
-            if (ret2 != null) { return ret2; }
+            if (ret2 != null) {
+                return ret2;
+            }
             JSonStorage.MAP.put(id, ret);
         }
         return ret;
@@ -249,7 +272,9 @@ public class JSonStorage {
                         // replace normal file with tmp file
                         file.delete();
                         tmpfile.renameTo(file);
-                        if (ret == null) { return def; }
+                        if (ret == null) {
+                            return def;
+                        }
                         return ret;
                     } catch (final Exception e) {
                         Log.L.warning("Could not restore tmp file");
@@ -260,7 +285,9 @@ public class JSonStorage {
                     }
                 }
                 final File res = file;
-                if (!res.exists() || res.length() == 0) { return def; }
+                if (!res.exists() || res.length() == 0) {
+                    return def;
+                }
                 str = IO.readFile(res);
                 if (plain) {
                     return JSonStorage.restoreFromString(stri = new String(str, "UTF-8"), type, def);
@@ -287,17 +314,15 @@ public class JSonStorage {
 
     /**
      * restores a store json object
-     * 
+     *
      * @param <E>
      * @param string
      *            name of the json object. example: cfg/savedobject.json
      * @param type
-     *            TypeRef instance. This is important for generic classes. for
-     *            example: new TypeRef<ArrayList<Contact>>(){} to restore type
+     *            TypeRef instance. This is important for generic classes. for example: new TypeRef<ArrayList<Contact>>(){} to restore type
      *            java.util.List<Contact>
      * @param def
-     *            defaultvalue. if typeref is not set, the method tries to use
-     *            the class of def as restoreclass
+     *            defaultvalue. if typeref is not set, the method tries to use the class of def as restoreclass
      * @return
      */
 
@@ -308,7 +333,9 @@ public class JSonStorage {
 
     public static <E> E restoreFromFile(final File file, final E def) {
         final E ret = JSonStorage.restoreFrom(file, true, null, null, def);
-        if (ret == null) { return def; }
+        if (ret == null) {
+            return def;
+        }
         return ret;
     }
 
@@ -318,7 +345,9 @@ public class JSonStorage {
     }
 
     public static <E> E restoreFromString(final byte[] data, final boolean plain, final byte[] key, final TypeRef<E> type, final E def) {
-        if (data == null) { return def; }
+        if (data == null) {
+            return def;
+        }
         String string = null;
         try {
             if (!plain) {
@@ -353,13 +382,17 @@ public class JSonStorage {
     }
 
     public static <E> E restoreFromString(final String string, final TypeRef<E> type) {
-        if (string == null || "".equals(string)) { return null; }
+        if (string == null || "".equals(string)) {
+            return null;
+        }
         return JSonStorage.JSON_MAPPER.stringToObject(string, type);
     }
 
     @SuppressWarnings("unchecked")
     public static <E> E restoreFromString(final String string, final TypeRef<E> type, final E def) {
-        if (string == null || "".equals(string)) { return def; }
+        if (string == null || "".equals(string)) {
+            return def;
+        }
         try {
             if (type != null) {
                 return JSonStorage.JSON_MAPPER.stringToObject(string, type);
@@ -375,9 +408,9 @@ public class JSonStorage {
         }
     }
 
-    public static void save() {
+    private static void close() {
         Log.L.config("Start Saving Storage");
-        List<Storage> storages = null;
+        final List<Storage> storages;
         synchronized (JSonStorage.MAP) {
             storages = new ArrayList<Storage>(JSonStorage.MAP.values());
         }
@@ -412,9 +445,13 @@ public class JSonStorage {
                     IO.writeToFile(tmp, Crypto.encrypt(json, key));
                 }
                 if (file.exists()) {
-                    if (!file.delete()) { throw new StorageException("Could not overwrite file: " + file.getAbsolutePath()); }
+                    if (!file.delete()) {
+                        throw new StorageException("Could not overwrite file: " + file.getAbsolutePath());
+                    }
                 }
-                if (!tmp.renameTo(file)) { throw new StorageException("Could not rename file: " + tmp + " to " + file); }
+                if (!tmp.renameTo(file)) {
+                    throw new StorageException("Could not rename file: " + tmp + " to " + file);
+                }
             } catch (final Exception e) {
                 throw new StorageException("Can not write to " + tmp.getAbsolutePath(), e);
             } finally {
@@ -462,9 +499,13 @@ public class JSonStorage {
                     IO.writeToFile(tmp, Crypto.encrypt(json, key));
                 }
                 if (file.exists()) {
-                    if (!file.delete()) { throw new StorageException("Could not overwrite file: " + file); }
+                    if (!file.delete()) {
+                        throw new StorageException("Could not overwrite file: " + file);
+                    }
                 }
-                if (!tmp.renameTo(file)) { throw new StorageException("Could not rename file: " + tmp + " to " + file); }
+                if (!tmp.renameTo(file)) {
+                    throw new StorageException("Could not rename file: " + tmp + " to " + file);
+                }
             } catch (final IOException e) {
                 throw new StorageException(e);
             } finally {
@@ -506,14 +547,16 @@ public class JSonStorage {
 
     /**
      * This method throws Exceptions
-     * 
+     *
      * @param string
      * @param type
      * @param def
      * @return
      */
     public static <E> E stringToObject(final String string, final TypeRef<E> type, final E def) {
-        if (StringUtils.isEmpty(string)) { throw new IllegalArgumentException("cannot stringToObject from empty string"); }
+        if (StringUtils.isEmpty(string)) {
+            throw new IllegalArgumentException("cannot stringToObject from empty string");
+        }
         if (type != null) {
             return JSonStorage.JSON_MAPPER.stringToObject(string, type);
         } else {
@@ -522,10 +565,9 @@ public class JSonStorage {
     }
 
     /**
-     * USe this method for debug code only. It is NOT guaranteed that this
-     * method returns json formated text. Use {@link #serializeToJson(Object)}
-     * instead
-     * 
+     * USe this method for debug code only. It is NOT guaranteed that this method returns json formated text. Use
+     * {@link #serializeToJson(Object)} instead
+     *
      * @param list
      * @return
      */

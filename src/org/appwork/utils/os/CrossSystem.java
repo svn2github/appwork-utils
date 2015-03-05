@@ -114,7 +114,9 @@ public class CrossSystem {
     private static Boolean ISRASPBERRYPI = null;
 
     public static boolean isRaspberryPi() {
-        if (CrossSystem.ISRASPBERRYPI != null) { return CrossSystem.ISRASPBERRYPI; }
+        if (CrossSystem.ISRASPBERRYPI != null) {
+            return CrossSystem.ISRASPBERRYPI;
+        }
         boolean isRaspberryPi = false;
         if (CrossSystem.isLinux() && ARCHFamily.ARM.equals(CrossSystem.getARCHFamily())) {
             FileInputStream fis = null;
@@ -293,28 +295,27 @@ public class CrossSystem {
     /**
      * use this method to make pathPart safe to use in a full absoluePath.
      *
-     * it will remove driveletters/path separators and all known chars that are
-     * forbidden in a path
+     * it will remove driveletters/path separators and all known chars that are forbidden in a path
      *
      * @param pathPart
      * @return
      */
     public static String alleviatePathParts(String pathPart) {
         if (StringUtils.isEmpty(pathPart)) {
-            if (pathPart != null) { return pathPart; }
+            if (pathPart != null) {
+                return pathPart;
+            }
             return null;
         }
         /* remove invalid chars */
         pathPart = pathPart.replaceAll("([\\\\|<|>|\\||\r|\n|\"|:|\\*|\\?|/|\\x00])+", "_");
         /*
-         * remove ending points, not allowed under windows and others os maybe
-         * too
+         * remove ending points, not allowed under windows and others os maybe too
          */
         pathPart = pathPart.replaceFirst("\\.+$", "");
         if (CrossSystem.isWindows() || CrossSystem.isOS2()) {
             /**
-             * http://msdn.microsoft.com/en-us/library/windows/desktop/aa365247%
-             * 28v=vs.85%29.aspx
+             * http://msdn.microsoft.com/en-us/library/windows/desktop/aa365247% 28v=vs.85%29.aspx
              */
             pathPart = pathPart.trim();
             if (CrossSystem.isForbiddenFilename(pathPart)) {
@@ -327,8 +328,7 @@ public class CrossSystem {
     public static boolean isForbiddenFilename(String name) {
         if (CrossSystem.isWindows() || CrossSystem.isOS2()) {
             /**
-             * http://msdn.microsoft.com/en-us/library/windows/desktop/aa365247%
-             * 28v=vs.85%29.aspx
+             * http://msdn.microsoft.com/en-us/library/windows/desktop/aa365247% 28v=vs.85%29.aspx
              */
             return new Regex(name, "^(CON|PRN|AUX|NUL|COM\\d+|LPT\\d+|CLOCK)\\s*?(\\.|$)").matches();
         }
@@ -337,7 +337,9 @@ public class CrossSystem {
 
     public static String fixPathSeparators(String path) {
         if (StringUtils.isEmpty(path)) {
-            if (path != null) { return path; }
+            if (path != null) {
+                return path;
+            }
             return null;
         }
         if (CrossSystem.isWindows()) {
@@ -364,7 +366,9 @@ public class CrossSystem {
      * @return
      */
     public static KeyStroke getDeleteShortcut() {
-        if (CrossSystem.isMac()) { return CrossSystem.KEY_STROKE_BACKSPACE_CTRL; }
+        if (CrossSystem.isMac()) {
+            return CrossSystem.KEY_STROKE_BACKSPACE_CTRL;
+        }
         return CrossSystem.KEY_STROKE_DELETE;
     }
 
@@ -377,7 +381,9 @@ public class CrossSystem {
 
             @Override
             public boolean accept(final File f) {
-                if (f.isDirectory()) { return true; }
+                if (f.isDirectory()) {
+                    return true;
+                }
                 if (CrossSystem.isWindows()) {
                     return f.getName().endsWith(".exe");
                 } else {
@@ -422,7 +428,9 @@ public class CrossSystem {
     }
 
     public static String getJavaBinary() {
-        if (CrossSystem.JAVAINT != null) { return CrossSystem.JAVAINT; }
+        if (CrossSystem.JAVAINT != null) {
+            return CrossSystem.JAVAINT;
+        }
         String javaBinary = "java";
         if (CrossSystem.isWindows() || CrossSystem.isOS2()) {
             javaBinary = "javaw.exe";
@@ -481,8 +489,7 @@ public class CrossSystem {
     }
 
     /**
-     * @return e.g. MacOsXVersion.MAC_OSX_10p6_SNOW_LEOPARD.getVersionID() for
-     *         10.6.4
+     * @return e.g. MacOsXVersion.MAC_OSX_10p6_SNOW_LEOPARD.getVersionID() for 10.6.4
      */
     public static long getMacOSVersion() {
         if (CrossSystem.isMac()) {
@@ -572,7 +579,9 @@ public class CrossSystem {
                 return ARCHFamily.SPARC;
             } else if (arch.contains("arm")) {
                 return ARCHFamily.ARM;
-            } else if (arch.contains("ia64")) { return ARCHFamily.IA64; }
+            } else if (arch.contains("ia64")) {
+                return ARCHFamily.IA64;
+            }
         }
         new Exception("Unknown CPU Architecture " + archString).printStackTrace();
         return ARCHFamily.NA;
@@ -603,8 +612,7 @@ public class CrossSystem {
         final LinkedList<String> ret = new LinkedList<String>();
         if (path != null) {
             /*
-             * getCanonicalFile once, so we are sure all .././symlinks are
-             * evaluated
+             * getCanonicalFile once, so we are sure all .././symlinks are evaluated
              */
             try {
                 if (!CrossSystem.isForbiddenFilename(path.getName())) {
@@ -656,13 +664,14 @@ public class CrossSystem {
              *
              * @return
              */
-            if (index >= 1) { return Long.parseLong(jvmName.substring(0, index)); }
+            if (index >= 1) {
+                return Long.parseLong(jvmName.substring(0, index));
+            }
         } catch (Throwable e) {
         }
         try {
             /**
-             * http://blog.philippheckel.com/2014/06/14/getting-the-java-process
-             * -pid-and-managing-pid-files-linux-windows/
+             * http://blog.philippheckel.com/2014/06/14/getting-the-java-process -pid-and-managing-pid-files-linux-windows/
              */
             final Field jvmField = runtimeMXBean.getClass().getDeclaredField("jvm");
             jvmField.setAccessible(true);
@@ -727,11 +736,12 @@ public class CrossSystem {
     }
 
     public static boolean is64BitOperatingSystem() {
-        if (CrossSystem.OS64BIT != null) { return CrossSystem.OS64BIT; }
+        if (CrossSystem.OS64BIT != null) {
+            return CrossSystem.OS64BIT;
+        }
         if (org.appwork.utils.Application.is64BitJvm()) {
             /*
-             * we are running a 64bit jvm, so the underlying os must be 64bit
-             * too
+             * we are running a 64bit jvm, so the underlying os must be 64bit too
              */
             CrossSystem.OS64BIT = true;
             return true;
@@ -794,11 +804,21 @@ public class CrossSystem {
      * @return
      */
     public static boolean isAbsolutePath(final String path) {
-        if (StringUtils.isEmpty(path)) { return false; }
-        if ((CrossSystem.isWindows() || CrossSystem.isOS2()) && path.matches("\\\\\\\\.+\\\\.+")) { return true; }
-        if ((CrossSystem.isWindows() || CrossSystem.isOS2()) && path.matches(".:/.*")) { return true; }
-        if ((CrossSystem.isWindows() || CrossSystem.isOS2()) && path.matches(".:\\\\.*")) { return true; }
-        if (!CrossSystem.isWindows() && !CrossSystem.isOS2() && path.startsWith("/")) { return true; }
+        if (StringUtils.isEmpty(path)) {
+            return false;
+        }
+        if ((CrossSystem.isWindows() || CrossSystem.isOS2()) && path.matches("\\\\\\\\.+\\\\.+")) {
+            return true;
+        }
+        if ((CrossSystem.isWindows() || CrossSystem.isOS2()) && path.matches("[a-zA-Z]:/.*")) {
+            return true;
+        }
+        if ((CrossSystem.isWindows() || CrossSystem.isOS2()) && path.matches("[a-zA-Z]:\\\\.*")) {
+            return true;
+        }
+        if (!CrossSystem.isWindows() && !CrossSystem.isOS2() && path.startsWith("/")) {
+            return true;
+        }
         return false;
     }
 
@@ -820,7 +840,9 @@ public class CrossSystem {
 
     public static boolean isContextMenuTrigger(final MouseEvent e) {
         if (CrossSystem.isMac()) {
-            if (e.getButton() == MouseEvent.BUTTON1 && e.isControlDown()) { return true; }
+            if (e.getButton() == MouseEvent.BUTTON1 && e.isControlDown()) {
+                return true;
+            }
 
         }
 
@@ -853,7 +875,9 @@ public class CrossSystem {
     public static boolean isDeleteFinalSelectionTrigger(final KeyStroke ks) {
         if (CrossSystem.isMac()) {
 
-            if (ks == KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask() | ActionEvent.SHIFT_MASK)) { return true; }
+            if (ks == KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask() | ActionEvent.SHIFT_MASK)) {
+                return true;
+            }
         }
         return ks == CrossSystem.KEY_STROKE_FORCE_DELETE;
     }
@@ -873,7 +897,9 @@ public class CrossSystem {
     public static boolean isDeleteSelectionTrigger(final KeyStroke ks) {
         if (CrossSystem.isMac()) {
 
-            if (ks == CrossSystem.KEY_STROKE_BACKSPACE_CTRL) { return true; }
+            if (ks == CrossSystem.KEY_STROKE_BACKSPACE_CTRL) {
+                return true;
+            }
         }
         return ks == CrossSystem.KEY_STROKE_DELETE;
     }
@@ -969,7 +995,9 @@ public class CrossSystem {
     }
 
     private static boolean openCustom(final String[] custom, final String what) throws IOException {
-        if (custom == null || custom.length < 1) { return false; }
+        if (custom == null || custom.length < 1) {
+            return false;
+        }
         boolean added = false;
         final java.util.List<String> commands = new ArrayList<String>();
         for (final String s : custom) {

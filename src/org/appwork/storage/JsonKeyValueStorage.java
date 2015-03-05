@@ -23,7 +23,7 @@ public class JsonKeyValueStorage extends Storage {
     private final boolean             plain;
     private final byte[]              key;
     private boolean                   autoPutValues = true;
-    private boolean                   closed        = false;
+    private volatile boolean          closed        = false;
     private final AtomicLong          setMark       = new AtomicLong(0);
     private final AtomicLong          writeMark     = new AtomicLong(0);
     private boolean                   enumCacheEnabled;
@@ -193,7 +193,7 @@ public class JsonKeyValueStorage extends Storage {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.storage.Storage#getID()
      */
     @Override
@@ -212,7 +212,9 @@ public class JsonKeyValueStorage extends Storage {
 
     private Object internal_put(final String key, final Object value) {
 
-        if (key == null) { throw new WTFException("key ==null is forbidden!"); }
+        if (key == null) {
+            throw new WTFException("key ==null is forbidden!");
+        }
         final Object ret;
         if (value != null) {
             ret = this.map.put(key, value);
@@ -305,7 +307,9 @@ public class JsonKeyValueStorage extends Storage {
     }
 
     private void putAll(final Map<String, Object> map) {
-        if (map == null) { return; }
+        if (map == null) {
+            return;
+        }
         final Iterator<Entry<String, Object>> it = map.entrySet().iterator();
         while (it.hasNext()) {
             final Entry<String, Object> next = it.next();
@@ -318,7 +322,9 @@ public class JsonKeyValueStorage extends Storage {
 
     @Override
     public Object remove(final String key) {
-        if (key == null) { throw new WTFException("key ==null is forbidden!"); }
+        if (key == null) {
+            throw new WTFException("key ==null is forbidden!");
+        }
         if (this.map.containsKey(key)) {
             final Object ret = this.map.remove(key);
             this.requestSave();
@@ -333,7 +339,9 @@ public class JsonKeyValueStorage extends Storage {
 
     @Override
     public void save() throws StorageException {
-        if (this.closed) { throw new StorageException("StorageChest already closed!"); }
+        if (this.closed) {
+            throw new StorageException("StorageChest already closed!");
+        }
         final long lastSetMark = this.setMark.get();
         if (this.writeMark.getAndSet(lastSetMark) != lastSetMark) {
             final String json = JSonStorage.getMapper().objectToString(this.map);
@@ -356,7 +364,7 @@ public class JsonKeyValueStorage extends Storage {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.storage.Storage#size()
      */
     @Override

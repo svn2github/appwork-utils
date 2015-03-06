@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2010 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.utils.event.queue
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -21,7 +21,7 @@ import org.appwork.utils.logging.Log;
  * @author daniel
  * @param <D>
  * @param <T>
- * 
+ *
  */
 public abstract class Queue {
 
@@ -31,21 +31,21 @@ public abstract class Queue {
         NORM
     }
 
-    protected boolean                                             debugFlag           = false;
-    protected ArrayDeque<QueueAction<?, ? extends Throwable>>     queue               = new ArrayDeque<QueueAction<?, ? extends Throwable>>();
+    protected boolean                                                   debugFlag           = false;
+    protected final ArrayDeque<QueueAction<?, ? extends Throwable>>     queue               = new ArrayDeque<QueueAction<?, ? extends Throwable>>();
 
-    protected java.util.List<QueueAction<?, ? extends Throwable>> queueThreadHistory  = new ArrayList<QueueAction<?, ? extends Throwable>>(20);
-    protected NullsafeAtomicReference<QueueThread>                thread              = new NullsafeAtomicReference<QueueThread>(null);
-    private QueueAction<?, ? extends Throwable>                   sourceItem          = null;
-    private QueueAction<?, ?>                                     currentJob;
+    protected final java.util.List<QueueAction<?, ? extends Throwable>> queueThreadHistory  = new ArrayList<QueueAction<?, ? extends Throwable>>(20);
+    protected final NullsafeAtomicReference<QueueThread>                thread              = new NullsafeAtomicReference<QueueThread>(null);
+    private volatile QueueAction<?, ? extends Throwable>                sourceItem          = null;
+    private volatile QueueAction<?, ?>                                  currentJob;
 
-    protected AtomicLong                                          addStats            = new AtomicLong(0);
-    protected AtomicLong                                          addWaitStats        = new AtomicLong(0);
-    protected AtomicLong                                          addRunStats         = new AtomicLong(0);
+    protected final AtomicLong                                          addStats            = new AtomicLong(0);
+    protected final AtomicLong                                          addWaitStats        = new AtomicLong(0);
+    protected final AtomicLong                                          addRunStats         = new AtomicLong(0);
 
-    protected static AtomicInteger                                QUEUELOOPPREVENTION = new AtomicInteger(0);
-    private final String                                          id;
-    protected long                                                timeout             = 10 * 1000l;
+    protected static AtomicInteger                                      QUEUELOOPPREVENTION = new AtomicInteger(0);
+    private final String                                                id;
+    protected volatile long                                             timeout             = 10 * 1000l;
 
     public Queue(final String id) {
         this.id = id;
@@ -53,12 +53,10 @@ public abstract class Queue {
     }
 
     /**
-     * This method adds an action to the queue. if the caller is a queueaction
-     * itself, the action will be executed directly. In this case, this method
-     * can throw Exceptions. If the caller is not the QUeuethread, this method
-     * is not able to throw exceptions, but the exceptions are passed to the
-     * exeptionhandler method of the queueaction
-     * 
+     * This method adds an action to the queue. if the caller is a queueaction itself, the action will be executed directly. In this case,
+     * this method can throw Exceptions. If the caller is not the QUeuethread, this method is not able to throw exceptions, but the
+     * exceptions are passed to the exeptionhandler method of the queueaction
+     *
      * @param <T>
      * @param <E>
      * @param item
@@ -87,9 +85,8 @@ public abstract class Queue {
     }
 
     /**
-     * Only use this method if you can asure that the caller is NEVER the queue
-     * itself. if you are not sure use #add
-     * 
+     * Only use this method if you can asure that the caller is NEVER the queue itself. if you are not sure use #add
+     *
      * @param <E>
      * @param <T>
      * @param action
@@ -114,8 +111,7 @@ public abstract class Queue {
         item.setCallerThread(this, Thread.currentThread());
         if (this.isQueueThread(item)) {
             /*
-             * call comes from current running item, so lets start item
-             * excaption handling is passed to top item. startItem throws an
+             * call comes from current running item, so lets start item excaption handling is passed to top item. startItem throws an
              * exception in error case
              */
             final QueueAction<?, ? extends Throwable> source = ((QueueThread) Thread.currentThread()).getSourceQueueAction();
@@ -172,8 +168,9 @@ public abstract class Queue {
     public java.util.List<QueueAction<?, ?>> getEntries() {
         final java.util.List<QueueAction<?, ?>> ret = new ArrayList<QueueAction<?, ?>>();
         synchronized (this.queue) {
-            if (this.currentJob != null) {
-                ret.add(this.currentJob);
+            final QueueAction<?, ?> lcurrentJob = currentJob;
+            if (lcurrentJob != null) {
+                ret.add(currentJob);
             }
             for (final QueueAction<?, ? extends Throwable> item : this.queue) {
                 ret.add(item);
@@ -188,7 +185,9 @@ public abstract class Queue {
 
     protected QueueAction<?, ? extends Throwable> getLastHistoryItem() {
         synchronized (this.queueThreadHistory) {
-            if (this.queueThreadHistory.size() == 0) { return null; }
+            if (this.queueThreadHistory.size() == 0) {
+                return null;
+            }
             return this.queueThreadHistory.get(this.queueThreadHistory.size() - 1);
         }
     }
@@ -235,7 +234,7 @@ public abstract class Queue {
 
     /**
      * returns true if this queue shows debug info
-     * 
+     *
      * @return
      */
     public boolean isDebug() {
@@ -249,17 +248,17 @@ public abstract class Queue {
     }
 
     /**
-     * this functions returns true if the current running Thread is our
-     * QueueThread OR the SourceQueueItem chain is rooted in current running
-     * QueueItem
+     * this functions returns true if the current running Thread is our QueueThread OR the SourceQueueItem chain is rooted in current
+     * running QueueItem
      */
     public boolean isQueueThread(final QueueAction<?, ? extends Throwable> item) {
-        if (Thread.currentThread() == this.thread.get()) { return true; }
+        if (Thread.currentThread() == this.thread.get()) {
+            return true;
+        }
         QueueAction<?, ? extends Throwable> last = item;
         Thread t = null;
         /*
-         * we walk through actionHistory to check if we are still in our
-         * QueueThread
+         * we walk through actionHistory to check if we are still in our QueueThread
          */
         int loopprevention = 0;
         while (last != null && (t = last.getCallerThread()) != null) {
@@ -273,9 +272,7 @@ public abstract class Queue {
                 last = ((QueueThread) t).getLastHistoryItem();
                 if (loopprevention > Queue.QUEUELOOPPREVENTION.get()) {
                     /*
-                     * loop prevention: while can only loop max
-                     * QUEUELOOPPREVENTION times, cause no more different queues
-                     * exist
+                     * loop prevention: while can only loop max QUEUELOOPPREVENTION times, cause no more different queues exist
                      */
                     if (this.debugFlag) {
                         org.appwork.utils.logging.Log.L.warning("QueueLoopPrevention!");
@@ -292,7 +289,7 @@ public abstract class Queue {
 
     /**
      * Does NOT kill the currently running job
-     * 
+     *
      */
     public void killQueue() {
         final ArrayList<QueueAction<?, ? extends Throwable>> killList = new ArrayList<QueueAction<?, ? extends Throwable>>();
@@ -369,7 +366,7 @@ public abstract class Queue {
 
     /**
      * changes this queue's debugFlag
-     * 
+     *
      * @param b
      */
     public void setDebug(final boolean b) {
@@ -377,8 +374,7 @@ public abstract class Queue {
     }
 
     public void setTimeout(long timeout) {
-        timeout = Math.max(0, timeout);
-        this.timeout = timeout;
+        this.timeout = Math.max(0, timeout);
         synchronized (this.queue) {
             this.queue.notifyAll();
         }

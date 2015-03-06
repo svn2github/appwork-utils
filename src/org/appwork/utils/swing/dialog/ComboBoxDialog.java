@@ -18,6 +18,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextPane;
 import javax.swing.ListCellRenderer;
 
+import org.appwork.storage.config.annotations.LabelInterface;
 import org.appwork.swing.MigPanel;
 import org.appwork.uio.ComboBoxDialogInterface;
 import org.appwork.utils.logging.Log;
@@ -55,8 +56,7 @@ public class ComboBoxDialog extends AbstractDialog<Integer> implements ComboBoxD
 
     /**
      * 
-     * @see Dialog#showComboDialog(int, String, String, Object[], int, Icon,
-     *      String, String, ListCellRenderer)
+     * @see Dialog#showComboDialog(int, String, String, Object[], int, Icon, String, String, ListCellRenderer)
      */
     public ComboBoxDialog(final int flag, final String title, final String question, final Object[] options, final int defaultSelection, final Icon icon, final String okText, final String cancelText, final ListCellRenderer renderer) {
         super(flag, title, icon, okText, cancelText);
@@ -110,7 +110,9 @@ public class ComboBoxDialog extends AbstractDialog<Integer> implements ComboBoxD
     }
 
     public Integer getReturnIndex() {
-        if ((getReturnmask() & Dialog.RETURN_OK) == 0) { return Integer.valueOf(-1); }
+        if ((getReturnmask() & Dialog.RETURN_OK) == 0) {
+            return Integer.valueOf(-1);
+        }
         return Integer.valueOf(box.getSelectedIndex());
     }
 
@@ -151,8 +153,7 @@ public class ComboBoxDialog extends AbstractDialog<Integer> implements ComboBoxD
     /*
      * (non-Javadoc)
      * 
-     * @see
-     * org.appwork.utils.swing.dialog.ComboBoxDialogInterface#getSelectedIndex()
+     * @see org.appwork.utils.swing.dialog.ComboBoxDialogInterface#getSelectedIndex()
      */
     @Override
     public int getSelectedIndex() {
@@ -179,7 +180,12 @@ public class ComboBoxDialog extends AbstractDialog<Integer> implements ComboBoxD
     public String[] getLabels() {
         String[] ret = new String[options.length];
         for (int i = 0; i < ret.length; i++) {
-            ret[i] = String.valueOf(options[i]);
+            if (options[i] instanceof LabelInterface) {
+                ret[i] = ((LabelInterface) options[i]).getLabel();
+
+            } else {
+                ret[i] = String.valueOf(options[i]);
+            }
 
         }
         return ret;

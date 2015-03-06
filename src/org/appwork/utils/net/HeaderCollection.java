@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2011 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.utils.net
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -18,7 +18,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * @author daniel
- * 
+ *
  */
 public class HeaderCollection implements Iterable<HTTPHeader> {
     private final CopyOnWriteArrayList<HTTPHeader> collection            = new CopyOnWriteArrayList<HTTPHeader>();
@@ -32,8 +32,11 @@ public class HeaderCollection implements Iterable<HTTPHeader> {
         final HTTPHeader existingHeader = this.get(header.getKey());
         if (existingHeader != null) {
             if (!this.allowedDuplicatedKeys.contains(header.getKey().toLowerCase(Locale.ENGLISH))) {
-                if (!existingHeader.isAllowOverwrite()) { return; }
-                this.remove(existingHeader);
+                if (existingHeader.isAllowOverwrite()) {
+                    final int index = indexOf(existingHeader);
+                    collection.set(index, header);
+                }
+                return;
             }
         }
         this.collection.add(header);
@@ -54,13 +57,23 @@ public class HeaderCollection implements Iterable<HTTPHeader> {
         return this.collection.get(index);
     }
 
+    public int indexOf(HTTPHeader header) {
+        return collection.indexOf(header);
+    }
+
     public HTTPHeader get(final String key) {
-        if (key == null) { return null; }
+        if (key == null) {
+            return null;
+        }
         for (final HTTPHeader header : this.collection) {
             if (header.getKey() == null) {
-                if (key == null) return header;
+                if (key == null) {
+                    return header;
+                }
             } else {
-                if (header.getKey().equalsIgnoreCase(key)) { return header; }
+                if (header.getKey().equalsIgnoreCase(key)) {
+                    return header;
+                }
             }
         }
         return null;
@@ -73,7 +86,9 @@ public class HeaderCollection implements Iterable<HTTPHeader> {
                 ret.add(header);
             }
         }
-        if (ret.size() > 0) { return ret; }
+        if (ret.size() > 0) {
+            return ret;
+        }
         return null;
     }
 
@@ -83,7 +98,9 @@ public class HeaderCollection implements Iterable<HTTPHeader> {
 
     public String getValue(final String key) {
         final HTTPHeader ret = this.get(key);
-        if (ret != null) { return ret.getValue(); }
+        if (ret != null) {
+            return ret.getValue();
+        }
         return null;
     }
 

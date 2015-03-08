@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2011 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.scheduler
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author daniel
- * 
+ *
  */
 public abstract class DelayedRunnable implements Runnable {
 
@@ -45,14 +45,12 @@ public abstract class DelayedRunnable implements Runnable {
     }
 
     /**
-     * return a ScheduledExecutorService with deamon Threads,
-     * allowCoreThreadTimeOut(true) and maxPoolSize(1)
+     * return a ScheduledExecutorService with deamon Threads, allowCoreThreadTimeOut(true) and maxPoolSize(1)
      */
     public static ScheduledExecutorService getNewScheduledExecutorService() {
         final String caller = DelayedRunnable.getCaller();
         /*
-         * changed core to 1 because of
-         * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7091003
+         * changed core to 1 because of http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7091003
          */
         final ScheduledThreadPoolExecutor ret = new ScheduledThreadPoolExecutor(1, new ThreadFactory() {
 
@@ -96,8 +94,16 @@ public abstract class DelayedRunnable implements Runnable {
         this.service = service;
         this.delayInMS = minDelayInMS;
         this.maxInMS = maxDelayInMS;
-        if (this.delayInMS <= 0) { throw new IllegalArgumentException("minDelay must be >0"); }
-        if (this.maxInMS == 0) { throw new IllegalArgumentException("maxDelay must be !=0"); }
+        if (this.delayInMS <= 0) {
+            throw new IllegalArgumentException("minDelay must be >0");
+        }
+        if (this.maxInMS == 0) {
+            throw new IllegalArgumentException("maxDelay must be !=0");
+        }
+    }
+
+    public ScheduledExecutorService getService() {
+        return service;
     }
 
     abstract public void delayedrun();
@@ -125,12 +131,16 @@ public abstract class DelayedRunnable implements Runnable {
             return;
         }
         this.lastRunRequest.set(System.currentTimeMillis());
-        if (this.delayerSet.getAndSet(true) == true) { return; }
+        if (this.delayerSet.getAndSet(true) == true) {
+            return;
+        }
         this.firstRunRequest.compareAndSet(0, System.currentTimeMillis());
         this.service.schedule(new Runnable() {
 
             private void delayAgain(final long currentTime, Long nextDelay, final long minDif, final long thisRequestRun) {
-                if (DelayedRunnable.this.delayerSet.get() == false) { return; }
+                if (DelayedRunnable.this.delayerSet.get() == false) {
+                    return;
+                }
                 if (nextDelay == null) {
                     nextDelay = Math.max(0, DelayedRunnable.this.delayInMS - minDif);
                 }
@@ -142,7 +152,9 @@ public abstract class DelayedRunnable implements Runnable {
             }
 
             public void run() {
-                if (DelayedRunnable.this.delayerSet.get() == false) { return; }
+                if (DelayedRunnable.this.delayerSet.get() == false) {
+                    return;
+                }
                 final long thisRunRequest = DelayedRunnable.this.lastRunRequest.get();
                 final long currentTime = System.currentTimeMillis();
                 final long minDif = currentTime - thisRunRequest;
@@ -188,7 +200,9 @@ public abstract class DelayedRunnable implements Runnable {
     }
 
     public void setDelayerEnabled(final boolean b) {
-        if (this.delayerEnabled.getAndSet(b) == b) { return; }
+        if (this.delayerEnabled.getAndSet(b) == b) {
+            return;
+        }
         if (!b) {
             this.stop();
         }

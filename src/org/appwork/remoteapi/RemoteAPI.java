@@ -114,7 +114,9 @@ public class RemoteAPI implements HttpRequestHandler {
     public static Object convert(String string, final Type type) {
         if ((type == String.class || type instanceof Class && ((Class<?>) type).isEnum()) && !string.startsWith("\"")) {
             /* workaround if strings are not escaped, same for enums */
-            if ("null".equals(string)) { return null; }
+            if ("null".equals(string)) {
+                return null;
+            }
 
             // string = "\"" + string.replace("\\", "\\\\").replace("\"",
             // "\\\"") + "\"";
@@ -139,7 +141,9 @@ public class RemoteAPI implements HttpRequestHandler {
         final HTTPHeader acceptEncoding = request.getRequestHeaders().get(HTTPConstants.HEADER_REQUEST_ACCEPT_ENCODING);
         if (acceptEncoding != null) {
             final String value = acceptEncoding.getValue();
-            if (value != null && value.contains("deflate")) { return true; }
+            if (value != null && value.contains("deflate")) {
+                return true;
+            }
         }
         return false;
     }
@@ -215,7 +219,9 @@ public class RemoteAPI implements HttpRequestHandler {
         final HTTPHeader acceptEncoding = request.getRequestHeaders().get(HTTPConstants.HEADER_REQUEST_ACCEPT_ENCODING);
         if (acceptEncoding != null) {
             final String value = acceptEncoding.getValue();
-            if (value != null && value.contains("gzip")) { return true; }
+            if (value != null && value.contains("gzip")) {
+                return true;
+            }
         }
         return false;
     }
@@ -270,8 +276,7 @@ public class RemoteAPI implements HttpRequestHandler {
             }
             if (methodHasResponseParameter && !methodHasReturnTypeAndAResponseParameter) {
                 /*
-                 * TODO: check for unhandled response, be aware of async
-                 * responses!
+                 * TODO: check for unhandled response, be aware of async responses!
                  */
                 return;
             }
@@ -285,14 +290,18 @@ public class RemoteAPI implements HttpRequestHandler {
                 e.setResponse(response);
             }
             e = this.preProcessBasicRemoteAPIException(request, response, e);
-            if (e != null) { throw e; }
+            if (e != null) {
+                throw e;
+            }
         } catch (final Throwable e) {
             e.printStackTrace();
             final InternalApiException internal = new InternalApiException(e);
             internal.setRequest(request);
             internal.setResponse(response);
             final BasicRemoteAPIException ret = this.preProcessBasicRemoteAPIException(request, response, internal);
-            if (ret != null) { throw ret; }
+            if (ret != null) {
+                throw ret;
+            }
         }
     }
 
@@ -310,7 +319,9 @@ public class RemoteAPI implements HttpRequestHandler {
             try {
                 try {
                     responseData = request.getIface().invoke(request.getIface().getSignatureHandler(), parameters);
-                    if (!Boolean.TRUE.equals(responseData)) { throw new AuthException(); }
+                    if (!Boolean.TRUE.equals(responseData)) {
+                        throw new AuthException();
+                    }
                 } catch (final InvocationTargetException e) {
                     throw e.getTargetException();
                 }
@@ -325,7 +336,9 @@ public class RemoteAPI implements HttpRequestHandler {
     public RemoteAPIRequest createRemoteAPIRequestObject(final HttpRequest request) throws BasicRemoteAPIException {
         this.validateRequest(request);
         final RemoteAPIMethod remoteAPIMethod = this.getRemoteAPIMethod(request);
-        if (remoteAPIMethod == null) { return null; }
+        if (remoteAPIMethod == null) {
+            return null;
+        }
         final java.util.List<String> parameters = new ArrayList<String>();
         String jqueryCallback = null;
         /* convert GET parameters to methodParameters */
@@ -364,8 +377,12 @@ public class RemoteAPI implements HttpRequestHandler {
                     }
                 }
             } catch (final Throwable e) {
-                if (e instanceof BasicRemoteAPIException) { throw (BasicRemoteAPIException) e; }
-                if (e.getCause() instanceof BasicRemoteAPIException) { throw (BasicRemoteAPIException) e.getCause(); }
+                if (e instanceof BasicRemoteAPIException) {
+                    throw (BasicRemoteAPIException) e;
+                }
+                if (e.getCause() instanceof BasicRemoteAPIException) {
+                    throw (BasicRemoteAPIException) e.getCause();
+                }
                 throw new RuntimeException(e);
             }
         }
@@ -394,15 +411,15 @@ public class RemoteAPI implements HttpRequestHandler {
         final String path = request.getRequestedPath();
         final String[] intf = new Regex(path, RemoteAPI.INTF).getRow(0);
 
-        if (intf == null || intf.length != 3) { return null; }
+        if (intf == null || intf.length != 3) {
+            return null;
+        }
         /* intf=unimportant,namespace,method */
         if (intf[2] != null && intf[2].endsWith("/")) {
             /* special handling for commands without name */
             /**
-             * Explanation: this is for special handling of this
-             * http://localhost/test -->this is method test in root
-             * http://localhost/test/ --> this is method without name in
-             * namespace test
+             * Explanation: this is for special handling of this http://localhost/test -->this is method test in root http://localhost/test/
+             * --> this is method without name in namespace test
              */
             intf[1] = intf[2].substring(0, intf[2].length() - 1);
             intf[2] = "";
@@ -413,7 +430,9 @@ public class RemoteAPI implements HttpRequestHandler {
 
         final InterfaceHandler<RemoteAPIInterface> ret = this.interfaces.get(intf[1]);
 
-        if (ret != null) { return new RemoteAPIMethod(intf[1], ret, intf[2]); }
+        if (ret != null) {
+            return new RemoteAPIMethod(intf[1], ret, intf[2]);
+        }
         return null;
     }
 
@@ -465,7 +484,9 @@ public class RemoteAPI implements HttpRequestHandler {
      */
     public boolean onGetRequest(final GetRequest request, final HttpResponse response) throws BasicRemoteAPIException {
         final RemoteAPIRequest apiRequest = this.createRemoteAPIRequestObject(request);
-        if (apiRequest == null) { return this.onUnknownRequest(request, response); }
+        if (apiRequest == null) {
+            return this.onUnknownRequest(request, response);
+        }
         try {
             this._handleRemoteAPICall(apiRequest, this.createRemoteAPIResponseObject(apiRequest, response));
         } catch (final IOException e) {
@@ -476,7 +497,9 @@ public class RemoteAPI implements HttpRequestHandler {
 
     public boolean onPostRequest(final PostRequest request, final HttpResponse response) throws BasicRemoteAPIException {
         final RemoteAPIRequest apiRequest = this.createRemoteAPIRequestObject(request);
-        if (apiRequest == null) { return this.onUnknownRequest(request, response); }
+        if (apiRequest == null) {
+            return this.onUnknownRequest(request, response);
+        }
         try {
             this._handleRemoteAPICall(apiRequest, this.createRemoteAPIResponseObject(apiRequest, response));
         } catch (final IOException e) {
@@ -510,27 +533,40 @@ public class RemoteAPI implements HttpRequestHandler {
                         }
                         interfaces.add(c);
                         String namespace = c.getName();
+
                         final ApiNamespace a = c.getAnnotation(ApiNamespace.class);
                         if (a != null) {
                             namespace = a.value();
                         }
-                        int defaultAuthLevel = 0;
-                        final ApiAuthLevel b = c.getAnnotation(ApiAuthLevel.class);
-                        if (b != null) {
-                            defaultAuthLevel = b.value();
-                        }
-                        // if (this.interfaces.containsKey(namespace)) { throw
-                        // new IllegalStateException("Interface " + c.getName()
-                        // + " with namespace " + namespace +
-                        // " already has been registered by " +
-                        // this.interfaces.get(namespace)); }
-                        // System.out.println("Register:   " + c.getName() +
-                        // "->" + namespace);
-                        // try {
-
-                        // System.out.println("Register:   " + c.getName() +
-                        // "->" + namespace);
                         try {
+                            try {
+                                Method method = x.getClass().getMethod("getAPINamespace", new Class[] { Class.class });
+                                if (method != null) {
+
+                                    namespace = (String) method.invoke(x, new Object[] { c });
+
+                                }
+                            } catch (NoSuchMethodException e) {
+
+                                // ok
+                            }
+                            int defaultAuthLevel = 0;
+                            final ApiAuthLevel b = c.getAnnotation(ApiAuthLevel.class);
+                            if (b != null) {
+                                defaultAuthLevel = b.value();
+                            }
+                            // if (this.interfaces.containsKey(namespace)) { throw
+                            // new IllegalStateException("Interface " + c.getName()
+                            // + " with namespace " + namespace +
+                            // " already has been registered by " +
+                            // this.interfaces.get(namespace)); }
+                            // System.out.println("Register:   " + c.getName() +
+                            // "->" + namespace);
+                            // try {
+
+                            // System.out.println("Register:   " + c.getName() +
+                            // "->" + namespace);
+
                             InterfaceHandler<RemoteAPIInterface> handler = linterfaces.get(namespace);
                             if (handler == null) {
                                 handler = InterfaceHandler.create((Class<RemoteAPIInterface>) c, x, defaultAuthLevel);
@@ -539,7 +575,12 @@ public class RemoteAPI implements HttpRequestHandler {
                             } else {
                                 handler.add((Class<RemoteAPIInterface>) c, x, defaultAuthLevel);
                             }
-
+                        } catch (IllegalAccessException e) {
+                            throw new ParseException(e);
+                        } catch (IllegalArgumentException e) {
+                            throw new ParseException(e);
+                        } catch (InvocationTargetException e) {
+                            throw new ParseException(e);
                         } catch (final SecurityException e) {
                             throw new ParseException(e);
                         } catch (final NoSuchMethodException e) {

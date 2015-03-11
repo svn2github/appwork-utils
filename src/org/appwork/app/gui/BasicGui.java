@@ -2,8 +2,8 @@ package org.appwork.app.gui;
 
 import java.awt.AWTException;
 import java.awt.Dimension;
-import java.awt.Frame;
 import java.awt.Image;
+import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
@@ -19,8 +19,6 @@ import javax.swing.JFrame;
 import javax.swing.WindowConstants;
 
 import org.appwork.shutdown.ShutdownController;
-import org.appwork.storage.JSonStorage;
-import org.appwork.storage.Storage;
 import org.appwork.swing.ExtJFrame;
 import org.appwork.swing.action.BasicAction;
 import org.appwork.swing.components.ExtButton;
@@ -29,6 +27,8 @@ import org.appwork.utils.os.CrossSystem;
 import org.appwork.utils.swing.EDTRunner;
 import org.appwork.utils.swing.LockPanel;
 import org.appwork.utils.swing.dialog.AbstractDialog;
+import org.appwork.utils.swing.dimensor.RememberLastDimensor;
+import org.appwork.utils.swing.locator.RememberAbsoluteLocator;
 import org.appwork.utils.swing.windowmanager.WindowManager;
 import org.appwork.utils.swing.windowmanager.WindowManager.FrameState;
 
@@ -160,13 +160,15 @@ public abstract class BasicGui {
     /**
      * The Mainframe
      */
-    private final JFrame  frame;
+    private final JFrame            frame;
 
-    private LockPanel     lockPanel;
+    private LockPanel               lockPanel;
 
-    private AWTrayIcon    ti;
+    private AWTrayIcon              ti;
 
-    private final Storage storage;
+    private RememberAbsoluteLocator locator;
+
+    private RememberLastDimensor    dimensor;
 
     protected BasicGui(final String title) {
 
@@ -204,13 +206,17 @@ public abstract class BasicGui {
         };
 
         // dilaog init
-        storage = JSonStorage.getPlainStorage("BasicGui");
+
+        locator = new RememberAbsoluteLocator(BasicGui.this.getClass().getName());
+        dimensor = new RememberLastDimensor(BasicGui.this.getClass().getName());
 
         AbstractDialog.setDefaultRoot(frame);
 
         frame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(final WindowEvent arg0) {
+                locator.onClose(frame);
+                dimensor.onClose(frame);
                 if (!CrossSystem.isMac()) {
                     new Thread("Closer") {
                         @Override
@@ -240,13 +246,12 @@ public abstract class BasicGui {
         frame.setIconImages(getAppIconList());
         // Set Application dimensions and locations
 
-        // set extended state
-
-        frame.setExtendedState(JSonStorage.getPlainStorage("Interface").get("EXTENDEDSTATE", Frame.NORMAL));
-        final Dimension dim = new Dimension(JSonStorage.getPlainStorage("Interface").get("DIMENSION_WIDTH", 1000), JSonStorage.getPlainStorage("Interface").get("DIMENSION_HEIGHT", 600));
+        Dimension dim = dimensor.getDimension(frame);
         // restore size
-        frame.setSize(dim);
-        frame.setPreferredSize(dim);
+        if (dim != null) {
+            frame.setSize(dim);
+            frame.setPreferredSize(dim);
+        }
 
         frame.setMinimumSize(new Dimension(100, 100));
         //
@@ -254,103 +259,19 @@ public abstract class BasicGui {
         layoutPanel();
         // setGlasPane();
 
-        // restore location. use center of screen as default.
-        final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        final int x = screenSize.width / 2 - frame.getSize().width / 2;
-        final int y = screenSize.height / 2 - frame.getSize().height / 2;
-
-        frame.setLocation(JSonStorage.getPlainStorage("Interface").get("LOCATION_X", x), JSonStorage.getPlainStorage("Interface").get("LOCATION_Y", y));
-
         frame.pack();
-        new Thread() {
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(2000);
-                } catch (final InterruptedException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-                new EDTRunner() {
+        Point loc = locator.getLocationOnScreen(frame);
+        if (loc != null) {
+            frame.setLocation(loc);
+        }
 
-                    @Override
-                    protected void runInEDT() {
-                        WindowManager.getInstance().setZState(frame, FrameState.TO_FRONT);
-
-                    }
-                };
-
-                try {
-                    Thread.sleep(5000);
-                } catch (final InterruptedException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-                new EDTRunner() {
-
-                    @Override
-                    protected void runInEDT() {
-                        // WindowManager.getInstance().setZState(BasicGui.this.frame,
-                        // FrameState.TO_BACK);
-
-                    }
-                };
-            };
-
-        }.start();
-        WindowManager.getInstance().show(frame, FrameState.TO_BACK);
-
-        // frame.setLocation(new Point(0,0));
-        // frame.setExtendedState(Frame.NORMAL);
-        // try {
-        // Thread.sleep(5000);
-        // } catch (final InterruptedException e) {sky
-        // // TODO Auto-generated catch block
-        // e.printStackTrace();
-        // }
-        // WindowManager.getInstance().toFront(frame);
-        // WindowManager.getInstance().show(frame, FrameState.TO_FRONT);
-        // WindowManager.getInstance().show(frame, FrameState.TO_FRONT);
-        // WindowManager.getInstance().show(frame, FrameState.TO_FRONT);
-        // WindowManager.getInstance().show(frame, FrameState.TO_FRONT);
-        // try {
-        // Thread.sleep(100);
-        // } catch (final InterruptedException e) {
-        // // TODO Auto-generated catch block
-        // e.printStackTrace();
-        // }
-        // WindowManager.getInstance().show(frame, FrameState.TO_FRONT);
-        // WindowManager.getInstance().show(frame, FrameState.TO_FRONT);
-        // try {
-        // Thread.sleep(100);
-        // } catch (final InterruptedException e) {
-        // // TODO Auto-generated catch block
-        // e.printStackTrace();
-        // }
-        // WindowManager.getInstance().show(frame, FrameState.TO_FRONT);
-        // WindowManager.getInstance().show(frame, FrameState.TO_FRONT);
-        // try {
-        // Thread.sleep(100);
-        // } catch (final InterruptedException e) {
-        // // TODO Auto-generated catch block
-        // e.printStackTrace();
-        // }
-        //
-        // WindowManager.getInstance().show(frame, FrameState.FOCUS);
+        WindowManager.getInstance().setVisible(frame, true);
+        WindowManager.getInstance().show(frame, FrameState.TO_FRONT_FOCUSED);
 
     }
 
     public void dispose() {
-        if (frame.getExtendedState() == Frame.NORMAL && frame.isShowing()) {
 
-            JSonStorage.getPlainStorage("Interface").put("LOCATION_X", frame.getLocationOnScreen().x);
-            JSonStorage.getPlainStorage("Interface").put("LOCATION_Y", frame.getLocationOnScreen().y);
-            JSonStorage.getPlainStorage("Interface").put("DIMENSION_WIDTH", frame.getSize().width);
-            JSonStorage.getPlainStorage("Interface").put("DIMENSION_HEIGHT", frame.getSize().height);
-
-        }
-
-        JSonStorage.getPlainStorage("Interface").put("EXTENDEDSTATE", frame.getExtendedState());
         if (ti != null) {
             ti.dispose();
         }
@@ -377,10 +298,6 @@ public abstract class BasicGui {
      */
     protected LockPanel getLockPanel() {
         return lockPanel;
-    }
-
-    public Storage getStorage() {
-        return storage;
     }
 
     /**

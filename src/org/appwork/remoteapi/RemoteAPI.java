@@ -566,7 +566,7 @@ public class RemoteAPI implements HttpRequestHandler {
 
                             // System.out.println("Register:   " + c.getName() +
                             // "->" + namespace);
-
+                            System.out.println("Try to register API namespace /" + namespace + " = " + c);
                             InterfaceHandler<RemoteAPIInterface> handler = linterfaces.get(namespace);
                             if (handler == null) {
                                 handler = InterfaceHandler.create((Class<RemoteAPIInterface>) c, x, defaultAuthLevel);

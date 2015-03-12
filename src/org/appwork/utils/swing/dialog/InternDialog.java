@@ -56,8 +56,8 @@ public class InternDialog<T> extends ExtJDialog {
         } else {
             if (getOwner() == null) {
                 final ArrayList<Image> l = new ArrayList<Image>();
-                l.add(AWUTheme.I().getImage("info", 16));
-                l.add(AWUTheme.I().getImage("info", 32));
+                l.add(AWUTheme.I().getImage("dialog/info", 16));
+                l.add(AWUTheme.I().getImage("dialog/info", 32));
 
                 setIconImages(l);
             }

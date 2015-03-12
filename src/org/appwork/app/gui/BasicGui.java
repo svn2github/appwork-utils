@@ -27,6 +27,9 @@ import org.appwork.utils.os.CrossSystem;
 import org.appwork.utils.swing.EDTRunner;
 import org.appwork.utils.swing.LockPanel;
 import org.appwork.utils.swing.dialog.AbstractDialog;
+import org.appwork.utils.swing.dialog.Dialog;
+import org.appwork.utils.swing.dialog.DialogCanceledException;
+import org.appwork.utils.swing.dialog.DialogClosedException;
 import org.appwork.utils.swing.dimensor.RememberLastDimensor;
 import org.appwork.utils.swing.locator.RememberAbsoluteLocator;
 import org.appwork.utils.swing.windowmanager.WindowManager;
@@ -215,6 +218,15 @@ public abstract class BasicGui {
         frame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(final WindowEvent arg0) {
+                try {
+                    Dialog.getInstance().showInputDialog("Closing");
+                } catch (DialogClosedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (DialogCanceledException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
                 locator.onClose(frame);
                 dimensor.onClose(frame);
                 if (!CrossSystem.isMac()) {
@@ -271,7 +283,15 @@ public abstract class BasicGui {
     }
 
     public void dispose() {
-
+        try {
+            Dialog.getInstance().showInputDialog("Dispose");
+        } catch (DialogClosedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (DialogCanceledException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         if (ti != null) {
             ti.dispose();
         }

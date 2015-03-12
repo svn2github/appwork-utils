@@ -15,7 +15,6 @@ import java.lang.reflect.Method;
 import java.util.Enumeration;
 import java.util.logging.Handler;
 import java.util.logging.Level;
-
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
@@ -28,7 +27,7 @@ import org.appwork.utils.logging2.LogSourceProvider;
  * 
  */
 public class LoggerFactory extends LogSourceProvider {
-    static{
+    static {
         System.setProperty("java.util.logging.manager", ExtLogManager.class.getName());
     }
     private static final LoggerFactory INSTANCE = new LoggerFactory();
@@ -84,7 +83,9 @@ public class LoggerFactory extends LogSourceProvider {
             } catch (final Throwable e1) {
                 e1.printStackTrace();
             }
-
+            // catch (final IllegalAccessException e1) {
+            // e1.printStackTrace();
+            // }
         }
     }
 
@@ -136,7 +137,5 @@ public class LoggerFactory extends LogSourceProvider {
             }
         });
     }
-
-
 
 }

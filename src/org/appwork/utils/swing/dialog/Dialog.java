@@ -28,8 +28,7 @@ import org.appwork.utils.logging.Log;
 import org.appwork.utils.swing.EDTRunner;
 
 /**
- * A Dialog Instance which provides extended Dialog features and thus replaces
- * JOptionPane
+ * A Dialog Instance which provides extended Dialog features and thus replaces JOptionPane
  */
 public class Dialog {
     /**
@@ -45,29 +44,25 @@ public class Dialog {
     /**
      * Icon Key for Error Icons
      * 
-     * @see org.appwork.utils.ImageProvider.ImageProvider#getIcon(String, int,
-     *      int, boolean)
+     * @see org.appwork.utils.ImageProvider.ImageProvider#getIcon(String, int, int, boolean)
      */
     public static final String  ICON_ERROR                          = "dialog/error";
     /**
      * Icon Key for Information Icons
      * 
-     * @see org.appwork.utils.ImageProvider.ImageProvider#getIcon(String, int,
-     *      int, boolean)
+     * @see org.appwork.utils.ImageProvider.ImageProvider#getIcon(String, int, int, boolean)
      */
     public static final String  ICON_INFO                           = "dialog/info";
     /**
      * Icon Key for Question Icons
      * 
-     * @see org.appwork.utils.ImageProvider.ImageProvider#getIcon(String, int,
-     *      int, boolean)
+     * @see org.appwork.utils.ImageProvider.ImageProvider#getIcon(String, int, int, boolean)
      */
     public static final String  ICON_QUESTION                       = "dialog/help";
     /**
      * Icon Key for Warning Icons
      * 
-     * @see org.appwork.utils.ImageProvider.ImageProvider#getIcon(String, int,
-     *      int, boolean)
+     * @see org.appwork.utils.ImageProvider.ImageProvider#getIcon(String, int, int, boolean)
      */
     public static final String  ICON_WARNING                        = "dialog/warning";
     /**
@@ -94,11 +89,9 @@ public class Dialog {
     /**
      * this return flag can be set in two situations:<br>
      * a) The user selected the {@link #STYLE_SHOW_DO_NOT_DISPLAY_AGAIN} Option<br>
-     * b) The dialog has been skipped because the DO NOT SHOW AGAIN flag has
-     * been set previously<br>
+     * b) The dialog has been skipped because the DO NOT SHOW AGAIN flag has been set previously<br>
      * <br>
-     * Check {@link #RETURN_SKIPPED_BY_DONT_SHOW} to know if the dialog has been
-     * visible or autoskipped
+     * Check {@link #RETURN_SKIPPED_BY_DONT_SHOW} to know if the dialog has been visible or autoskipped
      */
     public static final int     RETURN_DONT_SHOW_AGAIN              = 1 << 3;
 
@@ -107,15 +100,13 @@ public class Dialog {
      */
     public static final int     RETURN_OK                           = 1 << 1;
     /**
-     * If the dialog has been skipped due to previously selected
-     * {@link #STYLE_SHOW_DO_NOT_DISPLAY_AGAIN} Option, this return flag is set.
+     * If the dialog has been skipped due to previously selected {@link #STYLE_SHOW_DO_NOT_DISPLAY_AGAIN} Option, this return flag is set.
      * 
      * @see #RETURN_DONT_SHOW_AGAIN
      */
     public static final int     RETURN_SKIPPED_BY_DONT_SHOW         = 1 << 4;
     /**
-     * If the Timeout ({@link UIOManager#LOGIC_COUNTDOWN}) has run out, the
-     * return mask contains this flag
+     * If the Timeout ({@link UIOManager#LOGIC_COUNTDOWN}) has run out, the return mask contains this flag
      */
     public static final int     RETURN_TIMEOUT                      = 1 << 5;
 
@@ -134,12 +125,16 @@ public class Dialog {
     }
 
     public static boolean isClosed(final Object value) {
-        if (!(value instanceof Integer)) { return false; }
+        if (!(value instanceof Integer)) {
+            return false;
+        }
         return BinaryLogic.containsSome((Integer) value, Dialog.RETURN_CLOSED);
     }
 
     public static boolean isOK(final Object value) {
-        if (!(value instanceof Integer)) { return false; }
+        if (!(value instanceof Integer)) {
+            return false;
+        }
         return BinaryLogic.containsSome((Integer) value, Dialog.RETURN_OK);
     }
 
@@ -154,15 +149,13 @@ public class Dialog {
     public static final int       STYLE_HTML                      = 1 << 7;
 
     /**
-     * Some dialogs are able to layout themselves in a large mode. E:g. to
-     * display a huge text.
+     * Some dialogs are able to layout themselves in a large mode. E:g. to display a huge text.
      */
     public static final int       STYLE_LARGE                     = 1 << 6;
 
     /**
-     * Displays a Checkbox with "do not show this again" text. If the user
-     * selects this box, the UserInteraktion class will remember the answer and
-     * will not disturb the user with the same question (same title)
+     * Displays a Checkbox with "do not show this again" text. If the user selects this box, the UserInteraktion class will remember the
+     * answer and will not disturb the user with the same question (same title)
      */
     public static final int       STYLE_SHOW_DO_NOT_DISPLAY_AGAIN = 1 << 5;
 
@@ -172,8 +165,7 @@ public class Dialog {
     public static final int       STYLE_PASSWORD                  = 1 << 9;
 
     /**
-     * tries to find some special markers in the text and selects an appropriate
-     * icon
+     * tries to find some special markers in the text and selects an appropriate icon
      * 
      * @param text
      * @return
@@ -206,26 +198,17 @@ public class Dialog {
 
     public static void main(final String[] args) throws InterruptedException {
 
-        final Thread th = new Thread() {
-            @Override
-            public void run() {
-                try {
-                    Dialog.getInstance().showConfirmDialog(0, "Blabla?");
+        try {
+            Dialog.getInstance().showConfirmDialog(0, "Blabla?");
 
-                    System.out.println("RETURNED OK");
-                } catch (final DialogClosedException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (final DialogCanceledException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            }
-        };
-
-        th.start();
-        Thread.sleep(5000);
-        th.interrupt();
+            System.out.println("RETURNED OK");
+        } catch (final DialogClosedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (final DialogCanceledException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
     }
 
@@ -326,8 +309,7 @@ public class Dialog {
     /**
      * 
      * @param flag
-     *            see {@link Dialog} - Flags. There are various flags to
-     *            customize the dialog
+     *            see {@link Dialog} - Flags. There are various flags to customize the dialog
      * @param title
      *            The Dialog's Window Title
      * @param question
@@ -337,8 +319,7 @@ public class Dialog {
      * @param defaultSelectedIndex
      *            The option which is selected by default
      * @param icon
-     *            The dialog is able to display an Icon If this is null, the
-     *            dialog might select an Icon derived from the message and title
+     *            The dialog is able to display an Icon If this is null, the dialog might select an Icon derived from the message and title
      *            text
      * @param okOption
      *            Text for OK Button [null for default]
@@ -358,8 +339,7 @@ public class Dialog {
     /**
      * 
      * @param flag
-     *            see {@link Dialog} - Flags. There are various flags to
-     *            customize the dialog
+     *            see {@link Dialog} - Flags. There are various flags to customize the dialog
      * @param title
      *            The Dialog's Window Title
      * @param question
@@ -369,8 +349,7 @@ public class Dialog {
      * @param defaultSelectedItem
      *            The option which is selected by default
      * @param icon
-     *            The dialog is able to display an Icon If this is null, the
-     *            dialog might select an Icon derived from the message and title
+     *            The dialog is able to display an Icon If this is null, the dialog might select an Icon derived from the message and title
      *            text
      * @param okOption
      *            Text for OK Button [null for default]
@@ -400,8 +379,7 @@ public class Dialog {
     /**
      * 
      * @param flag
-     *            see {@link Dialog} - Flags. There are various flags to
-     *            customize the dialog
+     *            see {@link Dialog} - Flags. There are various flags to customize the dialog
      * @param question
      *            The Dialog is able to show a question to the user.
      * @return
@@ -415,8 +393,7 @@ public class Dialog {
     /**
      * 
      * @param flag
-     *            see {@link Dialog} - Flags. There are various flags to
-     *            customize the dialog
+     *            see {@link Dialog} - Flags. There are various flags to customize the dialog
      * @param title
      *            The Dialog's Window Title
      * @param question
@@ -430,8 +407,7 @@ public class Dialog {
     }
 
     /**
-     * Keep this method for webinstaller compatibility reasons. People cannot
-     * uninstall if this method is missing
+     * Keep this method for webinstaller compatibility reasons. People cannot uninstall if this method is missing
      * 
      * @param flag
      * @param title
@@ -451,22 +427,18 @@ public class Dialog {
      * Requests a ConfirmDialog
      * 
      * @param flag
-     *            see {@link Dialog} - Flags. There are various flags to
-     *            customize the dialog
+     *            see {@link Dialog} - Flags. There are various flags to customize the dialog
      * @param title
      *            The Dialog's Window Title
      * @param message
      *            The Dialog is able to show a message to the user
      * @param icon
-     *            The dialog is able to display an Icon If this is null, the
-     *            dialog might select an Icon derived from the message and title
+     *            The dialog is able to display an Icon If this is null, the dialog might select an Icon derived from the message and title
      *            text
      * @param okOption
-     *            Text for OK Button [null for default] Text for OK Button [null
-     *            for default]
+     *            Text for OK Button [null for default] Text for OK Button [null for default]
      * @param cancelOption
-     *            Text for Cancel Button [null for default] Text for cancel
-     *            Button [null for default]
+     *            Text for Cancel Button [null for default] Text for cancel Button [null for default]
      * @return
      * @throws DialogCanceledException
      * @throws DialogClosedException
@@ -506,7 +478,9 @@ public class Dialog {
      * @throws DialogCanceledException
      */
     protected <T> T showDialogRaw(final AbstractDialog<T> dialog) throws DialogClosedException, DialogCanceledException {
-        if (dialog == null) { return null; }
+        if (dialog == null) {
+            return null;
+        }
 
         if (SwingUtilities.isEventDispatchThread()) {
             return this.showDialogRawInEDT(dialog);
@@ -517,20 +491,28 @@ public class Dialog {
     }
 
     protected <T> T showDialogRawInEDT(final AbstractDialog<T> dialog) throws DialogClosedException, DialogCanceledException {
-        if (org.appwork.utils.Application.isHeadless()) { throw new HeadlessException("No Dialogs in Headless Mode!"); }
+        if (org.appwork.utils.Application.isHeadless()) {
+            throw new HeadlessException("No Dialogs in Headless Mode!");
+        }
         dialog.setCallerIsEDT(true);
         dialog.displayDialog();
         final T ret = dialog.getReturnValue();
         final int mask = dialog.getReturnmask();
-        if (BinaryLogic.containsSome(mask, Dialog.RETURN_CLOSED)) { throw new DialogClosedException(mask); }
-        if (BinaryLogic.containsSome(mask, Dialog.RETURN_CANCEL)) { throw new DialogCanceledException(mask); }
+        if (BinaryLogic.containsSome(mask, Dialog.RETURN_CLOSED)) {
+            throw new DialogClosedException(mask);
+        }
+        if (BinaryLogic.containsSome(mask, Dialog.RETURN_CANCEL)) {
+            throw new DialogCanceledException(mask);
+        }
         return ret;
 
     }
 
     protected <T> T showDialogRawOutsideEDT(final AbstractDialog<T> dialog) throws DialogClosedException, DialogCanceledException {
         dialog.setCallerIsEDT(false);
-        if (Thread.interrupted()) { throw new DialogClosedException(Dialog.RETURN_INTERRUPT, new InterruptedException()); }
+        if (Thread.interrupted()) {
+            throw new DialogClosedException(Dialog.RETURN_INTERRUPT, new InterruptedException());
+        }
 
         if (org.appwork.utils.Application.isHeadless()) {
             throw new HeadlessException("No Dialogs in Headless Mode!");
@@ -556,7 +538,9 @@ public class Dialog {
             };
 
             try {
-                if (Thread.interrupted()) { throw new InterruptedException(); }
+                if (Thread.interrupted()) {
+                    throw new InterruptedException();
+                }
                 synchronized (waitingLock) {
                     if (waitingLock.get() == false) {
                         waitingLock.wait();
@@ -587,8 +571,12 @@ public class Dialog {
         }
         final T ret = dialog.getReturnValue();
         final int mask = dialog.getReturnmask();
-        if (BinaryLogic.containsSome(mask, Dialog.RETURN_CLOSED)) { throw new DialogClosedException(mask); }
-        if (BinaryLogic.containsSome(mask, Dialog.RETURN_CANCEL)) { throw new DialogCanceledException(mask); }
+        if (BinaryLogic.containsSome(mask, Dialog.RETURN_CLOSED)) {
+            throw new DialogClosedException(mask);
+        }
+        if (BinaryLogic.containsSome(mask, Dialog.RETURN_CANCEL)) {
+            throw new DialogCanceledException(mask);
+        }
         return ret;
 
     }
@@ -643,8 +631,7 @@ public class Dialog {
     /**
      * 
      * @param flag
-     *            see {@link Dialog} - Flags. There are various flags to
-     *            customize the dialog flag
+     *            see {@link Dialog} - Flags. There are various flags to customize the dialog flag
      * @param question
      *            The Dialog is able to show a question to the user. question
      * @param defaultvalue
@@ -661,16 +648,14 @@ public class Dialog {
      * Requests in Inputdialog.
      * 
      * @param flag
-     *            see {@link Dialog} - Flags. There are various flags to
-     *            customize the dialog
+     *            see {@link Dialog} - Flags. There are various flags to customize the dialog
      * @param title
      *            The Dialog's Window Title
      * @param message
      *            The Dialog is able to show a message to the user
      * @param defaultMessage
      * @param icon
-     *            The dialog is able to display an Icon If this is null, the
-     *            dialog might select an Icon derived from the message and title
+     *            The dialog is able to display an Icon If this is null, the dialog might select an Icon derived from the message and title
      *            text
      * @param okOption
      *            Text for OK Button [null for default]
@@ -700,8 +685,7 @@ public class Dialog {
     /**
      * 
      * @param flag
-     *            see {@link Dialog} - Flags. There are various flags to
-     *            customize the dialog
+     *            see {@link Dialog} - Flags. There are various flags to customize the dialog
      * @param message
      *            The Dialog is able to show a message to the user
      * @throws DialogCanceledException
@@ -716,8 +700,7 @@ public class Dialog {
     /**
      * 
      * @param flag
-     *            see {@link Dialog} - Flags. There are various flags to
-     *            customize the dialog
+     *            see {@link Dialog} - Flags. There are various flags to customize the dialog
      * @param title
      *            The Dialog's Window Title
      * @param message
@@ -762,11 +745,9 @@ public class Dialog {
     /**
      * 
      * @param flag
-     *            see {@link Dialog} - Flags. There are various flags to
-     *            customize the dialog flag
+     *            see {@link Dialog} - Flags. There are various flags to customize the dialog flag
      * @param question
-     *            The Dialog is able to show 3 Passwordfields to the user.
-     *            question
+     *            The Dialog is able to show 3 Passwordfields to the user. question
      * @param defaultvalue
      *            defaultvalue
      * @return
@@ -781,16 +762,14 @@ public class Dialog {
      * Requests in MultiInputdialog.
      * 
      * @param flag
-     *            see {@link Dialog} - Flags. There are various flags to
-     *            customize the dialog
+     *            see {@link Dialog} - Flags. There are various flags to customize the dialog
      * @param title
      *            The Dialog's Window Title
      * @param message
      *            The Dialog is able to show a message to the user
      * @param defaultMessage
      * @param icon
-     *            The dialog is able to display an Icon If this is null, the
-     *            dialog might select an Icon derived from the message and title
+     *            The dialog is able to display an Icon If this is null, the dialog might select an Icon derived from the message and title
      *            text
      * @param okOption
      *            Text for OK Button [null for default]
@@ -835,8 +814,7 @@ public class Dialog {
     /**
      * 
      * @param flag
-     *            see {@link Dialog} - Flags. There are various flags to
-     *            customize the dialog flag
+     *            see {@link Dialog} - Flags. There are various flags to customize the dialog flag
      * @param question
      *            The Dialog is able to show a slider to the user. question
      * @param defaultvalue
@@ -861,16 +839,14 @@ public class Dialog {
      * Requests in ValueDialog.
      * 
      * @param flag
-     *            see {@link Dialog} - Flags. There are various flags to
-     *            customize the dialog
+     *            see {@link Dialog} - Flags. There are various flags to customize the dialog
      * @param title
      *            The Dialog's Window Title
      * @param message
      *            The Dialog is able to show a message to the user
      * @param defaultMessage
      * @param icon
-     *            The dialog is able to display an Icon If this is null, the
-     *            dialog might select an Icon derived from the message and title
+     *            The dialog is able to display an Icon If this is null, the dialog might select an Icon derived from the message and title
      *            text
      * @param okOption
      *            Text for OK Button [null for default]

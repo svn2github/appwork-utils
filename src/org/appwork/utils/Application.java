@@ -25,6 +25,7 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -337,12 +338,15 @@ public class Application {
      * Detects the applications home directory. it is either the pass of the appworkutils.jar or HOME/
      */
     public static String getRoot(final Class<?> rootOfClazz) {
+        System.out.println("Get Root");
+
         if (Application.ROOT != null) {
             return Application.ROOT;
         }
         final String key = "awuhome" + Application.APP_FOLDER;
         final String sysProp = System.getProperty(key);
         if (sysProp != null) {
+            System.out.println("Fixed Root " + sysProp);
             Application.ROOT = sysProp;
             return Application.ROOT;
         }
@@ -352,10 +356,33 @@ public class Application {
 
             loc = rootOfClazz.getProtectionDomain().getCodeSource().getLocation();
 
-            File appRoot;
+            java.io.File appRoot = null;
             try {
-                appRoot = new File(loc.toURI());
-
+                String path = loc.getPath();
+                // loc may be a
+                try {
+                    appRoot = new File(java.net.URLDecoder.decode(path, "UTF-8"));
+                    if (!appRoot.exists()) {
+                        appRoot = null;
+                    }
+                } catch (java.io.UnsupportedEncodingException e) {
+                    Log.exception(e);
+                }
+                if (appRoot == null) {
+                    appRoot = new File(path);
+                    if (!appRoot.exists()) {
+                        appRoot = null;
+                    }
+                }
+                if (appRoot == null) {
+                    appRoot = new File(loc.toURI());
+                    if (!appRoot.exists()) {
+                        appRoot = null;
+                    }
+                }
+                if (appRoot == null) {
+                    throw new java.net.URISyntaxException(loc + "", "Bad URI");
+                }
                 if (appRoot.isFile()) {
                     appRoot = appRoot.getParentFile();
                 }
@@ -400,6 +427,12 @@ public class Application {
             Log.exception(e);
             return null;
         }
+    }
+
+    public static void main(String[] args) throws MalformedURLException, URISyntaxException, UnsupportedEncodingException {
+        URL url = new URL("file:/C:/USers/Thomas/AppData/Local/NCB CatalOmat%201.0/Cataloger.jar");
+        System.out.println(new File(URLDecoder.decode(url.getPath(), "UTF-8")));
+
     }
 
     /**

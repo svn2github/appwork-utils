@@ -98,7 +98,9 @@ public class NetWorkFolder extends File {
      * @return
      */
     public File get(final String absolutePath) {
-        if (this.map != null) { return this.map.get(absolutePath); }
+        if (this.map != null) {
+            return this.map.get(absolutePath);
+        }
 
         return null;
     }
@@ -355,7 +357,7 @@ public class NetWorkFolder extends File {
     @Override
     public URL toURL() throws MalformedURLException {
 
-        return this.networkFolder.toURL();
+        return this.networkFolder.toURI().toURL();
     }
 
 }

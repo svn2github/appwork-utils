@@ -79,7 +79,9 @@ public class Theme implements MinTimeWeakReferenceCleanup {
     public Icon getCached(final String key) {
         synchronized (this.imageIconCache) {
             final MinTimeWeakReference<Icon> cache = this.imageIconCache.get(key);
-            if (cache != null) { return cache.get(); }
+            if (cache != null) {
+                return cache.get();
+            }
             return null;
         }
     }
@@ -90,7 +92,9 @@ public class Theme implements MinTimeWeakReferenceCleanup {
      * @return
      */
     protected String getCacheKey(final Object... objects) {
-        if (objects.length == 1) { return objects[0].toString(); }
+        if (objects.length == 1) {
+            return objects[0].toString();
+        }
         final StringBuilder sb = new StringBuilder();
         for (final Object o : objects) {
             if (sb.length() > 0) {
@@ -161,18 +165,6 @@ public class Theme implements MinTimeWeakReferenceCleanup {
             if (url == null) {
 
                 Log.exception(new Exception("Icon missing: " + this.getPath("images/", relativePath, ".png")));
-                // try {
-                // // Dialog.getInstance().showConfirmDialog(0, "Icon Missing",
-                // // "Please add the\r\n" + this.getPath("images/",
-                // // relativePath, ".png") + " to the classpath", ret, null,
-                // // null);
-                // } catch (final DialogClosedException e) {
-                // // TODO Auto-generated catch block
-                // e.printStackTrace();
-                // } catch (final DialogCanceledException e) {
-                // // TODO Auto-generated catch block
-                // e.printStackTrace();
-                // }
 
             }
             if (useCache) {
@@ -260,7 +252,9 @@ public class Theme implements MinTimeWeakReferenceCleanup {
             this.delegate.getText(string);
         }
         final URL url = this.getURL("", string, "");
-        if (url == null) { return null; }
+        if (url == null) {
+            return null;
+        }
         try {
             return IO.readURLToString(url);
         } catch (final IOException e) {
@@ -294,7 +288,9 @@ public class Theme implements MinTimeWeakReferenceCleanup {
             // first lookup in home dir. .jd_home or installdirectory
             final File file = Application.getResource(path);
 
-            if (file.exists()) { return file.toURI().toURL(); }
+            if (file.exists()) {
+                return file.toURI().toURL();
+            }
         } catch (final MalformedURLException e) {
             e.printStackTrace();
         }
@@ -316,8 +312,7 @@ public class Theme implements MinTimeWeakReferenceCleanup {
     /*
      * (non-Javadoc)
      * 
-     * @see org.appwork.storage.config.MinTimeWeakReferenceCleanup#
-     * onMinTimeWeakReferenceCleanup
+     * @see org.appwork.storage.config.MinTimeWeakReferenceCleanup# onMinTimeWeakReferenceCleanup
      * (org.appwork.storage.config.MinTimeWeakReference)
      */
     @Override

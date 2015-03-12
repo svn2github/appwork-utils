@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2012 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.utils.os
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -22,13 +22,14 @@ import org.appwork.utils.processes.ProcessOutput;
 
 /**
  * @author daniel
- * 
+ *
  */
 public class DesktopSupportLinux implements DesktopSupport {
 
     public static enum WINDOW_MANAGER {
         XFCE,
         GNOME,
+        MATE,
         UNITY,
         KDE,
         UNKNOWN
@@ -64,6 +65,11 @@ public class DesktopSupportLinux implements DesktopSupport {
             this.windowManager = WINDOW_MANAGER.GNOME;
             this.customFile = new String[] { "gnome-open", "%s" };
             this.customBrowse = new String[] { "gnome-open", "%s" };
+        } else if ("mate".equalsIgnoreCase(XDG_CURRENT_DESKTOP) || "mate".equalsIgnoreCase(DESKTOP_SESSION)) {
+            System.out.println("Mate Desktop detected");
+            this.windowManager = WINDOW_MANAGER.MATE;
+            this.customFile = new String[] { "gnome-open", "%s" };
+            this.customBrowse = new String[] { "gnome-open", "%s" };
         } else if ("true".equals(KDE_FULL_SESSION) || "kde-plasma".equals(DESKTOP_SESSION)) {
             System.out.println("KDE detected");
             this.windowManager = WINDOW_MANAGER.KDE;
@@ -88,7 +94,9 @@ public class DesktopSupportLinux implements DesktopSupport {
 
     @Override
     public void browseURL(final URL url) throws IOException, URISyntaxException {
-        if (this.openCustom(this.customBrowse, url.toExternalForm())) { return; }
+        if (this.openCustom(this.customBrowse, url.toExternalForm())) {
+            return;
+        }
         this.fallBack.browseURL(url);
     }
 
@@ -98,13 +106,16 @@ public class DesktopSupportLinux implements DesktopSupport {
 
     @Override
     public boolean isBrowseURLSupported() {
-        if (this.customBrowse != null && this.customFile.length >= 2 || this.fallBack.isBrowseURLSupported()) { return true; }
+        if (this.customBrowse != null && this.customFile.length >= 2 || this.fallBack.isBrowseURLSupported()) {
+            return true;
+        }
         return false;
     }
 
     public boolean isGnomeDesktop() {
         switch (this.windowManager) {
         case GNOME:
+        case MATE:
         case UNITY:
             return true;
         }
@@ -121,7 +132,9 @@ public class DesktopSupportLinux implements DesktopSupport {
 
     @Override
     public boolean isOpenFileSupported() {
-        if (this.customFile != null && this.customFile.length >= 2 || this.fallBack.isOpenFileSupported()) { return true; }
+        if (this.customFile != null && this.customFile.length >= 2 || this.fallBack.isOpenFileSupported()) {
+            return true;
+        }
         return false;
     }
 
@@ -134,7 +147,9 @@ public class DesktopSupportLinux implements DesktopSupport {
     }
 
     private boolean openCustom(final String[] custom, final String what) throws IOException {
-        if (custom == null || custom.length < 1) { return false; }
+        if (custom == null || custom.length < 1) {
+            return false;
+        }
         boolean added = false;
         final java.util.List<String> commands = new ArrayList<String>();
         for (final String s : custom) {
@@ -153,7 +168,9 @@ public class DesktopSupportLinux implements DesktopSupport {
 
     @Override
     public void openFile(final File file) throws IOException {
-        if (this.openCustom(this.customFile, file.getAbsolutePath())) { return; }
+        if (this.openCustom(this.customFile, file.getAbsolutePath())) {
+            return;
+        }
         this.fallBack.openFile(file);
     }
 
@@ -221,7 +238,7 @@ public class DesktopSupportLinux implements DesktopSupport {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.utils.os.DesktopSupport#getDefaultDownloadDirectory()
      */
     @Override

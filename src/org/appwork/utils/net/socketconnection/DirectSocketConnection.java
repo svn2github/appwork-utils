@@ -58,6 +58,7 @@ public class DirectSocketConnection extends SocketConnection {
                             connectSocket.connect(endpoint, connectTimeout);
                             break;
                         } catch (final ConnectException cE) {
+                            closeConnectSocket();
                             if (StringUtils.containsIgnoreCase(cE.getMessage(), "timed out")) {
                                 int timeout = (int) (System.currentTimeMillis() - beforeConnect);
                                 if (timeout < 1000) {
@@ -79,6 +80,7 @@ public class DirectSocketConnection extends SocketConnection {
                                 throw cE;
                             }
                         } catch (final SocketTimeoutException sTE) {
+                            closeConnectSocket();
                             if (StringUtils.containsIgnoreCase(sTE.getMessage(), "timed out")) {
                                 int timeout = (int) (System.currentTimeMillis() - beforeConnect);
                                 if (timeout < 1000) {
@@ -127,7 +129,12 @@ public class DirectSocketConnection extends SocketConnection {
     protected Socket createConnectSocket(int connectTimeout) throws IOException {
         final Socket socket = super.createConnectSocket(connectTimeout);
         if (this.getProxy().isDirect()) {
-            socket.bind(new InetSocketAddress(HTTPConnectionImpl.getDirectInetAddress(getProxy()), 0));
+            try {
+                socket.bind(new InetSocketAddress(HTTPConnectionImpl.getDirectInetAddress(getProxy()), 0));
+            } catch (IOException e) {
+                socket.close();
+                throw e;
+            }
         }
         return socket;
     }

@@ -192,6 +192,9 @@ public abstract class BasicGui {
                         }
 
                     }
+
+                    locator.onClose(frame);
+                    dimensor.onClose(frame);
                 }
 
                 super.setVisible(b);
@@ -215,15 +218,7 @@ public abstract class BasicGui {
         frame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(final WindowEvent arg0) {
-                // try {
-                // Dialog.getInstance().showInputDialog("Closing");
-                // } catch (DialogClosedException e) {
-                // // TODO Auto-generated catch block
-                // e.printStackTrace();
-                // } catch (DialogCanceledException e) {
-                // // TODO Auto-generated catch block
-                // e.printStackTrace();
-                // }
+
                 locator.onClose(frame);
                 dimensor.onClose(frame);
                 if (!CrossSystem.isMac()) {
@@ -280,15 +275,7 @@ public abstract class BasicGui {
     }
 
     public void dispose() {
-        // try {
-        // Dialog.getInstance().showInputDialog("Dispose");
-        // } catch (DialogClosedException e) {
-        // // TODO Auto-generated catch block
-        // e.printStackTrace();
-        // } catch (DialogCanceledException e) {
-        // // TODO Auto-generated catch block
-        // e.printStackTrace();
-        // }
+
         if (ti != null) {
             ti.dispose();
         }

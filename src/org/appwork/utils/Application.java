@@ -338,7 +338,6 @@ public class Application {
      * Detects the applications home directory. it is either the pass of the appworkutils.jar or HOME/
      */
     public static String getRoot(final Class<?> rootOfClazz) {
-        System.out.println("Get Root");
 
         if (Application.ROOT != null) {
             return Application.ROOT;
@@ -346,7 +345,7 @@ public class Application {
         final String key = "awuhome" + Application.APP_FOLDER;
         final String sysProp = System.getProperty(key);
         if (sysProp != null) {
-            System.out.println("Fixed Root " + sysProp);
+
             Application.ROOT = sysProp;
             return Application.ROOT;
         }

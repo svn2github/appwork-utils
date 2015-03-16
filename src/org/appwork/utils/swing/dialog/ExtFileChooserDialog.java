@@ -257,7 +257,9 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
 
         final int selstart = oldTextField.getSelectionStart();
         final int selend = oldTextField.getSelectionEnd();
-        if (selend != txt.length()) { return; }
+        if (selend != txt.length()) {
+            return;
+        }
         final String sel = txt.substring(selstart, selend);
         final String bef = txt.substring(0, selstart);
         final String name = bef.endsWith("/") || bef.endsWith("\\") ? "" : new File(bef).getName();
@@ -326,7 +328,9 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
                         case DIRECTORIES_ONLY:
                         case FILES_AND_DIRECTORIES:
                             f = fc.getCurrentDirectory();
-                            if (f != null) { return new File[] { f }; }
+                            if (f != null) {
+                                return new File[] { f };
+                            }
                         }
                         return null;
                     }
@@ -376,9 +380,15 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
      * @return
      */
     protected boolean isAllowedPath(final String path) {
-        if (path.equals(ExtFileSystemView.VIRTUAL_NETWORKFOLDER_XP)) { return false; }
-        if (path.equals(ExtFileSystemView.VIRTUAL_NETWORKFOLDER)) { return false; }
-        if (path.equals(_AWU.T.DIALOG_FILECHOOSER_networkfolder())) { return false; }
+        if (path.equals(ExtFileSystemView.VIRTUAL_NETWORKFOLDER_XP)) {
+            return false;
+        }
+        if (path.equals(ExtFileSystemView.VIRTUAL_NETWORKFOLDER)) {
+            return false;
+        }
+        if (path.equals(_AWU.T.DIALOG_FILECHOOSER_networkfolder())) {
+            return false;
+        }
         return true;
     }
 
@@ -388,14 +398,20 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
      * @return
      */
     private boolean equals(final String name, final String findName) {
-        if (CrossSystem.isWindows()) { return name.equalsIgnoreCase(findName); }
+        if (CrossSystem.isWindows()) {
+            return name.equalsIgnoreCase(findName);
+        }
 
         return name.equals(findName);
     }
 
     protected boolean exists(final File f) {
-        if (f.exists()) { return true; }
-        if (isSambaFolder(f)) { return true; }
+        if (f.exists()) {
+            return true;
+        }
+        if (isSambaFolder(f)) {
+            return true;
+        }
         return false;
     }
 
@@ -410,7 +426,9 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
         if (isFile(f)) {
             try {
                 final String ext = Files.getExtension(f.getName());
-                if (ext == null) { return null; }
+                if (ext == null) {
+                    return null;
+                }
                 return CrossSystem.getMime().getFileIcon(ext, 16, 16);
             } catch (final Exception e) {
                 return null;
@@ -434,7 +452,9 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
         } else if (f instanceof VirtualRoot) {
             key = ICON_KEY_HARDDRIVE;
         }
-        if (!AWUTheme.I().hasIcon(key)) { return null; }
+        if (!AWUTheme.I().hasIcon(key)) {
+            return null;
+        }
         return AWUTheme.I().getIcon(key, 18);
     }
 
@@ -447,9 +467,13 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
         if (CrossSystem.isWindows()) {
             // let's try to speed up this. windows may take a log of time for
             // f.isFile if the file is a network folder
-            if (f instanceof NetWorkFolder) { return false; }
+            if (f instanceof NetWorkFolder) {
+                return false;
+            }
             // example c:\
-            if (StringUtils.isEmpty(f.getName())) { return false; }
+            if (StringUtils.isEmpty(f.getName())) {
+                return false;
+            }
 
         }
         return f.isFile();
@@ -485,7 +509,9 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
      * @return
      */
     public File getSelectedFile() {
-        if (isMultiSelection()) { throw new IllegalStateException("Not available if multiselection is active. use #getSelection() instead"); }
+        if (isMultiSelection()) {
+            throw new IllegalStateException("Not available if multiselection is active. use #getSelection() instead");
+        }
         final File[] sel = getSelection();
         return sel == null || sel.length == 0 ? null : sel[0];
     }
@@ -494,7 +520,9 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
      * @return
      */
     public File[] getSelection() {
-        if (selection != null) { return selection; }
+        if (selection != null) {
+            return selection;
+        }
         return createReturnValue();
     }
 
@@ -538,7 +566,9 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
     }
 
     private void setBusy(final boolean newValue) {
-        if (busy == newValue) { return; }
+        if (busy == newValue) {
+            return;
+        }
         if (newValue) {
 
             System.out.println("Busy TRUE");
@@ -565,7 +595,9 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
      * @return
      */
     protected boolean isSambaFolder(final File f) {
-        if (fileSystemView.getNetworkFolder() != null) { return fileSystemView.getNetworkFolder().get(f.getAbsolutePath()) != null; }
+        if (fileSystemView.getNetworkFolder() != null) {
+            return fileSystemView.getNetworkFolder().get(f.getAbsolutePath()) != null;
+        }
 
         return false;
     }
@@ -650,7 +682,9 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
 
             @Override
             public void setCurrentDirectory(final File dir) {
-                if (!initComplete) { return; }
+                if (!initComplete) {
+                    return;
+                }
 
                 if (duringInit) {
                     // synch during init. else preselection will fail
@@ -767,9 +801,16 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
         System.out.println("Duration 6  " + (System.currentTimeMillis() - t));
         /* preSelection */
 
-        Log.L.info("Given presel: " + preSelection);
-
         File presel = preSelection;
+
+        if (presel != null && StringUtils.isEmpty(presel.getName())) {
+            // find and eliminate file.filePath=null file objects.
+
+            presel = null;
+        }
+
+        Log.L.info("Given presel: " + presel);
+
         if (presel == null) {
             final String path = getIDConfig().getLastSelection();
             presel = StringUtils.isEmpty(path) ? null : new File(path);
@@ -788,8 +829,7 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
                 if (presel.isDirectory()) {
                     fc.setCurrentDirectory(presel);
                     /*
-                     * we have to setSelectedFile here too, so the folder is
-                     * preselected
+                     * we have to setSelectedFile here too, so the folder is preselected
                      */
 
                 } else {
@@ -914,7 +954,9 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
                         SwingUtilities.invokeLater(new Runnable() {
 
                             private File getFile(final String txt) {
-                                if (fileSystemView.getNetworkFolder() != null && "\\".equals(txt)) { return fileSystemView.getNetworkFolder(); }
+                                if (fileSystemView.getNetworkFolder() != null && "\\".equals(txt)) {
+                                    return fileSystemView.getNetworkFolder();
+                                }
 
                                 File ret = null;
                                 if (fileSystemView.getNetworkFolder() != null) {
@@ -1293,7 +1335,9 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
      * 
      */
     private void updateView() {
-        if (fc == null) { return; }
+        if (fc == null) {
+            return;
+        }
         switch (getView()) {
         case DETAILS:
             try {

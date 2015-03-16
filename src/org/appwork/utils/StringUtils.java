@@ -41,8 +41,8 @@ public class StringUtils {
      * taken from http://stackoverflow.com/questions/4731055/whitespace-matching-regex-java
      */
     final private static String whitespace_chars = "[" /*
-     * dummy empty string for homogeneity
-     */
+                                                        * dummy empty string for homogeneity
+                                                        */
                                                          + "\\u0009" // CHARACTER
                                                          // TABULATION
                                                          + "\\u000A" // LINE
@@ -140,6 +140,21 @@ public class StringUtils {
         return pass.equalsIgnoreCase(pass2);
     }
 
+    public static String fillPre(final String string, final String filler, final int minCount) {
+        if (string.length() >= minCount) {
+            return string;
+        }
+
+        final StringBuilder sb = new StringBuilder();
+
+        sb.append(string);
+        while (sb.length() < minCount) {
+            sb.insert(0, filler);
+        }
+
+        return sb.toString();
+    }
+
     public static String fillPost(final String string, final String filler, final int minCount) {
         if (string.length() >= minCount) {
             return string;
@@ -178,7 +193,7 @@ public class StringUtils {
 
     /**
      * Returns wether a String is null,empty, or contains whitespace only
-     *
+     * 
      * @param ip
      * @return
      */

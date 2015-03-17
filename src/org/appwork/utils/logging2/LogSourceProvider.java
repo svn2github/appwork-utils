@@ -69,13 +69,13 @@ public abstract class LogSourceProvider {
     protected final HashMap<String, LogSink> logSinks    = new HashMap<String, LogSink>();
     private final int                        maxSize;
     private final int                        maxLogs;
-    protected long                           logTimeout;
+    protected final long                     logTimeout;
     protected Thread                         flushThread = null;
     protected File                           logFolder;
     protected LogConsoleHandler              consoleHandler;
 
-    protected boolean                        instantFlushDefault;
-    private long                             initTime;
+    protected final boolean                  instantFlushDefault;
+    private final long                       initTime;
     private final static AtomicBoolean       TRASHLOCK   = new AtomicBoolean(false);
 
     public LogSourceProvider(final long timeStamp) {
@@ -268,6 +268,7 @@ public abstract class LogSourceProvider {
                      */
                     sink.addHandler(this.consoleHandler);
                 }
+
                 try {
                     if (maxSize > 100 * 1024) {
                         final Handler fileHandler = new FileHandler(new File(this.logFolder, name).getAbsolutePath(), this.maxSize, this.maxLogs, true);
@@ -283,7 +284,7 @@ public abstract class LogSourceProvider {
                 this.startFlushThread();
             }
             final LogSource source = this.createLogSource(name, -1);
-            source.setInstantFlush(this.instantFlushDefault);
+            source.setInstantFlush(isInstantFlushDefault());
             sink.addLogSource(source);
             return source;
         }
@@ -294,7 +295,7 @@ public abstract class LogSourceProvider {
     }
 
     public boolean isInstantFlushDefault() {
-        return this.instantFlushDefault;
+        return this.instantFlushDefault || maxSize < 100 * 1024;
     }
 
     public void removeConsoleHandler() {

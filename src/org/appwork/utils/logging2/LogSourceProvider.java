@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2012 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.utils.logging2
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -124,8 +124,7 @@ public abstract class LogSourceProvider {
                                 if (timeStamp != null && (times = Long.parseLong(timeStamp)) < this.removeTimeStamp) {
                                     if (newestTimeStamp == -1 || times > newestTimeStamp) {
                                         /*
-                                         * find the latest logfolder, so we can
-                                         * keep it
+                                         * find the latest logfolder, so we can keep it
                                          */
                                         newestTimeStamp = times;
                                     }
@@ -206,7 +205,7 @@ public abstract class LogSourceProvider {
 
     /**
      * CL = Class Logger, returns a logger for calling Class
-     * 
+     *
      * @return
      */
     public LogSource getCurrentClassLogger() {
@@ -240,8 +239,7 @@ public abstract class LogSourceProvider {
             logger.log(e);
         }
         /*
-         * as we could not determine current class, lets put the strackTrace
-         * into this generated logger
+         * as we could not determine current class, lets put the strackTrace into this generated logger
          */
         logger.log(stackTrace);
         return logger;
@@ -254,7 +252,9 @@ public abstract class LogSourceProvider {
     public LogSource getLogger(String name) {
         LogSink sink = null;
         name = CrossSystem.alleviatePathParts(name);
-        if (StringUtils.isEmpty(name)) { return null; }
+        if (StringUtils.isEmpty(name)) {
+            return null;
+        }
         if (!name.endsWith(".log")) {
             name = name + ".log";
         }
@@ -264,17 +264,18 @@ public abstract class LogSourceProvider {
                 sink = new LogSink(name);
                 if (this.consoleHandler != null) {
                     /*
-                     * add ConsoleHandler to sink, it will add it to it's
-                     * sources
+                     * add ConsoleHandler to sink, it will add it to it's sources
                      */
                     sink.addHandler(this.consoleHandler);
                 }
                 try {
-                    final Handler fileHandler = new FileHandler(new File(this.logFolder, name).getAbsolutePath(), this.maxSize, this.maxLogs, true);
-                    sink.addHandler(fileHandler);
-                    fileHandler.setEncoding("UTF-8");
-                    fileHandler.setLevel(Level.ALL);
-                    fileHandler.setFormatter(new LogSourceFormatter());
+                    if (maxSize > 100 * 1024) {
+                        final Handler fileHandler = new FileHandler(new File(this.logFolder, name).getAbsolutePath(), this.maxSize, this.maxLogs, true);
+                        sink.addHandler(fileHandler);
+                        fileHandler.setEncoding("UTF-8");
+                        fileHandler.setLevel(Level.ALL);
+                        fileHandler.setFormatter(new LogSourceFormatter());
+                    }
                 } catch (final Throwable e) {
                     e.printStackTrace();
                 }
@@ -298,7 +299,9 @@ public abstract class LogSourceProvider {
 
     public void removeConsoleHandler() {
         synchronized (this.logSinks) {
-            if (this.consoleHandler == null) { return; }
+            if (this.consoleHandler == null) {
+                return;
+            }
             final Iterator<LogSink> it = this.logSinks.values().iterator();
             while (it.hasNext()) {
                 final LogSink next = it.next();
@@ -314,7 +317,9 @@ public abstract class LogSourceProvider {
     }
 
     protected void startFlushThread() {
-        if (this.flushThread != null && this.flushThread.isAlive()) { return; }
+        if (this.flushThread != null && this.flushThread.isAlive()) {
+            return;
+        }
         this.flushThread = new Thread("LogFlushThread") {
 
             @Override

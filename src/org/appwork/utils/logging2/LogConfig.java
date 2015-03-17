@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2012 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.utils.logging2
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -19,7 +19,7 @@ import org.appwork.storage.config.annotations.SpinnerValidator;
 
 /**
  * @author daniel
- * 
+ *
  */
 public interface LogConfig extends ConfigInterface {
 
@@ -46,8 +46,8 @@ public interface LogConfig extends ConfigInterface {
 
     @AboutConfig
     @DefaultIntValue(10 * 1024 * 1024)
-    @SpinnerValidator(min = 100 * 1024, max = Integer.MAX_VALUE)
-    @DescriptionForConfigEntry("Max logfile size in bytes")
+    @SpinnerValidator(min = 0, max = Integer.MAX_VALUE)
+    @DescriptionForConfigEntry("Max logfile size in bytes. Size <100Kbyte will disable logfiles")
     @RequiresRestart("A JDownloader Restart is Required")
     int getMaxLogFileSize();
 

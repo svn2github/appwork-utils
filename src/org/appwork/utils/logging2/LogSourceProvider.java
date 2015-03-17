@@ -27,7 +27,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.appwork.shutdown.ShutdownController;
 import org.appwork.shutdown.ShutdownEvent;
@@ -40,31 +39,6 @@ import org.appwork.utils.StringUtils;
 import org.appwork.utils.os.CrossSystem;
 
 public abstract class LogSourceProvider {
-    public static void main(final String[] args) {
-        final LogSourceProvider test = new LogSourceProvider(System.currentTimeMillis()) {
-        };
-        for (int i = 0; i < 20000; i++) {
-            final LogSource logger = test.getLogger("test");
-            final Logger parent = logger.getParent();
-            if (parent != null) {
-                System.out.println(i + " " + ((LogSink) logger.getParent()).getLogSources().size());
-            }
-            logger.info(i + "");
-        }
-        for (int i = 0; i < 100; i++) {
-            System.gc();
-            System.gc();
-            System.gc();
-            System.gc();
-            System.gc();
-            System.gc();
-        }
-        final LogSource logger = test.getLogger("test");
-        final Logger parent = logger.getParent();
-        if (parent != null) {
-            System.out.println(((LogSink) logger.getParent()).getLogSources().size());
-        }
-    }
 
     protected final HashMap<String, LogSink> logSinks    = new HashMap<String, LogSink>();
     private final int                        maxSize;

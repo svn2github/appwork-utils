@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2011 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.storage.config
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -34,7 +34,6 @@ import org.appwork.storage.Storage;
 import org.appwork.storage.StorageException;
 import org.appwork.storage.config.ConfigInterface;
 import org.appwork.storage.config.InterfaceParseException;
-import org.appwork.storage.config.MethodHandler;
 import org.appwork.storage.config.annotations.AllowStorage;
 import org.appwork.storage.config.annotations.CryptedStorage;
 import org.appwork.storage.config.annotations.DefaultBooleanArrayValue;
@@ -56,17 +55,17 @@ import org.appwork.utils.swing.dialog.Dialog;
 /**
  * @author thomas
  * @param <T>
- * 
+ *
  */
 public class StorageHandler<T extends ConfigInterface> implements InvocationHandler {
 
     protected static final DelayedRunnable SAVEDELAYER = new DelayedRunnable(5000, 30000) {
 
-                                                           @Override
-                                                           public void delayedrun() {
-                                                               StorageHandler.saveAll();
-                                                           }
-                                                       };
+        @Override
+        public void delayedrun() {
+            StorageHandler.saveAll();
+        }
+    };
     static {
         ShutdownController.getInstance().addShutdownEvent(new ShutdownEvent() {
 
@@ -138,7 +137,9 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
             StorageHandler<?> ret = null;
             while (it.hasNext()) {
                 final Entry<StorageHandler<?>, String> next = it.next();
-                if (ID.equals(next.getValue()) && (ret = next.getKey()) != null) { return ret; }
+                if (ID.equals(next.getValue()) && (ret = next.getKey()) != null) {
+                    return ret;
+                }
             }
         }
         return null;
@@ -160,18 +161,15 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
 
     private final Class<T>                                  configInterface;
     protected final HashMap<Method, KeyHandler<?>>          methodMap                 = new HashMap<Method, KeyHandler<?>>();
-
-    protected final HashMap<String, KeyHandler<?>>          keyHandlerMap             = new HashMap<String, KeyHandler<?>>();
     protected final Storage                                 primitiveStorage;
     private final File                                      path;
 
-    private volatile ConfigEventSender<Object>              eventSender               = null;
+    private ConfigEventSender<Object>                       eventSender               = null;
 
     private String                                          relativCPPath;
 
     // set externaly to start profiling
     public static HashMap<String, Long>                     PROFILER_MAP              = null;
-
     public static HashMap<String, Long>                     PROFILER_CALLNUM_MAP      = null;
 
     private volatile WriteStrategy                          writeStrategy             = null;
@@ -313,7 +311,9 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
     protected void addStorageHandler(final StorageHandler<? extends ConfigInterface> storageHandler, final String interfaceName, final String storage) {
         synchronized (StorageHandler.STORAGEMAP) {
             final StorageHandler<?> existing = StorageHandler.getStorageHandler(interfaceName, storage);
-            if (existing != null && existing != storageHandler) { throw new IllegalStateException("You cannot init the configinterface " + this.configInterface + " twice"); }
+            if (existing != null && existing != storageHandler) {
+                throw new IllegalStateException("You cannot init the configinterface " + this.configInterface + " twice");
+            }
             final String ID = interfaceName + "." + storage;
             StorageHandler.STORAGEMAP.put(storageHandler, ID);
         }
@@ -535,12 +535,13 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
      */
     @SuppressWarnings("unchecked")
     public <E extends KeyHandler<?>> E getKeyHandler(final String key, final Class<E> class1) {
-        final KeyHandler<?> ret = this.keyHandlerMap.get(key.toLowerCase(Locale.ENGLISH));
-        if (ret == null) {
-            //
-            throw new NullPointerException("No KeyHandler: " + key + " in " + this.configInterface);
+        final String keyHandlerKey = key.toLowerCase(Locale.ENGLISH);
+        for (KeyHandler<?> keyHandler : methodMap.values()) {
+            if (keyHandlerKey.equals(keyHandler.getKey())) {
+                return (E) keyHandler;
+            }
         }
-        return (E) ret;
+        throw new NullPointerException("No KeyHandler: " + key + " in " + this.configInterface);
     }
 
     public HashMap<Method, KeyHandler<?>> getMap() {
@@ -653,59 +654,57 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
 
     @SuppressWarnings("unchecked")
     public Object invoke(final Object instance, final Method m, final Object[] parameter) throws Throwable {
-        final long t = StorageHandler.PROFILER_MAP == null ? 0 : System.nanoTime();
-
-        try {
-
-            if (m == null) {
-                // yes.... Method m may be null. this happens if we call a
-                // method in the interface's own static init.
-                return this;
-            }
-            final KeyHandler<?> handler = this.methodMap.get(m);
-            if (handler != null) {
-                if (handler.isGetter(m)) {
-                    return handler.getValue();
-                } else {
-
-                    ((KeyHandler<Object>) handler).setValue(parameter[0]);
-                    if (this.writeStrategy != null) {
-                        this.writeStrategy.write(this, handler);
+        if (m != null) {
+            final long t = StorageHandler.PROFILER_MAP == null ? 0 : System.nanoTime();
+            try {
+                final KeyHandler<?> handler = this.methodMap.get(m);
+                if (handler != null) {
+                    if (handler.isGetter(m)) {
+                        return handler.getValue();
+                    } else {
+                        ((KeyHandler<Object>) handler).setValue(parameter[0]);
+                        if (this.writeStrategy != null) {
+                            this.writeStrategy.write(this, handler);
+                        }
+                        return null;
                     }
-                    return null;
-                }
-            } else if (m.getName().equals("toString")) {
-                return this.toString();
-                // } else if (m.getName().equals("addListener")) {
-                // this.eventSender.addListener((ConfigEventListener)
-                // parameter[0]);
-                // return null;
-                // } else if (m.getName().equals("removeListener")) {
-                // this.eventSender.removeListener((ConfigEventListener)
-                // parameter[0]);
-                // return null;
-            } else if (m.getName().equals("_getStorageHandler")) {
-                return this;
+                } else if (m.getName().equals("toString")) {
+                    return this.toString();
+                    // } else if (m.getName().equals("addListener")) {
+                    // this.eventSender.addListener((ConfigEventListener)
+                    // parameter[0]);
+                    // return null;
+                    // } else if (m.getName().equals("removeListener")) {
+                    // this.eventSender.removeListener((ConfigEventListener)
+                    // parameter[0]);
+                    // return null;
+                } else if (m.getName().equals("_getStorageHandler")) {
+                    return this;
 
-            } else {
-                throw new WTFException(m + " ??? no keyhandler. This is not possible!");
-            }
-        } finally {
-            if (StorageHandler.PROFILER_MAP != null && m != null) {
-                final long dur = System.nanoTime() - t;
-                final String id = m.toString();
-                Long g = StorageHandler.PROFILER_MAP.get(id);
-                if (g == null) {
-                    g = 0l;
+                } else {
+                    throw new WTFException(m + " ??? no keyhandler. This is not possible!");
                 }
-                StorageHandler.PROFILER_MAP.put(id, g + dur);
-            }
-            if (StorageHandler.PROFILER_CALLNUM_MAP != null && m != null) {
-                final String id = m.toString();
-                final Long g = StorageHandler.PROFILER_CALLNUM_MAP.get(id);
-                StorageHandler.PROFILER_CALLNUM_MAP.put(id, g == null ? 1 : g + 1);
-            }
+            } finally {
+                if (StorageHandler.PROFILER_MAP != null && m != null) {
+                    final long dur = System.nanoTime() - t;
+                    final String id = m.toString();
+                    Long g = StorageHandler.PROFILER_MAP.get(id);
+                    if (g == null) {
+                        g = 0l;
+                    }
+                    StorageHandler.PROFILER_MAP.put(id, g + dur);
+                }
+                if (StorageHandler.PROFILER_CALLNUM_MAP != null && m != null) {
+                    final String id = m.toString();
+                    final Long g = StorageHandler.PROFILER_CALLNUM_MAP.get(id);
+                    StorageHandler.PROFILER_CALLNUM_MAP.put(id, g == null ? 1 : g + 1);
+                }
 
+            }
+        } else {
+            // yes.... Method m may be null. this happens if we call a
+            // method in the interface's own static init.
+            return this;
         }
     }
 
@@ -722,7 +721,7 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
 
     /**
      * @throws Throwable
-     * 
+     *
      */
     protected void parseInterface() throws Throwable {
         final HashMap<String, Method> keyGetterMap = new HashMap<String, Method>();
@@ -732,21 +731,19 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
         Class<?> clazz = this.configInterface;
         while (clazz != null && clazz != ConfigInterface.class) {
             for (final Method m : clazz.getDeclaredMethods()) {
-
-                if (m.getName().startsWith("get")) {
-                    key = m.getName().substring(3).toLowerCase(Locale.ENGLISH);
+                final String methodName = m.getName().toLowerCase(Locale.ENGLISH);
+                if (methodName.startsWith("get")) {
+                    key = methodName.substring(3);
                     // we do not allow to setters/getters with the same name but
                     // different cases. this only confuses the user when editing
                     // the
                     // later config file
                     if (keyGetterMap.containsKey(key)) {
-
                         this.error(new InterfaceParseException("Key " + key + " Dupe found! " + keyGetterMap.get(key) + "<-->" + m));
                         continue;
                     }
                     keyGetterMap.put(key, m);
                     if (m.getParameterTypes().length > 0) {
-
                         this.error(new InterfaceParseException("Getter " + m + " has parameters."));
                         keyGetterMap.remove(key);
                         continue;
@@ -777,7 +774,6 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
                             }
                         }
                         if (!found) {
-
                             this.error(new InterfaceParseException(e));
                             keyGetterMap.remove(key);
                             continue;
@@ -788,15 +784,10 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
                         kh = this.createKeyHandler(key, m.getGenericReturnType());
                         parseMap.put(key, kh);
                     }
-                    // JSonStorage.canStorePrimitive(m.getReturnType())
-                    final MethodHandler h = new MethodHandler(this, MethodHandler.Type.GETTER, key, m);
-                    kh.setGetter(h);
-
+                    kh.setGetMethod(m);
                     this.methodMap.put(m, kh);
-                    this.keyHandlerMap.put(key, kh);
-
-                } else if (m.getName().startsWith("is")) {
-                    key = m.getName().substring(2).toLowerCase(Locale.ENGLISH);
+                } else if (methodName.startsWith("is")) {
+                    key = methodName.substring(2);
                     // we do not allow to setters/getters with the same name but
                     // different cases. this only confuses the user when editing
                     // the
@@ -807,7 +798,6 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
                     }
                     keyGetterMap.put(key, m);
                     if (m.getParameterTypes().length > 0) {
-
                         this.error(new InterfaceParseException("Getter " + m + " has parameters."));
                         keyGetterMap.remove(key);
                         continue;
@@ -824,17 +814,13 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
                         kh = this.createKeyHandler(key, m.getGenericReturnType());
                         parseMap.put(key, kh);
                     }
-                    final MethodHandler h = new MethodHandler(this, MethodHandler.Type.GETTER, key, m);
-                    kh.setGetter(h);
-                    this.keyHandlerMap.put(key, kh);
+                    kh.setGetMethod(m);
                     this.methodMap.put(m, kh);
-                } else if (m.getName().startsWith("set")) {
-                    key = m.getName().substring(3).toLowerCase(Locale.ENGLISH);
+                } else if (methodName.startsWith("set")) {
+                    key = methodName.substring(3);
                     if (keySetterMap.containsKey(key)) {
-
                         this.error(new InterfaceParseException("Key " + key + " Dupe found! " + keySetterMap.get(key) + "<-->" + m));
                         continue;
-
                     }
                     keySetterMap.put(key, m);
                     if (m.getParameterTypes().length != 1) {
@@ -862,26 +848,19 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
                             }
                         }
                         if (!found) {
-
                             this.error(new InterfaceParseException(e));
                             keySetterMap.remove(key);
                             continue;
-
                         }
                     }
-
                     KeyHandler<?> kh = parseMap.get(key);
                     if (kh == null) {
                         kh = this.createKeyHandler(key, m.getGenericParameterTypes()[0]);
                         parseMap.put(key, kh);
                     }
-                    final MethodHandler h = new MethodHandler(this, MethodHandler.Type.SETTER, key, m);
-                    kh.setSetter(h);
-                    this.keyHandlerMap.put(key, kh);
+                    kh.setSetMethod(m);
                     this.methodMap.put(m, kh);
-
                 } else {
-
                     this.error(new InterfaceParseException("Only getter and setter allowed:" + m));
                     continue;
                 }
@@ -890,24 +869,15 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
             // not work, because it only finds public methods
             final Class<?>[] interfaces = clazz.getInterfaces();
             clazz = interfaces[0];
-
         }
-
-        final java.util.List<Method> methodsToRemove = new ArrayList<Method>();
+        final ArrayList<Method> methodsToRemove = new ArrayList<Method>();
         for (final KeyHandler<?> kh : this.methodMap.values()) {
             try {
                 kh.init();
             } catch (final Throwable e) {
                 this.error(e);
-                this.keyHandlerMap.remove(kh.getKey());
-                if (kh.getGetter() != null) {
-                    methodsToRemove.add(kh.getGetter().getMethod());
-
-                }
-                if (kh.getSetter() != null) {
-                    methodsToRemove.add(kh.getSetter().getMethod());
-                }
-
+                methodsToRemove.add(kh.getGetMethod());
+                methodsToRemove.add(kh.getSetMethod());
             }
         }
         for (final Method m : methodsToRemove) {
@@ -932,7 +902,7 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
         final HashMap<String, Object> ret = new HashMap<String, Object>();
         for (final KeyHandler<?> h : this.methodMap.values()) {
             try {
-                ret.put(h.getGetter().getKey(), this.invoke(null, h.getGetter().getMethod(), new Object[] {}));
+                ret.put(h.getKey(), this.invoke(null, h.getGetMethod(), new Object[] {}));
             } catch (final Throwable e) {
                 e.printStackTrace();
                 ret.put(h.getKey(), e.getMessage());

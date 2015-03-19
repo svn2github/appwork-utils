@@ -57,7 +57,7 @@ public class ConfigUtils {
             strBuild.append("\r\n");
 
             // String key = kh.getKey();
-            final String methodname = kh.getGetter().getMethod().getName().startsWith("is") ? kh.getGetter().getMethod().getName().substring(2) : kh.getGetter().getMethod().getName().substring(3);
+            final String methodname = kh.getGetMethod().getName().startsWith("is") ? kh.getGetMethod().getName().substring(2) : kh.getGetMethod().getName().substring(3);
             final StringBuilder sb = new StringBuilder();
             char c, lastc;
             lastc = ' ';
@@ -75,7 +75,7 @@ public class ConfigUtils {
                 lastc = c;
             }
             /**
-             * 
+             *
              */
 
             if (kh.getAnnotation(DescriptionForConfigEntry.class) != null) {

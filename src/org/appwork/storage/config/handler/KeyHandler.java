@@ -20,7 +20,6 @@ import org.appwork.storage.Storage;
 import org.appwork.storage.TypeRef;
 import org.appwork.storage.config.ConfigInterface;
 import org.appwork.storage.config.InterfaceParseException;
-import org.appwork.storage.config.MethodHandler;
 import org.appwork.storage.config.ValidationException;
 import org.appwork.storage.config.annotations.AboutConfig;
 import org.appwork.storage.config.annotations.AbstractCustomValueGetter;
@@ -53,9 +52,8 @@ public abstract class KeyHandler<RawClass> {
     private static final String                 ANNOTATION_PACKAGE_NAME = CryptedStorage.class.getPackage().getName();
     private static final String                 PACKAGE_NAME            = PlainStorage.class.getPackage().getName();
     private final String                        key;
-    private MethodHandler                       getter;
-
-    protected MethodHandler                     setter;
+    protected Method                            getMethod               = null;
+    protected Method                            setMethod               = null;                                        ;
     protected final StorageHandler<?>           storageHandler;
     private boolean                             primitive;
     protected RawClass                          defaultValue;
@@ -89,9 +87,9 @@ public abstract class KeyHandler<RawClass> {
             throw new InterfaceParseException("Make sure that you use only one  of getDefaultAnnotation,DefaultObjectValue or DefaultValue ");
         }
 
-        this.checkBadAnnotations(this.getter.getMethod(), class1);
-        if (this.setter != null) {
-            this.checkBadAnnotations(this.setter.getMethod(), class1);
+        this.checkBadAnnotations(getMethod, class1);
+        if (setMethod != null) {
+            this.checkBadAnnotations(setMethod, class1);
         }
 
     }
@@ -157,16 +155,13 @@ public abstract class KeyHandler<RawClass> {
         if (class1 == null) {
             return null;
         }
-        T ret = this.getter.getMethod().getAnnotation(class1);
-        if (ret == null && this.setter != null) {
-            ret = this.setter.getMethod().getAnnotation(class1);
-        } else if (this.setter != null && this.setter.getMethod().getAnnotation(class1) != null) {
-
+        T ret = getMethod.getAnnotation(class1);
+        if (ret == null && setMethod != null) {
+            ret = setMethod.getAnnotation(class1);
+        } else if (setMethod != null && setMethod.getAnnotation(class1) != null) {
             if (KeyHandler.ANNOTATION_PACKAGE_NAME.equals(class1.getPackage().getName())) {
-
                 //
-
-                throw new InterfaceParseException("Dupe Annotation in  " + this + " (" + class1 + ") " + this.setter.getMethod());
+                throw new InterfaceParseException("Dupe Annotation in  " + this + " (" + class1 + ") " + setMethod);
             }
         }
         return ret;
@@ -176,12 +171,11 @@ public abstract class KeyHandler<RawClass> {
      * @return
      */
     public Class<?> getDeclaringClass() {
-        if (this.getter != null) {
-            return this.getter.getMethod().getDeclaringClass();
+        if (this.getMethod != null) {
+            return this.getMethod.getDeclaringClass();
         } else {
-            return this.setter.getMethod().getDeclaringClass();
+            return setMethod.getDeclaringClass();
         }
-
     }
 
     protected Class<? extends Annotation> getDefaultAnnotation() {
@@ -242,8 +236,8 @@ public abstract class KeyHandler<RawClass> {
         return this.eventSender;
     }
 
-    public MethodHandler getGetter() {
-        return this.getter;
+    public Method getGetMethod() {
+        return getMethod;
     }
 
     public String getKey() {
@@ -255,22 +249,21 @@ public abstract class KeyHandler<RawClass> {
      */
     @SuppressWarnings("unchecked")
     public Class<RawClass> getRawClass() {
-        return (Class<RawClass>) this.getter.getRawClass();
+        return (Class<RawClass>) getMethod.getReturnType();
     }
 
     /**
      * @return
      */
     public Type getRawType() {
-        if (this.getter != null) {
-            return this.getter.getRawType();
+        if (this.getMethod != null) {
+            return getMethod.getGenericReturnType();
         }
-        return this.setter.getRawType();
-
+        return setMethod.getGenericParameterTypes()[0];
     }
 
-    public MethodHandler getSetter() {
-        return this.setter;
+    public Method getSetMethod() {
+        return setMethod;
     }
 
     public StorageHandler<?> getStorageHandler() {
@@ -306,16 +299,9 @@ public abstract class KeyHandler<RawClass> {
     }
 
     public AbstractTypeDefinition getAbstractType() {
-        Type ret = null;
-        if (this.getter != null) {
-            ret = this.getter.getMethod().getGenericReturnType();
-        } else {
-            ret = this.setter.getMethod().getGenericParameterTypes()[0];
-        }
-
+        final Type ret = getRawType();
         if (ret instanceof Class) {
             final Class<?> clazz = (Class<?>) ret;
-
             if (Clazz.isBoolean(ret)) {
                 return AbstractTypeDefinition.BOOLEAN;
             }
@@ -344,17 +330,13 @@ public abstract class KeyHandler<RawClass> {
                 return AbstractTypeDefinition.SHORT;
             }
             if (Clazz.isString(ret)) {
-
                 if (this.getAnnotation(HexColorString.class) != null) {
                     return AbstractTypeDefinition.HEX_COLOR;
                 }
                 return AbstractTypeDefinition.STRING;
             }
-
             if (clazz.isArray()) {
-
                 final Class aType = ((Class) ret).getComponentType();
-
                 if (Clazz.isBoolean(aType)) {
                     return AbstractTypeDefinition.BOOLEAN_LIST;
                 }
@@ -388,16 +370,12 @@ public abstract class KeyHandler<RawClass> {
                     }
                     return AbstractTypeDefinition.STRING_LIST;
                 }
-
                 return AbstractTypeDefinition.OBJECT_LIST;
-
             }
-
             // if(ret instanceof List){
             // return AbstractType.OBJECT_LIST;
             // }
         } else {
-
             if (ret instanceof ParameterizedType) {
                 final Type raw = ((ParameterizedType) ret).getRawType();
                 final Type[] acutal = ((ParameterizedType) ret).getActualTypeArguments();
@@ -407,7 +385,6 @@ public abstract class KeyHandler<RawClass> {
                         if (Clazz.isBoolean(acutal[0])) {
                             return AbstractTypeDefinition.BOOLEAN_LIST;
                         }
-
                         if (Clazz.isByte(acutal[0])) {
                             return AbstractTypeDefinition.BYTE_LIST;
                         }
@@ -436,33 +413,24 @@ public abstract class KeyHandler<RawClass> {
                             if (this.getAnnotation(HexColorString.class) != null) {
                                 return AbstractTypeDefinition.HEX_COLOR_LIST;
                             }
-
                             return AbstractTypeDefinition.STRING_LIST;
                         }
                         return AbstractTypeDefinition.OBJECT_LIST;
-
                     }
                 } else {
                     return AbstractTypeDefinition.UNKNOWN;
                 }
-
             } else {
                 return AbstractTypeDefinition.UNKNOWN;
             }
         }
-
         return AbstractTypeDefinition.OBJECT;
     }
 
     public String getTypeString() {
-        Type ret = null;
-        if (this.getter != null) {
-            ret = this.getter.getMethod().getGenericReturnType();
-        } else {
-            ret = this.setter.getMethod().getGenericParameterTypes()[0];
-        }
+        final Type ret = getRawType();
         if (ret instanceof Class) {
-            return ((Class) ret).getName();
+            return ((Class<?>) ret).getName();
         } else {
             return ret.toString();
         }
@@ -519,12 +487,12 @@ public abstract class KeyHandler<RawClass> {
      */
     @SuppressWarnings("unchecked")
     protected void init() throws Throwable {
-        if (this.getter == null) {
-            throw new InterfaceParseException("Getter Method is Missing for " + this.setter.getMethod());
+        if (getMethod == null) {
+            throw new InterfaceParseException("Getter Method is Missing for " + setMethod);
         }
 
         // read local cryptinfos
-        this.primitive = JSonStorage.canStorePrimitive(this.getter.getMethod().getReturnType());
+        this.primitive = JSonStorage.canStorePrimitive(getMethod.getReturnType());
         final CryptedStorage cryptedStorage = this.getAnnotation(CryptedStorage.class);
         if (cryptedStorage != null) {
             if (this.storageHandler.getPrimitiveStorage().getCryptKey() != null) {
@@ -614,7 +582,7 @@ public abstract class KeyHandler<RawClass> {
      * @return
      */
     protected boolean isGetter(final Method m) {
-        return m.equals(this.getter.getMethod());
+        return m != null && m.equals(getMethod);
     }
 
     protected boolean isPrimitive() {
@@ -633,17 +601,15 @@ public abstract class KeyHandler<RawClass> {
     /**
      * @param h
      */
-    protected void setGetter(final MethodHandler h) {
-        this.getter = h;
-
+    protected void setGetMethod(final Method method) {
+        this.getMethod = method;
     }
 
     /**
      * @param h
      */
-    protected void setSetter(final MethodHandler h) {
-        this.setter = h;
-
+    protected void setSetMethod(final Method method) {
+        this.setMethod = method;
     }
 
     /**

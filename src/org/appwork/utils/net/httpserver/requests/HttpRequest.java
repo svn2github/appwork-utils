@@ -21,12 +21,48 @@ import org.appwork.utils.net.httpserver.HttpConnection;
  */
 public abstract class HttpRequest implements HttpRequestInterface {
 
-    protected String               requestedURL           = null;
+    protected String           requestedURL   = null;
 
-    protected HeaderCollection     requestHeaders         = null;
+    protected HeaderCollection requestHeaders = null;
 
-    protected String               requestedPath          = null;
+    protected String           requestedPath  = null;
+    protected String           serverName     = null;
 
+    public String getServerName() {
+        return serverName;
+    }
+
+    public void setServerName(String serverName) {
+        this.serverName = serverName;
+    }
+
+    public int getServerPort() {
+        return serverPort;
+    }
+
+    public void setServerPort(int serverPort) {
+        this.serverPort = serverPort;
+    }
+
+    public String getServerProtocol() {
+        return serverProtocol;
+    }
+
+    public void setServerProtocol(String serverProtocol) {
+        this.serverProtocol = serverProtocol;
+    }
+
+    public boolean isHttps() {
+        return https;
+    }
+
+    public void setHttps(boolean https) {
+        this.https = https;
+    }
+
+    protected int                  serverPort             = -1;
+    protected String               serverProtocol         = null;
+    protected boolean              https                  = false;
     protected List<KeyValuePair>   requestedURLParameters = null;
 
     private List<String>           remoteAddress          = new ArrayList<String>();
@@ -42,8 +78,8 @@ public abstract class HttpRequest implements HttpRequestInterface {
     }
 
     /**
-     * @see http://en.wikipedia.org/wiki/X-Forwarded-For There may be several
-     *      Remote Addresses if the connection is piped through several proxies.<br>
+     * @see http://en.wikipedia.org/wiki/X-Forwarded-For There may be several Remote Addresses if the connection is piped through several
+     *      proxies.<br>
      *      [0] is always the direct address.<br>
      *      if remoteAdresses.size>1 then<br>
      *      [1] is the actuall clients ip.<br>
@@ -77,8 +113,8 @@ public abstract class HttpRequest implements HttpRequestInterface {
     }
 
     /**
-     * @see http://en.wikipedia.org/wiki/X-Forwarded-For There may be several
-     *      Remote Addresses if the connection is piped through several proxies.<br>
+     * @see http://en.wikipedia.org/wiki/X-Forwarded-For There may be several Remote Addresses if the connection is piped through several
+     *      proxies.<br>
      *      [0] is always the direct address.<br>
      *      if remoteAdresses.size>1 then<br>
      *      [1] is the actuall clients ip.<br>

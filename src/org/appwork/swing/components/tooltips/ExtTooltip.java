@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2011 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.swing.components.tooltips
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -22,7 +22,6 @@ import javax.swing.JComponent;
 import javax.swing.JToolTip;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
-import javax.swing.plaf.synth.SynthToolTipUI;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -33,17 +32,17 @@ import org.appwork.utils.Application;
 
 /**
  * @author thomas
- * 
+ *
  */
 public abstract class ExtTooltip extends JToolTip implements AncestorListener {
 
     /**
-     * 
+     *
      */
     private static final long  serialVersionUID = -2212735987320956801L;
 
     /**
-     * 
+     *
      */
     public static final String DEFAULT          = "default";
 
@@ -92,7 +91,7 @@ public abstract class ExtTooltip extends JToolTip implements AncestorListener {
         setTipText("");
 
         // this.setUI(null);
-        SynthToolTipUI uiii = (SynthToolTipUI) getUI();
+
         // panel.setOpaque(true);
         // panel.setBackground(Color.BLUE);
 
@@ -236,7 +235,7 @@ public abstract class ExtTooltip extends JToolTip implements AncestorListener {
     /**
      * normal behaviour is, that a new tooltip will be shown immediately if we move the mouse to a new tooltip component within a short
      * time. if this method is false, this behaviour will not be active after this tooltip.
-     * 
+     *
      * @return
      */
     public boolean isLastHiddenEnabled() {
@@ -245,7 +244,7 @@ public abstract class ExtTooltip extends JToolTip implements AncestorListener {
     }
 
     /**
-     * 
+     *
      */
     public void onHide() {
         // TODO Auto-generated method stub
@@ -254,7 +253,7 @@ public abstract class ExtTooltip extends JToolTip implements AncestorListener {
 
     /**
      * @param ttPosition
-     * 
+     *
      */
     public void onShow() {
 
@@ -262,7 +261,7 @@ public abstract class ExtTooltip extends JToolTip implements AncestorListener {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.swing.JComponent#setMaximumSize(java.awt.Dimension)
      */
     @Override

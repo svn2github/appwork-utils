@@ -22,6 +22,7 @@ import javax.swing.JComponent;
 import javax.swing.JToolTip;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
+import javax.swing.plaf.synth.SynthToolTipUI;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -91,9 +92,9 @@ public abstract class ExtTooltip extends JToolTip implements AncestorListener {
         setTipText("");
 
         // this.setUI(null);
-
-        // this.setOpaque(true);
-        // this.setBackground(null);
+        SynthToolTipUI uiii = (SynthToolTipUI) getUI();
+        // panel.setOpaque(true);
+        // panel.setBackground(Color.BLUE);
 
         if (panel != null) {
             this.add(panel);
@@ -153,7 +154,9 @@ public abstract class ExtTooltip extends JToolTip implements AncestorListener {
 
     @Override
     public int getHeight() {
-        if (panel == null) { return 0; }
+        if (panel == null) {
+            return 0;
+        }
         final Insets insets = this.getInsets();
         final int th = panel.getPreferredSize().height + insets.top + insets.bottom;
         if (th > h) {
@@ -188,7 +191,9 @@ public abstract class ExtTooltip extends JToolTip implements AncestorListener {
 
     @Override
     public Dimension getPreferredSize() {
-        if (panel == null) { return new Dimension(0, 0); }
+        if (panel == null) {
+            return new Dimension(0, 0);
+        }
         final Dimension dim = panel.getPreferredSize();
         final Insets insets = this.getInsets();
         dim.width += insets.left + insets.right;
@@ -199,7 +204,9 @@ public abstract class ExtTooltip extends JToolTip implements AncestorListener {
 
     @Override
     public int getWidth() {
-        if (panel == null) { return 0; }
+        if (panel == null) {
+            return 0;
+        }
         final Insets insets = this.getInsets();
         final int tw = panel.getPreferredSize().width + insets.left + insets.right;
         if (tw > w) {
@@ -227,9 +234,8 @@ public abstract class ExtTooltip extends JToolTip implements AncestorListener {
     }
 
     /**
-     * normal behaviour is, that a new tooltip will be shown immediately if we
-     * move the mouse to a new tooltip component within a short time. if this
-     * method is false, this behaviour will not be active after this tooltip.
+     * normal behaviour is, that a new tooltip will be shown immediately if we move the mouse to a new tooltip component within a short
+     * time. if this method is false, this behaviour will not be active after this tooltip.
      * 
      * @return
      */

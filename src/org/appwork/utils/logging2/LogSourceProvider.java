@@ -48,7 +48,7 @@ public abstract class LogSourceProvider {
     protected File                           logFolder;
     protected LogConsoleHandler              consoleHandler;
 
-    protected final boolean                  instantFlushDefault;
+    protected boolean                        instantFlushDefault;
     private final long                       initTime;
     private final static AtomicBoolean       TRASHLOCK   = new AtomicBoolean(false);
 

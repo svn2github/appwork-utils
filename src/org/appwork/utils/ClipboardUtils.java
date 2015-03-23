@@ -50,6 +50,43 @@ public class ClipboardUtils {
     }
 
     @SuppressWarnings("unchecked")
+    public static java.util.List<File> getFiles(final Transferable info) {
+        final java.util.List<File> files = new ArrayList<File>();
+        String inString = null;
+        if (info != null) {
+            StringTokenizer izer;
+            try {
+                if (info.isDataFlavorSupported(ClipboardUtils.fileListFlavor)) {
+                    final List<File> list = (List<File>) info.getTransferData(ClipboardUtils.fileListFlavor);
+                    for (final File f : list) {
+                        if (f.isAbsolute() && f.exists()) {
+                            files.add(f);
+                        }
+                    }
+                } else if (ClipboardUtils.uriListFlavor != null && info.isDataFlavorSupported(ClipboardUtils.uriListFlavor)) {
+                    inString = (String) info.getTransferData(ClipboardUtils.uriListFlavor);
+                    izer = new StringTokenizer(inString, "\r\n");
+                    while (izer.hasMoreTokens()) {
+                        final String token = izer.nextToken().trim();
+                        try {
+                            final URI fi = new URI(token);
+                            final File f = new File(fi.getPath());
+                            if (f.isAbsolute() && f.exists()) {
+                                files.add(f);
+                            }
+                        } catch (final Throwable e) {
+                        }
+                    }
+                }
+            } catch (final Exception e) {
+                Log.L.warning(inString);
+                Log.L.warning(e.getMessage());
+            }
+        }
+        return files;
+    }
+
+    @SuppressWarnings("unchecked")
     public static java.util.List<File> getFiles(final TransferSupport info) {
         final java.util.List<File> files = new ArrayList<File>();
         String inString = null;
@@ -117,8 +154,7 @@ public class ClipboardUtils {
                 byte[] html = (byte[]) trans.getTransferData(htmlFlavor);
                 if (CrossSystem.isLinux()) {
                     /*
-                     * workaround for
-                     * https://bugzilla.mozilla.org/show_bug.cgi?id=385421if
+                     * workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=385421if
                      */
                     final int htmlLength = html.length;
                     final byte[] html2 = new byte[htmlLength];
@@ -159,9 +195,15 @@ public class ClipboardUtils {
 
     public static boolean hasSupport(final DataFlavor flavor) {
         if (flavor != null) {
-            if (ClipboardUtils.uriListFlavor != null && flavor.isMimeTypeEqual(ClipboardUtils.uriListFlavor)) { return true; }
-            if (ClipboardUtils.fileListFlavor != null && flavor.isMimeTypeEqual(ClipboardUtils.fileListFlavor)) { return true; }
-            if (ClipboardUtils.arrayListFlavor != null && flavor.isMimeTypeEqual(ClipboardUtils.arrayListFlavor)) { return true; }
+            if (ClipboardUtils.uriListFlavor != null && flavor.isMimeTypeEqual(ClipboardUtils.uriListFlavor)) {
+                return true;
+            }
+            if (ClipboardUtils.fileListFlavor != null && flavor.isMimeTypeEqual(ClipboardUtils.fileListFlavor)) {
+                return true;
+            }
+            if (ClipboardUtils.arrayListFlavor != null && flavor.isMimeTypeEqual(ClipboardUtils.arrayListFlavor)) {
+                return true;
+            }
         }
         return false;
     }
@@ -169,7 +211,9 @@ public class ClipboardUtils {
     public static boolean hasSupport(final TransferSupport info) {
         if (info != null) {
             for (final DataFlavor flavor : info.getDataFlavors()) {
-                if (ClipboardUtils.hasSupport(flavor)) { return true; }
+                if (ClipboardUtils.hasSupport(flavor)) {
+                    return true;
+                }
             }
         }
         return false;

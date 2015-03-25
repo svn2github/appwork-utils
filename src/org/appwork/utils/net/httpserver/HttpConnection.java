@@ -124,8 +124,7 @@ public class HttpConnection implements Runnable {
     }
 
     /**
-     * parses the request and creates a GET/POST-Request Object and fills it
-     * with all received data
+     * parses the request and creates a GET/POST-Request Object and fills it with all received data
      *
      * @return
      * @throws IOException
@@ -133,7 +132,9 @@ public class HttpConnection implements Runnable {
     protected HttpRequest buildRequest() throws IOException {
         /* read request Method and Path */
         final String requestLine = this.parseRequestLine();
-        if (StringUtils.isEmpty(requestLine)) { throw new IOException("Empty RequestLine"); }
+        if (StringUtils.isEmpty(requestLine)) {
+            throw new IOException("Empty RequestLine");
+        }
         // TOTO: requestLine may be "" in some cases (chrome pre connection...?)
         final HttpConnectionType connectionType = this.parseConnectionType(requestLine);
         final String requestedURL = new Regex(requestLine, HttpConnection.REQUESTLINE).getMatch(0);
@@ -182,18 +183,18 @@ public class HttpConnection implements Runnable {
     }
 
     /**
-     * closes the client socket and removes this connection from server
-     * connection pool
+     * closes the client socket and removes this connection from server connection pool
      */
     public void closeConnection() {
-        if (this.clientSocket == null) { return; }
-        try {
-            this.clientSocket.shutdownOutput();
-        } catch (final Throwable nothing) {
-        }
-        try {
-            this.clientSocket.close();
-        } catch (final Throwable nothing) {
+        if (this.clientSocket != null) {
+            try {
+                this.clientSocket.shutdownOutput();
+            } catch (final Throwable nothing) {
+            }
+            try {
+                this.clientSocket.close();
+            } catch (final Throwable nothing) {
+            }
         }
     }
 
@@ -216,8 +217,7 @@ public class HttpConnection implements Runnable {
     }
 
     /**
-     * return the outputStream for this connection. send response headers if
-     * they have not been sent yet send yet
+     * return the outputStream for this connection. send response headers if they have not been sent yet send yet
      *
      * @return
      * @throws IOException
@@ -230,12 +230,16 @@ public class HttpConnection implements Runnable {
     }
 
     protected InputStream getRawInputStream() throws IOException {
-        if (this.is == null) { throw new IllegalStateException("no RawInputStream available!"); }
+        if (this.is == null) {
+            throw new IllegalStateException("no RawInputStream available!");
+        }
         return this.is;
     }
 
     protected OutputStream getRawOutputStream() throws IOException {
-        if (this.os == null) { throw new IllegalStateException("no RawOutputStream available!"); }
+        if (this.os == null) {
+            throw new IllegalStateException("no RawOutputStream available!");
+        }
         return this.os;
     }
 
@@ -267,9 +271,10 @@ public class HttpConnection implements Runnable {
     }
 
     public boolean onException(final Throwable e, final HttpRequest request, final HttpResponse response) throws IOException {
-        if (e instanceof HttpConnectionExceptionHandler) { return ((HttpConnectionExceptionHandler) e).handle(response); }
+        if (e instanceof HttpConnectionExceptionHandler) {
+            return ((HttpConnectionExceptionHandler) e).handle(response);
+        }
         this.response = new HttpResponse(this);
-        e.printStackTrace();
         this.response.setResponseCode(ResponseCode.SERVERERROR_INTERNAL);
         final byte[] bytes = Exceptions.getStackTrace(e).getBytes("UTF-8");
         this.response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_TYPE, "text; charset=UTF-8"));
@@ -393,6 +398,7 @@ public class HttpConnection implements Runnable {
             try {
                 closeConnection = this.onException(e, this.request, this.response);
             } catch (final Throwable nothing) {
+                e.printStackTrace();
                 nothing.printStackTrace();
             }
         } finally {

@@ -31,14 +31,11 @@ import java.util.Locale;
 import java.util.logging.Level;
 
 import javax.swing.KeyStroke;
-import javax.swing.filechooser.FileFilter;
 
 import org.appwork.exceptions.WTFException;
 import org.appwork.shutdown.ShutdownController;
 import org.appwork.shutdown.ShutdownEvent;
 import org.appwork.shutdown.ShutdownRequest;
-import org.appwork.storage.JSonStorage;
-import org.appwork.storage.StorageException;
 import org.appwork.uio.UIOManager;
 import org.appwork.utils.Application;
 import org.appwork.utils.Regex;
@@ -46,22 +43,14 @@ import org.appwork.utils.StringUtils;
 import org.appwork.utils.locale._AWU;
 import org.appwork.utils.logging.Log;
 import org.appwork.utils.os.mime.Mime;
-import org.appwork.utils.os.mime.MimeDefault;
-import org.appwork.utils.os.mime.MimeLinux;
-import org.appwork.utils.os.mime.MimeMac;
-import org.appwork.utils.os.mime.MimeWindows;
+import org.appwork.utils.os.mime.MimeFactory;
 import org.appwork.utils.processes.ProcessBuilderFactory;
 import org.appwork.utils.swing.dialog.Dialog;
-import org.appwork.utils.swing.dialog.DialogCanceledException;
-import org.appwork.utils.swing.dialog.DialogClosedException;
 import org.appwork.utils.swing.dialog.DialogNoAnswerException;
-import org.appwork.utils.swing.dialog.ExtFileChooserDialog;
-import org.appwork.utils.swing.dialog.FileChooserSelectionMode;
-import org.appwork.utils.swing.dialog.FileChooserType;
 
 /**
  * This class provides a few native features.
- * 
+ *
  * @author $Author: unknown$
  */
 
@@ -234,18 +223,15 @@ public class CrossSystem {
         ARCH = CrossSystem.getARCHByString(CrossSystem.ARCH_STRING);
         /* Init MIME */
         if (CrossSystem.isWindows()) {
-            MIME = new MimeWindows();
             CrossSystem.DESKTOP_SUPPORT = new DesktopSupportWindows();
         } else if (CrossSystem.isLinux()) {
             CrossSystem.DESKTOP_SUPPORT = new DesktopSupportLinux();
-            MIME = new MimeLinux();
         } else if (CrossSystem.isMac()) {
             CrossSystem.DESKTOP_SUPPORT = new DesktopSupportMac();
-            MIME = new MimeMac();
         } else {
             CrossSystem.DESKTOP_SUPPORT = new DesktopSupportJavaDesktop();
-            MIME = new MimeDefault();
         }
+        MIME = MimeFactory.getInstance();
     }
 
     public static String getDefaultDownloadDirectory() {
@@ -268,7 +254,7 @@ public class CrossSystem {
 
     /**
      * internal function to open a file/folder
-     * 
+     *
      * @param file
      * @throws IOException
      */
@@ -281,7 +267,7 @@ public class CrossSystem {
 
     /**
      * internal function to open an URL in a browser
-     * 
+     *
      * @param _url
      * @throws IOException
      * @throws URISyntaxException
@@ -294,9 +280,9 @@ public class CrossSystem {
 
     /**
      * use this method to make pathPart safe to use in a full absoluePath.
-     * 
+     *
      * it will remove driveletters/path separators and all known chars that are forbidden in a path
-     * 
+     *
      * @param pathPart
      * @return
      */
@@ -370,57 +356,6 @@ public class CrossSystem {
             return CrossSystem.KEY_STROKE_BACKSPACE_CTRL;
         }
         return CrossSystem.KEY_STROKE_DELETE;
-    }
-
-    public static String[] getEditor(final String extension) throws DialogCanceledException, DialogClosedException, StorageException {
-
-        final ExtFileChooserDialog d = new ExtFileChooserDialog(0, _AWU.T.fileditcontroller_geteditor_for(extension), null, null);
-        d.setStorageID("FILE_EDIT_CONTROLLER_" + extension);
-        d.setFileSelectionMode(FileChooserSelectionMode.FILES_ONLY);
-        d.setFileFilter(new FileFilter() {
-
-            @Override
-            public boolean accept(final File f) {
-                if (f.isDirectory()) {
-                    return true;
-                }
-                if (CrossSystem.isWindows()) {
-                    return f.getName().endsWith(".exe");
-                } else {
-                    return f.canExecute();
-                }
-
-            }
-
-            @Override
-            public String getDescription() {
-
-                return _AWU.T.fileeditcontroller_exechooser_description(extension);
-
-            }
-
-        });
-        d.setType(FileChooserType.OPEN_DIALOG_WITH_PRESELECTION);
-        d.setMultiSelection(false);
-        d.setPreSelection(new File(JSonStorage.getPlainStorage("EDITORS").get(extension, "")));
-        try {
-            Dialog.I().showDialog(d);
-        } catch (final DialogClosedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (final DialogCanceledException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-        final File ret = d.getSelectedFile();
-        if (ret != null && ret.exists()) {
-            JSonStorage.getPlainStorage("EDITORS").put(extension, ret.toString());
-            return new String[] { ret.toString() };
-        } else {
-            return null;
-        }
-
     }
 
     public static String[] getFileCommandLine() {
@@ -511,7 +446,7 @@ public class CrossSystem {
 
     /**
      * Returns the Mime Class for the current OS
-     * 
+     *
      * @return
      * @see Mime
      */
@@ -589,7 +524,7 @@ public class CrossSystem {
 
     /**
      * Returns true if the OS is a linux system
-     * 
+     *
      * @return
      */
     public static OSFamily getOSFamily() {
@@ -661,7 +596,7 @@ public class CrossSystem {
             final int index = jvmName.indexOf('@');
             /**
              * http://www.golesny.de/p/code/javagetpid
-             * 
+             *
              * @return
              */
             if (index >= 1) {
@@ -799,7 +734,7 @@ public class CrossSystem {
 
     /**
      * checks if given path is absolute or relative
-     * 
+     *
      * @param path
      * @return
      */
@@ -831,9 +766,9 @@ public class CrossSystem {
     }
 
     /**
-     * 
+     *
      /**
-     * 
+     *
      * @param e
      * @return
      */
@@ -910,7 +845,7 @@ public class CrossSystem {
 
     /**
      * Returns true if the OS is a MAC System
-     * 
+     *
      * @return
      */
 
@@ -920,7 +855,7 @@ public class CrossSystem {
 
     /**
      * returns true in case of "open an URL in a browser" is supported
-     * 
+     *
      * @return
      */
     public static boolean isOpenBrowserSupported() {
@@ -929,7 +864,7 @@ public class CrossSystem {
 
     /**
      * returns true in case of "open a File" is supported
-     * 
+     *
      * @return
      */
     public static boolean isOpenFileSupported() {
@@ -987,7 +922,7 @@ public class CrossSystem {
 
     /**
      * Returns true if the OS is a Windows System
-     * 
+     *
      * @return
      */
     public static boolean isWindows() {
@@ -1016,7 +951,7 @@ public class CrossSystem {
 
     /**
      * Opens a file or directory
-     * 
+     *
      * @see java.awt.Desktop#open(File)
      * @param file
      * @throws IOException
@@ -1047,7 +982,7 @@ public class CrossSystem {
 
     /**
      * Open an url in the systems default browser
-     * 
+     *
      * @param url
      */
     public static void openURL(final String url) {
@@ -1175,7 +1110,7 @@ public class CrossSystem {
 
     /**
      * Set commandline to open the browser use %s as wildcard for the url
-     * 
+     *
      * @param commands
      */
     public static void setBrowserCommandLine(final String[] commands) {
@@ -1219,7 +1154,7 @@ public class CrossSystem {
 
     /**
      * splits filename into name,extension
-     * 
+     *
      * @param filename
      * @return
      */

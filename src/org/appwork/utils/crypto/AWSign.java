@@ -48,7 +48,7 @@ public class AWSign {
 
     public static void createKeyPair() throws NoSuchAlgorithmException {
         final KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-        keyPairGenerator.initialize(2048);
+        keyPairGenerator.initialize(4096);
         final KeyPair keyPair = keyPairGenerator.genKeyPair();
         System.out.println("PUBLIC  " + Base64.encodeToString(keyPair.getPublic().getEncoded(), false));
         System.out.println("PRIVATE " + Base64.encodeToString(keyPair.getPrivate().getEncoded(), false));
@@ -76,7 +76,9 @@ public class AWSign {
             sig.update(bytes, 0, bytes.length);
 
             final byte[] ret = sig.sign();
-            if (!salt) { return ret; }
+            if (!salt) {
+                return ret;
+            }
 
             final byte[] merged = new byte[ret.length + saltBytes.length];
             System.arraycopy(saltBytes, 0, merged, 0, saltBytes.length);
@@ -114,7 +116,9 @@ public class AWSign {
                     }
                 }
                 final byte[] ret = sig.sign();
-                if (!salt) { return ret; }
+                if (!salt) {
+                    return ret;
+                }
 
                 final byte[] merged = new byte[ret.length + saltBytes.length];
                 System.arraycopy(saltBytes, 0, merged, 0, saltBytes.length);
@@ -176,7 +180,9 @@ public class AWSign {
                 }
             }
             final byte[] generatedDigest = md.digest();
-            if (Arrays.equals(generatedDigest, readDigest) == false) { throw new IOException("Hash failed!"); }
+            if (Arrays.equals(generatedDigest, readDigest) == false) {
+                throw new IOException("Hash failed!");
+            }
             fos.close();
             deleteDst = false;
         } finally {
@@ -316,7 +322,9 @@ public class AWSign {
      * @throws NoSuchAlgorithmException
      */
     public static byte[] getSalt(final boolean salt) throws NoSuchAlgorithmException {
-        if (!salt) { return null; }
+        if (!salt) {
+            return null;
+        }
 
         final byte[] saltBytes = new byte[16];
         if (AWSign.sr != null) {
@@ -338,7 +346,10 @@ public class AWSign {
     }
 
     public static void main(final String[] args) throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IOException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, InvalidKeySpecException {
-        // AWSign.createKeyPair();
+        if (true) {
+            AWSign.createKeyPair();
+            return;
+        }
 
         // PUBLIC
         try {
@@ -394,7 +405,9 @@ public class AWSign {
             }
 
             sig.update(dataToVerify);
-            if (!sig.verify(signature)) { throw new SignatureViolationException("Signatur Check Failed"); }
+            if (!sig.verify(signature)) {
+                throw new SignatureViolationException("Signatur Check Failed");
+            }
         } catch (final SignatureViolationException e) {
             throw e;
         } catch (final Throwable e) {
@@ -455,7 +468,9 @@ public class AWSign {
                     sig.update(buffer, 0, len);
                 }
             }
-            if (!sig.verify(signature)) { throw new SignatureViolationException("Signatur Check Failed"); }
+            if (!sig.verify(signature)) {
+                throw new SignatureViolationException("Signatur Check Failed");
+            }
         } catch (final SignatureViolationException e) {
             throw e;
         } catch (final Throwable e) {

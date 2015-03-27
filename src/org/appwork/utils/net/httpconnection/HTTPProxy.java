@@ -1,6 +1,8 @@
 package org.appwork.utils.net.httpconnection;
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -449,7 +451,7 @@ public class HTTPProxy {
 
     /**
      * this proxy is DIRECT = using a local bound IP
-     *
+     * 
      * @return
      */
     public boolean isDirect() {
@@ -462,7 +464,7 @@ public class HTTPProxy {
 
     /**
      * this proxy is NONE = uses default gateway
-     *
+     * 
      * @return
      */
     public boolean isNone() {
@@ -478,7 +480,7 @@ public class HTTPProxy {
 
     /**
      * this proxy is REMOTE = using http,socks proxy
-     *
+     * 
      * @return
      */
     public boolean isRemote() {
@@ -549,6 +551,52 @@ public class HTTPProxy {
     @Override
     public String toString() {
         return this._toString();
+    }
+
+    /**
+     * @param plist
+     * @return
+     */
+    public static List<? extends HTTPProxy> convert(List<Proxy> plist) {
+        ArrayList<HTTPProxy> lst = new ArrayList<HTTPProxy>();
+        if (plist != null) {
+            for (final Proxy p : plist) {
+                try {
+                    switch (p.type()) {
+                    case DIRECT:
+                        lst.add(HTTPProxy.NONE);
+                        break;
+                    case HTTP:
+                        String host = null;
+                        int port = -1;
+                        if (p.address() instanceof InetSocketAddress) {
+                            host = ((InetSocketAddress) p.address()).getHostName();
+                            port = ((InetSocketAddress) p.address()).getPort();
+                        } else {
+                            System.out.println("Cannot handle Proxy address: " + p.address());
+                            continue;
+                        }
+                        lst.add(new HTTPProxy(TYPE.HTTP, host, port));
+                        break;
+                    case SOCKS:
+                        host = null;
+                        port = -1;
+                        if (p.address() instanceof InetSocketAddress) {
+                            host = ((InetSocketAddress) p.address()).getHostName();
+                            port = ((InetSocketAddress) p.address()).getPort();
+                        } else {
+                            System.out.println("Cannot handle Proxy address: " + p.address());
+                            continue;
+                        }
+                        lst.add(new HTTPProxy(TYPE.SOCKS5, host, port));
+                        break;
+                    }
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return lst;
     }
 
 }

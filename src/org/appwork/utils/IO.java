@@ -62,6 +62,7 @@ public class IO {
                 if (!in.exists()) {
                     throw new FileNotFoundException(in.getAbsolutePath());
                 }
+
                 inChannel = (fis = new FileInputStream(in)).getChannel();
                 outChannel = (fos = new FileOutputStream(out)).getChannel();
                 if (progress != null) {
@@ -182,7 +183,7 @@ public class IO {
                             throw new IOException("Cannot overwrite " + dst);
                         }
                     }
-
+                    dst.getParentFile().mkdirs();
                     IO.copyFile(f, dst, sync);
                 }
 

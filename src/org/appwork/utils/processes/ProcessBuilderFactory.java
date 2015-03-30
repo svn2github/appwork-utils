@@ -103,7 +103,7 @@ public class ProcessBuilderFactory {
                 }
             }
         };
-
+        // TODO check if pb.redirectErrorStream()
         final Thread reader2 = new Thread("Process-Reader-Error") {
             @Override
             public void run() {
@@ -124,6 +124,7 @@ public class ProcessBuilderFactory {
                 }
             }
         };
+
         if (CrossSystem.isWindows()) {
             reader1.setPriority(Thread.NORM_PRIORITY + 1);
             reader2.setPriority(Thread.NORM_PRIORITY + 1);

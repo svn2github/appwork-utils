@@ -715,10 +715,12 @@ public class CrossSystem {
                 break;
             case WINDOWS:
                 if (System.getenv("ProgramFiles(x86)") != null || System.getenv("ProgramW6432") != null) {
-                    CrossSystem.OS64BIT = true;
-                    return true;
+                    /* those folders also exist on newer 32bit os */
+                    if (CrossSystem.is64BitArch()) {
+                        CrossSystem.OS64BIT = true;
+                        return true;
+                    }
                 }
-
                 break;
             default:
                 if (CrossSystem.is64BitArch()) {

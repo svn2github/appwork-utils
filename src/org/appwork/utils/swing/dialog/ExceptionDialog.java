@@ -189,13 +189,17 @@ public class ExceptionDialog extends AbstractDialog<Integer> implements Exceptio
         if (moreString != null) {
             logField.setText(moreString);
         } else {
-            ExceptionDialog.this.logField.setText(Exceptions.getStackTrace(ExceptionDialog.this.exception));
+            ExceptionDialog.this.logField.setText(stacktraceToString());
         }
         ExceptionDialog.this.logLabel.setVisible(true);
 
         more.setVisible(false);
         ExceptionDialog.this.setResizable(true);
         ExceptionDialog.this.pack();
+    }
+
+    protected String stacktraceToString() {
+        return Exceptions.getStackTrace(ExceptionDialog.this.exception);
     }
 
     /**
@@ -213,7 +217,7 @@ public class ExceptionDialog extends AbstractDialog<Integer> implements Exceptio
      */
     @Override
     public String getStacktrace() {
-        return Exceptions.getStackTrace(ExceptionDialog.this.exception);
+        return stacktraceToString();
     }
 
 }

@@ -199,6 +199,23 @@ public class SyntheticaHelper {
             UIManager.put("Synthetica.menuItem.toolTipEnabled", true);
 
             de.javasoft.plaf.synthetica.SyntheticaLookAndFeel.setLookAndFeel(laf);
+
+            // final SynthStyleFactory factiory = SyntheticaLookAndFeel.getStyleFactory();
+            //
+            // SyntheticaLookAndFeel.setStyleFactory(new de.javasoft.plaf.synthetica.StyleFactory(factiory) {
+            //
+            // @Override
+            // public SynthStyle getStyle(JComponent c, Region id) {
+            //
+            // SynthStyle ret = factiory.getStyle(c, id);
+            // if (c instanceof ExtTooltip) {
+            // System.out.println(id + " " + c);
+            // ((ToolTipStyle) ret).getClass();
+            //
+            // }
+            // return ret;
+            // }
+            // });
             de.javasoft.plaf.synthetica.SyntheticaLookAndFeel.setExtendedFileChooserEnabled(false);
 
             final String fontName = SyntheticaHelper.getFontName(config, locale);

@@ -35,53 +35,54 @@ public class MimeWindows extends MimeDefault {
     public Icon getFileIcon(final String extension, final int width, final int height) throws IOException {
         final String iconKey = super.getIconKey(extension, width, height);
         Icon ret = super.getCacheIcon(iconKey);
-        if (ret == null) {
-            if (!hasFileIcon(extension)) {
-                ret = super.getFileIcon(extension, width, height);
-            } else {
-                final File path = Application.getTempResource("images/" + extension + ".png");
-                if (path.getParentFile().isDirectory()) {
-                    // woraround a bug we had until 24.06.2013.. created folders
-                    // instead of files
-                    path.getParentFile().delete();
-                }
-                if (!path.getParentFile().exists()) {
-                    path.getParentFile().mkdirs();
-                }
-                try {
-                    if (path.exists() && path.isFile()) {
-                        ret = new ImageIcon(ImageProvider.read(path));
-                    } else {
-                        File file = null;
-                        FileOutputStream fos = null;
+        if (ret != null) {
+            return ret;
+        }
+        if (!registryContainsFileIcon(extension)) {
+            ret = super.getFileIcon(extension, width, height);
+        } else {
+            final File path = Application.getTempResource("images/" + extension + ".png");
+            if (path.getParentFile().isDirectory()) {
+                // woraround a bug we had until 24.06.2013.. created folders
+                // instead of files
+                path.getParentFile().delete();
+            }
+            if (!path.getParentFile().exists()) {
+                path.getParentFile().mkdirs();
+            }
+            try {
+                if (path.exists() && path.isFile()) {
+                    ret = new ImageIcon(ImageProvider.read(path));
+                } else {
+                    File tempFile = null;
+                    FileOutputStream fos = null;
+                    try {
+                        tempFile = File.createTempFile("icon", "." + extension);
+                        final Image image = ShellFolderWrapper.getIcon(tempFile);
+                        ret = new ImageIcon(image);
+                        fos = new FileOutputStream(path);
+                        ImageIO.write((RenderedImage) image, "png", fos);
+                    } catch (final Throwable e) {
+                        e.printStackTrace();
+                        // http://www.oracle.com/technetwork/java/faq-sun-packages-142232.html
+                        ret = ImageProvider.toImageIcon(FileSystemView.getFileSystemView().getSystemIcon(tempFile));
+                    } finally {
                         try {
-                            file = File.createTempFile("icon", "." + extension);
-
-                            Image image = ShellFolderWrapper.getIcon(file);
-                            ret = new ImageIcon(image);
-                            fos = new FileOutputStream(path);
-                            ImageIO.write((RenderedImage) image, "png", fos);
-                        } catch (final Throwable e) {
-                            e.printStackTrace();
-                            // http://www.oracle.com/technetwork/java/faq-sun-packages-142232.html
-                            ret = ImageProvider.toImageIcon(FileSystemView.getFileSystemView().getSystemIcon(file));
-                        } finally {
-                            try {
+                            if (fos != null) {
                                 fos.close();
-                            } catch (final Throwable e) {
                             }
-                            if (file != null) {
-                                file.delete();
-                            }
+                        } catch (final Throwable e) {
                         }
-                        if (ret == null || ret.getIconWidth() < width || ret.getIconHeight() < height) {
-                            ret = super.getFileIcon(extension, width, height);
+                        if (tempFile != null) {
+                            tempFile.delete();
                         }
                     }
-                } catch (final Throwable e) {
-                    return null;
                 }
+            } catch (final Throwable e) {
             }
+        }
+        if (ret == null || ret.getIconWidth() < width || ret.getIconHeight() < height) {
+            ret = super.getFileIcon(extension, width, height);
         }
         ret = IconIO.getScaledInstance(ret, width, height);
         super.saveIconCache(iconKey, ret);
@@ -89,10 +90,11 @@ public class MimeWindows extends MimeDefault {
     }
 
     /**
-     * @param extension
-     * @return
+     * https://msdn.microsoft.com/en-us/library/windows/desktop/hh127427%28v=vs.85%29.aspx
+     *
+     * TODO: check ROOT_Class
      */
-    private boolean hasFileIcon(final String extension) {
+    private boolean registryContainsFileIcon(final String extension) {
         if (StringUtils.isNotEmpty(extension)) {
             try {
                 final Preferences userRoot = Preferences.userRoot();
@@ -112,11 +114,9 @@ public class MimeWindows extends MimeDefault {
                     }
                 }
             } catch (final Throwable e) {
-                e.printStackTrace();
             }
         }
         return false;
-
     }
 
     private byte[] toCstr(final String str) {

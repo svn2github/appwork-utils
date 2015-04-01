@@ -131,7 +131,7 @@ public class ExtTableHeaderRenderer extends DefaultTableCellRenderer implements 
         setForeground(hasFocus ? focusForeground : foregroundC);
         setBackground(hasFocus ? focusBackground : backgroundC);
         // sort column is no current column
-        if (this.column.getModel().getSortColumn() == null || this.column.getModel().getSortColumn() != this.column) {
+        if (!this.column.isPaintSortIcon() || (this.column.getModel().getSortColumn() == null || this.column.getModel().getSortColumn() != this.column)) {
             paintIcon = false;
 
         } else {

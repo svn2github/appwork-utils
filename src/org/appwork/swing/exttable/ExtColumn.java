@@ -34,8 +34,7 @@ import org.appwork.utils.swing.EDTRunner;
 import org.appwork.utils.swing.SwingUtils;
 
 /**
- * ExtColums define a single column of an extended Table. It contains all
- * columndetails including renderer
+ * ExtColums define a single column of an extended Table. It contains all columndetails including renderer
  * 
  * @author $Author: unknown$
  */
@@ -50,8 +49,7 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
     private static final long        serialVersionUID       = -2662459732650363059L;
     protected static final Border    DEFAULT_BORDER         = BorderFactory.createEmptyBorder(0, 5, 0, 5);
     /**
-     * If this colum is editable, this parameter says how many clicks are
-     * required to start edit mode
+     * If this colum is editable, this parameter says how many clicks are required to start edit mode
      */
     private int                      clickcount             = 2;
 
@@ -102,9 +100,13 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
 
     protected void repaint() {
         final ExtTableModel<E> model = getModel();
-        if (model == null) { return; }
+        if (model == null) {
+            return;
+        }
         final ExtTable<E> table = model.getTable();
-        if (table == null) { return; }
+        if (table == null) {
+            return;
+        }
         final Rectangle visibleRect = table.getVisibleRect();
 
         final Rectangle first = table.getCellRect(0, getIndex(), true);
@@ -203,7 +205,9 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
 
     public ExtTooltip createToolTip(final Point position, final E obj) {
         final String txt = this.getTooltipText(obj);
-        if (txt == null || txt.length() == 0) { return null; }
+        if (txt == null || txt.length() == 0) {
+            return null;
+        }
 
         this.tooltip.setTipText(txt);
         return this.tooltip;
@@ -214,7 +218,9 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
 
         System.out.println("Sort: " + newID);
         synchronized (ExtColumn.sortLOCK) {
-            if (ExtColumn.sortThread != null && ExtColumn.sortThread.isAlive()) { return; }
+            if (ExtColumn.sortThread != null && ExtColumn.sortThread.isAlive()) {
+                return;
+            }
 
             ExtColumn.sortThread = new Thread("TableSorter " + this.getID()) {
                 @Override
@@ -227,7 +233,9 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
                             public Integer edtRun() {
 
                                 final Container p = getModel().getTable().getParent();
-                                if (p == null || !(p instanceof JViewport)) { return 0; }
+                                if (p == null || !(p instanceof JViewport)) {
+                                    return 0;
+                                }
                                 final JViewport viewport = (JViewport) p;
 
                                 final Rectangle rec = viewport.getViewRect();
@@ -241,7 +249,9 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
                             @Override
                             public Rectangle edtRun() {
                                 final Container p = getModel().getTable().getParent();
-                                if (p == null || !(p instanceof JViewport)) { return null; }
+                                if (p == null || !(p instanceof JViewport)) {
+                                    return null;
+                                }
                                 final JViewport viewport = (JViewport) p;
                                 final Rectangle rec = viewport.getViewRect();
                                 return rec;
@@ -351,8 +361,7 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
     }
 
     /**
-     * The storageID for this column. Override this if you have a selfdefined
-     * column class which is used by several of your columns.
+     * The storageID for this column. Override this if you have a selfdefined column class which is used by several of your columns.
      * 
      * @return
      */
@@ -373,8 +382,7 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
     }
 
     /**
-     * Should be overwritten when there should be a maximal width for this
-     * column (e.g. for checkboxes)
+     * Should be overwritten when there should be a maximal width for this column (e.g. for checkboxes)
      */
     public int getMaxWidth() {
         return -1;
@@ -456,9 +464,8 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
      * @param row
      * @param column
      * @param editing
-     *            set editing to true, if the cellrenderer should not update the
-     *            editing value. for example a text in a textfiled. in this case
-     *            the renderer only updates the rest. colors, borders...
+     *            set editing to true, if the cellrenderer should not update the editing value. for example a text in a textfiled. in this
+     *            case the renderer only updates the rest. colors, borders...
      * @return
      */
     public Component getTableCellEditorComponent(final JTable table, final E value, final boolean isSelected, final int row, final int column, final boolean editing) {
@@ -532,16 +539,23 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
         return this.tableColumn.getWidth();
     }
 
+    public void setWidth(int width) {
+        this.tableColumn.setWidth(width);
+    }
+
     @Override
     public boolean isCellEditable(final EventObject evt) {
-        if (this.editableProgrammaticly) { return true; }
-        if (evt instanceof MouseEvent) { return ((MouseEvent) evt).getClickCount() >= this.getClickcount() && this.getClickcount() > 0; }
+        if (this.editableProgrammaticly) {
+            return true;
+        }
+        if (evt instanceof MouseEvent) {
+            return ((MouseEvent) evt).getClickCount() >= this.getClickcount() && this.getClickcount() > 0;
+        }
         return true;
     }
 
     /**
-     * Returns if the cell is editable. Do NOT override this. Use
-     * {@link #isEditable(Object)} instead
+     * Returns if the cell is editable. Do NOT override this. Use {@link #isEditable(Object)} instead
      * 
      * @param rowIndex
      * @param columnIndex
@@ -549,7 +563,9 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
      */
     public boolean isCellEditable(final int rowIndex, final int columnIndex) {
         final E obj = this.model.getValueAt(rowIndex, columnIndex);
-        if (obj == null) { return false; }
+        if (obj == null) {
+            return false;
+        }
         return this.isEditable(obj, this.isEnabled(obj));
     }
 
@@ -574,9 +590,8 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
     public abstract boolean isEditable(E obj);
 
     /**
-     * override this to enable cell editing if the cell is disabled IMPORTANT:
-     * YOU jave to override {@link #isEditable(Object)} as well if you override
-     * this method
+     * override this to enable cell editing if the cell is disabled IMPORTANT: YOU jave to override {@link #isEditable(Object)} as well if
+     * you override this method
      * 
      * @param obj
      * @param enabled
@@ -588,8 +603,7 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
     }
 
     /**
-     * returns if the cell defined by this column and the object is enabled or
-     * disabled
+     * returns if the cell defined by this column and the object is enabled or disabled
      * 
      * @param obj
      * @return
@@ -610,8 +624,7 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
     }
 
     /**
-     * If you want to use only an icon in the table header, you can override
-     * this and let the method return false. This only works if
+     * If you want to use only an icon in the table header, you can override this and let the method return false. This only works if
      * {@link #getHeaderIcon()} returns an icon
      * 
      * @return
@@ -642,9 +655,8 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
     }
 
     /**
-     * returns true if this column is sortable. if the call origin is an object,
-     * the object is passed in obj parameter. if the caller origin is the column
-     * header, obj is null
+     * returns true if this column is sortable. if the call origin is an object, the object is passed in obj parameter. if the caller origin
+     * is the column header, obj is null
      * 
      * @param obj
      * @return
@@ -664,11 +676,9 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
     }
 
     /**
-     * return true if you don't want to forward to following onDoubleClick
-     * listener
+     * return true if you don't want to forward to following onDoubleClick listener
      * 
-     * This method will be called when a doubleClick is performed on the object
-     * <code>obj</code>
+     * This method will be called when a doubleClick is performed on the object <code>obj</code>
      * 
      * @param obj
      */
@@ -677,8 +687,7 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
     }
 
     /**
-     * This method will be called if the user does a windows typic rename click
-     * order. Means: click on a already selected single row
+     * This method will be called if the user does a windows typic rename click order. Means: click on a already selected single row
      * 
      * @param e
      * @param obj
@@ -689,8 +698,7 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
     }
 
     /**
-     * return true if you dont want to forward to following onSingleClick
-     * listener
+     * return true if you dont want to forward to following onSingleClick listener
      * 
      * @param e
      * @param obj
@@ -804,14 +812,15 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
 
     public void setValueAt(final Object value, final int rowIndex, final int columnIndex) {
         final E obj = this.model.getValueAt(rowIndex, columnIndex);
-        if (obj == null) { return; }
+        if (obj == null) {
+            return;
+        }
         this.setValue(value, obj);
     }
 
     /**
-     * By default. if we start an editor, the row will be selected. If you want
-     * the framework not to select the current editing row, overwrite this
-     * method to return false
+     * By default. if we start an editor, the row will be selected. If you want the framework not to select the current editing row,
+     * overwrite this method to return false
      */
 
     @Override
@@ -874,6 +883,21 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
             return _AWU.T.tableheader_tooltip_locked(getName());
         }
 
+    }
+
+    /**
+     * @return
+     */
+    public boolean isPaintSortIcon() {
+
+        return true;
+    }
+
+    /**
+     * @return
+     */
+    public TableColumn getInternalColumn() {
+        return this.tableColumn;
     }
 
 }

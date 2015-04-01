@@ -118,8 +118,12 @@ public abstract class ExtTextColumn<E> extends ExtColumn<E> implements ActionLis
 
             @Override
             public void setText(final String text) {
-                if (text != null && text.equals(this.getText())) { return; }
-                if (text == null && this.getText() == null) { return; }
+                if (text != null && text.equals(this.getText())) {
+                    return;
+                }
+                if (text == null && this.getText() == null) {
+                    return;
+                }
                 super.setText(text);
             }
 
@@ -237,11 +241,9 @@ public abstract class ExtTextColumn<E> extends ExtColumn<E> implements ActionLis
     public void focusLost(final FocusEvent e) {
         if (!e.isTemporary() || e.getOppositeComponent() == null) {
             /*
-             * we check for temporary , because a rightclick menu will cause
-             * focus lost but editing should not stop
+             * we check for temporary , because a rightclick menu will cause focus lost but editing should not stop
              * 
-             * we also check for oppositeComponent to stopEditing when we click
-             * outside the window
+             * we also check for oppositeComponent to stopEditing when we click outside the window
              */
             ExtTextColumn.this.noset = true;
             try {
@@ -344,7 +346,9 @@ public abstract class ExtTextColumn<E> extends ExtColumn<E> implements ActionLis
     @Override
     public boolean matchSearch(final E object, final Pattern pattern) {
         final String stringValue = this.getStringValue(object);
-        if (stringValue == null) { return false; }
+        if (stringValue == null) {
+            return false;
+        }
         return pattern.matcher(stringValue).matches();
     }
 

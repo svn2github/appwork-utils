@@ -77,7 +77,24 @@ public class ExtTableHeaderRenderer extends DefaultTableCellRenderer implements 
         this.backgroundC = backgroundC;
     }
 
-    private Border     cellBorder;
+    private Border cellBorder;
+
+    public Border getFocusBorder() {
+        return focusBorder;
+    }
+
+    public void setFocusBorder(Border focusBorder) {
+        this.focusBorder = focusBorder;
+    }
+
+    public Border getCellBorder() {
+        return cellBorder;
+    }
+
+    public void setCellBorder(Border cellBorder) {
+        this.cellBorder = cellBorder;
+    }
+
     private final Icon lockedWidth;
 
     /**
@@ -154,6 +171,7 @@ public class ExtTableHeaderRenderer extends DefaultTableCellRenderer implements 
         if (!column.isResizable() && column.isPaintWidthLockIcon()) {
             paintLock = true;
         }
+
         final Border orgBorder = getBorder();
         final int widthDif = column.getWidth() - getPreferredSize().width;
         final boolean smallLockIcon = widthDif < lockedWidth.getIconWidth();

@@ -7,7 +7,7 @@ import java.util.Map.Entry;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
-import javax.swing.border.CompoundBorder;
+import javax.swing.border.Border;
 
 import org.appwork.swing.exttable.ExtColumn;
 import org.appwork.swing.exttable.ExtDefaultRowSorter;
@@ -15,15 +15,111 @@ import org.appwork.swing.exttable.ExtTableModel;
 import org.appwork.swing.exttable.renderercomponents.RendererProgressBar;
 
 abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
+    /**
+     * @author Thomas
+     * 
+     * @param <E>
+     */
+    public static final class IndeterminatedRenderer<E> extends RendererProgressBar {
+        /**
+         * 
+         */
+        private static final long    serialVersionUID = 1L;
+        private long                 cleanupTimer     = 0;
+        private volatile boolean     indeterminate    = false;
+        private volatile long        timer            = 0;
+        private ExtProgressColumn<E> column;
+
+        /**
+         * @param extProgressColumn
+         */
+        public IndeterminatedRenderer(ExtProgressColumn<E> column) {
+            this.column = column;
+            // TODO Auto-generated constructor stub
+        }
+
+        @Override
+        public boolean isDisplayable() {
+            return true;
+        }
+
+        @Override
+        public boolean isIndeterminate() {
+            return this.indeterminate;
+        }
+
+        @Override
+        public boolean isVisible() {
+            return false;
+        }
+
+        @Override
+        public void repaint() {
+            if (column == null) {
+                return;
+            }
+            if (column.isModifying()) {
+                return;
+            }
+            final ExtTableModel<E> mod = column.getModel();
+            if (mod != null && mod.getTable() != null && column.indeterminatedRenderer.isIndeterminate() && mod.getTable().isShowing()) {
+
+                // cleanup map in case we removed a indeterminated value
+                if (System.currentTimeMillis() - this.cleanupTimer > 30000) {
+                    Entry<E, Long> next;
+                    for (final Iterator<Entry<E, Long>> it = column.map.entrySet().iterator(); it.hasNext();) {
+                        next = it.next();
+                        final long lastUpdate = System.currentTimeMillis() - next.getValue();
+                        if (lastUpdate > 5000) {
+                            it.remove();
+                        }
+                    }
+
+                    this.cleanupTimer = System.currentTimeMillis();
+                    if (column.map.size() == 0 && column.indeterminatedRenderer.isIndeterminate()) {
+                        column.indeterminatedRenderer.setIndeterminate(false);
+                        return;
+                    }
+
+                }
+                if (column.columnIndex >= 0) {
+                    if (System.currentTimeMillis() - this.timer > 1000 / column.getFps()) {
+                        // mod._fireTableStructureChanged(mod.getTableData(),
+                        // false);
+                        // System.out.println(getLocation());
+                        column.repaint();
+                        this.timer = System.currentTimeMillis();
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void repaint(final Rectangle r) {
+            this.repaint();
+        }
+
+        @Override
+        public void setIndeterminate(final boolean newValue) {
+            if (newValue == this.indeterminate) {
+                return;
+            }
+            this.indeterminate = newValue;
+            super.setIndeterminate(newValue);
+        }
+    }
+
     private static final long serialVersionUID = -2473320164484034664L;
 
     public static double getPercentString(final long current, final long total) {
-        if (total <= 0) { return 0.00d; }
+        if (total <= 0) {
+            return 0.00d;
+        }
         return current * 10000 / total / 100.0d;
     }
 
     protected RendererProgressBar determinatedRenderer;
-    protected CompoundBorder      defaultBorder;
+    protected Border              defaultBorder;
     private RendererProgressBar   indeterminatedRenderer;
     private RendererProgressBar   renderer;
     private HashMap<E, Long>      map;
@@ -40,82 +136,9 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
     public ExtProgressColumn(final String name, final ExtTableModel<E> extModel) {
         super(name, extModel);
         this.map = new HashMap<E, Long>();
-        this.determinatedRenderer = new RendererProgressBar() {
-        };
+        this.determinatedRenderer = initDeterminatedRenderer();
 
-        this.indeterminatedRenderer = new RendererProgressBar() {
-            /**
-             * 
-             */
-            private static final long serialVersionUID = 1L;
-            private long              cleanupTimer     = 0;
-            private volatile boolean  indeterminate    = false;
-            private volatile long     timer            = 0;
-
-            @Override
-            public boolean isDisplayable() {
-                return true;
-            }
-
-            @Override
-            public boolean isIndeterminate() {
-                return this.indeterminate;
-            }
-
-            @Override
-            public boolean isVisible() {
-                return false;
-            }
-
-            @Override
-            public void repaint() {
-                if (ExtProgressColumn.this.isModifying()) { return; }
-                final ExtTableModel<E> mod = ExtProgressColumn.this.getModel();
-                if (mod != null && mod.getTable() != null && ExtProgressColumn.this.indeterminatedRenderer.isIndeterminate() && mod.getTable().isShowing()) {
-
-                    // cleanup map in case we removed a indeterminated value
-                    if (System.currentTimeMillis() - this.cleanupTimer > 30000) {
-                        Entry<E, Long> next;
-                        for (final Iterator<Entry<E, Long>> it = ExtProgressColumn.this.map.entrySet().iterator(); it.hasNext();) {
-                            next = it.next();
-                            final long lastUpdate = System.currentTimeMillis() - next.getValue();
-                            if (lastUpdate > 5000) {
-                                it.remove();
-                            }
-                        }
-
-                        this.cleanupTimer = System.currentTimeMillis();
-                        if (ExtProgressColumn.this.map.size() == 0 && ExtProgressColumn.this.indeterminatedRenderer.isIndeterminate()) {
-                            ExtProgressColumn.this.indeterminatedRenderer.setIndeterminate(false);
-                            return;
-                        }
-
-                    }
-                    if (ExtProgressColumn.this.columnIndex >= 0) {
-                        if (System.currentTimeMillis() - this.timer > 1000 / ExtProgressColumn.this.getFps()) {
-                            // mod._fireTableStructureChanged(mod.getTableData(),
-                            // false);
-                            // System.out.println(getLocation());
-                            ExtProgressColumn.this.repaint();
-                            this.timer = System.currentTimeMillis();
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void repaint(final Rectangle r) {
-                this.repaint();
-            }
-
-            @Override
-            public void setIndeterminate(final boolean newValue) {
-                if (newValue == this.indeterminate) { return; }
-                this.indeterminate = newValue;
-                super.setIndeterminate(newValue);
-            }
-
-        };
+        this.indeterminatedRenderer = initIndeterminatedRenderer();
 
         // this.getModel().addTableModelListener(new TableModelListener() {
         //
@@ -134,6 +157,7 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
         // });
         this.renderer = this.determinatedRenderer;
         this.defaultBorder = BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(1, 1, 2, 1), this.determinatedRenderer.getBorder());
+
         this.setRowSorter(new ExtDefaultRowSorter<E>() {
 
             @Override
@@ -141,7 +165,9 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
                 final double v1 = (double) ExtProgressColumn.this.getValue(o1) / ExtProgressColumn.this.getMax(o1);
                 final double v2 = (double) ExtProgressColumn.this.getValue(o2) / ExtProgressColumn.this.getMax(o2);
 
-                if (v1 == v2) { return 0; }
+                if (v1 == v2) {
+                    return 0;
+                }
                 if (this.getSortOrderIdentifier() != ExtColumn.SORT_ASC) {
                     return v1 > v2 ? -1 : 1;
                 } else {
@@ -150,6 +176,14 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
             }
 
         });
+    }
+
+    protected IndeterminatedRenderer<E> initIndeterminatedRenderer() {
+        return new IndeterminatedRenderer<E>(this);
+    }
+
+    protected RendererProgressBar initDeterminatedRenderer() {
+        return new RendererProgressBar();
     }
 
     /**
@@ -196,9 +230,7 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
     /*
      * (non-Javadoc)
      * 
-     * @see
-     * com.rapidshare.rsmanager.gui.components.table.ExtColumn#getCellEditorValue
-     * ()
+     * @see com.rapidshare.rsmanager.gui.components.table.ExtColumn#getCellEditorValue ()
      */
     @Override
     public Object getCellEditorValue() {
@@ -272,9 +304,7 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
     /*
      * (non-Javadoc)
      * 
-     * @see
-     * com.rapidshare.rsmanager.gui.components.table.ExtColumn#isEditable(java
-     * .lang.Object)
+     * @see com.rapidshare.rsmanager.gui.components.table.ExtColumn#isEditable(java .lang.Object)
      */
     @Override
     public boolean isEditable(final E obj) {
@@ -285,9 +315,7 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
     /*
      * (non-Javadoc)
      * 
-     * @see
-     * com.rapidshare.rsmanager.gui.components.table.ExtColumn#isEnabled(java
-     * .lang.Object)
+     * @see com.rapidshare.rsmanager.gui.components.table.ExtColumn#isEnabled(java .lang.Object)
      */
     @Override
     public boolean isEnabled(final E obj) {
@@ -311,9 +339,7 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
     /*
      * (non-Javadoc)
      * 
-     * @see
-     * com.rapidshare.rsmanager.gui.components.table.ExtColumn#isSortable(java
-     * .lang.Object)
+     * @see com.rapidshare.rsmanager.gui.components.table.ExtColumn#isSortable(java .lang.Object)
      */
     @Override
     public boolean isSortable(final E obj) {
@@ -344,9 +370,7 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
     /*
      * (non-Javadoc)
      * 
-     * @see
-     * com.rapidshare.rsmanager.gui.components.table.ExtColumn#setValue(java
-     * .lang.Object, java.lang.Object)
+     * @see com.rapidshare.rsmanager.gui.components.table.ExtColumn#setValue(java .lang.Object, java.lang.Object)
      */
     @Override
     public void setValue(final Object value, final E object) {

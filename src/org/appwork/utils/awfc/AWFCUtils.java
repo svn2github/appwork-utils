@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2012 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.utils.awfc
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -16,7 +16,7 @@ import java.io.OutputStream;
 
 /**
  * @author daniel
- * 
+ *
  */
 public class AWFCUtils {
 
@@ -42,7 +42,9 @@ public class AWFCUtils {
 
     public int ensureRead() throws IOException {
         final int read = this.getCurrentInputStream().read();
-        if (read == -1) { throw new EOFException(); }
+        if (read == -1) {
+            throw new EOFException();
+        }
         return read;
     }
 
@@ -51,30 +53,42 @@ public class AWFCUtils {
         if (stringBytes == null) {
             stringBytes = new byte[size];
         }
-        if (size > stringBytes.length) { throw new IOException("buffer too small"); }
+        if (size > stringBytes.length) {
+            throw new IOException("buffer too small");
+        }
         int done = 0;
         int read = 0;
         while (done < size && (read = this.getCurrentInputStream().read(stringBytes, done, size - done)) != -1) {
             done += read;
         }
-        if (done != size) { throw new EOFException(); }
+        if (done != size) {
+            throw new EOFException(done + "!=" + size);
+        }
         return stringBytes;
     }
 
     public InputStream getCurrentInputStream() throws IOException {
-        if (this.is != null) { return this.is; }
+        if (this.is != null) {
+            return this.is;
+        }
         throw new IOException("no InputStream available");
     }
 
     public OutputStream getCurrentOutputStream() throws IOException {
-        if (this.os != null) { return this.os; }
+        if (this.os != null) {
+            return this.os;
+        }
         throw new IOException("no OutputStream available");
     }
 
     public boolean readBoolean() throws IOException {
         final int read = this.ensureRead();
-        if (read == 1) { return true; }
-        if (read == 0) { return false; }
+        if (read == 1) {
+            return true;
+        }
+        if (read == 0) {
+            return false;
+        }
         throw new IOException("Invalid boolean value!");
     }
 
@@ -90,7 +104,9 @@ public class AWFCUtils {
         while (true) {
             read = this.ensureRead();
             ret = ret + (read >>> 1 << position * 7);
-            if ((read & 1) == 0) { return ret; }
+            if ((read & 1) == 0) {
+                return ret;
+            }
             position++;
         }
     }
@@ -156,9 +172,13 @@ public class AWFCUtils {
     }
 
     public void writeString(final String string) throws IOException {
-        if (string == null) { throw new IOException("string == null"); }
+        if (string == null) {
+            throw new IOException("string == null");
+        }
         final byte[] stringBytes = string.getBytes("UTF-8");
-        if (stringBytes.length > 32767) { throw new IllegalArgumentException("StringSize must not be greater than 32767 bytes"); }
+        if (stringBytes.length > 32767) {
+            throw new IllegalArgumentException("StringSize must not be greater than 32767 bytes");
+        }
         this.writeShort(stringBytes.length);
         this.getCurrentOutputStream().write(stringBytes);
     }

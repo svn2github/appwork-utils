@@ -2,6 +2,7 @@ package org.appwork.swing.exttable.columns;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -204,7 +205,7 @@ public abstract class ExtTextColumn<E> extends ExtColumn<E> implements ActionLis
 
         if (this.getTableColumn() != null) {
             try {
-                this.rendererField.setText(org.appwork.sunwrapper.sun.swing.SwingUtilities2Wrapper.clipStringIfNecessary(this.rendererField, this.rendererField.getFontMetrics(this.rendererField.getFont()), str, this.getTableColumn().getWidth() - this.rendererIcon.getPreferredSize().width - 5));
+                this.rendererField.setText(clip(this.rendererField, this.rendererField.getFontMetrics(this.rendererField.getFont()), str, this.getTableColumn().getWidth() - this.rendererIcon.getPreferredSize().width - 5));
             } catch (Throwable e) {
                 // fallback if org.appwork.swing.sunwrapper.SwingUtilities2
                 // disappears someday
@@ -217,8 +218,20 @@ public abstract class ExtTextColumn<E> extends ExtColumn<E> implements ActionLis
 
     }
 
+    /**
+     * @param rendererField2
+     * @param fontMetrics
+     * @param str
+     * @param i
+     * @return
+     */
+    protected String clip(JComponent label, FontMetrics fontMetrics, String str, int width) {
+        // TODO Auto-generated method stub
+        return org.appwork.sunwrapper.sun.swing.SwingUtilities2Wrapper.clipStringIfNecessary(label, fontMetrics, str, width);
+    }
+
     protected MigPanel createEditorPanel() {
-        return new MigPanel("ins 0", "[]5[grow,fill]", "[grow,fill]") {
+        return new MigPanel("ins 0 0 0 0", "[]5[grow,fill]", "[grow,fill]") {
 
             @Override
             public void requestFocus() {
@@ -229,7 +242,7 @@ public abstract class ExtTextColumn<E> extends ExtColumn<E> implements ActionLis
     }
 
     protected MigPanel createRendererPanel() {
-        return new RendererMigPanel("ins 0", "[]0[grow,fill]", "[grow,fill]");
+        return new RendererMigPanel("ins 0 0 0 0", "[]0[grow,fill]", "[grow,fill]");
     }
 
     @Override

@@ -72,9 +72,8 @@ import org.appwork.utils.swing.EDTRunner;
 /**
  * The ExtTable package is a tableframework that follows two main tasks:<br>
  * 1. Easy creating of tables<br>
- * 2. Implement extended features like column selection, database connection,
- * editing, easy rendering, sorting etc.
- *
+ * 2. Implement extended features like column selection, database connection, editing, easy rendering, sorting etc.
+ * 
  * @author $Author: unknown$
  */
 public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChangeListener {
@@ -144,7 +143,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
 
     /**
      * Create an Extended Table instance
-     *
+     * 
      * @param model
      *            Databsemodel
      * @param database
@@ -154,7 +153,9 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
      */
     public ExtTable(final ExtTableModel<E> model) {
         super(model);
-        if (model == null) { throw new NullPointerException("Model must not be null"); }
+        if (model == null) {
+            throw new NullPointerException("Model must not be null");
+        }
         this.flavor = new ExtDataFlavor<E>(this.getClass());
         this.eventSender = new ExtTableEventSender();
         ToolTipController.getInstance().register(this);
@@ -248,6 +249,9 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
                 if (ExtTable.this.getTableHeader().getCursor().getType() == Cursor.getDefaultCursor().getType()) {
                     if (e.getButton() == MouseEvent.BUTTON3) {
                         final JPopupMenu ccm = ExtTable.this.columnControlMenu(ExtTable.this.getExtColumnAtPoint(e.getPoint()));
+                        if (ccm == null) {
+                            return;
+                        }
                         ccm.show(ExtTable.this.getTableHeader(), e.getX(), e.getY());
 
                         if (ccm.getComponentCount() == 0) {
@@ -302,7 +306,9 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
         this.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 
             public void valueChanged(final ListSelectionEvent e) {
-                if (e == null || e.getValueIsAdjusting() || ExtTable.this.getModel().isTableSelectionClearing()) { return; }
+                if (e == null || e.getValueIsAdjusting() || ExtTable.this.getModel().isTableSelectionClearing()) {
+                    return;
+                }
                 ExtTable.this.onSelectionChanged();
                 ExtTable.this.eventSender.fireEvent(new ExtTableEvent<ArrayList<E>>(ExtTable.this, ExtTableEvent.Types.SELECTION_CHANGED));
 
@@ -334,8 +340,12 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
             }
 
             public void columnMoved(final TableColumnModelEvent e) {
-                if (e == null) { return; }
-                if (e.getFromIndex() == e.getToIndex()) { return; }
+                if (e == null) {
+                    return;
+                }
+                if (e.getFromIndex() == e.getToIndex()) {
+                    return;
+                }
                 final TableColumnModel tcm = ExtTable.this.getColumnModel();
                 for (int i = 0; i < tcm.getColumnCount(); i++) {
                     try {
@@ -359,7 +369,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
 
     /**
      * adds a row highlighter
-     *
+     * 
      * @param highlighter
      */
     public void addRowHighlighter(final ExtOverlayRowHighlighter highlighter) {
@@ -368,11 +378,10 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
     }
 
     /**
-     * create Columnselection popupmenu. It contains all available columns and
-     * let's the user select. The menu does not autoclose on click.
-     *
+     * create Columnselection popupmenu. It contains all available columns and let's the user select. The menu does not autoclose on click.
+     * 
      * @param extColumn
-     *
+     * 
      * @return
      */
     protected JPopupMenu columnControlMenu(final ExtColumn<E> extColumn) {
@@ -510,6 +519,10 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
                 final int y = source.getLocation().y;
 
                 final JPopupMenu ccm = ExtTable.this.columnControlMenu(null);
+                if (ccm == null) {
+                    Toolkit.getDefaultToolkit().beep();
+                    return;
+                }
                 ccm.show(source, x, y);
                 if (ccm.getComponentCount() == 0) {
                     Toolkit.getDefaultToolkit().beep();
@@ -527,9 +540,8 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
 
     /*
      * (non-Javadoc)
-     *
-     * @see
-     * org.appwork.swing.components.tooltips.ToolTipHandler#createExtTooltip()
+     * 
+     * @see org.appwork.swing.components.tooltips.ToolTipHandler#createExtTooltip()
      */
     @Override
     public ExtTooltip createExtTooltip(Point position) {
@@ -553,18 +565,17 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
      * @return
      */
     protected ExtTooltip createToolTip(final ExtColumn<E> col, final int row, final Point position, final E elementAt) {
-        if (row < 0) { return null; }
+        if (row < 0) {
+            return null;
+        }
 
         return col.createToolTip(position, elementAt);
     }
 
     /**
-     * By using {@link ExtColumn#setResizable(boolean)} you can lock the widths
-     * of a column. Locked Columns can fu%& up resizing.( Imagine, you have
-     * resizemode to LAST_column, and last_column is locked..) this doLayout
-     * method checks if resizing of the resize column worked. If not, we
-     * temporarily switch resizemode to AUTO_RESIZE_SUBSEQUENT_COLUMNS and
-     * finally AUTO_RESIZE_ALL_COLUMNS. <br>
+     * By using {@link ExtColumn#setResizable(boolean)} you can lock the widths of a column. Locked Columns can fu%& up resizing.( Imagine,
+     * you have resizemode to LAST_column, and last_column is locked..) this doLayout method checks if resizing of the resize column worked.
+     * If not, we temporarily switch resizemode to AUTO_RESIZE_SUBSEQUENT_COLUMNS and finally AUTO_RESIZE_ALL_COLUMNS. <br>
      * All in all, this helps to get a much better resizing
      */
     @Override
@@ -618,13 +629,27 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
     }
 
     private boolean dropLocationSame(final JTable.DropLocation a, final JTable.DropLocation b) {
-        if (a == null && b == null) { return true; }
-        if (a == null && b != null) { return false; }
-        if (b == null && a != null) { return false; }
-        if (a.isInsertColumn() != b.isInsertColumn()) { return false; }
-        if (a.isInsertRow() != b.isInsertRow()) { return false; }
-        if (a.getColumn() != b.getColumn()) { return false; }
-        if (a.getRow() != b.getRow()) { return false; }
+        if (a == null && b == null) {
+            return true;
+        }
+        if (a == null && b != null) {
+            return false;
+        }
+        if (b == null && a != null) {
+            return false;
+        }
+        if (a.isInsertColumn() != b.isInsertColumn()) {
+            return false;
+        }
+        if (a.isInsertRow() != b.isInsertRow()) {
+            return false;
+        }
+        if (a.getColumn() != b.getColumn()) {
+            return false;
+        }
+        if (a.getRow() != b.getRow()) {
+            return false;
+        }
         return true;
     }
 
@@ -632,8 +657,12 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
     public boolean editCellAt(final int row, final int column, final EventObject e) {
         if (e != null && e instanceof KeyEvent) {
             final int code = ((KeyEvent) e).getKeyCode();
-            if (code != KeyEvent.VK_ENTER && this.isAutoEditLimitedOnEnter()) { return false; }
-            if (((KeyEvent) e).isControlDown() && this.isAutoEditDisabledForCtrl()) { return false; }
+            if (code != KeyEvent.VK_ENTER && this.isAutoEditLimitedOnEnter()) {
+                return false;
+            }
+            if (((KeyEvent) e).isControlDown() && this.isAutoEditDisabledForCtrl()) {
+                return false;
+            }
 
         }
         final boolean ret = super.editCellAt(row, column, e);
@@ -670,8 +699,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
     }
 
     /**
-     * COnverts ther colum index to the current model and returns the column's
-     * cellrenderer
+     * COnverts ther colum index to the current model and returns the column's cellrenderer
      */
     @Override
     public TableCellRenderer getCellRenderer(final int row, final int column) {
@@ -774,7 +802,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
 
     /**
      * Returns the real column index at this point
-     *
+     * 
      * @param point
      */
     public ExtColumn<E> getExtColumnAtPoint(final Point point) {
@@ -783,11 +811,9 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
     }
 
     /**
-     *
+     * 
      * @param point
-     * @return columnModel Index. use
-     *         {@link ExtTableModel#getExtColumnByModelIndex(int)} to get the
-     *         columninstance
+     * @return columnModel Index. use {@link ExtTableModel#getExtColumnByModelIndex(int)} to get the columninstance
      */
     public int getExtColumnModelIndexByPoint(final Point point) {
         final int x = this.columnAtPoint(point);
@@ -796,9 +822,8 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
     }
 
     /**
-     * Returns the original Celleditor given by the current LAF UI. Used to have
-     * an reference to the LAF's default editor
-     *
+     * Returns the original Celleditor given by the current LAF UI. Used to have an reference to the LAF's default editor
+     * 
      * @param row
      * @param column
      * @return
@@ -815,9 +840,8 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
     // }
 
     /**
-     * Returns the original Cellrenderer given bei the current LAF UI Used to
-     * have an reference to the LAF's default renderer
-     *
+     * Returns the original Cellrenderer given bei the current LAF UI Used to have an reference to the LAF's default renderer
+     * 
      * @param row
      * @param column
      * @return
@@ -860,10 +884,9 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
 
     /*
      * (non-Javadoc)
-     *
-     * @see
-     * org.appwork.swing.components.tooltips.ToolTipHandler#updateTooltip(org
-     * .appwork.swing.components.tooltips.ExtTooltip, java.awt.event.MouseEvent)
+     * 
+     * @see org.appwork.swing.components.tooltips.ToolTipHandler#updateTooltip(org .appwork.swing.components.tooltips.ExtTooltip,
+     * java.awt.event.MouseEvent)
      */
     @Override
     public int getTooltipDelay(final Point mousePositionOnScreen) {
@@ -994,9 +1017,8 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
 
     /*
      * (non-Javadoc)
-     *
-     * @see org.appwork.swing.components.tooltips.ToolTipHandler#
-     * isTooltipDisabledUntilNextRefocus()
+     * 
+     * @see org.appwork.swing.components.tooltips.ToolTipHandler# isTooltipDisabledUntilNextRefocus()
      */
     @Override
     public boolean isTooltipDisabledUntilNextRefocus() {
@@ -1007,9 +1029,8 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
 
     /*
      * (non-Javadoc)
-     *
-     * @see org.appwork.swing.components.tooltips.ToolTipHandler#
-     * isTooltipWithoutFocusEnabled()
+     * 
+     * @see org.appwork.swing.components.tooltips.ToolTipHandler# isTooltipWithoutFocusEnabled()
      */
     @Override
     public boolean isTooltipWithoutFocusEnabled() {
@@ -1022,9 +1043,8 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
     }
 
     /**
-     * This method will be called when a doubleclick is performed on the object
-     * <code>obj</code>
-     *
+     * This method will be called when a doubleclick is performed on the object <code>obj</code>
+     * 
      * @param obj
      */
     protected boolean onDoubleClick(final MouseEvent e, final E obj) {
@@ -1033,7 +1053,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
 
     /**
      * Override this to handle header sort clicks
-     *
+     * 
      * @param e
      * @param oldIdentifier
      * @param oldColumn
@@ -1047,9 +1067,8 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
     }
 
     /**
-     * This method will be called if the user does a windows typic rename click
-     * order. Means: click on a already selected single row
-     *
+     * This method will be called if the user does a windows typic rename click order. Means: click on a already selected single row
+     * 
      * @param e
      * @param obj
      * @return
@@ -1134,7 +1153,9 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
      */
     protected void onSortHeaderClick(final MouseEvent e) {
         final int col = ExtTable.this.getExtColumnModelIndexByPoint(e.getPoint());
-        if (col == -1) { return; }
+        if (col == -1) {
+            return;
+        }
 
         final ExtColumn<E> oldColumn = ExtTable.this.getModel().getSortColumn();
         final String oldIdentifier = oldColumn == null ? null : oldColumn.getSortOrderIdentifier();
@@ -1151,7 +1172,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
     /**
      * @return
      */
-    public boolean osResizeableColumns() {
+    public boolean isResizeableColumns() {
 
         return true;
     }
@@ -1167,10 +1188,11 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
      */
     private void paintHighlighters(final Graphics g) {
         /*
-         * highlighter TODO: this might get slow for many rows TODO: change
-         * order? highlighting columns "overpaint" the text
+         * highlighter TODO: this might get slow for many rows TODO: change order? highlighting columns "overpaint" the text
          */
-        if (this.getRowCount() == 0) { return; }
+        if (this.getRowCount() == 0) {
+            return;
+        }
         final Rectangle visibleRect = this.getVisibleRect();
         Rectangle first, last;
         // get current width;
@@ -1207,8 +1229,12 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
         // ctrl + home or ctrl+end should scrol to top/bottom. If we would not
         // catch these events here, they would change the table selection
         // instead
-        if (evt.isControlDown() && evt.getKeyCode() == KeyEvent.VK_HOME) { return false; }
-        if (evt.isControlDown() && evt.getKeyCode() == KeyEvent.VK_END) { return false; }
+        if (evt.isControlDown() && evt.getKeyCode() == KeyEvent.VK_HOME) {
+            return false;
+        }
+        if (evt.isControlDown() && evt.getKeyCode() == KeyEvent.VK_END) {
+            return false;
+        }
         if (!evt.isControlDown() && evt.getKeyCode() == KeyEvent.VK_ENTER && pressed) {
             // edit
             final int leadRow = this.getSelectionModel().getLeadSelectionIndex();
@@ -1222,7 +1248,9 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
             }
 
         }
-        if (!pressed) { return super.processKeyBinding(stroke, evt, condition, pressed); }
+        if (!pressed) {
+            return super.processKeyBinding(stroke, evt, condition, pressed);
+        }
 
         final KeyStroke ks = stroke;
         if (ks != null) {
@@ -1420,7 +1448,9 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
                         this.eventSender.fireEvent(new ExtTableEvent<E>(this, ExtTableEvent.Types.DOUBLECLICK, obj));
                     }
                 }
-                if (ret == true) { return; }
+                if (ret == true) {
+                    return;
+                }
             } else if (e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 1) {
                 final int row = this.rowAtPoint(e.getPoint());
                 final E obj = this.getModel().getObjectbyRow(row);
@@ -1433,7 +1463,9 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
                     if (ret == false) {
                         ret = this.onSingleClick(e, obj);
                     }
-                    if (ret == true) { return; }
+                    if (ret == true) {
+                        return;
+                    }
                     if (this.clickDelayerRunable != null) {
                         this.renameClickDelayer.resetAndStart();
                     }
@@ -1469,9 +1501,13 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
                                         if (mousePosition != null) {
                                             final int rowNow = ExtTable.this.rowAtPoint(mousePosition);
                                             final ExtColumn<E> colNow = ExtTable.this.getExtColumnAtPoint(mousePosition);
-                                            if (rowNow != row || col != colNow) { return; }
+                                            if (rowNow != row || col != colNow) {
+                                                return;
+                                            }
                                         }
-                                        if (!ExtTable.this.getSelectionModel().isSelectedIndex(row)) { return; }
+                                        if (!ExtTable.this.getSelectionModel().isSelectedIndex(row)) {
+                                            return;
+                                        }
 
                                         if (!col.onRenameClick(e, obj)) {
                                             ExtTable.this.onRenameClick(e, obj);
@@ -1502,8 +1538,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
             }
         }
         /*
-         * moved this at the end of this function so it does not pre-interfere
-         * with customized click handling (eg changing selection)
+         * moved this at the end of this function so it does not pre-interfere with customized click handling (eg changing selection)
          */
         super.processMouseEvent(e);
     }
@@ -1538,7 +1573,9 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
             if (c2 instanceof JScrollPane) {
                 final JScrollPane scrollPane = (JScrollPane) c2;
                 final JViewport viewport = scrollPane.getViewport();
-                if (viewport == null || viewport.getView() != this) { return; }
+                if (viewport == null || viewport.getView() != this) {
+                    return;
+                }
                 if (this.isColumnButtonVisible()) {
                     this.verticalScrollPolicy = scrollPane.getVerticalScrollBarPolicy();
                     scrollPane.setCorner(ScrollPaneConstants.UPPER_TRAILING_CORNER, this.getColumnButton());
@@ -1559,7 +1596,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
 
     /**
      * Removes a rowhilighter
-     *
+     * 
      * @param highlighter
      */
     public void removeRowHighlighter(final ExtOverlayRowHighlighter highlighter) {
@@ -1567,9 +1604,8 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
     }
 
     /**
-     * Resets the columnwidth to their default value. If their is empty space
-     * afterwards, the table will distribute the DELTA to all columns PLease
-     * make sure to call {@link #updateColumns()} afterwards
+     * Resets the columnwidth to their default value. If their is empty space afterwards, the table will distribute the DELTA to all columns
+     * PLease make sure to call {@link #updateColumns()} afterwards
      */
     public void resetColumnDimensions() {
 
@@ -1585,9 +1621,8 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
     }
 
     /**
-     * Resets the column locks to their default value. If their is empty space
-     * afterwards, the table will distribute the DELTA to all columns PLease
-     * make sure to call {@link #updateColumns()} afterwards
+     * Resets the column locks to their default value. If their is empty space afterwards, the table will distribute the DELTA to all
+     * columns PLease make sure to call {@link #updateColumns()} afterwards
      */
     public void resetColumnLocks() {
         for (final ExtColumn<E> col : this.getModel().getColumns()) {
@@ -1598,8 +1633,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
     }
 
     /**
-     * Resets the Order of the columns to their default PLease make sure to call
-     * {@link #updateColumns()} afterwards
+     * Resets the Order of the columns to their default PLease make sure to call {@link #updateColumns()} afterwards
      */
     public void resetColumnOrder() {
         for (int i = 0; i < this.getModel().getColumns().size(); i++) {
@@ -1615,8 +1649,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
     }
 
     /**
-     * Resets the Visibility of all columns to their Default value. PLease make
-     * sure to call {@link #updateColumns()} afterwards
+     * Resets the Visibility of all columns to their Default value. PLease make sure to call {@link #updateColumns()} afterwards
      */
     public void resetColumnVisibility() {
         for (final ExtColumn<E> col : this.getModel().getColumns()) {
@@ -1655,13 +1688,17 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
 
     public void scrollToRow(final int row, final int preferedXPosition) {
 
-        if (row < 0) { return; }
+        if (row < 0) {
+            return;
+        }
         new EDTHelper<Object>() {
 
             @Override
             public Object edtRun() {
                 final JViewport viewport = (JViewport) ExtTable.this.getParent();
-                if (viewport == null) { return null; }
+                if (viewport == null) {
+                    return null;
+                }
                 final Rectangle rect = ExtTable.this.getCellRect(row, 0, true);
 
                 final Rectangle viewRect = viewport.getViewRect();
@@ -1689,9 +1726,13 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
             @Override
             public Object edtRun() {
                 final JViewport viewport = (JViewport) ExtTable.this.getParent();
-                if (viewport == null) { return null; }
+                if (viewport == null) {
+                    return null;
+                }
                 final int[] sel = ExtTable.this.getSelectedRows();
-                if (sel == null || sel.length == 0) { return null; }
+                if (sel == null || sel.length == 0) {
+                    return null;
+                }
                 final Rectangle rect = ExtTable.this.getCellRect(sel[0], 0, true);
                 final Rectangle rect2 = ExtTable.this.getCellRect(sel[sel.length - 1], 0, true);
                 rect.height += rect2.y - rect.y;

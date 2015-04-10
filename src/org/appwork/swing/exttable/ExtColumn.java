@@ -335,6 +335,7 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
      * @return
      */
     public int getDefaultWidth() {
+
         return 100;
     }
 
@@ -642,7 +643,7 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
     }
 
     public boolean isResizable() {
-        return getModel().getTable().osResizeableColumns() && !this.getModel().getTable().getColumnStore("ColumnWidthLocked_", this.getID(), !this.isDefaultResizable());
+        return getModel().getTable().isResizeableColumns() && !this.getModel().getTable().getColumnStore("ColumnWidthLocked_", this.getID(), !this.isDefaultResizable());
     }
 
     /**

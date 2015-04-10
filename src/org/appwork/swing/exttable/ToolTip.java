@@ -49,8 +49,9 @@ public class ToolTip extends ExtTooltip {
     public TooltipPanel createContent() {
         final TooltipPanel p = new TooltipPanel("ins 2,wrap 1", "[]", "[]");
         tf = new JLabel();
+        Color col;
         // this.tf.setEnabled(false);
-        tf.setForeground(new Color(getConfig().getForegroundColor()));
+        tf.setForeground(col = new Color(getConfig().getForegroundColor()));
         tf.setBackground(null);
 
         SwingUtils.setOpaque(tf, false);

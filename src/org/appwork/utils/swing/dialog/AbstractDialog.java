@@ -717,7 +717,7 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
     }
 
     protected JButton createOkButton() {
-        return new JButton(this.okButtonText);
+        return new JButton(getOKButtonText());
     }
 
     protected abstract T createReturnValue();

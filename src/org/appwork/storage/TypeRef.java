@@ -42,7 +42,12 @@ public abstract class TypeRef<T> {
     public static final TypeRef<HashMap<String, Integer>> HASHMAP_INTEGER = new TypeRef<HashMap<String, Integer>>() {
                                                                           };
     public static final TypeRef<Boolean>                  BOOLEAN         = new TypeRef<Boolean>() {
-                                                                          }; ;
+                                                                          };
+    public static final TypeRef<String[]>                 STRING_ARRAY    = new TypeRef<String[]>() {
+                                                                              public Type getType() {
+                                                                                  return String[].class;
+                                                                              };
+                                                                          };
     private final Type                                    type;
 
     public TypeRef() {

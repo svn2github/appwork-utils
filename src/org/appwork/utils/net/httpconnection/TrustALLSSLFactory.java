@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2011 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.utils.net.httpconnection
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -21,7 +21,7 @@ import javax.net.ssl.X509TrustManager;
 
 /**
  * @author daniel
- * 
+ *
  */
 public class TrustALLSSLFactory {
     private static TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
@@ -37,10 +37,8 @@ public class TrustALLSSLFactory {
                                                     @Override
                                                     public java.security.cert.X509Certificate[] getAcceptedIssuers() {
                                                         /*
-                                                         * returning null here
-                                                         * can cause a NPE in
-                                                         * some java versions!
-                                                         */
+             * returning null here can cause a NPE in some java versions!
+             */
                                                         return new java.security.cert.X509Certificate[0];
                                                     }
                                                 } };

@@ -62,9 +62,10 @@ public class IO {
                 if (!in.exists()) {
                     throw new FileNotFoundException(in.getAbsolutePath());
                 }
-
-                inChannel = (fis = new FileInputStream(in)).getChannel();
-                outChannel = (fos = new FileOutputStream(out)).getChannel();
+                fis = new FileInputStream(in);
+                fos = new FileOutputStream(out);
+                inChannel = fis.getChannel();
+                outChannel = fos.getChannel();
                 if (progress != null) {
                     progress.setBytesTotal(in.length());
                 }
@@ -122,15 +123,7 @@ public class IO {
                 throw e;
             } finally {
                 try {
-                    outChannel.close();
-                } catch (final Throwable e) {
-                }
-                try {
                     fos.close();
-                } catch (final Throwable e) {
-                }
-                try {
-                    inChannel.close();
                 } catch (final Throwable e) {
                 }
                 try {
@@ -497,7 +490,7 @@ public class IO {
 
     /**
      * Want to get informed in case of any io problems, set this handler
-     * 
+     *
      * @param handler
      */
     public static void setErrorHandler(final IOErrorHandler handler) {

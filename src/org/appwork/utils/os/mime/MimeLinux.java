@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2010 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.utils.os.mime
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -19,18 +19,24 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MimeLinux extends MimeDefault {
+
     @Override
     public String getMimeDescription(String mimeType) {
-        if (super.getMimeDescriptionCache(mimeType) != null) { return super.getMimeDescriptionCache(mimeType); }
+        if (super.getMimeDescriptionCache(mimeType) != null) {
+            return super.getMimeDescriptionCache(mimeType);
+        }
 
         File file = new File("/usr/share/mime/" + mimeType + ".xml");
 
-        if (!file.exists()) { return "Unknown"; }
+        if (!file.exists()) {
+            return "Unknown";
+        }
 
         String mime = "Unkown";
-
+        FileInputStream fis = null;
         try {
-            BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+            fis = new FileInputStream(file);
+            BufferedReader in = new BufferedReader(new InputStreamReader(fis));
             String line;
 
             while ((line = in.readLine()) != null) {
@@ -41,13 +47,18 @@ public class MimeLinux extends MimeDefault {
                 }
             }
 
-            in.close();
         } catch (FileNotFoundException e) {
             org.appwork.utils.logging.Log.exception(e);
         } catch (IOException e) {
             org.appwork.utils.logging.Log.exception(e);
+        } finally {
+            try {
+                if (fis != null) {
+                    fis.close();
+                }
+            } catch (final Throwable e) {
+            }
         }
-
         super.saveMimeDescriptionCache(mimeType, mime);
 
         return mime;

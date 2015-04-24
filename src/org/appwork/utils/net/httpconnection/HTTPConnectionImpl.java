@@ -432,7 +432,7 @@ public class HTTPConnectionImpl implements HTTPConnection {
                 if (socket != null && socket instanceof SSLSocket) {
                     final long javaVersion = Application.getJavaVersion();
                     final boolean gcmWorkaround = javaVersion < 18600000;
-                    final boolean dhWorkaround = javaVersion < Application.JAVA17;
+                    final boolean dhWorkaround = javaVersion < 17210000l;
                     if (gcmWorkaround || dhWorkaround) {
                         final SSLSocket sslSocket = (SSLSocket) socket;
                         final ArrayList<String> cipherSuits = new ArrayList<String>(Arrays.asList(sslSocket.getEnabledCipherSuites()));

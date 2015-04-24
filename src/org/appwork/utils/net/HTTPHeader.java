@@ -9,6 +9,8 @@
  */
 package org.appwork.utils.net;
 
+import org.appwork.net.protocol.http.HTTPConstants;
+
 /**
  * @author daniel
  * 
@@ -16,10 +18,11 @@ package org.appwork.utils.net;
 
 public class HTTPHeader {
 
-    public static final byte[] DELIMINATOR = ": ".getBytes();
-    private final String       key;
-    private final String       value;
-    private final boolean      allowOverwrite;
+    public static final byte[]     DELIMINATOR = ": ".getBytes();
+    public static final HTTPHeader CONTENT_TYPE_TEXT_UTF8   = new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_TYPE, "text; charset=utf-8");
+    private final String           key;
+    private final String           value;
+    private final boolean          allowOverwrite;
 
     public HTTPHeader(final String key, final String value) {
         this(key, value, true);
@@ -32,7 +35,9 @@ public class HTTPHeader {
     }
 
     public boolean contains(final String string) {
-        if (this.value != null && this.value.contains(string)) { return true; }
+        if (this.value != null && this.value.contains(string)) {
+            return true;
+        }
         return false;
     }
 

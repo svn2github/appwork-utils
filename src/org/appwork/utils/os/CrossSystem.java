@@ -110,18 +110,25 @@ public class CrossSystem {
         if (CrossSystem.isLinux() && ARCHFamily.ARM.equals(CrossSystem.getARCHFamily())) {
             FileInputStream fis = null;
             try {
+                boolean armV6 = false;
+                boolean armV7 = false;
+                boolean hardWareRP1 = false;
+                boolean hardWareRP2 = false;
                 fis = new FileInputStream("/proc/cpuinfo");
                 final BufferedReader is = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
                 String line = null;
-                int raspberryPiMatches = 0;
                 while ((line = is.readLine()) != null) {
                     if (line.contains("ARMv6")) {
-                        raspberryPiMatches++;
+                        armV6 = true;
+                    } else if (line.contains("ARMv7")) {
+                        armV7 = true;
                     } else if (line.contains("BCM2708")) {
-                        raspberryPiMatches++;
+                        hardWareRP1 = true;
+                    } else if (line.contains("BCM2709")) {
+                        hardWareRP2 = true;
                     }
                 }
-                isRaspberryPi = raspberryPiMatches == 2;
+                isRaspberryPi = (armV6 && hardWareRP1) || (armV7 && hardWareRP2);
             } catch (final Throwable e) {
                 e.printStackTrace();
             } finally {

@@ -4,15 +4,15 @@ import java.io.File;
 
 public class LogFolder {
 
-    private long    created;
-    private boolean selected;
-    private boolean current    = false;
+    private final long created;
+    private boolean    selected;
+    private boolean    current    = false;
 
-    private long    lastModified;
+    private final long lastModified;
 
-    private File    folder;
+    private final File folder;
 
-    private boolean needsFlush = false;
+    private boolean    needsFlush = false;
 
     public LogFolder(final File f, final long timestamp) {
         this.created = timestamp;
@@ -29,6 +29,9 @@ public class LogFolder {
     }
 
     public long getLastModified() {
+        if (isCurrent() && isNeedsFlush()) {
+            return System.currentTimeMillis();
+        }
         return this.lastModified;
     }
 
@@ -50,26 +53,6 @@ public class LogFolder {
         return this.selected;
     }
 
-    public void setCreated(final long created) {
-        this.created = created;
-    }
-
-    /**
-     * @param current
-     *            the current to set
-     */
-    public void setCurrent(final boolean current) {
-        this.current = current;
-    }
-
-    public void setFolder(final File folder) {
-        this.folder = folder;
-    }
-
-    public void setLastModified(final long lastModified) {
-        this.lastModified = lastModified;
-    }
-
     /**
      * @param needsFlush
      *            the needsFlush to set
@@ -80,6 +63,13 @@ public class LogFolder {
 
     public void setSelected(final boolean selected) {
         this.selected = selected;
+    }
+
+    /**
+     * @param b
+     */
+    public void setCurrent(boolean b) {
+        current = b;
     }
 
 }

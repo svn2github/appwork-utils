@@ -607,6 +607,27 @@ public class Application {
             sb.setLength(0);
         }
 
+        URL url = Application.getRessourceURL("version.nfo");
+
+        if (url != null) {
+            try {
+                logger.info(url + ":\r\n" + IO.readURLToString(url));
+            } catch (final IOException e1) {
+                logger.log(e1);
+
+            }
+        }
+        url = Application.getRessourceURL("build.json");
+
+        if (url != null) {
+            try {
+                logger.info(url + ":\r\n" + IO.readURLToString(url));
+            } catch (final IOException e1) {
+                logger.log(e1);
+
+            }
+        }
+
     }
 
     public static class PauseableOutputStream extends OutputStream {

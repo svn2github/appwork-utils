@@ -90,8 +90,7 @@ public class IconIO {
         /*
          * (non-Javadoc)
          * 
-         * @see javax.swing.Icon#paintIcon(java.awt.Component,
-         * java.awt.Graphics, int, int)
+         * @see javax.swing.Icon#paintIcon(java.awt.Component, java.awt.Graphics, int, int)
          */
         @Override
         public void paintIcon(final Component c, final Graphics g, final int x, final int y) {
@@ -113,7 +112,9 @@ public class IconIO {
          */
         @Override
         public IconIdentifier getIdentifier() {
-            if (source instanceof IDIcon) { return ((IDIcon) source).getIdentifier(); }
+            if (source instanceof IDIcon) {
+                return ((IDIcon) source).getIdentifier();
+            }
             return new IconIdentifier("unknown", source.toString());
         }
     }
@@ -172,10 +173,14 @@ public class IconIO {
 
     public static BufferedImage convertIconToBufferedImage(final Icon icon) {
 
-        if (icon == null) { return null; }
+        if (icon == null) {
+            return null;
+        }
         if (icon instanceof ImageIcon) {
             final Image ret = ((ImageIcon) icon).getImage();
-            if (ret instanceof BufferedImage) { return (BufferedImage) ret; }
+            if (ret instanceof BufferedImage) {
+                return (BufferedImage) ret;
+            }
         }
         final int w = icon.getIconWidth();
         final int h = icon.getIconHeight();
@@ -195,12 +200,18 @@ public class IconIO {
     }
 
     public static BufferedImage createEmptyImage(final int w, final int h) {
+        if (org.appwork.utils.Application.isHeadless()) {
 
-        final GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        final GraphicsDevice gd = ge.getDefaultScreenDevice();
-        final GraphicsConfiguration gc = gd.getDefaultConfiguration();
-        final BufferedImage image = gc.createCompatibleImage(w, h, Transparency.BITMASK);
-        return image;
+            final BufferedImage image = new BufferedImage(w, h, Transparency.BITMASK);
+
+            return image;
+        } else {
+            final GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+            final GraphicsDevice gd = ge.getDefaultScreenDevice();
+            final GraphicsConfiguration gc = gd.getDefaultConfiguration();
+            final BufferedImage image = gc.createCompatibleImage(w, h, Transparency.BITMASK);
+            return image;
+        }
     }
 
     public static BufferedImage debug(final BufferedImage img) {
@@ -222,17 +233,17 @@ public class IconIO {
         if (resource != null) {
             InputStream is = null;
             /*
-             * workaround for
-             * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7166379
+             * workaround for http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7166379
              */
             /*
-             * http://stackoverflow.com/questions/10441276/jdk-1-7-too-many-open-
-             * files-due-to-posix-semaphores
+             * http://stackoverflow.com/questions/10441276/jdk-1-7-too-many-open- files-due-to-posix-semaphores
              */
             try {
                 is = resource.openStream();
                 final BufferedImage ret = ImageIO.read(is);
-                if (ret != null) { return ret; }
+                if (ret != null) {
+                    return ret;
+                }
             } catch (final IOException e) {
                 Log.exception(Level.WARNING, e);
             } finally {
@@ -242,7 +253,9 @@ public class IconIO {
                 }
             }
         }
-        if (allowDummy) { return ImageProvider.createIcon("DUMMY", 48, 48); }
+        if (allowDummy) {
+            return ImageProvider.createIcon("DUMMY", 48, 48);
+        }
         return null;
     }
 
@@ -299,9 +312,8 @@ public class IconIO {
     }
 
     /**
-     * Taken from http://today.java.net/pub/a/today/2007/04/03/perils-of-image-
-     * getscaledinstance.html License: unknown Convenience method that returns a
-     * scaled instance of the provided {@code BufferedImage}.
+     * Taken from http://today.java.net/pub/a/today/2007/04/03/perils-of-image- getscaledinstance.html License: unknown Convenience method
+     * that returns a scaled instance of the provided {@code BufferedImage}.
      * 
      * @param img
      *            the original image to be scaled
@@ -311,19 +323,18 @@ public class IconIO {
      *            the desired height of the scaled instance, in pixels
      * @param hint
      * @param higherQuality
-     *            if true, this method will use a multi-step scaling technique
-     *            that provides higher quality than the usual one-step technique
-     *            (only useful in downscaling cases, where {@code targetWidth}
-     *            or {@code targetHeight} is smaller than the original
-     *            dimensions, and generally only when the {@code BILINEAR} hint
-     *            is specified)
+     *            if true, this method will use a multi-step scaling technique that provides higher quality than the usual one-step
+     *            technique (only useful in downscaling cases, where {@code targetWidth} or {@code targetHeight} is smaller than the
+     *            original dimensions, and generally only when the {@code BILINEAR} hint is specified)
      * @return a scaled version of the original {@code BufferedImage}
      */
     public static BufferedImage getScaledInstance(final Image img, int width, int height, final Interpolation interpolation, final boolean higherQuality) {
         final double faktor = Math.max((double) img.getWidth(null) / width, (double) img.getHeight(null) / height);
         width = Math.max((int) (img.getWidth(null) / faktor), 1);
         height = Math.max((int) (img.getHeight(null) / faktor), 1);
-        if (faktor == 1.0 && img instanceof BufferedImage) { return (BufferedImage) img; }
+        if (faktor == 1.0 && img instanceof BufferedImage) {
+            return (BufferedImage) img;
+        }
 
         Image ret = img;
         int w, h;
@@ -423,8 +434,7 @@ public class IconIO {
     }
 
     /**
-     * This function removes the major color of the image and replaces it with
-     * transparency.
+     * This function removes the major color of the image and replaces it with transparency.
      * 
      * @param image
      * @return
@@ -524,7 +534,9 @@ public class IconIO {
     public static BufferedImage toBufferedImage(final Icon icon) {
         if (icon instanceof ImageIcon) {
             Image img = ((ImageIcon) icon).getImage();
-            if (img instanceof BufferedImage) { return (BufferedImage) img; }
+            if (img instanceof BufferedImage) {
+                return (BufferedImage) img;
+            }
         }
         final int w = icon.getIconWidth();
         final int h = icon.getIconHeight();
@@ -579,7 +591,9 @@ public class IconIO {
      * @return
      */
     public static ImageIcon toImageIcon(final Icon icon) {
-        if (icon == null) { return null; }
+        if (icon == null) {
+            return null;
+        }
         if (icon instanceof ImageIcon) {
             return (ImageIcon) icon;
         } else {

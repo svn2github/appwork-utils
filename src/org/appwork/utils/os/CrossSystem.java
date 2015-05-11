@@ -302,11 +302,19 @@ public class CrossSystem {
         }
         /* remove invalid chars */
         pathPart = pathPart.replaceAll("([\\\\|<|>|\\||\r|\n|\"|:|\\*|\\?|/|\\x00])+", "_");
-        /*
-         * remove ending points, not allowed under windows and others os maybe too
-         */
+
         pathPart = pathPart.trim();
-        pathPart = pathPart.replaceFirst("\\.+$", "");
+        if (pathPart.matches("^\\.+$")) {
+            /*
+             * at least keep _
+             */
+            pathPart = pathPart.replaceFirst("\\.+$", "_");
+        } else {
+            /*
+             * remove ending points, not allowed under windows and others os maybe too
+             */
+            pathPart = pathPart.replaceFirst("\\.+$", "");
+        }
         if (CrossSystem.isWindows() || CrossSystem.isOS2()) {
             /**
              * http://msdn.microsoft.com/en-us/library/windows/desktop/aa365247% 28v=vs.85%29.aspx

@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2011 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.controlling
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -16,7 +16,7 @@ import org.appwork.utils.logging.Log;
 
 /**
  * @author daniel
- * 
+ *
  */
 public class SingleReachableState {
 
@@ -30,7 +30,9 @@ public class SingleReachableState {
     }
 
     public void executeWhen(final Runnable reached, final Runnable notreached) {
-        if (reached == null && notreached == null) { return; }
+        if (reached == null && notreached == null) {
+            return;
+        }
         while (true) {
             final ArrayList<Runnable> runnables = this.stateMachine.get();
             if (runnables == null) {
@@ -59,6 +61,19 @@ public class SingleReachableState {
         return this.stateMachine.get() == null;
     }
 
+    public void waitForReached() throws InterruptedException {
+        if (this.stateMachine.get() != null) {
+            while (true) {
+                synchronized (stateMachine) {
+                    if (this.stateMachine.get() == null) {
+                        break;
+                    }
+                    stateMachine.wait();
+                }
+            }
+        }
+    }
+
     private void run(final Runnable run) {
         try {
             if (run != null) {
@@ -70,10 +85,15 @@ public class SingleReachableState {
     }
 
     public void setReached() {
-        final ArrayList<Runnable> runnables = this.stateMachine.getAndSet(null);
-        if (runnables == null) { return; }
-        for (final Runnable run : runnables) {
-            this.run(run);
+        final ArrayList<Runnable> runnables;
+        synchronized (stateMachine) {
+            runnables = this.stateMachine.getAndSet(null);
+            stateMachine.notifyAll();
+        }
+        if (runnables != null) {
+            for (final Runnable run : runnables) {
+                this.run(run);
+            }
         }
     }
 

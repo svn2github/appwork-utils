@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2010 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.utils.swing.dialog
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -178,7 +178,7 @@ public class ConfirmDialog extends AbstractDialog<Integer> implements ConfirmDia
             // this.textField.setMaximumSize(new Dimension(450, 600));
         }
 
-        textField.setText(message);
+        textField.setText(getMessage());
         textField.setEditable(false);
         textField.setBackground(null);
         textField.setOpaque(false);
@@ -211,7 +211,7 @@ public class ConfirmDialog extends AbstractDialog<Integer> implements ConfirmDia
         if (BinaryLogic.containsAll(flagMask, Dialog.LOGIC_DONOTSHOW_BASED_ON_TITLE_ONLY)) {
             return ("dialog-" + getTitle()).replaceAll("\\W", "_");
         } else {
-            return ("dialog-" + getTitle() + "_" + message).replaceAll("\\W", "_");
+            return ("dialog-" + getTitle() + "_" + getMessage()).replaceAll("\\W", "_");
         }
 
     }

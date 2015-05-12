@@ -285,6 +285,14 @@ public class CrossSystem {
         }
     }
 
+    public static void main(String[] args) {
+        System.out.println(alleviatePathParts("."));
+        System.out.println(alleviatePathParts(".."));
+        System.out.println(alleviatePathParts("../Test"));
+        System.out.println(alleviatePathParts("./Test"));
+        System.out.println(alleviatePathParts(" . Test"));
+    }
+
     /**
      * use this method to make pathPart safe to use in a full absoluePath.
      *
@@ -300,21 +308,9 @@ public class CrossSystem {
             }
             return null;
         }
+        pathPart = pathPart.trim();
         /* remove invalid chars */
         pathPart = pathPart.replaceAll("([\\\\|<|>|\\||\r|\n|\"|:|\\*|\\?|/|\\x00])+", "_");
-
-        pathPart = pathPart.trim();
-        if (pathPart.matches("^\\.+$")) {
-            /*
-             * at least keep _
-             */
-            pathPart = pathPart.replaceFirst("\\.+$", "_");
-        } else {
-            /*
-             * remove ending points, not allowed under windows and others os maybe too
-             */
-            pathPart = pathPart.replaceFirst("\\.+$", "");
-        }
         if (CrossSystem.isWindows() || CrossSystem.isOS2()) {
             /**
              * http://msdn.microsoft.com/en-us/library/windows/desktop/aa365247% 28v=vs.85%29.aspx
@@ -323,7 +319,20 @@ public class CrossSystem {
                 pathPart = "_" + pathPart;
             }
         }
-        return pathPart.trim();
+        /*
+         * replace starting dots by single dot (prevents directory traversal)
+         */
+        pathPart = pathPart.replaceFirst("^\\.+", ".");
+        /*
+         * remove ending dots, not allowed under windows and others os maybe too
+         */
+        pathPart = pathPart.replaceFirst("\\.+$", "");
+        pathPart = pathPart.trim();
+        if (StringUtils.isEmpty(pathPart)) {
+            return "_";
+        } else {
+            return pathPart;
+        }
     }
 
     public static boolean isForbiddenFilename(String name) {

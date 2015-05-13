@@ -90,9 +90,9 @@ public class HTTPConnectionUtils {
                 }
             } else {
                 /* ohne Codierung */
-                filename = new Regex(contentdisposition, "filename.*?=[ ]*\"(.+)\"").getMatch(0);
+                filename = new Regex(contentdisposition, "file_?name.*?=[ ]*\"(.+)\"").getMatch(0);
                 if (filename == null) {
-                    filename = new Regex(contentdisposition, "filename.*?=[ ]*'(.+)'").getMatch(0);
+                    filename = new Regex(contentdisposition, "file_?name.*?=[ ]*'(.+)'").getMatch(0);
                 }
                 if (filename == null) {
                     header = header.replaceAll("=", "=\"") + "\"";

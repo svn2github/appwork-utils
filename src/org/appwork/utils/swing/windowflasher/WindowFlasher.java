@@ -14,13 +14,13 @@ import org.appwork.utils.swing.EDTRunner;
 
 public class WindowFlasher {
 
-    private final JFrame           window;
+    private final JFrame                window;
 
     private final java.util.List<Image> flashIcons;
-    private List<Image>            icons;
-    private Timer                  iconFlashTimer;
+    private List<Image>                 icons;
+    private Timer                       iconFlashTimer;
 
-    private boolean                running = false;
+    private volatile boolean            running = false;
 
     public WindowFlasher(final JFrame frame, final java.util.List<Image> list) {
         this.window = frame;
@@ -44,7 +44,9 @@ public class WindowFlasher {
      * @return
      */
     public boolean hasFocus() {
-        if (this.window.isFocused()) { return true; }
+        if (this.window.isFocused()) {
+            return true;
+        }
 
         return false;
     }
@@ -89,7 +91,7 @@ public class WindowFlasher {
     }
 
     /**
-     * 
+     *
      */
     public void stop() {
         this.running = false;

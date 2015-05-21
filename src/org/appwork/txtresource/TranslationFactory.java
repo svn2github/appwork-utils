@@ -62,8 +62,7 @@ public class TranslationFactory {
     }
 
     /**
-     * do not call this directly for each translationrequest. use a static cache
-     * instead!
+     * do not call this directly for each translationrequest. use a static cache instead!
      */
     @SuppressWarnings("unchecked")
     public static <T extends TranslateInterface> T create(final Class<T> class1, final String... lookup) {
@@ -226,7 +225,9 @@ public class TranslationFactory {
     }
 
     public static boolean setDesiredLanguage(final String loc) {
-        if (TranslationFactory.getDesiredLanguage().equals(loc)) { return false; }
+        if (TranslationFactory.getDesiredLanguage().equals(loc)) {
+            return false;
+        }
         TranslationFactory.language = loc;
 
         synchronized (TranslationFactory.CACHE) {

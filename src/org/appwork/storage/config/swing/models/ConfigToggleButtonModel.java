@@ -13,7 +13,7 @@ import org.appwork.utils.swing.EDTRunner;
 public class ConfigToggleButtonModel extends ToggleButtonModel implements GenericConfigEventListener<Boolean> {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -3517910678740645735L;
     private BooleanKeyHandler keyHandler;
@@ -30,7 +30,7 @@ public class ConfigToggleButtonModel extends ToggleButtonModel implements Generi
     }
 
     public boolean isSelected() {
-        return keyHandler.getValue();
+        return keyHandler.isEnabled();
     }
 
     public void setSelected(final boolean b) {

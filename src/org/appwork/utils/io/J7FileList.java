@@ -27,6 +27,10 @@ import java.util.regex.Pattern;
  */
 public class J7FileList {
     public static List<File> findFiles(final Pattern pattern, final File directory, final boolean filesOnly) throws IOException {
+        return findFiles(pattern, directory, filesOnly, true);
+    }
+
+    public static List<File> findFiles(final Pattern pattern, final File directory, final boolean filesOnly, final boolean patternOnFileNameOnly) throws IOException {
         final ArrayList<File> ret = new ArrayList<File>();
         if (directory != null && directory.exists()) {
             DirectoryStream<Path> stream = null;
@@ -35,12 +39,22 @@ public class J7FileList {
                 final FileSystem fs = directoryPath.getFileSystem();
                 if (pattern != null) {
                     final PathMatcher matcher = fs.getPathMatcher("regex:" + pattern.pattern());
-                    final DirectoryStream.Filter<Path> filter = new DirectoryStream.Filter<Path>() {
-                        @Override
-                        public boolean accept(Path entry) {
-                            return matcher.matches(entry.getFileName());
-                        }
-                    };
+                    final DirectoryStream.Filter<Path> filter;
+                    if (patternOnFileNameOnly) {
+                        filter = new DirectoryStream.Filter<Path>() {
+                            @Override
+                            public boolean accept(Path entry) {
+                                return matcher.matches(entry.getFileName());
+                            }
+                        };
+                    } else {
+                        filter = new DirectoryStream.Filter<Path>() {
+                            @Override
+                            public boolean accept(Path entry) {
+                                return matcher.matches(entry.toAbsolutePath());
+                            }
+                        };
+                    }
                     stream = fs.provider().newDirectoryStream(directoryPath, filter);
                 } else {
                     final DirectoryStream.Filter<Path> filter = new DirectoryStream.Filter<Path>() {

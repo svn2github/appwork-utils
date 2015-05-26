@@ -643,26 +643,34 @@ public class CrossSystem {
         return -1;
     }
 
+    public static String NEWLINE = null;
+
     public static String getNewLine() {
-        String newLine = null;
-        try {
-            if (Application.getJavaVersion() >= Application.JAVA17) {
-                newLine = System.lineSeparator();
+        if (NEWLINE == null) {
+            String newLine = null;
+            try {
+                if (Application.getJavaVersion() >= Application.JAVA17) {
+                    newLine = System.lineSeparator();
+                }
+            } catch (final Throwable e) {
             }
-        } catch (final Throwable e) {
-        }
-        if (StringUtils.isNotEmpty(newLine)) {
-            newLine = System.getProperty("line.separator");
-        }
-        if (StringUtils.isNotEmpty(newLine)) {
-            switch (CrossSystem.getOSFamily()) {
-            case WINDOWS:
-                return "\r\n";
-            default:
-                return "\n";
+            if (StringUtils.isEmpty(newLine)) {
+                newLine = System.getProperty("line.separator");
             }
+            if (StringUtils.isEmpty(newLine)) {
+                switch (CrossSystem.getOSFamily()) {
+                case WINDOWS:
+                    newLine = "\r\n";
+                    break;
+                default:
+                    newLine = "\n";
+                    break;
+                }
+            }
+            NEWLINE = newLine;
+            return newLine;
         }
-        return newLine;
+        return NEWLINE;
     }
 
     public static boolean is64BitArch() {

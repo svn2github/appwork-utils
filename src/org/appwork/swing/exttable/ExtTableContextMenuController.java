@@ -37,7 +37,7 @@ public abstract class ExtTableContextMenuController<T extends ExtTable<?>> imple
             final Object obj = this.table.getModel().getObjectbyRow(row);
             if (obj == null || row == -1) {
                 /* no object under mouse, lets clear the selection */
-                this.table.clearSelection();
+                this.table.getModel().clearSelection();
                 final JPopupMenu pu = this.getEmptyPopup();
                 if (pu != null && pu.getComponentCount() > 0) {
                     pu.show(this.table, e.getPoint().x, e.getPoint().y);
@@ -46,7 +46,7 @@ public abstract class ExtTableContextMenuController<T extends ExtTable<?>> imple
             } else {
                 /* check if we need to select object */
                 if (!this.table.isRowSelected(row)) {
-                    this.table.clearSelection();
+                    this.table.getModel().clearSelection();
                     this.table.addRowSelectionInterval(row, row);
                 }
                 final JPopupMenu pu = this.getPopup();

@@ -411,8 +411,20 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
         if (ltable == null) {
             return;
         }
-        ltable.getSelectionModel().clearSelection();
-        ltable.getColumnModel().getSelectionModel().clearSelection();
+        final ListSelectionModel selectionModel = ltable.getSelectionModel();
+        final ListSelectionModel columnModel = ltable.getColumnModel().getSelectionModel();
+        final boolean tableAdjusting = selectionModel.getValueIsAdjusting();
+        final boolean columnAdjusting = columnModel.getValueIsAdjusting();
+        selectionModel.setValueIsAdjusting(true);
+        columnModel.setValueIsAdjusting(true);
+        selectionModel.clearSelection();
+        columnModel.clearSelection();
+        selectionModel.setAnchorSelectionIndex(-1);
+        selectionModel.setLeadSelectionIndex(-1);
+        columnModel.setAnchorSelectionIndex(-1);
+        columnModel.setLeadSelectionIndex(-1);
+        selectionModel.setValueIsAdjusting(columnAdjusting);
+        columnModel.setValueIsAdjusting(tableAdjusting);
     }
 
     /**
@@ -440,7 +452,7 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
     public TableCellEditor getCelleditorByColumn(final int modelColumnIndex) {
         /*
          * Math.max(0, columnIndex)
-         * 
+         *
          * WORKAROUND for -1 column access,Index out of Bound,Unknown why it happens but this workaround seems to do its job
          */
         return this.getExtColumnByModelIndex(modelColumnIndex);
@@ -455,7 +467,7 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
     public ExtColumn<E> getCellrendererByColumn(final int columnIndex) {
         /*
          * Math.max(0, columnIndex)
-         * 
+         *
          * WORKAROUND for -1 column access,Index out of Bound,Unknown why it happens but this workaround seems to do its job
          */
         return this.columns.get(Math.max(0, columnIndex));
@@ -495,7 +507,7 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
     public String getColumnName(final int column) {
         /*
          * Math.max(0, columnIndex)
-         * 
+         *
          * WORKAROUND for -1 column access,Index out of Bound,Unknown why it happens but this workaround seems to do its job
          */
         return this.columns.get(Math.max(0, column)).getName();
@@ -902,9 +914,9 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
 
     /*
      * this will be called after fireTableStructureChanged. you can customize everything after this
-     * 
+     *
      * true = restore selection
-     * 
+     *
      * false = do not restore selection
      */
     protected boolean postSetTableData(final List<E> newtableData) {
@@ -1034,15 +1046,22 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
         new EDTHelper<Object>() {
             @Override
             public Object edtRun() {
-                if (ExtTableModel.this.hasSelectedObjects()) {
-                    ExtTableModel.this.clearSelection();
-                }
-                if (latest == null) {
-                    return null;
-                }
-                final int row = ExtTableModel.this.getRowforObject(latest);
-                if (row >= 0) {
-                    ltable.addRowSelectionInterval(row, row);
+                final ListSelectionModel s = ltable.getSelectionModel();
+                final boolean isValueAdjusting = s.getValueIsAdjusting();
+                s.setValueIsAdjusting(true);
+                try {
+                    if (ExtTableModel.this.hasSelectedObjects()) {
+                        ExtTableModel.this.clearSelection();
+                    }
+                    if (latest == null) {
+                        return null;
+                    }
+                    final int row = ExtTableModel.this.getRowforObject(latest);
+                    if (row >= 0) {
+                        ltable.addRowSelectionInterval(row, row);
+                    }
+                } finally {
+                    s.setValueIsAdjusting(isValueAdjusting);
                 }
                 return null;
             }
@@ -1062,89 +1081,92 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
         return new EDTHelper<int[]>() {
             @Override
             public int[] edtRun() {
-                if (ExtTableModel.this.hasSelectedObjects()) {
-                    ExtTableModel.this.clearSelection();
-                }
-                final List<E> ltableData = getTableData();
-                if (selections == null || selections.size() == 0 || ltableData.size() == 0) {
-                    return new int[] { -1, -1 };
-                }
-
-                // Transform to rowindex list
-                final int tableDataSize = ltableData.size();
-                final int selectionSize = selections.size();
-
-                int[] selectedRows = new int[selectionSize];
-                int selectedRowsCounter = 0;
-
-                int lastOptimizedIndex = 0;
-
-                final ArrayList<E> unoptimizedSelection = new ArrayList<E>();
-                final int[] maxUnoptimizedIndices = new int[selectionSize];
-                int unoptimizedIndex = 0;
-                optmizedLoop: for (E obj : selections) {
-                    for (int tableIndex = lastOptimizedIndex; tableIndex < tableDataSize; tableIndex++) {
-                        if (obj == ltableData.get(tableIndex)) {
-                            lastOptimizedIndex = tableIndex;
-                            selectedRows[selectedRowsCounter++] = tableIndex;
-                            continue optmizedLoop;
-                        }
-                    }
-                    unoptimizedSelection.add(obj);
-                    maxUnoptimizedIndices[unoptimizedIndex++] = lastOptimizedIndex;
-                }
-                final int unoptimizedSize = unoptimizedSelection.size();
-                findLoop: for (int findIndex = 0; findIndex < unoptimizedSize; findIndex++) {
-                    final E obj = unoptimizedSelection.get(findIndex);
-                    final int max = maxUnoptimizedIndices[findIndex];
-                    for (int tableIndex = 0; tableIndex < max; tableIndex++) {
-                        if (obj == ltableData.get(tableIndex)) {
-                            selectedRows[selectedRowsCounter++] = tableIndex;
-                            continue findLoop;
-                        }
-                    }
-                }
-                if (selectedRowsCounter == 0) {
-                    return new int[] { -1, -1 };
-                }
-                Arrays.sort(selectedRows);
                 final ListSelectionModel s = ltable.getSelectionModel();
                 final boolean isValueAdjusting = s.getValueIsAdjusting();
                 s.setValueIsAdjusting(true);
-                int index0 = -1;
-                int index1 = -1;
-                for (int selectedRowIndex = 0; selectedRowIndex < selectedRowsCounter; selectedRowIndex++) {
-                    final int row = selectedRows[selectedRowIndex];
-                    if (index0 < 0) {
-                        index0 = row;
-                    } else {
-                        if (index1 < 0) {
-                            if (row == index0 + 1) {
-                                index1 = row;
-                            } else {
-                                ltable.addRowSelectionInterval(index0, index0);
-                                index0 = row;
+                try {
+                    if (ExtTableModel.this.hasSelectedObjects()) {
+                        ExtTableModel.this.clearSelection();
+                    }
+                    final List<E> ltableData = getTableData();
+                    if (selections == null || selections.size() == 0 || ltableData.size() == 0) {
+                        return new int[] { -1, -1 };
+                    }
+
+                    // Transform to rowindex list
+                    final int tableDataSize = ltableData.size();
+                    final int selectionSize = selections.size();
+
+                    int[] selectedRows = new int[selectionSize];
+                    int selectedRowsCounter = 0;
+
+                    int lastOptimizedIndex = 0;
+
+                    final ArrayList<E> unoptimizedSelection = new ArrayList<E>();
+                    final int[] maxUnoptimizedIndices = new int[selectionSize];
+                    int unoptimizedIndex = 0;
+                    optmizedLoop: for (E obj : selections) {
+                        for (int tableIndex = lastOptimizedIndex; tableIndex < tableDataSize; tableIndex++) {
+                            if (obj == ltableData.get(tableIndex)) {
+                                lastOptimizedIndex = tableIndex;
+                                selectedRows[selectedRowsCounter++] = tableIndex;
+                                continue optmizedLoop;
                             }
-                        } else {
-                            if (row == index1 + 1) {
-                                index1 = row;
-                            } else {
-                                ltable.addRowSelectionInterval(index0, index1);
-                                index0 = row;
-                                index1 = -1;
+                        }
+                        unoptimizedSelection.add(obj);
+                        maxUnoptimizedIndices[unoptimizedIndex++] = lastOptimizedIndex;
+                    }
+                    final int unoptimizedSize = unoptimizedSelection.size();
+                    findLoop: for (int findIndex = 0; findIndex < unoptimizedSize; findIndex++) {
+                        final E obj = unoptimizedSelection.get(findIndex);
+                        final int max = maxUnoptimizedIndices[findIndex];
+                        for (int tableIndex = 0; tableIndex < max; tableIndex++) {
+                            if (obj == ltableData.get(tableIndex)) {
+                                selectedRows[selectedRowsCounter++] = tableIndex;
+                                continue findLoop;
                             }
                         }
                     }
-                }
-                if (index0 >= 0) {
-                    if (index1 < 0) {
-                        ltable.addRowSelectionInterval(index0, index0);
-                    } else {
-                        ltable.addRowSelectionInterval(index0, index1);
+                    if (selectedRowsCounter == 0) {
+                        return new int[] { -1, -1 };
                     }
+                    Arrays.sort(selectedRows);
+                    int index0 = -1;
+                    int index1 = -1;
+                    for (int selectedRowIndex = 0; selectedRowIndex < selectedRowsCounter; selectedRowIndex++) {
+                        final int row = selectedRows[selectedRowIndex];
+                        if (index0 < 0) {
+                            index0 = row;
+                        } else {
+                            if (index1 < 0) {
+                                if (row == index0 + 1) {
+                                    index1 = row;
+                                } else {
+                                    ltable.addRowSelectionInterval(index0, index0);
+                                    index0 = row;
+                                }
+                            } else {
+                                if (row == index1 + 1) {
+                                    index1 = row;
+                                } else {
+                                    ltable.addRowSelectionInterval(index0, index1);
+                                    index0 = row;
+                                    index1 = -1;
+                                }
+                            }
+                        }
+                    }
+                    if (index0 >= 0) {
+                        if (index1 < 0) {
+                            ltable.addRowSelectionInterval(index0, index0);
+                        } else {
+                            ltable.addRowSelectionInterval(index0, index1);
+                        }
+                    }
+                    return new int[] { selectedRows[0], selectedRows[selectedRowsCounter - 1] };
+                } finally {
+                    s.setValueIsAdjusting(isValueAdjusting);
                 }
-                s.setValueIsAdjusting(isValueAdjusting);
-                return new int[] { selectedRows[0], selectedRows[selectedRowsCounter - 1] };
             }
         }.getReturnValue();
     }
@@ -1154,52 +1176,55 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
         return new EDTHelper<int[]>() {
             @Override
             public int[] edtRun() {
-                if (ExtTableModel.this.hasSelectedObjects()) {
-                    ExtTableModel.this.clearSelection();
-                }
-                if (rows == null || rows.length == 0 || ExtTableModel.this.getTableData().size() == 0) {
-                    return new int[] { -1, -1 };
-                }
-                final int[] selectedRows = rows.clone();
-                Arrays.sort(selectedRows);
                 final ListSelectionModel s = ltable.getSelectionModel();
                 final boolean isValueAdjusting = s.getValueIsAdjusting();
                 s.setValueIsAdjusting(true);
-                int index0 = -1;
-                int index1 = -1;
-                int rowIndex = 0;
-                for (rowIndex = 0; rowIndex < selectedRows.length; rowIndex++) {
-                    final int row = selectedRows[rowIndex];
-                    if (index0 < 0) {
-                        index0 = row;
-                    } else {
-                        if (index1 < 0) {
-                            if (row == index0 + 1) {
-                                index1 = row;
-                            } else {
-                                ltable.addRowSelectionInterval(index0, index0);
-                                index0 = row;
-                            }
+                try {
+                    if (ExtTableModel.this.hasSelectedObjects()) {
+                        ExtTableModel.this.clearSelection();
+                    }
+                    if (rows == null || rows.length == 0 || ExtTableModel.this.getTableData().size() == 0) {
+                        return new int[] { -1, -1 };
+                    }
+                    final int[] selectedRows = rows.clone();
+                    Arrays.sort(selectedRows);
+                    int index0 = -1;
+                    int index1 = -1;
+                    int rowIndex = 0;
+                    for (rowIndex = 0; rowIndex < selectedRows.length; rowIndex++) {
+                        final int row = selectedRows[rowIndex];
+                        if (index0 < 0) {
+                            index0 = row;
                         } else {
-                            if (row == index1 + 1) {
-                                index1 = row;
+                            if (index1 < 0) {
+                                if (row == index0 + 1) {
+                                    index1 = row;
+                                } else {
+                                    ltable.addRowSelectionInterval(index0, index0);
+                                    index0 = row;
+                                }
                             } else {
-                                ltable.addRowSelectionInterval(index0, index1);
-                                index0 = row;
-                                index1 = -1;
+                                if (row == index1 + 1) {
+                                    index1 = row;
+                                } else {
+                                    ltable.addRowSelectionInterval(index0, index1);
+                                    index0 = row;
+                                    index1 = -1;
+                                }
                             }
                         }
                     }
-                }
-                if (index0 >= 0) {
-                    if (index1 < 0) {
-                        ltable.addRowSelectionInterval(index0, index0);
-                    } else {
-                        ltable.addRowSelectionInterval(index0, index1);
+                    if (index0 >= 0) {
+                        if (index1 < 0) {
+                            ltable.addRowSelectionInterval(index0, index0);
+                        } else {
+                            ltable.addRowSelectionInterval(index0, index1);
+                        }
                     }
+                    return new int[] { selectedRows[0], selectedRows[selectedRows.length - 1] };
+                } finally {
+                    s.setValueIsAdjusting(isValueAdjusting);
                 }
-                s.setValueIsAdjusting(isValueAdjusting);
-                return new int[] { selectedRows[0], selectedRows[selectedRows.length - 1] };
             }
         }.getReturnValue();
     }

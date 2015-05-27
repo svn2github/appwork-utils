@@ -170,11 +170,11 @@ public abstract class Eventsender<ListenerType extends EventListener, EventType 
             boolean added = false;
             if (weak == false) {
                 /* update strong listeners */
-                final java.util.List<ListenerType> newStrongListener = new ArrayList<ListenerType>(this.strongListeners);
-                if (!newStrongListener.contains(t)) {
+                if (!strongListeners.contains(t)) {
+                    final java.util.List<ListenerType> newStrongListener = new ArrayList<ListenerType>(this.strongListeners);
                     newStrongListener.add(t);
+                    this.strongListeners = newStrongListener;
                 }
-                this.strongListeners = newStrongListener;
             }
             /* update weak listeners */
             ListenerType l = null;
@@ -199,16 +199,18 @@ public abstract class Eventsender<ListenerType extends EventListener, EventType 
 
     public void cleanup() {
         synchronized (this.LOCK) {
-            final java.util.List<WeakReference<ListenerType>> newWeakListener = new ArrayList<WeakReference<ListenerType>>(this.weakListener.size());
-            for (final WeakReference<ListenerType> listener : this.weakListener) {
-                if (listener.get() == null) {
-                    /* weak item is gone */
-                    continue;
-                } else {
-                    newWeakListener.add(listener);
+            if (weakListener.size() > 0) {
+                final java.util.List<WeakReference<ListenerType>> newWeakListener = new ArrayList<WeakReference<ListenerType>>(this.weakListener.size());
+                for (final WeakReference<ListenerType> listener : this.weakListener) {
+                    if (listener.get() == null) {
+                        /* weak item is gone */
+                        continue;
+                    } else {
+                        newWeakListener.add(listener);
+                    }
                 }
+                this.weakListener = newWeakListener;
             }
-            this.weakListener = newWeakListener;
         }
     }
 
@@ -312,21 +314,25 @@ public abstract class Eventsender<ListenerType extends EventListener, EventType 
             return;
         }
         synchronized (this.LOCK) {
-            ListenerType l = null;
-            final java.util.List<WeakReference<ListenerType>> newWeakListener = new ArrayList<WeakReference<ListenerType>>(this.weakListener.size());
-            final java.util.List<ListenerType> newStrongListener = new ArrayList<ListenerType>(this.strongListeners);
-            for (final WeakReference<ListenerType> listener : this.weakListener) {
-                if ((l = listener.get()) == null) {
-                    /* weak item is gone */
-                    continue;
-                } else if (l != t) {
-                    newWeakListener.add(listener);
+            if (weakListener.size() > 0) {
+                ListenerType l = null;
+                final java.util.List<WeakReference<ListenerType>> newWeakListener = new ArrayList<WeakReference<ListenerType>>(this.weakListener.size());
+                for (final WeakReference<ListenerType> listener : this.weakListener) {
+                    if ((l = listener.get()) == null) {
+                        /* weak item is gone */
+                        continue;
+                    } else if (l != t) {
+                        newWeakListener.add(listener);
+                    }
                 }
+                this.weakListener = newWeakListener;
             }
             /* remove strong item */
-            newStrongListener.remove(t);
-            this.weakListener = newWeakListener;
-            this.strongListeners = newStrongListener;
+            if (strongListeners.contains(t)) {
+                final java.util.List<ListenerType> newStrongListener = new ArrayList<ListenerType>(this.strongListeners);
+                newStrongListener.remove(t);
+                this.strongListeners = newStrongListener;
+            }
         }
     }
 }

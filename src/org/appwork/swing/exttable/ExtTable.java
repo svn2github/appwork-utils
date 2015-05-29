@@ -1396,16 +1396,6 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
     //
     // }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see javax.swing.JTable#clearSelection()
-     */
-    @Override
-    public void clearSelection() {
-        getModel().clearSelection();
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     protected void processMouseEvent(final MouseEvent e) {

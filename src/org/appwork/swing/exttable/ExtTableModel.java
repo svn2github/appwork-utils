@@ -408,23 +408,12 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
      */
     public void clearSelection() {
         final ExtTable<E> ltable = this.getTable();
-        if (ltable == null) {
-            return;
+        if (ltable != null) {
+            final ListSelectionModel selectionModel = ltable.getSelectionModel();
+            if (selectionModel != null) {
+                selectionModel.clearSelection();
+            }
         }
-        final ListSelectionModel selectionModel = ltable.getSelectionModel();
-        final ListSelectionModel columnModel = ltable.getColumnModel().getSelectionModel();
-        final boolean tableAdjusting = selectionModel.getValueIsAdjusting();
-        final boolean columnAdjusting = columnModel.getValueIsAdjusting();
-        selectionModel.setValueIsAdjusting(true);
-        columnModel.setValueIsAdjusting(true);
-        selectionModel.clearSelection();
-        columnModel.clearSelection();
-        selectionModel.setAnchorSelectionIndex(-1);
-        selectionModel.setLeadSelectionIndex(-1);
-        columnModel.setAnchorSelectionIndex(-1);
-        columnModel.setLeadSelectionIndex(-1);
-        selectionModel.setValueIsAdjusting(columnAdjusting);
-        columnModel.setValueIsAdjusting(tableAdjusting);
     }
 
     /**

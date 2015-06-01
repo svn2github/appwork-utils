@@ -6,6 +6,7 @@ import java.net.InetAddress;
 import java.net.URLDecoder;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.util.regex.Matcher;
 
 import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
@@ -17,104 +18,59 @@ public class HTTPConnectionUtils {
     public final static byte R = (byte) 13;
     public final static byte N = (byte) 10;
 
-    public static String getFileNameFromDispositionHeader(String header) {
+    public static String getFileNameFromDispositionHeader(final String contentdisposition) {
         // http://greenbytes.de/tech/tc2231/
-        if (StringUtils.isEmpty(header)) {
-            return null;
-        }
-        final String orgheader = header;
-        String contentdisposition = header;
-
-        String filename = null;
-        for (int i = 0; i < 2; i++) {
-            if (contentdisposition.contains("filename*")) {
-                /* Codierung default */
-                /*
-                 * Content-Disposition: attachment;filename==?UTF-8?B?
-                 * RGF2aWQgR3VldHRhIC0gSnVzdCBBIExpdHRsZSBNb3JlIExvdmUgW2FMYnlsb3ZlciBYLUNsdXNpdiBSZW1peF0uTVAz ?=
-                 */
-                /* remove fallback, in case RFC 2231/5987 appear */
-                contentdisposition = contentdisposition.replaceAll("filename=.*?;", "");
-                contentdisposition = contentdisposition.replaceAll("filename\\*", "filename");
-                final String format = new Regex(contentdisposition, ".*?=[ \"']*(.+)''").getMatch(0);
-                if (format == null) {
-                    Log.L.severe("Content-Disposition: invalid format: " + header);
-                    filename = null;
-                    return filename;
+        if (!StringUtils.isEmpty(contentdisposition)) {
+            if (contentdisposition.matches("(?i).*(;| )filename\\*.*")) {
+                /* RFC2231 */
+                final String encoding = new Regex(contentdisposition, "(?:;| )filename\\*\\s*=\\s*(.+?)''").getMatch(0);
+                if (encoding == null) {
+                    Log.L.severe("Missing encoding: " + contentdisposition);
+                    return null;
                 }
-                contentdisposition = contentdisposition.replaceAll(format + "''", "");
-                filename = new Regex(contentdisposition, "filename.*?=[ ]*\"(.+)\"").getMatch(0);
+                final String filename = new Regex(contentdisposition, "(?:;| )filename\\*\\s*=\\s*.+?''(.*?)($|;\\s*|;$)").getMatch(0);
                 if (filename == null) {
-                    filename = new Regex(contentdisposition, "filename.*?=[ ]*'(.+)'").getMatch(0);
-                }
-                if (filename == null) {
-                    header = header.replaceAll("=", "=\"") + "\"";
-                    header = header.replaceAll(";\"", "\"");
-                    contentdisposition = header;
+                    Log.L.severe("Broken/Unsupported: " + contentdisposition);
+                    return null;
                 } else {
                     try {
-                        filename = URLDecoder.decode(filename, format);
+                        String ret = URLDecoder.decode(filename.trim(), encoding.trim()).trim();
+                        ret = ret.replaceFirst("^" + Matcher.quoteReplacement("\\") + "+", Matcher.quoteReplacement("_"));
+                        return ret;
                     } catch (final Exception e) {
-                        Log.L.severe("Content-Disposition: could not decode filename: " + header);
-                        filename = null;
-                        return filename;
+                        Log.L.severe("Decoding Error: " + filename + "|" + encoding + "|" + contentdisposition);
+                        return null;
                     }
                 }
-            } else if (new Regex(contentdisposition, "=\\?.*?\\?.*?\\?.*?\\?=").matches()) {
-                /*
-                 * Codierung Encoded Words, TODO: Q-Encoding und mehrfach tokens, aber noch nicht in freier Wildbahn gesehen
-                 */
-                final String tokens[][] = new Regex(contentdisposition, "=\\?(.*?)\\?(.*?)\\?(.*?)\\?=").getMatches();
-                if (tokens.length == 1 && tokens[0].length == 3 && tokens[0][1].trim().equalsIgnoreCase("B")) {
-                    /* Base64 Encoded */
+            } else if (contentdisposition.matches("(?i).*(;| )(filename|file_name|name).*")) {
+                final String special[] = new Regex(contentdisposition, "(?:;| )(?:filename|file_name|name)\\s*==\\?(.*?)\\?B\\?([a-z0-9+/=]+)\\?=").getRow(0);
+                if (special != null) {
                     try {
-                        filename = URLDecoder.decode(new String(Base64.decode(tokens[0][2].trim()), tokens[0][0].trim()), tokens[0][0].trim());
+                        final String base64 = special[1] != null ? special[1].trim() : null;
+                        final String encoding = special[0] != null ? special[0].trim() : null;
+                        String ret = URLDecoder.decode(new String(Base64.decode(base64), encoding), encoding).trim();
+                        ret = ret.replaceFirst("^" + Matcher.quoteReplacement("\\") + "+", Matcher.quoteReplacement("_"));
+                        return ret;
                     } catch (final Exception e) {
-                        Log.L.severe("Content-Disposition: could not decode filename: " + header);
-                        filename = null;
-                        return filename;
+                        Log.L.severe("Decoding(Base64) Error: " + contentdisposition);
+                        return null;
                     }
                 }
-            } else if (new Regex(contentdisposition, "=\\?.*?\\?.*?\\?=").matches()) {
-                /* Unicode Format wie es 4Shared nutzt */
-                final String tokens[][] = new Regex(contentdisposition, "=\\?(.*?)\\?(.*?)\\?=").getMatches();
-                if (tokens.length == 1 && tokens[0].length == 2) {
-                    try {
-                        contentdisposition = new String(tokens[0][1].trim().getBytes("ISO-8859-1"), tokens[0][0].trim());
-                        continue;
-                    } catch (final Exception e) {
-                        Log.L.severe("Content-Disposition: could not decode filename: " + header);
-                        filename = null;
-                        return filename;
-                    }
-                }
-            } else {
-                /* ohne Codierung */
-                filename = new Regex(contentdisposition, "file_?name.*?=[ ]*\"(.+)\"").getMatch(0);
+                final String filename = new Regex(contentdisposition, "(?:;| )(filename|file_name|name)\\s*=\\s*(\"|'|)(.*?)(\\2$|\\2;$|\\2;.)").getMatch(2);
                 if (filename == null) {
-                    filename = new Regex(contentdisposition, "file_?name.*?=[ ]*'(.+)'").getMatch(0);
+                    Log.L.severe("Broken/Unsupported: " + contentdisposition);
+                } else {
+                    String ret = filename.trim();
+                    ret = ret.replaceFirst("^" + Matcher.quoteReplacement("\\") + "+", Matcher.quoteReplacement("_"));
+                    return ret;
                 }
-                if (filename == null) {
-                    header = header.replaceAll("=", "=\"") + "\"";
-                    header = header.replaceAll(";\"", "\"");
-                    contentdisposition = header;
-                }
             }
-            if (filename != null) {
-                break;
+            if (contentdisposition.matches("(?i).*xfilename.*")) {
+                return null;
             }
+            Log.L.severe("Broken/Unsupported: " + contentdisposition);
         }
-        if (filename != null) {
-            filename = filename.trim();
-            if (filename.startsWith("\"")) {
-                Log.L.info("Using Workaround for broken filename header!");
-                filename = filename.substring(1);
-            }
-        }
-        if (filename == null) {
-            Log.L.severe("Content-Disposition: could not parse header: " + orgheader);
-        }
-        return filename;
+        return null;
     }
 
     public static ByteBuffer readheader(final InputStream in, final boolean readSingleLine) throws IOException {

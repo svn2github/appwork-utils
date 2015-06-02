@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2011 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.utils.swing.dialog
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -32,7 +32,7 @@ import org.appwork.utils.swing.dialog.LoginDialog.LoginData;
 
 /**
  * @author thomas
- * 
+ *
  */
 public class LoginDialog extends AbstractDialog<LoginData> implements ActionListener, CaretListener, LoginDialogInterface {
     public static class LoginData {
@@ -187,7 +187,7 @@ public class LoginDialog extends AbstractDialog<LoginData> implements ActionList
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.utils.swing.dialog.LoginDialogInterface#getUsername()
      */
     @Override
@@ -207,7 +207,7 @@ public class LoginDialog extends AbstractDialog<LoginData> implements ActionList
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.utils.swing.dialog.LoginDialogInterface#getPassword()
      */
     @Override
@@ -228,7 +228,7 @@ public class LoginDialog extends AbstractDialog<LoginData> implements ActionList
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.utils.swing.dialog.LoginDialogInterface#getDefaultUsername()
      */
     @Override
@@ -239,7 +239,7 @@ public class LoginDialog extends AbstractDialog<LoginData> implements ActionList
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.utils.swing.dialog.LoginDialogInterface#getDefaultPassword()
      */
     @Override
@@ -249,7 +249,7 @@ public class LoginDialog extends AbstractDialog<LoginData> implements ActionList
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.utils.swing.dialog.LoginDialogInterface#isDefaultRememberSelected()
      */
     @Override
@@ -260,7 +260,7 @@ public class LoginDialog extends AbstractDialog<LoginData> implements ActionList
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.utils.swing.dialog.LoginDialogInterface#isRememberSelected()
      */
     @Override
@@ -281,12 +281,11 @@ public class LoginDialog extends AbstractDialog<LoginData> implements ActionList
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.utils.swing.dialog.LoginDialogInterface#isRememberOptionVisible()
      */
     @Override
     public boolean isRememberOptionVisible() {
-
         return !rememberDisabled;
     }
 

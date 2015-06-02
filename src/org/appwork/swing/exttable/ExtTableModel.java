@@ -648,14 +648,13 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
     public List<E> getSelectedObjects(final int maxItems) {
         final ExtTable<E> ltable = this.getTable();
         final java.util.List<E> ret = new ArrayList<E>();
-        if (ltable == null) {
+        if (ltable == null || this.tableSelectionClearing.get()) {
             return ret;
         }
         final ListSelectionModel selectionModel = ltable.getSelectionModel();
-        if (ltable == null || selectionModel == null || this.tableSelectionClearing.get() || selectionModel.isSelectionEmpty()) {
-            return new ArrayList<E>(0);
+        if (selectionModel == null || selectionModel.isSelectionEmpty()) {
+            return ret;
         }
-
         final List<E> ltableData = this.getTableData();
         final int iMin = selectionModel.getMinSelectionIndex();
         final int iMax = selectionModel.getMaxSelectionIndex();

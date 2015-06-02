@@ -27,13 +27,14 @@ import net.miginfocom.swing.MigLayout;
 import org.appwork.resources.AWUTheme;
 import org.appwork.utils.BinaryLogic;
 import org.appwork.utils.locale._AWU;
+import org.appwork.utils.swing.EDTHelper;
 import org.appwork.utils.swing.dialog.LoginDialog.LoginData;
 
 /**
  * @author thomas
  * 
  */
-public class LoginDialog extends AbstractDialog<LoginData> implements ActionListener, CaretListener {
+public class LoginDialog extends AbstractDialog<LoginData> implements ActionListener, CaretListener, LoginDialogInterface {
     public static class LoginData {
         private final String  username;
         private final String  password;
@@ -124,7 +125,9 @@ public class LoginDialog extends AbstractDialog<LoginData> implements ActionList
 
     @Override
     protected LoginData createReturnValue() {
-        if ((getReturnmask() & (Dialog.RETURN_OK | Dialog.RETURN_TIMEOUT)) == 0) { return null; }
+        if ((getReturnmask() & (Dialog.RETURN_OK | Dialog.RETURN_TIMEOUT)) == 0) {
+            return null;
+        }
         return new LoginData(accid.getText(), new String(pass.getPassword()), save.isSelected());
     }
 
@@ -180,6 +183,111 @@ public class LoginDialog extends AbstractDialog<LoginData> implements ActionList
     public void setUsernameDefault(final String user) {
         preUser = user;
 
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.appwork.utils.swing.dialog.LoginDialogInterface#getUsername()
+     */
+    @Override
+    public String getUsername() {
+        if ((getReturnmask() & (Dialog.RETURN_OK | Dialog.RETURN_TIMEOUT)) == 0) {
+            return null;
+        }
+        return new EDTHelper<String>() {
+
+            @Override
+            public String edtRun() {
+
+                return accid.getText();
+            }
+        }.getReturnValue();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.appwork.utils.swing.dialog.LoginDialogInterface#getPassword()
+     */
+    @Override
+    public String getPassword() {
+        if ((getReturnmask() & (Dialog.RETURN_OK | Dialog.RETURN_TIMEOUT)) == 0) {
+            return null;
+        }
+        return new EDTHelper<String>() {
+
+            @Override
+            public String edtRun() {
+
+                return new String(pass.getPassword());
+            }
+        }.getReturnValue();
+
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.appwork.utils.swing.dialog.LoginDialogInterface#getDefaultUsername()
+     */
+    @Override
+    public String getDefaultUsername() {
+
+        return preUser;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.appwork.utils.swing.dialog.LoginDialogInterface#getDefaultPassword()
+     */
+    @Override
+    public String getDefaultPassword() {
+        return prePass;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.appwork.utils.swing.dialog.LoginDialogInterface#isDefaultRememberSelected()
+     */
+    @Override
+    public boolean isDefaultRememberSelected() {
+
+        return preSave;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.appwork.utils.swing.dialog.LoginDialogInterface#isRememberSelected()
+     */
+    @Override
+    public boolean isRememberSelected() {
+        if ((getReturnmask() & (Dialog.RETURN_OK | Dialog.RETURN_TIMEOUT)) == 0) {
+            return false;
+        }
+        // return new LoginData(accid.getText(), new String(pass.getPassword()), );
+        return new EDTHelper<Boolean>() {
+
+            @Override
+            public Boolean edtRun() {
+
+                return save.isSelected();
+            }
+        }.getReturnValue() == Boolean.TRUE;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.appwork.utils.swing.dialog.LoginDialogInterface#isRememberOptionVisible()
+     */
+    @Override
+    public boolean isRememberOptionVisible() {
+
+        return !rememberDisabled;
     }
 
 }

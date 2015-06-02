@@ -49,8 +49,14 @@ public abstract class LogSourceProvider {
     protected LogConsoleHandler              consoleHandler;
 
     protected boolean                        instantFlushDefault;
-    private final long                       initTime;
-    private final static AtomicBoolean       TRASHLOCK   = new AtomicBoolean(false);
+    private final boolean                    debugMode;
+
+    public boolean isDebugMode() {
+        return debugMode;
+    }
+
+    private final long                 initTime;
+    private final static AtomicBoolean TRASHLOCK = new AtomicBoolean(false);
 
     public LogSourceProvider(final long timeStamp) {
         this.initTime = timeStamp;
@@ -59,7 +65,8 @@ public abstract class LogSourceProvider {
         this.maxSize = config.getMaxLogFileSize();
         this.maxLogs = config.getMaxLogFiles();
         this.logTimeout = config.getLogFlushTimeout() * 1000l;
-        this.instantFlushDefault = config.isDebugModeEnabled();
+        debugMode = config.isDebugModeEnabled();
+        instantFlushDefault = debugMode;
         File llogFolder = Application.getResource("logs/" + timeStamp + "_" + new SimpleDateFormat("HH.mm").format(new Date(timeStamp)) + "/");
         if (llogFolder.exists()) {
             llogFolder = Application.getResource("logs/" + timeStamp + "_" + new SimpleDateFormat("HH.mm.ss").format(new Date(timeStamp)) + "/");
@@ -179,7 +186,7 @@ public abstract class LogSourceProvider {
 
     /**
      * CL = Class Logger, returns a logger for calling Class
-     * 
+     *
      * @return
      */
     public LogSource getCurrentClassLogger() {
@@ -269,7 +276,7 @@ public abstract class LogSourceProvider {
     }
 
     public boolean isInstantFlushDefault() {
-        return this.instantFlushDefault || maxSize < 100 * 1024;
+        return instantFlushDefault || maxSize < 100 * 1024;
     }
 
     public void removeConsoleHandler() {

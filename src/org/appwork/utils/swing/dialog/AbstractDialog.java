@@ -1650,27 +1650,12 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
      * @param b
      */
     protected void setReturnmask(final boolean b) {
-
         int ret = b ? Dialog.RETURN_OK : Dialog.RETURN_CANCEL;
         if (BinaryLogic.containsAll(this.flagMask, Dialog.STYLE_SHOW_DO_NOT_DISPLAY_AGAIN)) {
-            if (this.dontshowagain != null && this.dontshowagain.isSelected() && this.dontshowagain.isEnabled()) {
-                ret |= Dialog.RETURN_DONT_SHOW_AGAIN;
-                try {
-                    final String key = this.getDontShowAgainKey();
-                    if (key != null) {
-                        if (BinaryLogic.containsAll(this.flagMask, UIOManager.LOGIC_DONT_SHOW_AGAIN_DELETE_ON_EXIT)) {
-                            synchronized (AbstractDialog.SESSION_DONTSHOW_AGAIN) {
-                                AbstractDialog.SESSION_DONTSHOW_AGAIN.put(this.getDontShowAgainKey(), ret);
-                            }
-                        } else {
-                            JSonStorage.getPlainStorage("Dialogs").put(this.getDontShowAgainKey(), ret);
-                        }
-                    }
-                } catch (final Exception e) {
-                    Log.exception(e);
-                }
-            }
+            boolean isDontShowAgainSelected = this.dontshowagain != null && this.dontshowagain.isSelected() && this.dontshowagain.isEnabled();
+            ret = writeDontShowAgainAnswer(b, isDontShowAgainSelected);
         }
+
         if (ret == this.returnBitMask) {
             return;
         }
@@ -1679,6 +1664,30 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
             throw new IllegalStateException("Dialog already disposed");
         }
         this.returnBitMask = ret;
+    }
+
+    public int writeDontShowAgainAnswer(final boolean clickedOK, boolean isDontShowAgainSelected) {
+        int ret = clickedOK ? Dialog.RETURN_OK : Dialog.RETURN_CANCEL;
+
+        if (isDontShowAgainSelected) {
+            ret |= Dialog.RETURN_DONT_SHOW_AGAIN;
+            try {
+                final String key = this.getDontShowAgainKey();
+                if (key != null) {
+                    if (BinaryLogic.containsAll(this.flagMask, UIOManager.LOGIC_DONT_SHOW_AGAIN_DELETE_ON_EXIT)) {
+                        synchronized (AbstractDialog.SESSION_DONTSHOW_AGAIN) {
+                            AbstractDialog.SESSION_DONTSHOW_AGAIN.put(this.getDontShowAgainKey(), ret);
+                        }
+                    } else {
+                        JSonStorage.getPlainStorage("Dialogs").put(this.getDontShowAgainKey(), ret);
+                    }
+                }
+            } catch (final Exception e) {
+                Log.exception(e);
+            }
+        }
+
+        return ret;
     }
 
     /**

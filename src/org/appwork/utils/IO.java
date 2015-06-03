@@ -242,7 +242,7 @@ public class IO {
     /*
      * this function reads a line from a bufferedinputstream up to a maxLength. in case the line is longer than maxLength the rest of the
      * line is read but not returned
-     * 
+     *
      * this function skips emtpy lines
      */
 
@@ -428,7 +428,6 @@ public class IO {
      * @throws UnsupportedEncodingException
      */
     public static String readURLToString(final URL ressourceURL) throws IOException {
-
         InputStream fis = null;
         try {
             fis = ressourceURL.openStream();

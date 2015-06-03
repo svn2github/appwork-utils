@@ -21,7 +21,7 @@ public class HTTPConnectionUtils {
     public static String getFileNameFromDispositionHeader(final String contentdisposition) {
         // http://greenbytes.de/tech/tc2231/
         if (!StringUtils.isEmpty(contentdisposition)) {
-            if (contentdisposition.matches("(?i).*(;| )filename\\*.*")) {
+            if (contentdisposition.matches("(?i).*(;| )filename\\*.+")) {
                 /* RFC2231 */
                 final String encoding = new Regex(contentdisposition, "(?:;| )filename\\*\\s*=\\s*(.+?)''").getMatch(0);
                 if (encoding == null) {
@@ -42,7 +42,7 @@ public class HTTPConnectionUtils {
                         return null;
                     }
                 }
-            } else if (contentdisposition.matches("(?i).*(;| )(filename|file_name|name).*")) {
+            } else if (contentdisposition.matches("(?i).*(;| )(filename|file_name|name).+")) {
                 final String special[] = new Regex(contentdisposition, "(?:;| )(?:filename|file_name|name)\\s*==\\?(.*?)\\?B\\?([a-z0-9+/=]+)\\?=").getRow(0);
                 if (special != null) {
                     try {

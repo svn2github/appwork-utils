@@ -311,7 +311,6 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
                 }
                 ExtTable.this.onSelectionChanged();
                 ExtTable.this.eventSender.fireEvent(new ExtTableEvent<ArrayList<E>>(ExtTable.this, ExtTableEvent.Types.SELECTION_CHANGED));
-
             }
 
         });
@@ -1256,7 +1255,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
         if (ks != null) {
 
             if (this.isClearSelectionTrigger(ks)) {
-                getModel().clearSelection();
+                this.clearSelection();
                 return true;
             }
             if (this.isCutSelectionTrigger(ks)) {

@@ -36,6 +36,7 @@ import org.appwork.exceptions.WTFException;
 import org.appwork.shutdown.ShutdownController;
 import org.appwork.shutdown.ShutdownEvent;
 import org.appwork.shutdown.ShutdownRequest;
+import org.appwork.uio.InputDialogInterface;
 import org.appwork.uio.UIOManager;
 import org.appwork.utils.Application;
 import org.appwork.utils.Regex;
@@ -46,7 +47,7 @@ import org.appwork.utils.os.mime.Mime;
 import org.appwork.utils.os.mime.MimeFactory;
 import org.appwork.utils.processes.ProcessBuilderFactory;
 import org.appwork.utils.swing.dialog.Dialog;
-import org.appwork.utils.swing.dialog.DialogNoAnswerException;
+import org.appwork.utils.swing.dialog.InputDialog;
 
 /**
  * This class provides a few native features.
@@ -893,7 +894,7 @@ public class CrossSystem {
      * @return
      */
     public static boolean isOpenBrowserSupported() {
-        return CrossSystem.DESKTOP_SUPPORT.isBrowseURLSupported() || CrossSystem.getBrowserCommandLine() != null && CrossSystem.getBrowserCommandLine().length > 0;
+        return CrossSystem.DESKTOP_SUPPORT.isBrowseURLSupported() || (CrossSystem.getBrowserCommandLine() != null && CrossSystem.getBrowserCommandLine().length > 0);
     }
 
     /**
@@ -1040,8 +1041,11 @@ public class CrossSystem {
         } catch (final Throwable e) {
             Log.exception(Level.WARNING, e);
             try {
-                Dialog.getInstance().showInputDialog(UIOManager.BUTTONS_HIDE_CANCEL, _AWU.T.crossSystem_open_url_failed_msg(), urlString);
-            } catch (final DialogNoAnswerException donothing) {
+                final String question = _AWU.T.crossSystem_open_url_failed_msg();
+                final InputDialog dialog = new InputDialog(UIOManager.LOGIC_COUNTDOWN | UIOManager.BUTTONS_HIDE_CANCEL, _AWU.T.DIALOG_INPUT_TITLE(), question, urlString, Dialog.getIconByText(question), null, null);
+                dialog.setTimeout(60 * 1000);
+                UIOManager.I().show(InputDialogInterface.class, dialog);
+            } catch (final Throwable donothing) {
             }
         }
     }

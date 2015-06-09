@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2012 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.utils.os
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -16,11 +16,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
-import org.appwork.utils.Application;
-
 /**
  * @author daniel
- * 
+ *
  */
 public class DesktopSupportJavaDesktop implements DesktopSupport {
 
@@ -32,12 +30,16 @@ public class DesktopSupportJavaDesktop implements DesktopSupport {
         if (this.isBrowseURLSupported()) {
             final Desktop desktop = Desktop.getDesktop();
             desktop.browse(url.toURI());
+        } else {
+            throw new IOException("browseURL not supported");
         }
     }
 
     @Override
     public boolean isBrowseURLSupported() {
-        if (this.browseURLSupported != null) { return this.browseURLSupported; }
+        if (this.browseURLSupported != null) {
+            return this.browseURLSupported;
+        }
         if (!Desktop.isDesktopSupported()) {
             this.browseURLSupported = false;
             return false;
@@ -53,7 +55,9 @@ public class DesktopSupportJavaDesktop implements DesktopSupport {
 
     @Override
     public boolean isOpenFileSupported() {
-        if (this.openFileSupported != null) { return this.openFileSupported; }
+        if (this.openFileSupported != null) {
+            return this.openFileSupported;
+        }
         if (!Desktop.isDesktopSupported()) {
             this.openFileSupported = false;
             return false;
@@ -109,7 +113,9 @@ public class DesktopSupportJavaDesktop implements DesktopSupport {
         return false;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.appwork.utils.os.DesktopSupport#getDefaultDownloadDirectory()
      */
     @Override

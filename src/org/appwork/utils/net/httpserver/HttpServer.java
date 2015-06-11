@@ -84,6 +84,10 @@ public class HttpServer implements Runnable {
         return this.port;
     }
 
+    public int getWishedPort() {
+        return port;
+    }
+
     /**
      * @return the debug
      */

@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2011 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.utils.net.httpserver
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -16,7 +16,7 @@ import org.appwork.utils.net.httpserver.handler.HttpRequestHandler;
 
 /**
  * @author daniel
- * 
+ *
  */
 public class HttpServerController {
 
@@ -28,7 +28,9 @@ public class HttpServerController {
     public synchronized HttpServer getServer(final int port) {
 
         for (final HttpServer s : servers) {
-            if (s.getPort() == port) { return s; }
+            if (s.getWishedPort() == port || s.getPort() == port) {
+                return s;
+            }
         }
         return null;
     }
@@ -36,7 +38,7 @@ public class HttpServerController {
     public synchronized HttpHandlerInfo registerRequestHandler(final int port, final boolean localhost, final HttpRequestHandler handler) throws IOException {
         HttpServer server = null;
         for (final HttpServer s : servers) {
-            if (s.getPort() == port) {
+            if (s.getWishedPort() == port || s.getPort() == port) {
                 server = s;
                 break;
             }

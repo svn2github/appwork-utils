@@ -66,11 +66,11 @@ public class JSonStorage {
 
     /**
      * Cecks of the JSOn Mapper can map this Type
-     *
+     * 
      * @param allowNonStorableObjects
      *            TODO
      * @param genericReturnType
-     *
+     * 
      * @throws InvalidTypeException
      */
     public static void canStore(final Type gType, final boolean allowNonStorableObjects) throws InvalidTypeException {
@@ -259,37 +259,43 @@ public class JSonStorage {
             String stri = null;
             byte[] str = null;
             try {
-                final File tmpfile = new File(file.getAbsolutePath() + ".tmp");
-                if (tmpfile.exists() && tmpfile.length() > 0) {
-                    /* tmp files exists, try to restore */
-                    Log.L.warning("TMP file " + tmpfile.getAbsolutePath() + " found");
-                    try {
-                        // load it
-                        str = IO.readFile(tmpfile);
-                        E ret;
-                        // try to parse it
-                        if (plain) {
-                            ret = JSonStorage.restoreFromString(stri = new String(str, "UTF-8"), type, def);
-                        } else {
-                            ret = JSonStorage.restoreFromString(stri = Crypto.decrypt(str, key), type, def);
-                        }
-
-                        Log.L.warning("Could restore tmp file");
-                        // replace normal file with tmp file
-                        file.delete();
-                        tmpfile.renameTo(file);
-                        if (ret == null) {
-                            return def;
-                        }
-                        return ret;
-                    } catch (final Exception e) {
-                        Log.L.warning("Could not restore tmp file");
-                        Log.exception(Level.WARNING, e);
-                    } finally {
-                        /* tmp file must be gone after read */
-                        tmpfile.delete();
-                    }
-                }
+                // I doubt that this helps to solve any bug. remove it if we do not miss it until 2016 ;-P
+                // final File tmpfile = new File(file.getAbsolutePath() + ".tmp");
+                // if (tmpfile.exists() && tmpfile.length() > 0) {
+                // /* tmp files exists, try to restore */
+                // Log.L.warning("TMP file " + tmpfile.getAbsolutePath() + " found");
+                // try {
+                // // load it
+                // str = IO.readFile(tmpfile);
+                // E ret;
+                // // try to parse it
+                // if (plain) {
+                // ret = JSonStorage.restoreFromString(stri = new String(str, "UTF-8"), type, def);
+                // } else {
+                // ret = JSonStorage.restoreFromString(stri = Crypto.decrypt(str, key), type, def);
+                // }
+                //
+                // if (ret != def) {
+                // Log.L.warning("Could restore tmp file");
+                // // replace normal file with tmp file
+                // file.delete();
+                // tmpfile.renameTo(file);
+                // if (ret == null) {
+                // return def;
+                // }
+                // return ret;
+                // } else {
+                // // probably bad tmp file
+                // Log.L.warning("Could not restore tmp file. json restore method returned default value.");
+                // }
+                // } catch (final Exception e) {
+                // Log.L.warning("Could not restore tmp file");
+                // Log.exception(Level.WARNING, e);
+                // } finally {
+                // /* tmp file must be gone after read */
+                // tmpfile.delete();
+                // }
+                // }
                 final File res = file;
                 if (!res.exists() || res.length() == 0) {
                     return def;
@@ -320,7 +326,7 @@ public class JSonStorage {
 
     /**
      * restores a store json object
-     *
+     * 
      * @param <E>
      * @param string
      *            name of the json object. example: cfg/savedobject.json
@@ -553,7 +559,7 @@ public class JSonStorage {
 
     /**
      * This method throws Exceptions
-     *
+     * 
      * @param string
      * @param type
      * @param def
@@ -573,7 +579,7 @@ public class JSonStorage {
     /**
      * USe this method for debug code only. It is NOT guaranteed that this method returns json formated text. Use
      * {@link #serializeToJson(Object)} instead
-     *
+     * 
      * @param list
      * @return
      */

@@ -70,6 +70,11 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
         ShutdownController.getInstance().addShutdownEvent(new ShutdownEvent() {
 
             @Override
+            public long getMaxDuration() {
+                return 0;
+            }
+
+            @Override
             public int getHookPriority() {
                 return 0;
             }

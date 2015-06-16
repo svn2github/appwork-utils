@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2010 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.utils.zip
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -23,7 +23,7 @@ import org.appwork.utils.Hash;
 
 /**
  * @author daniel
- * 
+ *
  */
 public class ZipIOWriter {
 
@@ -40,7 +40,7 @@ public class ZipIOWriter {
 
     /**
      * constructor for ZipIOWriter
-     * 
+     *
      * @param zipFile
      *            zipFile we want create (does not overwrite existing files!)
      * @throws FileNotFoundException
@@ -53,7 +53,7 @@ public class ZipIOWriter {
 
     /**
      * constructor for ZipIOWriter
-     * 
+     *
      * @param zipFile
      *            zipFile we want create
      * @param overwrite
@@ -73,7 +73,7 @@ public class ZipIOWriter {
 
     /**
      * add given File (File or Directory) to this ZipFile
-     * 
+     *
      * @param add
      *            File to add
      * @param compress
@@ -84,7 +84,9 @@ public class ZipIOWriter {
      * @throws IOException
      */
     public synchronized void add(final File add, final boolean compress, final String path) throws ZipIOException, IOException {
-        if (add == null || !add.exists()) { throw new ZipIOException("add " + add.getAbsolutePath() + " invalid"); }
+        if (add == null || !add.exists()) {
+            throw new ZipIOException("add " + add.getAbsolutePath() + " invalid");
+        }
         if (add.isFile()) {
             this.addFileInternal(add, compress, path);
         } else if (add.isDirectory()) {
@@ -97,8 +99,11 @@ public class ZipIOWriter {
     public synchronized void addByteArry(final byte[] data, final boolean compress, final String path, final String name) throws IOException, ZipIOException {
         boolean zipEntryAdded = false;
         try {
-            if (data == null) { throw new ZipIOException("data array is invalid"); }
-            final ZipEntry zipAdd = new ZipEntry((path != null && path.trim().length() > 0 ? path + "/" : "") + name);
+            if (data == null) {
+                throw new ZipIOException("data array is invalid");
+            }
+            final String fullPath = (path != null && path.trim().length() > 0 ? path + "/" : "") + name;
+            final ZipEntry zipAdd = new ZipEntry(fullPath);
             zipAdd.setSize(data.length);
             if (compress) {
                 zipAdd.setMethod(ZipEntry.DEFLATED);
@@ -111,6 +116,7 @@ public class ZipIOWriter {
             this.zipStream.putNextEntry(zipAdd);
             zipEntryAdded = true;
             this.zipStream.write(data, 0, data.length);
+            notify(zipAdd, data.length, data.length);
         } finally {
             if (zipEntryAdded) {
                 this.zipStream.closeEntry();
@@ -120,7 +126,7 @@ public class ZipIOWriter {
 
     /**
      * add given Directory to this ZipFile
-     * 
+     *
      * @param addDirectory
      *            Directory to add
      * @param compress
@@ -134,10 +140,14 @@ public class ZipIOWriter {
         this.addDirectoryInternal(addDirectory, compress, path);
     }
 
-    private void addDirectoryInternal(final File addDirectory, final boolean compress, final String path) throws ZipIOException, IOException {
-        if (addDirectory == null || !addDirectory.isDirectory() || !addDirectory.exists()) { throw new ZipIOException("addDirectory " + addDirectory.getAbsolutePath() + " invalid"); }
+    protected void addDirectoryInternal(final File addDirectory, final boolean compress, final String path) throws ZipIOException, IOException {
+        if (addDirectory == null || !addDirectory.isDirectory() || !addDirectory.exists()) {
+            throw new ZipIOException("addDirectory " + addDirectory.getAbsolutePath() + " invalid");
+        }
         final File[] list = addDirectory.listFiles();
-        if (list == null) { return; }
+        if (list == null) {
+            return;
+        }
         for (final File add : list) {
             if (add.isFile()) {
                 this.addFileInternal(add, compress, (path != null && path.trim().length() > 0 ? path + "/" : "") + addDirectory.getName());
@@ -149,9 +159,12 @@ public class ZipIOWriter {
         }
     }
 
+    protected void notify(final ZipEntry entry, final long bytesWrite, final long bytesProcessed) {
+    }
+
     /**
      * Add file
-     * 
+     *
      * @param addFile
      * @param compress
      * @param fullPath
@@ -164,9 +177,12 @@ public class ZipIOWriter {
         FileInputStream fin = null;
         boolean zipEntryAdded = false;
         try {
-            if (addFile == null || !addFile.isFile() || !addFile.exists()) { throw new ZipIOException("addFile " + addFile.getAbsolutePath() + " invalid"); }
+            if (addFile == null || !addFile.isFile() || !addFile.exists()) {
+                throw new ZipIOException("addFile " + addFile.getAbsolutePath() + " invalid");
+            }
             final ZipEntry zipAdd = new ZipEntry(fullPath);
-            zipAdd.setSize(addFile.length());
+            final long size = addFile.length();
+            zipAdd.setSize(size);
             if (compress) {
                 zipAdd.setMethod(ZipEntry.DEFLATED);
             } else {
@@ -176,32 +192,36 @@ public class ZipIOWriter {
                 zipAdd.setCrc(Hash.getCRC32(addFile));
             }
             fin = new FileInputStream(addFile);
+            long total = 0;
             this.zipStream.putNextEntry(zipAdd);
             int len;
             while ((len = fin.read(this.buf)) > 0) {
                 this.zipStream.write(this.buf, 0, len);
+                total += len;
+                notify(zipAdd, len, total);
             }
             zipEntryAdded = true;
         } finally {
+            try {
+                if (fin != null) {
+                    fin.close();
+                }
+            } catch (final Throwable e) {
+            }
             if (zipEntryAdded) {
                 this.zipStream.closeEntry();
-            }
-            if (fin != null) {
-                fin.close();
             }
         }
     }
 
     private void addFileInternal(final File addFile, final boolean compress, final String path) throws ZipIOException, IOException {
-
         final String fullPath = (path != null && path.trim().length() > 0 ? path + "/" : "") + addFile.getName();
-
         this.addFile(addFile, compress, fullPath);
     }
 
     /**
      * add given File to this ZipFile
-     * 
+     *
      * @param addFile
      *            File to add
      * @param compress
@@ -223,6 +243,7 @@ public class ZipIOWriter {
         try {
             final ZipEntry zipAdd = new ZipEntry(fullPath);
             this.zipStream.putNextEntry(zipAdd);
+            notify(zipAdd, -1, -1);
             zipEntryAdded = true;
         } finally {
             if (zipEntryAdded) {
@@ -233,7 +254,7 @@ public class ZipIOWriter {
 
     /**
      * closes the ZipFile
-     * 
+     *
      * @throws Throwable
      */
     public synchronized void close() throws IOException {
@@ -268,16 +289,22 @@ public class ZipIOWriter {
 
     /**
      * opens the zipFile for further use
-     * 
+     *
      * @param overwrite
      *            overwrite existing zipFiles?
      * @throws ZipIOException
      * @throws FileNotFoundException
      */
     private void openZip(final boolean overwrite) throws ZipIOException, FileNotFoundException {
-        if (this.fileStream != null && this.zipStream != null) { return; }
-        if (this.zipFile == null || this.zipFile.isDirectory()) { throw new ZipIOException("invalid zipFile"); }
-        if (this.zipFile.exists() && !overwrite) { throw new ZipIOException("zipFile already exists"); }
+        if (this.fileStream != null && this.zipStream != null) {
+            return;
+        }
+        if (this.zipFile == null || this.zipFile.isDirectory()) {
+            throw new ZipIOException("invalid zipFile");
+        }
+        if (this.zipFile.exists() && !overwrite) {
+            throw new ZipIOException("zipFile already exists");
+        }
 
         this.fileStream = new FileOutputStream(this.zipFile);
         this.zipStream = new ZipOutputStream(this.fileStream);

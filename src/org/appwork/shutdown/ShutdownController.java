@@ -520,6 +520,7 @@ public class ShutdownController extends Thread {
 
                     thread.start();
                     try {
+                        e.waitFor();
                         thread.join(Math.max(0, e.getMaxDuration()));
                     } catch (final Throwable e1) {
                         e1.printStackTrace();

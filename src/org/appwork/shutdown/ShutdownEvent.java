@@ -10,7 +10,7 @@ public abstract class ShutdownEvent {
 
     /**
      * The higher the priority, the earlier the hook will be called.
-     * 
+     *
      * @param priority
      */
     public int getHookPriority() {
@@ -21,15 +21,17 @@ public abstract class ShutdownEvent {
      * Waits at most <code>millis</code> milliseconds for this event to die. A timeout of <code>0</code> means to wait forever
      */
     public long getMaxDuration() {
-
         return maxDuration;
     }
+
+    protected void waitFor() {
+    };
 
     abstract public void onShutdown(ShutdownRequest shutdownRequest);
 
     /**
      * The higher the priority, the earlier the hook will be called.
-     * 
+     *
      * @param priority
      */
 

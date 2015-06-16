@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2010 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.utils.zip
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -29,7 +29,7 @@ import org.appwork.utils.logging.Log;
 
 /**
  * @author daniel
- * 
+ *
  */
 public class ZipIOReader {
 
@@ -51,7 +51,7 @@ public class ZipIOReader {
 
     /**
      * open the zipFile for this ZipIOReader
-     * 
+     *
      * @param zipFile
      *            the zipFile we want to open
      * @throws ZipIOException
@@ -65,7 +65,7 @@ public class ZipIOReader {
 
     /**
      * closes the ZipFile
-     * 
+     *
      * @throws IOException
      */
     public synchronized void close() throws IOException {
@@ -81,7 +81,7 @@ public class ZipIOReader {
 
     /**
      * extract given ZipEntry to output File
-     * 
+     *
      * @param entry
      *            ZipEntry to extract
      * @param output
@@ -147,7 +147,15 @@ public class ZipIOReader {
                 return ret;
             }
         }
-        this.extract(entry, new FileOutputStream(output));
+        FileOutputStream os = null;
+        try {
+            os = new FileOutputStream(output);
+            this.extract(entry, os);
+        } finally {
+            if (os != null) {
+                os.close();
+            }
+        }
         ret.add(output);
         return ret;
     }
@@ -160,23 +168,23 @@ public class ZipIOReader {
      */
     public void extract(final ZipEntry entry, final OutputStream stream) throws ZipIOException, IOException {
         if (entry.isDirectory()) {
-
             if (this.isBreakOnError()) {
                 throw new ZipIOException("Cannot extract a directory", entry);
             } else {
                 Log.L.severe("Cannot extract a directory " + entry.getName());
             }
         }
-
         CheckedInputStream in = null;
         try {
-
             final InputStream is = this.getInputStream(entry);
             in = new CheckedInputStream(is, new CRC32());
             final byte[] buffer = new byte[32767];
             int len = 0;
+            long total = 0;
             while ((len = in.read(buffer)) != -1) {
                 stream.write(buffer, 0, len);
+                total += len;
+                notify(entry, len, total);
             }
             if (entry.getCrc() != -1 && entry.getCrc() != in.getChecksum().getValue()) {
                 if (this.isBreakOnError()) {
@@ -198,6 +206,9 @@ public class ZipIOReader {
             }
         }
 
+    }
+
+    protected void notify(final ZipEntry entry, final long bytesWrite, final long bytesProcessed) {
     }
 
     public synchronized java.util.List<File> extractTo(final File outputDirectory) throws ZipIOException, IOException {
@@ -247,7 +258,7 @@ public class ZipIOReader {
 
     /**
      * find ZipIOFile that represents the Folder with given path
-     * 
+     *
      * @param path
      *            the path we search a ZipIOFile for
      * @param currentRoot
@@ -255,14 +266,20 @@ public class ZipIOReader {
      * @return ZipIOFile if path is found, else null
      */
     private ZipIOFile getFolder(final String path, final ZipIOFile currentRoot) {
-        if (path == null || currentRoot == null || !currentRoot.isDirectory()) { return null; }
-        if (currentRoot.getAbsolutePath().equalsIgnoreCase(path)) { return currentRoot; }
+        if (path == null || currentRoot == null || !currentRoot.isDirectory()) {
+            return null;
+        }
+        if (currentRoot.getAbsolutePath().equalsIgnoreCase(path)) {
+            return currentRoot;
+        }
         for (final ZipIOFile tmp : currentRoot.getFiles()) {
             if (tmp.isDirectory() && tmp.getAbsolutePath().equalsIgnoreCase(path)) {
                 return tmp;
             } else if (tmp.isDirectory()) {
                 final ZipIOFile ret = this.getFolder(path, tmp);
-                if (ret != null) { return ret; }
+                if (ret != null) {
+                    return ret;
+                }
             }
         }
         return null;
@@ -270,7 +287,7 @@ public class ZipIOReader {
 
     /**
      * returns an InputStream for given ZipEntry
-     * 
+     *
      * @param entry
      *            ZipEntry we want an InputStream
      * @return InputStream for given ZipEntry
@@ -280,7 +297,7 @@ public class ZipIOReader {
     public synchronized InputStream getInputStream(final ZipEntry entry) throws ZipIOException, IOException {
         if (entry == null) {
 
-        throw new ZipIOException("invalid zipEntry");
+            throw new ZipIOException("invalid zipEntry");
 
         }
         if (this.zip != null) {
@@ -363,14 +380,16 @@ public class ZipIOReader {
 
     /**
      * returns the ZipEntry for the given name
-     * 
+     *
      * @param fileName
      *            Filename we want a ZipEntry for
      * @return ZipEntry if filename is found or null if not found
      * @throws ZipIOException
      */
     public synchronized ZipEntry getZipFile(final String fileName) throws ZipIOException {
-        if (fileName == null) { throw new ZipIOException("invalid fileName"); }
+        if (fileName == null) {
+            throw new ZipIOException("invalid fileName");
+        }
         if (this.zip != null) {
             return this.zip.getEntry(fileName);
         } else {
@@ -379,7 +398,9 @@ public class ZipIOReader {
                 zis = new ZipInputStream(new ByteArrayInputStream(this.byteArray));
                 ZipEntry ze = null;
                 while ((ze = zis.getNextEntry()) != null) {
-                    if (ze.getName().equals(fileName)) { return ze; }
+                    if (ze.getName().equals(fileName)) {
+                        return ze;
+                    }
                 }
                 return null;
             } catch (final IOException e) {
@@ -395,12 +416,14 @@ public class ZipIOReader {
 
     /**
      * returns a list of all ZipEntries in this ZipFile
-     * 
+     *
      * @return ZipEntry[] of all files in the ZipFile
      * @throws ZipIOException
      */
     public synchronized ZipEntry[] getZipFiles() throws ZipIOException {
-        if (this.zipEntries != null) { return this.zipEntries; }
+        if (this.zipEntries != null) {
+            return this.zipEntries;
+        }
         final java.util.List<ZipEntry> ret = new ArrayList<ZipEntry>();
         if (this.zip != null) {
             final Enumeration<? extends ZipEntry> zipIter = this.zip.entries();
@@ -430,12 +453,14 @@ public class ZipIOReader {
 
     /**
      * returns a ZipIOFile Filesystem for this ZipFile
-     * 
+     *
      * @return ZipIOFile that represents ROOT of the Filesystem
      * @throws ZipIOException
      */
     public synchronized ZipIOFile getZipIOFileSystem() throws ZipIOException {
-        if (this.rootFS != null) { return this.rootFS; }
+        if (this.rootFS != null) {
+            return this.rootFS;
+        }
         final ZipEntry[] content = this.getZipFiles();
         final java.util.List<ZipIOFile> root = new ArrayList<ZipIOFile>();
         for (final ZipEntry file : content) {
@@ -512,14 +537,18 @@ public class ZipIOReader {
 
     /**
      * opens the ZipFile for further use
-     * 
+     *
      * @throws ZipIOException
      * @throws ZipException
      * @throws IOException
      */
     private synchronized void openZip() throws ZipIOException, ZipException, IOException {
-        if (this.zip != null) { return; }
-        if (this.zipFile == null || this.zipFile.isDirectory() || !this.zipFile.exists()) { throw new ZipIOException("invalid zipFile"); }
+        if (this.zip != null) {
+            return;
+        }
+        if (this.zipFile == null || this.zipFile.isDirectory() || !this.zipFile.exists()) {
+            throw new ZipIOException("invalid zipFile");
+        }
         this.zip = new ZipFile(this.zipFile);
     }
 
@@ -532,9 +561,9 @@ public class ZipIOReader {
     }
 
     /**
-     * Set to true of you want to extract as many files as possible. if false,
-     * the first error throws an exception and interrupts the process
-     * 
+     * Set to true of you want to extract as many files as possible. if false, the first error throws an exception and interrupts the
+     * process
+     *
      * @param breakOnError
      */
     public void setBreakOnError(final boolean breakOnError) {
@@ -547,13 +576,15 @@ public class ZipIOReader {
 
     /**
      * how many ZipEntries does this ZipFile have
-     * 
+     *
      * @return
      * @throws ZipIOException
      * @throws IOException
      */
     public synchronized int size() throws ZipIOException {
-        if (this.zipEntriesSize != -1) { return this.zipEntriesSize; }
+        if (this.zipEntriesSize != -1) {
+            return this.zipEntriesSize;
+        }
         if (this.zip != null) {
             this.zipEntriesSize = this.zip.size();
         } else {
@@ -578,12 +609,14 @@ public class ZipIOReader {
 
     /**
      * trims the ZipIOFiles(reduces memory)
-     * 
+     *
      * @param root
      *            ZipIOFile we want to start
      */
     private void trimZipIOFiles(final ZipIOFile root) {
-        if (root == null) { return; }
+        if (root == null) {
+            return;
+        }
         for (final ZipIOFile tmp : root.getFiles()) {
             if (tmp.isDirectory()) {
                 this.trimZipIOFiles(tmp);

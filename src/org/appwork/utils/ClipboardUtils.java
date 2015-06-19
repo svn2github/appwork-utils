@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2010 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.utils
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -152,7 +152,7 @@ public class ClipboardUtils {
             if (htmlFlavor != null) {
                 final String charSet = new Regex(htmlFlavor.toString(), "charset=(.*?)]").getMatch(0);
                 byte[] html = (byte[]) trans.getTransferData(htmlFlavor);
-                if (CrossSystem.isLinux()) {
+                if (CrossSystem.isUnix()) {
                     /*
                      * workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=385421if
                      */

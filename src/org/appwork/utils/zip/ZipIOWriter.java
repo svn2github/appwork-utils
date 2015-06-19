@@ -153,8 +153,8 @@ public class ZipIOWriter {
                 this.addFileInternal(add, compress, (path != null && path.trim().length() > 0 ? path + "/" : "") + addDirectory.getName());
             } else if (add.isDirectory()) {
                 this.addDirectoryInternal(add, compress, (path != null && path.trim().length() > 0 ? path + "/" : "") + addDirectory.getName());
-            } else {
-                throw new ZipIOException("addDirectory " + addDirectory.getAbsolutePath() + " invalid");
+            } else if (!add.exists()) {
+                throw new ZipIOException("addDirectory: " + add.getAbsolutePath() + "(File:" + add.isFile() + "|Directory:" + add.isDirectory() + ")");
             }
         }
     }

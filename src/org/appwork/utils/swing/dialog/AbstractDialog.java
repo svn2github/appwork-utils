@@ -553,7 +553,7 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
                 @Override
                 public void componentShown(final ComponentEvent e) {
                     AbstractDialog.this.orgLocationOnScreen = AbstractDialog.this.getDialog().getLocationOnScreen();
-                    if (CrossSystem.isLinux()) {
+                    if (CrossSystem.isUnix()) {
                         AbstractDialog.this.getDialog().getContentPane().addComponentListener(new ComponentListener() {
 
                             @Override
@@ -689,7 +689,7 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
 
     /**
      * called when user closes the window
-     * 
+     *
      * @return <code>true</code>, if and only if the dialog should be closeable
      **/
     public boolean closeAllowed() {
@@ -963,7 +963,7 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
     /**
      * Create the key to save the don't showmagain state in database. should be overwritten in same dialogs. by default, the dialogs get
      * differed by their title and their classname
-     * 
+     *
      * @return
      */
     public String getDontShowAgainKey() {
@@ -1092,7 +1092,7 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
 
     /**
      * override this if you want to set a special height
-     * 
+     *
      * @return
      */
     protected int getPreferredHeight() {
@@ -1142,7 +1142,7 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
 
     /**
      * overwride this to set a special width
-     * 
+     *
      * @return
      */
     protected int getPreferredWidth() {
@@ -1160,7 +1160,7 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
 
     /**
      * Return the returnbitmask
-     * 
+     *
      * @return
      */
     public int getReturnmask() {
@@ -1212,7 +1212,7 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
     }
 
     /**
-     * 
+     *
      * @return if the dialog has been moved by the user
      */
     public boolean hasBeenMoved() {
@@ -1284,7 +1284,7 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
 
     /**
      * @return
-     * 
+     *
      */
     public boolean isCountdownFlagEnabled() {
         return BinaryLogic.containsAll(this.flagMask, UIOManager.LOGIC_COUNTDOWN);
@@ -1343,7 +1343,7 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
 
     /**
      * override to change default resizable flag
-     * 
+     *
      * @return
      */
     protected boolean isResizable() {
@@ -1382,7 +1382,7 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
 
     /**
      * This method has to be overwritten to implement custom content
-     * 
+     *
      * @return musst return a JComponent
      */
     abstract public JComponent layoutDialogContent();
@@ -1591,8 +1591,8 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
     }
 
     /**
-      *
-      */
+     *
+     */
     public void setInterrupted() {
         if (this.isDeveloperMode() && this.isDisposed()) {
             throw new IllegalStateException("Dialog already disposed");
@@ -1604,11 +1604,11 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
     /**
      * Add Additional BUttons on the left side of ok and cancel button. You can add a "tag" property to the action in ordner to help the
      * layouter,
-     * 
+     *
      * <pre>
      * abstractActions[0].putValue(&quot;tag&quot;, &quot;ok&quot;)
      * </pre>
-     * 
+     *
      * @param abstractActions
      *            list
      */
@@ -1646,7 +1646,7 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
 
     /**
      * Sets the returnvalue and saves the don't show again states to the database
-     * 
+     *
      * @param b
      */
     protected void setReturnmask(final boolean b) {
@@ -1692,7 +1692,7 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
 
     /**
      * Set countdown time on Milliseconds!
-     * 
+     *
      * @param countdownTimeInMs
      */
     public void setTimeout(final int countdownTimeInMs) {
@@ -1752,7 +1752,7 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
     /**
      * @throws DialogClosedException
      * @throws DialogCanceledException
-     * 
+     *
      */
     public void throwCloseExceptions() throws DialogClosedException, DialogCanceledException {
         final int mask = this.getReturnmask();

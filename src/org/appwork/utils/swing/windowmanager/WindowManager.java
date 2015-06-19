@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2013 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.utils.swing
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -16,7 +16,7 @@ import org.appwork.utils.os.CrossSystem;
 
 /**
  * @author Thomas
- * 
+ *
  */
 public abstract class WindowManager {
     public static enum FrameState {
@@ -37,9 +37,15 @@ public abstract class WindowManager {
          * @return
          */
         public static WindowExtendedState get(final int state) {
-            if ((state & Frame.MAXIMIZED_BOTH) != 0) { return MAXIMIZED_BOTH; }
-            if ((state & Frame.NORMAL) != 0) { return NORMAL; }
-            if ((state & Frame.ICONIFIED) != 0) { return ICONIFIED; }
+            if ((state & Frame.MAXIMIZED_BOTH) != 0) {
+                return MAXIMIZED_BOTH;
+            }
+            if ((state & Frame.NORMAL) != 0) {
+                return NORMAL;
+            }
+            if ((state & Frame.ICONIFIED) != 0) {
+                return ICONIFIED;
+            }
             return NORMAL;
         }
 
@@ -53,7 +59,7 @@ public abstract class WindowManager {
     private static WindowManager createOsWindowManager() {
         if (CrossSystem.isWindows()) {
             return new WindowsWindowManager();
-        } else if (CrossSystem.isLinux()) {
+        } else if (CrossSystem.isUnix()) {
             return new LinuxWindowManager();
         } else if (CrossSystem.isMac()) {
             return new MacWindowManager();
@@ -80,14 +86,19 @@ public abstract class WindowManager {
      * @return
      */
     public boolean hasFocus(final Window window) {
-        if (window != null && window.isFocusOwner()) { return true; }
-        if (window != null && window.getFocusOwner() != null) { return true;
+        if (window != null && window.isFocusOwner()) {
+            return true;
+        }
+        if (window != null && window.getFocusOwner() != null) {
+            return true;
 
         }
-        if (window != null && window.isFocused()) { return true;
+        if (window != null && window.isFocused()) {
+            return true;
 
         }
-        if (window != null && window.hasFocus()) { return true;
+        if (window != null && window.hasFocus()) {
+            return true;
 
         }
         return false;
@@ -105,7 +116,9 @@ public abstract class WindowManager {
     }
 
     public void setExtendedState(final Frame w, final WindowExtendedState state) {
-        if (state == null) { throw new NullPointerException("State is null"); }
+        if (state == null) {
+            throw new NullPointerException("State is null");
+        }
         switch (state) {
         case NORMAL:
             w.setExtendedState(Frame.NORMAL);
@@ -146,7 +159,9 @@ public abstract class WindowManager {
      */
     public boolean hasFocus() {
         for (final Window w : Window.getWindows()) {
-            if (hasFocus(w)) { return true; }
+            if (hasFocus(w)) {
+                return true;
+            }
         }
         return false;
     }

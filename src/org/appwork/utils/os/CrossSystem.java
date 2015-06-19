@@ -58,6 +58,10 @@ import org.appwork.utils.swing.dialog.InputDialog;
 public class CrossSystem {
 
     public static enum OperatingSystem {
+        NETBSD(OSFamily.BSD),
+        OPENBSD(OSFamily.BSD),
+        KFREEBSD(OSFamily.BSD),
+        FREEBSD(OSFamily.BSD),
         LINUX(OSFamily.LINUX),
         MAC(OSFamily.MAC),
         OS2(OSFamily.OS2),
@@ -65,6 +69,7 @@ public class CrossSystem {
         WINDOWS_2003(OSFamily.WINDOWS),
         WINDOWS_7(OSFamily.WINDOWS),
         WINDOWS_8(OSFamily.WINDOWS),
+        WINDOWS_10(OSFamily.WINDOWS),
         WINDOWS_NT(OSFamily.WINDOWS),
         WINDOWS_OTHERS(OSFamily.WINDOWS),
         WINDOWS_SERVER_2008(OSFamily.WINDOWS),
@@ -75,7 +80,6 @@ public class CrossSystem {
         private final OSFamily family;
 
         private OperatingSystem(final OSFamily family) {
-
             this.family = family;
         }
 
@@ -85,6 +89,7 @@ public class CrossSystem {
     }
 
     public static enum OSFamily {
+        BSD,
         LINUX,
         MAC,
         OS2,
@@ -103,12 +108,16 @@ public class CrossSystem {
 
     private static Boolean ISRASPBERRYPI = null;
 
+    public static boolean isUnix() {
+        return CrossSystem.isBSD() || CrossSystem.isLinux();
+    }
+
     public static boolean isRaspberryPi() {
         if (CrossSystem.ISRASPBERRYPI != null) {
             return CrossSystem.ISRASPBERRYPI;
         }
         boolean isRaspberryPi = false;
-        if (CrossSystem.isLinux() && ARCHFamily.ARM.equals(CrossSystem.getARCHFamily())) {
+        if (isUnix() && ARCHFamily.ARM.equals(CrossSystem.getARCHFamily())) {
             FileInputStream fis = null;
             try {
                 boolean armV6 = false;
@@ -130,6 +139,7 @@ public class CrossSystem {
                     }
                 }
                 isRaspberryPi = (armV6 && hardWareRP1) || (armV7 && hardWareRP2);
+                is.close();
             } catch (final Throwable e) {
                 e.printStackTrace();
             } finally {
@@ -284,14 +294,6 @@ public class CrossSystem {
         if (!CrossSystem.openCustom(CrossSystem.BROWSER_COMMANDLINE, _url)) {
             CrossSystem.DESKTOP_SUPPORT.browseURL(new URL(_url));
         }
-    }
-
-    public static void main(String[] args) {
-        System.out.println(alleviatePathParts("."));
-        System.out.println(alleviatePathParts(".."));
-        System.out.println(alleviatePathParts("../Test"));
-        System.out.println(alleviatePathParts("./Test"));
-        System.out.println(alleviatePathParts(" . Test"));
     }
 
     /**
@@ -493,7 +495,9 @@ public class CrossSystem {
     public static OperatingSystem getOSByString(final String osString) {
         if (osString != null) {
             final String os = osString.toLowerCase(Locale.ENGLISH);
-            if (os.contains("windows 8")) {
+            if (os.contains("windows 10")) {
+                return OperatingSystem.WINDOWS_10;
+            } else if (os.contains("windows 8")) {
                 return OperatingSystem.WINDOWS_8;
             } else if (os.contains("windows 7")) {
                 return OperatingSystem.WINDOWS_7;
@@ -513,10 +517,18 @@ public class CrossSystem {
                 return OperatingSystem.WINDOWS_NT;
             } else if (os.contains("windows")) {
                 return OperatingSystem.WINDOWS_OTHERS;
-            } else if (os.contains("mac")) {
+            } else if (os.contains("mac") || os.contains("darwin")) {
                 return OperatingSystem.MAC;
-            } else if (os.contains("OS/2")) {
+            } else if (os.contains("os/2")) {
                 return OperatingSystem.OS2;
+            } else if (os.contains("kfreebsd")) {
+                return OperatingSystem.KFREEBSD;
+            } else if (os.contains("freebsd")) {
+                return OperatingSystem.FREEBSD;
+            } else if (os.contains("netbsd")) {
+                return OperatingSystem.NETBSD;
+            } else if (os.contains("openbsd")) {
+                return OperatingSystem.OPENBSD;
             } else {
                 return OperatingSystem.LINUX;
             }
@@ -529,11 +541,11 @@ public class CrossSystem {
             final String arch = archString.toLowerCase(Locale.ENGLISH);
             if (arch.contains("amd64")) {
                 return ARCHFamily.X86;
-            } else if (arch.contains("i386")) {
+            } else if (arch.contains("i386") || arch.contains("i686") || arch.contains("i586")) {
                 return ARCHFamily.X86;
             } else if (arch.contains("x86")) {
                 return ARCHFamily.X86;
-            } else if (arch.contains("ppc")) {
+            } else if (arch.contains("ppc") || arch.contains("powerpc")) {
                 return ARCHFamily.PPC;
             } else if (arch.contains("sparc")) {
                 return ARCHFamily.SPARC;
@@ -543,7 +555,6 @@ public class CrossSystem {
                 return ARCHFamily.IA64;
             }
         }
-        new Exception("Unknown CPU Architecture " + archString).printStackTrace();
         return ARCHFamily.NA;
     }
 
@@ -688,6 +699,8 @@ public class CrossSystem {
                 is64bit = true;
             } else if ("ppc64".equals(osArch)) {
                 is64bit = true;
+            } else if ("ia64".equals(osArch)) {
+                is64bit = true;
             } else if ("amd_64".equals(osArch)) {
                 is64bit = true;
             } else if ("x86_64".equals(osArch)) {
@@ -715,6 +728,7 @@ public class CrossSystem {
             return true;
         } else {
             switch (CrossSystem.getOSFamily()) {
+            case BSD:
             case LINUX:
                 if (CrossSystem.is64BitArch()) {
                     CrossSystem.OS64BIT = true;
@@ -866,7 +880,6 @@ public class CrossSystem {
      */
     public static boolean isDeleteSelectionTrigger(final KeyStroke ks) {
         if (CrossSystem.isMac()) {
-
             if (ks == CrossSystem.KEY_STROKE_BACKSPACE_CTRL) {
                 return true;
             }
@@ -876,6 +889,10 @@ public class CrossSystem {
 
     public static boolean isLinux() {
         return CrossSystem.OS.getFamily() == OSFamily.LINUX;
+    }
+
+    public static boolean isBSD() {
+        return CrossSystem.OS.getFamily() == OSFamily.BSD;
     }
 
     /**

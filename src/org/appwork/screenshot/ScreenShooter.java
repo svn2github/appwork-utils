@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2011 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.screenshot
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -53,7 +53,7 @@ import org.appwork.utils.swing.dialog.DialogClosedException;
 
 /**
  * @author thomas
- * 
+ *
  */
 public class ScreenShooter extends JWindow implements MouseListener, MouseMotionListener {
 
@@ -73,9 +73,8 @@ public class ScreenShooter extends JWindow implements MouseListener, MouseMotion
     private static ScreenShooter layover;
 
     /**
-     * Creates a screenshot of all available screens. and returns the
-     * ScreenShooter
-     * 
+     * Creates a screenshot of all available screens. and returns the ScreenShooter
+     *
      * @return
      * @throws AWTException
      */
@@ -100,7 +99,7 @@ public class ScreenShooter extends JWindow implements MouseListener, MouseMotion
         // yMin, Transparency.TRANSLUCENT);
         Image complete = null;
         Graphics2D g2 = null;
-        if (CrossSystem.isLinux()) {
+        if (CrossSystem.isUnix()) {
             final BufferedImage img = new BufferedImage(xMax - xMin, yMax - yMin, BufferedImage.TYPE_INT_RGB);
             g2 = img.createGraphics();
             complete = img;
@@ -141,8 +140,8 @@ public class ScreenShooter extends JWindow implements MouseListener, MouseMotion
         g2gray.dispose();
         g2 = null;
         g2gray = null;
-        final ScreenShooter layover = new ScreenShooter(xMin,yMin,xMax,yMax);
-        
+        final ScreenShooter layover = new ScreenShooter(xMin, yMin, xMax, yMax);
+
         layover.setImage(complete, completeGrayed);
         return layover;
     }
@@ -196,17 +195,17 @@ public class ScreenShooter extends JWindow implements MouseListener, MouseMotion
 
     private Point             mouse;
     private boolean           disposed   = false;
-    private int xMin;
-    private int xMax;
-    private int yMin;
-    private int yMax;
+    private int               xMin;
+    private int               xMax;
+    private int               yMin;
+    private int               yMax;
 
     public ScreenShooter(int xMin, int yMin, int xMax, int yMax) {
         super();
-this.xMin=xMin;
-this.xMax=xMax;
-this.yMin=yMin;
-this.yMax=yMax;
+        this.xMin = xMin;
+        this.xMax = xMax;
+        this.yMin = yMin;
+        this.yMax = yMax;
         // we extends from a JFrame because JWindow cannot get focus and this
         // cannot listen on key events
         // this.setUndecorated(true);
@@ -253,7 +252,7 @@ this.yMax=yMax;
     }
 
     /**
-     * 
+     *
      */
     private void cancel() {
         if (this.isDragging) {
@@ -277,7 +276,7 @@ this.yMax=yMax;
 
     /**
      * Converts yourPoint to a coresponding point in the mag glass
-     * 
+     *
      * @param mouselocation
      * @param mag
      *            glass location
@@ -293,7 +292,7 @@ this.yMax=yMax;
 
     /**
      * Cuts the given range from the image(screenshot)
-     * 
+     *
      * @param x
      * @param y
      * @param x2
@@ -305,7 +304,9 @@ this.yMax=yMax;
         final int height = Math.abs(y1 - y2) + 1;
         final int sX = Math.min(x1, x2);
         final int sY = Math.min(y1, y2);
-        if (width <= 0 || height <= 0) { return null; }
+        if (width <= 0 || height <= 0) {
+            return null;
+        }
         final BufferedImage ret = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         final Graphics2D gb = (Graphics2D) ret.getGraphics();
         gb.drawImage(this.image, 0, 0, width, height, sX, sY, sX + width, sY + height, null);
@@ -345,10 +346,9 @@ this.yMax=yMax;
     }
 
     /**
-     * get the device bounds of the device l is in. Use to find the currently
-     * used screen
-     * 
-     * 
+     * get the device bounds of the device l is in. Use to find the currently used screen
+     *
+     *
      * @return
      */
     private Rectangle getDeviceBounds() {
@@ -369,7 +369,9 @@ this.yMax=yMax;
      * @return
      */
     public BufferedImage getFullScreenShot() {
-        if (this.image instanceof BufferedImage) { return (BufferedImage) this.image; }
+        if (this.image instanceof BufferedImage) {
+            return (BufferedImage) this.image;
+        }
         final BufferedImage img = new BufferedImage(this.getWidth(), this.getHeight(), BufferedImage.TYPE_INT_RGB);
         Graphics gd = img.getGraphics();
         gd.drawImage(this.image, 0, 0, null);
@@ -378,16 +380,17 @@ this.yMax=yMax;
     }
 
     /**
-     * calculates the position of the mag. mag position relative to the
-     * mouseposition changes if we reach the screen devices bounds
-     * 
+     * calculates the position of the mag. mag position relative to the mouseposition changes if we reach the screen devices bounds
+     *
      * @param l
      * @return
      */
     private Point getMagnifierPosition() {
 
         final Rectangle bounds = this.getDeviceBounds();
-        if (bounds == null) { return null; }
+        if (bounds == null) {
+            return null;
+        }
         int x = this.mouse.x + 20;
         if (x + ScreenShooter.SIZE > bounds.x + bounds.width) {
             x = this.mouse.x - ScreenShooter.SIZE - 20;
@@ -400,9 +403,8 @@ this.yMax=yMax;
     }
 
     /**
-     * gets the selected Screenshot. Blocks until a screenshot is available, or
-     * the user canceled
-     * 
+     * gets the selected Screenshot. Blocks until a screenshot is available, or the user canceled
+     *
      * @return
      * @throws InterruptedException
      */
@@ -420,7 +422,9 @@ this.yMax=yMax;
      */
     @Override
     public void mouseClicked(final MouseEvent e) {
-        if (e.isPopupTrigger() || e.getButton() == MouseEvent.BUTTON3) { return; }
+        if (e.isPopupTrigger() || e.getButton() == MouseEvent.BUTTON3) {
+            return;
+        }
         if (this.isDragging) {
             this.stopDrag();
             this.setVisible(false);
@@ -442,10 +446,8 @@ this.yMax=yMax;
 
     /*
      * (non-Javadoc)
-     * 
-     * @see
-     * java.awt.event.MouseMotionListener#mouseDragged(java.awt.event.MouseEvent
-     * )
+     *
+     * @see java.awt.event.MouseMotionListener#mouseDragged(java.awt.event.MouseEvent )
      */
     @Override
     public void mouseDragged(final MouseEvent e) {
@@ -476,9 +478,8 @@ this.yMax=yMax;
 
     /*
      * (non-Javadoc)
-     * 
-     * @see
-     * java.awt.event.MouseMotionListener#mouseMoved(java.awt.event.MouseEvent)
+     *
+     * @see java.awt.event.MouseMotionListener#mouseMoved(java.awt.event.MouseEvent)
      */
     @Override
     public void mouseMoved(final MouseEvent e) {
@@ -506,13 +507,14 @@ this.yMax=yMax;
 
     /*
      * (non-Javadoc)
-     * 
-     * @see
-     * java.awt.event.MouseListener#mouseReleased(java.awt.event.MouseEvent)
+     *
+     * @see java.awt.event.MouseListener#mouseReleased(java.awt.event.MouseEvent)
      */
     @Override
     public void mouseReleased(final MouseEvent e) {
-        if (e.isPopupTrigger() || e.getButton() == MouseEvent.BUTTON3) { return; }
+        if (e.isPopupTrigger() || e.getButton() == MouseEvent.BUTTON3) {
+            return;
+        }
 
     }
 
@@ -529,7 +531,7 @@ this.yMax=yMax;
 
     /**
      * Paints the mag, and the position values
-     * 
+     *
      * @param gb
      * @param l
      */
@@ -605,7 +607,7 @@ this.yMax=yMax;
     }
 
     /**
-     * 
+     *
      */
     public void start() {
         new EDTHelper<Object>() {
@@ -617,7 +619,7 @@ this.yMax=yMax;
                 ScreenShooter.this.frame.setVisible(true);
                 ScreenShooter.this.frame.requestFocus();
                 ScreenShooter.this.setVisible(true);
-                ScreenShooter.this.setLocation(xMin , yMin);
+                ScreenShooter.this.setLocation(xMin, yMin);
                 ScreenShooter.this.setAlwaysOnTop(false);
                 ScreenShooter.this.requestFocus();
                 ScreenShooter.this.requestFocusInWindow();
@@ -677,7 +679,7 @@ this.yMax=yMax;
     }
 
     /**
-     * 
+     *
      */
     private void startDrag() {
         this.dragStart = this.mouse;
@@ -686,7 +688,7 @@ this.yMax=yMax;
     }
 
     /**
-     * 
+     *
      */
     private void stopDrag() {
         this.isDragging = false;
@@ -696,7 +698,7 @@ this.yMax=yMax;
 
     /**
      * Paints the complete screen
-     * 
+     *
      * @param bufferStrategy
      */
     private void updateGUI(final BufferStrategy bufferStrategy) {

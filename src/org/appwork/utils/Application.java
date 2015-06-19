@@ -25,7 +25,6 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -43,9 +42,9 @@ import org.appwork.utils.os.CrossSystem;
 
 /**
  * Application utils provide statis helper functions concerning the applications System integration
- * 
+ *
  * @author $Author: unknown$
- * 
+ *
  */
 public class Application {
 
@@ -94,7 +93,7 @@ public class Application {
 
     /**
      * Adds a folder to the System classloader classpath this might fail if there is a security manager
-     * 
+     *
      * @param file
      * @throws IOException
      */
@@ -114,7 +113,7 @@ public class Application {
 
     /**
      * Adds a url to the classloader classpath this might fail if there is a security manager
-     * 
+     *
      * @param file
      * @throws IOException
      */
@@ -144,7 +143,7 @@ public class Application {
 
     /**
      * Returns the Path of appworkutils.jar
-     * 
+     *
      * @return
      */
     public static String getHome() {
@@ -256,7 +255,7 @@ public class Application {
 
     /**
      * Returns a ressourcefile relative to the instaldirectory
-     * 
+     *
      * @param relative
      * @return
      */
@@ -267,7 +266,7 @@ public class Application {
     /**
      * returns the url for the resource. if The resource can be found in classpath, it will be returned. otherwise the function will return
      * the fileurl to current wprkingdirectory
-     * 
+     *
      * @param string
      * @return
      */
@@ -277,20 +276,20 @@ public class Application {
 
     /**
      * Returns the Resource url for relative.
-     * 
+     *
      * NOTE:this function only returns URL's that really exists!
-     * 
+     *
      * if preferClassPath is true:
-     * 
+     *
      * we first check if there is a ressource available inside current classpath, for example inside the jar itself. if no such URL exists
      * we check for file in local filesystem
-     * 
+     *
      * if preferClassPath if false:
-     * 
+     *
      * first check local filesystem, then inside classpath
-     * 
-     * 
-     * 
+     *
+     *
+     *
      * @param string
      * @param b
      */
@@ -428,12 +427,6 @@ public class Application {
         }
     }
 
-    public static void main(String[] args) throws MalformedURLException, URISyntaxException, UnsupportedEncodingException {
-        URL url = new URL("file:/C:/USers/Thomas/AppData/Local/NCB CatalOmat%201.0/Cataloger.jar");
-        System.out.println(new File(URLDecoder.decode(url.getPath(), "UTF-8")));
-
-    }
-
     /**
      * @param class1
      * @param subPaths
@@ -494,9 +487,9 @@ public class Application {
 
     /**
      * Detects if the Application runs out of a jar or not.
-     * 
+     *
      * @param rootOfClazz
-     * 
+     *
      * @return
      */
     public static boolean isJared(Class<?> rootOfClazz) {
@@ -533,7 +526,7 @@ public class Application {
 
     /**
      * checks current java version for known issues/bugs or unsupported ones
-     * 
+     *
      * @param support15
      * @return
      */
@@ -841,7 +834,7 @@ public class Application {
 
     /**
      * sets current Application Folder and Jar ID. MUST BE SET at startup! Can only be set once!
-     * 
+     *
      * @param newAppFolder
      * @param newJar
      */
@@ -861,7 +854,7 @@ public class Application {
 
     /**
      * returns a file that does not exists. thus it ads a counter to the path until the resulting file does not exist
-     * 
+     *
      * @param string
      * @return
      */
@@ -871,7 +864,7 @@ public class Application {
 
     /**
      * returns a file that does not exists. thus it ads a counter to the path until the resulting file does not exist
-     * 
+     *
      * @param string
      * @return
      */
@@ -905,7 +898,7 @@ public class Application {
     /**
      * check if the synthetica look and feel is used. make sure not to call this before you set the final look and feel! Else all calls will
      * return the wrong results.
-     * 
+     *
      * @return
      */
     public static boolean isSyntheticaLookAndFeel() {

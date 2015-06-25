@@ -66,6 +66,13 @@ public class ProcessBuilderFactory {
         }
     }
 
+    public static ProcessOutput runCommand(ProcessBuilder pb) throws IOException, InterruptedException {
+        final ByteArrayOutputStream errorStream = new ByteArrayOutputStream();
+        final ByteArrayOutputStream sdtStream = new ByteArrayOutputStream();
+        int exitCode = runCommand(pb, errorStream, sdtStream);
+        return new ProcessOutput(exitCode, sdtStream.toByteArray(), errorStream.toByteArray());
+    }
+
     /**
      * s
      * 
@@ -74,14 +81,13 @@ public class ProcessBuilderFactory {
      * @throws IOException
      * @throws InterruptedException
      */
-    public static ProcessOutput runCommand(ProcessBuilder pb) throws IOException, InterruptedException {
+    public static int runCommand(ProcessBuilder pb, final OutputStream errorStream, final OutputStream sdtStream) throws IOException, InterruptedException {
         // System.out.println("Start Process " + pb.command());
 
         //
         final Process process = pb.start();
         process.getOutputStream().close();
-        final ByteArrayOutputStream errorStream = new ByteArrayOutputStream();
-        final ByteArrayOutputStream sdtStream = new ByteArrayOutputStream();
+
         final AtomicReference<IOException> exception = new AtomicReference<IOException>();
         final Thread reader1 = new Thread("Process-Reader-Std") {
             @Override
@@ -152,7 +158,7 @@ public class ProcessBuilderFactory {
                 reader2.interrupt();
             }
         }
-        return new ProcessOutput(returnCode, sdtStream.toByteArray(), errorStream.toByteArray());
+        return returnCode;
     }
 
     public static ProcessBuilder create(final java.util.List<String> splitCommandString) {

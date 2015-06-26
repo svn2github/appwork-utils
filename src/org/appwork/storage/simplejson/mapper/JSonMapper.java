@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2011 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.storage.simplejson.mapper
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -37,7 +37,7 @@ import org.appwork.utils.reflection.Clazz;
 
 /**
  * @author thomas
- * 
+ *
  */
 public class JSonMapper {
 
@@ -131,7 +131,9 @@ public class JSonMapper {
     public JSonNode create(final Object obj) throws MapperException {
         try {
 
-            if (obj == null) { return new JSonValue(null); }
+            if (obj == null) {
+                return new JSonValue(null);
+            }
             final Class<? extends Object> clazz = obj.getClass();
             TypeMapper<?> mapper;
             if (clazz.isPrimitive()) {
@@ -149,7 +151,9 @@ public class JSonMapper {
                     return new JSonValue(((Long) obj).longValue());
                 } else if (clazz == float.class) {
                     return new JSonValue(((Float) obj).doubleValue());
-                } else if (clazz == double.class) { return new JSonValue(((Double) obj).doubleValue()); }
+                } else if (clazz == double.class) {
+                    return new JSonValue(((Double) obj).doubleValue());
+                }
             } else if (clazz.isEnum()) {
                 return new JSonValue(obj + "");
             } else if (obj instanceof Boolean) {
@@ -177,7 +181,9 @@ public class JSonMapper {
                 Entry<Object, Object> next;
                 for (final Iterator<Entry<Object, Object>> it = ((Map<Object, Object>) obj).entrySet().iterator(); it.hasNext();) {
                     next = it.next();
-                    if (!(next.getKey() instanceof String)) { throw new MapperException("Map keys have to be Strings: " + clazz + " Keyclass:" + (next.getKey() == null ? "<null>" : next.getKey().getClass())); }
+                    if (!(next.getKey() instanceof String)) {
+                        throw new MapperException("Map keys have to be Strings: " + clazz + " Keyclass:" + (next.getKey() == null ? "<null>" : next.getKey().getClass()));
+                    }
                     ret.put(next.getKey().toString(), create(next.getValue()));
                 }
                 return ret;
@@ -234,7 +240,7 @@ public class JSonMapper {
 
     /**
      * if json maps null to a primitive field
-     * 
+     *
      * @return
      */
     public boolean isIgnorePrimitiveNullMapping() {
@@ -289,7 +295,7 @@ public class JSonMapper {
             final TypeMapper<?> tm = typeMapper.get(clazz);
             if (tm != null) {
 
-            return tm.reverseMap(json);
+                return tm.reverseMap(json);
 
             }
             if (json instanceof JSonValue) {
@@ -313,12 +319,13 @@ public class JSonMapper {
                         try {
                             return Enum.valueOf((Class<Enum>) type, ((JSonValue) json).getValue() + "");
                         } catch (final IllegalArgumentException e) {
-                            if (isIgnoreIllegalArgumentMappings() || isIgnoreIllegalEnumMappings()) { return null; }
+                            if (isIgnoreIllegalArgumentMappings() || isIgnoreIllegalEnumMappings()) {
+                                return null;
+                            }
                             throw e;
                         }
                     } else {
                         return ((JSonValue) json).getValue();
-
                     }
 
                 case NULL:
@@ -513,7 +520,9 @@ public class JSonMapper {
         if (class1.isInterface()) {
             if (List.class.isAssignableFrom(class1)) {
                 return ArrayList.class;
-            } else if (Map.class.isAssignableFrom(class1)) { return HashMap.class; }
+            } else if (Map.class.isAssignableFrom(class1)) {
+                return HashMap.class;
+            }
 
             throw new MapperException("Interface not supported: " + class1);
 

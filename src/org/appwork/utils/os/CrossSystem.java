@@ -1235,14 +1235,17 @@ public class CrossSystem {
 
     /**
      * @return
+     * @throws SecuritySoftwareException
      */
-    public static SecuritySoftwareInfo getAntiVirusSoftwareInfo() throws UnsupportedOperationException {
+    public static SecuritySoftwareInfo getAntiVirusSoftwareInfo() throws UnsupportedOperationException, SecuritySoftwareException {
+
+        String response = null;
         try {
             if (!CrossSystem.isWindows()) {
                 throw new UnsupportedOperationException("getAntiVirusSoftwareInfo: Not Supported for your OS");
             }
             final String charSet = Charset.defaultCharset().displayName();
-            final String response;
+
             switch (CrossSystem.getOS()) {
             case WINDOWS_XP:
                 response = ProcessBuilderFactory.runCommand("wmic", "/NAMESPACE:\\\\root\\SecurityCenter", "path", "AntiVirusProduct").getStdOutString(charSet);
@@ -1253,7 +1256,7 @@ public class CrossSystem {
             }
             return parseWindowWMIResponse(response);
         } catch (Throwable e) {
-            throw new WTFException(e);
+            throw new SecuritySoftwareException(e, response);
         }
     }
 
@@ -1286,15 +1289,17 @@ public class CrossSystem {
 
     /**
      * @return
+     * @throws SecuritySoftwareException
      * 
      */
-    public static SecuritySoftwareInfo getFirewallSoftwareInfo() throws UnsupportedOperationException {
+    public static SecuritySoftwareInfo getFirewallSoftwareInfo() throws UnsupportedOperationException, SecuritySoftwareException {
+        String response = null;
         try {
             if (!CrossSystem.isWindows()) {
                 throw new UnsupportedOperationException("getAntiVirusSoftwareInfo: Not Supported for your OS");
             }
             final String charSet = Charset.defaultCharset().displayName();
-            final String response;
+
             switch (CrossSystem.getOS()) {
             case WINDOWS_XP:
                 response = ProcessBuilderFactory.runCommand("wmic", "/NAMESPACE:\\\\root\\SecurityCenter", "path", "FirewallProduct").getStdOutString(charSet);
@@ -1305,21 +1310,23 @@ public class CrossSystem {
             }
             return parseWindowWMIResponse(response);
         } catch (Throwable e) {
-            throw new WTFException(e);
+            throw new SecuritySoftwareException(e, response);
         }
     }
 
     /**
      * @return
+     * @throws SecuritySoftwareException
      * 
      */
-    public static SecuritySoftwareInfo getAntiSpySoftwareInfo() throws UnsupportedOperationException {
+    public static SecuritySoftwareInfo getAntiSpySoftwareInfo() throws UnsupportedOperationException, SecuritySoftwareException {
+        String response = null;
         try {
             if (!CrossSystem.isWindows()) {
                 throw new UnsupportedOperationException("getAntiVirusSoftwareInfo: Not Supported for your OS");
             }
             final String charSet = Charset.defaultCharset().displayName();
-            final String response;
+
             switch (CrossSystem.getOS()) {
             case WINDOWS_XP:
                 response = null;
@@ -1330,7 +1337,7 @@ public class CrossSystem {
             }
             return parseWindowWMIResponse(response);
         } catch (Throwable e) {
-            throw new WTFException(e);
+            throw new SecuritySoftwareException(e, response);
         }
     }
 }

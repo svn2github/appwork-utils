@@ -52,7 +52,7 @@ import org.appwork.utils.swing.dialog.InputDialog;
 
 /**
  * This class provides a few native features.
- * 
+ *
  * @author $Author: unknown$
  */
 
@@ -273,7 +273,7 @@ public class CrossSystem {
 
     /**
      * internal function to open a file/folder
-     * 
+     *
      * @param file
      * @throws IOException
      */
@@ -286,7 +286,7 @@ public class CrossSystem {
 
     /**
      * internal function to open an URL in a browser
-     * 
+     *
      * @param _url
      * @throws IOException
      * @throws URISyntaxException
@@ -299,9 +299,9 @@ public class CrossSystem {
 
     /**
      * use this method to make pathPart safe to use in a full absoluePath.
-     * 
+     *
      * it will remove driveletters/path separators and all known chars that are forbidden in a path
-     * 
+     *
      * @param pathPart
      * @return
      */
@@ -474,7 +474,7 @@ public class CrossSystem {
 
     /**
      * Returns the Mime Class for the current OS
-     * 
+     *
      * @return
      * @see Mime
      */
@@ -561,7 +561,7 @@ public class CrossSystem {
 
     /**
      * Returns true if the OS is a linux system
-     * 
+     *
      * @return
      */
     public static OSFamily getOSFamily() {
@@ -633,7 +633,7 @@ public class CrossSystem {
             final int index = jvmName.indexOf('@');
             /**
              * http://www.golesny.de/p/code/javagetpid
-             * 
+             *
              * @return
              */
             if (index >= 1) {
@@ -784,7 +784,7 @@ public class CrossSystem {
 
     /**
      * checks if given path is absolute or relative
-     * 
+     *
      * @param path
      * @return
      */
@@ -816,9 +816,9 @@ public class CrossSystem {
     }
 
     /**
-     * 
+     *
      /**
-     * 
+     *
      * @param e
      * @return
      */
@@ -898,7 +898,7 @@ public class CrossSystem {
 
     /**
      * Returns true if the OS is a MAC System
-     * 
+     *
      * @return
      */
 
@@ -908,7 +908,7 @@ public class CrossSystem {
 
     /**
      * returns true in case of "open an URL in a browser" is supported
-     * 
+     *
      * @return
      */
     public static boolean isOpenBrowserSupported() {
@@ -917,7 +917,7 @@ public class CrossSystem {
 
     /**
      * returns true in case of "open a File" is supported
-     * 
+     *
      * @return
      */
     public static boolean isOpenFileSupported() {
@@ -975,7 +975,7 @@ public class CrossSystem {
 
     /**
      * Returns true if the OS is a Windows System
-     * 
+     *
      * @return
      */
     public static boolean isWindows() {
@@ -1004,7 +1004,7 @@ public class CrossSystem {
 
     /**
      * Opens a file or directory
-     * 
+     *
      * @see java.awt.Desktop#open(File)
      * @param file
      * @throws IOException
@@ -1035,7 +1035,7 @@ public class CrossSystem {
 
     /**
      * Open an url in the systems default browser
-     * 
+     *
      * @param url
      */
     public static void openURL(final String url) {
@@ -1166,7 +1166,7 @@ public class CrossSystem {
 
     /**
      * Set commandline to open the browser use %s as wildcard for the url
-     * 
+     *
      * @param commands
      */
     public static void setBrowserCommandLine(final String[] commands) {
@@ -1210,7 +1210,7 @@ public class CrossSystem {
 
     /**
      * splits filename into name,extension
-     * 
+     *
      * @param filename
      * @return
      */
@@ -1261,9 +1261,12 @@ public class CrossSystem {
     }
 
     private static SecuritySoftwareInfo parseWindowWMIResponse(final String response) {
-        if (response != null) {
+        if (StringUtils.isNotEmpty(response)) {
             Log.L.info(response);
-            final String[] lines = response.split("[\r\n]{1,2}");
+            String[] lines = response.split("[\r\n]{1,2}");
+            if (lines.length == 0) {
+                lines = new String[] { response };
+            }
             final String[] keys = new Regex(lines[0], "(\\S+\\s*)").getColumn(0);
             if (keys.length > 3) {
                 final SecuritySoftwareInfo ret = new SecuritySoftwareInfo();
@@ -1280,7 +1283,7 @@ public class CrossSystem {
                         break;
                     }
                 }
-                Log.L.info(ret + "");
+                Log.L.info(ret.toString());
                 return ret;
             }
         }
@@ -1290,7 +1293,7 @@ public class CrossSystem {
     /**
      * @return
      * @throws SecuritySoftwareException
-     * 
+     *
      */
     public static SecuritySoftwareInfo getFirewallSoftwareInfo() throws UnsupportedOperationException, SecuritySoftwareException {
         String response = null;
@@ -1317,7 +1320,7 @@ public class CrossSystem {
     /**
      * @return
      * @throws SecuritySoftwareException
-     * 
+     *
      */
     public static SecuritySoftwareInfo getAntiSpySoftwareInfo() throws UnsupportedOperationException, SecuritySoftwareException {
         String response = null;

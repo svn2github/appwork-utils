@@ -9,6 +9,7 @@
  */
 package org.appwork.utils.formatter;
 
+import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -182,10 +183,39 @@ public class TimeFormatter {
 
     public static Date parseDateString(final String date) {
         if (date != null) {
+            final Date ret = parseDateString(date, false);
+            if (ret != null) {
+                return ret;
+            }
+            return parseDateString(date, true);
+        }
+        return null;
+    }
+
+    public static Date parseDateString(final String date, final boolean fix) {
+        if (date != null) {
             for (final SimpleDateFormat format : TimeFormatter.dateformats) {
+                String parseDate = date;
+                if (fix) {
+                    final DateFormatSymbols symbols = format.getDateFormatSymbols();
+                    for (final String shortWeekDay : symbols.getShortWeekdays()) {
+                        if (shortWeekDay != null && shortWeekDay.length() > 0 && parseDate.contains(shortWeekDay)) {
+                            /* fix broken weekDayName */
+                            parseDate = parseDate.replaceAll("(" + Pattern.quote(shortWeekDay) + "[a-zA-Z]+)", shortWeekDay);
+                            break;
+                        }
+                    }
+                    for (final String shortMonth : symbols.getShortMonths()) {
+                        if (shortMonth != null && shortMonth.length() > 0 && parseDate.contains(shortMonth)) {
+                            /* fix broken shortMonthName */
+                            parseDate = parseDate.replaceAll("(" + Pattern.quote(shortMonth) + "[a-zA-Z]+)", shortMonth);
+                            break;
+                        }
+                    }
+                }
                 try {
                     synchronized (format) {
-                        return format.parse(date);
+                        return format.parse(parseDate);
                     }
                 } catch (final Throwable e2) {
                 }

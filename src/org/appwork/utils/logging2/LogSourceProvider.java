@@ -43,9 +43,9 @@ public abstract class LogSourceProvider {
     protected final HashMap<String, LogSink> logSinks    = new HashMap<String, LogSink>();
     private final int                        maxSize;
     private final int                        maxLogs;
-    protected long                           logTimeout;
+    protected final long                     logTimeout;
     protected Thread                         flushThread = null;
-    protected File                           logFolder;
+    protected final File                     logFolder;
     protected LogConsoleHandler              consoleHandler;
 
     protected boolean                        instantFlushDefault;
@@ -55,7 +55,13 @@ public abstract class LogSourceProvider {
         return debugMode;
     }
 
-    private final long                 initTime;
+    private final long    initTime;
+    private final boolean writeLogs;
+
+    public boolean isWriteLogs() {
+        return writeLogs;
+    }
+
     private final static AtomicBoolean TRASHLOCK = new AtomicBoolean(false);
 
     public LogSourceProvider(final long timeStamp) {
@@ -63,6 +69,7 @@ public abstract class LogSourceProvider {
         this.consoleHandler = new LogConsoleHandler();
         final LogConfig config = JsonConfig.create(LogConfig.class);
         this.maxSize = config.getMaxLogFileSize();
+        this.writeLogs = maxSize > 100 * 1024;
         this.maxLogs = config.getMaxLogFiles();
         this.logTimeout = config.getLogFlushTimeout() * 1000l;
         debugMode = config.isDebugModeEnabled();
@@ -71,7 +78,7 @@ public abstract class LogSourceProvider {
         if (llogFolder.exists()) {
             llogFolder = Application.getResource("logs/" + timeStamp + "_" + new SimpleDateFormat("HH.mm.ss").format(new Date(timeStamp)) + "/");
         }
-        if (!llogFolder.exists()) {
+        if (!llogFolder.exists() && isWriteLogs()) {
             llogFolder.mkdirs();
         }
         this.logFolder = llogFolder;
@@ -251,7 +258,7 @@ public abstract class LogSourceProvider {
                 }
 
                 try {
-                    if (maxSize > 100 * 1024) {
+                    if (isWriteLogs()) {
                         final Handler fileHandler = new FileHandler(new File(this.logFolder, name).getAbsolutePath(), this.maxSize, this.maxLogs, true);
                         sink.addHandler(fileHandler);
                         fileHandler.setEncoding("UTF-8");
@@ -276,7 +283,7 @@ public abstract class LogSourceProvider {
     }
 
     public boolean isInstantFlushDefault() {
-        return instantFlushDefault || maxSize < 100 * 1024;
+        return instantFlushDefault || isWriteLogs() == false;
     }
 
     public void removeConsoleHandler() {

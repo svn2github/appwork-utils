@@ -181,21 +181,17 @@ public class TimeFormatter {
     }
 
     public static Date parseDateString(final String date) {
-        if (date == null) {
-            return null;
-        }
-        Date expireDate = null;
-        for (final SimpleDateFormat format : TimeFormatter.dateformats) {
-            try {
-                expireDate = format.parse(date);
-                break;
-            } catch (final Throwable e2) {
+        if (date != null) {
+            for (final SimpleDateFormat format : TimeFormatter.dateformats) {
+                try {
+                    synchronized (format) {
+                        return format.parse(date);
+                    }
+                } catch (final Throwable e2) {
+                }
             }
         }
-        if (expireDate == null) {
-            return null;
-        }
-        return expireDate;
+        return null;
     }
 
     /**

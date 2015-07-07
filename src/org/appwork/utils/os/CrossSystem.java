@@ -314,7 +314,7 @@ public class CrossSystem {
         }
         pathPart = pathPart.trim();
         /* remove invalid chars */
-        pathPart = pathPart.replaceAll("([\\\\|<|>|\\||\r|\n|\"|:|\\*|\\?|/|\\x00])+", "_");
+        pathPart = pathPart.replaceAll("([\\\\|<|>|\\||\r|\n|\t|\"|:|\\*|\\?|/|\\x00])+", "_");
         if (CrossSystem.isWindows() || CrossSystem.isOS2()) {
             /**
              * http://msdn.microsoft.com/en-us/library/windows/desktop/aa365247% 28v=vs.85%29.aspx

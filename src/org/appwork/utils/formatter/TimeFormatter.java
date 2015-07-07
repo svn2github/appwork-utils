@@ -117,6 +117,10 @@ public class TimeFormatter {
         return string.toString();
     }
 
+    public static void main(String[] args) {
+        System.out.println(parseDateString("Fri, 04-Jul-2025 09:26:30 GMT"));
+    }
+
     /**
      * formats (\\d+)\\w?:(\\d+) to ms
      *
@@ -195,7 +199,7 @@ public class TimeFormatter {
     public static Date parseDateString(final String date, final boolean fix) {
         if (date != null) {
             for (final SimpleDateFormat format : TimeFormatter.dateformats) {
-                String parseDate = date;
+                String parseDate = date.trim();
                 if (fix) {
                     final DateFormatSymbols symbols = format.getDateFormatSymbols();
                     for (final String shortWeekDay : symbols.getShortWeekdays()) {

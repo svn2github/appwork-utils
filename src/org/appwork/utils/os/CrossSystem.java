@@ -37,6 +37,7 @@ import org.appwork.exceptions.WTFException;
 import org.appwork.shutdown.ShutdownController;
 import org.appwork.shutdown.ShutdownEvent;
 import org.appwork.shutdown.ShutdownRequest;
+import org.appwork.storage.JSonStorage;
 import org.appwork.uio.InputDialogInterface;
 import org.appwork.uio.UIOManager;
 import org.appwork.utils.Application;
@@ -1249,18 +1250,55 @@ public class CrossSystem {
             switch (CrossSystem.getOS()) {
             case WINDOWS_XP:
                 response = ProcessBuilderFactory.runCommand("wmic", "/NAMESPACE:\\\\root\\SecurityCenter", "path", "AntiVirusProduct").getStdOutString(charSet);
+
+                ArrayList<SecuritySoftwareInfo> ret = parseWindowWMIResponse(response, null);
+                if (ret == null || ret.size() == 0) {
+                    String[] displayname = Regex.getLines(ProcessBuilderFactory.runCommand("wmic", "/NAMESPACE:\\\\root\\SecurityCenter", "path", "AntiVirusProduct", "get", "displayName").getStdOutString(charSet));
+                    String[] enabled = Regex.getLines(ProcessBuilderFactory.runCommand("wmic", "/NAMESPACE:\\\\root\\SecurityCenter", "path", "AntiVirusProduct", "get", "enabled").getStdOutString(charSet));
+                    String[] pathToEnableOnAccessUI = Regex.getLines(ProcessBuilderFactory.runCommand("wmic", "/NAMESPACE:\\\\root\\SecurityCenter", "path", "AntiVirusProduct", "get", "enabled").getStdOutString(charSet));
+                    String[] productUptoDate = Regex.getLines(ProcessBuilderFactory.runCommand("wmic", "/NAMESPACE:\\\\root\\SecurityCenter", "path", "AntiVirusProduct", "get", "productUptoDate").getStdOutString(charSet));
+
+                    String[] pathToUpdateUI = Regex.getLines(ProcessBuilderFactory.runCommand("wmic", "/NAMESPACE:\\\\root\\SecurityCenter", "path", "AntiVirusProduct", "get", "enabled").getStdOutString(charSet));
+                    ArrayList<SecuritySoftwareInfo> list = new ArrayList<SecuritySoftwareInfo>();
+                    for (int i = 1; i < displayname.length; i++) {
+                        if (StringUtils.isNotEmpty(displayname[i])) {
+                            final SecuritySoftwareInfo s = new SecuritySoftwareInfo();
+
+                            s.put("response", JSonStorage.serializeToJson(new String[][] { displayname, enabled, pathToEnableOnAccessUI, pathToUpdateUI }));
+                            if (displayname.length > i) {
+                                s.put("displayName", displayname[i]);
+                            }
+                            if (pathToEnableOnAccessUI.length > i) {
+                                s.put("pathToEnableOnAccessUI", pathToEnableOnAccessUI[i]);
+                            }
+                            if (pathToUpdateUI.length > i) {
+                                s.put("pathToUpdateUI", pathToUpdateUI[i]);
+                            }
+                            if (productUptoDate.length > i) {
+                                s.put("updateToDate", productUptoDate[i]);
+                            }
+                            list.add(s);
+                        }
+                    }
+                    return list;
+                }
                 break;
             default:
+
                 response = ProcessBuilderFactory.runCommand("wmic", "/NAMESPACE:\\\\root\\SecurityCenter2", "path", "AntiVirusProduct").getStdOutString(charSet);
                 break;
             }
-            return parseWindowWMIResponse(response);
+            return parseWindowWMIResponse(response, null);
         } catch (Throwable e) {
             throw new SecuritySoftwareException(e, response);
         }
     }
 
-    private static ArrayList<SecuritySoftwareInfo> parseWindowWMIResponse(final String response) {
+    public static ArrayList<SecuritySoftwareInfo> parseWindowWMIResponse(final String response, OperatingSystem os) {
+        if (os == null) {
+            os = CrossSystem.getOS();
+        }
+
         ArrayList<SecuritySoftwareInfo> list = new ArrayList<SecuritySoftwareInfo>();
         if (StringUtils.isNotEmpty(response)) {
             Log.L.info(response);
@@ -1268,13 +1306,19 @@ public class CrossSystem {
             if (lines.length == 0) {
                 lines = new String[] { response };
             }
+            if (OperatingSystem.WINDOWS_XP == os) {
+                int startIndex = lines[0].indexOf("companyName");
+                if (startIndex > 0) {
+                    lines[0] = lines[0].substring(startIndex);
+                }
+            }
             final String[] keys = new Regex(lines[0], "(\\S+\\s*)").getColumn(0);
             if (keys.length > 3) {
 
                 for (int i = 1; i < lines.length; i++) {
                     if (lines[i].length() == lines[0].length()) {
                         final SecuritySoftwareInfo ret = new SecuritySoftwareInfo();
-                        ret.put("response", response);
+
                         int offset = 0;
                         for (int k = 0; k < keys.length; k++) {
                             final int end = offset + keys[k].length();
@@ -1282,8 +1326,21 @@ public class CrossSystem {
                             offset = end;
                             ret.put(keys[k].trim(), value.trim());
                         }
+                        ret.put("response", response);
                         list.add(ret);
 
+                    } else {
+                        String[] row = new Regex(lines[i], "^(.*?)(\\{[a-f0-9\\-]+\\})\\s+(.*?\\.[\\w\\d]{3})\\s(.+)\\s+(\\d{5,})\\s+").getRow(0);
+                        if (row != null) {
+                            final SecuritySoftwareInfo ret = new SecuritySoftwareInfo();
+                            ret.put("response", response);
+                            ret.put("displayName", row[0].trim());
+                            ret.put("instanceGuid", row[1].trim());
+                            ret.put("pathToSignedProductExe", row[2].trim());
+                            ret.put("pathToSignedReportingExe", row[3].trim());
+                            ret.put("productState", row[4].trim());
+                            list.add(ret);
+                        }
                     }
                 }
                 Log.L.info(list + "");
@@ -1314,7 +1371,7 @@ public class CrossSystem {
                 response = ProcessBuilderFactory.runCommand("wmic", "/NAMESPACE:\\\\root\\SecurityCenter2", "path", "FirewallProduct").getStdOutString(charSet);
                 break;
             }
-            return parseWindowWMIResponse(response);
+            return parseWindowWMIResponse(response, null);
         } catch (Throwable e) {
             throw new SecuritySoftwareException(e, response);
         }
@@ -1341,7 +1398,7 @@ public class CrossSystem {
                 response = ProcessBuilderFactory.runCommand("wmic", "/NAMESPACE:\\\\root\\SecurityCenter2", "path", "AntiSpywareProduct").getStdOutString(charSet);
                 break;
             }
-            return parseWindowWMIResponse(response);
+            return parseWindowWMIResponse(response, null);
         } catch (Throwable e) {
             throw new SecuritySoftwareException(e, response);
         }

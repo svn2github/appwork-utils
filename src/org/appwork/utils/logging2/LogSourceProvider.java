@@ -43,7 +43,8 @@ public abstract class LogSourceProvider {
     protected final HashMap<String, LogSink> logSinks    = new HashMap<String, LogSink>();
     private final int                        maxSize;
     private final int                        maxLogs;
-    protected final long                     logTimeout;
+    // Do not set final!
+    protected long                           logTimeout;
     protected Thread                         flushThread = null;
     protected final File                     logFolder;
     protected LogConsoleHandler              consoleHandler;

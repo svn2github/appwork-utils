@@ -76,7 +76,7 @@ public class SyntheticaHelper {
 
     /**
      * @throws IOException
-     * 
+     *
      */
     public static void init() throws IOException {
         SyntheticaHelper.init("de.javasoft.plaf.synthetica.SyntheticaSimple2DLookAndFeel");

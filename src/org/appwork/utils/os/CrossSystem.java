@@ -1235,6 +1235,7 @@ public class CrossSystem {
 
     public static void main(String[] args) {
         try {
+            getAntiVirusSoftwareInfo();
             getFirewallSoftwareInfo();
         } catch (UnsupportedOperationException e) {
             // TODO Auto-generated catch block
@@ -1332,7 +1333,7 @@ public class CrossSystem {
 
             switch (CrossSystem.getOS()) {
             case WINDOWS_XP:
-                response = ProcessBuilderFactory.runCommand("wmic", "/NAMESPACE:\\\\root\\SecurityCenter", "path", "FirewallProduct", "get", "companyName,displayName,pathToEnableOnAccessUI,pathToUpdateUI,productUptoDate", "/format:value").getStdOutString(charSet);
+                response = ProcessBuilderFactory.runCommand("wmic", "/NAMESPACE:\\\\root\\SecurityCenter", "path", "FirewallProduct", "get", "companyName,displayName,enabled,pathToEnableUI", "/format:value").getStdOutString(charSet);
                 break;
             default:
                 response = ProcessBuilderFactory.runCommand("wmic", "/NAMESPACE:\\\\root\\SecurityCenter2", "path", "FirewallProduct").getStdOutString(charSet);

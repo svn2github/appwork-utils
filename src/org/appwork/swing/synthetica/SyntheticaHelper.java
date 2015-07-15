@@ -158,6 +158,9 @@ public class SyntheticaHelper {
             }
             licenseLines = valids.toArray(new String[] {});
             final String key = licenseLines[0];
+            if (key.split("-").length == 5) {
+                throw new WTFException("Outdated Licensefile: " + Application.getRessourceURL("cfg/synthetica-license.key"));
+            }
             final String[] li = new String[licenseLines.length - 1];
             System.arraycopy(licenseLines, 1, li, 0, li.length);
             if (key != null) {

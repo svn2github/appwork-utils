@@ -41,6 +41,10 @@ public class SecuritySoftwareInfo extends HashMap<String, String> {
             return false;
         }
         int i = Integer.parseInt(state);
+        return isEnabledByState(i);
+    }
+
+    public static boolean isEnabledByState(int i) {
         // String hex = StringUtils.fillPre(Integer.toHexString(i), "0", 6);
         // int upToDate = 0xFF & i;
         int enabledFlag = 0xFF & i >> 8;

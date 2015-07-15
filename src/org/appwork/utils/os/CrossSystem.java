@@ -37,7 +37,6 @@ import org.appwork.exceptions.WTFException;
 import org.appwork.shutdown.ShutdownController;
 import org.appwork.shutdown.ShutdownEvent;
 import org.appwork.shutdown.ShutdownRequest;
-import org.appwork.storage.JSonStorage;
 import org.appwork.uio.InputDialogInterface;
 import org.appwork.uio.UIOManager;
 import org.appwork.utils.Application;
@@ -157,71 +156,71 @@ public class CrossSystem {
         return isRaspberryPi;
     }
 
-    private static final boolean        __HEADLESS                = Application.isHeadless();
+    private static final boolean __HEADLESS = Application.isHeadless();
 
-    private static String[]             BROWSER_COMMANDLINE       = null;
+    private static String[] BROWSER_COMMANDLINE = null;
 
-    private static DesktopSupport       DESKTOP_SUPPORT           = null;
+    private static DesktopSupport DESKTOP_SUPPORT = null;
 
-    private static String[]             FILE_COMMANDLINE          = null;
-    private static String               JAVAINT                   = null;
-
-    /**
-     *
-     */
-    private static final KeyStroke      KEY_STROKE_BACKSPACE_CTRL = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
-    /**
-     *
-     */
-    private static final KeyStroke      KEY_STROKE_COPY           = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_C, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
-    /**
-     *
-     */
-    private static final KeyStroke      KEY_STROKE_CUT            = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_X, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
-    /**
-     *
-     */
-    private static final KeyStroke      KEY_STROKE_DELETE         = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
+    private static String[] FILE_COMMANDLINE = null;
+    private static String   JAVAINT          = null;
 
     /**
      *
      */
-    private static final KeyStroke      KEY_STROKE_DOWN           = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0);
+    private static final KeyStroke KEY_STROKE_BACKSPACE_CTRL = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
+    /**
+     *
+     */
+    private static final KeyStroke KEY_STROKE_COPY           = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_C, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
+    /**
+     *
+     */
+    private static final KeyStroke KEY_STROKE_CUT            = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_X, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
+    /**
+     *
+     */
+    private static final KeyStroke KEY_STROKE_DELETE         = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
 
     /**
      *
      */
-    private static final KeyStroke      KEY_STROKE_ESCAPE         = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
+    private static final KeyStroke KEY_STROKE_DOWN = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0);
 
     /**
      *
      */
-    private static final KeyStroke      KEY_STROKE_FORCE_DELETE   = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, ActionEvent.SHIFT_MASK);
+    private static final KeyStroke KEY_STROKE_ESCAPE = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 
     /**
      *
      */
-    private static final KeyStroke      KEY_STROKE_PASTE          = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_V, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
+    private static final KeyStroke KEY_STROKE_FORCE_DELETE = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, ActionEvent.SHIFT_MASK);
 
     /**
      *
      */
-    private static final KeyStroke      KEY_STROKE_SEARCH         = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_F, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
+    private static final KeyStroke KEY_STROKE_PASTE = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_V, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
 
     /**
      *
      */
-    private static final KeyStroke      KEY_STROKE_SELECT_ALL     = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_A, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
+    private static final KeyStroke KEY_STROKE_SEARCH = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_F, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
 
     /**
      *
      */
-    private static final KeyStroke      KEY_STROKE_UP             = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0);
+    private static final KeyStroke KEY_STROKE_SELECT_ALL = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_A, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
+
+    /**
+     *
+     */
+    private static final KeyStroke KEY_STROKE_UP = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0);
 
     /**
      * Cache to store the Mime Class in
      */
-    private static final Mime           MIME;
+    private static final Mime MIME;
 
     public static final OperatingSystem OS;
     public static final ARCHFamily      ARCH;
@@ -229,11 +228,11 @@ public class CrossSystem {
     /**
      * Cache to store the OS string in
      */
-    private final static String         OS_STRING;
+    private final static String OS_STRING;
 
-    private final static String         ARCH_STRING;
+    private final static String ARCH_STRING;
 
-    private static Boolean              OS64BIT                   = null;
+    private static Boolean OS64BIT = null;
 
     static {
         /* Init OS_ID */
@@ -818,7 +817,7 @@ public class CrossSystem {
 
     /**
      *
-     /**
+     * /**
      *
      * @param e
      * @return
@@ -1236,7 +1235,7 @@ public class CrossSystem {
 
     public static void main(String[] args) {
         try {
-            getAntiVirusSoftwareInfo();
+            getFirewallSoftwareInfo();
         } catch (UnsupportedOperationException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -1261,39 +1260,8 @@ public class CrossSystem {
 
             switch (CrossSystem.getOS()) {
             case WINDOWS_XP:
-                response = ProcessBuilderFactory.runCommand("wmic", "/NAMESPACE:\\\\root\\SecurityCenter", "path", "AntiVirusProduct").getStdOutString(charSet);
+                response = ProcessBuilderFactory.runCommand("wmic", "/NAMESPACE:\\\\root\\SecurityCenter", "path", "AntiVirusProduct", "get", "companyName,displayName,pathToEnableOnAccessUI,pathToUpdateUI,productUptoDate", "/format:value").getStdOutString(charSet);
 
-                ArrayList<SecuritySoftwareInfo> ret = parseWindowWMIResponse(response, null);
-                if (ret == null || ret.size() == 0) {
-                    String[] displayname = Regex.getLines(ProcessBuilderFactory.runCommand("wmic", "/NAMESPACE:\\\\root\\SecurityCenter", "path", "AntiVirusProduct", "get", "displayName").getStdOutString(charSet));
-                    String[] enabled = Regex.getLines(ProcessBuilderFactory.runCommand("wmic", "/NAMESPACE:\\\\root\\SecurityCenter", "path", "AntiVirusProduct", "get", "enabled").getStdOutString(charSet));
-                    String[] pathToEnableOnAccessUI = Regex.getLines(ProcessBuilderFactory.runCommand("wmic", "/NAMESPACE:\\\\root\\SecurityCenter", "path", "AntiVirusProduct", "get", "enabled").getStdOutString(charSet));
-                    String[] productUptoDate = Regex.getLines(ProcessBuilderFactory.runCommand("wmic", "/NAMESPACE:\\\\root\\SecurityCenter", "path", "AntiVirusProduct", "get", "productUptoDate").getStdOutString(charSet));
-
-                    String[] pathToUpdateUI = Regex.getLines(ProcessBuilderFactory.runCommand("wmic", "/NAMESPACE:\\\\root\\SecurityCenter", "path", "AntiVirusProduct", "get", "enabled").getStdOutString(charSet));
-                    ArrayList<SecuritySoftwareInfo> list = new ArrayList<SecuritySoftwareInfo>();
-                    for (int i = 1; i < displayname.length; i++) {
-                        if (StringUtils.isNotEmpty(displayname[i])) {
-                            final SecuritySoftwareInfo s = new SecuritySoftwareInfo();
-
-                            s.put("response", JSonStorage.serializeToJson(new String[][] { displayname, enabled, pathToEnableOnAccessUI, pathToUpdateUI }));
-                            if (displayname.length > i) {
-                                s.put("displayName", displayname[i]);
-                            }
-                            if (pathToEnableOnAccessUI.length > i) {
-                                s.put("pathToEnableOnAccessUI", pathToEnableOnAccessUI[i]);
-                            }
-                            if (pathToUpdateUI.length > i) {
-                                s.put("pathToUpdateUI", pathToUpdateUI[i]);
-                            }
-                            if (productUptoDate.length > i) {
-                                s.put("updateToDate", productUptoDate[i]);
-                            }
-                            list.add(s);
-                        }
-                    }
-                    return list;
-                }
                 break;
             default:
 
@@ -1364,7 +1332,7 @@ public class CrossSystem {
 
             switch (CrossSystem.getOS()) {
             case WINDOWS_XP:
-                response = ProcessBuilderFactory.runCommand("wmic", "/NAMESPACE:\\\\root\\SecurityCenter", "path", "FirewallProduct").getStdOutString(charSet);
+                response = ProcessBuilderFactory.runCommand("wmic", "/NAMESPACE:\\\\root\\SecurityCenter", "path", "FirewallProduct", "get", "companyName,displayName,pathToEnableOnAccessUI,pathToUpdateUI,productUptoDate", "/format:value").getStdOutString(charSet);
                 break;
             default:
                 response = ProcessBuilderFactory.runCommand("wmic", "/NAMESPACE:\\\\root\\SecurityCenter2", "path", "FirewallProduct").getStdOutString(charSet);

@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2015 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.utils.os
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -13,7 +13,7 @@ import java.util.HashMap;
 
 /**
  * @author Thomas
- * 
+ *
  */
 public class SecuritySoftwareInfo extends HashMap<String, String> {
 
@@ -28,11 +28,14 @@ public class SecuritySoftwareInfo extends HashMap<String, String> {
 
     /**
      * http://neophob.com/2010/03/wmi-query-windows-securitycenter2/
-     * 
+     *
      * @return
      */
     public boolean isEnabled() {
-
+        if (get("productState") == null) {
+            // XP
+            return true;
+        }
         String state = getState();
         if (state == null) {
             return false;
@@ -51,7 +54,7 @@ public class SecuritySoftwareInfo extends HashMap<String, String> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.util.AbstractMap#toString()
      */
     @Override

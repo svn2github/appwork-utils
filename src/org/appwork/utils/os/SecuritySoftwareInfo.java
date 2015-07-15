@@ -32,6 +32,11 @@ public class SecuritySoftwareInfo extends HashMap<String, String> {
      * @return
      */
     public boolean isEnabled() {
+        if ("TRUE".equals(get("enabled"))) {
+
+            // XP Firewall only
+            return true;
+        }
         if (get("productState") == null) {
             // XP
             return true;

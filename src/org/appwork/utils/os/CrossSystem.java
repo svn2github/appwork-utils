@@ -53,7 +53,7 @@ import org.appwork.utils.swing.dialog.InputDialog;
 
 /**
  * This class provides a few native features.
- * 
+ *
  * @author $Author: unknown$
  */
 
@@ -274,7 +274,7 @@ public class CrossSystem {
 
     /**
      * internal function to open a file/folder
-     * 
+     *
      * @param file
      * @throws IOException
      */
@@ -287,7 +287,7 @@ public class CrossSystem {
 
     /**
      * internal function to open an URL in a browser
-     * 
+     *
      * @param _url
      * @throws IOException
      * @throws URISyntaxException
@@ -300,9 +300,9 @@ public class CrossSystem {
 
     /**
      * use this method to make pathPart safe to use in a full absoluePath.
-     * 
+     *
      * it will remove driveletters/path separators and all known chars that are forbidden in a path
-     * 
+     *
      * @param pathPart
      * @return
      */
@@ -475,7 +475,7 @@ public class CrossSystem {
 
     /**
      * Returns the Mime Class for the current OS
-     * 
+     *
      * @return
      * @see Mime
      */
@@ -562,7 +562,7 @@ public class CrossSystem {
 
     /**
      * Returns true if the OS is a linux system
-     * 
+     *
      * @return
      */
     public static OSFamily getOSFamily() {
@@ -634,7 +634,7 @@ public class CrossSystem {
             final int index = jvmName.indexOf('@');
             /**
              * http://www.golesny.de/p/code/javagetpid
-             * 
+             *
              * @return
              */
             if (index >= 1) {
@@ -785,7 +785,7 @@ public class CrossSystem {
 
     /**
      * checks if given path is absolute or relative
-     * 
+     *
      * @param path
      * @return
      */
@@ -817,9 +817,9 @@ public class CrossSystem {
     }
 
     /**
-     * 
+     *
      /**
-     * 
+     *
      * @param e
      * @return
      */
@@ -899,7 +899,7 @@ public class CrossSystem {
 
     /**
      * Returns true if the OS is a MAC System
-     * 
+     *
      * @return
      */
 
@@ -909,7 +909,7 @@ public class CrossSystem {
 
     /**
      * returns true in case of "open an URL in a browser" is supported
-     * 
+     *
      * @return
      */
     public static boolean isOpenBrowserSupported() {
@@ -918,7 +918,7 @@ public class CrossSystem {
 
     /**
      * returns true in case of "open a File" is supported
-     * 
+     *
      * @return
      */
     public static boolean isOpenFileSupported() {
@@ -976,7 +976,7 @@ public class CrossSystem {
 
     /**
      * Returns true if the OS is a Windows System
-     * 
+     *
      * @return
      */
     public static boolean isWindows() {
@@ -1005,7 +1005,7 @@ public class CrossSystem {
 
     /**
      * Opens a file or directory
-     * 
+     *
      * @see java.awt.Desktop#open(File)
      * @param file
      * @throws IOException
@@ -1036,7 +1036,7 @@ public class CrossSystem {
 
     /**
      * Open an url in the systems default browser
-     * 
+     *
      * @param url
      */
     public static void openURL(final String url) {
@@ -1167,7 +1167,7 @@ public class CrossSystem {
 
     /**
      * Set commandline to open the browser use %s as wildcard for the url
-     * 
+     *
      * @param commands
      */
     public static void setBrowserCommandLine(final String[] commands) {
@@ -1211,7 +1211,7 @@ public class CrossSystem {
 
     /**
      * splits filename into name,extension
-     * 
+     *
      * @param filename
      * @return
      */
@@ -1232,6 +1232,18 @@ public class CrossSystem {
 
     public static void shutdownSystem(final boolean force) {
         CrossSystem.DESKTOP_SUPPORT.shutdown(force);
+    }
+
+    public static void main(String[] args) {
+        try {
+            getAntiVirusSoftwareInfo();
+        } catch (UnsupportedOperationException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (SecuritySoftwareException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -1285,7 +1297,7 @@ public class CrossSystem {
                 break;
             default:
 
-                response = ProcessBuilderFactory.runCommand("wmic", "/NAMESPACE:\\\\root\\SecurityCenter2", "path", "AntiVirusProduct").getStdOutString(charSet);
+                response = ProcessBuilderFactory.runCommand("wmic", "/NAMESPACE:\\\\root\\SecurityCenter2", "path", "AntiVirusProduct", "get", "displayName,pathToSignedProductExe,pathToSignedReportingExe,productState", "/format:value").getStdOutString(charSet);
                 break;
             }
             return parseWindowWMIResponse(response, null);
@@ -1303,49 +1315,36 @@ public class CrossSystem {
         if (StringUtils.isNotEmpty(response)) {
             Log.L.info(response);
             String[] lines = response.split("[\r\n]{1,2}");
-            if (lines.length == 0) {
-                lines = new String[] { response };
-            }
-            if (OperatingSystem.WINDOWS_XP == os) {
-                int startIndex = lines[0].indexOf("companyName");
-                if (startIndex > 0) {
-                    lines[0] = lines[0].substring(startIndex);
-                }
-            }
-            final String[] keys = new Regex(lines[0], "(\\S+\\s*)").getColumn(0);
-            if (keys.length > 3) {
 
-                for (int i = 1; i < lines.length; i++) {
-                    if (lines[i].length() == lines[0].length()) {
-                        final SecuritySoftwareInfo ret = new SecuritySoftwareInfo();
-
-                        int offset = 0;
-                        for (int k = 0; k < keys.length; k++) {
-                            final int end = offset + keys[k].length();
-                            final String value = lines[i].substring(offset, end);
-                            offset = end;
-                            ret.put(keys[k].trim(), value.trim());
-                        }
-                        ret.put("response", response);
-                        list.add(ret);
-
-                    } else {
-                        String[] row = new Regex(lines[i], "^(.*?)(\\{[a-f0-9\\-]+\\})\\s+(.*?\\.[\\w\\d]{3})\\s(.+)\\s+(\\d{5,})\\s+").getRow(0);
-                        if (row != null) {
-                            final SecuritySoftwareInfo ret = new SecuritySoftwareInfo();
-                            ret.put("response", response);
-                            ret.put("displayName", row[0].trim());
-                            ret.put("instanceGuid", row[1].trim());
-                            ret.put("pathToSignedProductExe", row[2].trim());
-                            ret.put("pathToSignedReportingExe", row[3].trim());
-                            ret.put("productState", row[4].trim());
+            String firstKey = null;
+            SecuritySoftwareInfo ret = new SecuritySoftwareInfo();
+            for (int i = 0; i < lines.length; i++) {
+                String line = lines[i];
+                if (StringUtils.isNotEmpty(line)) {
+                    int index = line.indexOf("=");
+                    if (index > 0) {
+                        String key = line.substring(0, index);
+                        String value = line.substring(index + 1);
+                        if (firstKey != null && firstKey.equals(key)) {
                             list.add(ret);
+                            ret = new SecuritySoftwareInfo();
                         }
+                        if (firstKey == null) {
+                            firstKey = key;
+                        }
+
+                        ret.put(key, value);
+
                     }
                 }
-                Log.L.info(list + "");
-                return list;
+
             }
+            if (ret.size() > 0) {
+                list.add(ret);
+            }
+
+            return list;
+
         }
         return null;
     }
@@ -1353,7 +1352,7 @@ public class CrossSystem {
     /**
      * @return
      * @throws SecuritySoftwareException
-     * 
+     *
      */
     public static ArrayList<SecuritySoftwareInfo> getFirewallSoftwareInfo() throws UnsupportedOperationException, SecuritySoftwareException {
         String response = null;
@@ -1380,7 +1379,7 @@ public class CrossSystem {
     /**
      * @return
      * @throws SecuritySoftwareException
-     * 
+     *
      */
     public static ArrayList<SecuritySoftwareInfo> getAntiSpySoftwareInfo() throws UnsupportedOperationException, SecuritySoftwareException {
         String response = null;

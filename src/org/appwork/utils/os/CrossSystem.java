@@ -1235,8 +1235,8 @@ public class CrossSystem {
 
     public static void main(String[] args) {
         try {
-            getAntiVirusSoftwareInfo();
-            getFirewallSoftwareInfo();
+            SecuritySoftwareResponse lst = getAntiSpySoftwareInfo();
+            System.out.println(lst);
         } catch (UnsupportedOperationException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -1270,6 +1270,8 @@ public class CrossSystem {
                 break;
             }
             return parseWindowWMIResponse(response, null);
+        } catch (UnsupportedOperationException e) {
+            throw e;
         } catch (Throwable e) {
             throw new SecuritySoftwareException(e, response);
         }
@@ -1343,6 +1345,8 @@ public class CrossSystem {
                 break;
             }
             return parseWindowWMIResponse(response, null);
+        } catch (UnsupportedOperationException e) {
+            throw e;
         } catch (Throwable e) {
             throw new SecuritySoftwareException(e, response);
         }
@@ -1366,10 +1370,12 @@ public class CrossSystem {
                 throw new UnsupportedOperationException("getAntiSpySoftwareInfo: Not Supported for your OS");
 
             default:
-                response = ProcessBuilderFactory.runCommand("wmic", "/NAMESPACE:\\\\root\\SecurityCenter2", "path", "AntiSpywareProduct").getStdOutString(charSet);
+                response = ProcessBuilderFactory.runCommand("wmic", "/NAMESPACE:\\\\root\\SecurityCenter2", "path", "AntiSpywareProduct", "get", "displayName,pathToSignedProductExe,pathToSignedProductExe,pathToSignedReportingExe,productState", "/format:value").getStdOutString(charSet);
                 break;
             }
             return parseWindowWMIResponse(response, null);
+        } catch (UnsupportedOperationException e) {
+            throw e;
         } catch (Throwable e) {
             throw new SecuritySoftwareException(e, response);
         }

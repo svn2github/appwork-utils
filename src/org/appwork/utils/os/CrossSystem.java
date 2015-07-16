@@ -1327,7 +1327,7 @@ public class CrossSystem {
         String response = null;
         try {
             if (!CrossSystem.isWindows()) {
-                throw new UnsupportedOperationException("getAntiVirusSoftwareInfo: Not Supported for your OS");
+                throw new UnsupportedOperationException("getFirewallSoftwareInfo: Not Supported for your OS");
             }
             final String charSet = Charset.defaultCharset().displayName();
 
@@ -1355,14 +1355,14 @@ public class CrossSystem {
         String response = null;
         try {
             if (!CrossSystem.isWindows()) {
-                throw new UnsupportedOperationException("getAntiVirusSoftwareInfo: Not Supported for your OS");
+                throw new UnsupportedOperationException("getAntiSpySoftwareInfo: Not Supported for your OS");
             }
             final String charSet = Charset.defaultCharset().displayName();
 
             switch (CrossSystem.getOS()) {
             case WINDOWS_XP:
-                response = null;
-                break;
+                throw new UnsupportedOperationException("getAntiSpySoftwareInfo: Not Supported for your OS");
+
             default:
                 response = ProcessBuilderFactory.runCommand("wmic", "/NAMESPACE:\\\\root\\SecurityCenter2", "path", "AntiSpywareProduct").getStdOutString(charSet);
                 break;

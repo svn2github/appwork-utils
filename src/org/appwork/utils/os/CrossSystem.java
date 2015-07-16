@@ -1250,7 +1250,7 @@ public class CrossSystem {
      * @return
      * @throws SecuritySoftwareException
      */
-    public static ArrayList<SecuritySoftwareInfo> getAntiVirusSoftwareInfo() throws UnsupportedOperationException, SecuritySoftwareException {
+    public static SecuritySoftwareResponse getAntiVirusSoftwareInfo() throws UnsupportedOperationException, SecuritySoftwareException {
 
         String response = null;
         try {
@@ -1275,18 +1275,20 @@ public class CrossSystem {
         }
     }
 
-    public static ArrayList<SecuritySoftwareInfo> parseWindowWMIResponse(final String response, OperatingSystem os) {
+    public static SecuritySoftwareResponse parseWindowWMIResponse(final String response, OperatingSystem os) {
         if (os == null) {
             os = CrossSystem.getOS();
         }
 
-        ArrayList<SecuritySoftwareInfo> list = new ArrayList<SecuritySoftwareInfo>();
+        SecuritySoftwareResponse list = new SecuritySoftwareResponse();
+        list.setResponse(response);
         if (StringUtils.isNotEmpty(response)) {
             Log.L.info(response);
             String[] lines = response.split("[\r\n]{1,2}");
 
             String firstKey = null;
             SecuritySoftwareInfo ret = new SecuritySoftwareInfo();
+
             for (int i = 0; i < lines.length; i++) {
                 String line = lines[i];
                 if (StringUtils.isNotEmpty(line)) {
@@ -1323,7 +1325,7 @@ public class CrossSystem {
      * @throws SecuritySoftwareException
      *
      */
-    public static ArrayList<SecuritySoftwareInfo> getFirewallSoftwareInfo() throws UnsupportedOperationException, SecuritySoftwareException {
+    public static SecuritySoftwareResponse getFirewallSoftwareInfo() throws UnsupportedOperationException, SecuritySoftwareException {
         String response = null;
         try {
             if (!CrossSystem.isWindows()) {
@@ -1351,7 +1353,7 @@ public class CrossSystem {
      * @throws SecuritySoftwareException
      *
      */
-    public static ArrayList<SecuritySoftwareInfo> getAntiSpySoftwareInfo() throws UnsupportedOperationException, SecuritySoftwareException {
+    public static SecuritySoftwareResponse getAntiSpySoftwareInfo() throws UnsupportedOperationException, SecuritySoftwareException {
         String response = null;
         try {
             if (!CrossSystem.isWindows()) {

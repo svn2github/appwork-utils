@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2011 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.remoteapi
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -39,7 +39,7 @@ import org.appwork.utils.net.HTTPHeader;
 
 /**
  * @author thomas
- * 
+ *
  */
 public class InterfaceHandler<T> {
     private static Method HELP;
@@ -97,6 +97,9 @@ public class InterfaceHandler<T> {
         this.parameterCountMap = new HashMap<Method, Integer>();
         this.methods = new HashMap<String, Method>();
         this.signatureRequiredMethods = new HashSet<Method>();
+        if (x instanceof InterfaceHandlerSetter) {
+            ((InterfaceHandlerSetter) x).setInterfaceHandler(this);
+        }
     }
 
     /**
@@ -106,9 +109,15 @@ public class InterfaceHandler<T> {
      * @throws ParseException
      */
     public void add(final Class<T> c, final RemoteAPIInterface process, final int defaultAuthLevel) throws ParseException {
-        if (this.sessionRequired != (c.getAnnotation(ApiSessionRequired.class) != null)) { throw new ParseException("Check SessionRequired for " + this); }
-        if (defaultAuthLevel != this.getDefaultAuthLevel()) { throw new ParseException("Check Authlevel " + c + " " + this); }
-        if (process != this.impl) { throw new ParseException(process + "!=" + this.impl); }
+        if (this.sessionRequired != (c.getAnnotation(ApiSessionRequired.class) != null)) {
+            throw new ParseException("Check SessionRequired for " + this);
+        }
+        if (defaultAuthLevel != this.getDefaultAuthLevel()) {
+            throw new ParseException("Check Authlevel " + c + " " + this);
+        }
+        if (process != this.impl) {
+            throw new ParseException(process + "!=" + this.impl);
+        }
         try {
             this.interfaceClasses.add(c);
             this.parse();
@@ -122,7 +131,9 @@ public class InterfaceHandler<T> {
 
     public int getAuthLevel(final Method m) {
         final Integer auth = this.methodsAuthLevel.get(m);
-        if (auth != null) { return auth; }
+        if (auth != null) {
+            return auth;
+        }
         return this.defaultAuthLevel;
     }
 
@@ -138,7 +149,9 @@ public class InterfaceHandler<T> {
     public Method getMethod(final String methodName, final int length) {
         final String methodID = methodName + length;
         final Method ret = this.methods.get(methodID);
-        if (ret != null) { return ret; }
+        if (ret != null) {
+            return ret;
+        }
         return this.methods.get(methodName);
     }
 
@@ -148,7 +161,9 @@ public class InterfaceHandler<T> {
      */
     public int getParameterCount(final Method method) {
         final Integer ret = this.parameterCountMap.get(method);
-        if (ret != null) { return ret; }
+        if (ret != null) {
+            return ret;
+        }
         return -1;
     }
 
@@ -294,7 +309,7 @@ public class InterfaceHandler<T> {
 
     /**
      * @throws ParseException
-     * 
+     *
      */
     private void parse() throws ParseException {
         this.methods.clear();
@@ -329,7 +344,8 @@ public class InterfaceHandler<T> {
                 }
                 if (this.methods.put(name + paramCounter, m) != null) {
 
-                throw new ParseException(interfaceClass + " already contains method: \r\n" + name + "\r\n"); }
+                    throw new ParseException(interfaceClass + " already contains method: \r\n" + name + "\r\n");
+                }
 
                 if (m.getAnnotation(ApiRawMethod.class) != null) {
                     this.methods.put(name, m);
@@ -347,7 +363,9 @@ public class InterfaceHandler<T> {
                 }
             }
         }
-        if (signatureHandlerNeededClass != null && this.signatureHandler == null) { throw new ParseException(signatureHandlerNeededClass + " Contains methods that need validated Signatures but no Validator provided"); }
+        if (signatureHandlerNeededClass != null && this.signatureHandler == null) {
+            throw new ParseException(signatureHandlerNeededClass + " Contains methods that need validated Signatures but no Validator provided");
+        }
     }
 
     /**
@@ -365,7 +383,9 @@ public class InterfaceHandler<T> {
      * @throws ParseException
      */
     private void validateMethod(final Method m) throws ParseException {
-        if (m == InterfaceHandler.HELP) { throw new ParseException(m + " is reserved for internal usage"); }
+        if (m == InterfaceHandler.HELP) {
+            throw new ParseException(m + " is reserved for internal usage");
+        }
         boolean responseIsParamater = false;
         for (final Type t : m.getGenericParameterTypes()) {
             if (RemoteAPIRequest.class == t) {
@@ -385,7 +405,9 @@ public class InterfaceHandler<T> {
         }
         if (responseIsParamater) {
             if (m.getGenericReturnType() != void.class && m.getGenericReturnType() != Void.class) {
-                if (!RemoteAPISignatureHandler.class.isAssignableFrom(m.getDeclaringClass())) { throw new ParseException("Response in Parameters. " + m + " must return void, and has to handle the response itself"); }
+                if (!RemoteAPISignatureHandler.class.isAssignableFrom(m.getDeclaringClass())) {
+                    throw new ParseException("Response in Parameters. " + m + " must return void, and has to handle the response itself");
+                }
             }
         } else {
             try {
@@ -418,7 +440,9 @@ public class InterfaceHandler<T> {
                             }
                         }
                     }
-                    if (!found) { throw new InvalidTypeException(e); }
+                    if (!found) {
+                        throw new InvalidTypeException(e);
+                    }
                 }
             } catch (final InvalidTypeException e) {
                 throw new ParseException("return Type of " + m + " is invalid", e);

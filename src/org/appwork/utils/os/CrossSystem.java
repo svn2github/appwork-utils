@@ -1319,7 +1319,7 @@ public class CrossSystem {
             return list;
 
         }
-        return null;
+        throw new WTFException("WMIC returned no response");
     }
 
     /**

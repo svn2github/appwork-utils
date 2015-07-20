@@ -156,71 +156,71 @@ public class CrossSystem {
         return isRaspberryPi;
     }
 
-    private static final boolean        __HEADLESS                = Application.isHeadless();
+    private static final boolean __HEADLESS = Application.isHeadless();
 
-    private static String[]             BROWSER_COMMANDLINE       = null;
+    private static String[] BROWSER_COMMANDLINE = null;
 
-    private static DesktopSupport       DESKTOP_SUPPORT           = null;
+    private static DesktopSupport DESKTOP_SUPPORT = null;
 
-    private static String[]             FILE_COMMANDLINE          = null;
-    private static String               JAVAINT                   = null;
-
-    /**
-     *
-     */
-    private static final KeyStroke      KEY_STROKE_BACKSPACE_CTRL = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
-    /**
-     *
-     */
-    private static final KeyStroke      KEY_STROKE_COPY           = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_C, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
-    /**
-     *
-     */
-    private static final KeyStroke      KEY_STROKE_CUT            = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_X, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
-    /**
-     *
-     */
-    private static final KeyStroke      KEY_STROKE_DELETE         = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
+    private static String[] FILE_COMMANDLINE = null;
+    private static String   JAVAINT          = null;
 
     /**
      *
      */
-    private static final KeyStroke      KEY_STROKE_DOWN           = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0);
+    private static final KeyStroke KEY_STROKE_BACKSPACE_CTRL = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
+    /**
+     *
+     */
+    private static final KeyStroke KEY_STROKE_COPY           = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_C, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
+    /**
+     *
+     */
+    private static final KeyStroke KEY_STROKE_CUT            = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_X, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
+    /**
+     *
+     */
+    private static final KeyStroke KEY_STROKE_DELETE         = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
 
     /**
      *
      */
-    private static final KeyStroke      KEY_STROKE_ESCAPE         = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
+    private static final KeyStroke KEY_STROKE_DOWN = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0);
 
     /**
      *
      */
-    private static final KeyStroke      KEY_STROKE_FORCE_DELETE   = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, ActionEvent.SHIFT_MASK);
+    private static final KeyStroke KEY_STROKE_ESCAPE = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 
     /**
      *
      */
-    private static final KeyStroke      KEY_STROKE_PASTE          = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_V, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
+    private static final KeyStroke KEY_STROKE_FORCE_DELETE = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, ActionEvent.SHIFT_MASK);
 
     /**
      *
      */
-    private static final KeyStroke      KEY_STROKE_SEARCH         = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_F, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
+    private static final KeyStroke KEY_STROKE_PASTE = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_V, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
 
     /**
      *
      */
-    private static final KeyStroke      KEY_STROKE_SELECT_ALL     = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_A, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
+    private static final KeyStroke KEY_STROKE_SEARCH = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_F, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
 
     /**
      *
      */
-    private static final KeyStroke      KEY_STROKE_UP             = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0);
+    private static final KeyStroke KEY_STROKE_SELECT_ALL = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_A, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
+
+    /**
+     *
+     */
+    private static final KeyStroke KEY_STROKE_UP = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0);
 
     /**
      * Cache to store the Mime Class in
      */
-    private static final Mime           MIME;
+    private static final Mime MIME;
 
     public static final OperatingSystem OS;
     public static final ARCHFamily      ARCH;
@@ -228,11 +228,11 @@ public class CrossSystem {
     /**
      * Cache to store the OS string in
      */
-    private final static String         OS_STRING;
+    private final static String OS_STRING;
 
-    private final static String         ARCH_STRING;
+    private final static String ARCH_STRING;
 
-    private static Boolean              OS64BIT                   = null;
+    private static Boolean OS64BIT = null;
 
     static {
         /* Init OS_ID */
@@ -1235,9 +1235,12 @@ public class CrossSystem {
 
     public static void main(String[] args) {
         try {
-            isProcessRunning("C:\\KTMProd\\EolSW_1906_201\\eol.exe");
+            System.out.println(isProcessRunning("C:\\WINDOWS\\system32\\cmd.exe"));
 
         } catch (UnsupportedOperationException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (UnexpectedResponseException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
@@ -1378,7 +1381,7 @@ public class CrossSystem {
         }
     }
 
-    public static boolean isProcessRunning(String path) {
+    public static boolean isProcessRunning(String path) throws UnexpectedResponseException {
         String response = null;
         try {
             if (!CrossSystem.isWindows()) {
@@ -1387,9 +1390,6 @@ public class CrossSystem {
             final String charSet = Charset.defaultCharset().displayName();
 
             switch (CrossSystem.getOS()) {
-            case WINDOWS_XP:
-                throw new UnsupportedOperationException("getAntiSpySoftwareInfo: Not Supported for your OS");
-
             default:
                 response = ProcessBuilderFactory.runCommand("wmic", "process", "where", "executablepath='" + path.replaceAll("[\\/\\\\]+", "\\\\\\\\") + "'", "get", "processID", "/format:value").getStdOutString(charSet);
                 break;
@@ -1397,12 +1397,16 @@ public class CrossSystem {
 
             if (StringUtils.isNotEmpty(response) && response.contains("ProcessId=")) {
                 return true;
+            } else if (StringUtils.isEmpty(response)) {
+                return false;
             }
+
         } catch (UnsupportedOperationException e) {
             throw e;
         } catch (Throwable e) {
             throw new WTFException(e);
         }
-        return false;
+        throw new UnexpectedResponseException("Unexpected Response: " + response);
+
     }
 }

@@ -1235,12 +1235,9 @@ public class CrossSystem {
 
     public static void main(String[] args) {
         try {
-            SecuritySoftwareResponse lst = getAntiSpySoftwareInfo();
-            System.out.println(lst);
+            isProcessRunning("C:\\KTMProd\\EolSW_1906_201\\eol.exe");
+
         } catch (UnsupportedOperationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (SecuritySoftwareException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
@@ -1379,5 +1376,33 @@ public class CrossSystem {
         } catch (Throwable e) {
             throw new SecuritySoftwareException(e, response);
         }
+    }
+
+    public static boolean isProcessRunning(String path) {
+        String response = null;
+        try {
+            if (!CrossSystem.isWindows()) {
+                throw new UnsupportedOperationException("isProcessRunning: Not Supported for your OS");
+            }
+            final String charSet = Charset.defaultCharset().displayName();
+
+            switch (CrossSystem.getOS()) {
+            case WINDOWS_XP:
+                throw new UnsupportedOperationException("getAntiSpySoftwareInfo: Not Supported for your OS");
+
+            default:
+                response = ProcessBuilderFactory.runCommand("wmic", "process", "where", "executablepath='" + path.replaceAll("[\\/\\\\]+", "\\\\\\\\") + "'", "get", "processID", "/format:value").getStdOutString(charSet);
+                break;
+            }
+
+            if (StringUtils.isNotEmpty(response) && response.contains("ProcessId=")) {
+                return true;
+            }
+        } catch (UnsupportedOperationException e) {
+            throw e;
+        } catch (Throwable e) {
+            throw new WTFException(e);
+        }
+        return false;
     }
 }

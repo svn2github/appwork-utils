@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2010 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.utils.singleapp
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -35,7 +35,7 @@ import org.appwork.utils.IO;
 
 /**
  * @author daniel
- * 
+ *
  */
 public class SingleAppInstance {
 
@@ -61,7 +61,7 @@ public class SingleAppInstance {
     private boolean                 daemonRunning = false;
     private boolean                 alreadyUsed   = false;
     private ServerSocket            serverSocket  = null;
-    private final String            SINGLEAPP     = "SingleAppInstance";
+    private final String            singleApp     = "SingleAppInstance";
     private Thread                  daemon        = null;
     private static final int        DEFAULTPORT   = 9665;
 
@@ -87,7 +87,9 @@ public class SingleAppInstance {
     }
 
     public synchronized void exit() {
-        if (this.fileLock == null) { return; }
+        if (this.fileLock == null) {
+            return;
+        }
         this.daemonRunning = false;
         if (this.daemon != null) {
             this.daemon.interrupt();
@@ -122,7 +124,9 @@ public class SingleAppInstance {
             localhost = InetAddress.getByName("127.0.0.1");
         } catch (final UnknownHostException e1) {
         }
-        if (localhost != null) { return localhost; }
+        if (localhost != null) {
+            return localhost;
+        }
         try {
             localhost = InetAddress.getByName(null);
         } catch (final UnknownHostException e1) {
@@ -132,7 +136,9 @@ public class SingleAppInstance {
 
     private String readLine(final BufferedInputStream in) {
         final ByteArrayOutputStream inbuffer = new ByteArrayOutputStream();
-        if (in == null) { return ""; }
+        if (in == null) {
+            return "";
+        }
         int c;
         try {
             in.mark(1);
@@ -164,7 +170,9 @@ public class SingleAppInstance {
     }
 
     private int readPortFromPortFile() {
-        if (!this.portFile.exists()) { return 0; }
+        if (!this.portFile.exists()) {
+            return 0;
+        }
         try {
             final String port = IO.readFileToString(this.portFile);
             return Integer.parseInt(String.valueOf(port).trim());
@@ -186,7 +194,7 @@ public class SingleAppInstance {
                     final BufferedInputStream in = new BufferedInputStream(runninginstance.getInputStream());
                     final OutputStream out = runninginstance.getOutputStream();
                     final String response = this.readLine(in);
-                    if (response == null || !response.equalsIgnoreCase(this.SINGLEAPP)) {
+                    if (response == null || !response.equals(singleApp + "." + appID)) {
                         /* invalid server response */
                         return false;
                     }
@@ -230,7 +238,9 @@ public class SingleAppInstance {
 
     public synchronized void start() throws AnotherInstanceRunningException, UncheckableInstanceException {
 
-        if (this.fileLock != null) { return; }
+        if (this.fileLock != null) {
+            return;
+        }
         if (this.alreadyUsed) {
             this.cannotStart("create new instance!");
         }
@@ -261,6 +271,7 @@ public class SingleAppInstance {
                     this.serverSocket.close();
                 } catch (final Throwable e2) {
                 }
+                this.serverSocket = new ServerSocket();
                 socketAddress = new InetSocketAddress(this.getLocalHost(), 0);
                 this.serverSocket.bind(socketAddress);
             }
@@ -292,7 +303,9 @@ public class SingleAppInstance {
     }
 
     private synchronized void startDaemon() {
-        if (this.daemon != null) { return; }
+        if (this.daemon != null) {
+            return;
+        }
         this.daemon = new Thread(new Runnable() {
 
             public void run() {
@@ -308,7 +321,7 @@ public class SingleAppInstance {
                         client.setSoTimeout(10000);/* set Timeout */
                         final BufferedInputStream in = new BufferedInputStream(client.getInputStream());
                         final OutputStream out = client.getOutputStream();
-                        SingleAppInstance.this.writeLine(out, SingleAppInstance.this.SINGLEAPP);
+                        SingleAppInstance.this.writeLine(out, SingleAppInstance.this.singleApp + "." + appID);
                         final String line = SingleAppInstance.this.readLine(in);
                         if (line != null && line.length() > 0) {
                             final int lines = Integer.parseInt(line);
@@ -359,7 +372,9 @@ public class SingleAppInstance {
     }
 
     private void writeLine(final OutputStream outputStream, final String line) {
-        if (outputStream == null || line == null) { return; }
+        if (outputStream == null || line == null) {
+            return;
+        }
         try {
             outputStream.write(line.getBytes("UTF-8"));
             outputStream.write("\r\n".getBytes());

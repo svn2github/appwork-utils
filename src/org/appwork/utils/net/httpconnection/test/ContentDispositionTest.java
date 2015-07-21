@@ -27,6 +27,13 @@ public class ContentDispositionTest {
     public static void main(String[] args) {
         final ArrayList<String[]> tests = new ArrayList<String[]>();
 
+        tests.add(new String[] { "filename=test.zip", "test.zip" });
+        tests.add(new String[] { "filename ='test.zip'", "test.zip" });
+        tests.add(new String[] { "filename= test.zip", "test.zip" });
+        tests.add(new String[] { " filename=test.zip", "test.zip" });
+        tests.add(new String[] { ";filename =test.zip", "test.zip" });
+        tests.add(new String[] { "filename= test.zip", "test.zip" });
+
         tests.add(new String[] { "attachment;filename*=UTF-8''Test%20Test%20%282008%29.rar;filename=\"Test Test (2008).rar\"; ", "Test Test (2008).rar" });
         tests.add(new String[] { "attachment;filename*=UTF-8''TEST (2015).rar;filename=\"TEST (2015).rar\";", "TEST (2015).rar" });
         tests.add(new String[] { "attachment; filename==?UTF-8?B?dGVzdC56aXA=?=", "test.zip" });

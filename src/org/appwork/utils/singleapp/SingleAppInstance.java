@@ -194,7 +194,7 @@ public class SingleAppInstance {
                     final BufferedInputStream in = new BufferedInputStream(runninginstance.getInputStream());
                     final OutputStream out = runninginstance.getOutputStream();
                     final String response = this.readLine(in);
-                    if (response == null || !response.equals(singleApp + "." + appID)) {
+                    if (response == null || !response.equals(singleApp + "." + appID + "." + Application.getRoot(SingleAppInstance.class))) {
                         /* invalid server response */
                         return false;
                     }
@@ -321,7 +321,7 @@ public class SingleAppInstance {
                         client.setSoTimeout(10000);/* set Timeout */
                         final BufferedInputStream in = new BufferedInputStream(client.getInputStream());
                         final OutputStream out = client.getOutputStream();
-                        SingleAppInstance.this.writeLine(out, SingleAppInstance.this.singleApp + "." + appID);
+                        SingleAppInstance.this.writeLine(out, SingleAppInstance.this.singleApp + "." + appID + "." + Application.getRoot(SingleAppInstance.class));
                         final String line = SingleAppInstance.this.readLine(in);
                         if (line != null && line.length() > 0) {
                             final int lines = Integer.parseInt(line);

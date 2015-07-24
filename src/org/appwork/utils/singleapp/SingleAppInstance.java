@@ -103,6 +103,13 @@ public class SingleAppInstance {
                 this.lockChannel.close();
             } catch (final IOException e) {
             }
+
+            try {
+                serverSocket.close();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         } finally {
             this.lockChannel = null;
             this.fileLock = null;
@@ -194,7 +201,8 @@ public class SingleAppInstance {
                     final BufferedInputStream in = new BufferedInputStream(runninginstance.getInputStream());
                     final OutputStream out = runninginstance.getOutputStream();
                     final String response = this.readLine(in);
-                    if (response == null || !response.equals(singleApp + "." + appID + "." + Application.getRoot(SingleAppInstance.class))) {
+                    String ownID = createID(singleApp, appID, Application.getRoot(SingleAppInstance.class));
+                    if (response == null || !response.equals(ownID)) {
                         /* invalid server response */
                         return false;
                     }
@@ -232,6 +240,17 @@ public class SingleAppInstance {
         return false;
     }
 
+    /**
+     * @param singleApp2
+     * @param appID2
+     * @param root
+     * @return
+     */
+    protected String createID(String singleApp, String appID, String root) {
+
+        return singleApp + "." + appID + "." + root;
+    }
+
     public synchronized void setInstanceMessageListener(final InstanceMessageListener listener) {
         this.listener = listener;
     }
@@ -263,6 +282,7 @@ public class SingleAppInstance {
             this.serverSocket = new ServerSocket();
             SocketAddress socketAddress = null;
             try {
+
                 socketAddress = new InetSocketAddress(this.getLocalHost(), SingleAppInstance.DEFAULTPORT);
                 this.serverSocket.bind(socketAddress);
             } catch (final IOException e) {
@@ -321,7 +341,7 @@ public class SingleAppInstance {
                         client.setSoTimeout(10000);/* set Timeout */
                         final BufferedInputStream in = new BufferedInputStream(client.getInputStream());
                         final OutputStream out = client.getOutputStream();
-                        SingleAppInstance.this.writeLine(out, SingleAppInstance.this.singleApp + "." + appID + "." + Application.getRoot(SingleAppInstance.class));
+                        SingleAppInstance.this.writeLine(out, createID(SingleAppInstance.this.singleApp, appID, Application.getRoot(SingleAppInstance.class)));
                         final String line = SingleAppInstance.this.readLine(in);
                         if (line != null && line.length() > 0) {
                             final int lines = Integer.parseInt(line);
@@ -334,6 +354,7 @@ public class SingleAppInstance {
                                     try {
                                         SingleAppInstance.this.listener.parseMessage(message);
                                     } catch (final Throwable e) {
+                                        e.printStackTrace();
                                     }
                                 }
                             }

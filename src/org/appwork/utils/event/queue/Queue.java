@@ -349,6 +349,9 @@ public abstract class Queue {
                         }
                     }
                 }
+                if (!handleItem(item)) {
+                    continue;
+                }
                 try {
                     this.sourceItem = item;
                     this.startItem(item, true);
@@ -362,6 +365,15 @@ public abstract class Queue {
                 Log.exception(e);
             }
         }
+    }
+
+    /**
+     * @param item
+     * @return
+     */
+    protected boolean handleItem(QueueAction<?, ? extends Throwable> item) {
+
+        return true;
     }
 
     /**
@@ -421,7 +433,7 @@ public abstract class Queue {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Thread#toString()
      */
     @Override

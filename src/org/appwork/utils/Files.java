@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2010 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.utils
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -56,7 +56,7 @@ public class Files {
 
     /**
      * delete all files/folders that are given
-     * 
+     *
      * @param files
      * @throws IOException
      */
@@ -70,7 +70,9 @@ public class Files {
      * @throws IOException
      */
     public static void deleteRecursiv(final File file, final boolean breakOnError) throws IOException {
-        if (!file.exists()) { throw new FileNotFoundException(file.getAbsolutePath()); }
+        if (!file.exists()) {
+            throw new FileNotFoundException(file.getAbsolutePath());
+        }
         if (file.isDirectory()) {
             final File[] files = file.listFiles();
             if (files != null) {
@@ -79,8 +81,11 @@ public class Files {
                 }
             }
         }
+        System.out.println(" Delete file " + file);
         final boolean fd = file.delete();
-        if (file.exists() && !fd && breakOnError) { throw new IOException("Could not delete " + file); }
+        if (file.exists() && !fd && breakOnError) {
+            throw new IOException("Could not delete " + file);
+        }
 
     }
 
@@ -113,13 +118,16 @@ public class Files {
     }
 
     /**
-     * returns File if it exists (case (In)Sensitive). returns null if file does
-     * not exist
+     * returns File if it exists (case (In)Sensitive). returns null if file does not exist
      */
     public static File getExistingFile(final File file, final boolean caseSensitive) {
-        if (file == null) { return null; }
+        if (file == null) {
+            return null;
+        }
         if (caseSensitive) {
-            if (file.exists()) { return file; }
+            if (file.exists()) {
+                return file;
+            }
             return null;
         }
         /* get list of files in current directory */
@@ -129,7 +137,9 @@ public class Files {
             final File[] list = parent.listFiles();
             if (list != null) {
                 for (final File ret : list) {
-                    if (ret.getName().equalsIgnoreCase(lowerCaseFileName)) { return ret; }
+                    if (ret.getName().equalsIgnoreCase(lowerCaseFileName)) {
+                        return ret;
+                    }
                 }
             }
         }
@@ -138,15 +148,19 @@ public class Files {
 
     /**
      * Returns the fileextension for a file with the given name
-     * 
+     *
      * @see #getFileNameWithoutExtension(String)
      * @param name
      * @return
      */
     public static String getExtension(final String name) {
-        if (StringUtils.isEmpty(name)) { return null; }
+        if (StringUtils.isEmpty(name)) {
+            return null;
+        }
         final int index = name.lastIndexOf(".");
-        if (index < 0 || index + 1 >= name.length()) { return null; }
+        if (index < 0 || index + 1 >= name.length()) {
+            return null;
+        }
         return name.substring(index + 1).toLowerCase(Locale.ENGLISH);
     }
 
@@ -158,14 +172,15 @@ public class Files {
     public static String getFileNameWithoutExtension(final String filename) {
 
         final int index = filename.lastIndexOf(".");
-        if (index < 0) { return filename; }
+        if (index < 0) {
+            return filename;
+        }
         return filename.substring(0, index);
     }
 
     /**
-     * return all files ( and folders if includeDirectories is true ) for the
-     * given files
-     * 
+     * return all files ( and folders if includeDirectories is true ) for the given files
+     *
      * @param includeDirectories
      * @param files
      * @return
@@ -175,8 +190,12 @@ public class Files {
 
             @Override
             public boolean accept(final File pathname) {
-                if (includeDirectories && pathname.isDirectory()) { return true; }
-                if (includeFiles && pathname.isFile()) { return true; }
+                if (includeDirectories && pathname.isDirectory()) {
+                    return true;
+                }
+                if (includeFiles && pathname.isFile()) {
+                    return true;
+                }
                 return false;
             }
         }, files);
@@ -210,14 +229,15 @@ public class Files {
     }
 
     /**
-     * Returns the mikmetype of the file. If unknown, it returns
-     * Unknown/extension
-     * 
+     * Returns the mikmetype of the file. If unknown, it returns Unknown/extension
+     *
      * @param name
      * @return
      */
     public static String getMimeType(final String name) {
-        if (name == null) { return null; }
+        if (name == null) {
+            return null;
+        }
         final FileNameMap fileNameMap = URLConnection.getFileNameMap();
         String ret = fileNameMap.getContentTypeFor(name);
         if (ret == null) {
@@ -228,7 +248,7 @@ public class Files {
 
     /**
      * Returns the relative path of file based on root.
-     * 
+     *
      * @param root
      * @param f
      * @return
@@ -247,17 +267,25 @@ public class Files {
             }
             rootPath = root.toLowerCase(Locale.ENGLISH);
             filePath = file.toLowerCase(Locale.ENGLISH).replace("/", "\\");
-            if (rootPath.equals(filePath + "\\")) { return ""; }
+            if (rootPath.equals(filePath + "\\")) {
+                return "";
+            }
         } else {
             if (!root.endsWith("/")) {
                 root += "/";
             }
             rootPath = root;
             filePath = file;
-            if (rootPath.equals(filePath + "/")) { return ""; }
+            if (rootPath.equals(filePath + "/")) {
+                return "";
+            }
         }
-        if (!filePath.startsWith(rootPath)) { return null; }
-        if (rootPath.equals(filePath)) { return "/"; }
+        if (!filePath.startsWith(rootPath)) {
+            return null;
+        }
+        if (rootPath.equals(filePath)) {
+            return "/";
+        }
 
         if (CrossSystem.isWindows() || CrossSystem.isOS2()) {
             return file.substring(rootPath.length()).replace("\\", "/");
@@ -267,12 +295,16 @@ public class Files {
     }
 
     public static <T extends Exception> void internalWalkThroughStructure(final Handler<T> handler, final File f) throws T {
-        if (!f.exists()) { return; }
+        if (!f.exists()) {
+            return;
+        }
 
         handler.onFile(f);
         if (f.isDirectory()) {
             final File[] files = f.listFiles();
-            if (files == null) { return; }
+            if (files == null) {
+                return;
+            }
             for (final File sf : files) {
                 Files.internalWalkThroughStructure(handler, sf);
             }
@@ -280,10 +312,14 @@ public class Files {
     }
 
     public static <T extends Exception> void internalWalkThroughStructureReverse(final Handler<T> handler, final File f) throws T {
-        if (!f.exists()) { return; }
+        if (!f.exists()) {
+            return;
+        }
         if (f.isDirectory()) {
             final File[] files = f.listFiles();
-            if (files == null) { return; }
+            if (files == null) {
+                return;
+            }
             for (final File sf : files) {
                 Files.walkThroughStructureReverse(handler, sf);
             }
@@ -359,7 +395,9 @@ public class Files {
     private static void fill(List<File> filesA, File a) {
         HashSet<File> dupe = new HashSet<File>();
         while (a != null) {
-            if (!dupe.add(a)) { return; }
+            if (!dupe.add(a)) {
+                return;
+            }
             filesA.add(0, a);
             File aTmp = a.getParentFile();
             if (aTmp == null || aTmp.equals(a)) {

@@ -433,7 +433,7 @@ public abstract class Queue {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see java.lang.Thread#toString()
      */
     @Override

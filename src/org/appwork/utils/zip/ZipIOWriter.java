@@ -141,22 +141,28 @@ public class ZipIOWriter {
     }
 
     protected void addDirectoryInternal(final File addDirectory, final boolean compress, final String path) throws ZipIOException, IOException {
-        if (addDirectory == null || !addDirectory.isDirectory() || !addDirectory.exists()) {
-            throw new ZipIOException("addDirectory " + addDirectory.getAbsolutePath() + " invalid");
+        if (addDirectory == null) {
+            throw new ZipIOException("addDirectory invalid: null");
+        }
+        if (!addDirectory.exists() && throwExceptionOnFileGone(addDirectory)) {
+            throw new ZipIOException("addDirectory " + addDirectory.getAbsolutePath() + " invalid: does not exist");
         }
         final File[] list = addDirectory.listFiles();
-        if (list == null) {
-            return;
-        }
-        for (final File add : list) {
-            if (add.isFile()) {
-                this.addFileInternal(add, compress, (path != null && path.trim().length() > 0 ? path + "/" : "") + addDirectory.getName());
-            } else if (add.isDirectory()) {
-                this.addDirectoryInternal(add, compress, (path != null && path.trim().length() > 0 ? path + "/" : "") + addDirectory.getName());
-            } else if (!add.exists()) {
-                throw new ZipIOException("addDirectory: " + add.getAbsolutePath() + "(File:" + add.isFile() + "|Directory:" + add.isDirectory() + ")");
+        if (list != null) {
+            for (final File add : list) {
+                if (add.isFile()) {
+                    this.addFileInternal(add, compress, (path != null && path.trim().length() > 0 ? path + "/" : "") + addDirectory.getName());
+                } else if (add.isDirectory()) {
+                    this.addDirectoryInternal(add, compress, (path != null && path.trim().length() > 0 ? path + "/" : "") + addDirectory.getName());
+                } else if (!add.exists() && throwExceptionOnFileGone(add)) {
+                    throw new ZipIOException("addDirectory: " + add.getAbsolutePath() + "(File:" + add.isFile() + "|Directory:" + add.isDirectory() + ")");
+                }
             }
         }
+    }
+
+    protected boolean throwExceptionOnFileGone(File file) {
+        return true;
     }
 
     protected void notify(final ZipEntry entry, final long bytesWrite, final long bytesProcessed) {
@@ -177,9 +183,10 @@ public class ZipIOWriter {
         FileInputStream fin = null;
         boolean zipEntryAdded = false;
         try {
-            if (addFile == null || !addFile.isFile() || !addFile.exists()) {
-                throw new ZipIOException("addFile " + addFile.getAbsolutePath() + " invalid");
+            if (addFile == null) {
+                throw new ZipIOException("addFile invalid:null");
             }
+            fin = new FileInputStream(addFile);
             final ZipEntry zipAdd = new ZipEntry(fullPath);
             final long size = addFile.length();
             zipAdd.setSize(size);
@@ -191,7 +198,6 @@ public class ZipIOWriter {
                 /* STORED must have a CRC32! */
                 zipAdd.setCrc(Hash.getCRC32(addFile));
             }
-            fin = new FileInputStream(addFile);
             long total = 0;
             this.zipStream.putNextEntry(zipAdd);
             int len;
@@ -201,6 +207,14 @@ public class ZipIOWriter {
                 notify(zipAdd, len, total);
             }
             zipEntryAdded = true;
+        } catch (FileNotFoundException e) {
+            if (addFile.exists() == false) {
+                if (throwExceptionOnFileGone(addFile)) {
+                    throw e;
+                }
+                return;
+            }
+            throw e;
         } finally {
             try {
                 if (fin != null) {

@@ -19,6 +19,7 @@ import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
 import java.awt.image.ConvolveOp;
+import java.awt.image.DataBufferByte;
 import java.awt.image.FilteredImageSource;
 import java.awt.image.ImageFilter;
 import java.awt.image.ImageProducer;
@@ -45,7 +46,12 @@ public class IconIO {
 
     public static class ScaledIcon implements Icon, IDIcon {
 
-        private final Icon          source;
+        private final Icon source;
+
+        protected Icon getSource() {
+            return source;
+        }
+
         private final int           width;
         private final int           height;
         private final Interpolation interpolation;
@@ -172,7 +178,6 @@ public class IconIO {
     }
 
     public static BufferedImage convertIconToBufferedImage(final Icon icon) {
-
         if (icon == null) {
             return null;
         }
@@ -201,9 +206,7 @@ public class IconIO {
 
     public static BufferedImage createEmptyImage(final int w, final int h) {
         if (org.appwork.utils.Application.isHeadless()) {
-
             final BufferedImage image = new BufferedImage(w, h, Transparency.BITMASK);
-
             return image;
         } else {
             final GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
@@ -242,6 +245,7 @@ public class IconIO {
                 is = resource.openStream();
                 final BufferedImage ret = ImageIO.read(is);
                 if (ret != null) {
+                    // return getCroppedImage(ret);
                     return ret;
                 }
             } catch (final IOException e) {
@@ -260,11 +264,65 @@ public class IconIO {
     }
 
     /**
+     * from here http://stackoverflow.com/questions/3224561/crop-image-to-smallest-size-by-removing-transparent-pixels-in-java
+     *
+     * @param source
+     * @return
+     */
+    public static BufferedImage getCroppedImage(BufferedImage source) {
+        if (source != null && source.getType() == BufferedImage.TYPE_4BYTE_ABGR) {
+            try {
+                // Get our top-left pixel color as our "baseline" for cropping
+                final byte[] pixels = ((DataBufferByte) source.getRaster().getDataBuffer()).getData();
+                final int width = source.getWidth();
+                final int height = source.getHeight();
+                int x0, y0, x1, y1; // the new corners of the trimmed image
+                int i, j; // i - horizontal iterator; j - vertical iterator
+                leftLoop: for (i = 0; i < width; i++) {
+                    for (j = 0; j < height; j++) {
+                        if (pixels[(j * width + i) * 4] != 0) { // alpha is the very first byte and then every fourth one
+                            break leftLoop;
+                        }
+                    }
+                }
+                x0 = i;
+                topLoop: for (j = 0; j < height; j++) {
+                    for (i = 0; i < width; i++) {
+                        if (pixels[(j * width + i) * 4] != 0) {
+                            break topLoop;
+                        }
+                    }
+                }
+                y0 = j;
+                rightLoop: for (i = width - 1; i >= 0; i--) {
+                    for (j = 0; j < height; j++) {
+                        if (pixels[(j * width + i) * 4] != 0) {
+                            break rightLoop;
+                        }
+                    }
+                }
+                x1 = i + 1;
+                bottomLoop: for (j = height - 1; j >= 0; j--) {
+                    for (i = 0; i < width; i++) {
+                        if (pixels[(j * width + i) * 4] != 0) {
+                            break bottomLoop;
+                        }
+                    }
+                }
+                y1 = j + 1;
+                return source.getSubimage(x0, y0, x1 - x0, y1 - y0);
+            } catch (final Throwable e) {
+                e.printStackTrace();
+            }
+        }
+        return source;
+    }
+
+    /**
      * @param resource
      * @return
      */
     public static ImageIcon getImageIcon(final URL resource) {
-
         return new ImageIcon(IconIO.getImage(resource));
     }
 
@@ -295,8 +353,11 @@ public class IconIO {
      * @return
      */
     public static Icon getScaledInstance(final Icon icon, final int width, final int height, final Interpolation bicubic) {
-
-        return new ScaledIcon(icon, width, height, bicubic);
+        if (icon instanceof ScaledIcon) {
+            return new ScaledIcon(((ScaledIcon) icon).getSource(), width, height, bicubic);
+        } else {
+            return new ScaledIcon(icon, width, height, bicubic);
+        }
 
     }
 
@@ -533,7 +594,7 @@ public class IconIO {
      */
     public static BufferedImage toBufferedImage(final Icon icon) {
         if (icon instanceof ImageIcon) {
-            Image img = ((ImageIcon) icon).getImage();
+            final Image img = ((ImageIcon) icon).getImage();
             if (img instanceof BufferedImage) {
                 return (BufferedImage) img;
             }

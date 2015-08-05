@@ -216,7 +216,7 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
                                         int[] ret = ExtTableModel.this.setSelectedObjects(selectedObjects);
                                         if (ret[0] == -1) {
 
-                                            if (min >= 0) {
+                                            if (min >= 0 && false) {
                                                 if (min >= getRowCount()) {
                                                     ret = ExtTableModel.this.setSelectedRows(new int[] { getRowCount() - 1 });
                                                 } else {
@@ -441,7 +441,7 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
     public TableCellEditor getCelleditorByColumn(final int modelColumnIndex) {
         /*
          * Math.max(0, columnIndex)
-         * 
+         *
          * WORKAROUND for -1 column access,Index out of Bound,Unknown why it happens but this workaround seems to do its job
          */
         return this.getExtColumnByModelIndex(modelColumnIndex);
@@ -456,7 +456,7 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
     public ExtColumn<E> getCellrendererByColumn(final int columnIndex) {
         /*
          * Math.max(0, columnIndex)
-         * 
+         *
          * WORKAROUND for -1 column access,Index out of Bound,Unknown why it happens but this workaround seems to do its job
          */
         return this.columns.get(Math.max(0, columnIndex));
@@ -496,7 +496,7 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
     public String getColumnName(final int column) {
         /*
          * Math.max(0, columnIndex)
-         * 
+         *
          * WORKAROUND for -1 column access,Index out of Bound,Unknown why it happens but this workaround seems to do its job
          */
         return this.columns.get(Math.max(0, column)).getName();
@@ -902,9 +902,9 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
 
     /*
      * this will be called after fireTableStructureChanged. you can customize everything after this
-     * 
+     *
      * true = restore selection
-     * 
+     *
      * false = do not restore selection
      */
     protected boolean postSetTableData(final List<E> newtableData) {

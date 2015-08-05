@@ -300,7 +300,7 @@ public class CrossSystem {
      * @throws IOException
      * @throws URISyntaxException
      */
-    private static void _openURL(final String _url) throws IOException, URISyntaxException {
+    public static void openUrlOrThrowException(final String _url) throws IOException, URISyntaxException {
         if (!CrossSystem.openCustom(CrossSystem.BROWSER_COMMANDLINE, _url)) {
             CrossSystem.DESKTOP_SUPPORT.browseURL(new URL(_url));
         }
@@ -1049,7 +1049,7 @@ public class CrossSystem {
      */
     public static void openURL(final String url) {
         try {
-            CrossSystem._openURL(url);
+            CrossSystem.openUrlOrThrowException(url);
         } catch (final Throwable e) {
             Log.exception(Level.WARNING, e);
         }
@@ -1064,7 +1064,7 @@ public class CrossSystem {
      */
     public static void openURLOrShowMessage(final String urlString) {
         try {
-            CrossSystem._openURL(urlString);
+            CrossSystem.openUrlOrThrowException(urlString);
         } catch (final Throwable e) {
             Log.exception(Level.WARNING, e);
             try {

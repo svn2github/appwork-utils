@@ -669,15 +669,26 @@ public class IconIO {
      * @throws IOException
      */
     public static String toDataUrl(Icon icon) throws IOException {
+        return toDataUrl(IconIO.convertIconToBufferedImage(icon), "png");
+
+    }
+
+    /**
+     * @param convertIconToBufferedImage
+     * @param string
+     * @return
+     * @throws IOException
+     */
+    public static String toDataUrl(BufferedImage image, String mime) throws IOException {
         Base64OutputStream b64os = null;
         ByteArrayOutputStream bos = null;
 
         try {
             bos = new ByteArrayOutputStream();
             b64os = new Base64OutputStream(bos);
-            ImageIO.write(IconIO.convertIconToBufferedImage(icon), "png", b64os);
+            ImageIO.write(image, "png", b64os);
             b64os.flush(true);
-            final String ret = "png;base64," + bos.toString("UTF-8");
+            final String ret = mime + ";base64," + bos.toString("UTF-8");
             return ret;
 
         } finally {

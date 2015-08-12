@@ -35,7 +35,7 @@ import org.appwork.utils.swing.SwingUtils;
 
 /**
  * ExtColums define a single column of an extended Table. It contains all columndetails including renderer
- * 
+ *
  * @author $Author: unknown$
  */
 public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCellEditor, TableCellRenderer {
@@ -82,7 +82,7 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
 
     /**
      * Create a new ExtColum.
-     * 
+     *
      * @param name
      * @param table
      * @param database
@@ -92,7 +92,7 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
         this.model = table;
         this.sortOrderIdentifier = null;
 
-        this.generateID();
+        this.id = this.generateID();
         // sort function
         this.rowSorter = new ExtDefaultRowSorter<E>();
         this.tooltip = new ToolTip();
@@ -307,8 +307,8 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
 
     }
 
-    private void generateID() {
-        this.id = this.getClass().getSuperclass().getSimpleName() + "." + this.getClass().getName();
+    protected String generateID() {
+        return this.getClass().getSuperclass().getSimpleName() + "." + this.getClass().getName();
     }
 
     /**
@@ -363,7 +363,7 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
 
     /**
      * The storageID for this column. Override this if you have a selfdefined column class which is used by several of your columns.
-     * 
+     *
      * @return
      */
     public String getID() {
@@ -374,7 +374,7 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
 
     /**
      * returns the real visible columnindex
-     * 
+     *
      * @return
      */
     public int getIndex() {
@@ -437,7 +437,7 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
 
     /**
      * Returns null or a sorting comperator for this column
-     * 
+     *
      * @param sortToggle
      * @return
      */
@@ -520,7 +520,7 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
 
     /**
      * Returns the intern TableColumn
-     * 
+     *
      * @return
      */
     public TableColumn getTableColumn() {
@@ -557,7 +557,7 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
 
     /**
      * Returns if the cell is editable. Do NOT override this. Use {@link #isEditable(Object)} instead
-     * 
+     *
      * @param rowIndex
      * @param columnIndex
      * @return
@@ -584,7 +584,7 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
 
     /**
      * returns true if the column is editable for the object obj
-     * 
+     *
      * @param obj
      * @return
      */
@@ -593,7 +593,7 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
     /**
      * override this to enable cell editing if the cell is disabled IMPORTANT: YOU jave to override {@link #isEditable(Object)} as well if
      * you override this method
-     * 
+     *
      * @param obj
      * @param enabled
      * @return if the row with obj is editable
@@ -605,7 +605,7 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
 
     /**
      * returns if the cell defined by this column and the object is enabled or disabled
-     * 
+     *
      * @param obj
      * @return
      */
@@ -613,7 +613,7 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
 
     /**
      * returns if this column is allowed to be hidden
-     * 
+     *
      * @return
      */
     public boolean isHidable() {
@@ -627,7 +627,7 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
     /**
      * If you want to use only an icon in the table header, you can override this and let the method return false. This only works if
      * {@link #getHeaderIcon()} returns an icon
-     * 
+     *
      * @return
      */
     public boolean isPaintHeaderText() {
@@ -658,7 +658,7 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
     /**
      * returns true if this column is sortable. if the call origin is an object, the object is passed in obj parameter. if the caller origin
      * is the column header, obj is null
-     * 
+     *
      * @param obj
      * @return
      */
@@ -678,9 +678,9 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
 
     /**
      * return true if you don't want to forward to following onDoubleClick listener
-     * 
+     *
      * This method will be called when a doubleClick is performed on the object <code>obj</code>
-     * 
+     *
      * @param obj
      */
     public boolean onDoubleClick(final MouseEvent e, final E obj) {
@@ -689,7 +689,7 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
 
     /**
      * This method will be called if the user does a windows typic rename click order. Means: click on a already selected single row
-     * 
+     *
      * @param e
      * @param obj
      * @return
@@ -700,7 +700,7 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
 
     /**
      * return true if you dont want to forward to following onSingleClick listener
-     * 
+     *
      * @param e
      * @param obj
      */
@@ -709,12 +709,12 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
     }
 
     /**
-     * 
+     *
      */
     public abstract void resetEditor();
 
     /**
-     * 
+     *
      */
     public abstract void resetRenderer();
 
@@ -780,7 +780,7 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
 
     /**
      * Sets the real tableColumn.
-     * 
+     *
      * @param tableColumn
      */
     public void setTableColumn(final TableColumn tableColumn, final boolean updateSize) {
@@ -803,7 +803,7 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
 
     /**
      * USe this method to catch changed values.
-     * 
+     *
      * @param value
      *            the new value
      * @param object
@@ -847,7 +847,7 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
     }
 
     /**
-     * 
+     *
      */
     private void updateColumnGui() {
 

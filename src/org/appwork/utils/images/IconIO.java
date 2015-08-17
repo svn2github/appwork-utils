@@ -680,28 +680,12 @@ public class IconIO {
      * @throws IOException
      */
     public static String toDataUrl(BufferedImage image, String mime) throws IOException {
-        Base64OutputStream b64os = null;
-        ByteArrayOutputStream bos = null;
-
-        try {
-            bos = new ByteArrayOutputStream();
-            b64os = new Base64OutputStream(bos);
-            ImageIO.write(image, "png", b64os);
-            b64os.flush(true);
-            final String ret = mime + ";base64," + bos.toString("UTF-8");
-            return ret;
-
-        } finally {
-            try {
-                b64os.close();
-            } catch (final Throwable e) {
-            }
-            try {
-                bos.close();
-            } catch (final Throwable e) {
-            }
-
-        }
+        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        final Base64OutputStream b64os = new Base64OutputStream(bos);
+        ImageIO.write(image, "png", b64os);
+        b64os.close();
+        final String ret = mime + ";base64," + bos.toString("UTF-8");
+        return ret;
     }
 
     /**

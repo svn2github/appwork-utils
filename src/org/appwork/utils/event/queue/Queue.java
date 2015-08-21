@@ -13,8 +13,8 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
-import org.appwork.utils.NullsafeAtomicReference;
 import org.appwork.utils.logging.Log;
 
 /**
@@ -35,7 +35,7 @@ public abstract class Queue {
     protected final ArrayDeque<QueueAction<?, ? extends Throwable>>     queue               = new ArrayDeque<QueueAction<?, ? extends Throwable>>();
 
     protected final java.util.List<QueueAction<?, ? extends Throwable>> queueThreadHistory  = new ArrayList<QueueAction<?, ? extends Throwable>>(20);
-    protected final NullsafeAtomicReference<QueueThread>                thread              = new NullsafeAtomicReference<QueueThread>(null);
+    protected final AtomicReference<QueueThread>                        thread              = new AtomicReference<QueueThread>(null);
     private volatile QueueAction<?, ? extends Throwable>                sourceItem          = null;
     private volatile QueueAction<?, ?>                                  currentJob;
 
@@ -213,22 +213,36 @@ public abstract class Queue {
     }
 
     public void internalAdd(final QueueAction<?, ?> action) {
-        synchronized (this.queue) {
-            switch (action.getQueuePrio()) {
-            case NORM:
-                this.queue.offer(action);
-                break;
-            case HIGH:
-                this.queue.offerFirst(action);
-                break;
-            default:
-                this.queue.offer(action);
-                break;
+        if (action != null) {
+            synchronized (this.queue) {
+                try {
+                    final QueuePriority prio = action.getQueuePrio();
+                    if (prio != null) {
+                        switch (prio) {
+                        case HIGH:
+                            this.queue.offerFirst(action);
+                            break;
+                        case NORM:
+                        default:
+                            this.queue.offer(action);
+                            break;
+                        }
+                    } else {
+                        queue.offer(action);
+                    }
+                } finally {
+                    try {
+                        final Thread currentThread = this.thread.get();
+                        if (currentThread == null || !currentThread.isAlive()) {
+                            final QueueThread newThread = new QueueThread(this);
+                            this.thread.set(newThread);
+                            newThread.start();
+                        }
+                    } finally {
+                        this.queue.notifyAll();
+                    }
+                }
             }
-            if (this.thread.get() == null) {
-                this.thread.set(new QueueThread(this));
-            }
-            this.queue.notifyAll();
         }
     }
 
@@ -334,35 +348,47 @@ public abstract class Queue {
     }
 
     protected void runQueue() {
-        QueueAction<?, ? extends Throwable> item = null;
-        while (true) {
-            try {
-                this.handlePreRun();
-                synchronized (this.queue) {
-                    item = this.queue.poll();
-                    if (item == null) {
-                        this.queue.wait(this.getTimeout());
+        try {
+            QueueAction<?, ? extends Throwable> item = null;
+            while (true) {
+                try {
+                    this.handlePreRun();
+                    synchronized (this.queue) {
                         item = this.queue.poll();
                         if (item == null) {
-                            this.thread.set(null);
-                            return;
+                            this.queue.wait(this.getTimeout());
+                            item = this.queue.poll();
+                            if (item == null) {
+                                final Thread thread = Thread.currentThread();
+                                if (thread instanceof QueueThread) {
+                                    this.thread.compareAndSet((QueueThread) thread, null);
+                                }
+                                return;
+                            }
                         }
                     }
-                }
-                if (!handleItem(item)) {
-                    continue;
-                }
-                try {
-                    this.sourceItem = item;
-                    this.startItem(item, true);
+                    if (!handleItem(item)) {
+                        continue;
+                    }
+                    try {
+                        this.sourceItem = item;
+                        this.startItem(item, true);
+                    } catch (final Throwable e) {
+                    } finally {
+                        this.sourceItem = null;
+                        this.onItemHandled(item);
+                    }
                 } catch (final Throwable e) {
-                } finally {
-                    this.sourceItem = null;
-                    this.onItemHandled(item);
+                    Log.L.info("Queue rescued!");
+                    Log.exception(e);
                 }
-            } catch (final Throwable e) {
-                Log.L.info("Queue rescued!");
-                Log.exception(e);
+            }
+        } finally {
+            synchronized (this.queue) {
+                final Thread thread = Thread.currentThread();
+                if (thread instanceof QueueThread) {
+                    this.thread.compareAndSet((QueueThread) thread, null);
+                }
             }
         }
     }
@@ -433,7 +459,7 @@ public abstract class Queue {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Thread#toString()
      */
     @Override

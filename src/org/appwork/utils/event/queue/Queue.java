@@ -11,6 +11,7 @@ package org.appwork.utils.event.queue;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
@@ -25,14 +26,16 @@ import org.appwork.utils.logging.Log;
  */
 public abstract class Queue {
 
-    public enum QueuePriority {
+    protected final Object queueLock = new Object();
+
+    public static enum QueuePriority {
         HIGH,
-        LOW,
-        NORM
+        NORM,
+        LOW;
+
     }
 
     protected boolean                                                   debugFlag           = false;
-    protected final ArrayDeque<QueueAction<?, ? extends Throwable>>     queue               = new ArrayDeque<QueueAction<?, ? extends Throwable>>();
 
     protected final java.util.List<QueueAction<?, ? extends Throwable>> queueThreadHistory  = new ArrayList<QueueAction<?, ? extends Throwable>>(20);
     protected final AtomicReference<QueueThread>                        thread              = new AtomicReference<QueueThread>(null);
@@ -47,9 +50,15 @@ public abstract class Queue {
     private final String                                                id;
     protected volatile long                                             timeout             = 10 * 1000l;
 
+    private final ArrayDeque<?>[]                                       queues;
+
     public Queue(final String id) {
         this.id = id;
         Queue.QUEUELOOPPREVENTION.incrementAndGet();
+        queues = new ArrayDeque<?>[QueuePriority.values().length];
+        for (int i = 0; i < queues.length; i++) {
+            queues[i] = new ArrayDeque<QueueAction<?, ? extends Throwable>>();
+        }
     }
 
     /**
@@ -165,15 +174,16 @@ public abstract class Queue {
         return this.currentJob;
     }
 
-    public java.util.List<QueueAction<?, ?>> getEntries() {
-        final java.util.List<QueueAction<?, ?>> ret = new ArrayList<QueueAction<?, ?>>();
-        synchronized (this.queue) {
+    public List<QueueAction<?, ?>> getEntries() {
+        final List<QueueAction<?, ?>> ret = new ArrayList<QueueAction<?, ?>>();
+        synchronized (this.queueLock) {
             final QueueAction<?, ?> lcurrentJob = currentJob;
             if (lcurrentJob != null) {
                 ret.add(currentJob);
             }
-            for (final QueueAction<?, ? extends Throwable> item : this.queue) {
-                ret.add(item);
+            for (int i = 0; i < queues.length; i++) {
+                final ArrayDeque<?> queue = queues[i];
+                ret.addAll((ArrayDeque<QueueAction<?, ?>>) queue);
             }
         }
         return ret;
@@ -214,21 +224,13 @@ public abstract class Queue {
 
     public void internalAdd(final QueueAction<?, ?> action) {
         if (action != null) {
-            synchronized (this.queue) {
+            synchronized (this.queueLock) {
                 try {
                     final QueuePriority prio = action.getQueuePrio();
                     if (prio != null) {
-                        switch (prio) {
-                        case HIGH:
-                            this.queue.offerFirst(action);
-                            break;
-                        case NORM:
-                        default:
-                            this.queue.offer(action);
-                            break;
-                        }
+                        ((ArrayDeque<QueueAction<?, ? extends Throwable>>) queues[prio.ordinal()]).offer(action);
                     } else {
-                        queue.offer(action);
+                        ((ArrayDeque<QueueAction<?, ? extends Throwable>>) queues[QueuePriority.NORM.ordinal()]).offer(action);
                     }
                 } finally {
                     try {
@@ -239,7 +241,7 @@ public abstract class Queue {
                             newThread.start();
                         }
                     } finally {
-                        this.queue.notifyAll();
+                        queueLock.notifyAll();
                     }
                 }
             }
@@ -256,8 +258,14 @@ public abstract class Queue {
     }
 
     public boolean isEmpty() {
-        synchronized (this.queue) {
-            return this.queue.size() == 0;
+        synchronized (this.queueLock) {
+            for (int i = 0; i < queues.length; i++) {
+                final ArrayDeque<?> queue = queues[i];
+                if (!queue.isEmpty()) {
+                    return false;
+                }
+            }
+            return true;
         }
     }
 
@@ -306,16 +314,14 @@ public abstract class Queue {
      *
      */
     public void killQueue() {
-        final ArrayList<QueueAction<?, ? extends Throwable>> killList = new ArrayList<QueueAction<?, ? extends Throwable>>();
-        synchronized (this.queue) {
+        final List<QueueAction<?, ? extends Throwable>> killList = new ArrayList<QueueAction<?, ? extends Throwable>>();
+        synchronized (this.queueLock) {
             System.out.println("Kill: " + this);
-            for (final QueueAction<?, ? extends Throwable> item : this.queue) {
-                /* kill item */
-                System.out.println("K");
-                killList.add(item);
+            for (final ArrayDeque<?> queue : queues) {
+                killList.addAll((ArrayDeque<QueueAction<?, ? extends Throwable>>) queue);
+                queue.clear();
             }
-            /* clear queue */
-            this.queue.clear();
+
         }
         for (final QueueAction<?, ? extends Throwable> item : killList) {
             item.kill();
@@ -332,11 +338,19 @@ public abstract class Queue {
 
     public boolean remove(final QueueAction<?, ?> action) {
         QueueAction<?, ?> kill = null;
-        synchronized (this.queue) {
-            if (this.queue.remove(action)) {
+        synchronized (this.queueLock) {
+            final QueuePriority prio = action.getQueuePrio();
+            if (prio != null && queues[prio.ordinal()].remove(action)) {
                 kill = action;
-            } else if (action == this.currentJob) {
-                kill = action;
+            }
+            if (kill == null) {
+                for (int i = 0; i < queues.length; i++) {
+                    final ArrayDeque<?> queue = queues[i];
+                    if (queue.remove(action)) {
+                        kill = action;
+                        break;
+                    }
+                }
             }
         }
         if (kill != null) {
@@ -344,7 +358,17 @@ public abstract class Queue {
             return true;
         }
         return false;
+    }
 
+    private QueueAction<?, ? extends Throwable> poll() {
+        for (int i = 0; i < queues.length; i++) {
+            final ArrayDeque<?> queue = queues[i];
+            final QueueAction<?, ? extends Throwable> ret = (QueueAction<?, ? extends Throwable>) queue.poll();
+            if (ret != null) {
+                return ret;
+            }
+        }
+        return null;
     }
 
     protected void runQueue() {
@@ -353,11 +377,11 @@ public abstract class Queue {
             while (true) {
                 try {
                     this.handlePreRun();
-                    synchronized (this.queue) {
-                        item = this.queue.poll();
+                    synchronized (this.queueLock) {
+                        item = poll();
                         if (item == null) {
-                            this.queue.wait(this.getTimeout());
-                            item = this.queue.poll();
+                            this.queueLock.wait(this.getTimeout());
+                            item = poll();
                             if (item == null) {
                                 final Thread thread = Thread.currentThread();
                                 if (thread instanceof QueueThread) {
@@ -384,7 +408,7 @@ public abstract class Queue {
                 }
             }
         } finally {
-            synchronized (this.queue) {
+            synchronized (this.queueLock) {
                 final Thread thread = Thread.currentThread();
                 if (thread instanceof QueueThread) {
                     this.thread.compareAndSet((QueueThread) thread, null);
@@ -398,7 +422,6 @@ public abstract class Queue {
      * @return
      */
     protected boolean handleItem(QueueAction<?, ? extends Throwable> item) {
-
         return true;
     }
 
@@ -413,14 +436,19 @@ public abstract class Queue {
 
     public void setTimeout(long timeout) {
         this.timeout = Math.max(0, timeout);
-        synchronized (this.queue) {
-            this.queue.notifyAll();
+        synchronized (this.queueLock) {
+            this.queueLock.notifyAll();
         }
     }
 
     public int size() {
-        synchronized (this.queue) {
-            return this.queue.size();
+        synchronized (this.queueLock) {
+            int ret = 0;
+            for (int i = 0; i < queues.length; i++) {
+                final ArrayDeque<?> queue = queues[i];
+                ret += queue.size();
+            }
+            return ret;
         }
     }
 

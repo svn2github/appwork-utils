@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2013 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.utils.net
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -15,7 +15,7 @@ import java.io.OutputStream;
 
 /**
  * @author daniel
- * 
+ *
  */
 public class DeChunkingOutputStream extends OutputStream {
 
@@ -33,7 +33,7 @@ public class DeChunkingOutputStream extends OutputStream {
 
     protected final OutputStream os;
     protected int                nextExpectedChunkLeft = 0;
-    protected byte[]             chunkSize             = new byte[4];
+    protected byte[]             chunkSize             = new byte[8];
     protected int                chunkSizePosition     = 0;
     protected boolean            chunkedExtension      = false;
     protected boolean            chunkedTrailers       = false;
@@ -45,7 +45,9 @@ public class DeChunkingOutputStream extends OutputStream {
 
     @Override
     public void close() throws IOException {
-        if (this.nextExpectedChunkLeft > 0) { throw new IOException("malformed chunk, still " + this.nextExpectedChunkLeft + " bytes expected!"); }
+        if (this.nextExpectedChunkLeft > 0) {
+            throw new IOException("malformed chunk, still " + this.nextExpectedChunkLeft + " bytes expected!");
+        }
         this.os.close();
     }
 
@@ -55,11 +57,15 @@ public class DeChunkingOutputStream extends OutputStream {
     }
 
     protected int nextChunkInfoProcessed(final int b) throws IOException {
-        if (this.nextExpectedChunkLeft > 0) { return this.nextExpectedChunkLeft; }
+        if (this.nextExpectedChunkLeft > 0) {
+            return this.nextExpectedChunkLeft;
+        }
         if (this.lastWrite == 13 || this.lastWrite == 10) {
             /* finish of LF/CRLF */
             final boolean returnChunkSize = this.lastWrite == 10;
-            if (this.lastWrite == 13 && b != 10) { throw new IOException("malformed chunk, bad/missing LF/CRLF"); }
+            if (this.lastWrite == 13 && b != 10) {
+                throw new IOException("malformed chunk, bad/missing LF/CRLF");
+            }
             this.lastWrite = -1;
             this.chunkedExtension = false;
             if (this.chunkSizePosition > 0) {
@@ -121,7 +127,7 @@ public class DeChunkingOutputStream extends OutputStream {
                     rest -= next;
                     done += next;
                 } else {
-                    final byte temp = b[off + done];
+                    final int temp = b[off + done] & 0xff;
                     rest -= 1;
                     done += 1;
                     this.nextChunkInfoProcessed(temp);

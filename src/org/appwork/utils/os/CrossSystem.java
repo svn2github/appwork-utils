@@ -1070,7 +1070,7 @@ public class CrossSystem {
             try {
                 final String question = _AWU.T.crossSystem_open_url_failed_msg();
                 final InputDialog dialog = new InputDialog(UIOManager.LOGIC_COUNTDOWN | UIOManager.BUTTONS_HIDE_CANCEL, _AWU.T.DIALOG_INPUT_TITLE(), question, urlString, Dialog.getIconByText(question), null, null);
-                dialog.setTimeout(60 * 1000);
+                dialog.setTimeout(61 * 1000);
                 UIOManager.I().show(InputDialogInterface.class, dialog);
             } catch (final Throwable donothing) {
             }

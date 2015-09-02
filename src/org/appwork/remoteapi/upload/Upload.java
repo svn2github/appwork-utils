@@ -58,7 +58,9 @@ public abstract class Upload {
 
     public String getETag() {
         final String ret = new Regex(this.eTag, "\"(.*?)\"").getMatch(0);
-        if (ret != null) { return ret; }
+        if (ret != null) {
+            return ret;
+        }
         return this.eTag;
     }
 
@@ -76,12 +78,16 @@ public abstract class Upload {
 
     protected String getQuotedEtag() {
         final String ret = this.getETag();
-        if (ret == null) { return null; }
+        if (ret == null) {
+            return null;
+        }
         return "\"" + ret + "\"";
     }
 
     public long getRemoteSize(final boolean fetchOnline) throws FileNotFoundException, IOException, InterruptedException {
-        if (fetchOnline == false && this.remoteSize > 0) { return this.remoteSize; }
+        if (fetchOnline == false && this.remoteSize > 0) {
+            return this.remoteSize;
+        }
         final BasicHTTP shttp = this.getBasicHTTP();
         HTTPConnection con = null;
         try {
@@ -90,8 +96,11 @@ public abstract class Upload {
             if (eTag != null) {
                 header.put(HTTPConstants.HEADER_REQUEST_IF_MATCH, eTag);
             }
+            header.put(HTTPConstants.HEADER_REQUEST_CONTENT_TYPE, "application/octet-stream");
             header.put(HTTPConstants.HEADER_RESPONSE_CONTENT_LENGTH, "0");
-            if (this.file.exists() == false) { throw new FileNotFoundException("Local file does not exist: " + this.file); }
+            if (this.file.exists() == false) {
+                throw new FileNotFoundException("Local file does not exist: " + this.file);
+            }
             header.put(HTTPConstants.HEADER_RESPONSE_CONTENT_RANGE, "bytes */" + this.file.length());
             this.checkInterrupted();
             con = shttp.openPostConnection(this.getUploadURL(), null, new ByteArrayInputStream(new byte[0]), header);
@@ -119,16 +128,24 @@ public abstract class Upload {
     protected abstract URL getUploadURL() throws IOException;
 
     public boolean isUploadComplete() throws FileNotFoundException {
-        if (this.remoteSize <= 0) { return false; }
-        if (this.remoteSize > this.file.length()) { throw new FileNotFoundException("RemoteSize > LocalSize"); }
+        if (this.remoteSize <= 0) {
+            return false;
+        }
+        if (this.remoteSize > this.file.length()) {
+            throw new FileNotFoundException("RemoteSize > LocalSize");
+        }
         return this.file.length() == this.remoteSize;
     }
 
     protected void parseResponse(final HTTPConnection con) throws IOException {
-        if (con.getResponseCode() == 404) { throw new FileNotFoundException("Remote file does not exist: " + this.eTag); }
+        if (con.getResponseCode() == 404) {
+            throw new FileNotFoundException("Remote file does not exist: " + this.eTag);
+        }
         if (con.getResponseCode() == 308 || con.getResponseCode() == 200) {
             this.eTag = con.getHeaderField(HTTPConstants.HEADER_ETAG);
-            if (StringUtils.isEmpty(this.eTag)) { throw new IOException("No ETag!"); }
+            if (StringUtils.isEmpty(this.eTag)) {
+                throw new IOException("No ETag!");
+            }
             if (con.getResponseCode() == 308) {
                 this.remoteSize = 0;
                 final String range = con.getHeaderField(HTTPConstants.HEADER_REQUEST_RANGE);
@@ -190,7 +207,9 @@ public abstract class Upload {
             if (uploadProgress != null) {
                 uploadProgress.setUploaded(remoteSize);
             }
-            if (existingRemoteSize > uploadSize || remoteSize > uploadSize) { throw new FileNotFoundException("RemoteSize > UploadSize"); }
+            if (existingRemoteSize > uploadSize || remoteSize > uploadSize) {
+                throw new FileNotFoundException("RemoteSize > UploadSize");
+            }
             if (remoteSize == uploadSize) {
                 /* upload already finished */
                 return true;
@@ -261,6 +280,7 @@ public abstract class Upload {
             };
             final DigestInputStream is = new DigestInputStream(new LimitedInputStream(fis, uploadSize), md);
             header.put(HTTPConstants.HEADER_REQUEST_IF_MATCH, this.getQuotedEtag());
+            header.put(HTTPConstants.HEADER_REQUEST_CONTENT_TYPE, "application/octet-stream");
             header.put(HTTPConstants.HEADER_RESPONSE_CONTENT_LENGTH, "" + uploadSize);
             header.put(HTTPConstants.HEADER_RESPONSE_CONTENT_RANGE, "bytes " + remoteSize + "-" + rangeEnd + "/" + this.file.length());
             this.checkInterrupted();
@@ -268,7 +288,9 @@ public abstract class Upload {
             this.parseResponse(con);
             final String remoteHash = new String(IO.readStream(1024, con.getInputStream()), "UTF-8");
             final String localHash = HexFormatter.byteArrayToHex(is.getMessageDigest().digest());
-            if (!localHash.equalsIgnoreCase(remoteHash)) { throw new UploadHashException("Upload error: hash missmatch"); }
+            if (!localHash.equalsIgnoreCase(remoteHash)) {
+                throw new UploadHashException("Upload error: hash missmatch");
+            }
             this.setKnownErrorFreeRemoteSize(remoteSize + uploadSize);
             if (uploadProgress != null) {
                 uploadProgress.setUploaded(remoteSize + uploadSize);

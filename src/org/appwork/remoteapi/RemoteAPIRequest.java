@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2011 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.remoteapi
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -27,7 +27,7 @@ import org.appwork.utils.net.httpserver.requests.PostRequest;
 
 /**
  * @author daniel
- * 
+ *
  */
 public class RemoteAPIRequest implements HttpRequestInterface {
 
@@ -52,7 +52,7 @@ public class RemoteAPIRequest implements HttpRequestInterface {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#toString()
      */
     @Override
@@ -68,7 +68,9 @@ public class RemoteAPIRequest implements HttpRequestInterface {
         this.methodName = methodName;
         this.jqueryCallback = jqueryCallback;
         this.method = this.iface.getMethod(methodName, this.parameters.length);
-        if (method == null) { throw new ApiCommandNotAvailable(request.getRequestedURL()); }
+        if (method == null) {
+            throw new ApiCommandNotAvailable(request.getRequestedURL());
+        }
 
     }
 
@@ -81,7 +83,9 @@ public class RemoteAPIRequest implements HttpRequestInterface {
     }
 
     public InputStream getInputStream() throws IOException {
-        if (this.request instanceof PostRequest) { return ((PostRequest) this.request).getInputStream(); }
+        if (this.request instanceof PostRequest) {
+            return ((PostRequest) this.request).getInputStream();
+        }
         return null;
     }
 
@@ -110,22 +114,25 @@ public class RemoteAPIRequest implements HttpRequestInterface {
     /*
      * (non-Javadoc)
      * 
-     * @see org.appwork.utils.net.httpserver.requests.HttpRequestInterface#
-     * getParameterbyKey(java.lang.String)
+     * @see org.appwork.utils.net.httpserver.requests.HttpRequestInterface# getParameterbyKey(java.lang.String)
      */
     @Override
     public String getParameterbyKey(final String key) throws IOException {
         List<KeyValuePair> params = this.request.getRequestedURLParameters();
         if (params != null) {
             for (final KeyValuePair param : params) {
-                if (key.equalsIgnoreCase(param.key)) { return param.value; }
+                if (key.equalsIgnoreCase(param.key)) {
+                    return param.value;
+                }
             }
         }
         if (this.request instanceof PostRequest) {
             params = ((PostRequest) this.request).getPostParameter();
             if (params != null) {
                 for (final KeyValuePair param : params) {
-                    if (key.equalsIgnoreCase(param.key)) { return param.value; }
+                    if (key.equalsIgnoreCase(param.key)) {
+                        return param.value;
+                    }
                 }
             }
         }
@@ -149,8 +156,8 @@ public class RemoteAPIRequest implements HttpRequestInterface {
     }
 
     /**
-     * @see http://en.wikipedia.org/wiki/X-Forwarded-For There may be several
-     *      Remote Addresses if the connection is piped through several proxies.<br>
+     * @see http://en.wikipedia.org/wiki/X-Forwarded-For There may be several Remote Addresses if the connection is piped through several
+     *      proxies.<br>
      *      [0] is always the direct address.<br>
      *      if remoteAdresses.size>1 then<br>
      *      [1] is the actuall clients ip.<br>
@@ -191,10 +198,18 @@ public class RemoteAPIRequest implements HttpRequestInterface {
     }
 
     public REQUESTTYPE getRequestType() {
-        if (this.request instanceof OptionsRequest) { return REQUESTTYPE.OPTIONS; }
-        if (this.request instanceof HeadRequest) { return REQUESTTYPE.HEAD; }
-        if (this.request instanceof PostRequest) { return REQUESTTYPE.POST; }
-        if (this.request instanceof GetRequest) { return REQUESTTYPE.GET; }
+        if (this.request instanceof OptionsRequest) {
+            return REQUESTTYPE.OPTIONS;
+        }
+        if (this.request instanceof HeadRequest) {
+            return REQUESTTYPE.HEAD;
+        }
+        if (this.request instanceof PostRequest) {
+            return REQUESTTYPE.POST;
+        }
+        if (this.request instanceof GetRequest) {
+            return REQUESTTYPE.GET;
+        }
         return REQUESTTYPE.UNKNOWN;
     }
 
@@ -207,6 +222,13 @@ public class RemoteAPIRequest implements HttpRequestInterface {
 
     public boolean validateRID() {
         return true;
+    }
+
+    /**
+     *
+     */
+    public boolean isHttps() {
+        return request.isHttps();
     }
 
 }

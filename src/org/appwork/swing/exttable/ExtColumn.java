@@ -790,6 +790,7 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
             int w = ExtColumn.this.getDefaultWidth();
             try {
                 w = ExtColumn.this.getModel().getTable().getColumnStore("WIDTH_COL_", ExtColumn.this.getID(), w);
+                w = adjustWidth(w);
             } catch (final Exception e) {
                 Log.exception(e);
             } finally {
@@ -799,6 +800,16 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
             this.updateColumnGui();
         }
 
+    }
+
+    /**
+     * can be used to set a fixed width and to ignore {@link #getDefaultWidth()}and the stored width. @see {@link #isResizable()}
+     * 
+     * @param w
+     * @return
+     */
+    protected int adjustWidth(int w) {
+        return w;
     }
 
     /**

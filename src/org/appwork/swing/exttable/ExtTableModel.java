@@ -61,7 +61,7 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
     /**
      * Modelid to have an seperate key for database savong
      */
-    private final String                                           modelID;
+    private String                                                 modelID;
 
     /**
      * the table that uses this model
@@ -76,16 +76,16 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
     protected volatile ExtColumn<E>                                sortColumn;
 
     private volatile java.util.List<ExtComponentRowHighlighter<E>> extComponentRowHighlighters;
-    private final Object                                           highlighterLock        = new Object();
+    private Object                                                 highlighterLock        = new Object();
 
-    private final Icon                                             iconAsc;
-    private final Icon                                             iconDesc;
-    private final PropertyChangeListener                           replaceDelayer;
+    private Icon                                                   iconAsc;
+    private Icon                                                   iconDesc;
+    private PropertyChangeListener                                 replaceDelayer;
     private volatile boolean                                       replaceDelayerSet      = false;
     private volatile List<E>                                       delayedNewTableData    = null;
     private boolean                                                debugTableModel        = false;
-    private final AtomicBoolean                                    tableStructureChanging = new AtomicBoolean(false);
-    private final AtomicBoolean                                    tableSelectionClearing = new AtomicBoolean(false);
+    private AtomicBoolean                                          tableStructureChanging = new AtomicBoolean(false);
+    private AtomicBoolean                                          tableSelectionClearing = new AtomicBoolean(false);
 
     private ExtTableModelEventSender                               eventSender;
 
@@ -99,6 +99,13 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
      */
     public ExtTableModel(final String id) {
         super();
+        init(id);
+    }
+
+    /**
+     * @param id
+     */
+    protected void init(final String id) {
         this.extComponentRowHighlighters = new ArrayList<ExtComponentRowHighlighter<E>>();
         this.modelID = id;
         this.iconAsc = AWUTheme.I().getIcon("exttable/sortAsc", -1);

@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2011 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.txtresource
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -13,6 +13,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
@@ -21,19 +22,21 @@ import java.net.URL;
 
 import org.appwork.utils.Files;
 import org.appwork.utils.IO;
+import org.appwork.utils.URLStream;
 import org.appwork.utils.logging.Log;
 
 /**
  * @author thomas
- * 
+ *
  */
 public class TranslateResource {
 
     /**
-     * 
+     *
      */
 
-    private final URL     url;
+    private final URL url;
+
     public URL getUrl() {
         return url;
     }
@@ -57,7 +60,7 @@ public class TranslateResource {
     }
 
     /**
-     * 
+     *
      */
     private static void convert() {
         File root = new File("C:/workspace/");
@@ -133,18 +136,21 @@ public class TranslateResource {
 
         // if we have no translation files, but only defaults, read them
         // directly
-        if (this.url == null) { return this.readDefaults(method); }
+        if (this.url == null) {
+            return this.readDefaults(method);
+        }
         String ret = null;
         ret = this.getData().get(method.getName());
-        if (ret == null) { return this.readDefaults(method); }
+        if (ret == null) {
+            return this.readDefaults(method);
+        }
         return ret;
 
     }
 
     /**
-     * Use this method to check the origin of the translation. the method
-     * returns null (not found) or a TranslationSource object.
-     * 
+     * Use this method to check the origin of the translation. the method returns null (not found) or a TranslationSource object.
+     *
      * @param method
      * @return
      */
@@ -153,17 +159,23 @@ public class TranslateResource {
             final Default lngAn = method.getAnnotation(Default.class);
             if (lngAn != null) {
                 for (int i = 0; i < lngAn.lngs().length; i++) {
-                    if (lngAn.lngs()[i].equals(this.name)) { return new TranslationSource(this,method, false); }
+                    if (lngAn.lngs()[i].equals(this.name)) {
+                        return new TranslationSource(this, method, false);
+                    }
                 }
             }
             return null;
 
         }
-        if (this.getData().containsKey(method.getName())) { return new TranslationSource(this,method, true); }
+        if (this.getData().containsKey(method.getName())) {
+            return new TranslationSource(this, method, true);
+        }
         final Default lngAn = method.getAnnotation(Default.class);
         if (lngAn != null) {
             for (int i = 0; i < lngAn.lngs().length; i++) {
-                if (lngAn.lngs()[i].equals(this.name)) { return new TranslationSource(this, method,false); }
+                if (lngAn.lngs()[i].equals(this.name)) {
+                    return new TranslationSource(this, method, false);
+                }
             }
         }
         return null;
@@ -186,8 +198,10 @@ public class TranslateResource {
 
         BufferedReader f = null;
         InputStreamReader isr = null;
+        InputStream is = null;
         try {
-            f = new BufferedReader(isr = new InputStreamReader(url.openStream(), "UTF8"));
+            is = URLStream.openStream(url);
+            f = new BufferedReader(isr = new InputStreamReader(is, "UTF8"));
             String line;
             final StringBuilder ret = new StringBuilder();
             final String sep = System.getProperty("line.separator");
@@ -195,8 +209,7 @@ public class TranslateResource {
 
                 if (ret.length() == 0 && line.startsWith("\uFEFF")) {
                     /*
-                     * Workaround for this bug:
-                     * http://bugs.sun.com/view_bug.do?bug_id=4508058
+                     * Workaround for this bug: http://bugs.sun.com/view_bug.do?bug_id=4508058
                      * http://bugs.sun.com/view_bug.do?bug_id=6378911
                      */
                     Log.L.warning(url + " is UTF-8 with BOM. Please remove BOM");
@@ -215,6 +228,10 @@ public class TranslateResource {
             }
             return ret.toString();
         } finally {
+            try {
+                is.close();
+            } catch (final Throwable e) {
+            }
             try {
                 f.close();
             } catch (final Throwable e) {
@@ -240,7 +257,9 @@ public class TranslateResource {
             return null;
         }
         for (int i = 0; i < lngAn.lngs().length; i++) {
-            if (lngAn.lngs()[i].equals(this.name)) { return lngAn.values()[i]; }
+            if (lngAn.lngs()[i].equals(this.name)) {
+                return lngAn.values()[i];
+            }
         }
         return null;
     }

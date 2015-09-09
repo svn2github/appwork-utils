@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2014 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.utils.net
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -24,10 +24,11 @@ import java.util.regex.Pattern;
 
 import org.appwork.utils.Application;
 import org.appwork.utils.Regex;
+import org.appwork.utils.URLStream;
 
 /**
  * @author daniel
- * 
+ *
  */
 public class PublicSuffixList {
 
@@ -83,7 +84,9 @@ public class PublicSuffixList {
                 final String tld = fullDomain.substring(tldIndex + 1);
                 final List<String> list = this.map.get(tld);
                 if (list != null) {
-                    if (list.size() == 0) { return tld; }
+                    if (list.size() == 0) {
+                        return tld;
+                    }
                     final List<String> hits = new ArrayList<String>();
                     hits.add(tld);
                     for (String item : list) {
@@ -119,12 +122,13 @@ public class PublicSuffixList {
         return null;
     }
 
-    protected Map<String, List<String>> parse(URL publicSuffixList) throws IOException {
+    protected Map<String, List<String>> parse(final URL publicSuffixList) throws IOException {
         final HashMap<String, List<String>> map = new HashMap<String, List<String>>();
-        if (publicSuffixList == null) { return map; }
-        final InputStream is = publicSuffixList.openStream();
+        if (publicSuffixList == null) {
+            return map;
+        }
+        final InputStream is = URLStream.openStream(publicSuffixList);
         try {
-
             final BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
             final List<String> emptyList = new ArrayList<String>(0);
             String line = null;

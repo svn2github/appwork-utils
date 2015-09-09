@@ -14,10 +14,12 @@ import java.io.FileNotFoundException;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -27,10 +29,62 @@ import java.util.jar.JarFile;
  */
 public class URLStream {
 
-    public static void main(String[] args) throws UnsupportedEncodingException, IOException {
-        InputStream is = openStream(new URL("jar:file:/home/daniel/Temp!/JDownloader.jar!/version.nfo"));
-        System.out.println(IO.readInputStreamToString(is));
+    private static final class JarFileCache {
+        private final JarFile    jarFile;
+        private final AtomicLong openInputStreams = new AtomicLong(0);
+        private final String     jarFilePath;
+
+        private JarFileCache(final String jarFilePath) throws IOException {
+            this.jarFilePath = jarFilePath;
+            this.jarFile = new JarFile(jarFilePath);
+        }
+
+        private InputStream getInputStream(final String jarEntryName) throws IOException {
+            final JarEntry jarEntry = jarFile.getJarEntry(jarEntryName);
+            if (jarEntry != null) {
+                final InputStream is = jarFile.getInputStream(jarEntry);
+                final FilterInputStream ret = new FilterInputStream(is) {
+                    private final AtomicBoolean closed = new AtomicBoolean(false);
+
+                    @Override
+                    public void close() throws IOException {
+                        try {
+                            super.close();
+                        } finally {
+                            synchronized (JARFILECACHE) {
+                                if (closed.compareAndSet(false, true)) {
+                                    openInputStreams.decrementAndGet();
+                                    JarFileCache.this.close();
+                                }
+                            }
+                        }
+                    }
+
+                    @Override
+                    protected void finalize() throws Throwable {
+                        close();
+                    }
+                };
+                openInputStreams.incrementAndGet();
+                return ret;
+            }
+            return null;
+        }
+
+        private void close() throws IOException {
+            synchronized (JARFILECACHE) {
+                if (openInputStreams.get() == 0) {
+                    try {
+                        jarFile.close();
+                    } finally {
+                        JARFILECACHE.remove(jarFilePath, this);
+                    }
+                }
+            }
+        }
     }
+
+    private static final HashMap<String, JarFileCache> JARFILECACHE = new HashMap<String, JarFileCache>();
 
     /**
      * workaround for http://bugs.java.com/view_bug.do?bug_id=6390779
@@ -47,7 +101,7 @@ public class URLStream {
         if (url != null) {
             if ("jar".equalsIgnoreCase(url.getProtocol())) {
                 final String path = url.getPath();
-                if (StringUtils.startsWithCaseInsensitive(path, "file:")) {
+                if (StringUtils.startsWithCaseInsensitive(path, "file:") && StringUtils.contains(path, "!/")) {
                     File jarFileFile = null;
                     int lastIndex = 0;
                     while (true) {
@@ -71,39 +125,30 @@ public class URLStream {
                             break;
                         }
                     }
-                    if (jarFileFile != null && jarFileFile.getPath().contains("!")) {
+                    if (jarFileFile != null && jarFileFile.getPath().contains("!/")) {
+                        final String jarFilePath = jarFileFile.getPath();
                         final String jarEntryName = path.substring(lastIndex + 2);
-                        final JarFile jarFile = new JarFile(jarFileFile);
-                        boolean closeFlag = true;
-                        try {
-                            final JarEntry jarEntry = jarFile.getJarEntry(jarEntryName);
-                            if (jarEntry != null) {
-                                final InputStream is = jarFile.getInputStream(jarEntry);
-                                final FilterInputStream ret = new FilterInputStream(is) {
-                                    @Override
-                                    public void close() throws IOException {
-                                        try {
-                                            super.close();
-                                        } finally {
-                                            jarFile.close();
-                                        }
-                                    }
-
-                                    @Override
-                                    protected void finalize() throws Throwable {
-                                        jarFile.close();
-                                    }
-                                };
-                                closeFlag = false;
-                                return ret;
-                            } else {
-                                throw new FileNotFoundException(path);
+                        synchronized (JARFILECACHE) {
+                            JarFileCache jarFileCache = JARFILECACHE.get(jarFilePath);
+                            if (jarFileCache == null) {
+                                jarFileCache = new JarFileCache(jarFilePath);
+                                JARFILECACHE.put(jarFilePath, jarFileCache);
                             }
-                        } finally {
-                            if (closeFlag) {
-                                jarFile.close();
+                            boolean close = true;
+                            try {
+                                final InputStream is = jarFileCache.getInputStream(jarEntryName);
+                                if (is != null) {
+                                    close = false;
+                                    return is;
+                                }
+                                throw new FileNotFoundException(path);
+                            } finally {
+                                if (close) {
+                                    jarFileCache.close();
+                                }
                             }
                         }
+
                     }
                 }
             }
@@ -111,5 +156,4 @@ public class URLStream {
         }
         return null;
     }
-
 }

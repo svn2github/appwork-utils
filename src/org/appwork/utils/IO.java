@@ -242,7 +242,7 @@ public class IO {
     /*
      * this function reads a line from a bufferedinputstream up to a maxLength. in case the line is longer than maxLength the rest of the
      * line is read but not returned
-     *
+     * 
      * this function skips emtpy lines
      */
 
@@ -411,7 +411,7 @@ public class IO {
     public static byte[] readURL(final URL url, final int maxSize) throws IOException {
         InputStream input = null;
         try {
-            input = url.openStream();
+            input = URLStream.openStream(url);
             return IO.readStream(maxSize, input);
         } finally {
             try {
@@ -430,7 +430,7 @@ public class IO {
     public static String readURLToString(final URL ressourceURL) throws IOException {
         InputStream fis = null;
         try {
-            fis = ressourceURL.openStream();
+            fis = URLStream.openStream(ressourceURL);
             return IO.readInputStreamToString(fis);
         } finally {
             try {

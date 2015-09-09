@@ -539,7 +539,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.swing.components.tooltips.ToolTipHandler#createExtTooltip()
      */
     @Override
@@ -883,7 +883,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.swing.components.tooltips.ToolTipHandler#updateTooltip(org .appwork.swing.components.tooltips.ExtTooltip,
      * java.awt.event.MouseEvent)
      */
@@ -949,7 +949,6 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
      * @return
      */
     protected boolean isDeleteFinalSelectionTrigger(final KeyStroke ks) {
-
         return CrossSystem.isDeleteFinalSelectionTrigger(ks);
     }
 
@@ -958,7 +957,6 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
      * @return
      */
     protected boolean isDeleteSelectionTrigger(final KeyStroke ks) {
-
         return CrossSystem.isDeleteSelectionTrigger(ks);
     }
 
@@ -1016,7 +1014,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.swing.components.tooltips.ToolTipHandler# isTooltipDisabledUntilNextRefocus()
      */
     @Override
@@ -1028,7 +1026,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.swing.components.tooltips.ToolTipHandler# isTooltipWithoutFocusEnabled()
      */
     @Override

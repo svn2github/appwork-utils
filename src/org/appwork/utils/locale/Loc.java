@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2010 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.utils.locale
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -28,27 +28,26 @@ import java.util.jar.JarInputStream;
 import org.appwork.storage.JSonStorage;
 import org.appwork.storage.Storage;
 import org.appwork.utils.Application;
+import org.appwork.utils.URLStream;
 import org.appwork.utils.logging.Log;
 
 /**
  * This class provides functions to return translated strings
- * 
+ *
  * @author Christian
  */
 @Deprecated
 public class Loc {
     /**
-     * The directory, where all localization files are located. A_ because this
-     * the order is important.
+     * The directory, where all localization files are located. A_ because this the order is important.
      */
     // public static final File A_LOCALIZATION_DIR =
     // Application.getResource("languages/");
 
     public static final Storage             CFG             = JSonStorage.getStorage("Locale");
     /**
-     * The HashMap which contains all hashcodes of the keys and their translated
-     * values.
-     * 
+     * The HashMap which contains all hashcodes of the keys and their translated values.
+     *
      * @see Loc#parseLocalization(RFSFile)
      */
     private static HashMap<Integer, String> DATA            = null;
@@ -79,7 +78,9 @@ public class Loc {
      * @return
      */
     private static String getDefaultLocale() {
-        if (Loc.DEFAULT_LOCALE_CACHE != null) { return Loc.DEFAULT_LOCALE_CACHE; }
+        if (Loc.DEFAULT_LOCALE_CACHE != null) {
+            return Loc.DEFAULT_LOCALE_CACHE;
+        }
         final String sys = System.getProperty("user.language").toLowerCase();
         final String cou = System.getProperty("user.country").toUpperCase();
 
@@ -130,9 +131,8 @@ public class Loc {
     }
 
     /**
-     * Returns a localized regular expression for words that usualy ar present
-     * in an error message
-     * 
+     * Returns a localized regular expression for words that usualy ar present in an error message
+     *
      * @return
      */
     public static String getErrorRegex() {
@@ -237,24 +237,23 @@ public class Loc {
     }
 
     /**
-     * Returns the translated value for the translation-key. If the current
-     * language file doesn't contain the translated value, the default value
-     * will be returned.
-     * 
+     * Returns the translated value for the translation-key. If the current language file doesn't contain the translated value, the default
+     * value will be returned.
+     *
      * @param key
-     *            key for the translation in the language file. the key should
-     *            <b>always</b> have the following structure
+     *            key for the translation in the language file. the key should <b>always</b> have the following structure
      *            <i>PACKAGE_NAME_FROM_CALLER.CLASS_NAME_FROM_CALLER.key</i>
      * @param def
-     *            default value which will be returned if there is no mapping
-     *            for the key
+     *            default value which will be returned if there is no mapping for the key
      * @return translated value or the def parameter
      * @see Loc#LF(String, String, Object...)
      * @throws IllegalArgumentException
      *             if the key is null or is empty
      */
     public static String L(String key, final String def) {
-        if (key == null || (key = key.trim()).length() == 0) { throw new IllegalArgumentException(); }
+        if (key == null || (key = key.trim()).length() == 0) {
+            throw new IllegalArgumentException();
+        }
         if (Loc.DATA == null) {
             Log.L.warning("No parsed localization found! Loading now from saved localization file!");
             try {
@@ -264,7 +263,9 @@ public class Loc {
                 Log.L.severe("Error while loading the stored localization name!");
                 Loc.setLocale(Loc.FALLBACK_LOCALE);
             }
-            if (Loc.DATA == null) { return def == null ? "Error in Loc! No loaded data!" : def; }
+            if (Loc.DATA == null) {
+                return def == null ? "Error in Loc! No loaded data!" : def;
+            }
         }
 
         final String loc = Loc.DATA.get(key.toLowerCase().hashCode());
@@ -276,16 +277,13 @@ public class Loc {
     }
 
     /**
-     * Returns the translated value for the translation-key filled with the
-     * parameters.
-     * 
+     * Returns the translated value for the translation-key filled with the parameters.
+     *
      * @param key
-     *            key for the translation in the language file. the key should
-     *            <b>always</b> have the following structure
+     *            key for the translation in the language file. the key should <b>always</b> have the following structure
      *            <i>PACKAGE_NAME_FROM_CALLER.CLASS_NAME_FROM_CALLER.key</i>
      * @param def
-     *            default value which will be returned if there is no mapping
-     *            for the key
+     *            default value which will be returned if there is no mapping for the key
      * @param args
      *            parameters which should be inserted in the translated string
      * @return translated value or the def parameter filled with the parameters
@@ -302,7 +300,7 @@ public class Loc {
     /**
      * Creates a HashMap with the data obtained from the localization file. <br>
      * <b>Warning:</b> Overwrites any previously created HashMap
-     * 
+     *
      * @param file
      *            {@link RFSFile} object to the localization file
      * @throws IllegalArgumentException
@@ -310,7 +308,9 @@ public class Loc {
      * @see Loc#DATA
      */
     public static void parseLocalization(final URL file) throws IllegalArgumentException {
-        if (file == null) { throw new IllegalArgumentException(); }
+        if (file == null) {
+            throw new IllegalArgumentException();
+        }
 
         if (Loc.DATA != null) {
             Log.L.finer("Previous HashMap will be overwritten!");
@@ -321,7 +321,8 @@ public class Loc {
         InputStreamReader isr = null;
         InputStream fis = null;
         try {
-            reader = new BufferedReader(isr = new InputStreamReader(fis = file.openStream(), "UTF8"));
+            fis = URLStream.openStream(file);
+            reader = new BufferedReader(isr = new InputStreamReader(fis, "UTF8"));
 
             String line;
             String key;
@@ -364,7 +365,7 @@ public class Loc {
 
     /**
      * Set-up this class by creating the HashMap for the key-string-pairs.
-     * 
+     *
      * @param loc
      *            name of the localization file
      * @see Loc#parseLocalization(RFSFile)

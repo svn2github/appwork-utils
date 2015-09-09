@@ -242,16 +242,27 @@ public class IO {
     /*
      * this function reads a line from a bufferedinputstream up to a maxLength. in case the line is longer than maxLength the rest of the
      * line is read but not returned
-     * 
+     *
      * this function skips emtpy lines
      */
 
     public static byte[] readFile(final File ressource, final int maxSize) throws IOException {
-        return IO.readURL(ressource.toURI().toURL(), maxSize);
+        FileInputStream fis = null;
+        try {
+            fis = new FileInputStream(ressource);
+            return IO.readStream(maxSize, fis);
+        } finally {
+            try {
+                if (fis != null) {
+                    fis.close();
+                }
+            } catch (final Throwable e) {
+            }
+        }
     }
 
     public static String readFileToString(final File file) throws IOException {
-        return IO.readURLToString(file.toURI().toURL());
+        return IO.importFileToString(file, -1);
     }
 
     public static String readInputStreamToString(final InputStream fis) throws UnsupportedEncodingException, IOException {

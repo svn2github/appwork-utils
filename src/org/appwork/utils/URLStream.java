@@ -42,6 +42,7 @@ public class URLStream {
         private InputStream getInputStream(final String jarEntryName) throws IOException {
             final JarEntry jarEntry = jarFile.getJarEntry(jarEntryName);
             if (jarEntry != null) {
+                System.out.println("URLStream(Workaround)|JarFile:" + jarFilePath + "|Entry:" + jarEntryName);
                 final InputStream is = jarFile.getInputStream(jarEntry);
                 final FilterInputStream ret = new FilterInputStream(is) {
                     private final AtomicBoolean closed = new AtomicBoolean(false);

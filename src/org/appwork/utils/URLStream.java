@@ -104,6 +104,7 @@ public class URLStream {
         if (url != null) {
             if ("jar".equalsIgnoreCase(url.getProtocol())) {
                 final String path = url.getPath();
+                System.out.println(path);
                 if (StringUtils.startsWithCaseInsensitive(path, "file:") && StringUtils.contains(path, "!/")) {
                     File jarFileFile = null;
                     int lastIndex = 0;

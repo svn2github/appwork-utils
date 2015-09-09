@@ -78,7 +78,9 @@ public class URLStream {
                     try {
                         jarFile.close();
                     } finally {
-                        JARFILECACHE.remove(jarFilePath, this);
+                        if (JARFILECACHE.get(jarFilePath) == this) {
+                            JARFILECACHE.remove(jarFilePath);
+                        }
                     }
                 }
             }

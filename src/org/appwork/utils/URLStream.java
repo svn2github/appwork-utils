@@ -42,7 +42,7 @@ public class URLStream {
         private InputStream getInputStream(final String jarEntryName) throws IOException {
             final JarEntry jarEntry = jarFile.getJarEntry(jarEntryName);
             if (jarEntry != null) {
-                System.out.println("URLStream(!-Workaround)|JarFile:" + jarFilePath + "|Entry:" + jarEntryName);
+                System.out.println("URLStream.openStream(JarFile:" + jarFilePath + "|Entry:" + jarEntryName + ")");
                 final InputStream is = jarFile.getInputStream(jarEntry);
                 final FilterInputStream ret = new FilterInputStream(is) {
                     private final AtomicBoolean closed = new AtomicBoolean(false);
@@ -104,8 +104,7 @@ public class URLStream {
         if (url != null) {
             if ("jar".equalsIgnoreCase(url.getProtocol())) {
                 final String path = url.getPath();
-                System.out.println("URLStream:" + path);
-                if (StringUtils.startsWithCaseInsensitive(path, "file:") && StringUtils.contains(path, "!/")) {
+                if (StringUtils.startsWithCaseInsensitive(path, "file:")) {
                     File jarFileFile = null;
                     int lastIndex = 0;
                     while (true) {

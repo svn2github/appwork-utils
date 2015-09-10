@@ -113,13 +113,19 @@ public class URLStream {
                             final int index = indexOf + 4;
                             lastIndex = index;
                             final String jarFileString = path.substring(0, index);
-                            final URI testJarURI;
-                            try {
-                                testJarURI = new URI(jarFileString);
-                            } catch (URISyntaxException e) {
-                                throw new IOException(e);
+                            final File testJarFile;
+                            if (jarFileString.contains(" ")) {
+                                testJarFile = new File(jarFileString);
+                            } else {
+                                final URI testJarURI;
+                                try {
+                                    testJarURI = new URI(jarFileString);
+                                } catch (URISyntaxException e) {
+                                    e.printStackTrace();
+                                    continue;
+                                }
+                                testJarFile = new File(testJarURI);
                             }
-                            final File testJarFile = new File(testJarURI);
                             if (testJarFile.exists() && testJarFile.isFile()) {
                                 jarFileFile = testJarFile;
                                 break;

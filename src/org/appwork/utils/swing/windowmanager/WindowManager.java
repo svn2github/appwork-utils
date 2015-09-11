@@ -116,6 +116,8 @@ public abstract class WindowManager {
     }
 
     public void setExtendedState(final Frame w, final WindowExtendedState state) {
+        System.out.println("Set extended State " + state);
+        new Exception().printStackTrace();
         if (state == null) {
             throw new NullPointerException("State is null");
         }

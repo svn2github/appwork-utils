@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2013 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.utils.swing
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -44,7 +44,7 @@ import org.appwork.utils.StringUtils;
 
 /**
  * @author Thomas
- * 
+ *
  */
 public class WindowsWindowManager extends WindowManager {
 
@@ -128,7 +128,7 @@ public class WindowsWindowManager extends WindowManager {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.utils.swing.WindowManager#toFront(java.awt.Window)
      */
     @Override
@@ -146,7 +146,9 @@ public class WindowsWindowManager extends WindowManager {
             // setAutoRequestFocus is java 1.7 only
             // setFocusableWindowState is important. if it would be false, the
             // window would not even go to front.
-            if (w.hasFocus()) { return; }
+            if (w.hasFocus()) {
+                return;
+            }
             // if (true) { return; }
             WindowResetListener hasListener = findListener(w);
             ResetRunnable runner = runnerMap.get(w);
@@ -255,7 +257,7 @@ public class WindowsWindowManager extends WindowManager {
     }
 
     /**
-     * 
+     *
      */
     private void releaseAlt() {
         if (altWorkaroundEnabled) {
@@ -327,7 +329,9 @@ public class WindowsWindowManager extends WindowManager {
      */
     protected boolean setAlwaysOnTop(final Window w, final boolean b) {
         final boolean ret = w.isAlwaysOnTop();
-        if (b == ret) { return ret; }
+        if (b == ret) {
+            return ret;
+        }
 
         blocker = ExtJFrame.PROPERTY_ALWAYS_ON_TOP;
         try {
@@ -344,12 +348,12 @@ public class WindowsWindowManager extends WindowManager {
     /*
      * (non-Javadoc)
      * 
-     * @see org.appwork.utils.swing.WindowManager#setVisible(java.awt.Window,
-     * boolean, boolean, boolean)
+     * @see org.appwork.utils.swing.WindowManager#setVisible(java.awt.Window, boolean, boolean, boolean)
      */
     @Override
     public void setVisible(final Window w, final boolean visible, final FrameState state) {
-
+        System.out.println("Set Visible State " + state + " - " + visible);
+        new Exception().printStackTrace();
         if (w.isVisible() && visible) {
             setZState(w, state);
             return;
@@ -435,7 +439,9 @@ public class WindowsWindowManager extends WindowManager {
     protected void setExtendedState(final Frame w, final int frameExtendedState) {
         blocker = ExtJFrame.PROPERTY_EXTENDED_STATE;
         try {
-            if (frameExtendedState == w.getExtendedState()) { return; }
+            if (frameExtendedState == w.getExtendedState()) {
+                return;
+            }
             // System.out.println("Call setExtendedState " +
             // frameExtendedState);
 
@@ -477,7 +483,9 @@ public class WindowsWindowManager extends WindowManager {
     }
 
     protected void addDebugListener(final Window w) {
-        if (Application.isJared(WindowsWindowManager.class) || true) { return; }
+        if (Application.isJared(WindowsWindowManager.class) || true) {
+            return;
+        }
         w.addWindowFocusListener(new WindowFocusListener() {
 
             @Override
@@ -609,7 +617,9 @@ public class WindowsWindowManager extends WindowManager {
      * @return
      */
     private String name(final Component window) {
-        if (window == null) { return null; }
+        if (window == null) {
+            return null;
+        }
         String ret = window.getName();
         if (StringUtils.isEmpty(ret)) {
             ret = window.getClass().getName();
@@ -628,34 +638,34 @@ public class WindowsWindowManager extends WindowManager {
         /* 391 */case 200: /* 391 */
             return "WINDOW_OPENED";
 
-            /* 394 */case 201: /* 394 */
+        /* 394 */case 201: /* 394 */
             return "WINDOW_CLOSING";
 
-            /* 397 */case 202: /* 397 */
+        /* 397 */case 202: /* 397 */
             return "WINDOW_CLOSED";
 
-            /* 400 */case 203: /* 400 */
+        /* 400 */case 203: /* 400 */
             return "WINDOW_ICONIFIED";
 
-            /* 403 */case 204: /* 403 */
+        /* 403 */case 204: /* 403 */
             return "WINDOW_DEICONIFIED";
 
-            /* 406 */case 205: /* 406 */
+        /* 406 */case 205: /* 406 */
             return "WINDOW_ACTIVATED";
 
-            /* 409 */case 206: /* 409 */
+        /* 409 */case 206: /* 409 */
             return "WINDOW_DEACTIVATED";
 
-            /* 412 */case 207: /* 412 */
+        /* 412 */case 207: /* 412 */
             return "WINDOW_GAINED_FOCUS";
 
-            /* 415 */case 208: /* 415 */
+        /* 415 */case 208: /* 415 */
             return "WINDOW_LOST_FOCUS";
 
-            /* 418 */case 209: /* 418 */
+        /* 418 */case 209: /* 418 */
             return "WINDOW_STATE_CHANGED";
 
-            /* 421 */default:/* 421 */
+        /* 421 */default:/* 421 */
             return "unknown type";
 
         }
@@ -666,7 +676,9 @@ public class WindowsWindowManager extends WindowManager {
      * @param b
      */
     protected void setFocusable(final Window w, final boolean b) {
-        if (w.isFocusable() == b) { return; }
+        if (w.isFocusable() == b) {
+            return;
+        }
         blocker = ExtJFrame.PROPERTY_FOCUSABLE;
         try {
             // System.out.println("Call setFocusable " + b);
@@ -685,7 +697,9 @@ public class WindowsWindowManager extends WindowManager {
      */
     protected boolean setFocusableWindowState(final Window w, final boolean b) {
         final boolean ret = w.getFocusableWindowState();
-        if (ret == b) { return ret; }
+        if (ret == b) {
+            return ret;
+        }
 
         // System.out.println("Call setFocusableWindowState " + b);
         blocker = ExtJFrame.PROPERTY_FOCUSABLE_WINDOW_STATE;
@@ -729,7 +743,9 @@ public class WindowsWindowManager extends WindowManager {
     protected void requestFocus(final Window w) {
         // if a frame is active, one of its components has the focus, if we da a
         // requestfocus now, these components will lose the focus again
-        if (w.getFocusOwner() != null || w.isFocusOwner() || w.isFocused()) { return; }
+        if (w.getFocusOwner() != null || w.isFocusOwner() || w.isFocused()) {
+            return;
+        }
 
         // System.out.println("Call requestFocus");
         w.requestFocus();

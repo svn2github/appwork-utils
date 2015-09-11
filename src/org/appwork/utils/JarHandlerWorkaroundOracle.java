@@ -39,6 +39,7 @@ public class JarHandlerWorkaroundOracle {
                                 @Override
                                 protected URLConnection openConnection(final URL url) throws IOException {
                                     try {
+                                        System.out.println("openConnection:" + url);
                                         final String path = url.getFile();
                                         URL jarFileURL = null;
                                         int lastIndex = 0;
@@ -79,6 +80,7 @@ public class JarHandlerWorkaroundOracle {
                                             } else {
                                                 entryName = null;
                                             }
+                                            System.out.println("Workaround for openConnection:" + finalJarFileURL + " Entry:" + entryName);
                                             return new sun.net.www.protocol.jar.JarURLConnection(url, this) {
                                                 @Override
                                                 public URL getJarFileURL() {
@@ -107,6 +109,7 @@ public class JarHandlerWorkaroundOracle {
                         return null;
                     }
                 });
+                System.out.println("JarHandlerWorkaroundOracle");
             } catch (final Throwable e) {
                 e.printStackTrace();
             }

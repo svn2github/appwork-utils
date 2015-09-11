@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2013 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.app.gui
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -12,9 +12,6 @@ package org.appwork.swing;
 import java.awt.GraphicsConfiguration;
 import java.awt.HeadlessException;
 import java.awt.Point;
-import java.awt.Window;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowStateListener;
 
@@ -26,7 +23,7 @@ import org.appwork.utils.os.CrossSystem;
 
 /**
  * @author Thomas
- * 
+ *
  */
 public class ExtJFrame extends JFrame implements PropertyStateEventProviderInterface {
 
@@ -49,7 +46,7 @@ public class ExtJFrame extends JFrame implements PropertyStateEventProviderInter
     }
 
     /**
-     * 
+     *
      */
     private void macSpecials() {
         if (CrossSystem.isMac()) {
@@ -193,6 +190,8 @@ public class ExtJFrame extends JFrame implements PropertyStateEventProviderInter
 
     @Override
     public void setExtendedState(final int i) {
+        System.out.println("Set Extended State " + i);
+        new Exception().printStackTrace();
         if (this.propertySetEventSender != null) {
             this.propertySetEventSender.fireEvent(new PropertySetEvent(this, PropertySetEvent.Type.SET, ExtJFrame.PROPERTY_EXTENDED_STATE, this.getExtendedState(), i));
         }

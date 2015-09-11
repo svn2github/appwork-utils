@@ -36,6 +36,7 @@ public class JarHandlerWorkaroundOracle {
                     public URLStreamHandler createURLStreamHandler(String protocol) {
                         if ("jar".equals(protocol)) {
                             return new sun.net.www.protocol.jar.Handler() {
+
                                 @Override
                                 protected URLConnection openConnection(final URL url) throws IOException {
                                     try {
@@ -71,6 +72,7 @@ public class JarHandlerWorkaroundOracle {
                                             }
                                         }
                                         if (jarFileURL != null) {
+                                            System.out.println("Workaround");
                                             lastIndex++;// skip !
                                             final URL finalJarFileURL = jarFileURL;
                                             final String entryName;

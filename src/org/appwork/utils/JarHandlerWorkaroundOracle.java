@@ -13,6 +13,7 @@ import java.lang.reflect.Field;
 import java.net.URL;
 import java.net.URLStreamHandler;
 import java.net.URLStreamHandlerFactory;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -76,6 +77,30 @@ public class JarHandlerWorkaroundOracle {
                     jarHandler.setAccessible(true);
                     jarHandler.set(urlClassPath, oracleWorkaroundJarHandler.newInstance());
                     System.out.println("JarHandlerWorkaroundOracle:replacejarHandler");
+                    final Field loadersField = urlClassPath.getClass().getDeclaredField("loaders");
+                    loadersField.setAccessible(true);
+                    final List<Object> loaders = (List<Object>) loadersField.get(urlClassPath);
+                    System.out.println("JarHandlerWorkaroundOracle:replaceLoaders:" + loaders.size());
+                    for (int index = 0; index < loaders.size(); index++) {
+                        try {
+                            final Object loader = loaders.get(index);
+                            if (loader.getClass().getName().endsWith("JarLoader")) {
+                                Field handlerField = loader.getClass().getDeclaredField("handler");
+                                handlerField.setAccessible(true);
+                                handlerField.set(loader, oracleWorkaroundJarHandler.newInstance());
+                                System.out.println("JarHandlerWorkaroundOracle:replaceLoader:" + index + ":handler");
+                                final Field baseField = loader.getClass().getSuperclass().getDeclaredField("base");
+                                baseField.setAccessible(true);
+                                final URL base = (URL) baseField.get(loader);
+                                handlerField = base.getClass().getDeclaredField("handler");
+                                handlerField.setAccessible(true);
+                                handlerField.set(base, oracleWorkaroundJarHandler.newInstance());
+                                System.out.println("JarHandlerWorkaroundOracle:replaceLoader:" + index + ":handler:" + base);
+                            }
+                        } catch (final Throwable ignore) {
+                            ignore.printStackTrace();
+                        }
+                    }
                 }
             } catch (final Throwable e) {
                 e.printStackTrace();

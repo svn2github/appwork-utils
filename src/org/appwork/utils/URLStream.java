@@ -106,7 +106,7 @@ public class URLStream {
             try {
                 final Field field = url.getClass().getDeclaredField("handler");
                 field.setAccessible(true);
-                System.out.println(field.get(url));
+                System.out.println(url.getProtocol() + "|" + url.getPath() + "|" + field.get(url));
             } catch (final Throwable e) {
                 e.printStackTrace();
             }

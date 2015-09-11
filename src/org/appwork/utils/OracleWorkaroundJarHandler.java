@@ -24,7 +24,7 @@ public class OracleWorkaroundJarHandler extends sun.net.www.protocol.jar.Handler
     @Override
     protected URLConnection openConnection(final URL url) throws IOException {
         try {
-            System.out.println("openConnection:" + url);
+            // System.out.println("openConnection:" + url);
             final String path = url.getFile();
             URL jarFileURL = null;
             int lastIndex = 0;
@@ -56,7 +56,6 @@ public class OracleWorkaroundJarHandler extends sun.net.www.protocol.jar.Handler
                 }
             }
             if (jarFileURL != null) {
-                System.out.println("Workaround");
                 lastIndex++;// skip !
                 final URL finalJarFileURL = jarFileURL;
                 final String entryName;
@@ -66,7 +65,7 @@ public class OracleWorkaroundJarHandler extends sun.net.www.protocol.jar.Handler
                 } else {
                     entryName = null;
                 }
-                System.out.println("Workaround for openConnection:" + finalJarFileURL + " Entry:" + entryName);
+                System.out.println("Workaround for URL.openConnection:" + finalJarFileURL + " Entry:" + entryName);
                 return new sun.net.www.protocol.jar.JarURLConnection(url, this) {
                     @Override
                     public URL getJarFileURL() {

@@ -14,6 +14,7 @@ import java.io.FileNotFoundException;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -102,6 +103,13 @@ public class URLStream {
      */
     public static InputStream openStream(URL url) throws IOException {
         if (url != null) {
+            try {
+                final Field field = url.getClass().getDeclaredField("handler");
+                field.setAccessible(true);
+                System.out.println(field.get(url));
+            } catch (final Throwable e) {
+                e.printStackTrace();
+            }
             if (false && "jar".equalsIgnoreCase(url.getProtocol())) {
                 final String path = url.getPath();
                 if (StringUtils.startsWithCaseInsensitive(path, "file:")) {

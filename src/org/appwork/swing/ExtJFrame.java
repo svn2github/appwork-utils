@@ -45,11 +45,23 @@ public class ExtJFrame extends JFrame implements PropertyStateEventProviderInter
 
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.awt.Window#setVisible(boolean)
+     */
+    @Override
+    public void setVisible(boolean b) {
+        System.out.println("Set visible " + b);
+        new Exception().printStackTrace();
+        super.setVisible(b);
+    }
+
     /**
      *
      */
     private void macSpecials() {
-        if (CrossSystem.isMac()) {
+        if (false && CrossSystem.isMac()) {
             addWindowStateListener(new WindowStateListener() {
 
                 private boolean oldVisibleState = true;

@@ -9,6 +9,7 @@
  */
 package org.appwork.utils;
 
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.net.URLStreamHandler;
 import java.net.URLStreamHandlerFactory;
@@ -26,17 +27,41 @@ public class JarHandlerWorkaroundOracle {
     public static void init() {
         if (INIT.compareAndSet(false, true)) {
             try {
+                final Class<?> oracleWorkaroundJarHandler = Class.forName("org.appwork.utils.OracleWorkaroundJarHandler");
                 URL.setURLStreamHandlerFactory(new URLStreamHandlerFactory() {
 
                     @Override
                     public URLStreamHandler createURLStreamHandler(String protocol) {
-                        if ("jar".equals(protocol)) {
-                            return new OracleWorkaroundJarHandler();
+                        try {
+                            if ("jar".equals(protocol)) {
+                                return (URLStreamHandler) oracleWorkaroundJarHandler.newInstance();
+                            }
+                        } catch (Throwable e) {
+                            e.printStackTrace();
                         }
                         return null;
                     }
                 });
-                System.out.println("JarHandlerWorkaroundOracle");
+                System.out.println("JarHandlerWorkaroundOracle:setURLStreamHandlerFactory");
+                final Field field = sun.misc.Launcher.class.getDeclaredField("factory");
+                field.setAccessible(true);
+                final URLStreamHandlerFactory originalFactory = (URLStreamHandlerFactory) field.get(null);
+                final URLStreamHandlerFactory workAroundFactory = new URLStreamHandlerFactory() {
+
+                    @Override
+                    public URLStreamHandler createURLStreamHandler(final String protocol) {
+                        try {
+                            if ("jar".equals(protocol)) {
+                                return (URLStreamHandler) oracleWorkaroundJarHandler.newInstance();
+                            }
+                        } catch (final Throwable e) {
+                            e.printStackTrace();
+                        }
+                        return originalFactory.createURLStreamHandler(protocol);
+                    }
+                };
+                field.set(null, workAroundFactory);
+                System.out.println("JarHandlerWorkaroundOracle:replaceLauncherFactory");
             } catch (final Throwable e) {
                 e.printStackTrace();
             }

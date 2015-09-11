@@ -68,37 +68,46 @@ public class JarHandlerWorkaroundOracle {
                     System.out.println("JarHandlerWorkaroundOracle:replaceLauncherFactory");
                 }
                 {
-                    final ClassLoader cl = JarHandlerWorkaroundOracle.class.getClassLoader();
-                    final Field ucp = cl.getClass().getDeclaredField("ucp");
-                    ucp.setAccessible(true);
-                    sun.misc.URLClassPath urlClassPath = (sun.misc.URLClassPath) ucp.get(cl);
-                    System.out.println("JarHandlerWorkaroundOracle:replaceURLClassPath");
-                    final Field jarHandler = urlClassPath.getClass().getDeclaredField("jarHandler");
-                    jarHandler.setAccessible(true);
-                    jarHandler.set(urlClassPath, oracleWorkaroundJarHandler.newInstance());
-                    System.out.println("JarHandlerWorkaroundOracle:replacejarHandler");
-                    final Field loadersField = urlClassPath.getClass().getDeclaredField("loaders");
-                    loadersField.setAccessible(true);
-                    final List<Object> loaders = (List<Object>) loadersField.get(urlClassPath);
-                    System.out.println("JarHandlerWorkaroundOracle:replaceLoaders:" + loaders.size());
-                    for (int index = 0; index < loaders.size(); index++) {
-                        try {
-                            final Object loader = loaders.get(index);
-                            if (loader.getClass().getName().endsWith("JarLoader")) {
-                                Field handlerField = loader.getClass().getDeclaredField("handler");
-                                handlerField.setAccessible(true);
-                                handlerField.set(loader, oracleWorkaroundJarHandler.newInstance());
-                                System.out.println("JarHandlerWorkaroundOracle:replaceLoader:" + index + ":handler");
-                                final Field baseField = loader.getClass().getSuperclass().getDeclaredField("base");
-                                baseField.setAccessible(true);
-                                final URL base = (URL) baseField.get(loader);
-                                handlerField = base.getClass().getDeclaredField("handler");
-                                handlerField.setAccessible(true);
-                                handlerField.set(base, oracleWorkaroundJarHandler.newInstance());
-                                System.out.println("JarHandlerWorkaroundOracle:replaceLoader:" + index + ":handler:" + base);
+                    sun.misc.URLClassPath urlClassPath = null;
+                    try {
+                        final ClassLoader cl = JarHandlerWorkaroundOracle.class.getClassLoader();
+                        final Field ucp = cl.getClass().getDeclaredField("ucp");
+                        ucp.setAccessible(true);
+                        urlClassPath = (sun.misc.URLClassPath) ucp.get(cl);
+                    } catch (final Throwable e) {
+                        final Field bcp = sun.misc.Launcher.class.getDeclaredField("bcp");
+                        bcp.setAccessible(true);
+                        urlClassPath = (sun.misc.URLClassPath) bcp.get(null);
+                    }
+                    if (urlClassPath != null) {
+                        System.out.println("JarHandlerWorkaroundOracle:replaceURLClassPath");
+                        final Field jarHandler = urlClassPath.getClass().getDeclaredField("jarHandler");
+                        jarHandler.setAccessible(true);
+                        jarHandler.set(urlClassPath, oracleWorkaroundJarHandler.newInstance());
+                        System.out.println("JarHandlerWorkaroundOracle:replacejarHandler");
+                        final Field loadersField = urlClassPath.getClass().getDeclaredField("loaders");
+                        loadersField.setAccessible(true);
+                        final List<Object> loaders = (List<Object>) loadersField.get(urlClassPath);
+                        System.out.println("JarHandlerWorkaroundOracle:replaceLoaders:" + loaders.size());
+                        for (int index = 0; index < loaders.size(); index++) {
+                            try {
+                                final Object loader = loaders.get(index);
+                                if (loader.getClass().getName().endsWith("JarLoader")) {
+                                    Field handlerField = loader.getClass().getDeclaredField("handler");
+                                    handlerField.setAccessible(true);
+                                    handlerField.set(loader, oracleWorkaroundJarHandler.newInstance());
+                                    System.out.println("JarHandlerWorkaroundOracle:replaceLoader:" + index + ":handler");
+                                    final Field baseField = loader.getClass().getSuperclass().getDeclaredField("base");
+                                    baseField.setAccessible(true);
+                                    final URL base = (URL) baseField.get(loader);
+                                    handlerField = base.getClass().getDeclaredField("handler");
+                                    handlerField.setAccessible(true);
+                                    handlerField.set(base, oracleWorkaroundJarHandler.newInstance());
+                                    System.out.println("JarHandlerWorkaroundOracle:replaceLoader:" + index + ":handler:" + base);
+                                }
+                            } catch (final Throwable ignore) {
+                                ignore.printStackTrace();
                             }
-                        } catch (final Throwable ignore) {
-                            ignore.printStackTrace();
                         }
                     }
                 }

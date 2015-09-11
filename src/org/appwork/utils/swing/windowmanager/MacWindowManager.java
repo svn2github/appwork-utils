@@ -22,13 +22,12 @@ public class MacWindowManager extends WindowsWindowManager {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.utils.swing.WindowManager#toFront(java.awt.Window)
      */
     @Override
     public void setZState(final Window w, final FrameState state) {
-        System.out.println("Set zState State " + state);
-        new Exception().printStackTrace();
+
         switch (state) {
         case OS_DEFAULT:
             // do nothing

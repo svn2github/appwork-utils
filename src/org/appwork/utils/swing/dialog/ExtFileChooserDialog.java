@@ -51,48 +51,48 @@ import org.appwork.utils.swing.dialog.dimensor.RememberLastDialogDimension;
 
 public class ExtFileChooserDialog extends AbstractDialog<File[]> {
     /**
-     * 
+     *
      */
     public static String        ICON_KEY_VIEW         = "view";
     /**
-     * 
+     *
      */
     private static String       ICON_KEY_LIST_VIEW    = "list";
     /**
-     * 
+     *
      */
     public static String        ICON_KEY_DETAILS_VIEW = "details";
     /**
-     * 
+     *
      */
     public static String        ICON_KEY_PARENT       = "go-up";
     /**
-     * 
+     *
      */
     public static String        ICON_KEY_NEW_FOLDER   = "package_new";
     /**
-     * 
+     *
      */
     public static String        ICON_KEY_HARDDRIVE    = "harddisk";
     public static String        ICON_KEY_FLOPPY       = "save";
     /**
-     * 
+     *
      */
     public static String        ICON_KEY_NETWORK      = "network-idle";
     /**
-     * 
+     *
      */
     public static String        ICON_KEY_DESKTOP      = "desktop";
     /**
-     * 
+     *
      */
     public static String        ICON_KEY_COMPUTER     = "harddisk";
     /**
-     * 
+     *
      */
     public static String        ICON_KEY_FILE         = "file";
     /**
-     * 
+     *
      */
     public static String        ICON_KEY_FOLDER       = "folder";
 
@@ -148,13 +148,13 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
 
     }
     /**
-     * 
+     *
      */
     public static final String  LASTSELECTION         = "LASTSELECTION_";
     private final static Cursor BUSY_CURSOR           = Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR);
     private final static Cursor DEFAULT_CURSOR        = Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR);
     /**
-     * 
+     *
      */
     public static final String  FILECHOOSER           = "FILECHOOSER";
     public static final String  ICON_KEY_HOME         = "home";
@@ -250,7 +250,7 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
 
     /**
      * @param oldTextField
-     * 
+     *
      */
     protected void auto(final JTextField oldTextField) {
         final String txt = oldTextField.getText();
@@ -306,7 +306,7 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.utils.swing.dialog.AbstractDialog#createReturnValue()
      */
     @Override
@@ -349,7 +349,7 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.utils.swing.dialog.AbstractDialog#setDisposed(boolean)
      */
     @Override
@@ -572,16 +572,14 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
         if (newValue) {
 
             System.out.println("Busy TRUE");
-            // new Exception().printStackTrace();
-            // setCursor(BUSY_CURSOR);
+
             if (parentGlassPane != null) {
                 parentGlassPane.setCursor(BUSY_CURSOR);
                 parentGlassPane.setVisible(true);
             }
         } else {
             System.out.println("Busy FALSE");
-            // new Exception().printStackTrace();
-            // setCursor(null);
+
             if (parentGlassPane != null) {
                 parentGlassPane.setCursor(null);
                 parentGlassPane.setVisible(false);
@@ -604,7 +602,7 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.utils.swing.dialog.AbstractDialog#layoutDialogContent()
      */
     @Override
@@ -1179,7 +1177,7 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
     }
 
     /**
-     * 
+     *
      */
     private void putIcons() {
         putIcon("FileView.directoryIcon", ICON_KEY_FOLDER);
@@ -1209,7 +1207,7 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
     }
 
     /**
-     * 
+     *
      */
     private void cleanupIcons() {
         cleanupIcon("FileView.directoryIcon", ICON_KEY_FOLDER);
@@ -1332,7 +1330,7 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
     }
 
     /**
-     * 
+     *
      */
     private void updateView() {
         if (fc == null) {

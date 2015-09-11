@@ -19,6 +19,7 @@ import javax.swing.JFrame;
 
 import org.appwork.swing.event.PropertySetEvent;
 import org.appwork.swing.event.PropertySetEventSender;
+import org.appwork.utils.Application;
 import org.appwork.utils.os.CrossSystem;
 
 /**
@@ -47,13 +48,12 @@ public class ExtJFrame extends JFrame implements PropertyStateEventProviderInter
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.awt.Window#setVisible(boolean)
      */
     @Override
     public void setVisible(boolean b) {
-        System.out.println("Set visible " + b);
-        new Exception().printStackTrace();
+
         super.setVisible(b);
     }
 
@@ -61,7 +61,7 @@ public class ExtJFrame extends JFrame implements PropertyStateEventProviderInter
      *
      */
     private void macSpecials() {
-        if (false && CrossSystem.isMac()) {
+        if (CrossSystem.isMac() && Application.getJavaVersion() == 17025015) {
             addWindowStateListener(new WindowStateListener() {
 
                 private boolean oldVisibleState = true;
@@ -202,8 +202,7 @@ public class ExtJFrame extends JFrame implements PropertyStateEventProviderInter
 
     @Override
     public void setExtendedState(final int i) {
-        System.out.println("Set Extended State " + i);
-        new Exception().printStackTrace();
+
         if (this.propertySetEventSender != null) {
             this.propertySetEventSender.fireEvent(new PropertySetEvent(this, PropertySetEvent.Type.SET, ExtJFrame.PROPERTY_EXTENDED_STATE, this.getExtendedState(), i));
         }

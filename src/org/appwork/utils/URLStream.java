@@ -102,7 +102,7 @@ public class URLStream {
      */
     public static InputStream openStream(URL url) throws IOException {
         if (url != null) {
-            if ("jar".equalsIgnoreCase(url.getProtocol())) {
+            if (false && "jar".equalsIgnoreCase(url.getProtocol())) {
                 final String path = url.getPath();
                 if (StringUtils.startsWithCaseInsensitive(path, "file:")) {
                     File jarFileFile = null;

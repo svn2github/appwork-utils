@@ -140,7 +140,7 @@ public class TranslationFactory {
     }
 
     /**
-     * 
+     *
      */
     public static java.util.List<TranslateInterface> getCachedInterfaces() {
         final HashSet<TranslateInterface> ret = new HashSet<TranslateInterface>();

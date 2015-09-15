@@ -21,14 +21,22 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.nio.channels.SocketChannel;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicReference;
+
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 
 import org.appwork.utils.Application;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.net.httpconnection.HTTPConnectionUtils;
 import org.appwork.utils.net.httpconnection.HTTPProxy;
 import org.appwork.utils.net.httpconnection.ProxyConnectException;
+import org.appwork.utils.net.httpconnection.TrustALLSSLFactory;
 
 /**
  * @author daniel
@@ -36,27 +44,138 @@ import org.appwork.utils.net.httpconnection.ProxyConnectException;
  */
 public abstract class SocketConnection extends Socket {
 
+    public static SSLSocketFactory getSSLSocketFactory(final boolean useSSLTrustAll) throws IOException {
+        final SSLSocketFactory factory;
+        if (useSSLTrustAll) {
+            factory = TrustALLSSLFactory.getSSLFactoryTrustALL();
+        } else {
+            factory = (SSLSocketFactory) SSLSocketFactory.getDefault();
+        }
+        return new SSLSocketFactory() {
+            /**
+             * remove SSL because of POODLE Vulnerability
+             *
+             * https://www.us-cert.gov/ncas/alerts/TA14-290A
+             *
+             * @param socket
+             */
+            private Socket removeSSLProtocol(final Socket socket) {
+                if (socket != null && socket instanceof SSLSocket) {
+                    final SSLSocket sslSocket = (SSLSocket) socket;
+                    // final ArrayList<String> protocols = new
+                    // ArrayList<String>(Arrays.asList(sslSocket.getEnabledProtocols()));
+                    // final Iterator<String> it = protocols.iterator();
+                    // while (it.hasNext()) {
+                    // final String next = it.next();
+                    // if (StringUtils.containsIgnoreCase(next, "ssl")) {
+                    // it.remove();
+                    // }
+                    // }
+                    final long javaVersion = Application.getJavaVersion();
+                    if (javaVersion >= Application.JAVA18) {
+                        sslSocket.setEnabledProtocols(new String[] { "TLSv1", "TLSv1.1", "TLSv1.2" });
+                    } else if (javaVersion >= Application.JAVA17) {
+                        sslSocket.setEnabledProtocols(new String[] { "TLSv1", "TLSv1.1", "TLSv1.2" });
+                    } else {
+                        sslSocket.setEnabledProtocols(new String[] { "TLSv1" });
+                    }
+                }
+                return socket;
+            }
+
+            private Socket removeGMCCipherSuit(final Socket socket) {
+                if (socket != null && socket instanceof SSLSocket) {
+                    final long javaVersion = Application.getJavaVersion();
+                    final boolean gcmWorkaround = javaVersion < 18600000;
+                    if (gcmWorkaround) {
+                        final SSLSocket sslSocket = (SSLSocket) socket;
+                        final ArrayList<String> cipherSuits = new ArrayList<String>(Arrays.asList(sslSocket.getEnabledCipherSuites()));
+                        final Iterator<String> it = cipherSuits.iterator();
+                        boolean updateCipherSuites = false;
+                        while (it.hasNext()) {
+                            final String next = it.next();
+                            if (gcmWorkaround && StringUtils.containsIgnoreCase(next, "GCM")) {
+                                it.remove();
+                                updateCipherSuites = true;
+                            }
+                        }
+                        if (updateCipherSuites) {
+                            sslSocket.setEnabledCipherSuites(cipherSuits.toArray(new String[0]));
+                        }
+                    }
+                }
+                return socket;
+            }
+
+            @Override
+            public Socket createSocket(Socket arg0, String arg1, int arg2, boolean arg3) throws IOException {
+                return removeGMCCipherSuit(this.removeSSLProtocol(factory.createSocket(arg0, arg1, arg2, arg3)));
+            }
+
+            @Override
+            public String[] getDefaultCipherSuites() {
+                return factory.getDefaultCipherSuites();
+            }
+
+            @Override
+            public String[] getSupportedCipherSuites() {
+                return factory.getSupportedCipherSuites();
+
+            }
+
+            @Override
+            public Socket createSocket(String arg0, int arg1) throws IOException, UnknownHostException {
+                return removeGMCCipherSuit(this.removeSSLProtocol(factory.createSocket(arg0, arg1)));
+
+            }
+
+            @Override
+            public Socket createSocket(InetAddress arg0, int arg1) throws IOException {
+                return removeGMCCipherSuit(this.removeSSLProtocol(factory.createSocket(arg0, arg1)));
+            }
+
+            @Override
+            public Socket createSocket(String arg0, int arg1, InetAddress arg2, int arg3) throws IOException, UnknownHostException {
+                return removeGMCCipherSuit(this.removeSSLProtocol(factory.createSocket(arg0, arg1, arg2, arg3)));
+            }
+
+            @Override
+            public Socket createSocket(InetAddress arg0, int arg1, InetAddress arg2, int arg3) throws IOException {
+                return removeGMCCipherSuit(this.removeSSLProtocol(factory.createSocket(arg0, arg1, arg2, arg3)));
+            }
+
+        };
+    }
+
     protected static int ensureRead(final InputStream is) throws IOException {
         final int read = is.read();
-        if (read == -1) { throw new EOFException(); }
+        if (read == -1) {
+            throw new EOFException();
+        }
         return read;
     }
 
     protected static byte[] ensureRead(final InputStream is, final int size, final byte[] buffer) throws IOException {
-        if (size <= 0) { throw new IllegalArgumentException("size <=0"); }
+        if (size <= 0) {
+            throw new IllegalArgumentException("size <=0");
+        }
         final byte[] buf;
         if (buffer == null) {
             buf = new byte[size];
         } else {
             buf = buffer;
         }
-        if (size > buf.length) { throw new IOException("buffer too small"); }
+        if (size > buf.length) {
+            throw new IOException("buffer too small");
+        }
         int done = 0;
         int read = 0;
         while (done < size && (read = is.read(buf, done, size - done)) != -1) {
             done += read;
         }
-        if (done != size) { throw new EOFException(); }
+        if (done != size) {
+            throw new EOFException();
+        }
         return buf;
     }
 
@@ -157,7 +276,9 @@ public abstract class SocketConnection extends Socket {
 
     protected Socket getConnectSocket() throws IOException {
         final Socket socket = this.pendingConnectSocket.get();
-        if (socket == null) { throw new SocketException("Socket is not connecting"); }
+        if (socket == null) {
+            throw new SocketException("Socket is not connecting");
+        }
         return socket;
     }
 
@@ -201,7 +322,9 @@ public abstract class SocketConnection extends Socket {
                                     }
                                     final int lastConnectTimeout = connectTimeoutWorkaround;
                                     connectTimeoutWorkaround = Math.max(0, connectTimeoutWorkaround - timeout);
-                                    if (connectTimeoutWorkaround == 0 || Thread.currentThread().isInterrupted()) { throw cE; }
+                                    if (connectTimeoutWorkaround == 0 || Thread.currentThread().isInterrupted()) {
+                                        throw cE;
+                                    }
                                     System.out.println("Workaround for ConnectTimeout(Normal): " + lastConnectTimeout + ">" + timeout);
                                 } else {
                                     throw cE;
@@ -220,7 +343,9 @@ public abstract class SocketConnection extends Socket {
                                     }
                                     final int lastConnectTimeout = connectTimeoutWorkaround;
                                     connectTimeoutWorkaround = Math.max(0, connectTimeoutWorkaround - timeout);
-                                    if (connectTimeoutWorkaround == 0 || Thread.currentThread().isInterrupted()) { throw sTE; }
+                                    if (connectTimeoutWorkaround == 0 || Thread.currentThread().isInterrupted()) {
+                                        throw sTE;
+                                    }
                                     System.out.println("Workaround for ConnectTimeout(Interrupted): " + lastConnectTimeout + ">" + timeout);
                                 } else {
                                     throw sTE;
@@ -235,7 +360,9 @@ public abstract class SocketConnection extends Socket {
                     this.closeConnectSocket();
                 }
             }
-            if (ioE != null) { throw new ProxyConnectException(ioE, this.getProxy()); }
+            if (ioE != null) {
+                throw new ProxyConnectException(ioE, this.getProxy());
+            }
             final Socket connectedSocket = this.connectProxySocket(this.getConnectSocket(), endpoint, logger);
             if (connectedSocket != null) {
                 this.proxySocket = connectedSocket;
@@ -243,7 +370,9 @@ public abstract class SocketConnection extends Socket {
             }
             throw new ProxyConnectException(this.getProxy());
         } catch (final IOException e) {
-            if (e instanceof ProxyConnectException) { throw e; }
+            if (e instanceof ProxyConnectException) {
+                throw e;
+            }
             throw new ProxyConnectException(e, this.getProxy());
         } finally {
             if (this.proxySocket == null) {
@@ -256,63 +385,87 @@ public abstract class SocketConnection extends Socket {
 
     @Override
     public SocketChannel getChannel() {
-        if (this.proxySocket != null) { return this.proxySocket.getChannel(); }
+        if (this.proxySocket != null) {
+            return this.proxySocket.getChannel();
+        }
         return null;
     }
 
     @Override
     public InetAddress getInetAddress() {
-        if (this.proxySocket != null) { return this.proxySocket.getInetAddress(); }
+        if (this.proxySocket != null) {
+            return this.proxySocket.getInetAddress();
+        }
         return null;
     }
 
     @Override
     public InputStream getInputStream() throws IOException {
-        if (this.proxySocket != null) { return this.proxySocket.getInputStream(); }
+        if (this.proxySocket != null) {
+            return this.proxySocket.getInputStream();
+        }
         throw new SocketException("Socket is not connected");
     }
 
     @Override
     public boolean getKeepAlive() throws SocketException {
-        if (this.proxySocket != null) { return this.proxySocket.getKeepAlive(); }
-        if (this.keepAlive != null) { return this.keepAlive; }
+        if (this.proxySocket != null) {
+            return this.proxySocket.getKeepAlive();
+        }
+        if (this.keepAlive != null) {
+            return this.keepAlive;
+        }
         throw new SocketException("Socket is not connected");
     }
 
     @Override
     public InetAddress getLocalAddress() {
-        if (this.proxySocket != null) { return this.proxySocket.getLocalAddress(); }
+        if (this.proxySocket != null) {
+            return this.proxySocket.getLocalAddress();
+        }
         return new InetSocketAddress(0).getAddress();
     }
 
     @Override
     public int getLocalPort() {
-        if (this.proxySocket != null) { return this.proxySocket.getLocalPort(); }
+        if (this.proxySocket != null) {
+            return this.proxySocket.getLocalPort();
+        }
         return -1;
     }
 
     @Override
     public SocketAddress getLocalSocketAddress() {
-        if (this.proxySocket != null) { return this.proxySocket.getLocalSocketAddress(); }
+        if (this.proxySocket != null) {
+            return this.proxySocket.getLocalSocketAddress();
+        }
         return null;
     }
 
     @Override
     public boolean getOOBInline() throws SocketException {
-        if (this.proxySocket != null) { return this.proxySocket.getOOBInline(); }
-        if (this.oobInline != null) { return this.oobInline; }
+        if (this.proxySocket != null) {
+            return this.proxySocket.getOOBInline();
+        }
+        if (this.oobInline != null) {
+            return this.oobInline;
+        }
         throw new SocketException("Socket is not connected");
     }
 
     @Override
     public OutputStream getOutputStream() throws IOException {
-        if (this.proxySocket != null) { return this.proxySocket.getOutputStream(); }
+        if (this.proxySocket != null) {
+            return this.proxySocket.getOutputStream();
+        }
         throw new SocketException("Socket is not connected");
     }
 
     @Override
     public int getPort() {
-        if (this.proxySocket != null) { return this.proxySocket.getPort(); }
+        if (this.proxySocket != null) {
+            return this.proxySocket.getPort();
+        }
         return -1;
     }
 
@@ -322,85 +475,123 @@ public abstract class SocketConnection extends Socket {
 
     @Override
     public synchronized int getReceiveBufferSize() throws SocketException {
-        if (this.proxySocket != null) { return this.proxySocket.getReceiveBufferSize(); }
-        if (this.receiveBufferSize != null) { return this.receiveBufferSize; }
+        if (this.proxySocket != null) {
+            return this.proxySocket.getReceiveBufferSize();
+        }
+        if (this.receiveBufferSize != null) {
+            return this.receiveBufferSize;
+        }
         throw new SocketException("Socket is not connected");
     }
 
     @Override
     public SocketAddress getRemoteSocketAddress() {
-        if (this.proxySocket != null) { return this.proxySocket.getRemoteSocketAddress(); }
+        if (this.proxySocket != null) {
+            return this.proxySocket.getRemoteSocketAddress();
+        }
         return null;
     }
 
     @Override
     public boolean getReuseAddress() throws SocketException {
-        if (this.proxySocket != null) { return this.proxySocket.getReuseAddress(); }
-        if (this.reuseAddress != null) { return this.reuseAddress; }
+        if (this.proxySocket != null) {
+            return this.proxySocket.getReuseAddress();
+        }
+        if (this.reuseAddress != null) {
+            return this.reuseAddress;
+        }
         throw new SocketException("Socket is not connected");
     }
 
     @Override
     public synchronized int getSendBufferSize() throws SocketException {
-        if (this.proxySocket != null) { return this.proxySocket.getSendBufferSize(); }
-        if (this.sendBufferSize != null) { return this.sendBufferSize; }
+        if (this.proxySocket != null) {
+            return this.proxySocket.getSendBufferSize();
+        }
+        if (this.sendBufferSize != null) {
+            return this.sendBufferSize;
+        }
         throw new SocketException("Socket is not connected");
     }
 
     @Override
     public int getSoLinger() throws SocketException {
-        if (this.proxySocket != null) { return this.proxySocket.getSoLinger(); }
+        if (this.proxySocket != null) {
+            return this.proxySocket.getSoLinger();
+        }
         return this.soLinger == null ? -1 : this.soLinger;
     }
 
     @Override
     public synchronized int getSoTimeout() throws SocketException {
-        if (this.proxySocket != null) { return this.proxySocket.getSoTimeout(); }
-        if (this.soTimeout != null) { return this.soTimeout; }
+        if (this.proxySocket != null) {
+            return this.proxySocket.getSoTimeout();
+        }
+        if (this.soTimeout != null) {
+            return this.soTimeout;
+        }
         throw new SocketException("Socket is not connected");
     }
 
     @Override
     public boolean getTcpNoDelay() throws SocketException {
-        if (this.proxySocket != null) { return this.proxySocket.getTcpNoDelay(); }
-        if (this.tcpNoDelay != null) { return this.tcpNoDelay; }
+        if (this.proxySocket != null) {
+            return this.proxySocket.getTcpNoDelay();
+        }
+        if (this.tcpNoDelay != null) {
+            return this.tcpNoDelay;
+        }
         throw new SocketException("Socket is not connected");
     }
 
     @Override
     public int getTrafficClass() throws SocketException {
-        if (this.proxySocket != null) { return this.proxySocket.getTrafficClass(); }
-        if (this.trafficClass != null) { return this.trafficClass; }
+        if (this.proxySocket != null) {
+            return this.proxySocket.getTrafficClass();
+        }
+        if (this.trafficClass != null) {
+            return this.trafficClass;
+        }
         throw new SocketException("Socket is not connected");
     }
 
     @Override
     public boolean isBound() {
-        if (this.proxySocket != null) { return this.proxySocket.isBound(); }
+        if (this.proxySocket != null) {
+            return this.proxySocket.isBound();
+        }
         return this.bindPoint != null;
     }
 
     @Override
     public boolean isClosed() {
-        if (this.proxySocket != null) { return this.proxySocket.isClosed(); }
+        if (this.proxySocket != null) {
+            return this.proxySocket.isClosed();
+        }
         return false;
     }
 
     @Override
     public boolean isConnected() {
-        if (this.proxySocket != null) { return this.proxySocket.isConnected(); }
+        if (this.proxySocket != null) {
+            return this.proxySocket.isConnected();
+        }
         return false;
     }
 
     @Override
     public boolean isInputShutdown() {
-        if (this.proxySocket != null) { return this.proxySocket.isInputShutdown(); }
+        if (this.proxySocket != null) {
+            return this.proxySocket.isInputShutdown();
+        }
         return false;
     }
 
     @Override
     public boolean isOutputShutdown() {
-        if (this.proxySocket != null) { return this.proxySocket.isOutputShutdown(); }
+        if (this.proxySocket != null) {
+            return this.proxySocket.isOutputShutdown();
+        }
         return false;
     }
 
@@ -465,7 +656,9 @@ public abstract class SocketConnection extends Socket {
 
     @Override
     public String toString() {
-        if (this.proxySocket != null) { return this.proxySocket.toString(); }
+        if (this.proxySocket != null) {
+            return this.proxySocket.toString();
+        }
         return super.toString();
     }
 

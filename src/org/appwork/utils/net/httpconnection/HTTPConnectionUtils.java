@@ -36,7 +36,11 @@ public class HTTPConnectionUtils {
                     try {
                         String ret = URLDecoder.decode(filename.trim(), encoding.trim()).trim();
                         ret = ret.replaceFirst("^" + Matcher.quoteReplacement("\\") + "+", Matcher.quoteReplacement("_"));
-                        return ret;
+                        if (StringUtils.isNotEmpty(ret)) {
+                            return ret;
+                        } else {
+                            return null;
+                        }
                     } catch (final Exception e) {
                         Log.L.severe("Decoding Error: " + filename + "|" + encoding + "|" + contentdisposition);
                         return null;
@@ -50,7 +54,11 @@ public class HTTPConnectionUtils {
                         final String encoding = special[0] != null ? special[0].trim() : null;
                         String ret = URLDecoder.decode(new String(Base64.decode(base64), encoding), encoding).trim();
                         ret = ret.replaceFirst("^" + Matcher.quoteReplacement("\\") + "+", Matcher.quoteReplacement("_"));
-                        return ret;
+                        if (StringUtils.isNotEmpty(ret)) {
+                            return ret;
+                        } else {
+                            return null;
+                        }
                     } catch (final Exception e) {
                         Log.L.severe("Decoding(Base64) Error: " + contentdisposition);
                         return null;
@@ -62,7 +70,11 @@ public class HTTPConnectionUtils {
                 } else {
                     String ret = filename.trim();
                     ret = ret.replaceFirst("^" + Matcher.quoteReplacement("\\") + "+", Matcher.quoteReplacement("_"));
-                    return ret;
+                    if (StringUtils.isNotEmpty(ret)) {
+                        return ret;
+                    } else {
+                        return null;
+                    }
                 }
             }
             if (contentdisposition.matches("(?i).*xfilename.*")) {

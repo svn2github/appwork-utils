@@ -96,7 +96,7 @@ public class StatsLogger {
                 map.putAll(infos);
             }
 
-            simple.getPage(new java.net.URL("http://stats.appwork.org/jcgi/event/track?" + URLEncode.encodeRFC2396(path) + "&" + URLEncode.encodeRFC2396(JSonStorage.serializeToJson(map).replaceAll("[\r\n]+", "")) + "&" + ip + "&installerprovider"));
+            simple.getPage(new java.net.URL("http://stats.appwork.org/jcgi/event/track?" + URLEncode.encodeRFC2396(path) + "&" + URLEncode.encodeRFC2396(JSonStorage.serializeToJson(map).replaceAll("[\r\n]+", "")) + "&" + ip + "&" + URLEncode.encodeRFC2396(db)));
         } catch (final Throwable e) {
             getLogger().log(e);
         } finally {

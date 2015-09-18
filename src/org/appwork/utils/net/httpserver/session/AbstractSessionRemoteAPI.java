@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2011 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.utils.net.httpserver
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -36,7 +36,7 @@ import org.appwork.utils.reflection.Clazz;
 
 /**
  * @author daniel
- * 
+ *
  */
 public abstract class AbstractSessionRemoteAPI<T extends HttpSession> extends RemoteAPI implements HttpRequestHandler, LoginAPIInterface {
 
@@ -54,7 +54,9 @@ public abstract class AbstractSessionRemoteAPI<T extends HttpSession> extends Re
     public boolean disconnect(final RemoteAPIRequest request) {
         final SessionRemoteAPIRequest<T> req = (SessionRemoteAPIRequest<T>) request;
         final T session = req.getSession();
-        if (session != null) { return this.removeSession(session); }
+        if (session != null) {
+            return this.removeSession(session);
+        }
         return false;
     }
 
@@ -92,9 +94,8 @@ public abstract class AbstractSessionRemoteAPI<T extends HttpSession> extends Re
     }
 
     /**
-     * get session for given sessionID or null in case session is invalid/not
-     * found
-     * 
+     * get session for given sessionID or null in case session is invalid/not found
+     *
      * @param request
      * @param sessionID
      * @return
@@ -113,13 +114,15 @@ public abstract class AbstractSessionRemoteAPI<T extends HttpSession> extends Re
     @Override
     public String handshake(final RemoteAPIRequest request, final String user, final String password) throws AuthException {
         final T session = this.newSession(request, user, password);
-        if (session == null) { throw new AuthException(); }
+        if (session == null) {
+            throw new AuthException();
+        }
         return session.getSessionID();
     }
 
     /**
      * create new session for given username, password.
-     * 
+     *
      * @param username
      * @param password
      * @return
@@ -129,9 +132,7 @@ public abstract class AbstractSessionRemoteAPI<T extends HttpSession> extends Re
     /*
      * (non-Javadoc)
      * 
-     * @see
-     * org.appwork.utils.net.httpserver.handler.HttpRequestHandler#onGetRequest
-     * (org.appwork.utils.net.httpserver.requests.GetRequest,
+     * @see org.appwork.utils.net.httpserver.handler.HttpRequestHandler#onGetRequest (org.appwork.utils.net.httpserver.requests.GetRequest,
      * org.appwork.utils.net.httpserver.responses.HttpResponse)
      */
     @Override
@@ -143,10 +144,8 @@ public abstract class AbstractSessionRemoteAPI<T extends HttpSession> extends Re
     /*
      * (non-Javadoc)
      * 
-     * @see
-     * org.appwork.utils.net.httpserver.handler.HttpRequestHandler#onPostRequest
-     * (org.appwork.utils.net.httpserver.requests.PostRequest,
-     * org.appwork.utils.net.httpserver.responses.HttpResponse)
+     * @see org.appwork.utils.net.httpserver.handler.HttpRequestHandler#onPostRequest
+     * (org.appwork.utils.net.httpserver.requests.PostRequest, org.appwork.utils.net.httpserver.responses.HttpResponse)
      */
     @Override
     public boolean onPostRequest(final PostRequest request, final HttpResponse response) throws BasicRemoteAPIException {
@@ -165,13 +164,19 @@ public abstract class AbstractSessionRemoteAPI<T extends HttpSession> extends Re
 
             final String token = this.extractSessionID(request);
             RemoteAPIRequest apiRequest = this.createRemoteAPIRequestObject(request);
-            if (apiRequest == null) { throw new ApiInterfaceNotAvailable(); }
-            if (apiRequest.getMethod() == null) { throw new ApiInterfaceNotAvailable(); }
+            if (apiRequest == null) {
+                throw new ApiInterfaceNotAvailable();
+            }
+            if (apiRequest.getMethod() == null) {
+                throw new ApiInterfaceNotAvailable();
+            }
             final Class<?> declaringClass = apiRequest.getMethod().getDeclaringClass();
             if (declaringClass != LoginAPIInterface.class && apiRequest.getIface().isSessionRequired()) {
                 // session required
                 final T session = this.getSession(request, token);
-                if (session == null || !session.isAlive()) { throw new SessionException(); }
+                if (session == null || !session.isAlive()) {
+                    throw new SessionException();
+                }
                 apiRequest = this.createSessionRemoteAPIRequest(session, request, apiRequest);
             }
 

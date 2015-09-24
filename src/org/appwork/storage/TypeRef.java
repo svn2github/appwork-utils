@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2011 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.storage.simplejson.mapper
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -18,7 +18,7 @@ import org.appwork.storage.simplejson.mapper.CompiledTypeRef;
 
 /**
  * @author thomas
- * 
+ *
  */
 public abstract class TypeRef<T> {
 
@@ -47,6 +47,8 @@ public abstract class TypeRef<T> {
                                                                               public Type getType() {
                                                                                   return String[].class;
                                                                               };
+                                                                          };
+    public static final TypeRef<HashMap<String, Double>>  HASHMAP_DOUBLE  = new TypeRef<HashMap<String, Double>>() {
                                                                           };
     private final Type                                    type;
 

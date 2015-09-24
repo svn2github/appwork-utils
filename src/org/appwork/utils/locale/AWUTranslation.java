@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2011 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.utils.locale
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -15,7 +15,7 @@ import org.appwork.txtresource.TranslateInterface;
 
 /**
  * @author thomas
- * 
+ *
  */
 @Defaults(lngs = { "en", "de" })
 public interface AWUTranslation extends TranslateInterface {
@@ -133,12 +133,6 @@ public interface AWUTranslation extends TranslateInterface {
 
     @Default(lngs = { "en", "de" }, values = { "Enable all", "Alle aktivieren" })
     String extttable_enabled_all();
-
-    @Default(lngs = { "en", "de" }, values = { "Choose editor for Filetype '%s1'", "Editor für %s1-Dateien wählen" })
-    String fileditcontroller_geteditor_for(String fileType);
-
-    @Default(lngs = { "en", "de" }, values = { "%s1-Editor (Application)", "%s1-Editor (Anwendung)" })
-    String fileeditcontroller_exechooser_description(String type);
 
     @Default(lngs = { "en", "de" }, values = { "Disabled", "Deaktiviert" })
     String inactive();

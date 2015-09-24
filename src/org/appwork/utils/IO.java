@@ -20,6 +20,7 @@ import java.net.URL;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
 
+import org.appwork.exceptions.WTFException;
 import org.appwork.utils.Files.AbstractHandler;
 import org.appwork.utils.os.CrossSystem;
 
@@ -615,6 +616,9 @@ public class IO {
             FileOutputStream out = null;
             boolean deleteFile = true;
             try {
+                if (true) {
+                    new WTFException("Write to File:" + file).printStackTrace();
+                }
                 out = new FileOutputStream(file);
                 out.write(data);
                 out.flush();

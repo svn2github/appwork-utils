@@ -193,7 +193,7 @@ public class JsonKeyValueStorage extends Storage {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.storage.Storage#getID()
      */
     @Override
@@ -211,7 +211,6 @@ public class JsonKeyValueStorage extends Storage {
     }
 
     private Object internal_put(final String key, final Object value) {
-
         if (key == null) {
             throw new WTFException("key ==null is forbidden!");
         }
@@ -334,7 +333,8 @@ public class JsonKeyValueStorage extends Storage {
     }
 
     public void requestSave() {
-        this.setMark.incrementAndGet();
+        final long mark = this.setMark.incrementAndGet();
+        new WTFException("requestSave:" + this.getID() + "|" + mark).printStackTrace();
     }
 
     @Override
@@ -364,7 +364,7 @@ public class JsonKeyValueStorage extends Storage {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.storage.Storage#size()
      */
     @Override

@@ -2,22 +2,23 @@ package org.appwork.storage;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.appwork.exceptions.WTFException;
 import org.appwork.utils.Application;
 import org.appwork.utils.IO;
+import org.appwork.utils.ModifyLock;
 import org.appwork.utils.logging.Log;
 
 public class JsonKeyValueStorage extends Storage {
 
-    private final Map<String, Object> map;
+    private final Map<String, Object> internalMap;
     private final String              name;
     private final File                file;
     private final boolean             plain;
@@ -27,6 +28,15 @@ public class JsonKeyValueStorage extends Storage {
     private final AtomicLong          setMark       = new AtomicLong(0);
     private final AtomicLong          writeMark     = new AtomicLong(0);
     private boolean                   enumCacheEnabled;
+    private final ModifyLock          modifyLock    = new ModifyLock();
+
+    private final Map<String, Object> getMap() {
+        return internalMap;
+    }
+
+    private final ModifyLock getLock() {
+        return modifyLock;
+    }
 
     public JsonKeyValueStorage(final File file) throws StorageException {
         this(file, false);
@@ -47,7 +57,7 @@ public class JsonKeyValueStorage extends Storage {
      * @param key2
      */
     public JsonKeyValueStorage(final File file, final URL resource, final boolean plain, final byte[] key) {
-        this.map = new ConcurrentHashMap<String, Object>(8, 0.9f, 1);
+        this.internalMap = new HashMap<String, Object>();
         this.plain = plain;
         this.file = file;
         this.name = file.getName();
@@ -77,7 +87,7 @@ public class JsonKeyValueStorage extends Storage {
     }
 
     public JsonKeyValueStorage(final String name, final boolean plain, final byte[] key) throws StorageException {
-        this.map = new ConcurrentHashMap<String, Object>(8, 0.9f, 1);
+        this.internalMap = new HashMap<String, Object>();
         this.name = name;
         this.plain = plain;
         this.file = Application.getResource("cfg/" + name + (plain ? ".json" : ".ejs"));
@@ -89,8 +99,13 @@ public class JsonKeyValueStorage extends Storage {
 
     @Override
     public void clear() throws StorageException {
-        this.map.clear();
-        this.requestSave();
+        getLock().writeLock();
+        try {
+            getMap().clear();
+        } finally {
+            getLock().writeUnlock();
+            this.requestSave();
+        }
     }
 
     @Override
@@ -101,20 +116,27 @@ public class JsonKeyValueStorage extends Storage {
     @SuppressWarnings("unchecked")
     @Override
     public <E> E get(final String key, final E def) throws StorageException {
-        final boolean contains = this.map.containsKey(key);
-        Object ret = contains ? this.map.get(key) : null;
+        final boolean readL = getLock().readLock();
+        final boolean contains;
+        Object ret = null;
+        try {
+            contains = getMap().containsKey(key);
+            ret = contains ? getMap().get(key) : null;
+        } finally {
+            getLock().readUnlock(readL);
+        }
 
         if (ret != null && def != null && ret.getClass() != def.getClass()) {
             /* ret class different from def class, so we have to convert */
             if (def instanceof Long) {
                 if (ret instanceof Integer) {
-                    ret = new Long(((Integer) ret).longValue());
+                    ret = ((Integer) ret).longValue();
                 } else if (ret instanceof String) {
                     ret = Long.parseLong((String) ret);
                 }
             } else if (def instanceof Integer) {
                 if (ret instanceof Long) {
-                    ret = new Integer(((Long) ret).intValue());
+                    ret = ((Long) ret).intValue();
                 } else if (ret instanceof String) {
                     ret = Integer.parseInt((String) ret);
                 }
@@ -193,7 +215,7 @@ public class JsonKeyValueStorage extends Storage {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.storage.Storage#getID()
      */
     @Override
@@ -207,23 +229,65 @@ public class JsonKeyValueStorage extends Storage {
 
     @Override
     public boolean hasProperty(final String key) {
-        return this.map.containsKey(key);
+        final boolean readL = getLock().readLock();
+        try {
+            return getMap().containsKey(key);
+        } finally {
+            getLock().readUnlock(readL);
+        }
     }
 
     private Object internal_put(final String key, final Object value) {
         if (key == null) {
-            throw new WTFException("key ==null is forbidden!");
+            throw new WTFException("key == null is forbidden!");
         }
-        final Object ret;
-        if (value != null) {
-            ret = this.map.put(key, value);
-        } else {
-            /* not possible to save null values in concurrenthashmap */
-            ret = this.map.remove(key);
+        final boolean readL = getLock().readLock();
+        boolean requestSave = true;
+        try {
+            final Object ret = getMap().put(key, value);
+            requestSave = !requestSave(ret, value);
+            return ret;
+        } finally {
+            getLock().readUnlock(readL);
+            if (requestSave) {
+                this.requestSave();
+            }
         }
+    }
 
-        this.requestSave();
-        return ret;
+    private boolean requestSave(Object x, Object y) {
+        try {
+            if (x == null && y == null) {
+                return true;
+            } else if (x != null && y != null) {
+                if (x == y || x.equals(y)) {
+                    return true;
+                } else {
+                    if (x.getClass().isArray() && y.getClass().isArray()) {
+                        final int xL = Array.getLength(x);
+                        final int yL = Array.getLength(y);
+                        if (xL == yL) {
+                            for (int index = 0; index < xL; index++) {
+                                final Object xE = Array.get(x, index);
+                                final Object yE = Array.get(y, index);
+                                if (requestSave(xE, yE) == false) {
+                                    return false;
+                                }
+                            }
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    } else {
+                        return false;
+                    }
+                }
+            }
+            return false;
+        } catch (final Throwable e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     /**
@@ -266,11 +330,11 @@ public class JsonKeyValueStorage extends Storage {
 
     @Override
     public void put(final String key, final Enum<?> value) throws StorageException {
-        if (this.isEnumCacheEnabled()) {
-            this.internal_put(key, value);
+        if (value == null) {
+            this.internal_put(key, null);
         } else {
-            if (value == null) {
-                this.internal_put(key, null);
+            if (this.isEnumCacheEnabled()) {
+                this.internal_put(key, value);
             } else {
                 this.internal_put(key, value.name());
             }
@@ -306,16 +370,19 @@ public class JsonKeyValueStorage extends Storage {
     }
 
     private void putAll(final Map<String, Object> map) {
-        if (map == null) {
-            return;
-        }
-        final Iterator<Entry<String, Object>> it = map.entrySet().iterator();
-        while (it.hasNext()) {
-            final Entry<String, Object> next = it.next();
-            if (next.getKey() == null || next.getValue() == null) {
-                continue;
+        if (map != null) {
+            getLock().writeLock();
+            try {
+                final Iterator<Entry<String, Object>> it = map.entrySet().iterator();
+                while (it.hasNext()) {
+                    final Entry<String, Object> next = it.next();
+                    if (next.getKey() != null) {
+                        getMap().put(next.getKey(), next.getValue());
+                    }
+                }
+            } finally {
+                getLock().writeUnlock();
             }
-            this.map.put(next.getKey(), next.getValue());
         }
     }
 
@@ -324,10 +391,14 @@ public class JsonKeyValueStorage extends Storage {
         if (key == null) {
             throw new WTFException("key ==null is forbidden!");
         }
-        if (this.map.containsKey(key)) {
-            final Object ret = this.map.remove(key);
-            this.requestSave();
-            return ret;
+        if (hasProperty(key)) {
+            getLock().writeLock();
+            try {
+                return getMap().remove(key);
+            } finally {
+                getLock().writeUnlock();
+                this.requestSave();
+            }
         }
         return null;
     }
@@ -344,7 +415,14 @@ public class JsonKeyValueStorage extends Storage {
         }
         final long lastSetMark = this.setMark.get();
         if (this.writeMark.getAndSet(lastSetMark) != lastSetMark) {
-            final String json = JSonStorage.getMapper().objectToString(this.map);
+            final String json;
+            final boolean readL = getLock().readLock();
+            try {
+                json = JSonStorage.getMapper().objectToString(getMap());
+                writeMark.set(setMark.get());
+            } finally {
+                getLock().readUnlock(readL);
+            }
             JSonStorage.saveTo(this.file, this.plain, this.key, json);
         }
     }
@@ -364,22 +442,29 @@ public class JsonKeyValueStorage extends Storage {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.storage.Storage#size()
      */
     @Override
     public int size() {
-        return this.map.size();
+        final boolean readL = getLock().readLock();
+        try {
+            return getMap().size();
+        } finally {
+            getLock().readUnlock(readL);
+        }
     }
 
     @Override
     public String toString() {
+        final boolean readL = getLock().readLock();
         try {
-            return JSonStorage.getMapper().objectToString(this.map);
+            return JSonStorage.getMapper().objectToString(getMap());
         } catch (final Throwable e) {
-            return this.map.toString();
+            return getMap().toString();
+        } finally {
+            getLock().readUnlock(readL);
         }
-
     }
 
 }

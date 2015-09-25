@@ -405,7 +405,9 @@ public class JsonKeyValueStorage extends Storage {
 
     public void requestSave() {
         final long mark = this.setMark.incrementAndGet();
-        new WTFException("requestSave:" + this.getID() + "|" + mark).printStackTrace();
+        if (false) {
+            new WTFException("requestSave:" + this.getID() + "|" + mark).printStackTrace();
+        }
     }
 
     @Override

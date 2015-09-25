@@ -243,7 +243,7 @@ public class IO {
     /*
      * this function reads a line from a bufferedinputstream up to a maxLength. in case the line is longer than maxLength the rest of the
      * line is read but not returned
-     *
+     * 
      * this function skips emtpy lines
      */
 
@@ -616,7 +616,7 @@ public class IO {
             FileOutputStream out = null;
             boolean deleteFile = true;
             try {
-                if (true) {
+                if (false) {
                     new WTFException("Write to File:" + file).printStackTrace();
                 }
                 out = new FileOutputStream(file);

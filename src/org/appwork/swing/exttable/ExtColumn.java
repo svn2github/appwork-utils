@@ -804,7 +804,7 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
 
     /**
      * can be used to set a fixed width and to ignore {@link #getDefaultWidth()}and the stored width. @see {@link #isResizable()}
-     * 
+     *
      * @param w
      * @return
      */
@@ -877,7 +877,8 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
                 } else {
                     ExtColumn.this.tableColumn.setResizable(false);
                     ExtColumn.this.tableColumn.setMaxWidth(ExtColumn.this.tableColumn.getWidth());
-                    ExtColumn.this.tableColumn.setMinWidth(ExtColumn.this.tableColumn.getWidth());
+                    int m = ExtColumn.this.tableColumn.getWidth();
+                    ExtColumn.this.tableColumn.setMinWidth(m);
                 }
 
             }

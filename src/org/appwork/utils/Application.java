@@ -366,34 +366,7 @@ public class Application {
 
             java.io.File appRoot = null;
             try {
-                String path = loc.getPath();
-                // loc may be a
-                try {
-                    appRoot = new File(java.net.URLDecoder.decode(path, "UTF-8"));
-                    if (!appRoot.exists()) {
-                        appRoot = null;
-                    }
-                } catch (java.io.UnsupportedEncodingException e) {
-                    Log.exception(e);
-                }
-                if (appRoot == null) {
-                    appRoot = new File(path);
-                    if (!appRoot.exists()) {
-                        appRoot = null;
-                    }
-                }
-                if (appRoot == null) {
-                    appRoot = new File(loc.toURI());
-                    if (!appRoot.exists()) {
-                        appRoot = null;
-                    }
-                }
-                if (appRoot == null) {
-                    throw new java.net.URISyntaxException(loc + "", "Bad URI");
-                }
-                if (appRoot.isFile()) {
-                    appRoot = appRoot.getParentFile();
-                }
+                appRoot = urlToFile(loc);
                 Application.ROOT = appRoot.getAbsolutePath();
                 System.out.println("Application Root: " + Application.ROOT + " (jared) " + rootOfClazz);
             } catch (final URISyntaxException e) {
@@ -407,6 +380,45 @@ public class Application {
         }
         // do not use Log.L here. this might be null
         return Application.ROOT;
+    }
+
+    /**
+     * @param loc
+     * @param appRoot
+     * @return
+     * @throws URISyntaxException
+     */
+    public static java.io.File urlToFile(URL loc) throws URISyntaxException {
+        String path = loc.getPath();
+        File appRoot = null;
+        // loc may be a
+        try {
+            appRoot = new File(java.net.URLDecoder.decode(path, "UTF-8"));
+            if (!appRoot.exists()) {
+                appRoot = null;
+            }
+        } catch (java.io.UnsupportedEncodingException e) {
+            Log.exception(e);
+        }
+        if (appRoot == null) {
+            appRoot = new File(path);
+            if (!appRoot.exists()) {
+                appRoot = null;
+            }
+        }
+        if (appRoot == null) {
+            appRoot = new File(loc.toURI());
+            if (!appRoot.exists()) {
+                appRoot = null;
+            }
+        }
+        if (appRoot == null) {
+            throw new java.net.URISyntaxException(loc + "", "Bad URI");
+        }
+        if (appRoot.isFile()) {
+            appRoot = appRoot.getParentFile();
+        }
+        return appRoot;
     }
 
     /**
@@ -556,7 +568,7 @@ public class Application {
             Log.L.warning("Java 1.6 Update 18 has a serious bug in garbage collector!");
             /*
              * java 1.6 update 18 has a bug in garbage collector, causes java crashes
-             * 
+             *
              * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6847956
              */
             return true;
@@ -579,7 +591,7 @@ public class Application {
             Log.L.warning("freezing AppKit thread bug");
             /*
              * http://bugs.java.com/view_bug.do?bug_id=8025588
-             * 
+             *
              * Frozen AppKit thread
              */
             return true;
@@ -647,7 +659,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.io.OutputStream#write(int)
          */
         @Override
@@ -671,7 +683,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.io.OutputStream#write(byte[])
          */
         @Override
@@ -694,7 +706,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.io.OutputStream#write(byte[], int, int)
          */
         @Override
@@ -718,7 +730,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.io.OutputStream#flush()
          */
         @Override
@@ -741,7 +753,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.io.OutputStream#close()
          */
         @Override

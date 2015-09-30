@@ -685,7 +685,8 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
                     // return null;
                 } else if (m.getName().equals("_getStorageHandler")) {
                     return this;
-
+                } else if (m.getDeclaringClass() == Object.class) {
+                    return m.invoke(this, parameter);
                 } else {
                     throw new WTFException(m + " ??? no keyhandler. This is not possible!");
                 }

@@ -539,7 +539,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.swing.components.tooltips.ToolTipHandler#createExtTooltip()
      */
     @Override
@@ -883,7 +883,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.swing.components.tooltips.ToolTipHandler#updateTooltip(org .appwork.swing.components.tooltips.ExtTooltip,
      * java.awt.event.MouseEvent)
      */
@@ -1014,7 +1014,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.swing.components.tooltips.ToolTipHandler# isTooltipDisabledUntilNextRefocus()
      */
     @Override
@@ -1026,7 +1026,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.swing.components.tooltips.ToolTipHandler# isTooltipWithoutFocusEnabled()
      */
     @Override
@@ -1393,6 +1393,10 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
     //
     // }
 
+    protected void showPopup(final JPopupMenu popup, final Point p) {
+        popup.show(ExtTable.this, p.x, p.y);
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     protected void processMouseEvent(final MouseEvent e) {
@@ -1407,12 +1411,13 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
                     /* no object under mouse, lets clear the selection */
                     this.clearSelection();
                     final JPopupMenu popup = this.onContextMenu(new JPopupMenu(), null, null, col, e);
-                    this.eventSender.fireEvent(new ExtTableEvent<JPopupMenu>(this, ExtTableEvent.Types.CONTEXTMENU, popup));
-                    if (popup != null && popup.getComponentCount() > 0) {
-                        popup.show(ExtTable.this, e.getPoint().x, e.getPoint().y);
-                        return;
+                    if (popup != null) {
+                        this.eventSender.fireEvent(new ExtTableEvent<JPopupMenu>(this, ExtTableEvent.Types.CONTEXTMENU, popup));
+                        if (popup.getComponentCount() > 0) {
+                            showPopup(popup, e.getPoint());
+                            return;
+                        }
                     }
-
                 } else {
                     /* check if we need to select object */
                     if (!this.isRowSelected(row)) {
@@ -1421,12 +1426,10 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
                     }
                     final List<E> selected = this.getModel().getSelectedObjects();
                     final JPopupMenu popup = this.onContextMenu(new JPopupMenu(), obj, selected, col, e);
-
                     if (popup != null && popup.getComponentCount() > 0) {
-                        popup.show(ExtTable.this, e.getPoint().x, e.getPoint().y);
+                        showPopup(popup, e.getPoint());
                         return;
                     }
-
                 }
             }
         } else if (e.getID() == MouseEvent.MOUSE_CLICKED) {

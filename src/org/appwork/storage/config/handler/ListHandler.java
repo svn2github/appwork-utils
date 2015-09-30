@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2011 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.storage.config
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -30,7 +30,7 @@ import org.appwork.utils.logging.Log;
 
 /**
  * @author Thomas
- * 
+ *
  */
 public abstract class ListHandler<T> extends KeyHandler<T> {
     public static final int              MIN_LIFETIME   = 10000;
@@ -62,7 +62,9 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
     protected Object getCachedValue() {
         if (this.useObjectCache && this.getStorageHandler().isObjectCacheEnabled()) {
             final MinTimeWeakReference<Object> lCache = this.cache;
-            if (lCache != null) { return lCache.get(); }
+            if (lCache != null) {
+                return lCache.get();
+            }
         }
         return null;
     }
@@ -115,7 +117,6 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
     }
 
     protected void putCachedValue(Object value) {
-
         if (this.useObjectCache && this.getStorageHandler().isObjectCacheEnabled()) {
             if (value == null) {
                 value = ListHandler.NULL;
@@ -132,6 +133,17 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
         }
     }
 
+    @Override
+    protected boolean putValueCheck(T newValue) {
+        synchronized (this) {
+            final Object value = this.getCachedValue();
+            if (value != null) {
+                return super.putValueCheck(newValue);
+            }
+        }
+        return true;
+    }
+
     /**
      * @return
      * @throws IllegalAccessException
@@ -140,6 +152,7 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
      */
     @SuppressWarnings("unchecked")
     protected Object read() throws InstantiationException, IllegalAccessException, IOException {
+        boolean exists = false;
         try {
             final Object dummy = new Object();
             Object ret = null;
@@ -148,10 +161,14 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
                 ret = JSonStorage.restoreFromString(IO.readURL(this.url), this.cryptKey == null, this.cryptKey, this.typeRef, dummy);
             } else {
                 Log.L.finer("Read Config: " + this.path.getAbsolutePath());
+                exists = path.exists();
                 ret = JSonStorage.restoreFrom(this.path, this.cryptKey == null, this.cryptKey, this.typeRef, dummy);
             }
             if (ret == dummy) {
-                if (this.getDefaultValue() != null) { return this.getDefaultValue(); }
+                final T def = this.getDefaultValue();
+                if (def != null) {
+                    return def;
+                }
                 Annotation ann;
                 final DefaultJsonObject defaultJson = this.getAnnotation(DefaultJsonObject.class);
                 final DefaultFactory df = this.getAnnotation(DefaultFactory.class);
@@ -174,7 +191,7 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
             }
             return ret;
         } finally {
-            if (!this.path.exists() && this.url == null) {
+            if (!exists && this.url == null) {
                 this.write(this.getDefaultValue());
             }
         }
@@ -182,9 +199,8 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
 
     /*
      * (non-Javadoc)
-     * 
-     * @see
-     * org.appwork.storage.config.KeyHandler#validateValue(java.lang.Object)
+     *
+     * @see org.appwork.storage.config.KeyHandler#validateValue(java.lang.Object)
      */
     @Override
     protected void validateValue(final T object) throws Throwable {

@@ -10,6 +10,7 @@
 package org.appwork.storage.config.handler;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -612,40 +613,27 @@ public abstract class KeyHandler<RawClass> {
         this.setMethod = method;
     }
 
+    protected boolean putValueCheck(final RawClass newValue) {
+        final RawClass oldValue = this.getValue();
+        if (equals(oldValue, newValue)) {
+            return false;
+        }
+        return true;
+    }
+
     /**
      * @param newValue
      */
     public void setValue(final RawClass newValue) throws ValidationException {
         try {
             synchronized (this) {
-                final RawClass oldValue = this.getValue();
-                if (oldValue == null && newValue == null) {
-                    /* everything is null */
-                    return;
+                if (putValueCheck(newValue)) {
+                    if (this.validatorFactory != null) {
+                        this.validatorFactory.validate(newValue);
+                    }
+                    this.validateValue(newValue);
+                    this.putValue(newValue);
                 }
-                boolean changed = false;
-                if (newValue != null && oldValue == null) {
-                    /* old is null, but new is not */
-                    changed = true;
-                } else if (oldValue != null && newValue == null) {
-                    /* new is null, but old is not */
-                    changed = true;
-
-                } else if (!Clazz.isPrimitive(this.getRawClass()) && !Clazz.isEnum(this.getRawClass()) && this.getRawClass() != String.class) {
-                    /* no primitive, we cannot detect changes 100% */
-                    changed = true;
-                } else if (!newValue.equals(oldValue)) {
-                    /* does not equal */
-                    changed = true;
-                }
-                if (changed == false) {
-                    return;
-                }
-                if (this.validatorFactory != null) {
-                    this.validatorFactory.validate(newValue);
-                }
-                this.validateValue(newValue);
-                this.putValue(newValue);
             }
             this.fireEvent(ConfigEvent.Types.VALUE_UPDATED, this, newValue);
         } catch (final ValidationException e) {
@@ -659,6 +647,67 @@ public abstract class KeyHandler<RawClass> {
             this.fireEvent(ConfigEvent.Types.VALIDATOR_ERROR, this, e);
 
             throw e;
+        }
+    }
+
+    private boolean equals(Object x, Object y) {
+        try {
+            if (x == null && y == null) {
+                return true;
+            } else if (x != null && y != null) {
+                if (x == y || x.equals(y)) {
+                    return true;
+                } else {
+                    final Class<?> xC = x.getClass();
+                    final Class<?> yC = y.getClass();
+
+                    final boolean xCList = List.class.isAssignableFrom(xC);
+                    final boolean yCList = List.class.isAssignableFrom(yC);
+                    if (xCList && yCList) {
+                        final List<?> xL = (List) x;
+                        final List<?> yL = (List) y;
+                        final int xLL = xL.size();
+                        final int yLL = yL.size();
+                        if (xLL == yLL) {
+                            for (int index = 0; index < xLL; index++) {
+                                final Object xE = xL.get(index);
+                                final Object yE = yL.get(index);
+                                if (equals(xE, yE) == false) {
+                                    return false;
+                                }
+                            }
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+
+                    final boolean xCArray = xC.isArray();
+                    final boolean yCArray = yC.isArray();
+                    if (xCArray && yCArray) {
+                        final int xL = Array.getLength(x);
+                        final int yL = Array.getLength(y);
+                        if (xL == yL) {
+                            for (int index = 0; index < xL; index++) {
+                                final Object xE = Array.get(x, index);
+                                final Object yE = Array.get(y, index);
+                                if (equals(xE, yE) == false) {
+                                    return false;
+                                }
+                            }
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+
+                    return false;
+                }
+            }
+            return false;
+        } catch (final Throwable e) {
+            e.printStackTrace();
+            return false;
         }
     }
 

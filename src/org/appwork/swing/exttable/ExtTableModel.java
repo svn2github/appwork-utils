@@ -4,6 +4,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -157,12 +158,12 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
      * if it is true, we check whether the table is in editing mode. if so we add a propertychange listener and temporarily save the new
      * data and selection
      *
-     * @param newtableData
+     * @param newTableData
      * @param selection
      * @param checkEditing
      */
-    protected void _replaceTableData(final List<E> newtableData, final boolean checkEditing) {
-        if (newtableData == null) {
+    protected void _replaceTableData(final List<E> newTableData, final boolean checkEditing) {
+        if (newTableData == null) {
             return;
         }
         new EDTRunner() {
@@ -185,22 +186,21 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
                                 ltable.removePropertyChangeListener(ExtTableModel.this.replaceDelayer);
                             }
                             /* replace TableData and set Selection */
-                            List<E> selectedObjects = null;
                             final ListSelectionModel s = ltable.getSelectionModel();
                             final boolean adjusting = s.getValueIsAdjusting();
                             int leadIndex = -1;
-                            int min = -1;
-
                             int anchorIndex = -1;
                             E leadObject = null;
                             E anchorObject = null;
                             final boolean hadSelectedObjects = ExtTableModel.this.hasSelectedObjects();
+                            final List<E> selectedObjects;
+                            final BitSet selectedRowsBitSet = new BitSet();
                             try {
-                                if (newtableData.size() > 0) {
-                                    selectedObjects = ExtTableModel.this.getSelectedObjects();
+                                if (newTableData.size() > 0) {
+                                    selectedObjects = ExtTableModel.this.getSelectedObjects(-1, selectedRowsBitSet);
                                     // we only need this variable to restore
                                     // selection after removing elements.
-                                    min = newtableData.size() < getTableData().size() ? findFirstSelectedRow(s) : -1;
+                                    // min = newtableData.size() < getTableData().size() ? findFirstSelectedRow(s) : -1;
 
                                     leadIndex = s.getLeadSelectionIndex();
                                     anchorIndex = s.getAnchorSelectionIndex();
@@ -209,27 +209,25 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
                                     if (adjusting && ExtTableModel.this.isDebugTableModel()) {
                                         System.out.println("before:leadIndex=" + leadIndex + "->" + leadObject + "|anchorIndex=" + anchorIndex + "->" + anchorObject);
                                     }
+                                } else {
+                                    selectedObjects = null;
                                 }
+                                final List<E> oldTableData = getTableData();
                                 ExtTableModel.this.tableStructureChanging.set(true);
-                                ExtTableModel.this.setTableData(newtableData);
+                                ExtTableModel.this.setTableData(newTableData);
                                 try {
                                     ExtTableModel.this.tableSelectionClearing.set(true);
                                     ExtTableModel.this.fireTableStructureChanged();
                                 } finally {
                                     ExtTableModel.this.tableSelectionClearing.set(false);
                                 }
-                                if (ExtTableModel.this.postSetTableData(newtableData) && ExtTableModel.this.getRowCount() > 0) {
+                                if (ExtTableModel.this.postSetTableData(newTableData) && ExtTableModel.this.getRowCount() > 0) {
                                     if (selectedObjects != null && selectedObjects.size() > 0) {
                                         int[] ret = ExtTableModel.this.setSelectedObjects(selectedObjects);
                                         if (ret[0] == -1) {
-
-                                            if (min >= 0 && false) {
-                                                if (min >= getRowCount()) {
-                                                    ret = ExtTableModel.this.setSelectedRows(new int[] { getRowCount() - 1 });
-                                                } else {
-                                                    ret = ExtTableModel.this.setSelectedRows(new int[] { min });
-
-                                                }
+                                            final int[] rows = guessSelectedRows(oldTableData, leadIndex, anchorIndex, selectedRowsBitSet);
+                                            if (rows != null && rows.length > 0) {
+                                                ret = ExtTableModel.this.setSelectedRows(rows);
                                             }
                                         }
                                         if (adjusting) {
@@ -304,14 +302,14 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
                             }
                         } else {
                             ExtTableModel.this.tableStructureChanging.set(true);
-                            ExtTableModel.this.setTableData(newtableData);
+                            ExtTableModel.this.setTableData(newTableData);
                             try {
                                 ExtTableModel.this.tableSelectionClearing.set(true);
                                 ExtTableModel.this.fireTableStructureChanged();
                             } finally {
                                 ExtTableModel.this.tableSelectionClearing.set(false);
                             }
-                            ExtTableModel.this.postSetTableData(newtableData);
+                            ExtTableModel.this.postSetTableData(newTableData);
                         }
                     } finally {
                         ExtTableModel.this.tableStructureChanging.set(false);
@@ -320,7 +318,7 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
                     /* replace later because table is in editing mode */
                     /* set delayed TableData and Selection */
                     if (ltable != null) {
-                        ExtTableModel.this.delayedNewTableData = newtableData;
+                        ExtTableModel.this.delayedNewTableData = newTableData;
                         if (ExtTableModel.this.replaceDelayerSet == false) {
                             ExtTableModel.this.replaceDelayerSet = true;
                             ltable.addPropertyChangeListener(ExtTableModel.this.replaceDelayer);
@@ -332,8 +330,11 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
         };
     }
 
-    public void addAllElements(final Collection<E> entries) {
+    protected int[] guessSelectedRows(List<E> oldTableData, int leadIndex, int anchorIndex, BitSet selectedRowsBitSet) {
+        return null;
+    }
 
+    public void addAllElements(final Collection<E> entries) {
         final java.util.List<E> newdata = new ArrayList<E>(this.getTableData());
         for (final E n : entries) {
             newdata.add(n);
@@ -653,6 +654,10 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
     }
 
     public List<E> getSelectedObjects(final int maxItems) {
+        return getSelectedObjects(maxItems, null);
+    }
+
+    public List<E> getSelectedObjects(final int maxItems, final BitSet selectedRows) {
         final ExtTable<E> ltable = this.getTable();
         final java.util.List<E> ret = new ArrayList<E>();
         if (ltable == null || this.tableSelectionClearing.get()) {
@@ -676,6 +681,9 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
                 if (selectionModel.isSelectedIndex(i)) {
                     final E elem = ltableData.get(i);
                     if (elem != null) {
+                        if (selectedRows != null) {
+                            selectedRows.set(i);
+                        }
                         ret.add(elem);
                     }
                 }
@@ -685,6 +693,9 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
                 if (selectionModel.isSelectedIndex(i)) {
                     final E elem = ltableData.get(i);
                     if (elem != null) {
+                        if (selectedRows != null) {
+                            selectedRows.set(i);
+                        }
                         ret.add(elem);
                         if (ret.size() > maxItems) {
                             break;

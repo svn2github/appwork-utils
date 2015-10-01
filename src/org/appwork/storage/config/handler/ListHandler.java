@@ -134,11 +134,11 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
     }
 
     @Override
-    protected boolean putValueCheck(T newValue) {
+    protected boolean setValueEqualsGetValue(T newValue) {
         synchronized (this) {
             final Object value = this.getCachedValue();
             if (value != null) {
-                return super.putValueCheck(newValue);
+                return super.setValueEqualsGetValue(newValue);
             }
         }
         return true;

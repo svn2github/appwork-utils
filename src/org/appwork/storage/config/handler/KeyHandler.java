@@ -663,7 +663,7 @@ public abstract class KeyHandler<RawClass> {
             if (x == null && y == null) {
                 return true;
             } else if (x != null && y != null) {
-                if (x == y || x.equals(y)) {
+                if (x.equals(y)) {
                     return true;
                 } else {
                     final Class<?> xC = x.getClass();

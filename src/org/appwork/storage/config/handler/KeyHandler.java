@@ -623,10 +623,7 @@ public abstract class KeyHandler<RawClass> {
      */
     protected boolean setValueEqualsGetValue(final RawClass newValue) {
         final RawClass oldValue = this.getValue();
-        if (equals(oldValue, newValue)) {
-            return false;
-        }
-        return true;
+        return equals(oldValue, newValue);
     }
 
     /**
@@ -636,13 +633,13 @@ public abstract class KeyHandler<RawClass> {
         try {
             synchronized (this) {
                 if (setValueEqualsGetValue(newValue)) {
+                    return;
+                } else {
                     if (this.validatorFactory != null) {
                         this.validatorFactory.validate(newValue);
                     }
                     this.validateValue(newValue);
                     this.putValue(newValue);
-                } else {
-                    return;
                 }
             }
             this.fireEvent(ConfigEvent.Types.VALUE_UPDATED, this, newValue);

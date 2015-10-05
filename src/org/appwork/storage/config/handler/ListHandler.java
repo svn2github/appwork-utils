@@ -143,12 +143,12 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
                      * newValue is the same object as our cached value. changes within the object no longer can be detected!!! so we write *
                      * enforce write to make sure changes land on disk
                      */
-                    return true;
+                    return false;
                 }
                 return super.setValueEqualsGetValue(newValue);
             }
         }
-        return true;
+        return false;
     }
 
     /**
@@ -206,7 +206,7 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.storage.config.KeyHandler#validateValue(java.lang.Object)
      */
     @Override

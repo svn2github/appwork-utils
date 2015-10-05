@@ -623,7 +623,7 @@ public abstract class KeyHandler<RawClass> {
      */
     protected boolean setValueEqualsGetValue(final RawClass newValue) {
         final RawClass oldValue = this.getValue();
-        return equals(oldValue, newValue);
+        return equals(newValue, oldValue);
     }
 
     /**

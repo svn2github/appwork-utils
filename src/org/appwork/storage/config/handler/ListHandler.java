@@ -148,6 +148,9 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
                 return super.setValueEqualsGetValue(newValue);
             }
         }
+        /**
+         * without cached value we enforce write and avoid additional read+equals
+         */
         return false;
     }
 

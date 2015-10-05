@@ -14,7 +14,9 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.appwork.storage.JSonStorage;
 import org.appwork.storage.Storage;
@@ -656,65 +658,90 @@ public abstract class KeyHandler<RawClass> {
         }
     }
 
-    private boolean equals(Object x, Object y) {
+    private static final Set<Class<?>> WRAPPER_TYPES = getWrapperTypes();
+
+    public static boolean isWrapperType(final Class<?> clazz) {
+        return WRAPPER_TYPES.contains(clazz);
+    }
+
+    private static Set<Class<?>> getWrapperTypes() {
+        Set<Class<?>> ret = new HashSet<Class<?>>();
+        ret.add(Boolean.class);
+        ret.add(Character.class);
+        ret.add(Byte.class);
+        ret.add(Short.class);
+        ret.add(Integer.class);
+        ret.add(Long.class);
+        ret.add(Float.class);
+        ret.add(Double.class);
+        ret.add(Void.class);
+        ret.add(String.class);
+        return ret;
+    }
+
+    protected boolean equals(Object x, Object y) {
         try {
             if (x == null && y == null) {
                 return true;
             } else if (x != null && y != null) {
-                if (x.equals(y)) {
-                    return true;
-                } else {
-                    final Class<?> xC = x.getClass();
-                    final Class<?> yC = y.getClass();
-
-                    final boolean xCList = List.class.isAssignableFrom(xC);
-                    final boolean yCList = List.class.isAssignableFrom(yC);
-                    if (xCList && yCList) {
-                        final List<?> xL = (List) x;
-                        final List<?> yL = (List) y;
-                        final int xLL = xL.size();
-                        final int yLL = yL.size();
-                        if (xLL == yLL) {
-                            for (int index = 0; index < xLL; index++) {
-                                final Object xE = xL.get(index);
-                                final Object yE = yL.get(index);
-                                if (equals(xE, yE) == false) {
-                                    return false;
-                                }
+                final Class<?> xC = x.getClass();
+                final Class<?> yC = y.getClass();
+                if (xC.isPrimitive() && yC.isPrimitive()) {
+                    // primitives are safe to x.equals(y)
+                    return x.equals(y);
+                }
+                if (isWrapperType(xC) && isWrapperType(yC)) {
+                    // wrappers are safe to x.equals(y)
+                    return x.equals(y);
+                }
+                if (xC.isEnum() && yC.isEnum()) {
+                    // enums are safe to x.equals(y)
+                    return x.equals(y);
+                }
+                final boolean xCList = List.class.isAssignableFrom(xC);
+                final boolean yCList = List.class.isAssignableFrom(yC);
+                if (xCList && yCList) {
+                    final List<?> xL = (List) x;
+                    final List<?> yL = (List) y;
+                    final int xLL = xL.size();
+                    final int yLL = yL.size();
+                    if (xLL == yLL) {
+                        for (int index = 0; index < xLL; index++) {
+                            final Object xE = xL.get(index);
+                            final Object yE = yL.get(index);
+                            if (equals(xE, yE) == false) {
+                                return false;
                             }
-                            return true;
-                        } else {
-                            return false;
                         }
+                        return true;
+                    } else {
+                        return false;
                     }
+                }
 
-                    final boolean xCArray = xC.isArray();
-                    final boolean yCArray = yC.isArray();
-                    if (xCArray && yCArray) {
-                        final int xL = Array.getLength(x);
-                        final int yL = Array.getLength(y);
-                        if (xL == yL) {
-                            for (int index = 0; index < xL; index++) {
-                                final Object xE = Array.get(x, index);
-                                final Object yE = Array.get(y, index);
-                                if (equals(xE, yE) == false) {
-                                    return false;
-                                }
+                final boolean xCArray = xC.isArray();
+                final boolean yCArray = yC.isArray();
+                if (xCArray && yCArray) {
+                    final int xL = Array.getLength(x);
+                    final int yL = Array.getLength(y);
+                    if (xL == yL) {
+                        for (int index = 0; index < xL; index++) {
+                            final Object xE = Array.get(x, index);
+                            final Object yE = Array.get(y, index);
+                            if (equals(xE, yE) == false) {
+                                return false;
                             }
-                            return true;
-                        } else {
-                            return false;
                         }
+                        return true;
+                    } else {
+                        return false;
                     }
-
-                    return false;
                 }
             }
-            return false;
         } catch (final Throwable e) {
             e.printStackTrace();
-            return false;
         }
+        return false;
     }
 
     @Override

@@ -647,13 +647,11 @@ public abstract class KeyHandler<RawClass> {
         } catch (final ValidationException e) {
             e.setValue(newValue);
             this.fireEvent(ConfigEvent.Types.VALIDATOR_ERROR, this, e);
-
             throw e;
         } catch (final Throwable t) {
             final ValidationException e = new ValidationException(t);
             e.setValue(newValue);
             this.fireEvent(ConfigEvent.Types.VALIDATOR_ERROR, this, e);
-
             throw e;
         }
     }

@@ -138,6 +138,13 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
         synchronized (this) {
             final Object value = this.getCachedValue();
             if (value != null) {
+                if (value == newValue) {
+                    /**
+                     * newValue is the same object as our cached value. changes within the object no longer can be detected!!! so we write *
+                     * enforce write to make sure changes land on disk
+                     */
+                    return false;
+                }
                 return super.setValueEqualsGetValue(newValue);
             }
         }

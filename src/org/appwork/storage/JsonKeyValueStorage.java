@@ -218,7 +218,7 @@ public class JsonKeyValueStorage extends Storage {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.storage.Storage#getID()
      */
     @Override
@@ -291,7 +291,7 @@ public class JsonKeyValueStorage extends Storage {
                     return x.equals(y);
                 }
                 if (isWrapperType(xC) && isWrapperType(yC)) {
-                    // primitives wrappers are safe to x.equals(y)
+                    // wrappers are safe to x.equals(y)
                     return x.equals(y);
                 }
                 if (xC.isEnum() && yC.isEnum()) {
@@ -498,7 +498,7 @@ public class JsonKeyValueStorage extends Storage {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.storage.Storage#size()
      */
     @Override

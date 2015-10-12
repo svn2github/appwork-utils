@@ -3,6 +3,7 @@ package org.appwork.swing.exttable;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
@@ -79,6 +80,7 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
     public static final String       SORT_DESC              = "DESC";
     public static final String       SORT_ASC               = "ASC";
     protected volatile boolean       modifying              = false;
+    private int                      forcedWidth            = -1;
 
     /**
      * Create a new ExtColum.
@@ -193,6 +195,10 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
         if (this.getMinWidth() == this.getMaxWidth() && this.getMaxWidth() > 0) {
             // resize is not possible anyway
             return null;
+            // } else if (isAutoWidthEnabled()) {
+            // // resize is not possible anyway
+            // return null;
+
         } else {
             final JPopupMenu ret = new JPopupMenu();
             LockColumnWidthAction action;
@@ -737,8 +743,10 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
         this.generateID();
     }
 
-    public void setResizable(final boolean resizeAllowed) {
+    public void setResizable(boolean resizeAllowed) {
 
+        // getInternalColumn().setMinWidth(getMinWidth());
+        // getInternalColumn().setMaxWidth(getMaxWidth());
         this.getModel().getStorage().put(getModel().getTable().getColumnStoreKey("ColumnWidthLocked_", this.getID()), !resizeAllowed);
         this.updateColumnGui();
 
@@ -751,6 +759,7 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
         // this.getModel().getTable().setAutoResizeFallbackEnabled(false);
         //
         // }
+
         new EDTRunner() {
 
             @Override
@@ -760,6 +769,14 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
             }
         };
         getModel().getTable().fireColumnModelUpdate();
+
+    }
+
+    public Dimension getCellSizeEstimation(E element, int row) {
+
+        Component c = getTableCellRendererComponent(getModel().getTable(), element, false, false, row, 1);
+        return c.getPreferredSize();
+
     }
 
     /**
@@ -867,7 +884,7 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
             @Override
             protected void runInEDT() {
 
-                if (ExtColumn.this.isResizable()) {
+                if (ExtColumn.this.isResizable() || true) {
                     ExtColumn.this.getModel().getTable().saveWidthsRatio();
 
                     ExtColumn.this.tableColumn.setMaxWidth(ExtColumn.this.getMaxWidth() < 0 ? Integer.MAX_VALUE : ExtColumn.this.getMaxWidth());
@@ -875,6 +892,7 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
                     ExtColumn.this.tableColumn.setResizable(true);
 
                 } else {
+
                     ExtColumn.this.tableColumn.setResizable(false);
                     ExtColumn.this.tableColumn.setMaxWidth(ExtColumn.this.tableColumn.getWidth());
                     int m = ExtColumn.this.tableColumn.getWidth();
@@ -911,6 +929,34 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
      */
     public TableColumn getInternalColumn() {
         return this.tableColumn;
+    }
+
+    /**
+     * override if you want the column to automatically resize to the required width
+     *
+     * @return
+     */
+    public boolean isAutoWidthEnabled() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    /**
+     * @param value
+     */
+    public void setForcedWidth(int value) {
+        forcedWidth = value;
+        getInternalColumn().setWidth(value);
+        getInternalColumn().setPreferredWidth(value);
+    }
+
+    public int getForcedWidth() {
+        if (!isResizable()) {
+            return tableColumn.getWidth();
+            // int w = ExtColumn.this.getDefaultWidth();
+            // return ExtColumn.this.getModel().getTable().getColumnStore("WIDTH_COL_", ExtColumn.this.getID(), w);
+        }
+        return forcedWidth;
     }
 
 }

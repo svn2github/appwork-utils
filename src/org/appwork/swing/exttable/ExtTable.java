@@ -221,6 +221,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
 
         });
         this.createColumns();
+        getModel().autoColumnWidth();
         // get defaultbackground and Foregroundcolors
         Component c = super.getCellRenderer(0, 0).getTableCellRendererComponent(this, "", true, false, 0, 0);
         this.columnBackgroundSelected = c.getBackground();
@@ -443,10 +444,10 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
         final LinkedHashMap<String, TableColumn> columns = new LinkedHashMap<String, TableColumn>();
         for (int i = 0; i < this.getModel().getColumnCount(); ++i) {
             final int j = i;
+            ExtColumn<E> ext = this.model.getExtColumnByModelIndex(j);
+            final TableColumn tableColumn = new CustomOriginalTableColumn(ext, i);
 
-            final TableColumn tableColumn = new TableColumn(i);
-
-            this.model.getExtColumnByModelIndex(j).setTableColumn(tableColumn, true);
+            ext.setTableColumn(tableColumn, true);
             final ExtColumn<E> column = this.model.getExtColumnByModelIndex(j);
             final ExtTableHeaderRenderer customRenderer = column.getHeaderRenderer(this.getTableHeader());
             tableColumn.setHeaderRenderer(customRenderer != null ? customRenderer : this.createDefaultHeaderRenderer(column));
@@ -539,7 +540,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.swing.components.tooltips.ToolTipHandler#createExtTooltip()
      */
     @Override
@@ -580,6 +581,14 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
     @Override
     public void doLayout() {
         final TableColumn resizeColumn = this.getTableHeader().getResizingColumn();
+
+        // for(ExtColumn<E> c:getModel().getColumns()){
+        // if(!c.isResizable()){
+        // c.getInternalColumn().setMinWidth(c.getInternalColumn().getPreferredWidth());
+        // c.getInternalColumn().setMaxWidth(c.getInternalColumn().getPreferredWidth())
+        //
+        // }
+        // }
         if (resizeColumn == null) {
             super.doLayout();
 
@@ -679,6 +688,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
      *
      */
     protected void fireColumnModelUpdate() {
+        getModel().autoColumnWidth();
         ExtTable.this.eventSender.fireEvent(new ExtTableEvent<MouseEvent>(ExtTable.this, ExtTableEvent.Types.COLUMN_MODEL_UPDATE));
 
     }
@@ -883,7 +893,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.swing.components.tooltips.ToolTipHandler#updateTooltip(org .appwork.swing.components.tooltips.ExtTooltip,
      * java.awt.event.MouseEvent)
      */
@@ -1014,7 +1024,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.swing.components.tooltips.ToolTipHandler# isTooltipDisabledUntilNextRefocus()
      */
     @Override
@@ -1026,7 +1036,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.swing.components.tooltips.ToolTipHandler# isTooltipWithoutFocusEnabled()
      */
     @Override
@@ -1848,6 +1858,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
                 ExtTable.this.createColumns();
                 ExtTable.this.revalidate();
                 ExtTable.this.repaint();
+                getModel().fireTableStructureChanged();
             }
         };
     }

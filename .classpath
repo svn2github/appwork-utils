@@ -18,7 +18,11 @@
 			<attribute name="source_encoding" value="UTF-8"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="libs/proxyVole.jar"/>
+	<classpathentry kind="lib" path="libs/proxyVole.jar" sourcepath="C:/Users/Thomas/Downloads/proxy-vole_20131209_src.zip">
+		<attributes>
+			<attribute name="source_encoding" value="UTF-8"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="lib" path="libs/sequence-library.jar"/>
 	<classpathentry kind="lib" path="libs/sqljet.jar"/>
 	<classpathentry kind="lib" path="dev_libs/synthetica.jar"/>

@@ -1,5 +1,6 @@
 package org.appwork.swing.exttable;
 
+import java.awt.Dimension;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
@@ -8,7 +9,9 @@ import java.util.BitSet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
@@ -89,6 +92,7 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
     private AtomicBoolean                                          tableSelectionClearing = new AtomicBoolean(false);
 
     private ExtTableModelEventSender                               eventSender;
+    private boolean                                                autoWidthEnabled       = false;
 
     /**
      * Create a new ExtTableModel.
@@ -133,6 +137,79 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
             }
 
         };
+    }
+
+    @Override
+    public void fireTableDataChanged() {
+
+        super.fireTableDataChanged();
+
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see javax.swing.table.AbstractTableModel#fireTableChanged(javax.swing.event.TableModelEvent)
+     */
+    @Override
+    public void fireTableChanged(TableModelEvent e) {
+        autoColumnWidth();
+        super.fireTableChanged(e);
+    }
+
+    /**
+     * @param column
+     */
+    protected void autoColumnWidth() {
+        try {
+            if (getTable() == null) {
+                return;
+            }
+            if (!isAutoWidthEnabled()) {
+                return;
+            }
+            HashMap<ExtColumn, Integer> map = new HashMap<ExtColumn, Integer>();
+
+            List<E> elements = getElements();
+            Integer width;
+            for (int i = 0; i < elements.size(); i++) {
+                E e = elements.get(i);
+
+                for (ExtColumn<E> column : getColumns()) {
+                    // System.out.println("Auto " + column.getName() + " - " + column.isAutoWidthEnabled() + " - " + column.isResizable());
+                    if (column.isAutoWidthEnabled() && column.isResizable()) {
+
+                        width = map.get(column);
+                        if (width == null) {
+                            width = column.getMinWidth();
+                            map.put(column, width);
+                        }
+                        Dimension c = column.getCellSizeEstimation(e, i);
+                        if (c != null) {
+                            int wi = c.width;
+
+                            if (wi > width) {
+                                map.put(column, wi);
+                            }
+                        }
+
+                    }
+                }
+            }
+            for (Entry<ExtColumn, Integer> es : map.entrySet()) {
+                es.getKey().setForcedWidth(es.getValue());
+                // es.getKey().getInternalColumn().setWidth(es.getValue());
+                // es.getKey().getInternalColumn().setPreferredWidth(es.getValue());
+                // es.getKey().getInternalColumn().setMaxWidth(es.getValue());
+                // es.getKey().getInternalColumn().setMinWidth(es.getValue());
+            }
+            // borders
+            // width += 0;
+            // width = Math.max(column.getDefaultWidth(), width);
+        } catch (Throwable e) {
+            // just to be sure. new feature...a try catch is better than a unexpected exception...
+            e.printStackTrace();
+        }
     }
 
     public void _fireTableStructureChanged(final List<E> newtableData, final boolean refreshSort) {
@@ -801,7 +878,12 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
     protected void initModel() {
 
         this.initColumns();
-
+        for (ExtColumn<E> c : getColumns()) {
+            if (c.isAutoWidthEnabled()) {
+                autoWidthEnabled = true;
+                break;
+            }
+        }
         final ExtColumn<E> defSortColumn = this.getDefaultSortColumn();
         String columnId = defSortColumn == null ? null : defSortColumn.getID();
         String columnSortMode = null;
@@ -829,6 +911,14 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
             }
         }
 
+    }
+
+    public boolean isAutoWidthEnabled() {
+        return autoWidthEnabled;
+    }
+
+    public void setAutoWidthEnabled(boolean autoWidthEnabled) {
+        this.autoWidthEnabled = autoWidthEnabled;
     }
 
     /**
@@ -1247,6 +1337,7 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
      */
     protected void setTable(final ExtTable<E> table) {
         this.table = table;
+
     }
 
     protected void setTableData(final List<E> data) {

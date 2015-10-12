@@ -33,6 +33,7 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
 
 import org.appwork.exceptions.WTFException;
@@ -930,11 +931,16 @@ public class Application {
         }
         Class<?> cls;
         try {
-            cls = Class.forName("de.javasoft.plaf.synthetica.SyntheticaLookAndFeel");
-
-            IS_SYNTHETICA = cls.isAssignableFrom(UIManager.getLookAndFeel().getClass());
-        } catch (Throwable e) {
             IS_SYNTHETICA = false;
+            Class<? extends LookAndFeel> lafClass = UIManager.getLookAndFeel().getClass();
+            if (lafClass.getName().startsWith("de.javasoft.plaf.synthetica")) {
+                // this loads the Synthetica class and triggers the license check. we should only do this if we are pretty sure
+                cls = Class.forName("de.javasoft.plaf.synthetica.SyntheticaLookAndFeel");
+
+                IS_SYNTHETICA = cls.isAssignableFrom(lafClass);
+            }
+        } catch (Throwable e) {
+
         }
         return IS_SYNTHETICA;
     }

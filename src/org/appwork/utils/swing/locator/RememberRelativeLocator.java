@@ -20,7 +20,9 @@ public class RememberRelativeLocator extends AbstractLocator {
      */
     public RememberRelativeLocator(final String id, final Window jFrame) {
         this.id = id;
-        if (id == null) { throw new IllegalArgumentException("id ==null"); }
+        if (id == null) {
+            throw new IllegalArgumentException("id ==null");
+        }
         parent = jFrame;
         fallbackLocator = new CenterOfScreenLocator();
     }
@@ -60,7 +62,7 @@ public class RememberRelativeLocator extends AbstractLocator {
         if (storageID.length() > 128) {
             storageID = RememberRelativeLocator.class.getSimpleName() + "-" + Hash.getMD5(storageID);
         }
-        
+
         return JsonConfig.create(Application.getResource("cfg/" + storageID), LocationStorage.class);
     }
 
@@ -85,29 +87,37 @@ public class RememberRelativeLocator extends AbstractLocator {
             final LocationStorage cfg = createConfig(frame);
             if (cfg.isValid()) {
                 // Do a "is on screen check" here
+                Window parent = getParent();
                 final Point pLoc = parent == null || !parent.isShowing() ? frame.getParent().getLocationOnScreen() : parent.getLocationOnScreen();
                 return AbstractLocator.validate(new Point(cfg.getX() + pLoc.x, cfg.getY() + pLoc.y), frame);
             }
         } catch (final Throwable e) {
-   
+
             // frame.getParent() might be null or invisble
             // e.printStackTrace();
         }
         return getFallbackLocator().getLocationOnScreen(frame);
     }
 
+    /**
+     * @return
+     */
+    protected Window getParent() {
+        // TODO Auto-generated method stub
+        return parent;
+    }
+
     /*
      * (non-Javadoc)
      * 
-     * @see
-     * org.appwork.utils.swing.frame.Locator#onClose(org.appwork.utils.swing
-     * .frame.frame)
+     * @see org.appwork.utils.swing.frame.Locator#onClose(org.appwork.utils.swing .frame.frame)
      */
     @Override
     public void onClose(final Window frame) {
         try {
             if (frame.isShowing()) {
                 final Point loc = frame.getLocationOnScreen();
+                Window parent = getParent();
                 final Point pLoc = parent == null ? frame.getParent().getLocationOnScreen() : parent.getLocationOnScreen();
                 final LocationStorage cfg = createConfig(frame);
                 cfg.setValid(true);

@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2011 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.resources
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -28,9 +28,9 @@ import org.appwork.utils.images.Interpolation;
 import org.appwork.utils.logging.Log;
 
 /**
- * 
+ *
  * @author thomas
- * 
+ *
  */
 public class Theme implements MinTimeWeakReferenceCleanup {
     private String                                              path;
@@ -68,7 +68,7 @@ public class Theme implements MinTimeWeakReferenceCleanup {
     }
 
     /**
-     * 
+     *
      */
     public void clearCache() {
         synchronized (this.imageIconCache) {
@@ -269,7 +269,7 @@ public class Theme implements MinTimeWeakReferenceCleanup {
 
     /**
      * returns a valid resourceurl or null if no resource is available.
-     * 
+     *
      * @param pre
      *            subfolder. for exmaple "images/"
      * @param relativePath
@@ -311,7 +311,7 @@ public class Theme implements MinTimeWeakReferenceCleanup {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.storage.config.MinTimeWeakReferenceCleanup# onMinTimeWeakReferenceCleanup
      * (org.appwork.storage.config.MinTimeWeakReference)
      */

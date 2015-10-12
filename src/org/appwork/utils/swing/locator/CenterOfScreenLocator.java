@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2012 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.utils.swing.dialog
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -24,24 +24,21 @@ import org.appwork.utils.swing.SwingUtils;
 
 /**
  * @author Thomas
- * 
+ *
  */
 public class CenterOfScreenLocator extends AbstractLocator {
 
     /*
      * (non-Javadoc)
-     * 
-     * @see
-     * org.appwork.utils.swing.dialog.Locator#getLocationOnScreen(javax.swing
-     * .JDialog)
+     *
+     * @see org.appwork.utils.swing.dialog.Locator#getLocationOnScreen(javax.swing .JDialog)
      */
     @Override
     public Point getLocationOnScreen(final Window dialog) {
-
         if (dialog.getParent() == null || !dialog.getParent().isDisplayable() || !dialog.getParent().isVisible()) {
             final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 
-            return correct(new Point((int) (screenSize.getWidth() - dialog.getWidth()) / 2, (int) (screenSize.getHeight() - dialog.getHeight()) / 2),dialog);
+            return correct(new Point((int) (screenSize.getWidth() - dialog.getWidth()) / 2, (int) (screenSize.getHeight() - dialog.getHeight()) / 2), dialog);
 
         } else if (dialog.getParent() instanceof Frame && ((Frame) dialog.getParent()).getExtendedState() == Frame.ICONIFIED) {
             // dock dialog at bottom right if mainframe is not visible
@@ -56,7 +53,7 @@ public class CenterOfScreenLocator extends AbstractLocator {
                 final Insets insets = Toolkit.getDefaultToolkit().getScreenInsets(screen.getDefaultConfiguration());
                 if (bounds.contains(MouseInfo.getPointerInfo().getLocation())) {
 
-                return correct(new Point((int) (bounds.x + bounds.getWidth() - dialog.getWidth() - 20 - insets.right), (int) (bounds.y + bounds.getHeight() - dialog.getHeight() - 20 - insets.bottom)), dialog);
+                    return correct(new Point((int) (bounds.x + bounds.getWidth() - dialog.getWidth() - 20 - insets.right), (int) (bounds.y + bounds.getHeight() - dialog.getHeight() - 20 - insets.bottom)), dialog);
 
                 }
 
@@ -110,10 +107,8 @@ public class CenterOfScreenLocator extends AbstractLocator {
 
     /*
      * (non-Javadoc)
-     * 
-     * @see
-     * org.appwork.utils.swing.dialog.Locator#onClose(org.appwork.utils.swing
-     * .dialog.AbstractDialog)
+     *
+     * @see org.appwork.utils.swing.dialog.Locator#onClose(org.appwork.utils.swing .dialog.AbstractDialog)
      */
     @Override
     public void onClose(final Window abstractDialog) {

@@ -419,4 +419,7 @@ public interface AWUTranslation extends TranslateInterface {
 
     @Default(lngs = { "en" }, values = { "Remember" })
     String proxydialog_remember();
+
+    @Default(lngs = { "en", "de" }, values = { "Yes", "Ja" })
+    String lit_yes();
 }

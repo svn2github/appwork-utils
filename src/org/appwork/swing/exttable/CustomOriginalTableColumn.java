@@ -11,6 +11,8 @@ package org.appwork.swing.exttable;
 
 import javax.swing.table.TableColumn;
 
+import org.appwork.utils.logging.Log;
+
 /**
  * @author thomas
  *
@@ -43,7 +45,7 @@ public class CustomOriginalTableColumn extends TableColumn {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.swing.table.TableColumn#getMaxWidth()
      */
     @Override
@@ -59,7 +61,7 @@ public class CustomOriginalTableColumn extends TableColumn {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.swing.table.TableColumn#getMinWidth()
      */
     @Override
@@ -75,7 +77,7 @@ public class CustomOriginalTableColumn extends TableColumn {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.swing.table.TableColumn#setPreferredWidth(int)
      */
     @Override
@@ -100,18 +102,35 @@ public class CustomOriginalTableColumn extends TableColumn {
 
     }
 
+    /*
+     * (non-Javadoc)
+     *
+     * @see javax.swing.table.TableColumn#setMinWidth(int)
+     */
+    @Override
+    public void setMinWidth(int minWidth) {
+        // if ("Modul".equals(extColumn.getName())) {
+        // System.out.println("set max");
+        // }
+        super.setMinWidth(minWidth);
+    }
+
     public void setWidth(int width) {
         // int oldMax = getMaxWidth();
         // int oldMin = getMinWidth();
         // try {
         // setMaxWidth(Integer.MAX_VALUE);
         // setMinWidth(0);
-        // if (getModelIndex() == 1) {
+        // if ("Version".equals(extColumn.getName())) {
         // int now = getWidth();
-        // System.out.println("w " + getModelIndex() + " " + now + "->" + width);
+        // System.out.println("w " + getModelIndex() + " " + extColumn.getName() + " " + now + "->" + width);
         // }
 
         super.setWidth(width);
+        if (width != getWidth()) {
+
+            Log.L.severe("Bad Column Implementation: " + extColumn.getModel().getClass().getName() + "/" + extColumn.getName() + " Min: " + super.getMinWidth() + " Max: " + super.getMaxWidth());
+        }
         // if (getModelIndex() == 8) {
         // System.out.println("w-->" + getWidth());
         // }

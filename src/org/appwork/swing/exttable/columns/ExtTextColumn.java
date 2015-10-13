@@ -1,6 +1,8 @@
 package org.appwork.swing.exttable.columns;
 
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.event.ActionEvent;
@@ -45,6 +47,15 @@ public abstract class ExtTextColumn<E> extends ExtColumn<E> implements ActionLis
     protected JPanel          renderer;
     protected JLabel          editorIconLabel;
     protected boolean         noset            = false;
+    private boolean           clipingEnabled   = true;
+
+    public boolean isClipingEnabled() {
+        return clipingEnabled;
+    }
+
+    public void setClipingEnabled(boolean clipingEnabled) {
+        this.clipingEnabled = clipingEnabled;
+    }
 
     /**
      * @param string
@@ -52,6 +63,24 @@ public abstract class ExtTextColumn<E> extends ExtColumn<E> implements ActionLis
     public ExtTextColumn(final String name) {
         this(name, null);
 
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.appwork.swing.exttable.ExtColumn#getCellSizeEstimation(java.lang.Object, int)
+     */
+    @Override
+    public Dimension getCellSizeEstimation(E element, int row) {
+        boolean clip = isClipingEnabled();
+        try {
+            setClipingEnabled(false);
+
+            Component c = getTableCellRendererComponent(getModel().getTable(), element, false, false, row, 1);
+            return c.getPreferredSize();
+        } finally {
+            setClipingEnabled(clip);
+        }
     }
 
     public ExtTextColumn(final String name, final ExtTableModel<E> table) {
@@ -93,7 +122,7 @@ public abstract class ExtTextColumn<E> extends ExtColumn<E> implements ActionLis
 
         this.editorIconLabel = new RenderLabel() {
             /**
-             * 
+             *
              */
             private static final long serialVersionUID = 1L;
 
@@ -108,7 +137,7 @@ public abstract class ExtTextColumn<E> extends ExtColumn<E> implements ActionLis
         this.rendererField = new RenderLabel() {
 
             /**
-             * 
+             *
              */
             private static final long serialVersionUID = 1L;
 
@@ -226,7 +255,9 @@ public abstract class ExtTextColumn<E> extends ExtColumn<E> implements ActionLis
      * @return
      */
     protected String clip(JComponent label, FontMetrics fontMetrics, String str, int width) {
-        // TODO Auto-generated method stub
+        if (!clipingEnabled) {
+            return str;
+        }
         return org.appwork.sunwrapper.sun.swing.SwingUtilities2Wrapper.clipStringIfNecessary(label, fontMetrics, str, width);
     }
 
@@ -439,7 +470,7 @@ public abstract class ExtTextColumn<E> extends ExtColumn<E> implements ActionLis
 
     /**
      * Override to save value after editing
-     * 
+     *
      * @param value
      * @param object
      */

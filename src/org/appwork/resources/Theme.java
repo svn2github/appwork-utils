@@ -21,11 +21,14 @@ import javax.swing.Icon;
 import org.appwork.storage.config.MinTimeWeakReference;
 import org.appwork.storage.config.MinTimeWeakReferenceCleanup;
 import org.appwork.utils.Application;
+import org.appwork.utils.Exceptions;
 import org.appwork.utils.IO;
 import org.appwork.utils.ImageProvider.ImageProvider;
 import org.appwork.utils.images.IconIO;
 import org.appwork.utils.images.Interpolation;
+import org.appwork.utils.locale._AWU;
 import org.appwork.utils.logging.Log;
+import org.appwork.utils.swing.dialog.Dialog;
 
 /**
  *
@@ -58,6 +61,8 @@ public class Theme implements MinTimeWeakReferenceCleanup {
     }
 
     private Theme delegate;
+
+    private File  RESOURCE_HELPER_ROOT;
 
     /**
      * @param i
@@ -165,6 +170,9 @@ public class Theme implements MinTimeWeakReferenceCleanup {
             if (url == null) {
 
                 Log.exception(new Exception("Icon missing: " + this.getPath("images/", relativePath, ".png")));
+                if (!Application.isJared(null)) {
+                    resourcesHelper(this.getPath("images/", relativePath, ".png"));
+                }
 
             }
             if (useCache) {
@@ -184,6 +192,83 @@ public class Theme implements MinTimeWeakReferenceCleanup {
     // }
     // return ret;
     // }
+
+    /**
+     * @param relativePath
+     */
+    private void resourcesHelper(String relativePath) {
+        try {
+            URL self = getClass().getResource("/");
+            File file = new File(self.toURI());
+            File res = new File(file.getParentFile().getParent(), "Resources");
+            if (!res.exists()) {
+                return;
+            }
+            File helperRoot;
+
+            helperRoot = file.getParentFile();
+            if (RESOURCE_HELPER_ROOT != null) {
+                helperRoot = RESOURCE_HELPER_ROOT;
+            }
+            File to = new File(helperRoot, "themes/" + relativePath);
+            // String[] pathes = relativePath.split("[\\/\\\\]+");
+            while (true) {
+                File check = new File(res, relativePath);
+                if (check.exists()) {
+
+                    if (!to.exists()) {
+                        Dialog.I().showConfirmDialog(0, "Found Missing Resource", "The Project " + file.getParentFile().getName() + " requires the resource " + relativePath + ".\r\nCopy " + check + " to " + to, null, _AWU.T.lit_yes(), null);
+                        copy(check, to);
+                        break;
+                    }
+                } else {
+                    int in = relativePath.indexOf("\\");
+                    int in2 = relativePath.indexOf("/");
+
+                    if (in < 0 || in2 < in) {
+                        in = in2;
+                    }
+                    if (in < 0) {
+                        break;
+                    }
+                    relativePath = relativePath.substring(in + 1);
+                }
+            }
+        } catch (Throwable e) {
+            Log.L.severe(Exceptions.getStackTrace(e));
+        }
+
+    }
+
+    /**
+     * @param check
+     * @param to
+     * @throws IOException
+     */
+    protected void copy(File check, File to) throws IOException {
+        to.getParentFile().mkdirs();
+        IO.copyFile(check, to);
+        copy(check, to, ".txt");
+        copy(check, to, ".license");
+        copy(check, to, ".info");
+        copy(check, to, ".nfo");
+    }
+
+    /**
+     * @param check
+     * @param to
+     * @param ext
+     * @throws IOException
+     */
+    protected void copy(File check, File to, String ext) throws IOException {
+        File nfo = new File(check.getAbsolutePath() + ext);
+        File t = new File(to.getAbsolutePath() + ext);
+        if (nfo.exists() && !t.exists()) {
+            t.getParentFile().mkdirs();
+            IO.copyFile(nfo, t);
+
+        }
+    }
 
     /**
      * @param ret
@@ -311,7 +396,7 @@ public class Theme implements MinTimeWeakReferenceCleanup {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.storage.config.MinTimeWeakReferenceCleanup# onMinTimeWeakReferenceCleanup
      * (org.appwork.storage.config.MinTimeWeakReference)
      */

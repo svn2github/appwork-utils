@@ -884,20 +884,20 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
             @Override
             protected void runInEDT() {
 
-                if (ExtColumn.this.isResizable() || true) {
-                    ExtColumn.this.getModel().getTable().saveWidthsRatio();
+                // if (ExtColumn.this.isResizable() || true) {
+                ExtColumn.this.getModel().getTable().saveWidthsRatio();
 
-                    ExtColumn.this.tableColumn.setMaxWidth(ExtColumn.this.getMaxWidth() < 0 ? Integer.MAX_VALUE : ExtColumn.this.getMaxWidth());
-                    ExtColumn.this.tableColumn.setMinWidth(ExtColumn.this.getMinWidth() < 0 ? 15 : ExtColumn.this.getMinWidth());
-                    ExtColumn.this.tableColumn.setResizable(true);
-
-                } else {
-
-                    ExtColumn.this.tableColumn.setResizable(false);
-                    ExtColumn.this.tableColumn.setMaxWidth(ExtColumn.this.tableColumn.getWidth());
-                    int m = ExtColumn.this.tableColumn.getWidth();
-                    ExtColumn.this.tableColumn.setMinWidth(m);
-                }
+                ExtColumn.this.tableColumn.setMaxWidth(ExtColumn.this.getMaxWidth() < 0 ? Integer.MAX_VALUE : ExtColumn.this.getMaxWidth());
+                ExtColumn.this.tableColumn.setMinWidth(ExtColumn.this.getMinWidth() < 0 ? 15 : ExtColumn.this.getMinWidth());
+                ExtColumn.this.tableColumn.setResizable(true);
+                //
+                // } else {
+                //
+                // ExtColumn.this.tableColumn.setResizable(false);
+                // ExtColumn.this.tableColumn.setMaxWidth(ExtColumn.this.tableColumn.getWidth());
+                // int m = ExtColumn.this.tableColumn.getWidth();
+                // ExtColumn.this.tableColumn.setMinWidth(m);
+                // }
 
             }
         };

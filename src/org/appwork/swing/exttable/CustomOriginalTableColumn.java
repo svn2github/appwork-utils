@@ -167,7 +167,7 @@ public class CustomOriginalTableColumn extends TableColumn {
         // setMaxWidth(Integer.MAX_VALUE);
         // setMinWidth(0);
 
-        int now = getWidth();
+        // int now = getWidth();
 
         // if ("Column: Name".equals(this.toString()) && width == 10) {
         // System.out.println("w " + this + " " + now + "->" + width);
@@ -176,7 +176,7 @@ public class CustomOriginalTableColumn extends TableColumn {
         // System.out.println("w " + this + " " + now + "->" + width);
         // }
         super.setWidth(width);
-        if (width != getWidth()) {
+        if (width != getWidth() && extColumn.getModel().isColumnVisible(extColumn.getIndex())) {
 
             Log.L.severe("Bad Column Implementation: " + extColumn.getModel().getClass().getName() + "/" + extColumn.getName() + " Min: " + super.getMinWidth() + " Max: " + super.getMaxWidth());
         }

@@ -406,7 +406,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
                 mi.setHideOnClick(false);
                 // mis[i] = mi;
 
-                mi.setSelected(this.getModel().isVisible(i));
+                mi.setSelected(this.getModel().isColumnVisible(i));
                 mi.addActionListener(new ActionListener() {
 
                     public void actionPerformed(final ActionEvent e) {
@@ -453,7 +453,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
             tableColumn.setHeaderRenderer(customRenderer != null ? customRenderer : this.createDefaultHeaderRenderer(column));
             // Save column width
 
-            if (!this.model.isVisible(i) && column.isHidable()) {
+            if (!this.model.isColumnVisible(i) && column.isHidable()) {
                 continue;
             }
             columns.put(this.model.getExtColumnByModelIndex(j).getID(), tableColumn);
@@ -540,7 +540,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.swing.components.tooltips.ToolTipHandler#createExtTooltip()
      */
     @Override
@@ -893,7 +893,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.swing.components.tooltips.ToolTipHandler#updateTooltip(org .appwork.swing.components.tooltips.ExtTooltip,
      * java.awt.event.MouseEvent)
      */
@@ -1024,7 +1024,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.swing.components.tooltips.ToolTipHandler# isTooltipDisabledUntilNextRefocus()
      */
     @Override
@@ -1036,7 +1036,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.swing.components.tooltips.ToolTipHandler# isTooltipWithoutFocusEnabled()
      */
     @Override

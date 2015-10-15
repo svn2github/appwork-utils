@@ -148,7 +148,7 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see javax.swing.table.AbstractTableModel#fireTableChanged(javax.swing.event.TableModelEvent)
      */
     @Override
@@ -526,7 +526,7 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
     public TableCellEditor getCelleditorByColumn(final int modelColumnIndex) {
         /*
          * Math.max(0, columnIndex)
-         *
+         * 
          * WORKAROUND for -1 column access,Index out of Bound,Unknown why it happens but this workaround seems to do its job
          */
         return this.getExtColumnByModelIndex(modelColumnIndex);
@@ -541,7 +541,7 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
     public ExtColumn<E> getCellrendererByColumn(final int columnIndex) {
         /*
          * Math.max(0, columnIndex)
-         *
+         * 
          * WORKAROUND for -1 column access,Index out of Bound,Unknown why it happens but this workaround seems to do its job
          */
         return this.columns.get(Math.max(0, columnIndex));
@@ -581,7 +581,7 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
     public String getColumnName(final int column) {
         /*
          * Math.max(0, columnIndex)
-         *
+         * 
          * WORKAROUND for -1 column access,Index out of Bound,Unknown why it happens but this workaround seems to do its job
          */
         return this.columns.get(Math.max(0, column)).getName();
@@ -971,8 +971,16 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
      * @param column
      * @return
      */
-    public boolean isVisible(final int column) {
+    public boolean isColumnVisible(final int column) {
         final ExtColumn<E> col = this.getExtColumnByModelIndex(column);
+        return isColumnVisible(col);
+    }
+
+    /**
+     * @param col
+     * @return
+     */
+    public boolean isColumnVisible(final ExtColumn<E> col) {
         try {
             return col.isVisible(this.getTable().getColumnStore("VISABLE_COL_", col.getID(), col.isDefaultVisible()));
         } catch (final Exception e) {
@@ -1010,9 +1018,9 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
 
     /*
      * this will be called after fireTableStructureChanged. you can customize everything after this
-     *
+     * 
      * true = restore selection
-     *
+     * 
      * false = do not restore selection
      */
     protected boolean postSetTableData(final List<E> newtableData) {

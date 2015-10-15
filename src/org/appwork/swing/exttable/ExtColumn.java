@@ -811,7 +811,8 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
             } catch (final Exception e) {
                 Log.exception(e);
             } finally {
-                ExtColumn.this.tableColumn.setPreferredWidth(w);
+                System.out.println(tableColumn + " Set - >" + w);
+                tableColumn.setPreferredWidth(w);
                 tableColumn.setWidth(w);
             }
             this.updateColumnGui();

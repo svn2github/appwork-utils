@@ -39,14 +39,14 @@ public class CustomOriginalTableColumn extends TableColumn {
     public int getPreferredWidth() {
 
         if (extColumn.getForcedWidth() > 0) {
-            if ("Column: Name".equals(this.toString())) {
-                System.out.println("Get PrefWidth forced" + extColumn.getForcedWidth());
-            }
+            // if ("Column: Name".equals(this.toString())) {
+            // System.out.println("Get PrefWidth forced" + extColumn.getForcedWidth());
+            // }
             return extColumn.getForcedWidth();
         }
-        if ("Column: Name".equals(this.toString())) {
-            System.out.println("Get PrefWidth super" + super.getPreferredWidth());
-        }
+        // if ("Column: Name".equals(this.toString())) {
+        // System.out.println("Get PrefWidth super" + super.getPreferredWidth());
+        // }
         return super.getPreferredWidth();
     }
 
@@ -61,14 +61,14 @@ public class CustomOriginalTableColumn extends TableColumn {
         // System.out.println("extColumn.getForcedWidth() > 0 " + (extColumn.getForcedWidth() > 0) + "- " + extColumn.getForcedWidth());
         // }
         if (extColumn.getForcedWidth() > 0) {
-            if ("Column: Name".equals(this.toString())) {
-                System.out.println("Get getMaxWidth forced" + extColumn.getForcedWidth());
-            }
+            // if ("Column: Name".equals(this.toString())) {
+            // System.out.println("Get getMaxWidth forced" + extColumn.getForcedWidth());
+            // }
             return extColumn.getForcedWidth();
         }
-        if ("Column: Name".equals(this.toString())) {
-            System.out.println("Get getMaxWidth super" + super.getMaxWidth());
-        }
+        // if ("Column: Name".equals(this.toString())) {
+        // System.out.println("Get getMaxWidth super" + super.getMaxWidth());
+        // }
         return super.getMaxWidth();
     }
 
@@ -83,14 +83,14 @@ public class CustomOriginalTableColumn extends TableColumn {
         // System.out.println("extColumn.getForcedWidth() > 0 " + (extColumn.getForcedWidth() > 0) + "- " + extColumn.getForcedWidth());
         // }
         if (extColumn.getForcedWidth() > 0) {
-            if ("Column: Name".equals(this.toString())) {
-                System.out.println("Get getMinWidth forced" + extColumn.getForcedWidth());
-            }
+            // if ("Column: Name".equals(this.toString())) {
+            // System.out.println("Get getMinWidth forced" + extColumn.getForcedWidth());
+            // }
             return extColumn.getForcedWidth();
         }
-        if ("Column: Name".equals(this.toString())) {
-            System.out.println("Get getMinWidth super" + super.getMinWidth());
-        }
+        // if ("Column: Name".equals(this.toString())) {
+        // System.out.println("Get getMinWidth super" + super.getMinWidth());
+        // }
         return super.getMinWidth();
     }
 
@@ -110,7 +110,7 @@ public class CustomOriginalTableColumn extends TableColumn {
         // int now = getPreferredWidth();
         // System.out.println("pref " + getModelIndex() + " " + now + "->" + width);
         // }
-        super.setPreferredWidth(width);
+        super.setPreferredWidth(preferredWidth);
         // if (getModelIndex() == 8) {
         // System.out.println("pref-->" + getPreferredWidth());
         // }
@@ -129,9 +129,9 @@ public class CustomOriginalTableColumn extends TableColumn {
     @Override
     public int getWidth() {
 
-        if ("Column: Name".equals(this.toString())) {
-            System.out.println("Get Width " + super.getWidth());
-        }
+        // if ("Column: Name".equals(this.toString())) {
+        // System.out.println("Get Width " + super.getWidth());
+        // }
 
         return super.getWidth();
     }
@@ -169,12 +169,12 @@ public class CustomOriginalTableColumn extends TableColumn {
 
         int now = getWidth();
 
-        if ("Column: Name".equals(this.toString()) && width == 10) {
-            System.out.println("w " + this + " " + now + "->" + width);
-        }
-        if ("Column: Name".equals(this.toString()) && width == 386) {
-            System.out.println("w " + this + " " + now + "->" + width);
-        }
+        // if ("Column: Name".equals(this.toString()) && width == 10) {
+        // System.out.println("w " + this + " " + now + "->" + width);
+        // }
+        // if ("Column: Name".equals(this.toString()) && width == 386) {
+        // System.out.println("w " + this + " " + now + "->" + width);
+        // }
         super.setWidth(width);
         if (width != getWidth()) {
 

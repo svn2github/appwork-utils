@@ -37,8 +37,15 @@ public class CustomOriginalTableColumn extends TableColumn {
      */
     @Override
     public int getPreferredWidth() {
+
         if (extColumn.getForcedWidth() > 0) {
+            if ("Column: Name".equals(this.toString())) {
+                System.out.println("Get PrefWidth forced" + extColumn.getForcedWidth());
+            }
             return extColumn.getForcedWidth();
+        }
+        if ("Column: Name".equals(this.toString())) {
+            System.out.println("Get PrefWidth super" + super.getPreferredWidth());
         }
         return super.getPreferredWidth();
     }
@@ -54,7 +61,13 @@ public class CustomOriginalTableColumn extends TableColumn {
         // System.out.println("extColumn.getForcedWidth() > 0 " + (extColumn.getForcedWidth() > 0) + "- " + extColumn.getForcedWidth());
         // }
         if (extColumn.getForcedWidth() > 0) {
+            if ("Column: Name".equals(this.toString())) {
+                System.out.println("Get getMaxWidth forced" + extColumn.getForcedWidth());
+            }
             return extColumn.getForcedWidth();
+        }
+        if ("Column: Name".equals(this.toString())) {
+            System.out.println("Get getMaxWidth super" + super.getMaxWidth());
         }
         return super.getMaxWidth();
     }
@@ -70,7 +83,13 @@ public class CustomOriginalTableColumn extends TableColumn {
         // System.out.println("extColumn.getForcedWidth() > 0 " + (extColumn.getForcedWidth() > 0) + "- " + extColumn.getForcedWidth());
         // }
         if (extColumn.getForcedWidth() > 0) {
+            if ("Column: Name".equals(this.toString())) {
+                System.out.println("Get getMinWidth forced" + extColumn.getForcedWidth());
+            }
             return extColumn.getForcedWidth();
+        }
+        if ("Column: Name".equals(this.toString())) {
+            System.out.println("Get getMinWidth super" + super.getMinWidth());
         }
         return super.getMinWidth();
     }
@@ -105,6 +124,32 @@ public class CustomOriginalTableColumn extends TableColumn {
     /*
      * (non-Javadoc)
      *
+     * @see javax.swing.table.TableColumn#getWidth()
+     */
+    @Override
+    public int getWidth() {
+
+        if ("Column: Name".equals(this.toString())) {
+            System.out.println("Get Width " + super.getWidth());
+        }
+
+        return super.getWidth();
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        // TODO Auto-generated method stub
+        return "Column: " + extColumn.getName();
+    }
+
+    /*
+     * (non-Javadoc)
+     *
      * @see javax.swing.table.TableColumn#setMinWidth(int)
      */
     @Override
@@ -121,11 +166,15 @@ public class CustomOriginalTableColumn extends TableColumn {
         // try {
         // setMaxWidth(Integer.MAX_VALUE);
         // setMinWidth(0);
-        // if ("Version".equals(extColumn.getName())) {
-        // int now = getWidth();
-        // System.out.println("w " + getModelIndex() + " " + extColumn.getName() + " " + now + "->" + width);
-        // }
 
+        int now = getWidth();
+
+        if ("Column: Name".equals(this.toString()) && width == 10) {
+            System.out.println("w " + this + " " + now + "->" + width);
+        }
+        if ("Column: Name".equals(this.toString()) && width == 386) {
+            System.out.println("w " + this + " " + now + "->" + width);
+        }
         super.setWidth(width);
         if (width != getWidth()) {
 

@@ -93,15 +93,20 @@ public class ProxyDialog extends AbstractDialog<HTTPProxy> implements CaretListe
         }
     }
 
-    private JLabel                   lblUser;
-    private JLabel                   lblPass;
-    private JLabel                   lblPort;
-    private JLabel                   lblHost;
-    private DelayedRunnable          delayer;
-    private TYPE                     type;
-    private final HTTPProxy          proxy;
-    private ExtTextArea              desc;
-    private final String             message;
+    private JLabel          lblUser;
+    private JLabel          lblPass;
+    private JLabel          lblPort;
+    private JLabel          lblHost;
+    private DelayedRunnable delayer;
+    private TYPE            type;
+    private final HTTPProxy proxy;
+    private ExtTextArea     desc;
+    private String          message;
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
     private ExtCheckBox              cbAuth;
     private boolean                  authRequired = false;
 
@@ -154,7 +159,7 @@ public class ProxyDialog extends AbstractDialog<HTTPProxy> implements CaretListe
         if (!isShowRemember()) {
             return super.createBottomButtonPanel();
         }
-        DefaultButtonPanel ret = new DefaultButtonPanel("ins 0", "[]", "0[grow,fill]0");
+        DefaultButtonPanel ret = createButtonPanelImpl("ins 0", "[]", "0[grow,fill]0");
 
         remember = new JCheckBox();
         rememberLbl = new JLabel(_AWU.T.proxydialog_remember());
@@ -554,7 +559,7 @@ public class ProxyDialog extends AbstractDialog<HTTPProxy> implements CaretListe
         new EDTRunner() {
             /*
              * (non-Javadoc)
-             *
+             * 
              * @see org.appwork.utils.swing.EDTRunner#runInEDT()
              */
             @Override

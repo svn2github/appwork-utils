@@ -53,7 +53,8 @@ public abstract class SocksHTTPconnection extends HTTPConnectionImpl {
         }
         boolean sslSNIWorkAround = false;
         connect: while (true) {
-            if (this.isConnectionSocketValid()) { return;/* oder fehler */
+            if (this.isConnectionSocketValid()) {
+                return;/* oder fehler */
             }
             this.resetConnection();
             this.proxyRequest = new StringBuffer();
@@ -63,6 +64,7 @@ public abstract class SocksHTTPconnection extends HTTPConnectionImpl {
                 if (this.httpURL.getProtocol().startsWith("https")) {
                     /* we need to lay ssl over normal socks5 connection */
                     try {
+                        sockssocket.setSoTimeout(readTimeout);
                         final SSLSocket sslSocket;
                         if (sslSNIWorkAround) {
                             /* wrong configured SNI at serverSide */
@@ -70,6 +72,7 @@ public abstract class SocksHTTPconnection extends HTTPConnectionImpl {
                         } else {
                             sslSocket = (SSLSocket) HTTPConnectionImpl.getSSLSocketFactory(this).createSocket(this.sockssocket, this.httpURL.getHost(), this.httpPort, true);
                         }
+
                         sslSocket.startHandshake();
                         this.verifySSLHostname(sslSocket);
                         this.connectionSocket = sslSocket;
@@ -106,7 +109,9 @@ public abstract class SocksHTTPconnection extends HTTPConnectionImpl {
                 throw new ProxyConnectException(e, this.proxy);
             } catch (final IOException e) {
                 this.disconnect();
-                if (e instanceof HTTPProxyException) { throw e; }
+                if (e instanceof HTTPProxyException) {
+                    throw e;
+                }
                 this.connectExceptions.add(this.proxyInetSocketAddress + "|" + e.getMessage());
                 throw new ProxyConnectException(e, this.proxy);
             }

@@ -569,7 +569,7 @@ public class Application {
             Log.L.warning("Java 1.6 Update 18 has a serious bug in garbage collector!");
             /*
              * java 1.6 update 18 has a bug in garbage collector, causes java crashes
-             *
+             * 
              * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6847956
              */
             return true;
@@ -592,7 +592,7 @@ public class Application {
             Log.L.warning("freezing AppKit thread bug");
             /*
              * http://bugs.java.com/view_bug.do?bug_id=8025588
-             *
+             * 
              * Frozen AppKit thread
              */
             return true;
@@ -660,7 +660,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see java.io.OutputStream#write(int)
          */
         @Override
@@ -684,7 +684,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see java.io.OutputStream#write(byte[])
          */
         @Override
@@ -707,7 +707,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see java.io.OutputStream#write(byte[], int, int)
          */
         @Override
@@ -731,7 +731,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see java.io.OutputStream#flush()
          */
         @Override
@@ -754,7 +754,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see java.io.OutputStream#close()
          */
         @Override
@@ -925,22 +925,24 @@ public class Application {
      * @return
      */
     public static boolean isSyntheticaLookAndFeel() {
-
-        if (IS_SYNTHETICA != null) {
-            return IS_SYNTHETICA;
+        Boolean ret = IS_SYNTHETICA;
+        if (ret != null) {
+            return ret;
         }
-        Class<?> cls;
         try {
-            IS_SYNTHETICA = false;
-            Class<? extends LookAndFeel> lafClass = UIManager.getLookAndFeel().getClass();
-            if (lafClass.getName().startsWith("de.javasoft.plaf.synthetica")) {
+            final Class<? extends LookAndFeel> lafClass = UIManager.getLookAndFeel().getClass();
+            if (lafClass != null && lafClass.getName().startsWith("de.javasoft.plaf.synthetica")) {
                 // this loads the Synthetica class and triggers the license check. we should only do this if we are pretty sure
-                cls = Class.forName("de.javasoft.plaf.synthetica.SyntheticaLookAndFeel");
-
-                IS_SYNTHETICA = cls.isAssignableFrom(lafClass);
+                final Class<?> cls = Class.forName("de.javasoft.plaf.synthetica.SyntheticaLookAndFeel");
+                ret = cls != null && cls.isAssignableFrom(lafClass);
             }
         } catch (Throwable e) {
-
+        } finally {
+            if (ret != null) {
+                IS_SYNTHETICA = ret;
+            } else {
+                IS_SYNTHETICA = Boolean.FALSE;
+            }
         }
         return IS_SYNTHETICA;
     }

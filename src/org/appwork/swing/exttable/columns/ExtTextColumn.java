@@ -67,7 +67,7 @@ public abstract class ExtTextColumn<E> extends ExtColumn<E> implements ActionLis
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.swing.exttable.ExtColumn#getCellSizeEstimation(java.lang.Object, int)
      */
     @Override
@@ -286,7 +286,7 @@ public abstract class ExtTextColumn<E> extends ExtColumn<E> implements ActionLis
         if (!e.isTemporary() || e.getOppositeComponent() == null) {
             /*
              * we check for temporary , because a rightclick menu will cause focus lost but editing should not stop
-             * 
+             *
              * we also check for oppositeComponent to stopEditing when we click outside the window
              */
             ExtTextColumn.this.noset = true;
@@ -305,7 +305,7 @@ public abstract class ExtTextColumn<E> extends ExtColumn<E> implements ActionLis
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.swing.exttable.ExtColumn#getDefaultForeground()
      */
     @Override
@@ -328,7 +328,7 @@ public abstract class ExtTextColumn<E> extends ExtColumn<E> implements ActionLis
 
     /*
      * @param value
-     * 
+     *
      * @return
      */
     protected Icon getIcon(final E value) {

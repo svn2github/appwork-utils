@@ -1,5 +1,6 @@
 package org.appwork.utils.swing.locator;
 
+import java.awt.Container;
 import java.awt.Point;
 import java.awt.Window;
 
@@ -86,10 +87,26 @@ public class RememberRelativeLocator extends AbstractLocator {
         try {
             final LocationStorage cfg = createConfig(frame);
             if (cfg.isValid()) {
+                if ("absolute".equalsIgnoreCase(cfg.getType())) {
+                    return AbstractLocator.validate(new Point(cfg.getX(), cfg.getY()), frame);
+                }
                 // Do a "is on screen check" here
                 Window parent = getParent();
-                final Point pLoc = parent == null || !parent.isShowing() ? frame.getParent().getLocationOnScreen() : parent.getLocationOnScreen();
+                Container actualParent = frame.getParent();
+                Point pLoc = null;
+
+                if (parent != null) {
+                    pLoc = parent.getLocationOnScreen();
+
+                }
+                if (pLoc == null && actualParent != null) {
+                    pLoc = actualParent.getLocationOnScreen();
+                }
+                if (pLoc == null) {
+                    return getFallbackLocator().getLocationOnScreen(frame);
+                }
                 return AbstractLocator.validate(new Point(cfg.getX() + pLoc.x, cfg.getY() + pLoc.y), frame);
+
             }
         } catch (final Throwable e) {
 
@@ -109,7 +126,7 @@ public class RememberRelativeLocator extends AbstractLocator {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.utils.swing.frame.Locator#onClose(org.appwork.utils.swing .frame.frame)
      */
     @Override
@@ -118,12 +135,31 @@ public class RememberRelativeLocator extends AbstractLocator {
             if (frame.isShowing()) {
                 final Point loc = frame.getLocationOnScreen();
                 Window parent = getParent();
-                final Point pLoc = parent == null ? frame.getParent().getLocationOnScreen() : parent.getLocationOnScreen();
-                final LocationStorage cfg = createConfig(frame);
-                cfg.setValid(true);
-                cfg.setX(loc.x - pLoc.x);
-                cfg.setY(loc.y - pLoc.y);
-                cfg._getStorageHandler().write();
+                Container actualParent = frame.getParent();
+                Point pLoc = null;
+
+                if (parent != null) {
+                    pLoc = parent.getLocationOnScreen();
+
+                }
+                if (pLoc == null && actualParent != null) {
+                    pLoc = actualParent.getLocationOnScreen();
+                }
+                if (pLoc == null) {
+                    // no parent. save absolute
+                    final LocationStorage cfg = createConfig(frame);
+                    cfg.setValid(true);
+                    cfg.setType("absolute");
+                    cfg.setX(loc.x);
+                    cfg.setY(loc.y);
+                    cfg._getStorageHandler().write();
+                } else {
+                    final LocationStorage cfg = createConfig(frame);
+                    cfg.setValid(true);
+                    cfg.setX(loc.x - pLoc.x);
+                    cfg.setY(loc.y - pLoc.y);
+                    cfg._getStorageHandler().write();
+                }
             }
         } catch (final Throwable e) {
             e.printStackTrace();

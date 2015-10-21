@@ -360,7 +360,8 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
              // create panel for the dialog's buttons
              this.okButton = this.createOkButton();
              this.cancelButton = new JButton(this.cancelButtonText);
-             this.cancelButton.addFocusListener(this.defaultButtonFocusListener);
+
+            this.cancelButton.addFocusListener(this.defaultButtonFocusListener);
              this.okButton.addFocusListener(this.defaultButtonFocusListener);
              this.defaultButtons = this.getDefaultButtonPanel();
 

@@ -100,6 +100,23 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
         this.tooltip = new ToolTip();
     }
 
+    /**
+     * @return
+     */
+    public int calculateMinimumHeaderWidth() {
+        // derive default width from the preferred header width
+        TableColumn tableColumn = this.getTableColumn();
+        TableCellRenderer renderer = tableColumn.getHeaderRenderer();
+        if (renderer == null) {
+            renderer = getModel().getTable().getTableHeader().getDefaultRenderer();
+        }
+        Component component = renderer.getTableCellRendererComponent(getModel().getTable(), this.getName(), false, false, -1, 2);
+        // if (Application.isSyntheticaLookAndFeel()) {
+        // return component.getPreferredSize().width + 6;
+        // }
+        return component.getPreferredSize().width;
+    }
+
     protected void repaint() {
         final ExtTableModel<E> model = getModel();
         if (model == null) {

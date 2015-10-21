@@ -60,9 +60,9 @@ public class Theme implements MinTimeWeakReferenceCleanup {
         }
     }
 
-    private Theme delegate;
+    private Theme      delegate;
 
-    private File  RESOURCE_HELPER_ROOT;
+    public static File RESOURCE_HELPER_ROOT;
 
     /**
      * @param i
@@ -164,7 +164,11 @@ public class Theme implements MinTimeWeakReferenceCleanup {
             ret = this.getCached(key);
         }
         if (ret == null) {
-            final URL url = this.getURL("images/", relativePath, ".png");
+            URL url = this.getURL("images/", relativePath + "_" + size, ".png");
+            if (url == null) {
+                url = this.getURL("images/", relativePath, ".png");
+            }
+
             ret = IconIO.getImageIcon(url, size);
             ret = this.modify(ret, relativePath);
             if (url == null) {
@@ -206,11 +210,11 @@ public class Theme implements MinTimeWeakReferenceCleanup {
             }
             File helperRoot;
 
-            helperRoot = file.getParentFile();
+            helperRoot = new File(file.getParentFile(), "themes/");
             if (RESOURCE_HELPER_ROOT != null) {
                 helperRoot = RESOURCE_HELPER_ROOT;
             }
-            File to = new File(helperRoot, "themes/" + relativePath);
+            File to = new File(helperRoot, relativePath);
             // String[] pathes = relativePath.split("[\\/\\\\]+");
             while (true) {
                 File check = new File(res, relativePath);
@@ -221,18 +225,18 @@ public class Theme implements MinTimeWeakReferenceCleanup {
                         copy(check, to);
                         break;
                     }
-                } else {
-                    int in = relativePath.indexOf("\\");
-                    int in2 = relativePath.indexOf("/");
-
-                    if (in < 0 || in2 < in) {
-                        in = in2;
-                    }
-                    if (in < 0) {
-                        break;
-                    }
-                    relativePath = relativePath.substring(in + 1);
                 }
+                int in = relativePath.indexOf("\\");
+                int in2 = relativePath.indexOf("/");
+
+                if (in < 0 || in2 < in) {
+                    in = in2;
+                }
+                if (in < 0) {
+                    break;
+                }
+                relativePath = relativePath.substring(in + 1);
+
             }
         } catch (Throwable e) {
             Log.L.severe(Exceptions.getStackTrace(e));

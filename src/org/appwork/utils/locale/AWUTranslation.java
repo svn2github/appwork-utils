@@ -422,4 +422,10 @@ public interface AWUTranslation extends TranslateInterface {
 
     @Default(lngs = { "en", "de" }, values = { "Yes", "Ja" })
     String lit_yes();
+
+    @Default(lngs = { "en", "de" }, values = { "System Default", "Systemproxy" })
+    String ProxyDialog_auto();
+
+    @Default(lngs = { "en", "de" }, values = { "Close", "Schließen" })
+    String lit_close();
 }

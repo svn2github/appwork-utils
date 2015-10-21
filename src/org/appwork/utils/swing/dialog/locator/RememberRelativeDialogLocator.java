@@ -3,8 +3,6 @@ package org.appwork.utils.swing.dialog.locator;
 import java.awt.Point;
 import java.awt.Window;
 
-import javax.swing.JFrame;
-
 import org.appwork.utils.swing.dialog.AbstractDialog;
 import org.appwork.utils.swing.dialog.InternDialog;
 import org.appwork.utils.swing.locator.AbstractLocator;
@@ -19,16 +17,16 @@ public class RememberRelativeDialogLocator implements DialogLocator {
      * @param jFrame
      * @param string
      */
-    public RememberRelativeDialogLocator(final String id, final JFrame jFrame) {
+    public RememberRelativeDialogLocator(final String id, final Window jFrame) {
         this.id = id;
-        if (id == null) { throw new IllegalArgumentException("id ==null"); }
+        if (id == null) {
+            throw new IllegalArgumentException("id ==null");
+        }
         delegate = new RememberRelativeLocator(id, jFrame) {
             /*
              * (non-Javadoc)
              * 
-             * @see
-             * org.appwork.utils.swing.locator.RememberRelativeLocator#getID
-             * (java.awt.Window)
+             * @see org.appwork.utils.swing.locator.RememberRelativeLocator#getID (java.awt.Window)
              */
             @Override
             protected String getID(final Window frame) {
@@ -56,9 +54,7 @@ public class RememberRelativeDialogLocator implements DialogLocator {
     /*
      * (non-Javadoc)
      * 
-     * @see
-     * org.appwork.utils.swing.dialog.Locator#onClose(org.appwork.utils.swing
-     * .dialog.AbstractDialog)
+     * @see org.appwork.utils.swing.dialog.Locator#onClose(org.appwork.utils.swing .dialog.AbstractDialog)
      */
     @Override
     public void onClose(final AbstractDialog<?> abstractDialog) {

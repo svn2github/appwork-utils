@@ -166,14 +166,20 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
         try {
             final Object dummy = new Object();
             Object ret = null;
-            if (this.url != null) {
-                Log.L.finer("Read Config: " + this.url);
-                ret = JSonStorage.restoreFromString(IO.readURL(this.url), this.cryptKey == null, this.cryptKey, this.typeRef, dummy);
-            } else {
+            // prefer local file. like primitive storage does as well.
+            if (path.exists()) {
                 Log.L.finer("Read Config: " + this.path.getAbsolutePath());
                 exists = path.exists();
                 ret = JSonStorage.restoreFrom(this.path, this.cryptKey == null, this.cryptKey, this.typeRef, dummy);
+
             }
+            if (ret == dummy || (!path.exists())) {
+                if (this.url != null) {
+                    Log.L.finer("Read Config: " + this.url);
+                    ret = JSonStorage.restoreFromString(IO.readURL(this.url), this.cryptKey == null, this.cryptKey, this.typeRef, dummy);
+                }
+            }
+
             if (ret == dummy) {
                 final T def = this.getDefaultValue();
                 if (def != null) {
@@ -209,7 +215,7 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.storage.config.KeyHandler#validateValue(java.lang.Object)
      */
     @Override

@@ -61,11 +61,11 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
 
     protected static final DelayedRunnable SAVEDELAYER = new DelayedRunnable(5000, 30000) {
 
-                                                           @Override
-                                                           public void delayedrun() {
-                                                               StorageHandler.saveAll();
-                                                           }
-                                                       };
+        @Override
+        public void delayedrun() {
+            StorageHandler.saveAll();
+        }
+    };
     static {
         ShutdownController.getInstance().addShutdownEvent(new ShutdownEvent() {
 
@@ -223,7 +223,16 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
             }
         }
         this.storageID = storageID;
-        this.primitiveStorage = StorageHandler.createPrimitiveStorage(this.path, null, configInterface, StorageHandler.SAVEDELAYER);
+        String relativePath = null;
+
+        try {
+            // this way the config system reads default values from the classpath (bin folder or jar)
+            relativePath = Files.getRelativePath(Application.getResource(""), filePath);
+            this.relativCPPath = relativePath;
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+        this.primitiveStorage = StorageHandler.createPrimitiveStorage(this.path, relativePath, configInterface, StorageHandler.SAVEDELAYER);
         final CryptedStorage cryptedStorage = configInterface.getAnnotation(CryptedStorage.class);
         if (cryptedStorage != null) {
             this.validateKeys(cryptedStorage);

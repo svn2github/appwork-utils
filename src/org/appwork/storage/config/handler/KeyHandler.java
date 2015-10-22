@@ -210,18 +210,18 @@ public abstract class KeyHandler<RawClass> {
         try {
             final DefaultFactory df = this.getAnnotation(DefaultFactory.class);
             if (df != null) {
-                return (RawClass) df.value().newInstance().getDefaultValue();
+                return (RawClass) storageHandler.runDefaultValueFactory(this, df.value().newInstance().getDefaultValue());
             }
             final DefaultJsonObject defaultJson = this.getAnnotation(DefaultJsonObject.class);
             if (defaultJson != null) {
-                return (RawClass) JSonStorage.restoreFromString(defaultJson.value(), new TypeRef<Object>(this.getRawType()) {
-                }, null);
+                return (RawClass) storageHandler.runDefaultValueFactory(this, JSonStorage.restoreFromString(defaultJson.value(), new TypeRef<Object>(this.getRawType()) {
+                }, null));
             }
             final Annotation ann = this.getAnnotation(this.getDefaultAnnotation());
             if (ann != null) {
-                return (RawClass) ann.annotationType().getMethod("value", new Class[] {}).invoke(ann, new Object[] {});
+                return (RawClass) storageHandler.runDefaultValueFactory(this, ann.annotationType().getMethod("value", new Class[] {}).invoke(ann, new Object[] {}));
             }
-            return this.defaultValue;
+            return (RawClass) storageHandler.runDefaultValueFactory(this, this.defaultValue);
         } catch (final Throwable e) {
             throw new RuntimeException(e);
         }

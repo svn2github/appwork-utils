@@ -185,6 +185,15 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
     private static final HashMap<StorageHandler<?>, String> STORAGEMAP                = new HashMap<StorageHandler<?>, String>();
 
     boolean                                                 saveInShutdownHookEnabled = true;
+    private DefaultFactoryInterface                         defaultFactory;
+
+    public DefaultFactoryInterface getDefaultFactory() {
+        return defaultFactory;
+    }
+
+    public void setDefaultFactory(DefaultFactoryInterface defaultFactory) {
+        this.defaultFactory = defaultFactory;
+    }
 
     /**
      * @param name
@@ -322,6 +331,14 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
             final String ID = interfaceName + "." + storage;
             StorageHandler.STORAGEMAP.put(storageHandler, ID);
         }
+    }
+
+    public Object runDefaultValueFactory(KeyHandler<?> handler, Object o) {
+        DefaultFactoryInterface df = defaultFactory;
+        if (df == null) {
+            return o;
+        }
+        return df.getDefaultValue(handler, o);
     }
 
     /**

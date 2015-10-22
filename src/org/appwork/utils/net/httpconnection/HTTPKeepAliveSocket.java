@@ -10,7 +10,6 @@
 package org.appwork.utils.net.httpconnection;
 
 import java.net.InetAddress;
-import java.net.Socket;
 
 import org.appwork.utils.StringUtils;
 
@@ -20,9 +19,9 @@ import org.appwork.utils.StringUtils;
  */
 public class HTTPKeepAliveSocket {
 
-    private final Socket      socket;
-    private final InetAddress localIP;
-    private final String      host;
+    private final SocketStreamInterface socket;
+    private final InetAddress           localIP;
+    private final String                host;
 
     public InetAddress getLocalIP() {
         return this.localIP;
@@ -34,7 +33,7 @@ public class HTTPKeepAliveSocket {
 
     private final InetAddress[] remoteIPs;
 
-    public Socket getSocket() {
+    public SocketStreamInterface getSocketStream() {
         return this.socket;
     }
 
@@ -48,7 +47,7 @@ public class HTTPKeepAliveSocket {
 
     public boolean sameRemoteIPs(final InetAddress remoteIPs[]) {
         if (remoteIPs != null && remoteIPs.length > 0) {
-            final InetAddress socketRemoteIP = this.getSocket().getInetAddress();
+            final InetAddress socketRemoteIP = getSocketStream().getSocket().getInetAddress();
             for (final InetAddress remoteIP : remoteIPs) {
                 if (socketRemoteIP.equals(remoteIP)) {
                     //
@@ -103,7 +102,7 @@ public class HTTPKeepAliveSocket {
         this.keepAliveTimestamp = System.currentTimeMillis() + this.getKeepAliveTimeout();
     }
 
-    public HTTPKeepAliveSocket(final String host, final boolean ssl, final Socket socket, final long keepAliveTimeout, final long maxRequests, final InetAddress localIP, final InetAddress[] remoteIPs) {
+    public HTTPKeepAliveSocket(final String host, final boolean ssl, final SocketStreamInterface socket, final long keepAliveTimeout, final long maxRequests, final InetAddress localIP, final InetAddress[] remoteIPs) {
         this.host = host;
         this.socket = socket;
         this.localIP = localIP;

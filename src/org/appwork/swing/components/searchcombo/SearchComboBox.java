@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.lang.reflect.Field;
@@ -32,6 +33,7 @@ import javax.swing.JList;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
+import javax.swing.KeyStroke;
 import javax.swing.ListCellRenderer;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -54,11 +56,11 @@ import org.appwork.utils.swing.EDTRunner;
 import org.appwork.utils.swing.SwingUtils;
 
 /**
- * this component extends a normal combobox and implements a editable
- * filter/autocompletion feature. <b> make sure that you model is sorted</b>
- * 
+ * this component extends a normal combobox and implements a editable filter/autocompletion feature. <b> make sure that you model is
+ * sorted</b>
+ *
  * @author thomas
- * 
+ *
  * @param <T>
  */
 public abstract class SearchComboBox<T> extends JComboBox {
@@ -97,7 +99,7 @@ public abstract class SearchComboBox<T> extends JComboBox {
             this.panel = new MigPanel("ins 0", "[][grow,fill]", "[grow,fill]") {
 
                 /**
-                 * 
+                 *
                  */
                 private static final long serialVersionUID = 3558783171884965102L;
 
@@ -126,9 +128,8 @@ public abstract class SearchComboBox<T> extends JComboBox {
 
         /*
          * (non-Javadoc)
-         * 
-         * @see javax.swing.ComboBoxEditor#addActionListener(java.awt.event.
-         * ActionListener)
+         *
+         * @see javax.swing.ComboBoxEditor#addActionListener(java.awt.event. ActionListener)
          */
         @Override
         public void addActionListener(final ActionListener l) {
@@ -136,8 +137,12 @@ public abstract class SearchComboBox<T> extends JComboBox {
         }
 
         private void auto() {
-            if (!SearchComboBox.this.isAutoCompletionEnabled()) { return; }
-            if (this.valueSetter.get() > 0) { return; }
+            if (!SearchComboBox.this.isAutoCompletionEnabled()) {
+                return;
+            }
+            if (this.valueSetter.get() > 0) {
+                return;
+            }
 
             // scheduler executes at least 50 ms after this submit.
             // this.sheduler.run();
@@ -145,18 +150,21 @@ public abstract class SearchComboBox<T> extends JComboBox {
 
                 @Override
                 public void run() {
-                    if (Editor.this.valueSetter.get() > 0) { return; }
+                    if (Editor.this.valueSetter.get() > 0) {
+                        return;
+                    }
                     Editor.this.autoComplete(true);
                 }
             });
         }
 
         /**
-         * finds all possible matches of the entered text and sets the selected
-         * object
+         * finds all possible matches of the entered text and sets the selected object
          */
         protected boolean autoComplete(final boolean showPopup) {
-            if (!SearchComboBox.this.isAutoCompletionEnabled()) { return false; }
+            if (!SearchComboBox.this.isAutoCompletionEnabled()) {
+                return false;
+            }
             String rawtxt = Editor.this.tf.getText();
             if (StringUtils.isEmpty(rawtxt)) {
                 /* every string will begin with "" so we return here */
@@ -169,7 +177,9 @@ public abstract class SearchComboBox<T> extends JComboBox {
             final String txt = rawtxt;
 
             final T lValue = this.value;
-            if (lValue != null && SearchComboBox.this.getTextForValue(lValue).equals(txt)) { return true; }
+            if (lValue != null && SearchComboBox.this.getTextForValue(lValue).equals(txt)) {
+                return true;
+            }
             final java.util.List<T> found = new ArrayList<T>();
             for (int i = 0; i < SearchComboBox.this.getModel().getSize(); i++) {
                 final String text = SearchComboBox.this.getTextForValue((T) SearchComboBox.this.getModel().getElementAt(i));
@@ -246,10 +256,8 @@ public abstract class SearchComboBox<T> extends JComboBox {
 
         /*
          * (non-Javadoc)
-         * 
-         * @see
-         * javax.swing.event.DocumentListener#changedUpdate(javax.swing.event
-         * .DocumentEvent)
+         *
+         * @see javax.swing.event.DocumentListener#changedUpdate(javax.swing.event .DocumentEvent)
          */
         @Override
         public void changedUpdate(final DocumentEvent e) {
@@ -281,7 +289,7 @@ public abstract class SearchComboBox<T> extends JComboBox {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see javax.swing.ComboBoxEditor#getEditorComponent()
          */
         @Override
@@ -293,7 +301,7 @@ public abstract class SearchComboBox<T> extends JComboBox {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see javax.swing.ComboBoxEditor#getItem()
          */
         @Override
@@ -308,23 +316,19 @@ public abstract class SearchComboBox<T> extends JComboBox {
 
         /*
          * (non-Javadoc)
-         * 
-         * @see
-         * javax.swing.event.DocumentListener#insertUpdate(javax.swing.event
-         * .DocumentEvent)
+         *
+         * @see javax.swing.event.DocumentListener#insertUpdate(javax.swing.event .DocumentEvent)
          */
         @Override
         public void insertUpdate(final DocumentEvent e) {
             this.auto();
             SearchComboBox.this.onChanged();
-
         }
 
         /*
          * (non-Javadoc)
-         * 
-         * @see javax.swing.ComboBoxEditor#removeActionListener(java.awt.event.
-         * ActionListener)
+         *
+         * @see javax.swing.ComboBoxEditor#removeActionListener(java.awt.event. ActionListener)
          */
         @Override
         public void removeActionListener(final ActionListener l) {
@@ -333,10 +337,8 @@ public abstract class SearchComboBox<T> extends JComboBox {
 
         /*
          * (non-Javadoc)
-         * 
-         * @see
-         * javax.swing.event.DocumentListener#removeUpdate(javax.swing.event
-         * .DocumentEvent)
+         *
+         * @see javax.swing.event.DocumentListener#removeUpdate(javax.swing.event .DocumentEvent)
          */
         @Override
         public void removeUpdate(final DocumentEvent e) {
@@ -347,8 +349,7 @@ public abstract class SearchComboBox<T> extends JComboBox {
         }
 
         /**
-         * use this to set a Text to tf, we don't want action listeners to react
-         * on this
+         * use this to set a Text to tf, we don't want action listeners to react on this
          */
         protected void safeSet(final String txt) {
             this.valueSetter.incrementAndGet();
@@ -361,7 +362,7 @@ public abstract class SearchComboBox<T> extends JComboBox {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see javax.swing.ComboBoxEditor#selectAll()
          */
         @Override
@@ -371,7 +372,7 @@ public abstract class SearchComboBox<T> extends JComboBox {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see javax.swing.ComboBoxEditor#setItem(java.lang.Object)
          */
         @SuppressWarnings("unchecked")
@@ -402,7 +403,7 @@ public abstract class SearchComboBox<T> extends JComboBox {
                     final SearchComboBox<String> box1 = new SearchComboBox<String>() {
 
                         /**
-                         * 
+                         *
                          */
                         private static final long serialVersionUID = 743905470697711746L;
 
@@ -484,7 +485,7 @@ public abstract class SearchComboBox<T> extends JComboBox {
     private int               actualMaximumRowCount  = 8;
     public boolean            autoCompletionEnabled  = true;
     /**
-     * 
+     *
      */
     private static final long serialVersionUID       = 6475635443708682554L;
     private final ColorState  helpColorSet           = new ColorState(Color.LIGHT_GRAY);
@@ -592,7 +593,7 @@ public abstract class SearchComboBox<T> extends JComboBox {
         return new JTextField() {
 
             /**
-             * 
+             *
              */
             private static final long serialVersionUID = 8594276945732071594L;
 
@@ -600,23 +601,33 @@ public abstract class SearchComboBox<T> extends JComboBox {
             public void setText(final String t) {
                 super.setText(t);
             }
-            //
-            // super.setText(t);
-            // if (SearchComboBox.this.helptext != null) {
-            // if (SearchComboBox.this.helptext.equals(t)) {
-            // SearchComboBox.this.setColorState(SearchComboBox.this.helpColorSet);
-            //
-            // } else {
-            // // if (!Editor.this.autoComplete(false)) {
-            // // this.setForeground(SearchComboBox.this.foregroundBad);
-            // // } else {
-            // // this.setForeground(Editor.this.defaultForeground);
-            // // }
-            //
-            // this.setForeground(SearchComboBox.this.getForeground());
-            // }
-            // }
-            // }
+
+            private boolean key = false;
+
+            @Override
+            public void replaceSelection(String content) {
+                if (key) {
+                    // type on keyboard
+                    super.replaceSelection(content);
+                } else {
+                    // paste externaly. like contextmenu
+                    setText(content);
+                }
+            }
+
+            @Override
+            protected boolean processKeyBinding(KeyStroke ks, KeyEvent e, int condition, boolean pressed) {
+                // forward events
+                // this will cause to trigger a pressed event on enter. this
+                // will the trigger the default action of dialogs - for example
+                SearchComboBox.this.dispatchEvent(e);
+                key = true;
+                try {
+                    return super.processKeyBinding(ks, e, condition, pressed);
+                } finally {
+                    key = false;
+                }
+            }
 
         };
     }
@@ -655,7 +666,9 @@ public abstract class SearchComboBox<T> extends JComboBox {
 
     @SuppressWarnings("unchecked")
     public JTextField getTextField() {
-        if ((Editor) this.getEditor() == null) { return null; }
+        if ((Editor) this.getEditor() == null) {
+            return null;
+        }
         return ((Editor) this.getEditor()).getTf();
     }
 
@@ -683,9 +696,8 @@ public abstract class SearchComboBox<T> extends JComboBox {
     }
 
     /**
-     * if unknown values are allowed, the component will not try to find a valid
-     * entry on fopcus lost
-     * 
+     * if unknown values are allowed, the component will not try to find a valid entry on fopcus lost
+     *
      * @return
      */
     public boolean isUnkownTextInputAllowed() {
@@ -694,7 +706,7 @@ public abstract class SearchComboBox<T> extends JComboBox {
     }
 
     /**
-     * 
+     *
      */
     public void onChanged() {
 
@@ -746,7 +758,7 @@ public abstract class SearchComboBox<T> extends JComboBox {
 
     /**
      * Sets the Model for this combobox
-     * 
+     *
      * @param listModel
      */
     public void setList(final List<T> listModel) {
@@ -759,8 +771,7 @@ public abstract class SearchComboBox<T> extends JComboBox {
         try {
             if (prototype != null) {
                 /*
-                 * http://stackoverflow.com/questions/5896282/how-to-prevent-
-                 * jcombobox
+                 * http://stackoverflow.com/questions/5896282/how-to-prevent- jcombobox
                  * -from-becoming-unresponsive-when-using-a-custom-listcell
                  */
                 final Accessible a = this.getUI().getAccessibleChild(this, 0);
@@ -824,9 +835,8 @@ public abstract class SearchComboBox<T> extends JComboBox {
     }
 
     /**
-     * Do not use this method. For Type Safty, please use
-     * {@link #setList(java.util.List)} instead
-     * 
+     * Do not use this method. For Type Safty, please use {@link #setList(java.util.List)} instead
+     *
      * @deprecated use {@link #setList(java.util.List)}
      */
     @Override
@@ -876,9 +886,8 @@ public abstract class SearchComboBox<T> extends JComboBox {
     }
 
     /**
-     * if unknown values are allowed, the component will not try to find a valid
-     * entry on fopcus lost
-     * 
+     * if unknown values are allowed, the component will not try to find a valid entry on fopcus lost
+     *
      * @param allowUnknownValuesEnabled
      */
     public void setUnkownTextInputAllowed(final boolean allowUnknownValuesEnabled) {
@@ -898,19 +907,23 @@ public abstract class SearchComboBox<T> extends JComboBox {
      * @return
      */
     protected boolean textMatchesEntry(String txt) {
-        if (txt == null) { return false; }
+        if (txt == null) {
+            return false;
+        }
         txt = txt.toLowerCase(Locale.ENGLISH);
         String text;
 
         for (int i = 0; i < SearchComboBox.this.getModel().getSize(); i++) {
             text = SearchComboBox.this.getTextForValue((T) SearchComboBox.this.getModel().getElementAt(i));
-            if (text != null && text.toLowerCase(Locale.ENGLISH).startsWith(txt)) { return true; }
+            if (text != null && text.toLowerCase(Locale.ENGLISH).startsWith(txt)) {
+                return true;
+            }
         }
         return false;
     }
 
     /**
-     * 
+     *
      */
     public void updateColorByContent() {
         final String txt = this.getTextField().getText();
@@ -927,10 +940,12 @@ public abstract class SearchComboBox<T> extends JComboBox {
     }
 
     /**
-     * 
+     *
      */
     private void updateHelpText() {
-        if (this.getEditor() == null || this.helptext == null) { return; }
+        if (this.getEditor() == null || this.helptext == null) {
+            return;
+        }
 
         Document doc = this.getTextField().getDocument();
         String txt;

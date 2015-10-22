@@ -28,12 +28,12 @@ public class ExtPasswordField extends MigPanel implements FocusListener, Documen
 
     /**
      * @author Thomas
-     * 
+     *
      */
     public final class CustomTextField extends ExtTextField {
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see org.appwork.swing.components.ExtTextField#replaceSelection(java.lang.String)
          */
         @Override
@@ -44,12 +44,12 @@ public class ExtPasswordField extends MigPanel implements FocusListener, Documen
 
     /**
      * @author Thomas
-     * 
+     *
      */
     public final class CustomPasswordField extends JPasswordField {
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see javax.swing.text.JTextComponent#replaceSelection(java.lang.String)
          */
         private boolean key = false;
@@ -81,7 +81,7 @@ public class ExtPasswordField extends MigPanel implements FocusListener, Documen
     }
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 9035297840443317147L;
 
@@ -114,7 +114,7 @@ public class ExtPasswordField extends MigPanel implements FocusListener, Documen
                 p.add(pwhelptext);
                 p.add(new JButton(new AbstractAction() {
                     /**
-                     * 
+                     *
                      */
                     private static final long serialVersionUID = 7405750769257653425L;
 
@@ -194,7 +194,7 @@ public class ExtPasswordField extends MigPanel implements FocusListener, Documen
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.swing.event.DocumentListener#changedUpdate(javax.swing.event. DocumentEvent)
      */
     @Override
@@ -208,7 +208,7 @@ public class ExtPasswordField extends MigPanel implements FocusListener, Documen
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.awt.event.FocusListener#focusGained(java.awt.event.FocusEvent)
      */
     @Override
@@ -227,7 +227,7 @@ public class ExtPasswordField extends MigPanel implements FocusListener, Documen
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.awt.event.FocusListener#focusLost(java.awt.event.FocusEvent)
      */
     @Override
@@ -276,7 +276,7 @@ public class ExtPasswordField extends MigPanel implements FocusListener, Documen
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.utils.swing.dialog.TextComponentInterface#getText()
      */
     @Override
@@ -287,7 +287,7 @@ public class ExtPasswordField extends MigPanel implements FocusListener, Documen
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.swing.event.DocumentListener#insertUpdate(javax.swing.event. DocumentEvent)
      */
     @Override
@@ -323,7 +323,7 @@ public class ExtPasswordField extends MigPanel implements FocusListener, Documen
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.swing.event.DocumentListener#removeUpdate(javax.swing.event. DocumentEvent)
      */
     @Override
@@ -337,7 +337,7 @@ public class ExtPasswordField extends MigPanel implements FocusListener, Documen
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.swing.components.TextComponentInterface#selectAll()
      */
     @Override
@@ -404,7 +404,7 @@ public class ExtPasswordField extends MigPanel implements FocusListener, Documen
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.utils.swing.dialog.TextComponentInterface#setText(java.lang .String)
      */
     @Override
@@ -415,7 +415,7 @@ public class ExtPasswordField extends MigPanel implements FocusListener, Documen
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
      */
     @Override

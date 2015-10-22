@@ -4,12 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.Proxy;
-import java.net.Socket;
 import java.net.URL;
 import java.nio.ByteBuffer;
-
-import javax.net.ssl.SSLSocket;
 
 import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
@@ -58,12 +54,11 @@ public class HTTPProxyHTTPConnectionImpl extends HTTPConnectionImpl {
                 long startTime = System.currentTimeMillis();
                 for (final InetAddress host : hosts) {
                     this.resetConnection();
-                    this.connectionSocket = new Socket(Proxy.NO_PROXY);
-                    this.connectionSocket.setSoTimeout(this.readTimeout);
+                    this.connectionSocket = createConnectionSocket(null);
                     try {
                         /* create and connect to socks5 proxy */
                         startTime = System.currentTimeMillis();
-                        this.connectionSocket.connect(this.proxyInetSocketAddress = new InetSocketAddress(host, this.proxy.getPort()), this.connectTimeout);
+                        this.connectionSocket.getSocket().connect(this.proxyInetSocketAddress = new InetSocketAddress(host, this.proxy.getPort()), this.connectTimeout);
                         /* connection is okay */
                         ee = null;
                         break;
@@ -153,16 +148,13 @@ public class HTTPProxyHTTPConnectionImpl extends HTTPConnectionImpl {
                     }
                     if (this.httpURL.getProtocol().startsWith("https")) {
                         try {
-                            final SSLSocket sslSocket;
+                            final SSLSocketStreamFactory factory = getSSLSocketStreamFactory();
                             if (sslSNIWorkAround) {
                                 /* wrong configured SNI at serverSide */
-                                sslSocket = (SSLSocket) HTTPConnectionImpl.getSSLSocketFactory(this).createSocket(this.connectionSocket, "", this.httpPort, true);
+                                this.connectionSocket = factory.create(connectionSocket, "", httpPort, true, isSSLTrustALL());
                             } else {
-                                sslSocket = (SSLSocket) HTTPConnectionImpl.getSSLSocketFactory(this).createSocket(this.connectionSocket, this.httpURL.getHost(), this.httpPort, true);
+                                this.connectionSocket = factory.create(connectionSocket, this.httpURL.getHost(), httpPort, true, isSSLTrustALL());
                             }
-                            sslSocket.startHandshake();
-                            this.verifySSLHostname(sslSocket);
-                            this.connectionSocket = sslSocket;
                         } catch (final IOException e) {
                             this.connectExceptions.add(this.connectionSocket + "|" + e.getMessage());
                             this.disconnect();

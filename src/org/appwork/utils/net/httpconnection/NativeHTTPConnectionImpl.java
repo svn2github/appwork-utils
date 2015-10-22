@@ -2,9 +2,9 @@ package org.appwork.utils.net.httpconnection;
 
 /**
  * Copyright (c) 2009 - 2013 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.utils.net.httpconnection
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -41,7 +41,7 @@ import org.appwork.utils.net.NullOutputStream;
 
 /**
  * @author daniel
- * 
+ *
  */
 public class NativeHTTPConnectionImpl implements HTTPConnection {
     protected final URL                                 httpURL;
@@ -171,12 +171,18 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
         }
         if (this.con instanceof HttpsURLConnection) {
             final HttpsURLConnection scon = (HttpsURLConnection) this.con;
-            scon.setSSLSocketFactory(HTTPConnectionImpl.getSSLSocketFactory(this));
+            final boolean trustAll = isSSLTrustALL();
+            final String urlHost = httpURL.getHost();
+            scon.setSSLSocketFactory(JavaSSLSocketStreamFactory.getSSLSocketFactory(trustAll));
             scon.setHostnameVerifier(new HostnameVerifier() {
 
                 @Override
                 public boolean verify(String host, SSLSession sslSession) {
-                    return NativeHTTPConnectionImpl.this.isSSLTrustALL();
+                    if (trustAll) {
+                        return true;
+                    } else {
+                        return StringUtils.equalsIgnoreCase(host, urlHost);
+                    }
                 }
             });
         }
@@ -369,7 +375,7 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
                 /**
                  * disabled because it is unknown if httpurlconnection transparently handles transfer-encoding as it already handles chunked
                  * transfer-encoding
-                 * 
+                 *
                  */
                 // final String encodingTransfer =
                 // this.getHeaderField("Content-Transfer-Encoding");

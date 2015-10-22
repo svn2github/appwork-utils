@@ -11,10 +11,7 @@ package org.appwork.utils.net.httpconnection;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.net.URL;
-
-import javax.net.ssl.SSLSocket;
 
 /**
  * @author daniel
@@ -32,12 +29,12 @@ public abstract class SocksHTTPconnection extends HTTPConnectionImpl {
         DOMAIN
     }
 
-    protected Socket            sockssocket            = null;
+    protected SocketStreamInterface sockssocket            = null;
 
-    protected int               httpPort;
-    protected String            httpHost;
-    protected StringBuffer      proxyRequest           = null;
-    protected InetSocketAddress proxyInetSocketAddress = null;
+    protected int                   httpPort;
+    protected String                httpHost;
+    protected StringBuffer          proxyRequest           = null;
+    protected InetSocketAddress     proxyInetSocketAddress = null;
 
     public SocksHTTPconnection(final URL url, final HTTPProxy proxy) {
         super(url, proxy);
@@ -60,22 +57,18 @@ public abstract class SocksHTTPconnection extends HTTPConnectionImpl {
             this.proxyRequest = new StringBuffer();
             try {
                 long startTime = System.currentTimeMillis();
-                this.sockssocket = this.establishConnection();
+                this.sockssocket = this.createConnectionSocket(null);
+                this.sockssocket = connect(sockssocket);
                 if (this.httpURL.getProtocol().startsWith("https")) {
                     /* we need to lay ssl over normal socks5 connection */
                     try {
-                        sockssocket.setSoTimeout(readTimeout);
-                        final SSLSocket sslSocket;
+                        final SSLSocketStreamFactory factory = getSSLSocketStreamFactory();
                         if (sslSNIWorkAround) {
                             /* wrong configured SNI at serverSide */
-                            sslSocket = (SSLSocket) HTTPConnectionImpl.getSSLSocketFactory(this).createSocket(this.sockssocket, "", this.httpPort, true);
+                            this.connectionSocket = factory.create(sockssocket, "", httpPort, true, isSSLTrustALL());
                         } else {
-                            sslSocket = (SSLSocket) HTTPConnectionImpl.getSSLSocketFactory(this).createSocket(this.sockssocket, this.httpURL.getHost(), this.httpPort, true);
+                            this.connectionSocket = factory.create(sockssocket, this.httpURL.getHost(), httpPort, true, isSSLTrustALL());
                         }
-
-                        sslSocket.startHandshake();
-                        this.verifySSLHostname(sslSocket);
-                        this.connectionSocket = sslSocket;
                     } catch (final IOException e) {
                         this.connectExceptions.add(this.sockssocket + "|" + e.getMessage());
                         this.disconnect();
@@ -122,8 +115,10 @@ public abstract class SocksHTTPconnection extends HTTPConnectionImpl {
     public void setReadTimeout(int readTimeout) {
         try {
             this.readTimeout = Math.max(0, readTimeout);
-            this.sockssocket.setSoTimeout(this.readTimeout);
-            this.connectionSocket.setSoTimeout(this.readTimeout);
+            final SocketStreamInterface sockssocket = this.sockssocket;
+            if (sockssocket != null) {
+                this.sockssocket.getSocket().setSoTimeout(this.readTimeout);
+            }
         } catch (final Throwable ignore) {
         }
     }
@@ -138,9 +133,10 @@ public abstract class SocksHTTPconnection extends HTTPConnectionImpl {
         try {
             super.disconnect();
         } finally {
+            final SocketStreamInterface sockssocket = this.sockssocket;
             try {
-                if (this.sockssocket != null) {
-                    this.sockssocket.close();
+                if (sockssocket != null) {
+                    sockssocket.close();
                 }
             } catch (final Throwable e) {
                 this.sockssocket = null;
@@ -148,7 +144,7 @@ public abstract class SocksHTTPconnection extends HTTPConnectionImpl {
         }
     }
 
-    abstract protected Socket establishConnection() throws IOException;
+    abstract protected SocketStreamInterface connect(SocketStreamInterface socketStream) throws IOException;
 
     @Override
     protected String getRequestInfo() {

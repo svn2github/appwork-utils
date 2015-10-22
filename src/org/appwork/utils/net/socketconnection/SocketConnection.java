@@ -21,131 +21,20 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
 import java.nio.channels.SocketChannel;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicReference;
-
-import javax.net.ssl.SSLSocket;
-import javax.net.ssl.SSLSocketFactory;
 
 import org.appwork.utils.Application;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.net.httpconnection.HTTPConnectionUtils;
 import org.appwork.utils.net.httpconnection.HTTPProxy;
 import org.appwork.utils.net.httpconnection.ProxyConnectException;
-import org.appwork.utils.net.httpconnection.TrustALLSSLFactory;
 
 /**
  * @author daniel
  *
  */
 public abstract class SocketConnection extends Socket {
-
-    public static SSLSocketFactory getSSLSocketFactory(final boolean useSSLTrustAll) throws IOException {
-        final SSLSocketFactory factory;
-        if (useSSLTrustAll) {
-            factory = TrustALLSSLFactory.getSSLFactoryTrustALL();
-        } else {
-            factory = (SSLSocketFactory) SSLSocketFactory.getDefault();
-        }
-        return new SSLSocketFactory() {
-            /**
-             * remove SSL because of POODLE Vulnerability
-             *
-             * https://www.us-cert.gov/ncas/alerts/TA14-290A
-             *
-             * @param socket
-             */
-            private Socket removeSSLProtocol(final Socket socket) {
-                if (socket != null && socket instanceof SSLSocket) {
-                    final SSLSocket sslSocket = (SSLSocket) socket;
-                    // final ArrayList<String> protocols = new
-                    // ArrayList<String>(Arrays.asList(sslSocket.getEnabledProtocols()));
-                    // final Iterator<String> it = protocols.iterator();
-                    // while (it.hasNext()) {
-                    // final String next = it.next();
-                    // if (StringUtils.containsIgnoreCase(next, "ssl")) {
-                    // it.remove();
-                    // }
-                    // }
-                    final long javaVersion = Application.getJavaVersion();
-                    if (javaVersion >= Application.JAVA18) {
-                        sslSocket.setEnabledProtocols(new String[] { "TLSv1", "TLSv1.1", "TLSv1.2" });
-                    } else if (javaVersion >= Application.JAVA17) {
-                        sslSocket.setEnabledProtocols(new String[] { "TLSv1", "TLSv1.1", "TLSv1.2" });
-                    } else {
-                        sslSocket.setEnabledProtocols(new String[] { "TLSv1" });
-                    }
-                }
-                return socket;
-            }
-
-            private Socket removeGMCCipherSuit(final Socket socket) {
-                if (socket != null && socket instanceof SSLSocket) {
-                    final long javaVersion = Application.getJavaVersion();
-                    final boolean gcmWorkaround = javaVersion < 18600000;
-                    if (gcmWorkaround) {
-                        final SSLSocket sslSocket = (SSLSocket) socket;
-                        final ArrayList<String> cipherSuits = new ArrayList<String>(Arrays.asList(sslSocket.getEnabledCipherSuites()));
-                        final Iterator<String> it = cipherSuits.iterator();
-                        boolean updateCipherSuites = false;
-                        while (it.hasNext()) {
-                            final String next = it.next();
-                            if (gcmWorkaround && StringUtils.containsIgnoreCase(next, "GCM")) {
-                                it.remove();
-                                updateCipherSuites = true;
-                            }
-                        }
-                        if (updateCipherSuites) {
-                            sslSocket.setEnabledCipherSuites(cipherSuits.toArray(new String[0]));
-                        }
-                    }
-                }
-                return socket;
-            }
-
-            @Override
-            public Socket createSocket(Socket arg0, String arg1, int arg2, boolean arg3) throws IOException {
-                return removeGMCCipherSuit(this.removeSSLProtocol(factory.createSocket(arg0, arg1, arg2, arg3)));
-            }
-
-            @Override
-            public String[] getDefaultCipherSuites() {
-                return factory.getDefaultCipherSuites();
-            }
-
-            @Override
-            public String[] getSupportedCipherSuites() {
-                return factory.getSupportedCipherSuites();
-
-            }
-
-            @Override
-            public Socket createSocket(String arg0, int arg1) throws IOException, UnknownHostException {
-                return removeGMCCipherSuit(this.removeSSLProtocol(factory.createSocket(arg0, arg1)));
-
-            }
-
-            @Override
-            public Socket createSocket(InetAddress arg0, int arg1) throws IOException {
-                return removeGMCCipherSuit(this.removeSSLProtocol(factory.createSocket(arg0, arg1)));
-            }
-
-            @Override
-            public Socket createSocket(String arg0, int arg1, InetAddress arg2, int arg3) throws IOException, UnknownHostException {
-                return removeGMCCipherSuit(this.removeSSLProtocol(factory.createSocket(arg0, arg1, arg2, arg3)));
-            }
-
-            @Override
-            public Socket createSocket(InetAddress arg0, int arg1, InetAddress arg2, int arg3) throws IOException {
-                return removeGMCCipherSuit(this.removeSSLProtocol(factory.createSocket(arg0, arg1, arg2, arg3)));
-            }
-
-        };
-    }
 
     protected static int ensureRead(final InputStream is) throws IOException {
         final int read = is.read();

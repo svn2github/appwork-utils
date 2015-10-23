@@ -195,11 +195,11 @@ public class JavaSSLSocketStreamFactory implements SSLSocketStreamFactory {
     }
 
     @Override
-    public SocketStreamInterface create(final SocketStreamInterface socketStream, final String host, final int port, final boolean autoClose, final boolean trustAll) throws IOException {
+    public SSLSocketStreamInterface create(final SocketStreamInterface socketStream, final String host, final int port, final boolean autoClose, final boolean trustAll) throws IOException {
         final SSLSocket sslSocket = (SSLSocket) getSSLSocketFactory(trustAll).createSocket(socketStream.getSocket(), host, port, autoClose);
         sslSocket.startHandshake();
         verifySSLHostname(sslSocket, host, trustAll);
-        return new SocketStreamInterface() {
+        return new SSLSocketStreamInterface() {
 
             @Override
             public Socket getSocket() {
@@ -219,6 +219,11 @@ public class JavaSSLSocketStreamFactory implements SSLSocketStreamFactory {
             @Override
             public void close() throws IOException {
                 sslSocket.close();
+            }
+
+            @Override
+            public String getCipherSuite() {
+                return sslSocket.getSession().getCipherSuite();
             }
         };
     }

@@ -128,7 +128,7 @@ public abstract class SearchComboBox<T> extends JComboBox {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see javax.swing.ComboBoxEditor#addActionListener(java.awt.event. ActionListener)
          */
         @Override
@@ -256,7 +256,7 @@ public abstract class SearchComboBox<T> extends JComboBox {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see javax.swing.event.DocumentListener#changedUpdate(javax.swing.event .DocumentEvent)
          */
         @Override
@@ -289,7 +289,7 @@ public abstract class SearchComboBox<T> extends JComboBox {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see javax.swing.ComboBoxEditor#getEditorComponent()
          */
         @Override
@@ -301,7 +301,7 @@ public abstract class SearchComboBox<T> extends JComboBox {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see javax.swing.ComboBoxEditor#getItem()
          */
         @Override
@@ -316,7 +316,7 @@ public abstract class SearchComboBox<T> extends JComboBox {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see javax.swing.event.DocumentListener#insertUpdate(javax.swing.event .DocumentEvent)
          */
         @Override
@@ -327,7 +327,7 @@ public abstract class SearchComboBox<T> extends JComboBox {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see javax.swing.ComboBoxEditor#removeActionListener(java.awt.event. ActionListener)
          */
         @Override
@@ -337,7 +337,7 @@ public abstract class SearchComboBox<T> extends JComboBox {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see javax.swing.event.DocumentListener#removeUpdate(javax.swing.event .DocumentEvent)
          */
         @Override
@@ -362,7 +362,7 @@ public abstract class SearchComboBox<T> extends JComboBox {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see javax.swing.ComboBoxEditor#selectAll()
          */
         @Override
@@ -372,7 +372,7 @@ public abstract class SearchComboBox<T> extends JComboBox {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see javax.swing.ComboBoxEditor#setItem(java.lang.Object)
          */
         @SuppressWarnings("unchecked")
@@ -620,7 +620,6 @@ public abstract class SearchComboBox<T> extends JComboBox {
                 // forward events
                 // this will cause to trigger a pressed event on enter. this
                 // will the trigger the default action of dialogs - for example
-                SearchComboBox.this.dispatchEvent(e);
                 key = true;
                 try {
                     return super.processKeyBinding(ks, e, condition, pressed);

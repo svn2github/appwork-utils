@@ -9,13 +9,11 @@
  */
 package org.appwork.utils.net.httpconnection;
 
-import java.io.IOException;
-
 /**
  * @author daniel
  *
  */
-public interface SSLSocketStreamFactory {
+public interface SSLSocketStreamInterface extends SocketStreamInterface {
 
-    public SSLSocketStreamInterface create(SocketStreamInterface socketStream, final String host, final int port, final boolean autoclose, final boolean trustAll) throws IOException;
+    public String getCipherSuite();
 }

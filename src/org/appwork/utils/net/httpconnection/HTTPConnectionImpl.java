@@ -31,8 +31,6 @@ import java.util.WeakHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.zip.GZIPInputStream;
 
-import javax.net.ssl.SSLSocket;
-
 import org.appwork.net.protocol.http.HTTPConstants;
 import org.appwork.scheduler.DelayedRunnable;
 import org.appwork.utils.Regex;
@@ -1072,9 +1070,9 @@ public class HTTPConnectionImpl implements HTTPConnection {
         }
         final InetAddress lLastConnection = this.lastConnection;
         if (lhttpSocket != null && lhttpSocket.isConnected()) {
-            if (lhttpSocket instanceof SSLSocket) {
-                final SSLSocket sslSocket = (SSLSocket) lhttpSocket;
-                sb.append("SSLCipher: ").append(sslSocket.getSession().getCipherSuite()).append("\r\n");
+            if (socketStream instanceof SSLSocketStreamInterface) {
+                final SSLSocketStreamInterface sslSocketStream = (SSLSocketStreamInterface) socketStream;
+                sb.append("SSLCipher: ").append(sslSocketStream.getCipherSuite()).append("\r\n");
             }
             sb.append("ConnectIP: ").append(lhttpSocket.getInetAddress()).append(":").append(lhttpSocket.getPort()).append("\r\n");
         } else if (lLastConnection != null) {

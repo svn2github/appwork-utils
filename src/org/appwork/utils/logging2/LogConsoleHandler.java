@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2013 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.utils.logging2
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -20,7 +20,7 @@ import org.appwork.utils.logging.LogFormatter;
 
 /**
  * @author daniel
- * 
+ *
  */
 public class LogConsoleHandler extends ConsoleHandler {
 
@@ -29,6 +29,7 @@ public class LogConsoleHandler extends ConsoleHandler {
     public LogConsoleHandler() {
         setLevel(Level.ALL);
         setFormatter(new LogFormatter());
+        //
     }
 
     public HashSet<String> getAllowedLoggerNames() {
@@ -38,9 +39,15 @@ public class LogConsoleHandler extends ConsoleHandler {
     @Override
     public boolean isLoggable(final LogRecord record) {
         final HashSet<String> lallowedLoggerNames = allowedLoggerNames;
-        if (lallowedLoggerNames == null) { return false; }
-        if (lallowedLoggerNames.size() == 0) { return true; }
-        if (allowedLoggerNames.contains(record.getLoggerName().toLowerCase(Locale.ENGLISH))) { return true; }
+        if (lallowedLoggerNames == null) {
+            return false;
+        }
+        if (lallowedLoggerNames.size() == 0) {
+            return true;
+        }
+        if (allowedLoggerNames.contains(record.getLoggerName().toLowerCase(Locale.ENGLISH))) {
+            return true;
+        }
 
         return false;
     }

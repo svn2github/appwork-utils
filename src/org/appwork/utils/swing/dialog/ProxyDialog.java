@@ -35,7 +35,6 @@ import org.appwork.swing.components.ExtTextField;
 import org.appwork.utils.BinaryLogic;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.locale._AWU;
-
 import org.appwork.utils.net.httpconnection.HTTPProxy;
 import org.appwork.utils.net.httpconnection.HTTPProxy.TYPE;
 import org.appwork.utils.swing.EDTHelper;
@@ -553,7 +552,7 @@ public class ProxyDialog extends AbstractDialog<HTTPProxy> implements CaretListe
         registerFocus(txtHost);
         // set(ClipboardMonitoring.getINSTANCE().getCurrentContent());
         this.set(proxy);
-        cbAuth.setSelected(isAuthRequired());
+        cbAuth.setSelected(cbAuth.isSelected() || isAuthRequired());
         cbAuth.updateDependencies();
         return panel;
     }
@@ -601,7 +600,7 @@ public class ProxyDialog extends AbstractDialog<HTTPProxy> implements CaretListe
         new EDTRunner() {
             /*
              * (non-Javadoc)
-             * 
+             *
              * @see org.appwork.utils.swing.EDTRunner#runInEDT()
              */
             @Override
@@ -632,6 +631,7 @@ public class ProxyDialog extends AbstractDialog<HTTPProxy> implements CaretListe
                     txtHost.setText(p.getHost());
                     txtPort.setText(p.getPort() + "");
                     txtUser.setText(p.getUser());
+                    txtPass.setText(p.getPass());
                     break;
 
                 case SOCKS4:
@@ -652,9 +652,10 @@ public class ProxyDialog extends AbstractDialog<HTTPProxy> implements CaretListe
                     txtHost.setText(p.getHost());
                     txtPort.setText(p.getPort() + "");
                     txtUser.setText(p.getUser());
+                    txtPass.setText(p.getPass());
                     break;
                 }
-
+                cbAuth.setSelected(StringUtils.isNotEmpty(txtHost.getText()));
                 cmbType.setEnabled(typeEditable);
             }
         };

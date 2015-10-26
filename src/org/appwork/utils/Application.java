@@ -283,7 +283,7 @@ public class Application {
             System.out.println(" !!!!!!! FrameWork Init is not done. Call Application.ensureFrameWorkInit() as very first action in your application");
             System.out.println(" !!!!!!! FrameWork Init is not done. Call Application.ensureFrameWorkInit() as very first action in your application");
             System.out.println(" !!!!!!! FrameWork Init is not done. Call Application.ensureFrameWorkInit() as very first action in your application");
-            new Exception().printStackTrace();
+            new Exception(" !!!!!!! FrameWork Init is not done. Call Application.ensureFrameWorkInit() as very first action in your application").printStackTrace();
         }
     }
 

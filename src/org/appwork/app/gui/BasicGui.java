@@ -23,6 +23,7 @@ import org.appwork.swing.ExtJFrame;
 import org.appwork.swing.action.BasicAction;
 import org.appwork.swing.components.ExtButton;
 import org.appwork.swing.trayicon.AWTrayIcon;
+import org.appwork.utils.logging2.extmanager.LoggerFactory;
 import org.appwork.utils.os.CrossSystem;
 import org.appwork.utils.swing.EDTRunner;
 import org.appwork.utils.swing.LockPanel;
@@ -58,7 +59,7 @@ public abstract class BasicGui {
                         getFrame().add(bt = new ExtButton(new BasicAction(" button") {
 
                             /**
-                             * 
+                             *
                              */
                             private static final long serialVersionUID = -4007724735998967065L;
 
@@ -174,7 +175,7 @@ public abstract class BasicGui {
 
         frame = new ExtJFrame(title) {
             /**
-             * 
+             *
              */
             private static final long serialVersionUID = -8325715174242107194L;
             private final boolean     notToFront       = false;                 ;
@@ -245,7 +246,7 @@ public abstract class BasicGui {
             lockPanel = LockPanel.create(frame);
         } catch (final AWTException e1) {
 
-            org.appwork.utils.logging.Log.exception(e1);
+            LoggerFactory.I().getDefaultLogger().log(e1);
         }
         frame.setIconImages(getAppIconList());
         // Set Application dimensions and locations
@@ -306,7 +307,7 @@ public abstract class BasicGui {
 
     /**
      * Creates the whole mainframework panel
-     * 
+     *
      * @throws IOException
      */
     protected abstract void layoutPanel();

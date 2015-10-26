@@ -11,7 +11,7 @@ import java.util.regex.Matcher;
 import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.encoding.Base64;
-import org.appwork.utils.logging.Log;
+
 
 public class HTTPConnectionUtils {
 
@@ -25,12 +25,12 @@ public class HTTPConnectionUtils {
                 /* RFC2231 */
                 final String encoding = new Regex(contentdisposition, "(?:;| |^)filename\\*\\s*=\\s*(.+?)''").getMatch(0);
                 if (encoding == null) {
-                    Log.L.severe("Missing encoding: " + contentdisposition);
+                          org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Missing encoding: " + contentdisposition);
                     return null;
                 }
                 final String filename = new Regex(contentdisposition, "(?:;| |^)filename\\*\\s*=\\s*.+?''(.*?)($|;\\s*|;$)").getMatch(0);
                 if (filename == null) {
-                    Log.L.severe("Broken/Unsupported: " + contentdisposition);
+                          org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Broken/Unsupported: " + contentdisposition);
                     return null;
                 } else {
                     try {
@@ -42,7 +42,7 @@ public class HTTPConnectionUtils {
                             return null;
                         }
                     } catch (final Exception e) {
-                        Log.L.severe("Decoding Error: " + filename + "|" + encoding + "|" + contentdisposition);
+                              org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Decoding Error: " + filename + "|" + encoding + "|" + contentdisposition);
                         return null;
                     }
                 }
@@ -60,13 +60,13 @@ public class HTTPConnectionUtils {
                             return null;
                         }
                     } catch (final Exception e) {
-                        Log.L.severe("Decoding(Base64) Error: " + contentdisposition);
+                              org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Decoding(Base64) Error: " + contentdisposition);
                         return null;
                     }
                 }
                 final String filename = new Regex(contentdisposition, "(?:;| |^)(filename|file_name|name)\\s*=\\s*(\"|'|)(.*?)(\\2$|\\2;$|\\2;.)").getMatch(2);
                 if (filename == null) {
-                    Log.L.severe("Broken/Unsupported: " + contentdisposition);
+                          org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Broken/Unsupported: " + contentdisposition);
                 } else {
                     String ret = filename.trim();
                     ret = ret.replaceFirst("^" + Matcher.quoteReplacement("\\") + "+", Matcher.quoteReplacement("_"));
@@ -80,7 +80,7 @@ public class HTTPConnectionUtils {
             if (contentdisposition.matches("(?i).*xfilename.*")) {
                 return null;
             }
-            Log.L.severe("Broken/Unsupported: " + contentdisposition);
+                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Broken/Unsupported: " + contentdisposition);
         }
         return null;
     }

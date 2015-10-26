@@ -16,7 +16,7 @@
 
 package org.appwork.utils.svn;
 
-import org.appwork.utils.logging.Log;
+
 import org.tmatesoft.svn.core.SVNNodeKind;
 import org.tmatesoft.svn.core.wc.ISVNInfoHandler;
 import org.tmatesoft.svn.core.wc.SVNInfo;
@@ -24,54 +24,54 @@ import org.tmatesoft.svn.core.wc.SVNInfo;
 public class InfoEventHandler implements ISVNInfoHandler {
 
     public void handleInfo(SVNInfo info) {
-        Log.L.fine("-----------------INFO-----------------");
-        Log.L.fine("Local Path: " + info.getPath());
-        Log.L.fine("URL: " + info.getURL());
+              org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("-----------------INFO-----------------");
+              org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Local Path: " + info.getPath());
+              org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("URL: " + info.getURL());
 
         if (info.isRemote() && info.getRepositoryRootURL() != null) {
-            Log.L.fine("Repository Root URL: " + info.getRepositoryRootURL());
+                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Repository Root URL: " + info.getRepositoryRootURL());
         }
 
         if (info.getRepositoryUUID() != null) {
-            Log.L.fine("Repository UUID: " + info.getRepositoryUUID());
+                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Repository UUID: " + info.getRepositoryUUID());
         }
 
-        Log.L.fine("Revision: " + info.getRevision().getNumber());
-        Log.L.fine("Node Kind: " + info.getKind().toString());
+              org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Revision: " + info.getRevision().getNumber());
+              org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Node Kind: " + info.getKind().toString());
 
         if (!info.isRemote()) {
-            Log.L.fine("Schedule: " + (info.getSchedule() != null ? info.getSchedule() : "normal"));
+                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Schedule: " + (info.getSchedule() != null ? info.getSchedule() : "normal"));
         }
 
-        Log.L.fine("Last Changed Author: " + info.getAuthor());
-        Log.L.fine("Last Changed Revision: " + info.getCommittedRevision().getNumber());
-        Log.L.fine("Last Changed Date: " + info.getCommittedDate());
+              org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Last Changed Author: " + info.getAuthor());
+              org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Last Changed Revision: " + info.getCommittedRevision().getNumber());
+              org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Last Changed Date: " + info.getCommittedDate());
 
         if (info.getPropTime() != null) {
-            Log.L.fine("Properties Last Updated: " + info.getPropTime());
+                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Properties Last Updated: " + info.getPropTime());
         }
 
         if (info.getKind() == SVNNodeKind.FILE && info.getChecksum() != null) {
             if (info.getTextTime() != null) {
-                Log.L.fine("Text Last Updated: " + info.getTextTime());
+                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Text Last Updated: " + info.getTextTime());
             }
-            Log.L.fine("Checksum: " + info.getChecksum());
+                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Checksum: " + info.getChecksum());
         }
 
         if (info.getLock() != null) {
             if (info.getLock().getID() != null) {
-                Log.L.fine("Lock Token: " + info.getLock().getID());
+                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Lock Token: " + info.getLock().getID());
             }
 
-            Log.L.fine("Lock Owner: " + info.getLock().getOwner());
-            Log.L.fine("Lock Created: " + info.getLock().getCreationDate());
+                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Lock Owner: " + info.getLock().getOwner());
+                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Lock Created: " + info.getLock().getCreationDate());
 
             if (info.getLock().getExpirationDate() != null) {
-                Log.L.fine("Lock Expires: " + info.getLock().getExpirationDate());
+                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Lock Expires: " + info.getLock().getExpirationDate());
             }
 
             if (info.getLock().getComment() != null) {
-                Log.L.fine("Lock Comment: " + info.getLock().getComment());
+                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Lock Comment: " + info.getLock().getComment());
             }
         }
     }

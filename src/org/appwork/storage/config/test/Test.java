@@ -20,7 +20,7 @@ import org.appwork.storage.config.events.ConfigEventListener;
 import org.appwork.storage.config.events.GenericConfigEventListener;
 import org.appwork.storage.config.handler.KeyHandler;
 import org.appwork.storage.config.handler.StorageHandler;
-import org.appwork.utils.logging.Log;
+
 
 /**
  * @author thomas
@@ -46,8 +46,8 @@ public class Test {
             final BadInterface jc = JsonConfig.create(BadInterface.class);
         } catch (final Throwable e) {
 
-            Log.L.info("This exception is ok, because BadInterface is malformed due to various reasons");
-            Log.exception(e);
+                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("This exception is ok, because BadInterface is malformed due to various reasons");
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
         }
         try {
             final MyInterface jc = JsonConfig.create(MyInterface.class);
@@ -140,7 +140,7 @@ public class Test {
             System.out.println(MyInterface.CFG.getDefault());
         } catch (final RuntimeException e) {
             // seems like the interface is malformed
-            Log.exception(e);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
 
             System.out.println("TEST FAILED");
         }

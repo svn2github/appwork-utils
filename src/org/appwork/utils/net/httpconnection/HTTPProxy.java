@@ -11,7 +11,7 @@ import org.appwork.utils.IO;
 import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.locale._AWU;
-import org.appwork.utils.logging.Log;
+
 import org.appwork.utils.processes.ProcessBuilderFactory;
 
 public class HTTPProxy {
@@ -91,7 +91,7 @@ public class HTTPProxy {
                 }
             }
         } catch (final Throwable e) {
-            Log.exception(e);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
         }
         return ret;
     }
@@ -145,7 +145,7 @@ public class HTTPProxy {
             if (tmpport != null) {
                 info[1] = "" + tmpport;
             } else {
-                Log.L.severe("No proxyport defined, using default 8080");
+                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("No proxyport defined, using default 8080");
                 info[1] = "8080";
             }
         }
@@ -205,7 +205,7 @@ public class HTTPProxy {
                 final String autoProxy = new Regex(result, "AutoConfigURL\\s+REG_SZ\\s+([^\r\n]+)").getMatch(0);
 
                 if (!StringUtils.isEmpty(autoProxy)) {
-                    Log.L.info("AutoProxy.pac Script found: " + autoProxy);
+                          org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("AutoProxy.pac Script found: " + autoProxy);
                 }
             } catch (final Exception e) {
 
@@ -254,7 +254,7 @@ public class HTTPProxy {
                 }
             }
         } catch (final Throwable e) {
-            Log.exception(e);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
         }
         return ret;
     }

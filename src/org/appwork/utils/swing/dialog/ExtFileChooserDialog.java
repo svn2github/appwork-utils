@@ -43,7 +43,6 @@ import org.appwork.utils.Application;
 import org.appwork.utils.Files;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.locale._AWU;
-import org.appwork.utils.logging.Log;
 import org.appwork.utils.os.CrossSystem;
 import org.appwork.utils.swing.EDTRunner;
 import org.appwork.utils.swing.SwingUtils;
@@ -235,14 +234,14 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
     public void actionPerformed(final ActionEvent e) {
 
         if (e.getSource() == okButton) {
-            Log.L.fine("Answer: Button<OK:" + okButton.getText() + ">");
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Answer: Button<OK:" + okButton.getText() + ">");
             if (fcUI != null) {
                 fcUI.getApproveSelectionAction().actionPerformed(e);
             } else {
                 setReturnmask(true);
             }
         } else if (e.getSource() == cancelButton) {
-            Log.L.fine("Answer: Button<CANCEL:" + cancelButton.getText() + ">");
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Answer: Button<CANCEL:" + cancelButton.getText() + ">");
             setReturnmask(false);
         }
         dispose();
@@ -306,7 +305,7 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.utils.swing.dialog.AbstractDialog#createReturnValue()
      */
     @Override
@@ -349,7 +348,7 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.utils.swing.dialog.AbstractDialog#setDisposed(boolean)
      */
     @Override
@@ -571,14 +570,14 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
         }
         if (newValue) {
 
-            System.out.println("Busy TRUE");
+            // System.out.println("Busy TRUE");
 
             if (parentGlassPane != null) {
                 parentGlassPane.setCursor(BUSY_CURSOR);
                 parentGlassPane.setVisible(true);
             }
         } else {
-            System.out.println("Busy FALSE");
+            // System.out.println("Busy FALSE");
 
             if (parentGlassPane != null) {
                 parentGlassPane.setCursor(null);
@@ -602,7 +601,7 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.utils.swing.dialog.AbstractDialog#layoutDialogContent()
      */
     @Override
@@ -754,16 +753,16 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
 
             @Override
             public void actionPerformed(final ActionEvent e) {
-                Log.L.info(e + "");
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info(e + "");
                 if (JFileChooser.CANCEL_SELECTION.equals(e.getActionCommand())) {
-                    Log.L.fine("Answer: FC CANCEL>");
+                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Answer: FC CANCEL>");
                     // this is called indirectly through #setReturnmask(false).
                     // so we use super here to avoid a loop
                     ExtFileChooserDialog.super.setReturnmask(false);
                     //
                     ExtFileChooserDialog.this.dispose();
                 } else if (JFileChooser.APPROVE_SELECTION.equals(e.getActionCommand())) {
-                    Log.L.fine("Answer: FC APPROVE>");
+                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Answer: FC APPROVE>");
                     ExtFileChooserDialog.this.setReturnmask(true);
 
                     ExtFileChooserDialog.this.dispose();
@@ -775,7 +774,7 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
         try {
             fcUI = (BasicFileChooserUI) fc.getUI();
         } catch (final Throwable e) {
-            Log.exception(e);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
         }
         System.out.println("Duration 5  " + (System.currentTimeMillis() - t));
         if (isFilePreviewEnabled()) {
@@ -807,7 +806,7 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
             presel = null;
         }
 
-        Log.L.info("Given presel: " + presel);
+        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Given presel: " + presel);
 
         if (presel == null) {
             final String path = getIDConfig().getLastSelection();
@@ -876,7 +875,7 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
 
             // might throw exceptions, because the path, and the whole
             // detailsview thingy is part of the ui/LAF
-            Log.exception(t1);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(t1);
         }
 
         if (fileSelectionMode.getId() == FileChooserSelectionMode.DIRECTORIES_ONLY.getId()) {
@@ -1161,7 +1160,7 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
                 }
 
             } catch (final Throwable e) {
-                Log.exception(e);
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
             }
         }
         if (directoryModel != null) {
@@ -1345,7 +1344,7 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
 
                 // might throw exceptions, because the path, and the whole
                 // detailsview thingy is part of the ui/LAF
-                Log.exception(t);
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(t);
             }
             break;
 
@@ -1357,7 +1356,7 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
 
                 // might throw exceptions, because the path, and the whole
                 // detailsview thingy is part of the ui/LAF
-                Log.exception(t);
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(t);
             }
             break;
 

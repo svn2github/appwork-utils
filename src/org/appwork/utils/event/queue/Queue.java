@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.appwork.utils.logging.Log;
+
 
 /**
  * @author daniel
@@ -287,7 +287,7 @@ public abstract class Queue {
             if (t != null && t instanceof QueueThread) {
                 if (t == this.getQueueThread()) {
                     if (this.debugFlag) {
-                        org.appwork.utils.logging.Log.L.warning("Multiple queues detected-> external synchronization may be required! " + item);
+                        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Multiple queues detected-> external synchronization may be required! " + item);
                     }
                     return true;
                 }
@@ -297,7 +297,7 @@ public abstract class Queue {
                      * loop prevention: while can only loop max QUEUELOOPPREVENTION times, cause no more different queues exist
                      */
                     if (this.debugFlag) {
-                        org.appwork.utils.logging.Log.L.warning("QueueLoopPrevention!");
+                        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("QueueLoopPrevention!");
                     }
                     break;
                 }
@@ -403,8 +403,8 @@ public abstract class Queue {
                         this.onItemHandled(item);
                     }
                 } catch (final Throwable e) {
-                    Log.L.info("Queue rescued!");
-                    Log.exception(e);
+                          org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Queue rescued!");
+                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
                 }
             }
         } finally {

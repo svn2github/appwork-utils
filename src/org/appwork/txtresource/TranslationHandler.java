@@ -19,7 +19,7 @@ import java.util.Iterator;
 import java.util.logging.Level;
 
 import org.appwork.utils.Application;
-import org.appwork.utils.logging.Log;
+
 
 /**
  * @author thomas
@@ -145,14 +145,14 @@ public class TranslationHandler implements InvocationHandler {
             path = rPath != null ? "translations/custom/" + rPath.value().newInstance().getPath() + "." + string + ".lng" : "translations/custom/" + this.tInterface.getName().replace(".", "/") + "." + string + ".lng";
             url = Application.getRessourceURL(path, false);
             if (url != null) {
-                Log.L.finer("Load Custom Translation " + url);
+                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Load Custom Translation " + url);
             }
         }
         if (url == null) {
             path = rPath != null ? "translations/" + rPath.value().newInstance().getPath() + "." + string + ".lng" : "translations/" + this.tInterface.getName().replace(".", "/") + "." + string + ".lng";
             url = Application.getRessourceURL(path, false);
             if (url != null) {
-                Log.L.finer("Load Translation " + url);
+                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Load Translation " + url);
             }
         }
         if (url == null) {
@@ -162,7 +162,7 @@ public class TranslationHandler implements InvocationHandler {
             url = Application.getRessourceURL(path, false);
 
             if (url != null) {
-                Log.L.finer("Load Neighbour Translation " + url);
+                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Load Neighbour Translation " + url);
             }
         }
 
@@ -171,7 +171,7 @@ public class TranslationHandler implements InvocationHandler {
             url = Application.getRessourceURL(path, false);
 
             if (url != null) {
-                Log.L.finer("Load DynamicResourcePath Translation " + url);
+                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Load DynamicResourcePath Translation " + url);
             }
         }
         miss: if (url == null) {
@@ -181,7 +181,7 @@ public class TranslationHandler implements InvocationHandler {
                 for (final String d : ann.lngs()) {
                     if (d.equals(string)) {
                         // defaults
-                        Log.L.info("Translation file missing:" + path + "Use Annotation Dev fallback");
+                              org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Translation file missing:" + path + "Use Annotation Dev fallback");
                         break miss;
                     }
                 }
@@ -212,10 +212,10 @@ public class TranslationHandler implements InvocationHandler {
                 res = this.createTranslationResource(o);
                 ret.add(res);
             } catch (final NullPointerException e) {
-                Log.L.warning(e.getMessage());
+                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning(e.getMessage());
 
             } catch (final Throwable e) {
-                Log.exception(Level.WARNING, e);
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
             }
         }
         if (!containsDefault) {
@@ -223,7 +223,7 @@ public class TranslationHandler implements InvocationHandler {
                 res = this.createTranslationResource(TranslationHandler.DEFAULT);
                 ret.add(res);
             } catch (final Throwable e) {
-                Log.exception(Level.WARNING, e);
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
             }
         }
         return ret;
@@ -312,8 +312,8 @@ public class TranslationHandler implements InvocationHandler {
                 ret = res.getEntry(method);
                 if (ret != null) { return ret; }
             } catch (final Throwable e) {
-                Log.L.warning("Exception in translation: " + this.tInterface.getName() + "." + res.getName());
-                Log.exception(Level.WARNING, e);
+                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Exception in translation: " + this.tInterface.getName() + "." + res.getName());
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
             }
         }
         if (ret == null) {
@@ -385,8 +385,8 @@ public class TranslationHandler implements InvocationHandler {
                 ret = res.getSource(method);
                 if (ret != null) { return ret; }
             } catch (final Throwable e) {
-                Log.L.warning("Exception in translation: " + this.tInterface.getName() + "." + res.getName());
-                Log.exception(Level.WARNING, e);
+                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Exception in translation: " + this.tInterface.getName() + "." + res.getName());
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
             }
         }
 

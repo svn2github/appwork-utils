@@ -29,7 +29,7 @@ import javax.swing.table.TableColumn;
 import org.appwork.swing.components.tooltips.ExtTooltip;
 import org.appwork.swing.exttable.columnmenu.LockColumnWidthAction;
 import org.appwork.utils.locale._AWU;
-import org.appwork.utils.logging.Log;
+
 import org.appwork.utils.swing.EDTHelper;
 import org.appwork.utils.swing.EDTRunner;
 import org.appwork.utils.swing.SwingUtils;
@@ -160,7 +160,7 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
                 }
             }
         } catch (final Throwable e) {
-            Log.exception(e);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
         }
     }
 
@@ -826,7 +826,7 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
                 w = ExtColumn.this.getModel().getTable().getColumnStore("WIDTH_COL_", ExtColumn.this.getID(), w);
                 w = adjustWidth(w);
             } catch (final Exception e) {
-                Log.exception(e);
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
             } finally {
                 System.out.println(tableColumn + " Set - >" + w);
                 tableColumn.setPreferredWidth(w);

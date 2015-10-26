@@ -15,7 +15,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Locale;
 
-import org.appwork.utils.logging.Log;
+
 import org.appwork.utils.net.SimpleHTTP;
 
 /**
@@ -43,7 +43,7 @@ public class SMS77Gateway {
         try {
             sb.append("?u=" + URLEncoder.encode(this.userName, "UTF-8") + "&p=" + URLEncoder.encode(this.userPass, "UTF-8"));
         } catch (final UnsupportedEncodingException e) {
-            Log.exception(e);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
             sb.append("?u=" + this.userName + "&p=" + this.userPass);
         }
 

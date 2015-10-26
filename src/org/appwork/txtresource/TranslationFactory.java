@@ -16,7 +16,7 @@ import java.util.jar.JarInputStream;
 
 import org.appwork.utils.Application;
 import org.appwork.utils.Files;
-import org.appwork.utils.logging.Log;
+
 
 public class TranslationFactory {
 
@@ -48,7 +48,7 @@ public class TranslationFactory {
                     name = name.substring(index + 1, name.length() - 4);
 
                     if (ret.add(name)) {
-                        Log.L.info(name + " found in " + file);
+                              org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info(name + " found in " + file);
                     }
                 } catch (final Throwable e) {
                     // Invalid LanguageFile nameing
@@ -123,7 +123,7 @@ public class TranslationFactory {
                             name = name.substring(index + 1, name.length() - 4);
 
                             if (ret.add(name)) {
-                                Log.L.finer(name + " found in " + new File(jarName));
+                                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer(name + " found in " + new File(jarName));
                             }
                         }
                     }
@@ -134,7 +134,7 @@ public class TranslationFactory {
 
             }
         } catch (final Exception e) {
-            Log.exception(e);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
         }
 
     }
@@ -181,7 +181,7 @@ public class TranslationFactory {
                 for (final String s : defs.lngs()) {
 
                     if (ret.add(s)) {
-                        Log.L.finer(s + " src: " + clazz + " Defaults");
+                              org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer(s + " src: " + clazz + " Defaults");
                     }
                 }
             }

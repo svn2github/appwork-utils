@@ -13,7 +13,7 @@ import org.appwork.jna.winapi.kernel32.Kernel;
 import org.appwork.jna.winapi.structs.IconInfo;
 import org.appwork.jna.winapi.user32.User;
 import org.appwork.utils.Application;
-import org.appwork.utils.logging.Log;
+
 
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
@@ -172,10 +172,10 @@ public class Main {
                         // "INFO",
                         // new ImageIcon(image), null, null);
                         // } catch (final DialogClosedException e) {
-                        // Log.exception(Level.WARNING, e);
+                        // org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
                         //
                         // } catch (final DialogCanceledException e) {
-                        // Log.exception(Level.WARNING, e);
+                        // org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
                         //
                         // }
 
@@ -187,7 +187,7 @@ public class Main {
                             ImageIO.write(image, "png", saveTo);
                             System.out.println(saveTo);
                         } catch (final IOException e) {
-                            Log.exception(Level.WARNING, e);
+                            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
 
                         }
                     }
@@ -225,13 +225,13 @@ public class Main {
         // Dialog.getInstance().showConfirmDialog(0, "title", "icon", new
         // ImageIcon(b), null, null);
         // } catch (final DialogClosedException e) {
-        // Log.exception(Level.WARNING, e);
+        // org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
         //
         // } catch (final DialogCanceledException e) {
-        // Log.exception(Level.WARNING, e);
+        // org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
         //
         // } catch (final Throwable e) {
-        // Log.exception(Level.WARNING, e);
+        // org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
         //
         // }
 

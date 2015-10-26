@@ -10,7 +10,7 @@
 package org.appwork.utils.event.queue;
 
 import org.appwork.utils.event.queue.Queue.QueuePriority;
-import org.appwork.utils.logging.Log;
+
 
 /**
  * @author daniel
@@ -98,7 +98,7 @@ public abstract class QueueAction<T, E extends Throwable> {
      * @return
      */
     public boolean handleException(final Throwable e) {
-        Log.exception(e);
+        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
         return false;
     }
 
@@ -166,7 +166,7 @@ public abstract class QueueAction<T, E extends Throwable> {
         } catch (final Throwable th) {
 
             if (queue != null && queue.isDebug()) {
-                Log.L.severe("QueueActionCallerStackTrace:\r\n" + this.callerStackTrace);
+                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("QueueActionCallerStackTrace:\r\n" + this.callerStackTrace);
             }
             this.exeption = th;
             if (th instanceof RuntimeException) {
@@ -178,7 +178,7 @@ public abstract class QueueAction<T, E extends Throwable> {
             try {
                 this.postRun();
             } catch (final Throwable e) {
-                Log.exception(e);
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
             }
         }
     }

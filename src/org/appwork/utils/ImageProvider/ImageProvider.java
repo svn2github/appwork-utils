@@ -39,7 +39,7 @@ import org.appwork.storage.config.MinTimeWeakReferenceCleanup;
 import org.appwork.sunwrapper.sun.awt.image.ToolkitImageWrapper;
 import org.appwork.utils.Application;
 import org.appwork.utils.URLStream;
-import org.appwork.utils.logging.Log;
+
 
 /**
  * This class grants easy access to images stored in APPROOT/images/**.png
@@ -187,27 +187,27 @@ public class ImageProvider {
 
              final URL absolutePath = Application.getRessourceURL("images/" + name + ".png");
              try {
-                 Log.L.info("Init Image: " + name + ": " + absolutePath);
+                       org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Init Image: " + name + ": " + absolutePath);
                  final BufferedImage image = ImageProvider.read(absolutePath);
                  if (putIntoCache) {
                      if (image.getHeight() * image.getWidth() > 100 * 100) {
-                         // Log.exception(new Throwable("BIG IMAGE IN CACHE: " +
+                         // org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(new Throwable("BIG IMAGE IN CACHE: " +
                          // name));
                      }
                      ImageProvider.IMAGE_CACHE.put(name, new MinTimeWeakReference<BufferedImage>(image, ImageProvider.MIN_LIFETIME, name, ImageProvider.IMAGE_CACHE_CLEANUP));
                  }
                  return image;
              } catch (final IOException e) {
-                 Log.L.severe("Could not Init Image: " + absolutePath);
+                       org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Could not Init Image: " + absolutePath);
                  if (createDummy) {
-                     Log.exception(Level.WARNING, e);
+                     org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
                      return ImageProvider.createIcon(name.toUpperCase(Locale.ENGLISH), 48, 48);
                  } else {
                      throw e;
                  }
              } catch (final Throwable e) {
-                 Log.L.severe("Could not Init Image: " + absolutePath);
-                 Log.exception(Level.WARNING, e);
+                       org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Could not Init Image: " + absolutePath);
+                 org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
                  return ImageProvider.createIcon(name.toUpperCase(Locale.ENGLISH), 48, 48);
              }
          }
@@ -253,7 +253,7 @@ public class ImageProvider {
              return ImageProvider.getImageIcon(name, x, y, true);
          } catch (final IOException e) {
              // can not happen. true creates a dummyicon in case of io errors
-             Log.exception(e);
+             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
              return null;
          }
      }
@@ -311,7 +311,7 @@ public class ImageProvider {
              return ImageProvider.getImageIcon(name, x, y, true, false);
          } catch (final IOException e) {
              // can not happen. true creates a dummyicon in case of io errors
-             Log.exception(e);
+             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
              return null;
          }
      }
@@ -543,7 +543,7 @@ public class ImageProvider {
          try {
              return ImageProvider.dereferenceImage(image);
          } catch (final IOException e) {
-             Log.exception(e);
+             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
              return null;
          }
 

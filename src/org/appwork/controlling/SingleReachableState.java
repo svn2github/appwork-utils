@@ -12,7 +12,7 @@ package org.appwork.controlling;
 import java.util.ArrayList;
 
 import org.appwork.utils.NullsafeAtomicReference;
-import org.appwork.utils.logging.Log;
+import org.appwork.utils.logging2.extmanager.LoggerFactory;
 
 /**
  * @author daniel
@@ -25,6 +25,7 @@ public class SingleReachableState {
     private final String                                       name;
 
     public SingleReachableState(final String name) {
+
         this.stateMachine = new NullsafeAtomicReference<ArrayList<Runnable>>(new ArrayList<Runnable>());
         this.name = name;
     }
@@ -80,7 +81,7 @@ public class SingleReachableState {
                 run.run();
             }
         } catch (final Throwable e) {
-            Log.exception(e);
+            LoggerFactory.I().getDefaultLogger().log(e);
         }
     }
 

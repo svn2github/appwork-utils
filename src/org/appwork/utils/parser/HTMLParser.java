@@ -14,7 +14,7 @@ import java.net.URL;
 import java.util.ArrayList;
 
 import org.appwork.utils.Regex;
-import org.appwork.utils.logging.Log;
+
 
 /**
  * @author coalado
@@ -42,7 +42,7 @@ public class HTMLParser {
                 }
             }
         } catch (final Exception e) {
-            Log.exception(e);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
         }
         return HTMLParser.removeDuplicates(ret);
     }

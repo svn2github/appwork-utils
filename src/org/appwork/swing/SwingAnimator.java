@@ -14,7 +14,7 @@ import java.awt.event.ActionListener;
 
 import javax.swing.Timer;
 
-import org.appwork.utils.logging.Log;
+
 
 /**
  * tiny animation class
@@ -67,7 +67,7 @@ public class SwingAnimator {
 
                 }
             } catch (final Throwable t) {
-                Log.exception(t);
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(t);
                 SwingAnimator.this.timer.stop();
                 SwingAnimator.this.timer = null;
                 this.finalizer.run();

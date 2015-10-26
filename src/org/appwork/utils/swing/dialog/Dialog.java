@@ -24,7 +24,7 @@ import org.appwork.uio.UIOManager;
 import org.appwork.utils.BinaryLogic;
 import org.appwork.utils.interfaces.ValueConverter;
 import org.appwork.utils.locale._AWU;
-import org.appwork.utils.logging.Log;
+
 import org.appwork.utils.swing.EDTRunner;
 
 /**
@@ -182,7 +182,7 @@ public class Dialog {
                 return AWUTheme.I().getIcon(Dialog.ICON_INFO, 32);
             }
         } catch (final Throwable e) {
-            Log.exception(e);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
             return null;
         }
     }

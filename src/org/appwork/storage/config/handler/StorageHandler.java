@@ -48,7 +48,7 @@ import org.appwork.storage.config.events.ConfigEventSender;
 import org.appwork.utils.Application;
 import org.appwork.utils.Files;
 import org.appwork.utils.StringUtils;
-import org.appwork.utils.logging.Log;
+
 import org.appwork.utils.reflection.Clazz;
 import org.appwork.utils.swing.dialog.Dialog;
 
@@ -61,11 +61,11 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
 
     protected static final DelayedRunnable SAVEDELAYER = new DelayedRunnable(5000, 30000) {
 
-        @Override
-        public void delayedrun() {
-            StorageHandler.saveAll();
-        }
-    };
+                                                           @Override
+                                                           public void delayedrun() {
+                                                               StorageHandler.saveAll();
+                                                           }
+                                                       };
     static {
         ShutdownController.getInstance().addShutdownEvent(new ShutdownEvent() {
 
@@ -101,6 +101,8 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
             }
             URL urlClassPath = null;
             if (classPath != null) {
+                // Do not use Application.getResourceUrl here! it might return urls to local files instead of classpath urls
+
                 urlClassPath = Application.class.getClassLoader().getResource(classPath + ".ejs");
             }
             ret = new JsonKeyValueStorage(new File(filePath.getAbsolutePath() + ".ejs"), urlClassPath, false, key) {
@@ -115,6 +117,7 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
         } else {
             URL urlClassPath = null;
             if (classPath != null) {
+                // Do not use Application.getResourceUrl here! it might return urls to local files instead of classpath urls
                 urlClassPath = Application.class.getClassLoader().getResource(classPath + ".json");
             }
             ret = new JsonKeyValueStorage(new File(filePath.getAbsolutePath() + ".json"), urlClassPath, true, null) {
@@ -212,7 +215,7 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
         this.configInterface = configInterface;
         this.path = filePath;
         if (filePath.getName().endsWith(".json") || filePath.getName().endsWith(".ejs")) {
-            Log.L.warning(filePath + " should not have an extension!!");
+                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning(filePath + " should not have an extension!!");
         }
         final File expected = Application.getResource("cfg/" + configInterface.getName());
         String storageID = null;
@@ -238,7 +241,7 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
             this.validateKeys(cryptedStorage);
         }
         try {
-            Log.L.finer("Init StorageHandler for Interface:" + configInterface.getName() + "|Path:" + this.path);
+                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Init StorageHandler for Interface:" + configInterface.getName() + "|Path:" + this.path);
             this.parseInterface();
         } catch (final InterfaceParseException e) {
             throw e;
@@ -280,7 +283,7 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
             this.validateKeys(cryptedStorage);
         }
         try {
-            Log.L.finer("Init StorageHandler for Interface:" + configInterface.getName() + "|Path:" + this.path);
+                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Init StorageHandler for Interface:" + configInterface.getName() + "|Path:" + this.path);
             this.parseInterface();
         } catch (final Throwable e) {
             throw new InterfaceParseException(e);
@@ -305,7 +308,7 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
         this.configInterface = configInterface;
         this.relativCPPath = classPath;
         if (classPath.endsWith(".json") || classPath.endsWith(".ejs")) {
-            Log.L.warning(classPath + " should not have an extension!!");
+                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning(classPath + " should not have an extension!!");
         }
         this.path = Application.getResource(classPath);
         final File expected = Application.getResource("cfg/" + configInterface.getName());
@@ -323,7 +326,7 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
             this.validateKeys(cryptedStorage);
         }
         try {
-            Log.L.finer("Init StorageHandler for Interface:" + configInterface.getName() + "|Path:" + this.path);
+                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Init StorageHandler for Interface:" + configInterface.getName() + "|Path:" + this.path);
             this.parseInterface();
         } catch (final Throwable e) {
             throw new InterfaceParseException(e);

@@ -19,7 +19,7 @@ import java.util.StringTokenizer;
 
 import javax.swing.TransferHandler.TransferSupport;
 
-import org.appwork.utils.logging.Log;
+
 import org.appwork.utils.os.CrossSystem;
 import org.appwork.utils.parser.HTMLParser;
 
@@ -79,8 +79,8 @@ public class ClipboardUtils {
                     }
                 }
             } catch (final Exception e) {
-                Log.L.warning(inString);
-                Log.L.warning(e.getMessage());
+                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning(inString);
+                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning(e.getMessage());
             }
         }
         return files;
@@ -116,8 +116,8 @@ public class ClipboardUtils {
                     }
                 }
             } catch (final Exception e) {
-                Log.L.warning(inString);
-                Log.L.warning(e.getMessage());
+                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning(inString);
+                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning(e.getMessage());
             }
         }
         return files;
@@ -184,7 +184,7 @@ public class ClipboardUtils {
                 links.addAll(HTMLParser.findUrls(content));
             }
         } catch (final Exception e) {
-            Log.L.info(e.getMessage());
+                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info(e.getMessage());
         }
         return links;
     }

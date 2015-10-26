@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.appwork.utils.logging.Log;
+
 import org.appwork.utils.speedmeter.AverageSpeedMeter;
 import org.appwork.utils.speedmeter.SpeedMeterInterface;
 
@@ -129,7 +129,7 @@ public class SimpleThrottledConnectionHandler implements ThrottledConnectionHand
                         try {
                             Thread.sleep(sleepTime);
                         } catch (final InterruptedException e) {
-                            Log.exception(e);
+                            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
                         }
                         long lastTraffic = 0;
                         int newBandwidth = 0;

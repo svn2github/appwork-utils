@@ -10,10 +10,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
 
+import org.appwork.utils.Application;
 import org.appwork.utils.Exceptions;
-import org.appwork.utils.logging.Log;
 import org.appwork.utils.logging2.LogSource;
 
 public class ShutdownController extends Thread {
@@ -46,7 +45,7 @@ public class ShutdownController extends Thread {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see org.appwork.shutdown.ShutdownEvent#run()
          */
         @Override
@@ -73,7 +72,8 @@ public class ShutdownController extends Thread {
     }
 
     public static void main(final String[] args) {
-        Log.L.setLevel(Level.ALL);
+        // org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().setLevel(Level.ALL);
+        Application.ensureFrameWorkInit();
         ShutdownController.getInstance().addShutdownEvent(new ShutdownEvent() {
             @Override
             public int getHookPriority() {
@@ -82,7 +82,7 @@ public class ShutdownController extends Thread {
 
             @Override
             public void onShutdown(final ShutdownRequest shutdownRequest) {
-                Log.L.finest("DO " + this.getHookPriority());
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finest("DO " + this.getHookPriority());
             }
 
         });
@@ -95,7 +95,7 @@ public class ShutdownController extends Thread {
 
             @Override
             public void onShutdown(final ShutdownRequest shutdownRequest) {
-                Log.L.finest("DO " + this.getHookPriority());
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finest("DO " + this.getHookPriority());
 
             }
 
@@ -109,7 +109,7 @@ public class ShutdownController extends Thread {
 
             @Override
             public void onShutdown(final ShutdownRequest shutdownRequest) {
-                Log.L.finest("DO " + this.getHookPriority());
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finest("DO " + this.getHookPriority());
             }
 
         });
@@ -186,26 +186,15 @@ public class ShutdownController extends Thread {
             }
 
         } catch (final Throwable e) {
-            Log.exception(e);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
             Runtime.getRuntime().addShutdownHook(this);
         }
 
-        // do not remove the Log call here. we have to be sure that Log.class is
-        // already loaded
-        Log.L.finest("Init ShutdownController");
-        this.addShutdownEvent(new ShutdownEvent() {
-
-            @Override
-            public void onShutdown(final ShutdownRequest shutdownRequest) {
-                Log.closeLogfile();
-
-            }
-        });
     }
 
     public void addShutdownEvent(final ShutdownEvent event) {
         if (this.isAlive()) {
-            Log.exception(new IllegalStateException("Cannot add hooks during shutdown"));
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(new IllegalStateException("Cannot add hooks during shutdown"));
             return;
         }
         if (event instanceof ShutdownEventWrapper) {
@@ -236,7 +225,7 @@ public class ShutdownController extends Thread {
             if (this.vetoListeners.contains(listener)) {
                 return;
             }
-            Log.L.finest("ADD " + listener);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finest("ADD " + listener);
             this.vetoListeners.add(listener);
             try {
                 java.util.Collections.sort(this.vetoListeners, new Comparator<ShutdownVetoListener>() {
@@ -248,7 +237,7 @@ public class ShutdownController extends Thread {
                     }
                 });
             } catch (final Throwable e) {
-                Log.L.log(Level.SEVERE, "Exception", e);
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
             }
         }
     }
@@ -359,7 +348,7 @@ public class ShutdownController extends Thread {
 
     public void removeShutdownVetoListener(final ShutdownVetoListener listener) {
         synchronized (this.vetoListeners) {
-            Log.L.finest("Remove " + listener);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finest("Remove " + listener);
             this.vetoListeners.remove(listener);
         }
     }
@@ -388,30 +377,30 @@ public class ShutdownController extends Thread {
 
             if (vetos.size() == 0) {
 
-                Log.L.info("No Vetos");
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("No Vetos");
                 ShutdownVetoListener[] localList = null;
                 synchronized (this.vetoListeners) {
                     localList = this.vetoListeners.toArray(new ShutdownVetoListener[] {});
                 }
 
-                Log.L.info("Fire onShutDownEvents");
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Fire onShutDownEvents");
                 for (final ShutdownVetoListener v : localList) {
                     try {
-                        Log.L.info("Call onShutdown: " + v);
+                        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Call onShutdown: " + v);
                         v.onShutdown(request);
                     } catch (final Throwable e) {
-                        Log.exception(e);
+                        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
 
                     } finally {
-                        Log.L.info("Call onShutdown done: " + v);
+                        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Call onShutdown done: " + v);
                     }
                 }
                 if (this.shutDown.getAndSet(true) == false) {
-                    Log.L.info("Create ExitThread");
+                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Create ExitThread");
                     try {
                         request.onShutdown();
                     } catch (final Throwable e) {
-                        Log.L.severe(Exceptions.getStackTrace(e));
+                        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe(Exceptions.getStackTrace(e));
                     }
                     this.exitThread = new Thread("ShutdownThread") {
 
@@ -419,13 +408,13 @@ public class ShutdownController extends Thread {
                         public void run() {
                             ShutdownController.this.shutdownRequest = request;
 
-                            Log.L.info("Exit Now: Code: " + ShutdownController.this.getExitCode());
+                            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Exit Now: Code: " + ShutdownController.this.getExitCode());
                             System.exit(ShutdownController.this.getExitCode());
                         }
                     };
                     this.exitThread.start();
                 }
-                Log.L.info("Wait");
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Wait");
                 while (this.exitThread.isAlive()) {
                     try {
                         Thread.sleep(500);
@@ -433,10 +422,10 @@ public class ShutdownController extends Thread {
                         return true;
                     }
                 }
-                Log.L.finest("DONE");
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finest("DONE");
                 return true;
             } else {
-                Log.L.info("Vetos found");
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Vetos found");
                 ShutdownVetoListener[] localList = null;
                 synchronized (this.vetoListeners) {
                     localList = this.vetoListeners.toArray(new ShutdownVetoListener[] {});
@@ -446,7 +435,7 @@ public class ShutdownController extends Thread {
                         /* make sure noone changes content of vetos */
                         v.onShutdownVeto(request);
                     } catch (final Throwable e) {
-                        Log.exception(e);
+                        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
                     }
                 }
                 request.onShutdownVeto();
@@ -488,7 +477,7 @@ public class ShutdownController extends Thread {
         /*
          * Attention. This runs in shutdownhook. make sure, that we do not have to load previous unloaded classes here.
          */
-
+        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finest("TEST");
         try {
 
             java.util.List<ShutdownEvent> list;
@@ -506,7 +495,7 @@ public class ShutdownController extends Thread {
 
                     final long started = System.currentTimeMillis();
 
-                    Log.L.finest("[" + i + "/" + list.size() + "|Priority: " + e.getHookPriority() + "]" + "ShutdownController: start item->" + e);
+                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finest("[" + i + "/" + list.size() + "|Priority: " + e.getHookPriority() + "]" + "ShutdownController: start item->" + e);
                     System.out.println("[" + i + "/" + list.size() + "|Priority: " + e.getHookPriority() + "]" + "ShutdownController: start item->" + e);
 
                     final Thread thread = new Thread(new Runnable() {
@@ -527,20 +516,21 @@ public class ShutdownController extends Thread {
 
                     }
                     if (thread.isAlive()) {
-                        Log.L.finest("[" + i + "/" + list.size() + "|Priority: " + e.getHookPriority() + "]" + "ShutdownController: " + e + "->is still running after " + e.getMaxDuration() + " ms");
-                        Log.L.finest("[" + i + "/" + list.size() + "|Priority: " + e.getHookPriority() + "]" + "ShutdownController: " + e + "->StackTrace:\r\n" + this.getStackTrace(thread));
+                        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finest("[" + i + "/" + list.size() + "|Priority: " + e.getHookPriority() + "]" + "ShutdownController: " + e + "->is still running after " + e.getMaxDuration() + " ms");
+                        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finest("[" + i + "/" + list.size() + "|Priority: " + e.getHookPriority() + "]" + "ShutdownController: " + e + "->StackTrace:\r\n" + this.getStackTrace(thread));
                     } else {
-                        Log.L.finest("[" + i + "/" + list.size() + "|Priority: " + e.getHookPriority() + "]" + "ShutdownController: item ended after->" + (System.currentTimeMillis() - started));
+                        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finest("[" + i + "/" + list.size() + "|Priority: " + e.getHookPriority() + "]" + "ShutdownController: item ended after->" + (System.currentTimeMillis() - started));
                     }
                     System.out.println("[Done:" + i + "/" + list.size());
                 } catch (final Throwable e1) {
                     e1.printStackTrace();
                 }
             }
-            Log.L.info("Shutdown Hooks Finished");
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Shutdown Hooks Finished");
 
         } catch (final Throwable e1) {
-            // do not use Log here. If Log.exception(e1); throws an exception,
+            // do not use Log here. If org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e1); throws an
+            // exception,
             // we have to catch it here without the risk of another exception.
 
         }

@@ -14,7 +14,7 @@ import java.awt.HeadlessException;
 import javax.swing.SwingUtilities;
 
 import org.appwork.utils.Application;
-import org.appwork.utils.logging.Log;
+
 
 /**
  * This class should be used to run gui code in the edt and return the generic
@@ -89,23 +89,23 @@ public abstract class EDTHelper<T> implements Runnable {
         try {
             if (Application.isHeadless()) {
                 if (this.caller != null) {
-                    Log.exception(this.caller);
+                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(this.caller);
                 }
             }
             this.returnValue = this.edtRun();
         } catch (HeadlessException e) {
             this.exception = e;
-            Log.exception(e);
-            Log.L.severe("Unhandled Headless Exception in EDT");
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Unhandled Headless Exception in EDT");
             if (this.caller != null) {
-                Log.exception(this.caller);
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(this.caller);
             }
         } catch (final RuntimeException e) {
             this.exception = e;
-            Log.exception(e);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
         } catch (final Error e) {
             this.error = e;
-            Log.exception(e);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
         } finally {
             this.done = true;
         }

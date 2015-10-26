@@ -42,7 +42,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.appwork.resources.AWUTheme;
 import org.appwork.utils.ImageProvider.ImageProvider;
-import org.appwork.utils.logging.Log;
+
 import org.appwork.utils.swing.windowmanager.WindowManager;
 import org.appwork.utils.swing.windowmanager.WindowManager.FrameState;
 
@@ -186,7 +186,7 @@ public class LockPanel extends JPanel {
                          * to catch component must be showing on the screen to
                          * determine its location
                          */
-                        Log.exception(Level.WARNING, e);
+                        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
                         return null;
                     }
 

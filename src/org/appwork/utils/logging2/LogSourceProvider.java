@@ -23,6 +23,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
@@ -40,54 +42,54 @@ import org.appwork.utils.os.CrossSystem;
 
 public abstract class LogSourceProvider {
 
-    protected final HashMap<String, LogSink> logSinks    = new HashMap<String, LogSink>();
+    protected final HashMap<String, LogSink> logSinks = new HashMap<String, LogSink>();
     private final int                        maxSize;
     private final int                        maxLogs;
     // Do not set final!
     protected long                           logTimeout;
-    protected Thread                         flushThread = null;
-    protected final File                     logFolder;
-    protected LogConsoleHandler              consoleHandler;
 
-    protected boolean                        instantFlushDefault;
-    private final boolean                    debugMode;
+    public long getLogTimeout() {
+
+        return logTimeout;
+    }
+
+    public void setLogTimeout(long logTimeout) {
+        this.logTimeout = logTimeout;
+    }
+
+    protected Thread            flushThread = null;
+    protected final File        logFolder;
+    protected LogConsoleHandler consoleHandler;
+
+    protected boolean           instantFlushDefault;
+    private final boolean       debugMode;
 
     public boolean isDebugMode() {
         return debugMode;
     }
 
-    private final long    initTime;
-    private final boolean writeLogs;
+    private final long                     initTime;
+    private final boolean                  writeLogs;
+    private static List<LogSourceProvider> INSTANCES = new ArrayList<LogSourceProvider>();
+
+    protected static List<LogSourceProvider> getInstances() {
+        synchronized (INIT_LOCK) {
+            return new ArrayList<LogSourceProvider>(INSTANCES);
+        }
+    }
 
     public boolean isWriteLogs() {
         return writeLogs;
     }
 
     private final static AtomicBoolean TRASHLOCK = new AtomicBoolean(false);
-
-    public LogSourceProvider(final long timeStamp) {
-        this.initTime = timeStamp;
-        this.consoleHandler = new LogConsoleHandler();
-        final LogConfig config = JsonConfig.create(LogConfig.class);
-        this.maxSize = config.getMaxLogFileSize();
-        this.writeLogs = maxSize > 100 * 1024;
-        this.maxLogs = config.getMaxLogFiles();
-        this.logTimeout = config.getLogFlushTimeout() * 1000l;
-        debugMode = config.isDebugModeEnabled();
-        instantFlushDefault = debugMode;
-        File llogFolder = Application.getResource("logs/" + timeStamp + "_" + new SimpleDateFormat("HH.mm").format(new Date(timeStamp)) + "/");
-        if (llogFolder.exists()) {
-            llogFolder = Application.getResource("logs/" + timeStamp + "_" + new SimpleDateFormat("HH.mm.ss").format(new Date(timeStamp)) + "/");
-        }
-        if (!llogFolder.exists() && isWriteLogs()) {
-            llogFolder.mkdirs();
-        }
-        this.logFolder = llogFolder;
+    private static final Object        INIT_LOCK = new Object();
+    static {
         ShutdownController.getInstance().addShutdownEvent(new ShutdownEvent() {
 
             @Override
             public void onShutdown(final ShutdownRequest shutdownRequest) {
-                LogSourceProvider.this.flushSinks(false, true);
+                LogSourceProvider.flushAllSinks(false, true);
             }
 
             @Override
@@ -96,50 +98,97 @@ public abstract class LogSourceProvider {
             }
 
         });
-        if (LogSourceProvider.TRASHLOCK.compareAndSet(false, true)) {
-            new Thread("LogsCleanup") {
-                long newestTimeStamp = -1;
+    }
 
-                @Override
-                public void run() {
-                    final File oldLogs[] = Application.getResource("logs/").listFiles(new FilenameFilter() {
-                        long removeTimeStamp = timeStamp - config.getCleanupLogsOlderThanXDays() * 24 * 60 * 60 * 1000l;
+    public LogSourceProvider(final long timeStamp) {
+        synchronized (INIT_LOCK) {
 
-                        @Override
-                        public boolean accept(final File dir, final String name) {
-                            if (dir.exists() && dir.isDirectory() && name.matches("^\\d+_\\d+\\.\\d+(\\.\\d+)?$")) {
-                                final String timeStamp = new Regex(name, "^(\\d+)_").getMatch(0);
-                                long times = 0;
-                                if (timeStamp != null && (times = Long.parseLong(timeStamp)) < this.removeTimeStamp) {
-                                    if (newestTimeStamp == -1 || times > newestTimeStamp) {
-                                        /*
-                                         * find the latest logfolder, so we can keep it
-                                         */
-                                        newestTimeStamp = times;
+            this.initTime = timeStamp;
+            this.consoleHandler = new LogConsoleHandler();
+            final LogConfig config = JsonConfig.create(LogConfig.class);
+            this.maxSize = config.getMaxLogFileSize();
+            this.writeLogs = maxSize > 100 * 1024;
+            this.maxLogs = config.getMaxLogFiles();
+            this.logTimeout = config.getLogFlushTimeout() * 1000l;
+            debugMode = config.isDebugModeEnabled();
+            instantFlushDefault = debugMode;
+            if (INSTANCES.size() > 0) {
+
+                for (LogSourceProvider p : INSTANCES) {
+                    System.out.println("Multiple LogControllers Detected: " + p.getClass().getName());
+                }
+                System.out.println("Multiple LogControllers Detected: " + getClass().getName());
+                logFolder = INSTANCES.get(0).getLogFolder();
+
+                System.out.println("Use Shared Log Folder: " + logFolder);
+
+            } else {
+                // it is important that folders start with " + timeStamp + "_" !. the rest does not matter.
+                File llogFolder = Application.getResource("logs/" + timeStamp + "_" + new SimpleDateFormat("EEE, MMM d, yyyy HH.mm z", Locale.ENGLISH).format(new Date(timeStamp)) + "/");
+                int i = 2;
+                while (llogFolder.exists()) {
+                    llogFolder = Application.getResource("logs/" + timeStamp + "_" + new SimpleDateFormat("EEE, MMM d, yyyy HH.mm z", Locale.ENGLISH).format(new Date(timeStamp)) + "_" + (i++) + "/");
+                }
+                this.logFolder = llogFolder;
+            }
+
+            if (!logFolder.exists() && isWriteLogs()) {
+                logFolder.mkdirs();
+            }
+
+            if (LogSourceProvider.TRASHLOCK.compareAndSet(false, true)) {
+                new Thread("LogsCleanup") {
+                    long newestTimeStamp = -1;
+
+                    @Override
+                    public void run() {
+                        final File oldLogs[] = Application.getResource("logs/").listFiles(new FilenameFilter() {
+                            long   removeTimeStamp = timeStamp - config.getCleanupLogsOlderThanXDays() * 24 * 60 * 60 * 1000l;
+                            int    currentLength   = String.valueOf(System.currentTimeMillis()).length();
+                            String regex           = "^(\\d{" + (currentLength - 1) + "," + (currentLength + 1) + "})_";
+
+                            @Override
+                            public boolean accept(final File dir, final String name) {
+
+                                if (dir.exists() && dir.isDirectory() && name.matches(regex)) {
+                                    final String timeStamp = new Regex(name, regex).getMatch(0);
+                                    long times = 0;
+                                    if (timeStamp != null && (times = Long.parseLong(timeStamp)) < this.removeTimeStamp) {
+                                        if (newestTimeStamp == -1 || times > newestTimeStamp) {
+                                            /*
+                                             * find the latest logfolder, so we can keep it
+                                             */
+                                            newestTimeStamp = times;
+                                        }
+                                        return true;
                                     }
-                                    return true;
                                 }
+                                return false;
                             }
-                            return false;
-                        }
-                    });
-                    if (oldLogs != null) {
-                        for (final File oldLog : oldLogs) {
-                            try {
-                                if (this.newestTimeStamp > 0 && oldLog.getName().contains(this.newestTimeStamp + "")) {
-                                    /* always keep at least the last logfolder! */
-                                    continue;
+                        });
+                        if (oldLogs != null) {
+                            for (final File oldLog : oldLogs) {
+                                try {
+                                    if (this.newestTimeStamp > 0 && oldLog.getName().contains(this.newestTimeStamp + "")) {
+                                        /* always keep at least the last logfolder! */
+                                        continue;
+                                    }
+                                    Files.deleteRecursiv(oldLog);
+                                } catch (final IOException e) {
+                                    e.printStackTrace();
                                 }
-                                Files.deleteRecursiv(oldLog);
-                            } catch (final IOException e) {
-                                e.printStackTrace();
                             }
                         }
                     }
-                }
 
-            }.start();
+                }.start();
+            }
+            INSTANCES.add(this);
         }
+    }
+
+    public File getLogFolder() {
+        return logFolder;
     }
 
     /**
@@ -240,6 +289,7 @@ public abstract class LogSourceProvider {
 
     public LogSource getLogger(String name) {
         LogSink sink = null;
+
         name = CrossSystem.alleviatePathParts(name);
         if (StringUtils.isEmpty(name)) {
             return null;
@@ -247,8 +297,9 @@ public abstract class LogSourceProvider {
         if (!name.endsWith(".log")) {
             name = name + ".log";
         }
-        synchronized (this.logSinks) {
-            sink = this.logSinks.get(name);
+        synchronized (INIT_LOCK) {
+
+            sink = getGlobalLockSink(name.toLowerCase(Locale.ENGLISH));
             if (sink == null) {
                 sink = new LogSink(name);
                 if (this.consoleHandler != null) {
@@ -269,7 +320,7 @@ public abstract class LogSourceProvider {
                 } catch (final Throwable e) {
                     e.printStackTrace();
                 }
-                this.logSinks.put(name, sink);
+                this.logSinks.put(name.toLowerCase(Locale.ENGLISH), sink);
                 this.startFlushThread();
             }
             final LogSource source = this.createLogSource(name, -1);
@@ -277,6 +328,28 @@ public abstract class LogSourceProvider {
             sink.addLogSource(source);
             return source;
         }
+    }
+
+    /**
+     * @param name
+     * @return
+     */
+    private LogSink getGlobalLockSink(String name) {
+        LogSink ret = this.logSinks.get(name);
+        if (ret == null) {
+            for (LogSourceProvider p : INSTANCES) {
+                if (p == this) {
+                    continue;
+                }
+                ret = p.logSinks.get(name);
+                if (ret != null) {
+                    System.out.println("Use Log Sink from " + p.getClass() + "." + name + " (instead of " + this.getClass().getName() + ")");
+                    break;
+                }
+            }
+        }
+
+        return ret;
     }
 
     public LogSource getPreviousThreadLogSource() {
@@ -338,4 +411,14 @@ public abstract class LogSourceProvider {
         this.flushThread.start();
     }
 
+    /**
+     * @param b
+     * @param c
+     */
+    public static void flushAllSinks(boolean flushOnly, boolean finalFlush) {
+        for (LogSourceProvider p : getInstances()) {
+            p.flushSinks(flushOnly, finalFlush);
+        }
+
+    }
 }

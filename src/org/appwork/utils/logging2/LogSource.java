@@ -22,17 +22,31 @@ import java.util.logging.Logger;
 import org.appwork.utils.Exceptions;
 import org.appwork.utils.logging.ExceptionDefaultLogLevel;
 
-public class LogSource extends Logger implements LogInterface {
+public class LogSource extends Logger implements LogInterface, ClearableLogInterface, ClosableLogInterface {
 
     private static WeakHashMap<Thread, WeakReference<LogSource>> LASTTHREADLOGSOURCE = new WeakHashMap<Thread, WeakReference<LogSource>>();
 
     public static void exception(final Logger logger, final Throwable e) {
-        if (logger == null || e == null) { return; }
+        if (logger == null || e == null) {
+            return;
+        }
         if (logger instanceof LogSource) {
             ((LogSource) logger).log(e);
         } else {
             logger.severe(Exceptions.getStackTrace(e));
         }
+    }
+
+    /**
+     * @param logger
+     * @param e
+     */
+    public static void exception(LogInterface logger, Throwable e) {
+        if (logger == null || e == null) {
+            return;
+        }
+        logger.log(e);
+
     }
 
     public static LogSource getPreviousThreadLogSource() {
@@ -41,7 +55,9 @@ public class LogSource extends Logger implements LogInterface {
             final WeakReference<LogSource> prevLogSource = LogSource.LASTTHREADLOGSOURCE.get(thread);
             if (prevLogSource != null) {
                 final LogSource previousLogger = prevLogSource.get();
-                if (previousLogger != null && previousLogger.isClosed() == false) { return previousLogger; }
+                if (previousLogger != null && previousLogger.isClosed() == false) {
+                    return previousLogger;
+                }
                 LogSource.LASTTHREADLOGSOURCE.remove(thread);
             }
         }
@@ -78,14 +94,13 @@ public class LogSource extends Logger implements LogInterface {
 
     /*
      * creates a LogCollector with given name
-     *
-     * maxLogRecordsInMemory defines how many log records this logger will
-     * buffer in memory before logging to parent's handlers
-     *
+     * 
+     * maxLogRecordsInMemory defines how many log records this logger will buffer in memory before logging to parent's handlers
+     * 
      * <0 = unlimited in memory, manual flush needed
-     *
+     * 
      * 0 = forward directly to parent's handlers
-     *
+     * 
      * >0 = limited
      */
     public LogSource(final String name, final int maxLogRecordsInMemory) {
@@ -122,7 +137,9 @@ public class LogSource extends Logger implements LogInterface {
     }
 
     public synchronized void flush() {
-        if (this.closed) { return; }
+        if (this.closed) {
+            return;
+        }
         if (this.records == null || this.records.size() == 0) {
             this.currentSizeInMemory = 0;
             this.records = null;
@@ -136,8 +153,7 @@ public class LogSource extends Logger implements LogInterface {
                     if (handler != null) {
                         if (handler instanceof ConsoleHandler) {
                             /*
-                             * we dont want logRecords to appear twice on
-                             * console
+                             * we dont want logRecords to appear twice on console
                              */
                             continue;
                         }
@@ -195,7 +211,9 @@ public class LogSource extends Logger implements LogInterface {
 
     @Override
     public synchronized void log(final LogRecord record) {
-        if (this.closed || record == null) { return; }
+        if (this.closed || record == null) {
+            return;
+        }
         this.setCurrentThreadLogSource();
         record.setLoggerName(this.getName());
         /* make sure we have gathered all information about current class/method */
@@ -288,7 +306,9 @@ public class LogSource extends Logger implements LogInterface {
      *            the instantFlush to set
      */
     public void setInstantFlush(final boolean instantFlush) {
-        if (this.instantFlush == instantFlush) { return; }
+        if (this.instantFlush == instantFlush) {
+            return;
+        }
         this.instantFlush = instantFlush;
         if (instantFlush) {
             this.flush();
@@ -297,7 +317,9 @@ public class LogSource extends Logger implements LogInterface {
 
     public synchronized void setMaxLogRecordsInMemory(int newMax) {
         newMax = Math.max(0, newMax);
-        if (this.maxLogRecordsInMemory == newMax) { return; }
+        if (this.maxLogRecordsInMemory == newMax) {
+            return;
+        }
         this.maxLogRecordsInMemory = newMax;
         if (newMax == 0 || newMax <= this.records.size()) {
             this.flush();
@@ -311,7 +333,9 @@ public class LogSource extends Logger implements LogInterface {
      */
     public synchronized void setMaxSizeInMemory(int maxSizeInMemory) {
         maxSizeInMemory = Math.max(0, maxSizeInMemory);
-        if (this.maxSizeInMemory == maxSizeInMemory) { return; }
+        if (this.maxSizeInMemory == maxSizeInMemory) {
+            return;
+        }
         this.maxSizeInMemory = maxSizeInMemory;
         if (maxSizeInMemory == 0 || maxSizeInMemory <= this.currentSizeInMemory) {
             this.flush();
@@ -352,4 +376,5 @@ public class LogSource extends Logger implements LogInterface {
         }
         return sb.toString();
     }
+
 }

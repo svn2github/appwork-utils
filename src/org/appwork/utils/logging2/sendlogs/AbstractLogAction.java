@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2013 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.utils.logging2.sendlogs
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -37,7 +37,7 @@ import org.appwork.utils.zip.ZipIOWriter;
 
 /**
  * @author Thomas
- * 
+ *
  */
 public abstract class AbstractLogAction extends BasicAction {
 
@@ -93,15 +93,14 @@ public abstract class AbstractLogAction extends BasicAction {
 
         if (logs != null) {
             for (final File f : logs) {
-                final String timestampString = new Regex(f.getName(), "(\\d+)_\\d\\d\\.\\d\\d").getMatch(0);
+                final String timestampString = new Regex(f.getName(), "(\\d{7,})_").getMatch(0);
                 if (timestampString != null) {
                     final long timestamp = Long.parseLong(timestampString);
                     LogFolder lf;
                     lf = new LogFolder(f, timestamp);
                     if (this.isCurrentLogFolder(timestamp)) {
                         /*
-                         * this is our current logfolder, flush it before we can
-                         * upload it
+                         * this is our current logfolder, flush it before we can upload it
                          */
                         lf.setNeedsFlush(true);
                         currentLog = lf;
@@ -140,7 +139,9 @@ public abstract class AbstractLogAction extends BasicAction {
         Dialog.getInstance().showDialog(d);
 
         final java.util.List<LogFolder> selection = d.getSelectedFolders();
-        if (selection.size() == 0) { return; }
+        if (selection.size() == 0) {
+            return;
+        }
         this.total = selection.size();
         this.current = 0;
         final ProgressDialog p = new ProgressDialog(new ProgressGetter() {
@@ -152,7 +153,9 @@ public abstract class AbstractLogAction extends BasicAction {
 
             @Override
             public int getProgress() {
-                if (AbstractLogAction.this.current == 0) { return -1; }
+                if (AbstractLogAction.this.current == 0) {
+                    return -1;
+                }
                 return Math.min(99, AbstractLogAction.this.current * 100 / AbstractLogAction.this.total);
             }
 
@@ -179,7 +182,7 @@ public abstract class AbstractLogAction extends BasicAction {
 
     /**
      * @param selection
-     * 
+     *
      */
     protected void createPackage(final List<LogFolder> selection) throws Exception {
         for (final LogFolder lf : selection) {
@@ -198,8 +201,12 @@ public abstract class AbstractLogAction extends BasicAction {
                 writer = new ZipIOWriter(zip) {
                     @Override
                     public void addFile(final File addFile, final boolean compress, final String fullPath) throws FileNotFoundException, ZipIOException, IOException {
-                        if (addFile.getName().endsWith(".lck") || addFile.isFile() && addFile.length() == 0) { return; }
-                        if (Thread.currentThread().isInterrupted()) { throw new WTFException("INterrupted"); }
+                        if (addFile.getName().endsWith(".lck") || addFile.isFile() && addFile.length() == 0) {
+                            return;
+                        }
+                        if (Thread.currentThread().isInterrupted()) {
+                            throw new WTFException("INterrupted");
+                        }
                         super.addFile(addFile, compress, fullPath);
                     }
                 };
@@ -223,7 +230,7 @@ public abstract class AbstractLogAction extends BasicAction {
     }
 
     /**
-     * 
+     *
      */
     abstract protected void flushLogs();
 

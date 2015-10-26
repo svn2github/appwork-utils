@@ -16,7 +16,7 @@ import java.util.logging.Level;
 
 import org.appwork.utils.Application;
 import org.appwork.utils.Hash;
-import org.appwork.utils.logging.Log;
+
 
 import com.sun.nio.file.ExtendedWatchEventModifier;
 
@@ -140,7 +140,7 @@ public abstract class J7FileObserver implements Runnable {
 
             }
         } catch (final IOException e) {
-            Log.exception(Level.WARNING, e);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
 
         }
 

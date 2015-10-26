@@ -5,7 +5,7 @@ import java.awt.Robot;
 import java.awt.event.KeyEvent;
 import java.util.logging.Level;
 
-import org.appwork.utils.logging.Log;
+
 import org.appwork.utils.os.CrossSystem;
 
 public class AutoType {
@@ -35,7 +35,7 @@ public class AutoType {
             } catch (final AWTException e) {
                 e.printStackTrace();
             } catch (final InterruptedException e) {
-                Log.exception(Level.WARNING, e);
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
 
             }
         }

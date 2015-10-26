@@ -58,12 +58,14 @@ public class MimeWindows extends MimeDefault {
                     FileOutputStream fos = null;
                     try {
                         tempFile = File.createTempFile("icon", "." + extension);
+
                         final Image image = ShellFolderWrapper.getIcon(tempFile);
                         ret = new ImageIcon(image);
+
                         fos = new FileOutputStream(path);
                         ImageIO.write((RenderedImage) image, "png", fos);
                     } catch (final Throwable e) {
-                        e.printStackTrace();
+                        // e.printStackTrace();
                         // http://www.oracle.com/technetwork/java/faq-sun-packages-142232.html
                         ret = ImageProvider.toImageIcon(FileSystemView.getFileSystemView().getSystemIcon(tempFile));
                     } finally {

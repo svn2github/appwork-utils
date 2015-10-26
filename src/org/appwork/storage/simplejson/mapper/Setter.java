@@ -16,7 +16,7 @@ import java.lang.reflect.Type;
 import org.appwork.exceptions.WTFException;
 import org.appwork.storage.config.annotations.ConvertValueFrom;
 import org.appwork.storage.config.annotations.JSonFieldName;
-import org.appwork.utils.logging.Log;
+
 
 /**
  * @author thomas
@@ -105,7 +105,7 @@ public class Setter {
         try {
             this.method.invoke(inst, parameter);
         } catch (final IllegalArgumentException e) {
-            Log.L.severe(this.method + " " + parameter);
+                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe(this.method + " " + parameter);
             throw e;
         }
 

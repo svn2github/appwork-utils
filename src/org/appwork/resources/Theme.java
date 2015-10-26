@@ -27,7 +27,7 @@ import org.appwork.utils.ImageProvider.ImageProvider;
 import org.appwork.utils.images.IconIO;
 import org.appwork.utils.images.Interpolation;
 import org.appwork.utils.locale._AWU;
-import org.appwork.utils.logging.Log;
+
 import org.appwork.utils.swing.dialog.Dialog;
 
 /**
@@ -173,7 +173,7 @@ public class Theme implements MinTimeWeakReferenceCleanup {
             ret = this.modify(ret, relativePath);
             if (url == null) {
 
-                Log.exception(new Exception("Icon missing: " + this.getPath("images/", relativePath, ".png")));
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(new Exception("Icon missing: " + this.getPath("images/", relativePath, ".png")));
                 if (!Application.isJared(null)) {
                     resourcesHelper(this.getPath("images/", relativePath, ".png"));
                 }
@@ -239,7 +239,7 @@ public class Theme implements MinTimeWeakReferenceCleanup {
 
             }
         } catch (Throwable e) {
-            Log.L.severe(Exceptions.getStackTrace(e));
+                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe(Exceptions.getStackTrace(e));
         }
 
     }
@@ -347,7 +347,7 @@ public class Theme implements MinTimeWeakReferenceCleanup {
         try {
             return IO.readURLToString(url);
         } catch (final IOException e) {
-            Log.exception(e);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
         }
         return null;
     }

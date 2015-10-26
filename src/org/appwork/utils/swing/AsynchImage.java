@@ -18,7 +18,7 @@ import org.appwork.utils.Hash;
 import org.appwork.utils.ImageProvider.ImageProvider;
 import org.appwork.utils.event.queue.Queue;
 import org.appwork.utils.event.queue.QueueAction;
-import org.appwork.utils.logging.Log;
+
 import org.appwork.utils.net.SimpleHTTP;
 
 public class AsynchImage extends JLabel {
@@ -83,17 +83,17 @@ public class AsynchImage extends JLabel {
                             return null;
                         }
                     }
-                    Log.L.finest("Update image " + cache);
+                          org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finest("Update image " + cache);
                     if (url == null) {
-                        Log.L.finest("no url given");
+                              org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finest("no url given");
                         return null;
                     }
                     final SimpleHTTP simple = new SimpleHTTP();
                     HttpURLConnection ret = null;
                     try {
-                        Log.L.finest("Call " + url);
+                              org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finest("Call " + url);
                         ret = simple.openGetConnection(url, 30 * 1000);
-                        Log.L.finest("DONE");
+                              org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finest("DONE");
                         image = ImageIO.read(ret.getInputStream());
                     } finally {
                         try {
@@ -105,7 +105,7 @@ public class AsynchImage extends JLabel {
                         } catch (final Throwable e) {
                         }
                     }
-                    Log.L.finest("Scale image " + cache);
+                          org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finest("Scale image " + cache);
                     image = ImageProvider.getScaledInstance(image, x, y, RenderingHints.VALUE_INTERPOLATION_BILINEAR, true);
                 }
                 synchronized (AsynchImage.LOCK) {
@@ -120,7 +120,7 @@ public class AsynchImage extends JLabel {
                         }
                         return null;
                     }
-                    Log.L.finest("Cachewrite image " + cache + " " + x + " - " + image.getWidth());
+                          org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finest("Cachewrite image " + cache + " " + x + " - " + image.getWidth());
                     cache.getParentFile().mkdirs();
                     FileOutputStream fos = null;
                     try {
@@ -137,9 +137,9 @@ public class AsynchImage extends JLabel {
                     }
                 }
             } catch (final Throwable e) {
-                Log.L.severe("Error loading Url:"+url);
+                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Error loading Url:"+url);
       
-                Log.exception(e);
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
             
             }
             return null;
@@ -206,7 +206,7 @@ public class AsynchImage extends JLabel {
             new EDTRunner() {
                 @Override
                 protected void runInEDT() {
-                    Log.L.finest("Set image " + cache);
+                          org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finest("Set image " + cache);
                     AsynchImage.this.setIcon(imageIcon);
                     AsynchImage.this.repaint();
                 }
@@ -235,7 +235,7 @@ public class AsynchImage extends JLabel {
                     this.setIcon(new ImageIcon(image));
                     if (!isSetIconAfterLoading()) {
                         if (image.getWidth() > 32) {
-                            // Log.L.finest(this.cache);
+                            //       org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finest(this.cache);
                         }
                     }
                     return;

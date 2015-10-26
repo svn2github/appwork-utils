@@ -15,7 +15,7 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.appwork.utils.logging.Log;
+
 
 /**
  * Crypto class provides a few easy to use functions to encrypt or decrypt data.
@@ -62,7 +62,7 @@ public class Crypto {
             cipher.init(Cipher.DECRYPT_MODE, skeySpec, ivSpec);
             return new String(cipher.doFinal(b), "UTF-8");
         } catch (final Exception e) {
-            Log.exception(Level.WARNING, e);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
             final IvParameterSpec ivSpec = new IvParameterSpec(iv);
             final SecretKeySpec skeySpec = new SecretKeySpec(key, "AES");
 
@@ -72,7 +72,7 @@ public class Crypto {
                 cipher.init(Cipher.DECRYPT_MODE, skeySpec, ivSpec);
                 return new String(cipher.doFinal(b), "UTF-8");
             } catch (final Exception e1) {
-                Log.exception(Level.WARNING, e1);
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e1);
             }
 
         }
@@ -115,7 +115,7 @@ public class Crypto {
 
         } catch (final Exception e) {
 
-            Log.exception(Level.WARNING, e);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
         }
         return null;
     }

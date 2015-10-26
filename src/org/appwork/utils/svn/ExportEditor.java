@@ -20,7 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.appwork.utils.logging.Log;
+
 import org.tmatesoft.svn.core.SVNCommitInfo;
 import org.tmatesoft.svn.core.SVNErrorCode;
 import org.tmatesoft.svn.core.SVNErrorMessage;
@@ -80,7 +80,7 @@ public class ExportEditor implements ISVNEditor {
                 throw new SVNException(err);
             }
         }
-        Log.L.fine("dir added: " + path);
+              org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("dir added: " + path);
     }
 
     /**

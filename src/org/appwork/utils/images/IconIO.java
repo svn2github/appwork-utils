@@ -40,7 +40,7 @@ import org.appwork.swing.components.IDIcon;
 import org.appwork.swing.components.IconIdentifier;
 import org.appwork.utils.URLStream;
 import org.appwork.utils.ImageProvider.ImageProvider;
-import org.appwork.utils.logging.Log;
+
 import org.appwork.utils.net.Base64OutputStream;
 
 public class IconIO {
@@ -250,7 +250,7 @@ public class IconIO {
                     return ret;
                 }
             } catch (final IOException e) {
-                Log.exception(Level.WARNING, e);
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
             } finally {
                 try {
                     is.close();

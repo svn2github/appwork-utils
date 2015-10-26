@@ -3,8 +3,6 @@ package org.appwork.controlling;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.appwork.utils.logging.Log;
-
 public class StateMachine {
 
     private static State checkState(final State state) {
@@ -14,21 +12,26 @@ public class StateMachine {
             if (finalState == null) {
                 finalState = ret;
             }
-            if (finalState != ret) { throw new StateConflictException("States do not all result in one common final state"); }
+            if (finalState != ret) {
+                throw new StateConflictException("States do not all result in one common final state");
+            }
         }
-        if (finalState == null) { throw new StateConflictException(state + " is a blind state (has no children)"); }
+        if (finalState == null) {
+            throw new StateConflictException(state + " is a blind state (has no children)");
+        }
         return finalState;
     }
 
     /**
-     * validates a statechain and checks if all states can be reached, and if
-     * all chans result in one common finalstate
-     * 
+     * validates a statechain and checks if all states can be reached, and if all chans result in one common finalstate
+     *
      * @param initState
      * @throws StateConflictException
      */
     public static void validateStateChain(final State initState) {
-        if (initState.getParents().size() > 0) { throw new StateConflictException("initState must not have a parent"); }
+        if (initState.getParents().size() > 0) {
+            throw new StateConflictException("initState must not have a parent");
+        }
         StateMachine.checkState(initState);
     }
 
@@ -61,15 +64,16 @@ public class StateMachine {
     }
 
     /**
-     * synchronized execution of a runnable if statemachine is currently in a
-     * given state
-     * 
+     * synchronized execution of a runnable if statemachine is currently in a given state
+     *
      * @param run
      * @param state
      * @return
      */
     public boolean executeIfOnState(final Runnable run, final State state) {
-        if (run == null || state == null) { return false; }
+        if (run == null || state == null) {
+            return false;
+        }
         synchronized (this.lock) {
             if (this.isState(state)) {
                 run.run();
@@ -80,11 +84,12 @@ public class StateMachine {
     }
 
     /*
-     * synchronized hasPassed/addListener to start run when state has
-     * reached/passed
+     * synchronized hasPassed/addListener to start run when state has reached/passed
      */
     public void executeOnceOnState(final Runnable run, final State state) {
-        if (run == null || state == null) { return; }
+        if (run == null || state == null) {
+            return;
+        }
         boolean reached = false;
         synchronized (this.lock) {
             if (this.hasPassed(state)) {
@@ -107,7 +112,9 @@ public class StateMachine {
     public void fireUpdate(final State currentState) {
         if (currentState != null) {
             synchronized (this.lock) {
-                if (this.currentState != currentState) { throw new StateConflictException("Cannot update state " + currentState + " because current state is " + this.currentState); }
+                if (this.currentState != currentState) {
+                    throw new StateConflictException("Cannot update state " + currentState + " because current state is " + this.currentState);
+                }
             }
         }
         final StateEvent event = new StateEvent(this, StateEvent.Types.UPDATED, currentState, currentState);
@@ -117,12 +124,15 @@ public class StateMachine {
     public void forceState(final State newState) {
         StateEvent event;
         synchronized (this.lock) {
-            if (this.currentState == newState) { return; }
+            if (this.currentState == newState) {
+                return;
+            }
             event = new StateEvent(this, StateEvent.Types.CHANGED, this.currentState, newState);
             synchronized (this.lock2) {
                 this.path.add(new StatePathEntry(newState));
             }
-            Log.L.finest(this.owner + " State changed " + this.currentState + " -> " + newState);
+
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finest(this.owner + " State changed " + this.currentState + " -> " + newState);
             this.currentState = newState;
         }
         this.eventSender.fireEvent(event);
@@ -134,7 +144,7 @@ public class StateMachine {
 
     /**
      * TODO: not synchronized
-     * 
+     *
      * @param failedState
      * @return
      */
@@ -144,7 +154,9 @@ public class StateMachine {
             synchronized (this.lock2) {
                 for (int i = this.path.size() - 1; i >= 0; i--) {
                     entry = this.path.get(i);
-                    if (entry.getState() == failedState) { return entry; }
+                    if (entry.getState() == failedState) {
+                        return entry;
+                    }
                 }
             }
         } catch (final Exception e) {
@@ -182,7 +194,9 @@ public class StateMachine {
         synchronized (this.lock2) {
             for (final State s : states) {
                 for (final StatePathEntry e : this.path) {
-                    if (e.getState() == s) { return true; }
+                    if (e.getState() == s) {
+                        return true;
+                    }
                 }
             }
         }
@@ -224,7 +238,9 @@ public class StateMachine {
     public boolean isState(final State... states) {
         synchronized (this.lock) {
             for (final State s : states) {
-                if (s == this.currentState) { return true; }
+                if (s == this.currentState) {
+                    return true;
+                }
             }
         }
         return false;
@@ -239,18 +255,21 @@ public class StateMachine {
     }
 
     /**
-     * set force to true of you want to reset in any case. else reset is only
-     * possible inf inal state
-     * 
+     * set force to true of you want to reset in any case. else reset is only possible inf inal state
+     *
      * @param force
      */
     public void reset(final boolean force) {
         StateEvent event;
         synchronized (this.lock) {
-            if (this.currentState == this.initState) { return; }
-            if (!force && this.finalState != this.currentState) { throw new StateConflictException("Cannot reset from state " + this.currentState); }
+            if (this.currentState == this.initState) {
+                return;
+            }
+            if (!force && this.finalState != this.currentState) {
+                throw new StateConflictException("Cannot reset from state " + this.currentState);
+            }
             event = new StateEvent(this, StateEvent.Types.CHANGED, this.currentState, this.initState);
-            Log.L.finest(this.owner + " State changed (reset) " + this.currentState + " -> " + this.initState);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finest(this.owner + " State changed (reset) " + this.currentState + " -> " + this.initState);
             this.currentState = this.initState;
             synchronized (this.lock2) {
                 this.path.clear();
@@ -266,18 +285,24 @@ public class StateMachine {
 
     public void setStatus(final State newState) {
         synchronized (this.lock) {
-            if (this.currentState == newState) { return; }
-            if (!this.currentState.getChildren().contains(newState)) { throw new StateConflictException("Cannot change state from " + this.currentState + " to " + newState); }
+            if (this.currentState == newState) {
+                return;
+            }
+            if (!this.currentState.getChildren().contains(newState)) {
+                throw new StateConflictException("Cannot change state from " + this.currentState + " to " + newState);
+            }
         }
         this.forceState(newState);
     }
 
     /**
      * Throws a StateViolationException if the current state is not state
-     * 
+     *
      * @param downloadBranchlist
      */
     public void validateState(final State state) {
-        if (!this.isState(state)) { throw new StateViolationException(state); }
+        if (!this.isState(state)) {
+            throw new StateViolationException(state);
+        }
     }
 }

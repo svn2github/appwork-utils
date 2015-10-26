@@ -8,27 +8,30 @@ import java.util.Locale;
 import org.appwork.utils.Application;
 import org.appwork.utils.IO;
 import org.appwork.utils.event.Eventsender;
-import org.appwork.utils.logging.Log;
+import org.appwork.utils.logging2.LogSource;
+import org.appwork.utils.logging2.extmanager.LoggerFactory;
 import org.appwork.utils.parser.ShellParser;
 
 /**
  * This class is used to parse and evaluate Startparameters
- * 
+ *
  * @author $Author: unknown $
- * 
+ *
  */
 public class ParameterParser {
     /**
      * Stores the Applications startParameters
      */
-    private  String[]                                          rawArguments;
+    private String[]                                                rawArguments;
     /**
      * The eventsenderobjekt is used to add Listenersupport to this class.
      */
     private final Eventsender<CommandSwitchListener, CommandSwitch> eventSender;
     private HashMap<String, CommandSwitch>                          map;
+    private LogSource                                               logger;
 
     public ParameterParser(final String[] args) {
+        logger = LoggerFactory.I().getLogger(getClass().getSimpleName());
         rawArguments = args;
         eventSender = new Eventsender<CommandSwitchListener, CommandSwitch>() {
 
@@ -82,9 +85,8 @@ public class ParameterParser {
     }
 
     /**
-     * parses the command row. and fires {@link CommandSwitch} for each switch
-     * command
-     * 
+     * parses the command row. and fires {@link CommandSwitch} for each switch command
+     *
      * @param commandFilePath
      *            TODO
      */
@@ -97,7 +99,7 @@ public class ParameterParser {
             try {
                 this.parse(ShellParser.splitCommandString(IO.readFileToString(Application.getResource(commandFilePath)).replaceAll("[\r\n]", " ")).toArray(new String[] {}));
             } catch (final IOException e) {
-                Log.exception(e);
+                logger.log(e);
             }
         }
 

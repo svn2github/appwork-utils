@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 
-import org.appwork.utils.logging.Log;
+
 import org.appwork.utils.processes.ProcessBuilderFactory;
 
 /**
@@ -52,12 +52,12 @@ public class DesktopSupportMac extends DesktopSupportJavaDesktop {
             try {
                 ProcessBuilderFactory.runCommand(new String[] { "sudo", "shutdown", "-p", "now" });
             } catch (Exception e) {
-                Log.exception(e);
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
             }
             try {
                 ProcessBuilderFactory.runCommand(new String[] { "sudo", "shutdown", "-h", "now" });
             } catch (Exception e) {
-                Log.exception(e);
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
             }
             return true;
         } else {
@@ -66,7 +66,7 @@ public class DesktopSupportMac extends DesktopSupportJavaDesktop {
                 ProcessBuilderFactory.runCommand(new String[] { "/usr/bin/osascript", "-e", "tell application \"Finder\" to shut down" });
                 return true;
             } catch (Exception e) {
-                Log.exception(e);
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
             }
         }
         return false;
@@ -78,15 +78,15 @@ public class DesktopSupportMac extends DesktopSupportJavaDesktop {
             ProcessBuilderFactory.runCommand(new String[] { "/usr/bin/osascript", "-e", "tell application \"Finder\" to sleep" });
             return true;
         } catch (Exception e) {
-            Log.exception(e);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
         }
-        Log.L.info("no standby support, use shutdown");
+              org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("no standby support, use shutdown");
         return false;
     }
 
     @Override
     public boolean hibernate() {
-        Log.L.info("no hibernate support, use shutdown");
+              org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("no hibernate support, use shutdown");
         return false;
     }
 }

@@ -16,7 +16,7 @@
 
 package org.appwork.utils.svn;
 
-import org.appwork.utils.logging.Log;
+
 import org.tmatesoft.svn.core.SVNDepth;
 import org.tmatesoft.svn.core.SVNException;
 import org.tmatesoft.svn.core.io.ISVNReporter;
@@ -47,7 +47,7 @@ public class ExportReporterBaton implements ISVNReporterBaton {
             reporter.finishReport();
         } catch (SVNException svne) {
             reporter.abortReport();
-            Log.L.fine("Report failed.");
+                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Report failed.");
         }
     }
 }

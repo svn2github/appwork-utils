@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2011 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.storage.simplejson.mapper
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -15,15 +15,13 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.logging.Level;
 
 import org.appwork.storage.simplejson.Ignore;
 import org.appwork.storage.simplejson.Ignores;
-import org.appwork.utils.logging.Log;
 
 /**
  * @author thomas
- * 
+ *
  */
 public class ClassCache {
     private static final HashMap<Class<?>, ClassCache> CACHE        = new HashMap<Class<?>, ClassCache>();
@@ -37,7 +35,7 @@ public class ClassCache {
      * @throws SecurityException
      */
     protected static ClassCache create(final Class<? extends Object> clazz) throws SecurityException, NoSuchMethodException {
-      
+
         final ClassCache cc = new ClassCache(clazz);
         Getter g;
         Setter s;
@@ -61,16 +59,16 @@ public class ClassCache {
                 if (m.getName().startsWith("get") && m.getParameterTypes().length == 0 && m.getReturnType() != void.class) {
                     cc.getter.add(g = new Getter(createKey(m.getName().substring(3)), m));
                     cc.getterMap.put(g.getKey(), g);
-//                    Log.L.finer(m.toString());
+                    // org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer(m.toString());
 
                 } else if (m.getName().startsWith("is") && m.getParameterTypes().length == 0 && m.getReturnType() != void.class) {
                     cc.getter.add(g = new Getter(createKey(m.getName().substring(2)), m));
                     cc.getterMap.put(g.getKey(), g);
-//                    Log.L.finer(m.toString());
+                    // org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer(m.toString());
                 } else if (m.getName().startsWith("set") && m.getParameterTypes().length == 1) {
                     cc.setter.add(s = new Setter(createKey(m.getName().substring(3)), m));
                     cc.setterMap.put(s.getKey(), s);
-//                    Log.L.finer(m.toString());
+                    // org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer(m.toString());
                 }
 
             }
@@ -83,18 +81,18 @@ public class ClassCache {
                     c.setAccessible(true);
                     cc.constructor = c;
                 } catch (final java.lang.SecurityException e) {
-                    Log.exception(Level.WARNING, e);
+                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
                 }
                 break;
             }
         }
         if (cc.constructor == null) {
             //
-        final int lastIndex = clazz.getName().lastIndexOf(".");
-            final String pkg = lastIndex>0?clazz.getName().substring(0,lastIndex):"";
+            final int lastIndex = clazz.getName().lastIndexOf(".");
+            final String pkg = lastIndex > 0 ? clazz.getName().substring(0, lastIndex) : "";
             if (pkg.startsWith("java") || pkg.startsWith("sun.")) {
 
-                Log.L.warning("No Null Constructor in " + clazz + " found. De-Json-serial will fail");
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("No Null Constructor in " + clazz + " found. De-Json-serial will fail");
             } else {
                 throw new NoSuchMethodException(" Class " + clazz + " requires a null constructor. please add private " + clazz.getSimpleName() + "(){}");
             }
@@ -103,11 +101,10 @@ public class ClassCache {
     }
 
     /**
-     * 
-     * Jackson maps methodnames to keys like this. setID becomes key "id" ,
-     * setMethodName becomes "methodName". To keep compatibility between jackson
-     * and simplemapper, we should do it the same way
-     * 
+     *
+     * Jackson maps methodnames to keys like this. setID becomes key "id" , setMethodName becomes "methodName". To keep compatibility
+     * between jackson and simplemapper, we should do it the same way
+     *
      * @param substring
      * @return
      */
@@ -144,8 +141,8 @@ public class ClassCache {
     protected Constructor<? extends Object> constructor;
 
     protected final Class<? extends Object> clazz;
-    protected final java.util.List<Getter>       getter;
-    protected final java.util.List<Setter>       setter;
+    protected final java.util.List<Getter>  getter;
+    protected final java.util.List<Setter>  setter;
     protected final HashMap<String, Getter> getterMap;
     protected final HashMap<String, Setter> setterMap;
 

@@ -35,7 +35,7 @@ import org.appwork.swing.components.ExtTextField;
 import org.appwork.utils.BinaryLogic;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.locale._AWU;
-import org.appwork.utils.logging.Log;
+
 import org.appwork.utils.net.httpconnection.HTTPProxy;
 import org.appwork.utils.net.httpconnection.HTTPProxy.TYPE;
 import org.appwork.utils.swing.EDTHelper;
@@ -342,7 +342,7 @@ public class ProxyDialog extends AbstractDialog<HTTPProxy> implements CaretListe
             ret.setUser(txtUser.getText());
             return ret;
         } catch (final Throwable e) {
-            Log.exception(e);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
             return null;
         }
     }

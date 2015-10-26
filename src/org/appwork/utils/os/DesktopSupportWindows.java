@@ -19,7 +19,7 @@ import java.nio.charset.Charset;
 import org.appwork.utils.Application;
 import org.appwork.utils.Files;
 import org.appwork.utils.IO;
-import org.appwork.utils.logging.Log;
+
 import org.appwork.utils.os.CrossSystem.OperatingSystem;
 import org.appwork.utils.processes.ProcessBuilderFactory;
 import org.appwork.utils.processes.ProcessOutput;
@@ -96,24 +96,24 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
                     ProcessBuilderFactory.runCommand(new String[] { "shutdown.exe", "-s", "-f", "-t", "01" });
 
                 } catch (Exception e) {
-                    Log.exception(e);
+                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
                 }
                 try {
                     ProcessBuilderFactory.runCommand(new String[] { "%windir%\\system32\\shutdown.exe", "-s", "-f", "-t", "01" });
                 } catch (Exception e) {
-                    Log.exception(e);
+                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
                 }
             } else {
                 /* normal shutdown */
                 try {
                     ProcessBuilderFactory.runCommand(new String[] { "shutdown.exe", "-s", "-t", "01" });
                 } catch (Exception e) {
-                    Log.exception(e);
+                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
                 }
                 try {
                     ProcessBuilderFactory.runCommand(new String[] { "%windir%\\system32\\shutdown.exe", "-s", "-t", "01" });
                 } catch (Exception e) {
-                    Log.exception(e);
+                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
                 }
             }
             if (CrossSystem.OS == OperatingSystem.WINDOWS_2000 || CrossSystem.OS == OperatingSystem.WINDOWS_NT) {
@@ -129,7 +129,7 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
                         Files.deleteRecursiv(f);
                     }
                 } catch (Exception e) {
-                    Log.exception(e);
+                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
                 }
             }
             break;
@@ -138,12 +138,12 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
             try {
                 ProcessBuilderFactory.runCommand(new String[] { "RUNDLL32.EXE", "user,ExitWindows" });
             } catch (Exception e) {
-                Log.exception(e);
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
             }
             try {
                 ProcessBuilderFactory.runCommand(new String[] { "RUNDLL32.EXE", "Shell32,SHExitWindowsEx", "1" });
             } catch (Exception e) {
-                Log.exception(e);
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
             }
             break;
         }
@@ -170,7 +170,7 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
                     ProcessBuilderFactory.runCommand(new String[] { path, "powercfg", "-hibernate", "off" });
 
                 } catch (Throwable e) {
-                    Log.exception(e);
+                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
                 }
             }
             try {
@@ -179,7 +179,7 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
                 try {
                     ProcessBuilderFactory.runCommand(new String[] { "%windir%\\system32\\powercfg.exe", "hibernate off" });
                 } catch (Exception ex) {
-                    Log.exception(ex);
+                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(ex);
                 }
             }
             try {
@@ -188,13 +188,13 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
                 try {
                     ProcessBuilderFactory.runCommand(new String[] { "%windir%\\system32\\RUNDLL32.EXE", "powrprof.dll,SetSuspendState" });
                 } catch (Exception e1) {
-                    Log.exception(e);
+                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
                 }
             }
             break;
         case WINDOWS_OTHERS:
             /* older windows versions */
-            Log.L.info("no standby support, use shutdown");
+                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("no standby support, use shutdown");
             return false;
 
         }
@@ -226,7 +226,7 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
                     ProcessBuilderFactory.runCommand(new String[] { path, "powercfg", "-hibernate", "on" });
 
                 } catch (Throwable e) {
-                    Log.exception(e);
+                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
                 }
             }
             try {
@@ -235,23 +235,23 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
                 try {
                     ProcessBuilderFactory.runCommand(new String[] { "%windir%\\system32\\powercfg.exe", "hibernate on" });
                 } catch (Exception ex) {
-                    Log.exception(ex);
+                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(ex);
                 }
             }
             try {
                 ProcessBuilderFactory.runCommand(new String[] { "RUNDLL32.EXE", "powrprof.dll,SetSuspendState" });
             } catch (Exception e) {
-                Log.exception(e);
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
                 try {
                     ProcessBuilderFactory.runCommand(new String[] { "%windir%\\system32\\RUNDLL32.EXE", "powrprof.dll,SetSuspendState" });
                 } catch (Exception ex) {
-                    Log.exception(ex);
+                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(ex);
                 }
             }
             break;
         case WINDOWS_OTHERS:
             /* older windows versions */
-            Log.L.info("no hibernate support, use shutdown");
+                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("no hibernate support, use shutdown");
             return false;
         }
         return true;
@@ -275,7 +275,7 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
                 }
             }
         } catch (Exception e) {
-            Log.exception(e);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
         }
 
         return true;

@@ -66,7 +66,7 @@ import org.appwork.utils.NullsafeAtomicReference;
 import org.appwork.utils.formatter.TimeFormatter;
 import org.appwork.utils.images.IconIO;
 import org.appwork.utils.locale._AWU;
-import org.appwork.utils.logging.Log;
+
 import org.appwork.utils.net.Base64OutputStream;
 import org.appwork.utils.os.CrossSystem;
 import org.appwork.utils.swing.EDTRunner;
@@ -172,7 +172,7 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
              }
              JSonStorage.getPlainStorage("Dialogs").clear();
          } catch (final Exception e) {
-             Log.exception(e);
+             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
          }
      }
 
@@ -614,7 +614,7 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
              //
              // if (this.returnBitMask == 0) {
              // this.setVisible(true);
-             // Log.L.fine("Answer: Parent Closed ");
+             //       org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Answer: Parent Closed ");
              // this.returnBitMask |= Dialog.RETURN_CLOSED;
              // this.setVisible(false);
              //
@@ -662,10 +662,10 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
      public void actionPerformed(final ActionEvent e) {
 
          if (e.getSource() == this.okButton) {
-             Log.L.fine("Answer: Button<OK:" + this.okButton.getText() + ">");
+                   org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Answer: Button<OK:" + this.okButton.getText() + ">");
              this.setReturnmask(true);
          } else if (e.getSource() == this.cancelButton) {
-             Log.L.fine("Answer: Button<CANCEL:" + this.cancelButton.getText() + ">");
+                   org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Answer: Button<CANCEL:" + this.cancelButton.getText() + ">");
              this.setReturnmask(false);
          }
 
@@ -742,7 +742,7 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
          if (this.initialized) {
              return;
          }
-         Log.L.info("Display Dialog: " + this);
+               org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Display Dialog: " + this);
          this.initialized = true;
          this._init();
      }
@@ -842,7 +842,7 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
                          return true;
                      }
                  } catch (final Exception e) {
-                     Log.exception(e);
+                     org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
                  }
              }
          }
@@ -877,7 +877,7 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
       */
      public void forceDummyInit() {
          if (Application.isHeadless()) {
-             Log.L.info("Force Dummy Init");
+                   org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Force Dummy Init");
              AbstractDialog.this.initialized = true;
              AbstractDialog.this.dummyInit = true;
          } else {
@@ -885,7 +885,7 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
 
                  @Override
                  protected void runInEDT() {
-                     Log.L.info("Force Dummy Init");
+                           org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Force Dummy Init");
                      AbstractDialog.this.initialized = true;
                      AbstractDialog.this.dummyInit = true;
                  }
@@ -1461,7 +1461,7 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
                      if (AbstractDialog.this.isDisposed()) {
                          return;
                      }
-                     Log.L.fine("Answer: Key<ESCAPE>");
+                           org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Answer: Key<ESCAPE>");
 
                      AbstractDialog.this.setReturnmask(false);
                      AbstractDialog.this.returnBitMask |= Dialog.RETURN_ESC;
@@ -1484,7 +1484,7 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
 
      public void resetDummyInit() {
          if (org.appwork.utils.Application.isHeadless()) {
-             Log.L.info("Reset Dummy Info");
+                   org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Reset Dummy Info");
              AbstractDialog.this.initialized = false;
              AbstractDialog.this.dummyInit = false;
          } else {
@@ -1492,7 +1492,7 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
 
                  @Override
                  protected void runInEDT() {
-                     Log.L.info("Reset Dummy Info");
+                           org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Reset Dummy Info");
                      AbstractDialog.this.initialized = false;
                      AbstractDialog.this.dummyInit = false;
                  }
@@ -1695,7 +1695,7 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
                      }
                  }
              } catch (final Exception e) {
-                 Log.exception(e);
+                 org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
              }
          }
 
@@ -1793,14 +1793,14 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
 
      public void windowClosing(final WindowEvent arg0) {
          if (this.closeAllowed()) {
-             Log.L.fine("Answer: Button<[X]>");
+                   org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Answer: Button<[X]>");
              if (this.isDeveloperMode() && this.isDisposed()) {
                  throw new IllegalStateException("Dialog already disposed");
              }
              this.returnBitMask |= Dialog.RETURN_CLOSED;
              this.dispose();
          } else {
-             Log.L.fine("(Answer: Tried [X] bot not allowed)");
+                   org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("(Answer: Tried [X] bot not allowed)");
          }
      }
 

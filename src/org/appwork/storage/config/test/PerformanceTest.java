@@ -10,7 +10,7 @@
 package org.appwork.storage.config.test;
 
 import org.appwork.storage.config.JsonConfig;
-import org.appwork.utils.logging.Log;
+
 
 /**
  * @author thomas
@@ -32,7 +32,7 @@ public class PerformanceTest {
             System.out.println("TEST SUCCESSFULL");
         } catch (final RuntimeException e) {
             // seems like the interface is malformed
-            Log.exception(e);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
 
             System.out.println("TEST FAILED");
         }

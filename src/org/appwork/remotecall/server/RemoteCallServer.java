@@ -9,7 +9,7 @@ import org.appwork.remotecall.Utils;
 import org.appwork.remotecall.client.MethodHandler;
 import org.appwork.storage.JSonStorage;
 import org.appwork.storage.TypeRef;
-import org.appwork.utils.logging.Log;
+
 
 @Deprecated
 public class RemoteCallServer {
@@ -90,10 +90,10 @@ public class RemoteCallServer {
             final Throwable cause = e1.getCause();
             if (cause != null) {
                 if (cause instanceof ResponseAlreadySentException) { throw (ResponseAlreadySentException) cause; }
-                Log.exception(e1);
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e1);
                 throw new ServerInvokationException(handleRequestError(requestor, cause), requestor);
             }
-            Log.exception(e1);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e1);
             throw new ServerInvokationException(handleRequestError(requestor, new RuntimeException(e1)), requestor);
         } catch (final ServerInvokationException e) {
             throw e;
@@ -115,7 +115,7 @@ public class RemoteCallServer {
 
     protected String handleRequestError(final Requestor requestor, final Throwable e) {
         // TODO byte[]-generated method stub
-        Log.exception(e);
+        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
         final StringBuilder sb = new StringBuilder();
 
         try {

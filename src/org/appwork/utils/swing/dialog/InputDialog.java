@@ -31,7 +31,7 @@ import org.appwork.uio.InputDialogInterface;
 import org.appwork.uio.UIOManager;
 import org.appwork.utils.BinaryLogic;
 import org.appwork.utils.StringUtils;
-import org.appwork.utils.logging.Log;
+
 import org.appwork.utils.os.CrossSystem;
 import org.appwork.utils.swing.EDTHelper;
 import org.appwork.utils.swing.EDTRunner;
@@ -58,7 +58,7 @@ public class InputDialog extends AbstractDialog<String> implements KeyListener, 
 
     public InputDialog(final int flag, final String title, final String message, final String defaultMessage, final Icon icon, final String okOption, final String cancelOption) {
         super(flag, title, icon, okOption, cancelOption);
-        Log.L.fine("Dialog    [" + okOption + "][" + cancelOption + "]\r\nflag:  " + Integer.toBinaryString(flag) + "\r\ntitle: " + title + "\r\nmsg:   \r\n" + message + "\r\ndef:   \r\n" + defaultMessage);
+              org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Dialog    [" + okOption + "][" + cancelOption + "]\r\nflag:  " + Integer.toBinaryString(flag) + "\r\ntitle: " + title + "\r\nmsg:   \r\n" + message + "\r\ndef:   \r\n" + defaultMessage);
 
         this.defaultMessage = defaultMessage;
         this.message = message;

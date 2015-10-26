@@ -1,8 +1,8 @@
 /**
  * Copyright (c) 2009 - 2012 AppWork UG(haftungsbeschränkt) <e-mail@appwork.org>
- * 
+ *
  * This file is part of org.appwork.utils.swing.dialog
- * 
+ *
  * This software is licensed under the Artistic License 2.0,
  * see the LICENSE file or http://www.opensource.org/licenses/artistic-license-2.0.php
  * for details
@@ -25,24 +25,25 @@ import javax.swing.filechooser.FileSystemView;
 import org.appwork.resources.AWUTheme;
 import org.appwork.sunwrapper.sun.awt.shell.ShellFolderWrapper;
 import org.appwork.utils.locale._AWU;
-import org.appwork.utils.logging.Log;
+import org.appwork.utils.logging2.extmanager.LoggerFactory;
 import org.appwork.utils.os.CrossSystem;
 
 /**
- * 
- * 
- * This ExtFileSystemView is a workaround. The standard FileSystemView maps all
- * contents of the Windows Desktop into the save in combobox. The virtual
- * WIndows Folders are a pain in the a%/&
- * 
+ *
+ *
+ * This ExtFileSystemView is a workaround. The standard FileSystemView maps all contents of the Windows Desktop into the save in combobox.
+ * The virtual WIndows Folders are a pain in the a%/&
+ *
  * @author Thomas
- * 
+ *
  */
 public class ExtFileSystemView extends FileSystemView {
     public static boolean SAMBA_SCANNED = false;
 
     public static void runSambaScanner() {
-        if (ExtFileSystemView.SAMBA_SCANNED) { return; }
+        if (ExtFileSystemView.SAMBA_SCANNED) {
+            return;
+        }
         ExtFileSystemView.SAMBA_SCANNED = true;
 
         // final long tt = System.currentTimeMillis();
@@ -54,7 +55,8 @@ public class ExtFileSystemView extends FileSystemView {
         // try {
         // if (view.networkFolder != null) {
         // view.networkFolder.listFiles();
-        // Log.L.info("List Networkfolder done " + (System.currentTimeMillis() -
+        // LoggerFactory.I().getDefaultLogger().info("List Networkfolder done " +
+        // (System.currentTimeMillis() -
         // tt));
         // }
         // } catch (final Exception e) {
@@ -71,7 +73,7 @@ public class ExtFileSystemView extends FileSystemView {
     private HashMap<File, File>  specialsMap;
 
     /**
-     * 
+     *
      */
     public static final String   VIRTUAL_NETWORKFOLDER    = "::{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}";
     public static final String   VIRTUAL_NETWORKFOLDER_XP = "::{208D2C60-3AEA-1069-A2D7-08002B30309D}";
@@ -125,13 +127,14 @@ public class ExtFileSystemView extends FileSystemView {
         try {
             final File[] ret;
             if (dir == this.networkFolder) {
-                Log.L.info("getFilesShellfolder");
+
+                LoggerFactory.I().getDefaultLogger().info("getFilesShellfolder");
                 ret = this.getFilesShellfolder((NetWorkFolder) dir, useFileHiding);
             } else {
-                Log.L.info("org.getFiles(dir, useFileHiding);");
+                LoggerFactory.I().getDefaultLogger().info("org.getFiles(dir, useFileHiding);");
                 ret = this.org.getFiles(dir, useFileHiding);
             }
-            Log.L.info("getFiles: ms:" + (System.currentTimeMillis() - t) + " " + dir + "|" + ret.length);
+            LoggerFactory.I().getDefaultLogger().info("getFiles: ms:" + (System.currentTimeMillis() - t) + " " + dir + "|" + ret.length);
             final java.util.List<File> filtered = new ArrayList<File>();
             for (final File f : ret) {
                 if (f.getName().equals(ExtFileSystemView.VIRTUAL_NETWORKFOLDER)) {
@@ -145,10 +148,10 @@ public class ExtFileSystemView extends FileSystemView {
                 }
                 filtered.add(f);
             }
-            Log.L.info("Return Files for " + dir + "(" + useFileHiding + "): " + filtered.size());
+            LoggerFactory.I().getDefaultLogger().info("Return Files for " + dir + "(" + useFileHiding + "): " + filtered.size());
             return filtered.toArray(new File[] {});
         } finally {
-            Log.L.info("getFiles(end): ms:" + (System.currentTimeMillis() - t) + " " + dir);
+            LoggerFactory.I().getDefaultLogger().info("getFiles(end): ms:" + (System.currentTimeMillis() - t) + " " + dir);
         }
     }
 
@@ -156,7 +159,9 @@ public class ExtFileSystemView extends FileSystemView {
         final List<File> files = new ArrayList<File>();
 
         final File[] names = network.listFiles(useFileHiding);
-        if (names == null) { return new File[0]; }
+        if (names == null) {
+            return new File[0];
+        }
 
         for (File f : names) {
             if (Thread.currentThread().isInterrupted()) {
@@ -212,9 +217,11 @@ public class ExtFileSystemView extends FileSystemView {
     @Override
     public File[] getRoots() {
         final long t = System.currentTimeMillis();
-        Log.L.info("Get Roots");
+        LoggerFactory.I().getDefaultLogger().info("Get Roots");
 
-        if (this.roots != null) { return this.roots; }
+        if (this.roots != null) {
+            return this.roots;
+        }
         try {
 
             // this may take a long time on some systems.
@@ -224,7 +231,7 @@ public class ExtFileSystemView extends FileSystemView {
                 }
             });
 
-            Log.L.info("Listed Base folders " + (System.currentTimeMillis() - t));
+            LoggerFactory.I().getDefaultLogger().info("Listed Base folders " + (System.currentTimeMillis() - t));
             final LinkedHashSet<File> unique = new LinkedHashSet<File>() {
                 /*
                  * (non-Javadoc)
@@ -233,7 +240,9 @@ public class ExtFileSystemView extends FileSystemView {
                  */
                 @Override
                 public boolean add(final File e) {
-                    if (this.contains(e)) { return false; }
+                    if (this.contains(e)) {
+                        return false;
+                    }
                     return super.add(e);
                 }
             };
@@ -285,7 +294,7 @@ public class ExtFileSystemView extends FileSystemView {
                     if (f.getParentFile() == null || !f.getParentFile().equals(home)) {
                         unique.add(f);
                     }
-                    Log.L.info("Basefolder: " + f.getName() + " - " + f + " - " + CrossSystem.getOSString());
+                    LoggerFactory.I().getDefaultLogger().info("Basefolder: " + f.getName() + " - " + f + " - " + CrossSystem.getOSString());
                 }
             }
             final File[] nroots = unique.toArray(new File[] {});
@@ -297,15 +306,19 @@ public class ExtFileSystemView extends FileSystemView {
             this.roots = nroots;
             return this.roots;
         } finally {
-            Log.L.info("Roots: " + (System.currentTimeMillis() - t));
+            LoggerFactory.I().getDefaultLogger().info("Roots: " + (System.currentTimeMillis() - t));
 
         }
     }
 
     @Override
     public String getSystemDisplayName(final File f) {
-        if (f == this.networkFolder) { return _AWU.T.DIALOG_FILECHOOSER_networkfolder(); }
-        if (f instanceof VirtualRoot) { return f.getName(); }
+        if (f == this.networkFolder) {
+            return _AWU.T.DIALOG_FILECHOOSER_networkfolder();
+        }
+        if (f instanceof VirtualRoot) {
+            return f.getName();
+        }
         return this.org.getSystemDisplayName(f);
     }
 
@@ -314,7 +327,8 @@ public class ExtFileSystemView extends FileSystemView {
         try {
             if (f instanceof VirtualRoot) {
 
-            return AWUTheme.I().getIcon("root", 18); }
+                return AWUTheme.I().getIcon("root", 18);
+            }
 
             return this.org.getSystemIcon(f);
 

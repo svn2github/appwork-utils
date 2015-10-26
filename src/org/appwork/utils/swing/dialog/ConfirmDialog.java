@@ -20,7 +20,7 @@ import org.appwork.swing.MigPanel;
 import org.appwork.uio.ConfirmDialogInterface;
 import org.appwork.uio.UIOManager;
 import org.appwork.utils.BinaryLogic;
-import org.appwork.utils.logging.Log;
+
 import org.appwork.utils.os.CrossSystem;
 
 public class ConfirmDialog extends AbstractDialog<Integer> implements ConfirmDialogInterface {
@@ -108,7 +108,7 @@ public class ConfirmDialog extends AbstractDialog<Integer> implements ConfirmDia
 
     public ConfirmDialog(final int flag, final String title, final String message, final Icon icon, final String okOption, final String cancelOption) {
         super(flag, title, icon, okOption, cancelOption);
-        Log.L.fine("Dialog    [" + okOption + "][" + cancelOption + "]\r\nflag:  " + Integer.toBinaryString(flag) + "\r\ntitle: " + title + "\r\nmsg:   \r\n" + message);
+              org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Dialog    [" + okOption + "][" + cancelOption + "]\r\nflag:  " + Integer.toBinaryString(flag) + "\r\ntitle: " + title + "\r\nmsg:   \r\n" + message);
 
         this.message = message;
     }

@@ -25,7 +25,7 @@ import org.appwork.storage.InvalidTypeException;
 import org.appwork.storage.JSonStorage;
 import org.appwork.storage.TypeRef;
 import org.appwork.storage.config.InterfaceParseException;
-import org.appwork.utils.logging.Log;
+
 import org.appwork.utils.reflection.Clazz;
 
 /**
@@ -80,7 +80,7 @@ public class InvocationHandlerImpl<T extends RemoteCallInterface> implements Inv
                         JSonStorage.canStore(t, false);
                     }
                 } catch (final InvalidTypeException e) {
-                    Log.exception(e);
+                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
                     throw new InterfaceParseException("Json Serialize not possible for " + m);
                 }
                 for (final Class<?> e : m.getExceptionTypes()) {

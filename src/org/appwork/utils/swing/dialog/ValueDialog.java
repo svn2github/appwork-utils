@@ -32,7 +32,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.appwork.utils.BinaryLogic;
 import org.appwork.utils.interfaces.ValueConverter;
-import org.appwork.utils.logging.Log;
+
 
 public class ValueDialog extends AbstractDialog<Long> implements KeyListener, MouseListener {
 
@@ -52,7 +52,7 @@ public class ValueDialog extends AbstractDialog<Long> implements KeyListener, Mo
     public ValueDialog(final int flag, final String title, final String message, final Icon icon, final String okOption, final String cancelOption, long defaultValue, long min, long max, long step, ValueConverter valueConverter) {
         super(flag, title, icon, okOption, cancelOption);
 
-        Log.L.fine("Dialog    [" + okOption + "][" + cancelOption + "]\r\nflag:  " + Integer.toBinaryString(flag) + "\r\ntitle: " + title + "\r\nmsg:   \r\n" + message + " \r\n" + min + "<=" + defaultValue + "<=" + max + " [" + step + "]");
+              org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Dialog    [" + okOption + "][" + cancelOption + "]\r\nflag:  " + Integer.toBinaryString(flag) + "\r\ntitle: " + title + "\r\nmsg:   \r\n" + message + " \r\n" + min + "<=" + defaultValue + "<=" + max + " [" + step + "]");
 
         this.message = message;
         while (max > Integer.MAX_VALUE) {

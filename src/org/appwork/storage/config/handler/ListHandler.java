@@ -26,7 +26,7 @@ import org.appwork.storage.config.annotations.DisableObjectCache;
 import org.appwork.storage.config.annotations.PlainStorage;
 import org.appwork.utils.Application;
 import org.appwork.utils.IO;
-import org.appwork.utils.logging.Log;
+
 
 /**
  * @author Thomas
@@ -97,7 +97,9 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
     protected void initHandler() throws Throwable {
         this.path = new File(this.storageHandler.getPath() + "." + this.getKey() + "." + (this.cryptKey != null ? "ejs" : "json"));
         if (this.storageHandler.getRelativCPPath() != null && !this.path.exists()) {
-            this.url = Application.getRessourceURL(this.storageHandler.getRelativCPPath() + "." + this.getKey() + "." + (this.cryptKey != null ? "ejs" : "json"));
+            // Remember: Application.getResourceUrl returns an url to the classpath (bin/jar) or to a file on the harddisk (cfg folder)
+            // we do only want urls to the classpath here
+            this.url = Application.class.getClassLoader().getResource(this.storageHandler.getRelativCPPath() + "." + this.getKey() + "." + (this.cryptKey != null ? "ejs" : "json"));
         }
 
         this.useObjectCache = this.getAnnotation(DisableObjectCache.class) == null;
@@ -168,14 +170,14 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
             Object ret = null;
             // prefer local file. like primitive storage does as well.
             if (path.exists()) {
-                Log.L.finer("Read Config: " + this.path.getAbsolutePath());
+                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Read Config: " + this.path.getAbsolutePath());
                 exists = path.exists();
                 ret = JSonStorage.restoreFrom(this.path, this.cryptKey == null, this.cryptKey, this.typeRef, dummy);
 
             }
             if (ret == dummy || (!path.exists())) {
                 if (this.url != null) {
-                    Log.L.finer("Read Config: " + this.url);
+                          org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Read Config: " + this.url);
                     ret = JSonStorage.restoreFromString(IO.readURL(this.url), this.cryptKey == null, this.cryptKey, this.typeRef, dummy);
                 }
             }
@@ -215,7 +217,7 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.storage.config.KeyHandler#validateValue(java.lang.Object)
      */
     @Override

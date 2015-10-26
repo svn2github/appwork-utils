@@ -25,7 +25,7 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 import org.appwork.utils.Files;
-import org.appwork.utils.logging.Log;
+
 
 /**
  * @author daniel
@@ -99,12 +99,12 @@ public class ZipIOReader {
                     if (this.isBreakOnError()) {
                         throw new IOException("Cannot extract File to Directory " + output);
                     } else {
-                        Log.L.severe("Cannot extract File to Directory " + output);
+                              org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Cannot extract File to Directory " + output);
                     }
                 }
             }
             if (output.exists() && output.isDirectory()) {
-                Log.L.finer("Skipped extraction: directory exists: " + output);
+                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Skipped extraction: directory exists: " + output);
                 return ret;
 
             }
@@ -117,13 +117,13 @@ public class ZipIOReader {
                     if (this.isBreakOnError()) {
                         throw new IOException("Cannot overwrite File " + output);
                     } else {
-                        Log.L.severe("Cannot overwrite File " + output);
+                              org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Cannot overwrite File " + output);
                     }
 
                 }
             }
             if (output.exists()) {
-                Log.L.finer("Skipped extraction: file exists: " + output);
+                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Skipped extraction: file exists: " + output);
                 return ret;
             }
         }
@@ -137,13 +137,13 @@ public class ZipIOReader {
                     if (this.isBreakOnError()) {
                         throw new IOException("Cannot create folder for File " + output);
                     } else {
-                        Log.L.severe("Cannot create folder for File " + output);
+                              org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Cannot create folder for File " + output);
                     }
 
                 }
             }
             if (!output.getParentFile().exists()) {
-                Log.L.finer("Skipped extraction: cannot create dir: " + output);
+                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Skipped extraction: cannot create dir: " + output);
                 return ret;
             }
         }
@@ -171,7 +171,7 @@ public class ZipIOReader {
             if (this.isBreakOnError()) {
                 throw new ZipIOException("Cannot extract a directory", entry);
             } else {
-                Log.L.severe("Cannot extract a directory " + entry.getName());
+                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Cannot extract a directory " + entry.getName());
             }
         }
         CheckedInputStream in = null;
@@ -190,7 +190,7 @@ public class ZipIOReader {
                 if (this.isBreakOnError()) {
                     throw new ZipIOException("CRC32 Failed", entry);
                 } else {
-                    Log.L.severe("CRC32 Failed " + entry);
+                          org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("CRC32 Failed " + entry);
                 }
 
             }
@@ -217,14 +217,14 @@ public class ZipIOReader {
             if (this.isBreakOnError()) {
                 throw new IOException("cannot extract to a file " + outputDirectory);
             } else {
-                Log.L.severe("cannot extract to a file " + outputDirectory);
+                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("cannot extract to a file " + outputDirectory);
             }
         }
         if (!outputDirectory.exists() && !(this.autoCreateExtractPath && outputDirectory.mkdirs())) {
             if (this.isBreakOnError()) {
                 throw new IOException("could not create outputDirectory " + outputDirectory);
             } else {
-                Log.L.severe("could not create outputDirectory " + outputDirectory);
+                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("could not create outputDirectory " + outputDirectory);
             }
         }
 
@@ -239,13 +239,13 @@ public class ZipIOReader {
                             if (this.isBreakOnError()) {
                                 throw new IOException("could not create outputDirectory " + out);
                             } else {
-                                Log.L.severe("could not create outputDirectory " + out);
+                                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("could not create outputDirectory " + out);
                             }
 
                         }
                         ret.add(out);
                     } else {
-                        Log.L.finer("SKipped creatzion of: " + out);
+                              org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("SKipped creatzion of: " + out);
                     }
                 }
 

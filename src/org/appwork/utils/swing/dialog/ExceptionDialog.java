@@ -32,7 +32,7 @@ import org.appwork.uio.ExceptionDialogInterface;
 import org.appwork.utils.BinaryLogic;
 import org.appwork.utils.Exceptions;
 import org.appwork.utils.locale._AWU;
-import org.appwork.utils.logging.Log;
+
 import org.appwork.utils.os.CrossSystem;
 
 /**
@@ -70,7 +70,7 @@ public class ExceptionDialog extends AbstractDialog<Integer> implements Exceptio
 
     public ExceptionDialog(final int flag, final String title, final String message, final Throwable exception, final String okOption, final String cancelOption) {
         super(flag, title, null, okOption, cancelOption);
-        Log.L.fine("Dialog    [" + okOption + "][" + cancelOption + "]\r\nflag:  " + Integer.toBinaryString(flag) + "\r\ntitle: " + title + "\r\nmsg:   \r\n" + message);
+              org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Dialog    [" + okOption + "][" + cancelOption + "]\r\nflag:  " + Integer.toBinaryString(flag) + "\r\ntitle: " + title + "\r\nmsg:   \r\n" + message);
 
         this.message = message;
         this.exception = exception;

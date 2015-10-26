@@ -41,7 +41,7 @@ import javax.swing.PopupFactory;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 
-import org.appwork.utils.logging.Log;
+
 import org.appwork.utils.swing.EDTRunner;
 
 /**
@@ -310,7 +310,7 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
 
             }
         } catch (final Exception e) {
-            Log.exception(e);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
         }
         return false;
     }
@@ -329,7 +329,7 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
                 return bounds.contains(locationOnScreen);
             }
         } catch (final Exception e) {
-            Log.exception(e);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
         }
         return false;
     }

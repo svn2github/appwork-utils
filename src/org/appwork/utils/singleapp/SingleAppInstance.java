@@ -360,7 +360,7 @@ public class SingleAppInstance {
                             }
                         }
                     } catch (final IOException e) {
-                        org.appwork.utils.logging.Log.exception(e);
+                        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
                     } finally {
                         if (client != null) {
                             try {
@@ -382,7 +382,7 @@ public class SingleAppInstance {
                 try {
                     SingleAppInstance.this.serverSocket.close();
                 } catch (final Throwable e) {
-                    org.appwork.utils.logging.Log.exception(e);
+                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
                 }
             }
         });

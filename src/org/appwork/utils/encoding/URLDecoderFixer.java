@@ -12,7 +12,7 @@ package org.appwork.utils.encoding;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 
-import org.appwork.utils.logging.Log;
+
 
 /**
  * @author daniel
@@ -91,7 +91,7 @@ public class URLDecoderFixer extends URLDecoder {
             }
         }
         if (exceptionFixed) {
-            Log.exception(new Exception("URLDecoderFixer: had to fix " + s));
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(new Exception("URLDecoderFixer: had to fix " + s));
         }
         return needToChange ? sb.toString() : s;
     }

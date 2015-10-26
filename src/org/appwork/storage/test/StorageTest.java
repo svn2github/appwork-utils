@@ -11,7 +11,7 @@ package org.appwork.storage.test;
 
 import org.appwork.storage.JSonStorage;
 import org.appwork.storage.Storage;
-import org.appwork.utils.logging.Log;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -40,7 +40,7 @@ public class StorageTest {
             final long mytinyint = s.get("TINYLONG", (long) 0);
             Assert.assertTrue("Restore error", mytinyint == 100l);
         } catch (final Exception e) {
-            Log.exception(e);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
             Assert.fail(e.getMessage());
         }
     }
@@ -63,7 +63,7 @@ public class StorageTest {
             s.put("NOTNULL", (String) null);
 
         } catch (final Exception e) {
-            Log.exception(e);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
             Assert.fail(e.getMessage());
         }
 

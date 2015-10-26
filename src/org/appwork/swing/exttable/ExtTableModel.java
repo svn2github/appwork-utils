@@ -27,7 +27,7 @@ import org.appwork.exceptions.WTFException;
 import org.appwork.resources.AWUTheme;
 import org.appwork.storage.JSonStorage;
 import org.appwork.storage.Storage;
-import org.appwork.utils.logging.Log;
+
 import org.appwork.utils.swing.EDTHelper;
 import org.appwork.utils.swing.EDTRunner;
 
@@ -214,7 +214,7 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
 
     public void _fireTableStructureChanged(final List<E> newtableData, final boolean refreshSort) {
         if (this.isDebugTableModel() && SwingUtilities.isEventDispatchThread()) {
-            Log.exception(new WTFException("_fireTableStructureChanged inside EDT! "));
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(new WTFException("_fireTableStructureChanged inside EDT! "));
         }
         final List<E> tableData;
         if (refreshSort) {
@@ -556,7 +556,7 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
                 }
             }
         } catch (final Exception e) {
-            Log.exception(e);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
         }
         return null;
     }
@@ -948,7 +948,7 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
         try {
             return col.isHidable();
         } catch (final Exception e) {
-            Log.exception(e);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
             return true;
         }
     }
@@ -984,7 +984,7 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
         try {
             return col.isVisible(this.getTable().getColumnStore("VISABLE_COL_", col.getID(), col.isDefaultVisible()));
         } catch (final Exception e) {
-            Log.exception(e);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
             return true;
         }
     }
@@ -1038,7 +1038,7 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
 
     public List<E> refreshSort(final List<E> data) {
         if (this.isDebugTableModel() && SwingUtilities.isEventDispatchThread()) {
-            Log.exception(new WTFException("refreshSort inside EDT! "));
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(new WTFException("refreshSort inside EDT! "));
         }
         boolean sameTable = false;
         if (data == this.getTableData()) {
@@ -1046,7 +1046,7 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
         }
         final List<E> ret = this.sort(data, this.sortColumn);
         if (this.isDebugTableModel() && this.getTableData() == ret && sameTable) {
-            Log.exception(new WTFException("WARNING: sorting on live backend!"));
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(new WTFException("WARNING: sorting on live backend!"));
         }
         return ret;
     }
@@ -1116,7 +1116,7 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
         try {
             this.getTable().getStorage().put(this.getTable().getColumnStoreKey("VISABLE_COL_", column.getID()), visible);
         } catch (final Exception e) {
-            Log.exception(e);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
         }
         this.getTable().updateColumns();
 
@@ -1371,19 +1371,19 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
                 this.getStorage().put(ExtTableModel.SORT_ORDER_ID_KEY, id);
                 this.getStorage().put(ExtTableModel.SORTCOLUMN_KEY, column.getID());
             } catch (final Exception e) {
-                Log.exception(e);
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
             }
             try {
                 Collections.sort(data, column.getRowSorter());
             } catch (final Throwable e) {
-                Log.exception(e);
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
             }
         } else {
             try {
                 this.getStorage().put(ExtTableModel.SORT_ORDER_ID_KEY, (String) null);
                 this.getStorage().put(ExtTableModel.SORTCOLUMN_KEY, (String) null);
             } catch (final Exception e) {
-                Log.exception(e);
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
             }
         }
         return data;

@@ -12,7 +12,7 @@ import org.appwork.exceptions.WTFException;
 import org.appwork.utils.Application;
 import org.appwork.utils.Files;
 import org.appwork.utils.IO;
-import org.appwork.utils.logging.Log;
+
 import org.tmatesoft.svn.core.SVNCancelException;
 import org.tmatesoft.svn.core.SVNCommitInfo;
 import org.tmatesoft.svn.core.SVNDepth;
@@ -246,9 +246,9 @@ public class Subversion implements ISVNEventHandler {
             @Override
             protected SVNCommitInfo run() throws SVNException {
                 getWCClient().doAdd(dstPath, true, false, true, SVNDepth.INFINITY, false, false);
-                Log.L.finer("Create CommitPacket");
+                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Create CommitPacket");
                 final SVNCommitPacket packet = getCommitClient().doCollectCommitItems(new File[] { dstPath }, false, false, SVNDepth.INFINITY, null);
-                Log.L.finer("Transfer Package");
+                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Transfer Package");
                 return getCommitClient().doCommit(packet, true, false, message, null);
             }
 
@@ -490,7 +490,7 @@ public class Subversion implements ISVNEventHandler {
         try {
             return getRevision(resource);
         } catch (final SVNException e) {
-            Log.exception(e);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
         }
         return -1;
 
@@ -542,31 +542,31 @@ public class Subversion implements ISVNEventHandler {
             /*
              * The item is scheduled for addition.
              */
-            Log.L.fine("A     " + event.getFile());
+                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("A     " + event.getFile());
             return;
         } else if (action == SVNEventAction.COPY) {
             /*
              * The item is scheduled for addition with history (copied, in other words).
              */
-            Log.L.fine("A  +  " + event.getFile());
+                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("A  +  " + event.getFile());
             return;
         } else if (action == SVNEventAction.DELETE) {
             /*
              * The item is scheduled for deletion.
              */
-            Log.L.fine("D     " + event.getFile());
+                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("D     " + event.getFile());
             return;
         } else if (action == SVNEventAction.LOCKED) {
             /*
              * The item is locked.
              */
-            Log.L.fine("L     " + event.getFile());
+                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("L     " + event.getFile());
             return;
         } else if (action == SVNEventAction.LOCK_FAILED) {
             /*
              * Locking operation failed.
              */
-            Log.L.fine("failed to lock    " + event.getFile());
+                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("failed to lock    " + event.getFile());
             return;
         }
 
@@ -612,14 +612,14 @@ public class Subversion implements ISVNEventHandler {
             /*
              * for externals definitions
              */
-            Log.L.fine("Fetching external item into '" + event.getFile().getAbsolutePath() + "'");
-            Log.L.fine("External at revision " + event.getRevision());
+                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Fetching external item into '" + event.getFile().getAbsolutePath() + "'");
+                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("External at revision " + event.getRevision());
             return;
         } else if (action == SVNEventAction.UPDATE_COMPLETED) {
             /*
              * Working copy update is completed. Prints out the revision.
              */
-            Log.L.fine("At revision " + event.getRevision());
+                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("At revision " + event.getRevision());
             return;
         }
 
@@ -658,7 +658,7 @@ public class Subversion implements ISVNEventHandler {
             lockLabel = "B";
         }
         if (pathChangeType != nullString || propertiesChangeType != nullString || lockLabel != nullString) {
-            Log.L.fine(pathChangeType + propertiesChangeType + lockLabel + "       " + event.getFile());
+                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine(pathChangeType + propertiesChangeType + lockLabel + "       " + event.getFile());
         }
 
         /*
@@ -666,13 +666,13 @@ public class Subversion implements ISVNEventHandler {
          */
 
         if (action == SVNEventAction.COMMIT_MODIFIED) {
-            Log.L.fine("Sending   " + event.getFile());
+                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Sending   " + event.getFile());
         } else if (action == SVNEventAction.COMMIT_DELETED) {
-            Log.L.fine("Deleting   " + event.getFile());
+                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Deleting   " + event.getFile());
         } else if (action == SVNEventAction.COMMIT_REPLACED) {
-            Log.L.fine("Replacing   " + event.getFile());
+                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Replacing   " + event.getFile());
         } else if (action == SVNEventAction.COMMIT_DELTA_SENT) {
-            Log.L.fine("Transmitting file data....");
+                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Transmitting file data....");
         } else if (action == SVNEventAction.COMMIT_ADDED) {
             /*
              * Gets the MIME-type of the item.
@@ -682,9 +682,9 @@ public class Subversion implements ISVNEventHandler {
                 /*
                  * If the item is a binary file
                  */
-                Log.L.fine("Adding  (bin)  " + event.getFile());
+                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Adding  (bin)  " + event.getFile());
             } else {
-                Log.L.fine("Adding         " + event.getFile());
+                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Adding         " + event.getFile());
             }
         }
 
@@ -828,7 +828,7 @@ public class Subversion implements ISVNEventHandler {
                             try {
                                 Subversion.this.resolveConflictedFile(info, info.getFile(), handler);
                                 Subversion.this.getWCClient().doResolve(info.getFile(), SVNDepth.INFINITY, null);
-                                Log.L.fine(file + " resolved");
+                                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine(file + " resolved");
                             } catch (final Exception e) {
                                 e.printStackTrace();
                             }
@@ -985,7 +985,7 @@ public class Subversion implements ISVNEventHandler {
                     // depth, includeIgnored, makeParents);
                     // long ret = updateClient.doCheckout(svnurl, file, frevision,
                     // frevision, i, true);
-                    Log.L.info("SVN Update at " + file + " to Revision " + frevision + " depths:" + fi + "  " + svnurl);
+                          org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("SVN Update at " + file + " to Revision " + frevision + " depths:" + fi + "  " + svnurl);
                     long ret = updateClient.doUpdate(file, frevision, fi, false, true);
                     if (ret < 0) {
                         // no working copy?
@@ -994,12 +994,12 @@ public class Subversion implements ISVNEventHandler {
                     }
                     return ret;
                 } catch (final Exception e) {
-                    Log.L.info(e.getMessage());
-                    Log.L.info("SVN Checkout at " + file + "  " + svnurl);
+                          org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info(e.getMessage());
+                          org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("SVN Checkout at " + file + "  " + svnurl);
                     return updateClient.doCheckout(svnurl, file, frevision, frevision, fi, true);
 
                 } finally {
-                    Log.L.info("SVN Update finished");
+                          org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("SVN Update finished");
                 }
 
             }

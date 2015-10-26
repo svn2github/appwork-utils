@@ -28,7 +28,7 @@ import org.appwork.storage.JSonStorage;
 import org.appwork.swing.MigPanel;
 import org.appwork.swing.components.searchcombo.SearchComboBox;
 import org.appwork.utils.images.IconIO;
-import org.appwork.utils.logging.Log;
+
 import org.appwork.utils.net.Base64OutputStream;
 
 public class SearchComboBoxDialog<Type> extends AbstractDialog<Type> implements IconComboBoxDialogInterface {
@@ -63,7 +63,7 @@ public class SearchComboBoxDialog<Type> extends AbstractDialog<Type> implements 
      */
     public SearchComboBoxDialog(final int flag, final String title, final String question, final Type[] options, final Type defaultSelection, final ImageIcon icon, final String okText, final String cancelText) {
         super(flag, title, icon, okText, cancelText);
-        Log.L.fine("Dialog    [" + okText + "][" + cancelText + "]\r\nflag:  " + Integer.toBinaryString(flag) + "\r\ntitle: " + title + "\r\nmsg:   \r\n" + question + "\r\noptions:   \r\n" + Arrays.toString(options) + "\r\ndef:" + defaultSelection);
+              org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Dialog    [" + okText + "][" + cancelText + "]\r\nflag:  " + Integer.toBinaryString(flag) + "\r\ntitle: " + title + "\r\nmsg:   \r\n" + question + "\r\noptions:   \r\n" + Arrays.toString(options) + "\r\ndef:" + defaultSelection);
 
         message = question;
 

@@ -11,7 +11,7 @@ package org.appwork.utils.parser;
 
 import java.util.ArrayList;
 
-import org.appwork.utils.logging.Log;
+
 
 /**
  * @author thomas
@@ -107,7 +107,7 @@ public class ShellParser {
                     while (true) {
                         if (nq == -1) {
                             nq = command.length() - 1;
-                            Log.L.warning("Malformed commandstring");
+                                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Malformed commandstring");
                             break;
                         }
                         int escapes = 0;
@@ -127,7 +127,7 @@ public class ShellParser {
                     while (true) {
                         if (nq == -1) {
                             nq = command.length() - 1;
-                            Log.L.warning("Malformed commandstring");
+                                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Malformed commandstring");
                             break;
                         }
                         int escapes = 0;

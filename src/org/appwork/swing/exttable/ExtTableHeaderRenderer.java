@@ -23,7 +23,7 @@ import javax.swing.table.JTableHeader;
 
 import org.appwork.resources.AWUTheme;
 import org.appwork.sunwrapper.sun.swing.DefaultLookupWrapper;
-import org.appwork.utils.logging.Log;
+
 
 /**
  * @author thomas
@@ -111,7 +111,7 @@ public class ExtTableHeaderRenderer extends DefaultTableCellRenderer implements 
             focusBackground = DefaultLookupWrapper.getColor(this, ui, "TableHeader.focusCellBackground");
 
         } catch (final Throwable e) {
-            Log.exception(e);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
         }
         if (focusForeground == null) {
             focusForeground = header.getForeground();
@@ -130,7 +130,7 @@ public class ExtTableHeaderRenderer extends DefaultTableCellRenderer implements 
             cellBorder = DefaultLookupWrapper.getBorder(this, ui, "TableHeader.cellBorder");
 
         } catch (final Throwable e) {
-            Log.exception(e);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
             // avoid that the block above kills edt
         }
         if (focusBorder == null) {
@@ -217,7 +217,7 @@ public class ExtTableHeaderRenderer extends DefaultTableCellRenderer implements 
                 // g2.setComposite(comp);
             }
         } catch (final RuntimeException e) {
-            Log.exception(e);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
         }
 
     }

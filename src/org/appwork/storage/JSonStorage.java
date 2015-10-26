@@ -12,7 +12,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
 
 import org.appwork.shutdown.ShutdownController;
 import org.appwork.shutdown.ShutdownEvent;
@@ -22,7 +21,6 @@ import org.appwork.utils.IO;
 import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.crypto.Crypto;
-import org.appwork.utils.logging.Log;
 import org.appwork.utils.reflection.Clazz;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -66,11 +64,11 @@ public class JSonStorage {
 
     /**
      * Cecks of the JSOn Mapper can map this Type
-     * 
+     *
      * @param allowNonStorableObjects
      *            TODO
      * @param genericReturnType
-     * 
+     *
      * @throws InvalidTypeException
      */
     public static void canStore(final Type gType, final boolean allowNonStorableObjects) throws InvalidTypeException {
@@ -263,7 +261,8 @@ public class JSonStorage {
                 // final File tmpfile = new File(file.getAbsolutePath() + ".tmp");
                 // if (tmpfile.exists() && tmpfile.length() > 0) {
                 // /* tmp files exists, try to restore */
-                // Log.L.warning("TMP file " + tmpfile.getAbsolutePath() + " found");
+                // org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("TMP file " +
+                // tmpfile.getAbsolutePath() + " found");
                 // try {
                 // // load it
                 // str = IO.readFile(tmpfile);
@@ -276,7 +275,7 @@ public class JSonStorage {
                 // }
                 //
                 // if (ret != def) {
-                // Log.L.warning("Could restore tmp file");
+                // org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Could restore tmp file");
                 // // replace normal file with tmp file
                 // file.delete();
                 // tmpfile.renameTo(file);
@@ -286,11 +285,11 @@ public class JSonStorage {
                 // return ret;
                 // } else {
                 // // probably bad tmp file
-                // Log.L.warning("Could not restore tmp file. json restore method returned default value.");
+                // org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Could not restore tmp file. json restore method returned default value.");
                 // }
                 // } catch (final Exception e) {
-                // Log.L.warning("Could not restore tmp file");
-                // Log.exception(Level.WARNING, e);
+                // org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Could not restore tmp file");
+                // org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
                 // } finally {
                 // /* tmp file must be gone after read */
                 // tmpfile.delete();
@@ -308,15 +307,15 @@ public class JSonStorage {
                 }
 
             } catch (final Throwable e) {
-                Log.L.warning(file.getAbsolutePath() + ":read:" + stri);
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning(file.getAbsolutePath() + ":read:" + stri);
                 try {
                     if (str != null) {
-                        Log.L.severe(file.getAbsolutePath() + ":original:" + new String(str, "UTF-8"));
+                        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe(file.getAbsolutePath() + ":original:" + new String(str, "UTF-8"));
                     }
                 } catch (final Throwable e2) {
-                    Log.exception(e2);
+                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e2);
                 }
-                Log.exception(e);
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
             } finally {
                 JSonStorage.unLock(file);
             }
@@ -326,7 +325,7 @@ public class JSonStorage {
 
     /**
      * restores a store json object
-     * 
+     *
      * @param <E>
      * @param string
      *            name of the json object. example: cfg/savedobject.json
@@ -373,8 +372,8 @@ public class JSonStorage {
                 return (E) JSonStorage.JSON_MAPPER.stringToObject(string, def.getClass());
             }
         } catch (final Exception e) {
-            Log.exception(Level.WARNING, e);
-            Log.L.warning(string);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning(string);
             return def;
         }
     }
@@ -413,15 +412,15 @@ public class JSonStorage {
             }
         } catch (final Exception e) {
             if (string.length() < 32767) {
-                Log.L.warning("Error parsing String: " + string);
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Error parsing String: " + string);
             }
-            Log.exception(Level.WARNING, e);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
             return def;
         }
     }
 
     private static void close() {
-        Log.L.config("Start Saving Storage");
+        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Start Saving Storage");
         final List<Storage> storages;
         synchronized (JSonStorage.MAP) {
             storages = new ArrayList<Storage>(JSonStorage.MAP.values());
@@ -430,16 +429,16 @@ public class JSonStorage {
             try {
                 storage.save();
             } catch (final Throwable e) {
-                Log.exception(e);
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
             } finally {
                 try {
                     storage.close();
                 } catch (final Throwable e2) {
-                    Log.exception(e2);
+                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e2);
                 }
             }
         }
-        Log.L.config("ENDED Saving Storage");
+        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("ENDED Saving Storage");
     }
 
     public static void saveTo(final File file, final boolean plain, final byte[] key, final String json) throws StorageException {
@@ -559,7 +558,7 @@ public class JSonStorage {
 
     /**
      * This method throws Exceptions
-     * 
+     *
      * @param string
      * @param type
      * @param def
@@ -579,7 +578,7 @@ public class JSonStorage {
     /**
      * USe this method for debug code only. It is NOT guaranteed that this method returns json formated text. Use
      * {@link #serializeToJson(Object)} instead
-     * 
+     *
      * @param list
      * @return
      */

@@ -38,7 +38,7 @@ import net.miginfocom.swing.MigLayout;
 import org.appwork.resources.AWUTheme;
 import org.appwork.utils.BinaryLogic;
 import org.appwork.utils.locale._AWU;
-import org.appwork.utils.logging.Log;
+
 import org.appwork.utils.swing.SwingUtils;
 import org.appwork.utils.swing.dialog.AbstractDialog;
 
@@ -85,7 +85,7 @@ public abstract class SearchDialog extends JDialog implements WindowListener, Ac
             caseSensitive.addActionListener(saveListener);
             regularExpression.addActionListener(saveListener);
         } catch (final Exception e) {
-            Log.exception(e);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
         }
         caseSensitive.setVisible(BinaryLogic.containsNone(flag, SearchDialog.NO_CASE_FLAG));
         regularExpression.setVisible(BinaryLogic.containsNone(flag, SearchDialog.NO_REGEX_FLAG));

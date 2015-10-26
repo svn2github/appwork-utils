@@ -10,7 +10,7 @@ import org.appwork.jna.winapi.structs.IconInfo;
 import org.appwork.utils.Application;
 import org.appwork.utils.IO;
 import org.appwork.utils.Regex;
-import org.appwork.utils.logging.Log;
+
 
 import com.sun.jna.Memory;
 import com.sun.jna.platform.win32.GDI32;
@@ -125,7 +125,7 @@ public class FileIconExporter {
             try {
                 IO.writeToFile(this.iconsExt, IO.readURL(FileIconExporter.class.getResource("iconsext/iconsext.exe")));
             } catch (final IOException e) {
-                Log.exception(Level.WARNING, e);
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
 
             }
         }
@@ -172,7 +172,7 @@ public class FileIconExporter {
             }
 
         } catch (final IOException e) {
-            Log.exception(Level.WARNING, e);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
 
         }
         return null;

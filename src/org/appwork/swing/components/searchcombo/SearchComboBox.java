@@ -51,7 +51,7 @@ import org.appwork.app.gui.BasicGui;
 import org.appwork.resources.AWUTheme;
 import org.appwork.swing.MigPanel;
 import org.appwork.utils.StringUtils;
-import org.appwork.utils.logging.Log;
+
 import org.appwork.utils.swing.EDTRunner;
 import org.appwork.utils.swing.SwingUtils;
 
@@ -236,7 +236,7 @@ public abstract class SearchComboBox<T> extends JComboBox {
                                     }
                                 }
                             } catch (final Throwable e) {
-                                Log.exception(e);
+                                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
                             }
                         } else {
                             SearchComboBox.this.hidePopup();

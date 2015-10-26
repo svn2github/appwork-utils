@@ -17,7 +17,9 @@ import org.appwork.exceptions.WTFException;
 import org.appwork.utils.Application;
 import org.appwork.utils.IO;
 import org.appwork.utils.ModifyLock;
-import org.appwork.utils.logging.Log;
+import org.appwork.utils.logging2.ConsoleLogImpl;
+import org.appwork.utils.logging2.LogInterface;
+import org.appwork.utils.logging2.extmanager.LoggerFactory;
 
 public class JsonKeyValueStorage extends Storage {
 
@@ -66,7 +68,7 @@ public class JsonKeyValueStorage extends Storage {
         this.name = file.getName();
         this.key = key;
         if (resource != null) {
-            Log.L.info("Load JSon Storage from Classpath url: " + resource);
+            getDefaultLogger().info("Load JSon Storage from Classpath url: " + resource);
             try {
                 final HashMap<String, Object> load = JSonStorage.restoreFromString(IO.readURL(resource), plain, key, TypeRef.HASHMAP, new HashMap<String, Object>());
                 this.putAll(load);
@@ -75,10 +77,21 @@ public class JsonKeyValueStorage extends Storage {
             }
         }
         if (file.exists()) {
-            Log.L.info("Prefer (merged) JSon Storage from File: " + file);
+            getDefaultLogger().info("Prefer (merged) JSon Storage from File: " + file);
             final HashMap<String, Object> load = JSonStorage.restoreFrom(file, plain, key, TypeRef.HASHMAP, new HashMap<String, Object>());
             this.putAll(load);
         }
+    }
+
+    /**
+     * @return
+     */
+    protected LogInterface getDefaultLogger() {
+        LoggerFactory instance = LoggerFactory.I();
+        if (instance != null) {
+            return instance.getDefaultLogger();
+        }
+        return new ConsoleLogImpl();
     }
 
     public JsonKeyValueStorage(final String name) throws StorageException {
@@ -94,7 +107,7 @@ public class JsonKeyValueStorage extends Storage {
         this.name = name;
         this.plain = plain;
         this.file = Application.getResource("cfg/" + name + (plain ? ".json" : ".ejs"));
-        Log.L.finer("Read Config: " + this.file.getAbsolutePath());
+        getDefaultLogger().finer("Read Config: " + this.file.getAbsolutePath());
         this.key = key;
         final HashMap<String, Object> load = JSonStorage.restoreFrom(this.file, plain, key, TypeRef.HASHMAP, new HashMap<String, Object>());
         this.putAll(load);
@@ -186,15 +199,15 @@ public class JsonKeyValueStorage extends Storage {
                     this.put(key, (Enum<?>) ret);
                 }
             } catch (final IllegalArgumentException e) {
-                Log.L.info("Could not restore the enum. There is no value for " + ret + " in " + ((Enum<?>) def).getDeclaringClass());
-                Log.exception(e);
+                getDefaultLogger().info("Could not restore the enum. There is no value for " + ret + " in " + ((Enum<?>) def).getDeclaringClass());
+                getDefaultLogger().log(e);
                 if (this.autoPutValues) {
                     this.put(key, (Enum<?>) def);
                 }
                 ret = def;
             } catch (final Throwable e) {
 
-                Log.exception(e);
+                getDefaultLogger().log(e);
                 if (this.autoPutValues) {
                     this.put(key, (Enum<?>) def);
                 }

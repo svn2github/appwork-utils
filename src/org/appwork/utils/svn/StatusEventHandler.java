@@ -16,7 +16,7 @@
 
 package org.appwork.utils.svn;
 
-import org.appwork.utils.logging.Log;
+
 import org.tmatesoft.svn.core.SVNCancelException;
 import org.tmatesoft.svn.core.SVNLock;
 import org.tmatesoft.svn.core.wc.ISVNEventHandler;
@@ -45,7 +45,7 @@ public class StatusEventHandler implements ISVNStatusHandler, ISVNEventHandler {
          * won't be dispatched.
          */
         if (action == SVNEventAction.STATUS_COMPLETED) {
-            Log.L.fine("Status against revision:  " + event.getRevision());
+                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Status against revision:  " + event.getRevision());
         }
 
     }
@@ -227,6 +227,6 @@ public class StatusEventHandler implements ISVNStatusHandler, ISVNEventHandler {
          * client's command "svn status"
          */
 
-        Log.L.fine(pathChangeType + propertiesChangeType + (isLocked ? "L" : " ") + (isAddedWithHistory ? "+" : " ") + (isSwitched ? "S" : " ") + lockLabel + "  " + remoteChangeType + "  " + workingRevision + offsets[0] + (lastChangedRevision >= 0 ? String.valueOf(lastChangedRevision) : "?") + offsets[1] + (status.getAuthor() != null ? status.getAuthor() : "?") + offsets[2] + status.getFile().getPath());
+              org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine(pathChangeType + propertiesChangeType + (isLocked ? "L" : " ") + (isAddedWithHistory ? "+" : " ") + (isSwitched ? "S" : " ") + lockLabel + "  " + remoteChangeType + "  " + workingRevision + offsets[0] + (lastChangedRevision >= 0 ? String.valueOf(lastChangedRevision) : "?") + offsets[1] + (status.getAuthor() != null ? status.getAuthor() : "?") + offsets[2] + status.getFile().getPath());
     }
 }

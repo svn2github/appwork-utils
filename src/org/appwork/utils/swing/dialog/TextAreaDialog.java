@@ -17,7 +17,7 @@ import javax.swing.JTextArea;
 import net.miginfocom.swing.MigLayout;
 
 import org.appwork.resources.AWUTheme;
-import org.appwork.utils.logging.Log;
+
 
 public class TextAreaDialog extends AbstractDialog<String> {
 
@@ -30,7 +30,7 @@ public class TextAreaDialog extends AbstractDialog<String> {
     public TextAreaDialog(final String title, final String message, final String def) {
         super(0, title, AWUTheme.I().getIcon("dialog/info", 32), null, null);
 
-        Log.L.fine("Dialog \r\ntitle: " + title + "\r\nmsg:   \r\n" + message + "\r\ndef:   \r\n" + def);
+              org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Dialog \r\ntitle: " + title + "\r\nmsg:   \r\n" + message + "\r\ndef:   \r\n" + def);
 
         this.message = message;
         this.def = def;

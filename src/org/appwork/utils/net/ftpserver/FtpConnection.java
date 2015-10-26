@@ -24,7 +24,7 @@ import org.appwork.controlling.StateConflictException;
 import org.appwork.controlling.StateMachine;
 import org.appwork.controlling.StateMachineInterface;
 import org.appwork.utils.Regex;
-import org.appwork.utils.logging.Log;
+
 
 /**
  * @author daniel
@@ -827,7 +827,7 @@ public class FtpConnection implements Runnable, StateMachineInterface {
                     break;
                 }
                 if (this.ftpServer.isDebug()) {
-                    Log.L.info("REQ: " + command);
+                          org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("REQ: " + command);
                 }
                 this.handleCommand(command);
             }
@@ -852,7 +852,7 @@ public class FtpConnection implements Runnable, StateMachineInterface {
 
     private void write(final int code, final String message) throws IOException {
         if (this.ftpServer.isDebug()) {
-            Log.L.info("RESP: " + code + " " + message);
+                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("RESP: " + code + " " + message);
         }
         this.write(code, message, false);
     }

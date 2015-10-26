@@ -34,7 +34,7 @@ import org.appwork.remoteapi.annotations.ApiSignatureRequired;
 import org.appwork.storage.InvalidTypeException;
 import org.appwork.storage.JSonStorage;
 import org.appwork.storage.config.annotations.AllowStorage;
-import org.appwork.utils.logging.Log;
+
 import org.appwork.utils.net.HTTPHeader;
 
 /**
@@ -47,9 +47,9 @@ public class InterfaceHandler<T> {
         try {
             InterfaceHandler.HELP = InterfaceHandler.class.getMethod("help", new Class[] { RemoteAPIRequest.class, RemoteAPIResponse.class });
         } catch (final SecurityException e) {
-            Log.exception(e);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
         } catch (final NoSuchMethodException e) {
-            Log.exception(e);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
         }
 
     }

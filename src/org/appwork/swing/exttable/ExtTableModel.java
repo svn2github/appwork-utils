@@ -27,7 +27,6 @@ import org.appwork.exceptions.WTFException;
 import org.appwork.resources.AWUTheme;
 import org.appwork.storage.JSonStorage;
 import org.appwork.storage.Storage;
-
 import org.appwork.utils.swing.EDTHelper;
 import org.appwork.utils.swing.EDTRunner;
 
@@ -1146,10 +1145,10 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
      * @param latest
      */
     public void setSelectedObject(final E latest) {
-        final ExtTable<E> ltable = ExtTableModel.this.getTable();
         new EDTHelper<Object>() {
             @Override
             public Object edtRun() {
+                final ExtTable<E> ltable = ExtTableModel.this.getTable();
                 final ListSelectionModel s = ltable.getSelectionModel();
                 final boolean isValueAdjusting = s.getValueIsAdjusting();
                 s.setValueIsAdjusting(true);
@@ -1157,12 +1156,11 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
                     if (ExtTableModel.this.hasSelectedObjects()) {
                         ExtTableModel.this.clearSelection();
                     }
-                    if (latest == null) {
-                        return null;
-                    }
-                    final int row = ExtTableModel.this.getRowforObject(latest);
-                    if (row >= 0) {
-                        ltable.addRowSelectionInterval(row, row);
+                    if (latest != null) {
+                        final int row = ExtTableModel.this.getRowforObject(latest);
+                        if (row >= 0) {
+                            ltable.addRowSelectionInterval(row, row);
+                        }
                     }
                 } finally {
                     s.setValueIsAdjusting(isValueAdjusting);
@@ -1178,13 +1176,13 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
      * @param selections
      */
     public int[] setSelectedObjects(final Collection<E> selections) {
-        final ExtTable<E> ltable = ExtTableModel.this.getTable();
-        if (ltable == null) {
-            return new int[] { -1, -1 };
-        }
         return new EDTHelper<int[]>() {
             @Override
             public int[] edtRun() {
+                final ExtTable<E> ltable = ExtTableModel.this.getTable();
+                if (ltable == null) {
+                    return new int[] { -1, -1 };
+                }
                 final ListSelectionModel s = ltable.getSelectionModel();
                 final boolean isValueAdjusting = s.getValueIsAdjusting();
                 s.setValueIsAdjusting(true);
@@ -1277,10 +1275,10 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
     }
 
     public int[] setSelectedRows(final int[] rows) {
-        final ExtTable<E> ltable = ExtTableModel.this.getTable();
         return new EDTHelper<int[]>() {
             @Override
             public int[] edtRun() {
+                final ExtTable<E> ltable = ExtTableModel.this.getTable();
                 final ListSelectionModel s = ltable.getSelectionModel();
                 final boolean isValueAdjusting = s.getValueIsAdjusting();
                 s.setValueIsAdjusting(true);

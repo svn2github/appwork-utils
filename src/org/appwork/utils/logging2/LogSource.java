@@ -46,7 +46,6 @@ public class LogSource extends Logger implements LogInterface, ClearableLogInter
             return;
         }
         logger.log(e);
-
     }
 
     public static LogSource getPreviousThreadLogSource() {
@@ -94,13 +93,13 @@ public class LogSource extends Logger implements LogInterface, ClearableLogInter
 
     /*
      * creates a LogCollector with given name
-     * 
+     *
      * maxLogRecordsInMemory defines how many log records this logger will buffer in memory before logging to parent's handlers
-     * 
+     *
      * <0 = unlimited in memory, manual flush needed
-     * 
+     *
      * 0 = forward directly to parent's handlers
-     * 
+     *
      * >0 = limited
      */
     public LogSource(final String name, final int maxLogRecordsInMemory) {

@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ConnectException;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -22,6 +23,8 @@ import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.nio.channels.SocketChannel;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.appwork.utils.Application;
@@ -176,10 +179,24 @@ public abstract class SocketConnection extends Socket {
         this.connect(endpoint, connectTimeout, null);
     }
 
+    public InetAddress[] resolvHostIP(final String host) throws IOException {
+        final InetAddress[] ips = HTTPConnectionUtils.resolvHostIP(host);
+        if (ips != null) {
+            final List<InetAddress> ips_v4 = new ArrayList<InetAddress>();
+            for (final InetAddress ip : ips) {
+                if (ip instanceof Inet4Address) {
+                    ips_v4.add(ip);
+                }
+            }
+            return ips_v4.toArray(new InetAddress[0]);
+        }
+        return null;
+    }
+
     public void connect(SocketAddress endpoint, final int connectTimeout, final StringBuffer logger) throws IOException {
         try {
             IOException ioE = null;
-            for (final InetAddress connectAddress : HTTPConnectionUtils.resolvHostIP(this.getProxy().getHost())) {
+            for (final InetAddress connectAddress : resolvHostIP(this.getProxy().getHost())) {
                 final InetSocketAddress connectSocketAddress = new InetSocketAddress(connectAddress, this.getProxy().getPort());
                 try {
                     if (connectTimeout == 0) {

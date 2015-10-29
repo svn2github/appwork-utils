@@ -1,5 +1,5 @@
 /**
- * 
+ *
  * ====================================================================================================================================================
  * 	    "MyJDownloader Client" License
  * 	    The "MyJDownloader Client" will be called [The Product] from now on.
@@ -7,27 +7,27 @@
  * 	    Copyright (c) 2009-2015, AppWork GmbH <e-mail@appwork.org>
  * 	    Schwabacher Straße 117
  * 	    90763 Fürth
- * 	    Germany   
+ * 	    Germany
  * === Preamble ===
  * 	This license establishes the terms under which the [The Product] Source Code & Binary files may be used, copied, modified, distributed, and/or redistributed.
  * 	The intent is that the AppWork GmbH is able to provide  their utilities library for free to non-commercial projects whereas commercial usage is only permitted after obtaining a commercial license.
  * 	These terms apply to all files that have the [The Product] License header (IN the file), a <filename>.license or <filename>.info (like mylib.jar.info) file that contains a reference to this license.
- * 	
+ *
  * === 3rd Party Licences ===
  * 	Some parts of the [The Product] use or reference 3rd party libraries and classes. These parts may have different licensing conditions. Please check the *.license and *.info files of included libraries
- * 	to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header. 	
- * 	
+ * 	to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header.
+ *
  * === Definition: Commercial Usage ===
- * 	If anybody or any organization is generating income (directly or indirectly) by using [The Product] or if there's as much as a 
+ * 	If anybody or any organization is generating income (directly or indirectly) by using [The Product] or if there's as much as a
  * 	sniff of commercial interest or aspect in what you are doing, we consider this as a commercial usage. If you are unsure whether your use-case is commercial or not, consider it as commercial.
  * === Dual Licensing ===
  * === Commercial Usage ===
  * 	If you want to use [The Product] in a commercial way (see definition above), you have to obtain a paid license from AppWork GmbH.
  * 	Contact AppWork for further details: e-mail@appwork.org
  * === Non-Commercial Usage ===
- * 	If there is no commercial usage (see definition above), you may use [The Product] under the terms of the 
+ * 	If there is no commercial usage (see definition above), you may use [The Product] under the terms of the
  * 	"GNU Affero General Public License" (http://www.gnu.org/licenses/agpl-3.0.en.html).
- * 	
+ *
  * 	If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
@@ -50,7 +50,6 @@ import org.appwork.storage.config.annotations.DisableObjectCache;
 import org.appwork.storage.config.annotations.PlainStorage;
 import org.appwork.utils.Application;
 import org.appwork.utils.IO;
-
 
 /**
  * @author Thomas
@@ -190,23 +189,22 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
     protected Object read() throws InstantiationException, IllegalAccessException, IOException {
         boolean exists = false;
         try {
-            final Object dummy = new Object();
-            Object ret = null;
+            final Object dummyObject = new Object();
+            Object readObject = null;
             // prefer local file. like primitive storage does as well.
             if (path.exists()) {
-                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Read Config: " + this.path.getAbsolutePath());
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Read Config: " + this.path.getAbsolutePath());
+                readObject = JSonStorage.restoreFrom(this.path, this.cryptKey == null, this.cryptKey, this.typeRef, dummyObject);
                 exists = path.exists();
-                ret = JSonStorage.restoreFrom(this.path, this.cryptKey == null, this.cryptKey, this.typeRef, dummy);
-
             }
-            if (ret == dummy || (!path.exists())) {
+            if (readObject == dummyObject || !exists) {
                 if (this.url != null) {
-                          org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Read Config: " + this.url);
-                    ret = JSonStorage.restoreFromString(IO.readURL(this.url), this.cryptKey == null, this.cryptKey, this.typeRef, dummy);
+                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Read Config: " + this.url);
+                    readObject = JSonStorage.restoreFromString(IO.readURL(this.url), this.cryptKey == null, this.cryptKey, this.typeRef, dummyObject);
+                    exists = true;
                 }
             }
-
-            if (ret == dummy) {
+            if (readObject == dummyObject || !exists) {
                 final T def = this.getDefaultValue();
                 if (def != null) {
                     return def;
@@ -231,7 +229,7 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
                     return null;
                 }
             }
-            return ret;
+            return readObject;
         } finally {
             if (!exists && this.url == null) {
                 this.write(this.getDefaultValue());
@@ -241,7 +239,7 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.storage.config.KeyHandler#validateValue(java.lang.Object)
      */
     @Override

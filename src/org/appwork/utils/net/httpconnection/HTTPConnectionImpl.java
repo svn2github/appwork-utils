@@ -1,5 +1,5 @@
 /**
- * 
+ *
  * ====================================================================================================================================================
  * 	    "MyJDownloader Client" License
  * 	    The "MyJDownloader Client" will be called [The Product] from now on.
@@ -7,27 +7,27 @@
  * 	    Copyright (c) 2009-2015, AppWork GmbH <e-mail@appwork.org>
  * 	    Schwabacher Straße 117
  * 	    90763 Fürth
- * 	    Germany   
+ * 	    Germany
  * === Preamble ===
  * 	This license establishes the terms under which the [The Product] Source Code & Binary files may be used, copied, modified, distributed, and/or redistributed.
  * 	The intent is that the AppWork GmbH is able to provide  their utilities library for free to non-commercial projects whereas commercial usage is only permitted after obtaining a commercial license.
  * 	These terms apply to all files that have the [The Product] License header (IN the file), a <filename>.license or <filename>.info (like mylib.jar.info) file that contains a reference to this license.
- * 	
+ *
  * === 3rd Party Licences ===
  * 	Some parts of the [The Product] use or reference 3rd party libraries and classes. These parts may have different licensing conditions. Please check the *.license and *.info files of included libraries
- * 	to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header. 	
- * 	
+ * 	to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header.
+ *
  * === Definition: Commercial Usage ===
- * 	If anybody or any organization is generating income (directly or indirectly) by using [The Product] or if there's as much as a 
+ * 	If anybody or any organization is generating income (directly or indirectly) by using [The Product] or if there's as much as a
  * 	sniff of commercial interest or aspect in what you are doing, we consider this as a commercial usage. If you are unsure whether your use-case is commercial or not, consider it as commercial.
  * === Dual Licensing ===
  * === Commercial Usage ===
  * 	If you want to use [The Product] in a commercial way (see definition above), you have to obtain a paid license from AppWork GmbH.
  * 	Contact AppWork for further details: e-mail@appwork.org
  * === Non-Commercial Usage ===
- * 	If there is no commercial usage (see definition above), you may use [The Product] under the terms of the 
+ * 	If there is no commercial usage (see definition above), you may use [The Product] under the terms of the
  * 	"GNU Affero General Public License" (http://www.gnu.org/licenses/agpl-3.0.en.html).
- * 	
+ *
  * 	If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
@@ -42,6 +42,7 @@ import java.io.PushbackInputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.ConnectException;
 import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
@@ -176,42 +177,42 @@ public class HTTPConnectionImpl implements HTTPConnection {
     protected static final Object                                                  LOCK             = new Object();
     protected static final DelayedRunnable                                         keepAliveCleanup = new DelayedRunnable(10000, 30000) {
 
-                                                                                                        @Override
-                                                                                                        public void delayedrun() {
-                                                                                                            synchronized (HTTPConnectionImpl.LOCK) {
-                                                                                                                try {
-                                                                                                                    HTTPConnectionImpl.KEEPALIVESOCKETS.isEmpty();
-                                                                                                                    final Iterator<Entry<String, LinkedList<HTTPKeepAliveSocket>>> hostIterator = HTTPConnectionImpl.KEEPALIVEPOOL.entrySet().iterator();
-                                                                                                                    while (hostIterator.hasNext()) {
-                                                                                                                        final Entry<String, LinkedList<HTTPKeepAliveSocket>> next = hostIterator.next();
-                                                                                                                        final LinkedList<HTTPKeepAliveSocket> keepAliveSockets = next.getValue();
-                                                                                                                        if (keepAliveSockets != null) {
-                                                                                                                            final Iterator<HTTPKeepAliveSocket> keepAliveIterator = keepAliveSockets.iterator();
-                                                                                                                            while (keepAliveIterator.hasNext()) {
-                                                                                                                                final HTTPKeepAliveSocket keepAliveSocket = keepAliveIterator.next();
-                                                                                                                                final SocketStreamInterface socketStream = keepAliveSocket.getSocketStream();
-                                                                                                                                final Socket socket = socketStream.getSocket();
-                                                                                                                                if (socket.isClosed() || keepAliveSocket.getKeepAliveTimestamp() <= System.currentTimeMillis()) {
-                                                                                                                                    try {
-                                                                                                                                        socket.close();
-                                                                                                                                    } catch (final Throwable ignore) {
-                                                                                                                                    }
-                                                                                                                                    keepAliveIterator.remove();
-                                                                                                                                }
-                                                                                                                            }
-                                                                                                                        }
-                                                                                                                        if (keepAliveSockets == null || keepAliveSockets.size() == 0) {
-                                                                                                                            hostIterator.remove();
-                                                                                                                        }
-                                                                                                                    }
-                                                                                                                } finally {
-                                                                                                                    if (HTTPConnectionImpl.KEEPALIVEPOOL.size() > 0) {
-                                                                                                                        HTTPConnectionImpl.keepAliveCleanup.resetAndStart();
-                                                                                                                    }
-                                                                                                                }
-                                                                                                            }
-                                                                                                        }
-                                                                                                    };
+        @Override
+        public void delayedrun() {
+            synchronized (HTTPConnectionImpl.LOCK) {
+                try {
+                    HTTPConnectionImpl.KEEPALIVESOCKETS.isEmpty();
+                    final Iterator<Entry<String, LinkedList<HTTPKeepAliveSocket>>> hostIterator = HTTPConnectionImpl.KEEPALIVEPOOL.entrySet().iterator();
+                    while (hostIterator.hasNext()) {
+                        final Entry<String, LinkedList<HTTPKeepAliveSocket>> next = hostIterator.next();
+                        final LinkedList<HTTPKeepAliveSocket> keepAliveSockets = next.getValue();
+                        if (keepAliveSockets != null) {
+                            final Iterator<HTTPKeepAliveSocket> keepAliveIterator = keepAliveSockets.iterator();
+                            while (keepAliveIterator.hasNext()) {
+                                final HTTPKeepAliveSocket keepAliveSocket = keepAliveIterator.next();
+                                final SocketStreamInterface socketStream = keepAliveSocket.getSocketStream();
+                                final Socket socket = socketStream.getSocket();
+                                if (socket.isClosed() || keepAliveSocket.getKeepAliveTimestamp() <= System.currentTimeMillis()) {
+                                    try {
+                                        socket.close();
+                                    } catch (final Throwable ignore) {
+                                    }
+                                    keepAliveIterator.remove();
+                                }
+                            }
+                        }
+                        if (keepAliveSockets == null || keepAliveSockets.size() == 0) {
+                            hostIterator.remove();
+                        }
+                    }
+                } finally {
+                    if (HTTPConnectionImpl.KEEPALIVEPOOL.size() > 0) {
+                        HTTPConnectionImpl.keepAliveCleanup.resetAndStart();
+                    }
+                }
+            }
+        }
+    };
 
     public HTTPConnectionImpl(final URL url) {
         this(url, null);
@@ -267,77 +268,77 @@ public class HTTPConnectionImpl implements HTTPConnection {
          *
          *
          */
-        if (socketStream != null) {
-            final Socket socket = socketStream.getSocket();
-            if (socket != null && this.isKeepAlivedEnabled() && this.isKeepAliveOK() && socket.isConnected() && !socket.isClosed() && socket.isInputShutdown() == false && socket.isOutputShutdown() == false) {
-                if (this.inputStream != null && this.inputStream instanceof StreamValidEOF && ((StreamValidEOF) this.inputStream).isValidEOF()) {
-                    if (!this.requiresOutputStream() || ((CountingOutputStream) this.outputStream).transferedBytes() == this.postTodoLength) {
-                        socket.setKeepAlive(true);
-                        synchronized (HTTPConnectionImpl.LOCK) {
-                            HTTPKeepAliveSocket keepAliveSocket = HTTPConnectionImpl.KEEPALIVESOCKETS.remove(socket);
-                            if (keepAliveSocket == null) {
-                                final String connectionResponse = this.getHeaderField("Keep-Alive");
-                                final String maxKeepAliveTimeoutString = new Regex(connectionResponse, "timeout\\s*?=\\s*?(\\d+)").getMatch(0);
-                                final String maxKeepAliveRequestsString = new Regex(connectionResponse, "max\\s*?=\\s*?(\\d+)").getMatch(0);
-                                final long maxKeepAliveTimeout;
-                                if (maxKeepAliveTimeoutString != null) {
-                                    maxKeepAliveTimeout = Long.parseLong(maxKeepAliveTimeoutString) * 1000l;
-                                } else {
-                                    maxKeepAliveTimeout = this.getDefaultKeepAliveTimeout();
-                                }
-                                final long maxKeepAliveRequests;
-                                if (maxKeepAliveRequestsString != null) {
-                                    maxKeepAliveRequests = Long.parseLong(maxKeepAliveRequestsString);
-                                } else {
-                                    maxKeepAliveRequests = this.getDefaultKeepAliveMaxRequests();
-                                }
-                                final InetAddress localIP;
-                                if (this.proxy != null && this.proxy.isDirect()) {
-                                    localIP = socket.getLocalAddress();
-                                } else {
-                                    localIP = null;
-                                }
-                                final String host = this.httpURL.getHost().toLowerCase(Locale.ENGLISH);
-                                final boolean ssl = StringUtils.equalsIgnoreCase("https", this.httpURL.getProtocol());
-                                keepAliveSocket = new HTTPKeepAliveSocket(host, ssl, socketStream, maxKeepAliveTimeout, maxKeepAliveRequests, localIP, this.remoteIPs);
-                            }
-                            keepAliveSocket.increaseRequests();
-                            if (keepAliveSocket.getRequestsLeft() > 0) {
-                                String domain = null;
-                                if (HTTPConnectionImpl.PSL != null) {
-                                    domain = HTTPConnectionImpl.PSL.getDomain(keepAliveSocket.getHost());
-                                }
-                                if (StringUtils.isEmpty(domain)) {
-                                    domain = "FALLBACK";
-                                }
-                                LinkedList<HTTPKeepAliveSocket> keepAlivePool = HTTPConnectionImpl.KEEPALIVEPOOL.get(domain);
-                                if (keepAlivePool == null) {
-                                    keepAlivePool = new LinkedList<HTTPKeepAliveSocket>();
-                                    HTTPConnectionImpl.KEEPALIVEPOOL.put(domain, keepAlivePool);
-                                }
-                                keepAlivePool.add(keepAliveSocket);
-                                keepAliveSocket.keepAlive();
-                                final long maxKeepAlive = this.getMaxKeepAliveSockets();
-                                if (keepAlivePool.size() > maxKeepAlive) {
-                                    final Iterator<HTTPKeepAliveSocket> it = keepAlivePool.iterator();
-                                    while (it.hasNext() && keepAlivePool.size() > maxKeepAlive) {
-                                        final HTTPKeepAliveSocket next = it.next();
-                                        try {
-                                            next.getSocketStream().close();
-                                        } catch (final Throwable ignore) {
-                                        }
-                                        it.remove();
-                                    }
-                                }
-                                HTTPConnectionImpl.keepAliveCleanup.resetAndStart();
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return false;
+         if (socketStream != null) {
+             final Socket socket = socketStream.getSocket();
+             if (socket != null && this.isKeepAlivedEnabled() && this.isKeepAliveOK() && socket.isConnected() && !socket.isClosed() && socket.isInputShutdown() == false && socket.isOutputShutdown() == false) {
+                 if (this.inputStream != null && this.inputStream instanceof StreamValidEOF && ((StreamValidEOF) this.inputStream).isValidEOF()) {
+                     if (!this.requiresOutputStream() || ((CountingOutputStream) this.outputStream).transferedBytes() == this.postTodoLength) {
+                         socket.setKeepAlive(true);
+                         synchronized (HTTPConnectionImpl.LOCK) {
+                             HTTPKeepAliveSocket keepAliveSocket = HTTPConnectionImpl.KEEPALIVESOCKETS.remove(socket);
+                             if (keepAliveSocket == null) {
+                                 final String connectionResponse = this.getHeaderField("Keep-Alive");
+                                 final String maxKeepAliveTimeoutString = new Regex(connectionResponse, "timeout\\s*?=\\s*?(\\d+)").getMatch(0);
+                                 final String maxKeepAliveRequestsString = new Regex(connectionResponse, "max\\s*?=\\s*?(\\d+)").getMatch(0);
+                                 final long maxKeepAliveTimeout;
+                                 if (maxKeepAliveTimeoutString != null) {
+                                     maxKeepAliveTimeout = Long.parseLong(maxKeepAliveTimeoutString) * 1000l;
+                                 } else {
+                                     maxKeepAliveTimeout = this.getDefaultKeepAliveTimeout();
+                                 }
+                                 final long maxKeepAliveRequests;
+                                 if (maxKeepAliveRequestsString != null) {
+                                     maxKeepAliveRequests = Long.parseLong(maxKeepAliveRequestsString);
+                                 } else {
+                                     maxKeepAliveRequests = this.getDefaultKeepAliveMaxRequests();
+                                 }
+                                 final InetAddress localIP;
+                                 if (this.proxy != null && this.proxy.isDirect()) {
+                                     localIP = socket.getLocalAddress();
+                                 } else {
+                                     localIP = null;
+                                 }
+                                 final String host = this.httpURL.getHost().toLowerCase(Locale.ENGLISH);
+                                 final boolean ssl = StringUtils.equalsIgnoreCase("https", this.httpURL.getProtocol());
+                                 keepAliveSocket = new HTTPKeepAliveSocket(host, ssl, socketStream, maxKeepAliveTimeout, maxKeepAliveRequests, localIP, this.remoteIPs);
+                             }
+                             keepAliveSocket.increaseRequests();
+                             if (keepAliveSocket.getRequestsLeft() > 0) {
+                                 String domain = null;
+                                 if (HTTPConnectionImpl.PSL != null) {
+                                     domain = HTTPConnectionImpl.PSL.getDomain(keepAliveSocket.getHost());
+                                 }
+                                 if (StringUtils.isEmpty(domain)) {
+                                     domain = "FALLBACK";
+                                 }
+                                 LinkedList<HTTPKeepAliveSocket> keepAlivePool = HTTPConnectionImpl.KEEPALIVEPOOL.get(domain);
+                                 if (keepAlivePool == null) {
+                                     keepAlivePool = new LinkedList<HTTPKeepAliveSocket>();
+                                     HTTPConnectionImpl.KEEPALIVEPOOL.put(domain, keepAlivePool);
+                                 }
+                                 keepAlivePool.add(keepAliveSocket);
+                                 keepAliveSocket.keepAlive();
+                                 final long maxKeepAlive = this.getMaxKeepAliveSockets();
+                                 if (keepAlivePool.size() > maxKeepAlive) {
+                                     final Iterator<HTTPKeepAliveSocket> it = keepAlivePool.iterator();
+                                     while (it.hasNext() && keepAlivePool.size() > maxKeepAlive) {
+                                         final HTTPKeepAliveSocket next = it.next();
+                                         try {
+                                             next.getSocketStream().close();
+                                         } catch (final Throwable ignore) {
+                                         }
+                                         it.remove();
+                                     }
+                                 }
+                                 HTTPConnectionImpl.keepAliveCleanup.resetAndStart();
+                                 return true;
+                             }
+                         }
+                     }
+                 }
+             }
+         }
+         return false;
     }
 
     protected SocketStreamInterface getKeepAliveSocket() throws IOException {
@@ -1285,13 +1286,18 @@ public class HTTPConnectionImpl implements HTTPConnection {
     public InetAddress[] resolvHostIP(final String host) throws IOException {
         final InetAddress[] ips = HTTPConnectionUtils.resolvHostIP(host);
         if (ips != null) {
-            final List<InetAddress> ips_v4 = new ArrayList<InetAddress>();
+            final List<InetAddress> ipv4FirstList = new ArrayList<InetAddress>();
             for (final InetAddress ip : ips) {
                 if (ip instanceof Inet4Address) {
-                    ips_v4.add(ip);
+                    ipv4FirstList.add(ip);
                 }
             }
-            return ips_v4.toArray(new InetAddress[0]);
+            for (final InetAddress ip : ips) {
+                if (ip instanceof Inet6Address) {
+                    ipv4FirstList.add(ip);
+                }
+            }
+            return ipv4FirstList.toArray(new InetAddress[0]);
         }
         return null;
     }

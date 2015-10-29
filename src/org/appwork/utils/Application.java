@@ -899,7 +899,6 @@ public class Application {
      * @param newJar
      */
     public synchronized static void setApplication(final String newAppFolder) {
-        warnInit();
         Application.ROOT = null;
         Application.APP_FOLDER = newAppFolder;
         Application.ensureFrameWorkInit();
@@ -989,7 +988,7 @@ public class Application {
     /**
      * This should alsways run as very first action in an application
      */
-    public synchronized static void ensureFrameWorkInit() {
+    private synchronized static void ensureFrameWorkInit() {
         if (DID_INIT) {
             return;
         }

@@ -2,7 +2,7 @@
 ====================================================================================================================================================
 	    "AppWork Utilities" License
 ====================================================================================================================================================
-	    Copyright (c) 2009-2015, AppWork GmbH
+	    Copyright (c) 2009-2015, AppWork GmbH <e-mail@appwork.org>
 	    Schwabacher Straße 117
 	    90763 Fürth
 	    Germany
@@ -10,7 +10,7 @@
 === Preamble ===
 
 	This license establishes the terms under which the AppWork Utilities Source Code & Binary files may be used, copied, modified, distributed, and/or redistributed.
-	The intent is that the AppWork GmbH is able to provide  their utilities library for free to non-commercial projects whereas commercial usage is only allowed after obtaining a commercial license.
+	The intent is that the AppWork GmbH is able to provide  their utilities library for free to non-commercial projects whereas commercial usage is only permitted after obtaining a commercial license.
 
 	These terms apply to all files that have the "AppWork Utilities" License header (IN the file), a <filename>.license or <filename>.info (like mylib.jar.info) file that contains a reference to this license.
 	

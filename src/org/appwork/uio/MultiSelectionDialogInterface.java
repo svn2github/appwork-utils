@@ -1,8 +1,8 @@
 /**
  * 
  * ====================================================================================================================================================
- * 	    "MyJDownloader Client" License
- * 	    The "MyJDownloader Client" will be called [The Product] from now on.
+ * 	    "AppWork Utilities" License
+ * 	    The "AppWork Utilities" will be called [The Product] from now on.
  * ====================================================================================================================================================
  * 	    Copyright (c) 2009-2015, AppWork GmbH <e-mail@appwork.org>
  * 	    Schwabacher Straße 117

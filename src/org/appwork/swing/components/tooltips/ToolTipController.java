@@ -1,5 +1,5 @@
 /**
- * 
+ *
  * ====================================================================================================================================================
  *         "AppWork Utilities" License
  *         The "AppWork Utilities" will be called [The Product] from now on.
@@ -7,16 +7,16 @@
  *         Copyright (c) 2009-2015, AppWork GmbH <e-mail@appwork.org>
  *         Schwabacher Straße 117
  *         90763 Fürth
- *         Germany   
+ *         Germany
  * === Preamble ===
  *     This license establishes the terms under which the [The Product] Source Code & Binary files may be used, copied, modified, distributed, and/or redistributed.
  *     The intent is that the AppWork GmbH is able to provide their utilities library for free to non-commercial projects whereas commercial usage is only permitted after obtaining a commercial license.
  *     These terms apply to all files that have the [The Product] License header (IN the file), a <filename>.license or <filename>.info (like mylib.jar.info) file that contains a reference to this license.
- * 	
+ *
  * === 3rd Party Licences ===
  *     Some parts of the [The Product] use or reference 3rd party libraries and classes. These parts may have different licensing conditions. Please check the *.license and *.info files of included libraries
- *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header. 	
- * 	
+ *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header.
+ *
  * === Definition: Commercial Usage ===
  *     If anybody or any organization is generating income (directly or indirectly) by using [The Product] or if there's any commercial interest or aspect in what you are doing, we consider this as a commercial usage.
  *     If your use-case is neither strictly private nor strictly educational, it is commercial. If you are unsure whether your use-case is commercial or not, consider it as commercial or contact us.
@@ -25,9 +25,9 @@
  *     If you want to use [The Product] in a commercial way (see definition above), you have to obtain a paid license from AppWork GmbH.
  *     Contact AppWork for further details: <e-mail@appwork.org>
  * === Non-Commercial Usage ===
- *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the 
+ *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the
  *     "GNU Affero General Public License" (http://www.gnu.org/licenses/agpl-3.0.en.html).
- * 	
+ *
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
@@ -65,12 +65,11 @@ import javax.swing.PopupFactory;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 
-
 import org.appwork.utils.swing.EDTRunner;
 
 /**
  * @author thomas
- * 
+ *
  */
 public class ToolTipController implements MouseListener, MouseMotionListener, WindowFocusListener, PropertyChangeListener, AWTEventListener {
 
@@ -81,7 +80,7 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
 
     /**
      * get the only existing instance of ToolTipManager. This is a singleton
-     * 
+     *
      * @return
      */
     public static ToolTipController getInstance() {
@@ -97,7 +96,7 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent)
      */
     private int              changeDelay = 500;
@@ -109,8 +108,8 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
     // private Window parentWindow;
 
     /**
-     * Create a new instance of ToolTipManager. This is a singleton class.
-     * Access the only existing instance by using {@link #getInstance()}.
+     * Create a new instance of ToolTipManager. This is a singleton class. Access the only existing instance by using {@link #getInstance()}
+     * .
      */
     private ToolTipController() {
         setDelay(2500);
@@ -131,7 +130,7 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
     }
 
     /**
-     * 
+     *
      */
     public void hideTooltip() {
         delayer.stop();
@@ -177,9 +176,7 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
     /*
      * (non-Javadoc)
      * 
-     * @see
-     * org.appwork.swing.event.AWTEventListener#onAWTEventAfterDispatch(java
-     * .awt.AWTEvent)
+     * @see org.appwork.swing.event.AWTEventListener#onAWTEventAfterDispatch(java .awt.AWTEvent)
      */
     @Override
     public void eventDispatched(final AWTEvent event) {
@@ -207,7 +204,7 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
      */
     @Override
@@ -218,9 +215,7 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
     /*
      * (non-Javadoc)
      * 
-     * @see
-     * java.awt.event.MouseMotionListener#mouseDragged(java.awt.event.MouseEvent
-     * )
+     * @see java.awt.event.MouseMotionListener#mouseDragged(java.awt.event.MouseEvent )
      */
     @Override
     public void mouseDragged(final MouseEvent e) {
@@ -232,7 +227,9 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
     public void mouseEntered(final MouseEvent e) {
 
         if (e.getSource() instanceof ToolTipHandler) {
-            if (e.getSource() == activeComponent) { return; }
+            if (e.getSource() == activeComponent) {
+                return;
+            }
             // just to be sure
             if (activeComponent instanceof JComponent) {
                 ToolTipManager.sharedInstance().unregisterComponent(activeComponent);
@@ -256,7 +253,7 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.awt.event.MouseListener#mouseExited(java.awt.event.MouseEvent)
      */
     @Override
@@ -271,8 +268,7 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
     /*
      * (non-Javadoc)
      * 
-     * @see
-     * java.awt.event.MouseMotionListener#mouseMoved(java.awt.event.MouseEvent)
+     * @see java.awt.event.MouseMotionListener#mouseMoved(java.awt.event.MouseEvent)
      */
     @Override
     public void mouseMoved(final MouseEvent e) {
@@ -361,8 +357,7 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
     /*
      * (non-Javadoc)
      * 
-     * @see java.beans.PropertyChangeListener#propertyChange(java.beans.
-     * PropertyChangeEvent)
+     * @see java.beans.PropertyChangeListener#propertyChange(java.beans. PropertyChangeEvent)
      */
     @Override
     public void propertyChange(final PropertyChangeEvent evt) {
@@ -429,7 +424,9 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
         // delayer.stop();
         if (tt != null) {
             if (handler != null) {
-                if (handler.showToolTip(tt)) { return; }
+                if (handler.showToolTip(tt)) {
+                    return;
+                }
 
             }
             if (isClassicToolstipsEnabled()) {
@@ -447,7 +444,9 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
                         }
                     }
                 }
-                if (gc == null) { return; }
+                if (gc == null) {
+                    return;
+                }
                 final Rectangle screenBounds = gc.getBounds();
                 final Insets screenInsets = Toolkit.getDefaultToolkit().getScreenInsets(gc);
                 Point ttPosition = new Point(mousePosition.x, mousePosition.y);
@@ -531,12 +530,19 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
     }
 
     /**
-     * 
+     *
      */
     protected void showTooltip() {
         ToolTipController.this.hideTooltip();
         final JComponent aC = ToolTipController.this.activeComponent;
-        if (aC != null && (!aC.isFocusable() || aC.hasFocus() || ((ToolTipHandler) aC).isTooltipWithoutFocusEnabled()) && !ToolTipController.this.isTooltipVisible() && ToolTipController.this.mouseOverComponent(MouseInfo.getPointerInfo().getLocation())) {
+        boolean focusable = aC.isFocusable();
+        boolean hasFocus = aC.hasFocus();
+        boolean tooltipWithoutFocusEnabled = ((ToolTipHandler) aC).isTooltipWithoutFocusEnabled();
+        boolean tooltipVisible = ToolTipController.this.isTooltipVisible();
+        boolean mouseOverComponent = ToolTipController.this.mouseOverComponent(MouseInfo.getPointerInfo().getLocation());
+
+        if (aC != null && (!focusable || hasFocus || tooltipWithoutFocusEnabled) && !tooltipVisible && mouseOverComponent) {
+
             if (aC instanceof JTable && ((JTable) aC).getDropLocation() != null) {
                 System.out.println("drop is going on");
                 return;
@@ -574,8 +580,7 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
     /*
      * (non-Javadoc)
      * 
-     * @see java.awt.event.WindowFocusListener#windowGainedFocus(java.awt.event.
-     * WindowEvent)
+     * @see java.awt.event.WindowFocusListener#windowGainedFocus(java.awt.event. WindowEvent)
      */
     @Override
     public void windowGainedFocus(final WindowEvent e) {
@@ -586,9 +591,7 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
     /*
      * (non-Javadoc)
      * 
-     * @see
-     * java.awt.event.WindowFocusListener#windowLostFocus(java.awt.event.WindowEvent
-     * )
+     * @see java.awt.event.WindowFocusListener#windowLostFocus(java.awt.event.WindowEvent )
      */
     @Override
     public void windowLostFocus(final WindowEvent e) {
@@ -598,7 +601,7 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.awt.event.MouseListener#mousePressed(java.awt.event.MouseEvent)
      */
     @Override
@@ -610,8 +613,7 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
     /*
      * (non-Javadoc)
      * 
-     * @see
-     * java.awt.event.MouseListener#mouseReleased(java.awt.event.MouseEvent)
+     * @see java.awt.event.MouseListener#mouseReleased(java.awt.event.MouseEvent)
      */
     @Override
     public void mouseReleased(final MouseEvent e) {

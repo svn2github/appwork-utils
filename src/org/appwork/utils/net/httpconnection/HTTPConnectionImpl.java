@@ -1,5 +1,5 @@
 /**
- * 
+ *
  * ====================================================================================================================================================
  *         "AppWork Utilities" License
  *         The "AppWork Utilities" will be called [The Product] from now on.
@@ -7,16 +7,16 @@
  *         Copyright (c) 2009-2015, AppWork GmbH <e-mail@appwork.org>
  *         Schwabacher Straße 117
  *         90763 Fürth
- *         Germany   
+ *         Germany
  * === Preamble ===
  *     This license establishes the terms under which the [The Product] Source Code & Binary files may be used, copied, modified, distributed, and/or redistributed.
  *     The intent is that the AppWork GmbH is able to provide their utilities library for free to non-commercial projects whereas commercial usage is only permitted after obtaining a commercial license.
  *     These terms apply to all files that have the [The Product] License header (IN the file), a <filename>.license or <filename>.info (like mylib.jar.info) file that contains a reference to this license.
- * 	
+ *
  * === 3rd Party Licences ===
  *     Some parts of the [The Product] use or reference 3rd party libraries and classes. These parts may have different licensing conditions. Please check the *.license and *.info files of included libraries
- *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header. 	
- * 	
+ *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header.
+ *
  * === Definition: Commercial Usage ===
  *     If anybody or any organization is generating income (directly or indirectly) by using [The Product] or if there's any commercial interest or aspect in what you are doing, we consider this as a commercial usage.
  *     If your use-case is neither strictly private nor strictly educational, it is commercial. If you are unsure whether your use-case is commercial or not, consider it as commercial or contact us.
@@ -25,9 +25,9 @@
  *     If you want to use [The Product] in a commercial way (see definition above), you have to obtain a paid license from AppWork GmbH.
  *     Contact AppWork for further details: <e-mail@appwork.org>
  * === Non-Commercial Usage ===
- *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the 
+ *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the
  *     "GNU Affero General Public License" (http://www.gnu.org/licenses/agpl-3.0.en.html).
- * 	
+ *
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
@@ -139,7 +139,9 @@ public class HTTPConnectionImpl implements HTTPConnection {
         return this.connectTimeout;
     }
 
+    protected volatile long                      connectTime          = -1;
     protected volatile long                      requestTime          = -1;
+
     protected OutputStream                       outputStream         = null;
     protected InputStream                        inputStream          = null;
     protected InputStream                        convertedInputStream = null;
@@ -421,6 +423,7 @@ public class HTTPConnectionImpl implements HTTPConnection {
         this.outputStream = null;
         this.inputStream = null;
         this.convertedInputStream = null;
+        this.connectTime = -1;
         this.requestTime = -1;
         this.headers.clear();
         this.ranges = null;
@@ -585,7 +588,7 @@ public class HTTPConnectionImpl implements HTTPConnection {
                     if (port == -1) {
                         port = this.httpURL.getDefaultPort();
                     }
-                    final long startTime = System.currentTimeMillis();
+                    long startTime = System.currentTimeMillis();
                     final HTTPProxy lProxy = getProxy();
                     InetAddress bindInetAddress = null;
                     if (lProxy != null) {
@@ -601,6 +604,7 @@ public class HTTPConnectionImpl implements HTTPConnection {
                         connectedInetSocketAddress = new InetSocketAddress(host, port);
                         int connectTimeout = this.getConnectTimeout();
                         if (connectTimeout == 0) {
+                            startTime = System.currentTimeMillis();
                             this.connectionSocket = createConnectionSocket(bindInetAddress);
                             /** no workaround for infinite connect timeouts **/
                             this.connectionSocket.getSocket().connect(connectedInetSocketAddress, connectTimeout);
@@ -609,6 +613,7 @@ public class HTTPConnectionImpl implements HTTPConnection {
                              * workaround for too early connect timeouts
                              */
                             while (true) {
+                                startTime = System.currentTimeMillis();
                                 this.connectionSocket = createConnectionSocket(bindInetAddress);
                                 final long beforeConnect = System.currentTimeMillis();
                                 try {
@@ -670,7 +675,7 @@ public class HTTPConnectionImpl implements HTTPConnection {
                                 this.connectionSocket = factory.create(connectionSocket, this.httpURL.getHost(), port, true, isSSLTrustALL());
                             }
                         }
-                        this.requestTime = System.currentTimeMillis() - startTime;
+                        this.connectTime = System.currentTimeMillis() - startTime;
                         ee = null;
                         break;
                     } catch (final IOException e) {
@@ -753,6 +758,7 @@ public class HTTPConnectionImpl implements HTTPConnection {
                 /* flush outputstream in case some buffers are not flushed yet */
                 this.outputStream.flush();
             }
+            final long startTime = System.currentTimeMillis();
             final InputStream inputStream = connectionSocket.getInputStream();
             this.inputStreamConnected = true;
             /* first read http header */
@@ -814,6 +820,7 @@ public class HTTPConnectionImpl implements HTTPConnection {
                 header.get(bytes);
                 temp = new String(bytes, "UTF-8");
             }
+            this.requestTime = System.currentTimeMillis() - startTime;
             /*
              * split header into single strings, use RN or N(buggy fucking non rfc)
              */
@@ -1167,6 +1174,10 @@ public class HTTPConnectionImpl implements HTTPConnection {
         return this.requestTime;
     }
 
+    public long getConnectTime() {
+        return this.connectTime;
+    }
+
     public int getResponseCode() {
         return this.httpResponseCode;
     }
@@ -1176,12 +1187,14 @@ public class HTTPConnectionImpl implements HTTPConnection {
         sb.append("----------------Response Information------------\r\n");
         try {
             if (this.inputStream != null) {
-                final long lrequestTime = this.requestTime;
-                if (lrequestTime >= 0) {
-                    sb.append("Connection-Time: ").append(lrequestTime + "ms").append("\r\n");
+                final long lconnectTime = getConnectTime();
+                if (lconnectTime >= 0) {
+                    sb.append("Connection-Time: ").append(lconnectTime + "ms").append("\r\n");
                 } else {
                     sb.append("Connection-Time: keep-Alive\r\n");
                 }
+                final long lrequestTime = getRequestTime();
+                sb.append("Request-Time: ").append(Math.min(0, lrequestTime) + "ms").append("\r\n");
                 sb.append("----------------Response------------------------\r\n");
                 this.connectInputStream();
                 sb.append(this.httpHeader).append("\r\n");

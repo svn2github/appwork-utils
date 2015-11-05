@@ -1,5 +1,5 @@
 /**
- * 
+ *
  * ====================================================================================================================================================
  *         "AppWork Utilities" License
  *         The "AppWork Utilities" will be called [The Product] from now on.
@@ -7,16 +7,16 @@
  *         Copyright (c) 2009-2015, AppWork GmbH <e-mail@appwork.org>
  *         Schwabacher Straße 117
  *         90763 Fürth
- *         Germany   
+ *         Germany
  * === Preamble ===
  *     This license establishes the terms under which the [The Product] Source Code & Binary files may be used, copied, modified, distributed, and/or redistributed.
  *     The intent is that the AppWork GmbH is able to provide their utilities library for free to non-commercial projects whereas commercial usage is only permitted after obtaining a commercial license.
  *     These terms apply to all files that have the [The Product] License header (IN the file), a <filename>.license or <filename>.info (like mylib.jar.info) file that contains a reference to this license.
- * 	
+ *
  * === 3rd Party Licences ===
  *     Some parts of the [The Product] use or reference 3rd party libraries and classes. These parts may have different licensing conditions. Please check the *.license and *.info files of included libraries
- *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header. 	
- * 	
+ *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header.
+ *
  * === Definition: Commercial Usage ===
  *     If anybody or any organization is generating income (directly or indirectly) by using [The Product] or if there's any commercial interest or aspect in what you are doing, we consider this as a commercial usage.
  *     If your use-case is neither strictly private nor strictly educational, it is commercial. If you are unsure whether your use-case is commercial or not, consider it as commercial or contact us.
@@ -25,9 +25,9 @@
  *     If you want to use [The Product] in a commercial way (see definition above), you have to obtain a paid license from AppWork GmbH.
  *     Contact AppWork for further details: <e-mail@appwork.org>
  * === Non-Commercial Usage ===
- *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the 
+ *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the
  *     "GNU Affero General Public License" (http://www.gnu.org/licenses/agpl-3.0.en.html).
- * 	
+ *
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
@@ -53,8 +53,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Locale;
-import java.util.Map;
-import java.util.logging.Level;
 
 import javax.swing.KeyStroke;
 
@@ -68,7 +66,6 @@ import org.appwork.utils.Application;
 import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.locale._AWU;
-
 import org.appwork.utils.os.mime.Mime;
 import org.appwork.utils.os.mime.MimeFactory;
 import org.appwork.utils.processes.ProcessBuilderFactory;
@@ -259,7 +256,7 @@ public class CrossSystem {
 
     private static Boolean              OS64BIT                   = null;
 
-    private static String               WMIC_PATH;
+    private static String               WMIC_PATH                 = null;
 
     static {
         /* Init OS_ID */
@@ -278,11 +275,13 @@ public class CrossSystem {
             CrossSystem.DESKTOP_SUPPORT = new DesktopSupportJavaDesktop();
         }
         MIME = MimeFactory.getInstance();
-        String wmic = System.getenv("SYSTEMROOT") + "\\System32\\Wbem\\wmic.exe";
-        if (new File(wmic).exists()) {
-            WMIC_PATH = wmic;
-        } else {
-            WMIC_PATH = "wmic";
+        if (CrossSystem.isWindows()) {
+            final String wmic = System.getenv("SYSTEMROOT") + "\\System32\\Wbem\\wmic.exe";
+            if (new File(wmic).exists()) {
+                WMIC_PATH = wmic;
+            } else {
+                WMIC_PATH = "wmic";
+            }
         }
     }
 
@@ -861,11 +860,8 @@ public class CrossSystem {
             if (e.getButton() == MouseEvent.BUTTON1 && e.isControlDown()) {
                 return true;
             }
-
         }
-
         return e.isPopupTrigger() || e.getButton() == MouseEvent.BUTTON3;
-
     }
 
     /**
@@ -873,7 +869,6 @@ public class CrossSystem {
      * @return
      */
     public static boolean isCopySelectionTrigger(final KeyStroke ks) {
-
         return ks == CrossSystem.KEY_STROKE_COPY;
     }
 
@@ -1046,7 +1041,6 @@ public class CrossSystem {
         // I noticed a bug: desktop.open freezes under win7 java 1.7u25 in some
         // cases... we should at least avoid a gui freeze in such cases..
         final Runnable runnable = new Runnable() {
-
             @Override
             public void run() {
                 try {
@@ -1057,13 +1051,10 @@ public class CrossSystem {
             }
         };
         if (CrossSystem.isWindows()) {
-
             new Thread(runnable, "Open Folder").start();
-
         } else {
             runnable.run();
         }
-
     }
 
     /**
@@ -1105,40 +1096,32 @@ public class CrossSystem {
      * @param class1
      */
     public static void restartApplication(final File jar, final String... parameters) {
-
         try {
-                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("restartApplication " + jar + " " + parameters.length);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("restartApplication " + jar + " " + parameters.length);
             final java.util.List<String> nativeParameters = new ArrayList<String>();
             File runin = null;
             if (CrossSystem.isMac()) {
-
                 // find .app
                 File rootpath = jar;
                 final HashSet<File> loopMap = new HashSet<File>();
                 while (rootpath != null && loopMap.add(rootpath)) {
                     if (rootpath.getName().endsWith(".app")) {
                         break;
-
                     }
                     rootpath = rootpath.getParentFile();
-
                 }
                 if (rootpath.getName().endsWith(".app")) {
-
                     // found app.- restart it.
-
                     nativeParameters.add("open");
                     nativeParameters.add("-n");
                     nativeParameters.add(rootpath.getAbsolutePath());
                     runin = rootpath.getParentFile();
-
                 }
-
             }
             if (nativeParameters.isEmpty()) {
-                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Find Jarfile");
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Find Jarfile");
                 final File jarFile = jar;
-                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Find Jarfile " + jarFile);
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Find Jarfile " + jarFile);
                 runin = jarFile.getParentFile();
                 if (CrossSystem.isWindows() || CrossSystem.isOS2()) {
                     final File exeFile = new File(jarFile.getParentFile(), jarFile.getName().substring(0, jarFile.getName().length() - 4) + ".exe");
@@ -1154,25 +1137,21 @@ public class CrossSystem {
                     nativeParameters.add("-jar");
                     nativeParameters.add(jarFile.getAbsolutePath());
                 }
-
             }
-
             if (parameters != null) {
                 for (final String s : parameters) {
                     nativeParameters.add(s);
                 }
             }
-                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Start " + nativeParameters);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Start " + nativeParameters);
             final ProcessBuilder pb = ProcessBuilderFactory.create(nativeParameters.toArray(new String[] {}));
             /*
              * needed because the root is different for jre/class version
              */
-
-                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Root: " + runin);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Root: " + runin);
             if (runin != null) {
                 pb.directory(runin);
             }
-
             ShutdownController.getInstance().addShutdownEvent(new ShutdownEvent() {
                 {
                     this.setHookPriority(Integer.MIN_VALUE);
@@ -1185,12 +1164,9 @@ public class CrossSystem {
                     } catch (final IOException e) {
                         org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
                     }
-
                 }
             });
-
-                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Start " + ShutdownController.getInstance().requestShutdown(true));
-
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Start " + ShutdownController.getInstance().requestShutdown(true));
         } catch (final Throwable e) {
             throw new WTFException(e);
         }
@@ -1220,7 +1196,6 @@ public class CrossSystem {
                     // we need to go this cmd /c way, because explorer.exe seems to
                     // do some strange parameter parsing.
                     new ProcessBuilder("cmd", "/c", "explorer /select,\"" + saveTo.getAbsolutePath() + "\"").start();
-
                     return;
                 } catch (final IOException e) {
                     e.printStackTrace();
@@ -1266,43 +1241,22 @@ public class CrossSystem {
         CrossSystem.DESKTOP_SUPPORT.shutdown(force);
     }
 
-    public static void main(String[] args) {
-        try {
-            Map<String, String> env = System.getenv();
-            for (String envName : env.keySet()) {
-                System.out.format("%s=%s%n", envName, env.get(envName));
-            }
-            System.out.println(isProcessRunning("C:\\WINDOWS\\system32\\cmd.exe"));
-
-        } catch (UnsupportedOperationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (UnexpectedResponseException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
-
     /**
      * @return
      * @throws SecuritySoftwareException
      */
     public static SecuritySoftwareResponse getAntiVirusSoftwareInfo() throws UnsupportedOperationException, SecuritySoftwareException {
-
         String response = null;
         try {
             if (!CrossSystem.isWindows()) {
                 throw new UnsupportedOperationException("getAntiVirusSoftwareInfo: Not Supported for your OS");
             }
             final String charSet = Charset.defaultCharset().displayName();
-
             switch (CrossSystem.getOS()) {
             case WINDOWS_XP:
                 response = ProcessBuilderFactory.runCommand(WMIC_PATH, "/NAMESPACE:\\\\root\\SecurityCenter", "path", "AntiVirusProduct", "get", "companyName,displayName,pathToEnableOnAccessUI,pathToUpdateUI,productUptoDate", "/format:value").getStdOutString(charSet);
-
                 break;
             default:
-
                 response = ProcessBuilderFactory.runCommand(WMIC_PATH, "/NAMESPACE:\\\\root\\SecurityCenter2", "path", "AntiVirusProduct", "get", "displayName,pathToSignedProductExe,pathToSignedReportingExe,productState", "/format:value").getStdOutString(charSet);
                 break;
             }
@@ -1318,16 +1272,13 @@ public class CrossSystem {
         if (os == null) {
             os = CrossSystem.getOS();
         }
-
         SecuritySoftwareResponse list = new SecuritySoftwareResponse();
         list.setResponse(response);
         if (StringUtils.isNotEmpty(response)) {
-                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info(response);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info(response);
             String[] lines = response.split("[\r\n]{1,2}");
-
             String firstKey = null;
             SecuritySoftwareInfo ret = new SecuritySoftwareInfo();
-
             for (int i = 0; i < lines.length; i++) {
                 String line = lines[i];
                 if (StringUtils.isNotEmpty(line)) {
@@ -1342,19 +1293,14 @@ public class CrossSystem {
                         if (firstKey == null) {
                             firstKey = key;
                         }
-
                         ret.put(key, value);
-
                     }
                 }
-
             }
             if (ret.size() > 0) {
                 list.add(ret);
             }
-
             return list;
-
         }
         throw new WTFException("WMIC returned no response");
     }
@@ -1371,11 +1317,9 @@ public class CrossSystem {
                 throw new UnsupportedOperationException("getFirewallSoftwareInfo: Not Supported for your OS");
             }
             final String charSet = Charset.defaultCharset().displayName();
-
             switch (CrossSystem.getOS()) {
             case WINDOWS_XP:
                 response = ProcessBuilderFactory.runCommand(WMIC_PATH, "/NAMESPACE:\\\\root\\SecurityCenter", "path", "FirewallProduct", "get", "companyName,displayName,enabled,pathToEnableUI", "/format:value").getStdOutString(charSet);
-
                 break;
             default:
                 response = ProcessBuilderFactory.runCommand(WMIC_PATH, "/NAMESPACE:\\\\root\\SecurityCenter2", "path", "FirewallProduct", "get", "displayName,pathToSignedProductExe,pathToSignedProductExe,pathToSignedReportingExe,productState", "/format:value").getStdOutString(charSet);
@@ -1401,11 +1345,9 @@ public class CrossSystem {
                 throw new UnsupportedOperationException("getAntiSpySoftwareInfo: Not Supported for your OS");
             }
             final String charSet = Charset.defaultCharset().displayName();
-
             switch (CrossSystem.getOS()) {
             case WINDOWS_XP:
                 throw new UnsupportedOperationException("getAntiSpySoftwareInfo: Not Supported for your OS");
-
             default:
                 response = ProcessBuilderFactory.runCommand(WMIC_PATH, "/NAMESPACE:\\\\root\\SecurityCenter2", "path", "AntiSpywareProduct", "get", "displayName,pathToSignedProductExe,pathToSignedProductExe,pathToSignedReportingExe,productState", "/format:value").getStdOutString(charSet);
                 break;
@@ -1425,7 +1367,6 @@ public class CrossSystem {
                 throw new UnsupportedOperationException("isProcessRunning: Not Supported for your OS");
             }
             final String charSet = Charset.defaultCharset().displayName();
-
             switch (CrossSystem.getOS()) {
             default:
                 response = ProcessBuilderFactory.runCommand(WMIC_PATH, "process", "where", "executablepath='" + path.replaceAll("[\\/\\\\]+", "\\\\\\\\") + "'", "get", "processID", "/format:value").getStdOutString(charSet);
@@ -1437,14 +1378,12 @@ public class CrossSystem {
             } else if (StringUtils.isEmpty(response)) {
                 return false;
             }
-
         } catch (UnsupportedOperationException e) {
             throw e;
         } catch (Throwable e) {
             throw new WTFException(e);
         }
         throw new UnexpectedResponseException("Unexpected Response: " + response);
-
     }
 
 }

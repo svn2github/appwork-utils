@@ -88,17 +88,17 @@ public class CrossSystem {
         LINUX(OSFamily.LINUX),
         MAC(OSFamily.MAC),
         OS2(OSFamily.OS2),
+        WINDOWS_OTHERS(OSFamily.WINDOWS),
+        WINDOWS_NT(OSFamily.WINDOWS),
         WINDOWS_2000(OSFamily.WINDOWS),
+        WINDOWS_XP(OSFamily.WINDOWS),
         WINDOWS_2003(OSFamily.WINDOWS),
+        WINDOWS_VISTA(OSFamily.WINDOWS),
+        WINDOWS_SERVER_2008(OSFamily.WINDOWS),
         WINDOWS_7(OSFamily.WINDOWS),
         WINDOWS_8(OSFamily.WINDOWS),
-        WINDOWS_10(OSFamily.WINDOWS),
-        WINDOWS_NT(OSFamily.WINDOWS),
-        WINDOWS_OTHERS(OSFamily.WINDOWS),
-        WINDOWS_SERVER_2008(OSFamily.WINDOWS),
         WINDOWS_SERVER_2012(OSFamily.WINDOWS),
-        WINDOWS_VISTA(OSFamily.WINDOWS),
-        WINDOWS_XP(OSFamily.WINDOWS);
+        WINDOWS_10(OSFamily.WINDOWS);
 
         private final OSFamily family;
 
@@ -108,6 +108,14 @@ public class CrossSystem {
 
         public OSFamily getFamily() {
             return this.family;
+        }
+
+        public boolean isMinimum(OperatingSystem os) {
+            if (os.getFamily().equals(getFamily())) {
+                final int minimum = os.ordinal();
+                return ordinal() >= minimum;
+            }
+            return false;
         }
     }
 

@@ -88,6 +88,9 @@ public class CrossSystem {
         LINUX(OSFamily.LINUX),
         MAC(OSFamily.MAC),
         OS2(OSFamily.OS2),
+        /*
+         * List must be sorted by release Date!!
+         */
         WINDOWS_OTHERS(OSFamily.WINDOWS),
         WINDOWS_NT(OSFamily.WINDOWS),
         WINDOWS_2000(OSFamily.WINDOWS),

@@ -1,5 +1,5 @@
 /**
- * 
+ *
  * ====================================================================================================================================================
  *         "AppWork Utilities" License
  *         The "AppWork Utilities" will be called [The Product] from now on.
@@ -7,16 +7,16 @@
  *         Copyright (c) 2009-2015, AppWork GmbH <e-mail@appwork.org>
  *         Schwabacher Straße 117
  *         90763 Fürth
- *         Germany   
+ *         Germany
  * === Preamble ===
  *     This license establishes the terms under which the [The Product] Source Code & Binary files may be used, copied, modified, distributed, and/or redistributed.
  *     The intent is that the AppWork GmbH is able to provide their utilities library for free to non-commercial projects whereas commercial usage is only permitted after obtaining a commercial license.
  *     These terms apply to all files that have the [The Product] License header (IN the file), a <filename>.license or <filename>.info (like mylib.jar.info) file that contains a reference to this license.
- * 	
+ *
  * === 3rd Party Licences ===
  *     Some parts of the [The Product] use or reference 3rd party libraries and classes. These parts may have different licensing conditions. Please check the *.license and *.info files of included libraries
- *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header. 	
- * 	
+ *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header.
+ *
  * === Definition: Commercial Usage ===
  *     If anybody or any organization is generating income (directly or indirectly) by using [The Product] or if there's any commercial interest or aspect in what you are doing, we consider this as a commercial usage.
  *     If your use-case is neither strictly private nor strictly educational, it is commercial. If you are unsure whether your use-case is commercial or not, consider it as commercial or contact us.
@@ -25,9 +25,9 @@
  *     If you want to use [The Product] in a commercial way (see definition above), you have to obtain a paid license from AppWork GmbH.
  *     Contact AppWork for further details: <e-mail@appwork.org>
  * === Non-Commercial Usage ===
- *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the 
+ *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the
  *     "GNU Affero General Public License" (http://www.gnu.org/licenses/agpl-3.0.en.html).
- * 	
+ *
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
@@ -63,7 +63,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.HashMap;
-import java.util.logging.Level;
 
 import javax.imageio.ImageIO;
 import javax.swing.Icon;
@@ -73,7 +72,6 @@ import org.appwork.swing.components.IDIcon;
 import org.appwork.swing.components.IconIdentifier;
 import org.appwork.utils.URLStream;
 import org.appwork.utils.ImageProvider.ImageProvider;
-
 import org.appwork.utils.net.Base64OutputStream;
 
 public class IconIO {
@@ -737,6 +735,60 @@ public class IconIO {
 
         return IconIO.colorRangeToTransparency(image, new Color(Math.max((int) (r * (1d - tollerance)), 0), Math.max((int) (g * (1d - tollerance)), 0), Math.max((int) (b * (1d - tollerance)), 0), a), new Color(Math.min(255, (int) (r * (1d + tollerance))), Math.min(255, (int) (g * (1d + tollerance))), Math.min(255, (int) (b * (1d + tollerance))), a));
 
+    }
+
+    /**
+     * @param keepBrightness
+     *            TODO
+     * @param checkBoxImage
+     * @param i
+     * @return
+     */
+    public static Icon replaceColor(Icon icon, final Color search, final int tollerance, final Color replace, boolean keepBrightness) {
+
+        return new ImageIcon(replaceColor(toBufferedImage(icon), search, tollerance, replace, keepBrightness));
+    }
+
+    /**
+     * @param bufferedImage
+     * @param color
+     * @return
+     */
+    public static Image replaceColor(BufferedImage image, final Color search, final int tollerance, final Color replace, final boolean keepBrightness) {
+        final int a1 = search.getAlpha();
+        final int r1 = search.getRed();
+        final int g1 = search.getGreen();
+        final int b1 = search.getBlue();
+
+        final ImageFilter filter = new RGBImageFilter() {
+            @Override
+            public final int filterRGB(final int x, final int y, final int rgb) {
+                final int a = (rgb >> 24) & 0xff;
+                final int r = (rgb >> 16) & 0xff;
+                final int g = (rgb >> 8) & 0xff;
+                final int b = (rgb >> 0) & 0xff;
+                System.out.println(a);
+                if (r == 0 && b == 0 && g == 0) {
+                    System.out.println(1);
+                }
+                if (Math.abs(r - r1) <= tollerance && Math.abs(g - g1) <= tollerance && Math.abs(b - b1) <= tollerance && Math.abs(a - a1) <= tollerance) {
+                    if (!keepBrightness) {
+                        return replace.getRGB();
+                    }
+                    final double brightness = ((r + g + b) / 3) / (double) 255;
+
+                    Color nc = new Color((int) (replace.getRed() * brightness), (int) (replace.getGreen() * brightness), (int) (replace.getBlue() * brightness), (int) (replace.getAlpha() * brightness));
+
+                    return nc.getRGB();
+                }
+
+                return rgb;
+            }
+        };
+
+        final ImageProducer ip = new FilteredImageSource(image.getSource(), filter);
+        final Image img = Toolkit.getDefaultToolkit().createImage(ip);
+        return img;
     }
 
 }

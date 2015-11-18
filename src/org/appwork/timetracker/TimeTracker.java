@@ -33,11 +33,11 @@
  * ==================================================================================================================================================== */
 package org.appwork.timetracker;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ListIterator;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.appwork.utils.formatter.TimeFormatter;
 import org.appwork.utils.logging2.LogSource;
@@ -49,10 +49,10 @@ import org.appwork.utils.logging2.extmanager.LoggerFactory;
  *
  */
 public class TimeTracker {
-    private String                   id;
-    private ArrayList<TrackerRule>   rules;
-    private LinkedList<TrackedEntry> entries;
-    private LogSource                logger;
+    private final String                            id;
+    private final CopyOnWriteArrayList<TrackerRule> rules   = new CopyOnWriteArrayList<TrackerRule>();
+    private final LinkedList<TrackedEntry>          entries = new LinkedList<TrackedEntry>();
+    private final LogSource                         logger;
 
     public String getId() {
         return id;
@@ -63,42 +63,30 @@ public class TimeTracker {
      */
     public TimeTracker(String typeID) {
         this.id = typeID;
-        this.rules = new ArrayList<TrackerRule>();
-        entries = new LinkedList<TrackedEntry>();
         logger = LoggerFactory.I().getLogger("TimeTracker " + id);
-
     }
 
     public void addRule(TrackerRule rule) {
-        ArrayList<TrackerRule> newRules = new ArrayList<TrackerRule>(rules);
-
-        newRules.add(rule);
-        rules = newRules;
-
+        if (rule != null) {
+            rules.addIfAbsent(rule);
+        }
     }
 
     public void wait(TrackerJob job) throws InterruptedException {
-        if (rules.size() == 0) {
+        if (rules.size() == 0 || job == null) {
             return;
         }
-        long waitFor = 0;
-
+        final long waitFor;
         synchronized (this) {
-
             waitFor = getWaitFor(job.getWeight());
-
             entries.add(createEntry(waitFor, job.getWeight()));
-
         }
-
         if (waitFor > 0) {
             logger.info("Wait " + TimeFormatter.formatMilliSeconds(waitFor, 0));
             job.waitForNextSlot(waitFor);
         }
-
         job.run();
         logger.info("RUN");
-
     }
 
     /**
@@ -106,28 +94,23 @@ public class TimeTracker {
      * @return
      */
     public long getWaitFor(int weight) {
-
         int sum = 0;
-        LinkedList<TrackerRule> lRules = new LinkedList<TrackerRule>(rules);
-        ListIterator<TrackedEntry> itEntres = entries.listIterator(entries.size());
+        final LinkedList<TrackerRule> lRules = new LinkedList<TrackerRule>(rules);
+        final ListIterator<TrackedEntry> itEntres = entries.listIterator(entries.size());
         long time = System.currentTimeMillis();
         logger.info("Find wait For");
         long interval = 0;
         while (itEntres.hasPrevious()) {
-
-            TrackedEntry entry = itEntres.previous();
+            final TrackedEntry entry = itEntres.previous();
             logger.info("Check Entry " + new Date(entry.getTime()));
             // time = Math.max(entry.getTime(), time);
             sum += entry.getWeight();
-
-            Iterator<TrackerRule> it = lRules.iterator();
+            final Iterator<TrackerRule> it = lRules.iterator();
             while (it.hasNext()) {
-                TrackerRule r = it.next();
-
-                long diff = time - entry.getTime();
+                final TrackerRule r = it.next();
+                final long diff = time - entry.getTime();
                 if (diff > r.getInterval()) {
                     it.remove();
-
                     if (lRules.size() == 0) {
                         logger.info("" + sum + "/" + r.getAmount() + " in the last " + r.getInterval());
                         // cleanup
@@ -146,7 +129,6 @@ public class TimeTracker {
                     }
                 }
             }
-
         }
         logger.info("" + sum + " --> " + TimeFormatter.formatMilliSeconds(interval, 0));
         return interval;

@@ -1,5 +1,5 @@
 /**
- * 
+ *
  * ====================================================================================================================================================
  *         "AppWork Utilities" License
  *         The "AppWork Utilities" will be called [The Product] from now on.
@@ -7,16 +7,16 @@
  *         Copyright (c) 2009-2015, AppWork GmbH <e-mail@appwork.org>
  *         Schwabacher Straße 117
  *         90763 Fürth
- *         Germany   
+ *         Germany
  * === Preamble ===
  *     This license establishes the terms under which the [The Product] Source Code & Binary files may be used, copied, modified, distributed, and/or redistributed.
  *     The intent is that the AppWork GmbH is able to provide their utilities library for free to non-commercial projects whereas commercial usage is only permitted after obtaining a commercial license.
  *     These terms apply to all files that have the [The Product] License header (IN the file), a <filename>.license or <filename>.info (like mylib.jar.info) file that contains a reference to this license.
- * 	
+ *
  * === 3rd Party Licences ===
  *     Some parts of the [The Product] use or reference 3rd party libraries and classes. These parts may have different licensing conditions. Please check the *.license and *.info files of included libraries
- *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header. 	
- * 	
+ *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header.
+ *
  * === Definition: Commercial Usage ===
  *     If anybody or any organization is generating income (directly or indirectly) by using [The Product] or if there's any commercial interest or aspect in what you are doing, we consider this as a commercial usage.
  *     If your use-case is neither strictly private nor strictly educational, it is commercial. If you are unsure whether your use-case is commercial or not, consider it as commercial or contact us.
@@ -25,9 +25,9 @@
  *     If you want to use [The Product] in a commercial way (see definition above), you have to obtain a paid license from AppWork GmbH.
  *     Contact AppWork for further details: <e-mail@appwork.org>
  * === Non-Commercial Usage ===
- *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the 
+ *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the
  *     "GNU Affero General Public License" (http://www.gnu.org/licenses/agpl-3.0.en.html).
- * 	
+ *
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
@@ -72,7 +72,7 @@ import org.appwork.storage.config.events.ConfigEventSender;
 import org.appwork.utils.Application;
 import org.appwork.utils.Files;
 import org.appwork.utils.StringUtils;
-
+import org.appwork.utils.logging2.extmanager.LoggerFactory;
 import org.appwork.utils.reflection.Clazz;
 import org.appwork.utils.swing.dialog.Dialog;
 
@@ -239,7 +239,7 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
         this.configInterface = configInterface;
         this.path = filePath;
         if (filePath.getName().endsWith(".json") || filePath.getName().endsWith(".ejs")) {
-                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning(filePath + " should not have an extension!!");
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning(filePath + " should not have an extension!!");
         }
         final File expected = Application.getResource("cfg/" + configInterface.getName());
         String storageID = null;
@@ -265,7 +265,7 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
             this.validateKeys(cryptedStorage);
         }
         try {
-                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Init StorageHandler for Interface:" + configInterface.getName() + "|Path:" + this.path);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Init StorageHandler for Interface:" + configInterface.getName() + "|Path:" + this.path);
             this.parseInterface();
         } catch (final InterfaceParseException e) {
             throw e;
@@ -307,7 +307,7 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
             this.validateKeys(cryptedStorage);
         }
         try {
-                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Init StorageHandler for Interface:" + configInterface.getName() + "|Path:" + this.path);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Init StorageHandler for Interface:" + configInterface.getName() + "|Path:" + this.path);
             this.parseInterface();
         } catch (final Throwable e) {
             throw new InterfaceParseException(e);
@@ -332,7 +332,7 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
         this.configInterface = configInterface;
         this.relativCPPath = classPath;
         if (classPath.endsWith(".json") || classPath.endsWith(".ejs")) {
-                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning(classPath + " should not have an extension!!");
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning(classPath + " should not have an extension!!");
         }
         this.path = Application.getResource(classPath);
         final File expected = Application.getResource("cfg/" + configInterface.getName());
@@ -350,7 +350,7 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
             this.validateKeys(cryptedStorage);
         }
         try {
-                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Init StorageHandler for Interface:" + configInterface.getName() + "|Path:" + this.path);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Init StorageHandler for Interface:" + configInterface.getName() + "|Path:" + this.path);
             this.parseInterface();
         } catch (final Throwable e) {
             throw new InterfaceParseException(e);
@@ -798,6 +798,12 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
                     // the
                     // later config file
                     if (keyGetterMap.containsKey(key)) {
+                        if (m.getName().equals(keyGetterMap.get(key).getName()) && m.getParameterCount() == keyGetterMap.get(key).getParameterCount()) {
+                            // overridden method. that's ok
+                            LoggerFactory.getDefaultLogger().info("Overridden Config Key found " + keyGetterMap.get(key) + "<-->" + m);
+                            continue;
+
+                        }
                         this.error(new InterfaceParseException("Key " + key + " Dupe found! " + keyGetterMap.get(key) + "<-->" + m));
                         continue;
                     }
@@ -852,6 +858,12 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
                     // the
                     // later config file
                     if (keyGetterMap.containsKey(key)) {
+                        if (m.getName().equals(keyGetterMap.get(key).getName()) && m.getParameterCount() == keyGetterMap.get(key).getParameterCount()) {
+                            // overridden method. that's ok
+                            LoggerFactory.getDefaultLogger().info("Overridden Config Key found " + keyGetterMap.get(key) + "<-->" + m);
+                            continue;
+
+                        }
                         this.error(new InterfaceParseException("Key " + key + " Dupe found! " + keyGetterMap.get(key) + "<-->" + m));
                         continue;
                     }
@@ -878,6 +890,12 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
                 } else if (methodName.startsWith("set")) {
                     key = methodName.substring(3);
                     if (keySetterMap.containsKey(key)) {
+                        if (m.getName().equals(keyGetterMap.get(key).getName()) && m.getParameterCount() == keyGetterMap.get(key).getParameterCount()) {
+                            // overridden method. that's ok
+                            LoggerFactory.getDefaultLogger().info("Overridden Config Key found " + keyGetterMap.get(key) + "<-->" + m);
+                            continue;
+
+                        }
                         this.error(new InterfaceParseException("Key " + key + " Dupe found! " + keySetterMap.get(key) + "<-->" + m));
                         continue;
                     }

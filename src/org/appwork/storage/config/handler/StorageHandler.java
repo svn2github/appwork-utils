@@ -43,6 +43,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map.Entry;
 
@@ -72,6 +73,7 @@ import org.appwork.storage.config.events.ConfigEventSender;
 import org.appwork.utils.Application;
 import org.appwork.utils.Files;
 import org.appwork.utils.StringUtils;
+import org.appwork.utils.logging2.LogInterface;
 import org.appwork.utils.logging2.extmanager.LoggerFactory;
 import org.appwork.utils.reflection.Clazz;
 import org.appwork.utils.swing.dialog.Dialog;
@@ -82,15 +84,52 @@ import org.appwork.utils.swing.dialog.Dialog;
  *
  */
 public class StorageHandler<T extends ConfigInterface> implements InvocationHandler {
+    private final static LinkedHashMap<String, Runnable> DELAYEDWRITES = new LinkedHashMap<String, Runnable>();
 
-    protected static final DelayedRunnable SAVEDELAYER = new DelayedRunnable(5000, 30000) {
+    protected static final DelayedRunnable               SAVEDELAYER   = new DelayedRunnable(5000, 30000) {
 
-                                                           @Override
-                                                           public void delayedrun() {
-                                                               StorageHandler.saveAll();
-                                                           }
-                                                       };
+                                                                           @Override
+                                                                           public void delayedrun() {
+                                                                               StorageHandler.saveAll();
+                                                                           }
+                                                                       };
     static {
+        ShutdownController.getInstance().addShutdownEvent(new ShutdownEvent() {
+
+            @Override
+            public long getMaxDuration() {
+                return 0;
+            }
+
+            @Override
+            public int getHookPriority() {
+                return 0;
+            }
+
+            @Override
+            public void onShutdown(final ShutdownRequest shutdownRequest) {
+                final ArrayList<Runnable> delayedWrites;
+                synchronized (DELAYEDWRITES) {
+                    delayedWrites = new ArrayList<Runnable>(DELAYEDWRITES.values());
+                    DELAYEDWRITES.clear();
+                }
+                if (delayedWrites.size() > 0) {
+                    final LogInterface logger = org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger();
+                    for (final Runnable delayedWrite : delayedWrites) {
+                        try {
+                            delayedWrite.run();
+                        } catch (final Throwable th) {
+                            logger.log(th);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public String toString() {
+                return "ShutdownEvent: ProcessDelayedWrites";
+            }
+        });
         ShutdownController.getInstance().addShutdownEvent(new ShutdownEvent() {
 
             @Override
@@ -115,7 +154,7 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
         });
     }
 
-    public static JsonKeyValueStorage createPrimitiveStorage(final File filePath, final String classPath, final Class<? extends ConfigInterface> configInterface, final Runnable saveCallback) {
+    public static JsonKeyValueStorage createPrimitiveStorage(final File filePath, final String classPath, final Class<? extends ConfigInterface> configInterface) {
         final CryptedStorage crypted = configInterface.getAnnotation(CryptedStorage.class);
         JsonKeyValueStorage ret = null;
         if (crypted != null) {
@@ -129,32 +168,37 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
 
                 urlClassPath = Application.class.getClassLoader().getResource(classPath + ".ejs");
             }
-            ret = new JsonKeyValueStorage(new File(filePath.getAbsolutePath() + ".ejs"), urlClassPath, false, key) {
-                @Override
-                public void requestSave() {
-                    super.requestSave();
-                    if (saveCallback != null) {
-                        saveCallback.run();
-                    }
-                }
-            };
+            ret = new JsonKeyValueStorage(new File(filePath.getAbsolutePath() + ".ejs"), urlClassPath, false, key);
         } else {
             URL urlClassPath = null;
             if (classPath != null) {
                 // Do not use Application.getResourceUrl here! it might return urls to local files instead of classpath urls
                 urlClassPath = Application.class.getClassLoader().getResource(classPath + ".json");
             }
-            ret = new JsonKeyValueStorage(new File(filePath.getAbsolutePath() + ".json"), urlClassPath, true, null) {
-                @Override
-                public void requestSave() {
-                    super.requestSave();
-                    if (saveCallback != null) {
-                        saveCallback.run();
-                    }
-                }
-            };
+            ret = new JsonKeyValueStorage(new File(filePath.getAbsolutePath() + ".json"), urlClassPath, true, null);
         }
         return ret;
+    }
+
+    protected boolean isDelayedWriteAllowed() {
+        return false;
+    }
+
+    public static void enqueueWrite(final Runnable run, final String ID, final boolean delayWrite) {
+        final boolean write;
+        synchronized (DELAYEDWRITES) {
+            final boolean isShuttingDown = ShutdownController.getInstance().isShuttingDown();
+            if (true || isShuttingDown || !delayWrite) {
+                DELAYEDWRITES.remove(ID);
+                write = true;
+            } else {
+                DELAYEDWRITES.put(ID, run);
+                write = false;
+            }
+        }
+        if (write) {
+            run.run();
+        }
     }
 
     /**
@@ -259,7 +303,7 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
         } catch (Throwable e) {
             e.printStackTrace();
         }
-        this.primitiveStorage = StorageHandler.createPrimitiveStorage(this.path, relativePath, configInterface, StorageHandler.SAVEDELAYER);
+        this.primitiveStorage = StorageHandler.createPrimitiveStorage(this.path, relativePath, configInterface);
         final CryptedStorage cryptedStorage = configInterface.getAnnotation(CryptedStorage.class);
         if (cryptedStorage != null) {
             this.validateKeys(cryptedStorage);
@@ -315,6 +359,12 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
         this.addStorageHandler(this, configInterface.getName(), storageID);
     }
 
+    protected void requestSave() {
+        if (!isDelayedWriteAllowed()) {
+            SAVEDELAYER.resetAndStart();
+        }
+    }
+
     /**
      * @param path2
      * @param configInterface2
@@ -344,7 +394,7 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
             }
         }
         this.storageID = storageID;
-        this.primitiveStorage = StorageHandler.createPrimitiveStorage(Application.getResource(classPath), classPath, configInterface, StorageHandler.SAVEDELAYER);
+        this.primitiveStorage = StorageHandler.createPrimitiveStorage(Application.getResource(classPath), classPath, configInterface);
         final CryptedStorage cryptedStorage = configInterface.getAnnotation(CryptedStorage.class);
         if (cryptedStorage != null) {
             this.validateKeys(cryptedStorage);
@@ -778,6 +828,13 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
         return this.saveInShutdownHookEnabled;
     }
 
+    protected int getParameterCount(final Method method) {
+        if (method != null) {
+            return method.getParameterTypes().length;
+        }
+        return 0;
+    }
+
     /**
      * @throws Throwable
      *
@@ -798,7 +855,7 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
                     // the
                     // later config file
                     if (keyGetterMap.containsKey(key)) {
-                        if (m.getName().equals(keyGetterMap.get(key).getName()) && m.getParameterCount() == keyGetterMap.get(key).getParameterCount()) {
+                        if (m.getName().equals(keyGetterMap.get(key).getName()) && getParameterCount(m) == getParameterCount(keyGetterMap.get(key))) {
                             // overridden method. that's ok
                             LoggerFactory.getDefaultLogger().info("Overridden Config Key found " + keyGetterMap.get(key) + "<-->" + m);
                             continue;
@@ -808,7 +865,7 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
                         continue;
                     }
                     keyGetterMap.put(key, m);
-                    if (m.getParameterTypes().length > 0) {
+                    if (getParameterCount(m) > 0) {
                         this.error(new InterfaceParseException("Getter " + m + " has parameters."));
                         keyGetterMap.remove(key);
                         continue;
@@ -858,7 +915,7 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
                     // the
                     // later config file
                     if (keyGetterMap.containsKey(key)) {
-                        if (m.getName().equals(keyGetterMap.get(key).getName()) && m.getParameterCount() == keyGetterMap.get(key).getParameterCount()) {
+                        if (m.getName().equals(keyGetterMap.get(key).getName()) && getParameterCount(m) == getParameterCount(keyGetterMap.get(key))) {
                             // overridden method. that's ok
                             LoggerFactory.getDefaultLogger().info("Overridden Config Key found " + keyGetterMap.get(key) + "<-->" + m);
                             continue;
@@ -868,7 +925,7 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
                         continue;
                     }
                     keyGetterMap.put(key, m);
-                    if (m.getParameterTypes().length > 0) {
+                    if (getParameterCount(m) > 0) {
                         this.error(new InterfaceParseException("Getter " + m + " has parameters."));
                         keyGetterMap.remove(key);
                         continue;
@@ -890,7 +947,7 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
                 } else if (methodName.startsWith("set")) {
                     key = methodName.substring(3);
                     if (keySetterMap.containsKey(key)) {
-                        if (m.getName().equals(keyGetterMap.get(key).getName()) && m.getParameterCount() == keyGetterMap.get(key).getParameterCount()) {
+                        if (m.getName().equals(keyGetterMap.get(key).getName()) && getParameterCount(m) == getParameterCount(keyGetterMap.get(key))) {
                             // overridden method. that's ok
                             LoggerFactory.getDefaultLogger().info("Overridden Config Key found " + keyGetterMap.get(key) + "<-->" + m);
                             continue;
@@ -900,7 +957,7 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
                         continue;
                     }
                     keySetterMap.put(key, m);
-                    if (m.getParameterTypes().length != 1) {
+                    if (getParameterCount(m) != 1) {
                         this.error(new InterfaceParseException("Setter " + m + " has !=1 parameters."));
                         keySetterMap.remove(key);
                         continue;

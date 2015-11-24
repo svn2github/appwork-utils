@@ -1,5 +1,5 @@
 /**
- * 
+ *
  * ====================================================================================================================================================
  *         "AppWork Utilities" License
  *         The "AppWork Utilities" will be called [The Product] from now on.
@@ -7,16 +7,16 @@
  *         Copyright (c) 2009-2015, AppWork GmbH <e-mail@appwork.org>
  *         Schwabacher Straße 117
  *         90763 Fürth
- *         Germany   
+ *         Germany
  * === Preamble ===
  *     This license establishes the terms under which the [The Product] Source Code & Binary files may be used, copied, modified, distributed, and/or redistributed.
  *     The intent is that the AppWork GmbH is able to provide their utilities library for free to non-commercial projects whereas commercial usage is only permitted after obtaining a commercial license.
  *     These terms apply to all files that have the [The Product] License header (IN the file), a <filename>.license or <filename>.info (like mylib.jar.info) file that contains a reference to this license.
- * 	
+ *
  * === 3rd Party Licences ===
  *     Some parts of the [The Product] use or reference 3rd party libraries and classes. These parts may have different licensing conditions. Please check the *.license and *.info files of included libraries
- *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header. 	
- * 	
+ *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header.
+ *
  * === Definition: Commercial Usage ===
  *     If anybody or any organization is generating income (directly or indirectly) by using [The Product] or if there's any commercial interest or aspect in what you are doing, we consider this as a commercial usage.
  *     If your use-case is neither strictly private nor strictly educational, it is commercial. If you are unsure whether your use-case is commercial or not, consider it as commercial or contact us.
@@ -25,9 +25,9 @@
  *     If you want to use [The Product] in a commercial way (see definition above), you have to obtain a paid license from AppWork GmbH.
  *     Contact AppWork for further details: <e-mail@appwork.org>
  * === Non-Commercial Usage ===
- *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the 
+ *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the
  *     "GNU Affero General Public License" (http://www.gnu.org/licenses/agpl-3.0.en.html).
- * 	
+ *
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
@@ -56,15 +56,20 @@ import org.appwork.utils.IO;
  *
  */
 public abstract class ListHandler<T> extends KeyHandler<T> {
-    public static final int              MIN_LIFETIME   = 10000;
-    private MinTimeWeakReference<Object> cache;
-    private final TypeRef<Object>        typeRef;
-    private final static Object          NULL           = new Object();
 
-    private File                         path;
-    private URL                          url;
-    private boolean                      useObjectCache = false;
-    private byte[]                       cryptKey       = null;
+    private interface ListHandlerCache<T> {
+        public T get();
+    }
+
+    public static final int                   MIN_LIFETIME   = 10000;
+    private volatile ListHandlerCache<Object> cache;
+    private final TypeRef<Object>             typeRef;
+    private final static Object               NULL           = new Object();
+
+    private File                              path;
+    private URL                               url;
+    private boolean                           useObjectCache = false;
+    private byte[]                            cryptKey       = null;
 
     /**
      * @param storageHandler
@@ -74,7 +79,6 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
         super(storageHandler, key);
         this.typeRef = new TypeRef<Object>(type) {
         };
-
     }
 
     @Override
@@ -84,7 +88,7 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
 
     protected Object getCachedValue() {
         if (this.useObjectCache && this.getStorageHandler().isObjectCacheEnabled()) {
-            final MinTimeWeakReference<Object> lCache = this.cache;
+            final ListHandlerCache<Object> lCache = this.cache;
             if (lCache != null) {
                 return lCache.get();
             }
@@ -141,12 +145,34 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
         }
     }
 
-    protected void putCachedValue(Object value) {
-        if (this.useObjectCache && this.getStorageHandler().isObjectCacheEnabled()) {
-            if (value == null) {
-                value = ListHandler.NULL;
-            }
-            this.cache = new MinTimeWeakReference<Object>(value, ListHandler.MIN_LIFETIME, "Storage " + this.getKey());
+    protected void putCachedValue(final Object value) {
+        final Object finalValue;
+        if (value == null) {
+            finalValue = ListHandler.NULL;
+        } else {
+            finalValue = value;
+        }
+        if (this.getStorageHandler().isDelayedWriteAllowed()) {
+            this.cache = new ListHandlerCache<Object>() {
+
+                @Override
+                public Object get() {
+                    return finalValue;
+                }
+
+            };
+        } else if (this.useObjectCache && this.getStorageHandler().isObjectCacheEnabled()) {
+            this.cache = new ListHandlerCache<Object>() {
+                final MinTimeWeakReference<Object> minTimeWeakReference = new MinTimeWeakReference<Object>(finalValue, ListHandler.MIN_LIFETIME, "Storage " + getKey());
+
+                @Override
+                public Object get() {
+                    return minTimeWeakReference.get();
+                }
+
+            };
+        } else {
+            this.cache = null;
         }
     }
 
@@ -250,7 +276,15 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
      * @param object
      */
     protected void write(final T object) {
-        JSonStorage.saveTo(this.path, this.cryptKey == null, this.cryptKey, JSonStorage.serializeToJson(object));
+        final String json = JSonStorage.serializeToJson(object);
+        final Runnable run = new Runnable() {
+
+            @Override
+            public void run() {
+                JSonStorage.saveTo(path, cryptKey == null, cryptKey, json);
+            }
+        };
+        StorageHandler.enqueueWrite(run, path.getAbsolutePath(), getStorageHandler().isDelayedWriteAllowed());
         this.url = null;
     }
 

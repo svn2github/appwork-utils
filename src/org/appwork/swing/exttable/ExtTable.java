@@ -1268,10 +1268,37 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
     @SuppressWarnings("unchecked")
     @Override
     protected boolean processKeyBinding(final KeyStroke stroke, final KeyEvent evt, final int condition, final boolean pressed) {
-
-        // ctrl + home or ctrl+end should scrol to top/bottom. If we would not
-        // catch these events here, they would change the table selection
-        // instead
+        if (evt.getModifiers() == 0 && evt.getKeyCode() == KeyEvent.VK_CONTEXT_MENU && !pressed) {
+            // show context menu (horizontally centered in first column)
+            final E contextObject = this.getModel().getObjectbyRow(this.getSelectedRow());
+            final List<E> selectedObjects = this.getModel().getSelectedObjects();
+            final ExtColumn<E> firstColumn = this.getModel().getExtColumnByModelIndex(0);
+            final Point point = new Point(firstColumn.getWidth() / 2, 0);
+            if (this.getSelectedRow() == -1) {
+                // find vertical position for no selection
+                point.y = this.getRowCount() * rowHeight;
+                if (point.y + rowHeight / 2 < this.getHeight()) {
+                    // center in next possible row (non-existent)
+                    point.y += rowHeight / 2;
+                } else if (point.y < this.getHeight()) {
+                    // center in remaining space not covered by rows
+                    point.y += (this.getHeight() - point.y) / 2;
+                } else {
+                    // center in table
+                    point.y = this.getHeight() / 2;
+                }
+            } else {
+                // find vertical position with rows selected (centered between first and last selected row)
+                int[] selectedRows = this.getSelectedRows();
+                point.y += (selectedRows[0] + (double) (selectedRows[selectedRows.length - 1] + 1 - selectedRows[0]) / 2) * rowHeight;
+            }
+            final Point absolutePoint = (Point) point.clone();
+            SwingUtilities.convertPointToScreen(absolutePoint, this);
+            final MouseEvent mouseEvent = new MouseEvent(this, MouseEvent.MOUSE_RELEASED, evt.getWhen(), 0, point.x, point.y, absolutePoint.x, absolutePoint.y, 1, true, MouseEvent.BUTTON3);
+            final JPopupMenu menu = this.onContextMenu(new JPopupMenu(), contextObject, selectedObjects, firstColumn, mouseEvent);
+            this.showPopup(menu, point);
+            return true;
+        }
         if (evt.isControlDown() && evt.getKeyCode() == KeyEvent.VK_HOME) {
             return false;
         }

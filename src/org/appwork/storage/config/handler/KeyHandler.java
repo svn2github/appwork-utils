@@ -583,6 +583,10 @@ public abstract class KeyHandler<RawClass> {
 
     }
 
+    protected boolean isDelayedWriteAllowed() {
+        return true;
+    }
+
     protected void initDefaults() throws Throwable {
         this.defaultValue = null;
     }

@@ -1,5 +1,5 @@
 /**
- * 
+ *
  * ====================================================================================================================================================
  *         "AppWork Utilities" License
  *         The "AppWork Utilities" will be called [The Product] from now on.
@@ -7,16 +7,16 @@
  *         Copyright (c) 2009-2015, AppWork GmbH <e-mail@appwork.org>
  *         Schwabacher Straße 117
  *         90763 Fürth
- *         Germany   
+ *         Germany
  * === Preamble ===
  *     This license establishes the terms under which the [The Product] Source Code & Binary files may be used, copied, modified, distributed, and/or redistributed.
  *     The intent is that the AppWork GmbH is able to provide their utilities library for free to non-commercial projects whereas commercial usage is only permitted after obtaining a commercial license.
  *     These terms apply to all files that have the [The Product] License header (IN the file), a <filename>.license or <filename>.info (like mylib.jar.info) file that contains a reference to this license.
- * 	
+ *
  * === 3rd Party Licences ===
  *     Some parts of the [The Product] use or reference 3rd party libraries and classes. These parts may have different licensing conditions. Please check the *.license and *.info files of included libraries
- *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header. 	
- * 	
+ *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header.
+ *
  * === Definition: Commercial Usage ===
  *     If anybody or any organization is generating income (directly or indirectly) by using [The Product] or if there's any commercial interest or aspect in what you are doing, we consider this as a commercial usage.
  *     If your use-case is neither strictly private nor strictly educational, it is commercial. If you are unsure whether your use-case is commercial or not, consider it as commercial or contact us.
@@ -25,9 +25,9 @@
  *     If you want to use [The Product] in a commercial way (see definition above), you have to obtain a paid license from AppWork GmbH.
  *     Contact AppWork for further details: <e-mail@appwork.org>
  * === Non-Commercial Usage ===
- *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the 
+ *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the
  *     "GNU Affero General Public License" (http://www.gnu.org/licenses/agpl-3.0.en.html).
- * 	
+ *
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
@@ -35,8 +35,6 @@ package org.appwork.storage.jackson;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.appwork.storage.JSONMapper;
 import org.appwork.storage.JSonMapperException;
@@ -56,21 +54,16 @@ import org.codehaus.jackson.type.TypeReference;
 
 /**
  * @author thomas
- * 
+ *
  */
 public class JacksonMapper implements JSONMapper {
 
     private final ObjectMapper mapper;
 
     public JacksonMapper() {
-
         mapper = new ObjectMapper(new ExtJsonFactory());
-
         mapper.getDeserializationConfig().set(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
     }
-
-    private List<JsonSerializer> serializer = new ArrayList<JsonSerializer>();
 
     /**
      * @param <T>
@@ -98,10 +91,9 @@ public class JacksonMapper implements JSONMapper {
      * @see org.appwork.storage.JSONMapper#objectToString(java.lang.Object)
      */
     @Override
-    public String objectToString(final Object o) throws JSonMapperException {
+    public String objectToString(final Object value) throws JSonMapperException {
         try {
-
-            return mapper.writeValueAsString(o);
+            return mapper.writeValueAsString(value);
         } catch (final JsonGenerationException e) {
             throw new JSonMapperException(e);
         } catch (final JsonMappingException e) {
@@ -127,9 +119,8 @@ public class JacksonMapper implements JSONMapper {
 
     /*
      * (non-Javadoc)
-     * 
-     * @see org.appwork.storage.JSONMapper#stringToObject(java.lang.String,
-     * org.appwork.storage.TypeRef)
+     *
+     * @see org.appwork.storage.JSONMapper#stringToObject(java.lang.String, org.appwork.storage.TypeRef)
      */
     @SuppressWarnings("unchecked")
     @Override
@@ -156,9 +147,8 @@ public class JacksonMapper implements JSONMapper {
 
     /*
      * (non-Javadoc)
-     * 
-     * @see org.appwork.storage.JSONMapper#convert(java.lang.Object,
-     * org.appwork.storage.TypeRef)
+     *
+     * @see org.appwork.storage.JSONMapper#convert(java.lang.Object, org.appwork.storage.TypeRef)
      */
     @Override
     public <T> T convert(Object jsonString, final TypeRef<T> type) throws JSonMapperException {
@@ -171,4 +161,16 @@ public class JacksonMapper implements JSONMapper {
         return mapper.convertValue(jsonString, tr);
     }
 
+    @Override
+    public byte[] objectToByteArray(final Object value) throws JSonMapperException {
+        try {
+            return mapper.writeValueAsBytes(value);
+        } catch (final JsonGenerationException e) {
+            throw new JSonMapperException(e);
+        } catch (final JsonMappingException e) {
+            throw new JSonMapperException(e);
+        } catch (final IOException e) {
+            throw new JSonMapperException(e);
+        }
+    }
 }

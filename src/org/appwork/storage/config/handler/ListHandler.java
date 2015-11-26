@@ -152,7 +152,7 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
         } else {
             finalValue = value;
         }
-        if (this.getStorageHandler().isDelayedWriteAllowed()) {
+        if (isDelayedWriteAllowed()) {
             this.cache = new ListHandlerCache<Object>() {
 
                 @Override
@@ -265,7 +265,7 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.storage.config.KeyHandler#validateValue(java.lang.Object)
      */
     @Override
@@ -276,7 +276,7 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
      * @param object
      */
     protected void write(final T object) {
-        final String json = JSonStorage.serializeToJson(object);
+        final byte[] json = JSonStorage.getMapper().objectToByteArray(object);
         final Runnable run = new Runnable() {
 
             @Override
@@ -284,7 +284,7 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
                 JSonStorage.saveTo(path, cryptKey == null, cryptKey, json);
             }
         };
-        StorageHandler.enqueueWrite(run, path.getAbsolutePath(), getStorageHandler().isDelayedWriteAllowed());
+        StorageHandler.enqueueWrite(run, path.getAbsolutePath(), isDelayedWriteAllowed());
         this.url = null;
     }
 

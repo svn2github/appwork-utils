@@ -88,13 +88,14 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
 
     protected static final DelayedRunnable               SAVEDELAYER   = new DelayedRunnable(5000, 30000) {
 
-                                                                           @Override
-                                                                           public void delayedrun() {
-                                                                               StorageHandler.saveAll();
-                                                                           }
-                                                                       };
+        @Override
+        public void delayedrun() {
+            StorageHandler.saveAll();
+        }
+    };
     static {
         ShutdownController.getInstance().addShutdownEvent(new ShutdownEvent() {
+            final LogInterface logger = org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger();
 
             @Override
             public long getMaxDuration() {
@@ -108,26 +109,30 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
 
             @Override
             public void onShutdown(final ShutdownRequest shutdownRequest) {
-                final ArrayList<Runnable> delayedWrites;
-                synchronized (DELAYEDWRITES) {
-                    delayedWrites = new ArrayList<Runnable>(DELAYEDWRITES.values());
-                    DELAYEDWRITES.clear();
-                }
-                if (delayedWrites.size() > 0) {
-                    final LogInterface logger = org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger();
-                    for (final Runnable delayedWrite : delayedWrites) {
-                        try {
-                            delayedWrite.run();
-                        } catch (final Throwable th) {
-                            logger.log(th);
+                while (true) {
+                    synchronized (DELAYEDWRITES) {
+                        final Iterator<Runnable> it = DELAYEDWRITES.values().iterator();
+                        if (it.hasNext()) {
+                            final Runnable next = it.next();
+                            it.remove();
+                            try {
+                                next.run();
+                            } catch (final Throwable th) {
+                                logger.log(th);
+                            }
+                        } else {
+                            return;
                         }
                     }
+
                 }
             }
 
             @Override
             public String toString() {
-                return "ShutdownEvent: ProcessDelayedWrites";
+                synchronized (DELAYEDWRITES) {
+                    return "ShutdownEvent: ProcessDelayedWrites num=" + DELAYEDWRITES.size();
+                }
             }
         });
         ShutdownController.getInstance().addShutdownEvent(new ShutdownEvent() {
@@ -156,24 +161,27 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
 
     public static JsonKeyValueStorage createPrimitiveStorage(final File filePath, final String classPath, final Class<? extends ConfigInterface> configInterface) {
         final CryptedStorage crypted = configInterface.getAnnotation(CryptedStorage.class);
-        JsonKeyValueStorage ret = null;
+        final JsonKeyValueStorage ret;
         if (crypted != null) {
             byte[] key = JSonStorage.KEY;
             if (crypted.key() != null) {
                 key = crypted.key();
             }
-            URL urlClassPath = null;
+            final URL urlClassPath;
             if (classPath != null) {
                 // Do not use Application.getResourceUrl here! it might return urls to local files instead of classpath urls
-
                 urlClassPath = Application.class.getClassLoader().getResource(classPath + ".ejs");
+            } else {
+                urlClassPath = null;
             }
             ret = new JsonKeyValueStorage(new File(filePath.getAbsolutePath() + ".ejs"), urlClassPath, false, key);
         } else {
-            URL urlClassPath = null;
+            final URL urlClassPath;
             if (classPath != null) {
                 // Do not use Application.getResourceUrl here! it might return urls to local files instead of classpath urls
                 urlClassPath = Application.class.getClassLoader().getResource(classPath + ".json");
+            } else {
+                urlClassPath = null;
             }
             ret = new JsonKeyValueStorage(new File(filePath.getAbsolutePath() + ".json"), urlClassPath, true, null);
         }
@@ -181,7 +189,7 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
     }
 
     protected boolean isDelayedWriteAllowed() {
-        return false;
+        return true;
     }
 
     public static void enqueueWrite(final Runnable run, final String ID, final boolean delayWrite) {
@@ -360,9 +368,7 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
     }
 
     protected void requestSave() {
-        if (!isDelayedWriteAllowed()) {
-            SAVEDELAYER.resetAndStart();
-        }
+        SAVEDELAYER.resetAndStart();
     }
 
     /**

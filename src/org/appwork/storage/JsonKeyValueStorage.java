@@ -265,7 +265,7 @@ public class JsonKeyValueStorage extends Storage {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.storage.Storage#getID()
      */
     @Override
@@ -518,10 +518,10 @@ public class JsonKeyValueStorage extends Storage {
         }
         final long lastSetMark = this.setMark.get();
         if (this.writeMark.getAndSet(lastSetMark) != lastSetMark) {
-            final String json;
             final boolean readL = getLock().readLock();
+            final byte[] json;
             try {
-                json = JSonStorage.getMapper().objectToString(getMap());
+                json = JSonStorage.getMapper().objectToByteArray(getMap());
                 writeMark.set(setMark.get());
             } finally {
                 getLock().readUnlock(readL);
@@ -553,7 +553,7 @@ public class JsonKeyValueStorage extends Storage {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.storage.Storage#size()
      */
     @Override

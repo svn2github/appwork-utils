@@ -88,11 +88,11 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
 
     protected static final DelayedRunnable               SAVEDELAYER   = new DelayedRunnable(5000, 30000) {
 
-                                                                           @Override
-                                                                           public void delayedrun() {
-                                                                               StorageHandler.saveAll();
-                                                                           }
-                                                                       };
+        @Override
+        public void delayedrun() {
+            StorageHandler.saveAll();
+        }
+    };
     static {
         ShutdownController.getInstance().addShutdownEvent(new ShutdownEvent() {
             final LogInterface logger = org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger();
@@ -189,20 +189,20 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
     }
 
     public static void enqueueWrite(final Runnable run, final String ID, final boolean delayWrite) {
-        final boolean write;
-        synchronized (DELAYEDWRITES) {
-            final boolean isShuttingDown = ShutdownController.getInstance().isShuttingDown();
-            if (true || isShuttingDown || !delayWrite) {
-                DELAYEDWRITES.remove(ID);
-                write = true;
-            } else {
-                DELAYEDWRITES.put(ID, run);
-                write = false;
-            }
-        }
-        if (write) {
-            run.run();
-        }
+        // final boolean write;
+        // synchronized (DELAYEDWRITES) {
+        // final boolean isShuttingDown = ShutdownController.getInstance().isShuttingDown();
+        // if (true || isShuttingDown || !delayWrite) {
+        // DELAYEDWRITES.remove(ID);
+        // write = true;
+        // } else {
+        // DELAYEDWRITES.put(ID, run);
+        // write = false;
+        // }
+        // }
+        // if (write) {
+        run.run();
+        // }
     }
 
     /**

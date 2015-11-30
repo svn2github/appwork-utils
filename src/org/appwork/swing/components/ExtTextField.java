@@ -81,7 +81,7 @@ public class ExtTextField extends JTextField implements CaretListener, FocusList
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see javax.swing.event.DocumentListener#changedUpdate(javax.swing.event. DocumentEvent)
      */
     @Override
@@ -140,7 +140,7 @@ public class ExtTextField extends JTextField implements CaretListener, FocusList
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.app.gui.copycutpaste.ContextMenuAdapter#getPopupMenu(org. appwork.app.gui.copycutpaste.CutAction,
      * org.appwork.app.gui.copycutpaste.CopyAction, org.appwork.app.gui.copycutpaste.PasteAction,
      * org.appwork.app.gui.copycutpaste.DeleteAction, org.appwork.app.gui.copycutpaste.SelectAction)
@@ -180,7 +180,7 @@ public class ExtTextField extends JTextField implements CaretListener, FocusList
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see javax.swing.event.DocumentListener#insertUpdate(javax.swing.event. DocumentEvent)
      */
     @Override
@@ -211,7 +211,7 @@ public class ExtTextField extends JTextField implements CaretListener, FocusList
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see javax.swing.event.DocumentListener#removeUpdate(javax.swing.event. DocumentEvent)
      */
     @Override
@@ -262,12 +262,11 @@ public class ExtTextField extends JTextField implements CaretListener, FocusList
 
     @Override
     public void setText(String t) {
-        String isText = getText();
 
-        if (StringUtils.equals(t == null ? "" : t, isText)) {
-            return;
-        }
         if (!this.isHelperEnabled()) {
+            if (StringUtils.equals(t == null ? "" : t, getText())) {
+                return;
+            }
             super.setText(t);
             return;
         }
@@ -276,6 +275,9 @@ public class ExtTextField extends JTextField implements CaretListener, FocusList
             try {
                 if (!this.hasFocus() && this.helpText != null && (t == null || t.length() == 0)) {
                     t = this.helpText;
+                }
+                if (StringUtils.equals(t == null ? "" : t, super.getText())) {
+                    return;
                 }
                 super.setText(t);
                 if (this.helpText != null) {

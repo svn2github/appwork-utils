@@ -96,7 +96,7 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent)
      */
     private int              changeDelay = 500;
@@ -175,7 +175,7 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.swing.event.AWTEventListener#onAWTEventAfterDispatch(java .awt.AWTEvent)
      */
     @Override
@@ -204,7 +204,7 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
      */
     @Override
@@ -214,7 +214,7 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.awt.event.MouseMotionListener#mouseDragged(java.awt.event.MouseEvent )
      */
     @Override
@@ -253,7 +253,7 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see java.awt.event.MouseListener#mouseExited(java.awt.event.MouseEvent)
      */
     @Override
@@ -267,7 +267,7 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.awt.event.MouseMotionListener#mouseMoved(java.awt.event.MouseEvent)
      */
     @Override
@@ -356,7 +356,7 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.beans.PropertyChangeListener#propertyChange(java.beans. PropertyChangeEvent)
      */
     @Override
@@ -535,9 +535,9 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
     protected void showTooltip() {
         ToolTipController.this.hideTooltip();
         final JComponent aC = ToolTipController.this.activeComponent;
-        boolean focusable = aC.isFocusable();
-        boolean hasFocus = aC.hasFocus();
-        boolean tooltipWithoutFocusEnabled = ((ToolTipHandler) aC).isTooltipWithoutFocusEnabled();
+        boolean focusable = aC != null && aC.isFocusable();
+        boolean hasFocus = aC != null && aC.hasFocus();
+        boolean tooltipWithoutFocusEnabled = aC != null && ((ToolTipHandler) aC).isTooltipWithoutFocusEnabled();
         boolean tooltipVisible = ToolTipController.this.isTooltipVisible();
         boolean mouseOverComponent = ToolTipController.this.mouseOverComponent(MouseInfo.getPointerInfo().getLocation());
 
@@ -579,7 +579,7 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.awt.event.WindowFocusListener#windowGainedFocus(java.awt.event. WindowEvent)
      */
     @Override
@@ -590,7 +590,7 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.awt.event.WindowFocusListener#windowLostFocus(java.awt.event.WindowEvent )
      */
     @Override
@@ -601,7 +601,7 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see java.awt.event.MouseListener#mousePressed(java.awt.event.MouseEvent)
      */
     @Override
@@ -612,7 +612,7 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.awt.event.MouseListener#mouseReleased(java.awt.event.MouseEvent)
      */
     @Override

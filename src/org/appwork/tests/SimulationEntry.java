@@ -10,7 +10,7 @@
  *         Germany
  * === Preamble ===
  *     This license establishes the terms under which the [The Product] Source Code & Binary files may be used, copied, modified, distributed, and/or redistributed.
- *     The intent is that the AppWork GmbH is able to provide their utilities library for free to non-commercial projects whereas commercial usage is only permitted after obtaining a commercial license.
+ *     The intent is that the AppWork GmbH is able to provide  their utilities library for free to non-commercial projects whereas commercial usage is only permitted after obtaining a commercial license.
  *     These terms apply to all files that have the [The Product] License header (IN the file), a <filename>.license or <filename>.info (like mylib.jar.info) file that contains a reference to this license.
  *
  * === 3rd Party Licences ===
@@ -19,11 +19,11 @@
  *
  * === Definition: Commercial Usage ===
  *     If anybody or any organization is generating income (directly or indirectly) by using [The Product] or if there's any commercial interest or aspect in what you are doing, we consider this as a commercial usage.
- *     If your use-case is neither strictly private nor strictly educational, it is commercial. If you are unsure whether your use-case is commercial or not, consider it as commercial or contact us.
+ *     If your use-case is neither strictly private nor strictly educational, it is commercial. If you are unsure whether your use-case is commercial or not, consider it as commercial or contact as.
  * === Dual Licensing ===
  * === Commercial Usage ===
  *     If you want to use [The Product] in a commercial way (see definition above), you have to obtain a paid license from AppWork GmbH.
- *     Contact AppWork for further details: <e-mail@appwork.org>
+ *     Contact AppWork for further details: e-mail@appwork.org
  * === Non-Commercial Usage ===
  *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the
  *     "GNU Affero General Public License" (http://www.gnu.org/licenses/agpl-3.0.en.html).
@@ -31,87 +31,45 @@
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
-package org.appwork.app.launcher.parameterparser;
-
-import org.appwork.utils.event.DefaultEvent;
+package org.appwork.tests;
 
 /**
- * This event contains information about a startup parameter kombination like -switch p1 p2 ...
- *
- * @author $Author: unknown$
- *
+ * @author thomas
+ * @date 26.11.2015
  *
  */
-public class CommandSwitch extends DefaultEvent {
-    /**
-     * the parameters that follow the {@link #switchCommand} without leading -
-     */
-    private final String[] parameters;
+public class SimulationEntry {
+
+    private String key;
 
     /**
-     * command. given at startup with --command or -command
+     * @param key
      */
-    private final String   switchCommand;
-
-    /**
-     * @param switchCommand
-     * @param array
-     */
-    public CommandSwitch(final String switchCommand, final String[] array) {
-        super(null);
-        this.switchCommand = switchCommand;
-        parameters = array;
+    public SimulationEntry(String key) {
+        this.key = key;
     }
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see java.lang.Object#toString()
      */
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("-");
-        sb.append(switchCommand);
 
-        for (String p : parameters) {
-            if (sb.length() > 0) {
-                sb.append(" ");
-            }
-            sb.append("\"");
-            sb.append(p);
-            sb.append("\"");
-        }
-        return sb.toString();
-    }
-
-    /**
-     * @return the {@link CommandSwitch#parameters}
-     * @see CommandSwitch#parameters
-     */
-    public String[] getParameters() {
-        return parameters;
-    }
-
-    /**
-     * @return the {@link CommandSwitch#switchCommand}
-     * @see CommandSwitch#switchCommand
-     */
-    public String getSwitchCommand() {
-        return switchCommand;
+        return "-Dtest_sim_" + key;
     }
 
     /**
      * @param string
      * @return
      */
-    public boolean hasParameter(final String string) {
-        for (final String p : getParameters()) {
-            if (p.equals(string)) {
-                return true;
-            }
+    public static SimulationEntry create(String key) {
+
+        if (!System.getProperties().containsKey("test_sim_" + key)) {
+            return null;
         }
-        return false;
+        return new SimulationEntry(key);
     }
 
 }

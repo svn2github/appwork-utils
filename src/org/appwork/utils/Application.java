@@ -390,14 +390,16 @@ public class Application {
             return Application.ROOT;
         }
         String system = System.getProperty("ROOT");
+
         if (system != null) {
+            System.out.println("Set Root " + system);
             ROOT = system;
             return ROOT;
         }
         final String key = "awuhome" + Application.APP_FOLDER;
         final String sysProp = System.getProperty(key);
         if (sysProp != null) {
-
+            System.out.println("Set Root " + sysProp);
             Application.ROOT = sysProp;
             return Application.ROOT;
         }
@@ -419,6 +421,7 @@ public class Application {
             }
         } else {
             Application.ROOT = System.getProperty("user.home") + System.getProperty("file.separator") + Application.APP_FOLDER;
+
             System.out.println("Application Root: " + Application.ROOT + " (DEV) " + rootOfClazz);
         }
         // do not use Log.L here. this might be null
@@ -611,7 +614,7 @@ public class Application {
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Java 1.6 Update 18 has a serious bug in garbage collector!");
             /*
              * java 1.6 update 18 has a bug in garbage collector, causes java crashes
-             * 
+             *
              * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6847956
              */
             return true;
@@ -634,7 +637,7 @@ public class Application {
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("freezing AppKit thread bug");
             /*
              * http://bugs.java.com/view_bug.do?bug_id=8025588
-             * 
+             *
              * Frozen AppKit thread
              */
             return true;
@@ -702,7 +705,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.io.OutputStream#write(int)
          */
         @Override
@@ -726,7 +729,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.io.OutputStream#write(byte[])
          */
         @Override
@@ -749,7 +752,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.io.OutputStream#write(byte[], int, int)
          */
         @Override
@@ -773,7 +776,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.io.OutputStream#flush()
          */
         @Override
@@ -796,7 +799,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.io.OutputStream#close()
          */
         @Override

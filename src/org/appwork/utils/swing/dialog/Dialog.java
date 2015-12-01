@@ -1,5 +1,5 @@
 /**
- * 
+ *
  * ====================================================================================================================================================
  *         "AppWork Utilities" License
  *         The "AppWork Utilities" will be called [The Product] from now on.
@@ -7,16 +7,16 @@
  *         Copyright (c) 2009-2015, AppWork GmbH <e-mail@appwork.org>
  *         Schwabacher Straße 117
  *         90763 Fürth
- *         Germany   
+ *         Germany
  * === Preamble ===
  *     This license establishes the terms under which the [The Product] Source Code & Binary files may be used, copied, modified, distributed, and/or redistributed.
  *     The intent is that the AppWork GmbH is able to provide their utilities library for free to non-commercial projects whereas commercial usage is only permitted after obtaining a commercial license.
  *     These terms apply to all files that have the [The Product] License header (IN the file), a <filename>.license or <filename>.info (like mylib.jar.info) file that contains a reference to this license.
- * 	
+ *
  * === 3rd Party Licences ===
  *     Some parts of the [The Product] use or reference 3rd party libraries and classes. These parts may have different licensing conditions. Please check the *.license and *.info files of included libraries
- *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header. 	
- * 	
+ *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header.
+ *
  * === Definition: Commercial Usage ===
  *     If anybody or any organization is generating income (directly or indirectly) by using [The Product] or if there's any commercial interest or aspect in what you are doing, we consider this as a commercial usage.
  *     If your use-case is neither strictly private nor strictly educational, it is commercial. If you are unsure whether your use-case is commercial or not, consider it as commercial or contact us.
@@ -25,9 +25,9 @@
  *     If you want to use [The Product] in a commercial way (see definition above), you have to obtain a paid license from AppWork GmbH.
  *     Contact AppWork for further details: <e-mail@appwork.org>
  * === Non-Commercial Usage ===
- *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the 
+ *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the
  *     "GNU Affero General Public License" (http://www.gnu.org/licenses/agpl-3.0.en.html).
- * 	
+ *
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
@@ -48,7 +48,6 @@ import org.appwork.uio.UIOManager;
 import org.appwork.utils.BinaryLogic;
 import org.appwork.utils.interfaces.ValueConverter;
 import org.appwork.utils.locale._AWU;
-
 import org.appwork.utils.swing.EDTRunner;
 
 /**
@@ -56,36 +55,36 @@ import org.appwork.utils.swing.EDTRunner;
  */
 public class Dialog {
     /**
-     * 
+     *
      */
     public static final String  LASTSELECTION                       = "LASTSELECTION_";
 
     /**
-     * 
+     *
      */
     public static final String  FILECHOOSER                         = "FILECHOOSER";
 
     /**
      * Icon Key for Error Icons
-     * 
+     *
      * @see org.appwork.utils.ImageProvider.ImageProvider#getIcon(String, int, int, boolean)
      */
     public static final String  ICON_ERROR                          = "dialog/error";
     /**
      * Icon Key for Information Icons
-     * 
+     *
      * @see org.appwork.utils.ImageProvider.ImageProvider#getIcon(String, int, int, boolean)
      */
     public static final String  ICON_INFO                           = "dialog/info";
     /**
      * Icon Key for Question Icons
-     * 
+     *
      * @see org.appwork.utils.ImageProvider.ImageProvider#getIcon(String, int, int, boolean)
      */
     public static final String  ICON_QUESTION                       = "dialog/help";
     /**
      * Icon Key for Warning Icons
-     * 
+     *
      * @see org.appwork.utils.ImageProvider.ImageProvider#getIcon(String, int, int, boolean)
      */
     public static final String  ICON_WARNING                        = "dialog/warning";
@@ -95,7 +94,7 @@ public class Dialog {
     private static final Dialog INSTANCE                            = new Dialog();
 
     /**
-     * 
+     *
      * @deprecated Use org.appwork.uio.UIOManager Constants instead
      */
     @Deprecated()
@@ -125,7 +124,7 @@ public class Dialog {
     public static final int     RETURN_OK                           = 1 << 1;
     /**
      * If the dialog has been skipped due to previously selected {@link #STYLE_SHOW_DO_NOT_DISPLAY_AGAIN} Option, this return flag is set.
-     * 
+     *
      * @see #RETURN_DONT_SHOW_AGAIN
      */
     public static final int     RETURN_SKIPPED_BY_DONT_SHOW         = 1 << 4;
@@ -141,7 +140,7 @@ public class Dialog {
 
     /**
      * @return
-     * 
+     *
      */
     public static Dialog I() {
         return Dialog.INSTANCE;
@@ -190,7 +189,7 @@ public class Dialog {
 
     /**
      * tries to find some special markers in the text and selects an appropriate icon
-     * 
+     *
      * @param text
      * @return
      */
@@ -213,7 +212,7 @@ public class Dialog {
 
     /**
      * Return the singleton instance of Dialog
-     * 
+     *
      * @return
      */
     public static Dialog getInstance() {
@@ -292,7 +291,7 @@ public class Dialog {
     }
 
     /**
-     * 
+     *
      */
     public void initLaf() {
         synchronized (this) {
@@ -331,7 +330,7 @@ public class Dialog {
     }
 
     /**
-     * 
+     *
      * @param flag
      *            see {@link Dialog} - Flags. There are various flags to customize the dialog
      * @param title
@@ -361,7 +360,7 @@ public class Dialog {
     }
 
     /**
-     * 
+     *
      * @param flag
      *            see {@link Dialog} - Flags. There are various flags to customize the dialog
      * @param title
@@ -401,7 +400,7 @@ public class Dialog {
     }
 
     /**
-     * 
+     *
      * @param flag
      *            see {@link Dialog} - Flags. There are various flags to customize the dialog
      * @param question
@@ -415,7 +414,7 @@ public class Dialog {
     }
 
     /**
-     * 
+     *
      * @param flag
      *            see {@link Dialog} - Flags. There are various flags to customize the dialog
      * @param title
@@ -432,7 +431,7 @@ public class Dialog {
 
     /**
      * Keep this method for webinstaller compatibility reasons. People cannot uninstall if this method is missing
-     * 
+     *
      * @param flag
      * @param title
      * @param message
@@ -449,7 +448,7 @@ public class Dialog {
 
     /**
      * Requests a ConfirmDialog
-     * 
+     *
      * @param flag
      *            see {@link Dialog} - Flags. There are various flags to customize the dialog
      * @param title
@@ -480,7 +479,7 @@ public class Dialog {
 
     /**
      * note: showdialog must not call init itself!!
-     * 
+     *
      * @param <T>
      * @param dialog
      * @return
@@ -501,7 +500,7 @@ public class Dialog {
      * @throws DialogClosedException
      * @throws DialogCanceledException
      */
-    protected <T> T showDialogRaw(final AbstractDialog<T> dialog) throws DialogClosedException, DialogCanceledException {
+    public <T> T showDialogRaw(final AbstractDialog<T> dialog) throws DialogClosedException, DialogCanceledException {
         if (dialog == null) {
             return null;
         }
@@ -653,7 +652,7 @@ public class Dialog {
     }
 
     /**
-     * 
+     *
      * @param flag
      *            see {@link Dialog} - Flags. There are various flags to customize the dialog flag
      * @param question
@@ -670,7 +669,7 @@ public class Dialog {
 
     /**
      * Requests in Inputdialog.
-     * 
+     *
      * @param flag
      *            see {@link Dialog} - Flags. There are various flags to customize the dialog
      * @param title
@@ -695,7 +694,7 @@ public class Dialog {
     }
 
     /**
-     * 
+     *
      * @param message
      *            The Dialog is able to show a message to the user
      * @return
@@ -707,7 +706,7 @@ public class Dialog {
     }
 
     /**
-     * 
+     *
      * @param flag
      *            see {@link Dialog} - Flags. There are various flags to customize the dialog
      * @param message
@@ -722,7 +721,7 @@ public class Dialog {
     }
 
     /**
-     * 
+     *
      * @param flag
      *            see {@link Dialog} - Flags. There are various flags to customize the dialog
      * @param title
@@ -743,7 +742,7 @@ public class Dialog {
     }
 
     /**
-     * 
+     *
      * @param message
      *            The Dialog is able to show a message to the user
      * @throws DialogCanceledException
@@ -754,7 +753,7 @@ public class Dialog {
     }
 
     /**
-     * 
+     *
      * @param title
      *            The Dialog's Window Title
      * @param message
@@ -767,7 +766,7 @@ public class Dialog {
     }
 
     /**
-     * 
+     *
      * @param flag
      *            see {@link Dialog} - Flags. There are various flags to customize the dialog flag
      * @param question
@@ -784,7 +783,7 @@ public class Dialog {
 
     /**
      * Requests in MultiInputdialog.
-     * 
+     *
      * @param flag
      *            see {@link Dialog} - Flags. There are various flags to customize the dialog
      * @param title
@@ -809,7 +808,7 @@ public class Dialog {
     }
 
     /**
-     * 
+     *
      * @param message
      *            The Dialog is able to show a message to the user
      * @return
@@ -821,7 +820,7 @@ public class Dialog {
     }
 
     /**
-     * 
+     *
      * @param title
      *            The Dialog's Window Title
      * @param message
@@ -836,7 +835,7 @@ public class Dialog {
     }
 
     /**
-     * 
+     *
      * @param flag
      *            see {@link Dialog} - Flags. There are various flags to customize the dialog flag
      * @param question
@@ -861,7 +860,7 @@ public class Dialog {
 
     /**
      * Requests in ValueDialog.
-     * 
+     *
      * @param flag
      *            see {@link Dialog} - Flags. There are various flags to customize the dialog
      * @param title

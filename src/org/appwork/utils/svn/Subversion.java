@@ -1,5 +1,5 @@
 /**
- * 
+ *
  * ====================================================================================================================================================
  *         "AppWork Utilities" License
  *         The "AppWork Utilities" will be called [The Product] from now on.
@@ -7,16 +7,16 @@
  *         Copyright (c) 2009-2015, AppWork GmbH <e-mail@appwork.org>
  *         Schwabacher Straße 117
  *         90763 Fürth
- *         Germany   
+ *         Germany
  * === Preamble ===
  *     This license establishes the terms under which the [The Product] Source Code & Binary files may be used, copied, modified, distributed, and/or redistributed.
  *     The intent is that the AppWork GmbH is able to provide their utilities library for free to non-commercial projects whereas commercial usage is only permitted after obtaining a commercial license.
  *     These terms apply to all files that have the [The Product] License header (IN the file), a <filename>.license or <filename>.info (like mylib.jar.info) file that contains a reference to this license.
- * 	
+ *
  * === 3rd Party Licences ===
  *     Some parts of the [The Product] use or reference 3rd party libraries and classes. These parts may have different licensing conditions. Please check the *.license and *.info files of included libraries
- *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header. 	
- * 	
+ *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header.
+ *
  * === Definition: Commercial Usage ===
  *     If anybody or any organization is generating income (directly or indirectly) by using [The Product] or if there's any commercial interest or aspect in what you are doing, we consider this as a commercial usage.
  *     If your use-case is neither strictly private nor strictly educational, it is commercial. If you are unsure whether your use-case is commercial or not, consider it as commercial or contact us.
@@ -25,9 +25,9 @@
  *     If you want to use [The Product] in a commercial way (see definition above), you have to obtain a paid license from AppWork GmbH.
  *     Contact AppWork for further details: <e-mail@appwork.org>
  * === Non-Commercial Usage ===
- *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the 
+ *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the
  *     "GNU Affero General Public License" (http://www.gnu.org/licenses/agpl-3.0.en.html).
- * 	
+ *
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
@@ -45,7 +45,6 @@ import org.appwork.exceptions.WTFException;
 import org.appwork.utils.Application;
 import org.appwork.utils.Files;
 import org.appwork.utils.IO;
-
 import org.tmatesoft.svn.core.SVNCancelException;
 import org.tmatesoft.svn.core.SVNCommitInfo;
 import org.tmatesoft.svn.core.SVNDepth;
@@ -71,6 +70,7 @@ import org.tmatesoft.svn.core.io.diff.SVNDeltaGenerator;
 import org.tmatesoft.svn.core.wc.ISVNCommitParameters;
 import org.tmatesoft.svn.core.wc.ISVNEventHandler;
 import org.tmatesoft.svn.core.wc.ISVNInfoHandler;
+import org.tmatesoft.svn.core.wc.ISVNStatusHandler;
 import org.tmatesoft.svn.core.wc.SVNClientManager;
 import org.tmatesoft.svn.core.wc.SVNCommitClient;
 import org.tmatesoft.svn.core.wc.SVNCommitPacket;
@@ -78,6 +78,7 @@ import org.tmatesoft.svn.core.wc.SVNEvent;
 import org.tmatesoft.svn.core.wc.SVNEventAction;
 import org.tmatesoft.svn.core.wc.SVNInfo;
 import org.tmatesoft.svn.core.wc.SVNRevision;
+import org.tmatesoft.svn.core.wc.SVNStatus;
 import org.tmatesoft.svn.core.wc.SVNStatusClient;
 import org.tmatesoft.svn.core.wc.SVNStatusType;
 import org.tmatesoft.svn.core.wc.SVNUpdateClient;
@@ -279,9 +280,12 @@ public class Subversion implements ISVNEventHandler {
             @Override
             protected SVNCommitInfo run() throws SVNException {
                 getWCClient().doAdd(dstPath, true, false, true, SVNDepth.INFINITY, false, false);
-                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Create CommitPacket");
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Create CommitPacket");
                 final SVNCommitPacket packet = getCommitClient().doCollectCommitItems(new File[] { dstPath }, false, false, SVNDepth.INFINITY, null);
-                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Transfer Package");
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Transfer Package");
+                if (packet == SVNCommitPacket.EMPTY) {
+                    return null;
+                }
                 return getCommitClient().doCommit(packet, true, false, message, null);
             }
 
@@ -575,31 +579,31 @@ public class Subversion implements ISVNEventHandler {
             /*
              * The item is scheduled for addition.
              */
-                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("A     " + event.getFile());
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("A     " + event.getFile());
             return;
         } else if (action == SVNEventAction.COPY) {
             /*
              * The item is scheduled for addition with history (copied, in other words).
              */
-                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("A  +  " + event.getFile());
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("A  +  " + event.getFile());
             return;
         } else if (action == SVNEventAction.DELETE) {
             /*
              * The item is scheduled for deletion.
              */
-                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("D     " + event.getFile());
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("D     " + event.getFile());
             return;
         } else if (action == SVNEventAction.LOCKED) {
             /*
              * The item is locked.
              */
-                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("L     " + event.getFile());
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("L     " + event.getFile());
             return;
         } else if (action == SVNEventAction.LOCK_FAILED) {
             /*
              * Locking operation failed.
              */
-                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("failed to lock    " + event.getFile());
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("failed to lock    " + event.getFile());
             return;
         }
 
@@ -618,7 +622,7 @@ public class Subversion implements ISVNEventHandler {
         } else if (action == SVNEventAction.UPDATE_UPDATE) {
             /*
              * Find out in details what state the item is (after having been updated).
-             *
+             * 
              * Gets the status of file/directory item contents. It is SVNStatusType who contains information on the state of an item.
              */
             final SVNStatusType contentsStatus = event.getContentsStatus();
@@ -645,14 +649,14 @@ public class Subversion implements ISVNEventHandler {
             /*
              * for externals definitions
              */
-                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Fetching external item into '" + event.getFile().getAbsolutePath() + "'");
-                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("External at revision " + event.getRevision());
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Fetching external item into '" + event.getFile().getAbsolutePath() + "'");
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("External at revision " + event.getRevision());
             return;
         } else if (action == SVNEventAction.UPDATE_COMPLETED) {
             /*
              * Working copy update is completed. Prints out the revision.
              */
-                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("At revision " + event.getRevision());
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("At revision " + event.getRevision());
             return;
         }
 
@@ -691,7 +695,7 @@ public class Subversion implements ISVNEventHandler {
             lockLabel = "B";
         }
         if (pathChangeType != nullString || propertiesChangeType != nullString || lockLabel != nullString) {
-                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine(pathChangeType + propertiesChangeType + lockLabel + "       " + event.getFile());
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine(pathChangeType + propertiesChangeType + lockLabel + "       " + event.getFile());
         }
 
         /*
@@ -699,13 +703,13 @@ public class Subversion implements ISVNEventHandler {
          */
 
         if (action == SVNEventAction.COMMIT_MODIFIED) {
-                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Sending   " + event.getFile());
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Sending   " + event.getFile());
         } else if (action == SVNEventAction.COMMIT_DELETED) {
-                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Deleting   " + event.getFile());
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Deleting   " + event.getFile());
         } else if (action == SVNEventAction.COMMIT_REPLACED) {
-                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Replacing   " + event.getFile());
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Replacing   " + event.getFile());
         } else if (action == SVNEventAction.COMMIT_DELTA_SENT) {
-                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Transmitting file data....");
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Transmitting file data....");
         } else if (action == SVNEventAction.COMMIT_ADDED) {
             /*
              * Gets the MIME-type of the item.
@@ -715,9 +719,9 @@ public class Subversion implements ISVNEventHandler {
                 /*
                  * If the item is a binary file
                  */
-                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Adding  (bin)  " + event.getFile());
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Adding  (bin)  " + event.getFile());
             } else {
-                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Adding         " + event.getFile());
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Adding         " + event.getFile());
             }
         }
 
@@ -861,7 +865,7 @@ public class Subversion implements ISVNEventHandler {
                             try {
                                 Subversion.this.resolveConflictedFile(info, info.getFile(), handler);
                                 Subversion.this.getWCClient().doResolve(info.getFile(), SVNDepth.INFINITY, null);
-                                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine(file + " resolved");
+                                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine(file + " resolved");
                             } catch (final Exception e) {
                                 e.printStackTrace();
                             }
@@ -875,23 +879,47 @@ public class Subversion implements ISVNEventHandler {
 
     }
 
+    public void revert(final File dstPath) throws SVNException {
+        revert(dstPath, false);
+    }
+
     /**
      * Reverts the file or directory
      *
      * @param dstPath
      * @throws SVNException
      */
-    public void revert(final File dstPath) throws SVNException {
+    public void revert(final File dstPath, final boolean deleteUnversionedFiles) throws SVNException {
         new LocaleRunnable<Void, SVNException>() {
 
             @Override
             protected Void run() throws SVNException {
                 try {
+                    if (deleteUnversionedFiles) {
+                        getStatusClient().doStatus(dstPath, SVNRevision.HEAD, SVNDepth.INFINITY, false, true, false, false, new ISVNStatusHandler() {
 
+                            @Override
+                            public void handleStatus(SVNStatus status) throws SVNException {
+                                SVNStatusType statusType = status.getContentsStatus();
+                                if (statusType == SVNStatusType.STATUS_NONE) {
+                                    try {
+                                        Files.deleteRecursiv(status.getFile(), true);
+                                    } catch (IOException e) {
+                                        throw new WTFException(e);
+                                    }
+                                }
+
+                            }
+                        }, null);
+                    }
                     getWCClient().doRevert(new File[] { dstPath }, SVNDepth.INFINITY, null);
-                } catch (final Exception e) {
-                    e.printStackTrace();
+                } catch (final RuntimeException e) {
                     cleanUp(dstPath, false);
+                    throw e;
+                } catch (final SVNException e) {
+
+                    cleanUp(dstPath, false);
+                    throw e;
                 }
                 return null;
             }
@@ -1018,7 +1046,7 @@ public class Subversion implements ISVNEventHandler {
                     // depth, includeIgnored, makeParents);
                     // long ret = updateClient.doCheckout(svnurl, file, frevision,
                     // frevision, i, true);
-                          org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("SVN Update at " + file + " to Revision " + frevision + " depths:" + fi + "  " + svnurl);
+                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("SVN Update at " + file + " to Revision " + frevision + " depths:" + fi + "  " + svnurl);
                     long ret = updateClient.doUpdate(file, frevision, fi, false, true);
                     if (ret < 0) {
                         // no working copy?
@@ -1027,12 +1055,12 @@ public class Subversion implements ISVNEventHandler {
                     }
                     return ret;
                 } catch (final Exception e) {
-                          org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info(e.getMessage());
-                          org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("SVN Checkout at " + file + "  " + svnurl);
+                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info(e.getMessage());
+                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("SVN Checkout at " + file + "  " + svnurl);
                     return updateClient.doCheckout(svnurl, file, frevision, frevision, fi, true);
 
                 } finally {
-                          org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("SVN Update finished");
+                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("SVN Update finished");
                 }
 
             }

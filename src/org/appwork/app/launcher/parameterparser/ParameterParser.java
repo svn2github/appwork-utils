@@ -33,12 +33,12 @@
  * ==================================================================================================================================================== */
 package org.appwork.app.launcher.parameterparser;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 
-import org.appwork.utils.Application;
 import org.appwork.utils.IO;
 import org.appwork.utils.event.Eventsender;
 import org.appwork.utils.logging2.LogSource;
@@ -62,6 +62,7 @@ public class ParameterParser {
     private final Eventsender<CommandSwitchListener, CommandSwitch> eventSender;
     private HashMap<String, CommandSwitch>                          map;
     private LogSource                                               logger;
+    private ArrayList<CommandSwitch>                                list;
 
     public ParameterParser(final String[] args) {
         logger = LoggerFactory.I().getLogger(getClass().getSimpleName());
@@ -124,20 +125,20 @@ public class ParameterParser {
      *            TODO
      * @return
      */
-    public ParameterParser parse(final String commandFilePath) {
+    public ParameterParser parse(final File file) {
 
         map = new HashMap<String, CommandSwitch>();
-
-        if (commandFilePath != null && Application.getResource(commandFilePath).exists()) {
+        list = new ArrayList<CommandSwitch>();
+        this.parse(rawArguments);
+        if (file != null && file.exists()) {
 
             try {
-                this.parse(ShellParser.splitCommandString(IO.readFileToString(Application.getResource(commandFilePath)).replaceAll("[\r\n]", " ")).toArray(new String[] {}));
+                this.parse(ShellParser.splitCommandString(IO.readFileToString(file).replaceAll("[\r\n]", " ")).toArray(new String[] {}));
             } catch (final IOException e) {
                 logger.log(e);
             }
         }
 
-        this.parse(rawArguments);
         return this;
     }
 
@@ -160,6 +161,7 @@ public class ParameterParser {
                     }
                     getEventSender().fireEvent(cs = new CommandSwitch(switchCommand, params.toArray(new String[] {})));
                     map.put(switchCommand, cs);
+                    list.add(cs);
                 }
                 switchCommand = var;
 
@@ -175,7 +177,16 @@ public class ParameterParser {
             }
             getEventSender().fireEvent(cs = new CommandSwitch(switchCommand, params.toArray(new String[] {})));
             map.put(switchCommand, cs);
+            list.add(cs);
         }
+    }
+
+    public ArrayList<CommandSwitch> getList() {
+        return list;
+    }
+
+    public void setList(ArrayList<CommandSwitch> list) {
+        this.list = list;
     }
 
 }

@@ -67,6 +67,7 @@ import java.util.zip.GZIPInputStream;
 
 import org.appwork.net.protocol.http.HTTPConstants;
 import org.appwork.scheduler.DelayedRunnable;
+import org.appwork.tests.SimulationEntry;
 import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.net.Base64InputStream;
@@ -174,10 +175,10 @@ public class HTTPConnectionImpl implements HTTPConnection {
     /**
      * Keep-Alive stuff
      */
-    protected static final HashMap<String, LinkedList<HTTPKeepAliveSocket>>        KEEPALIVEPOOL    = new HashMap<String, LinkedList<HTTPKeepAliveSocket>>();
-    protected static final WeakHashMap<SocketStreamInterface, HTTPKeepAliveSocket> KEEPALIVESOCKETS = new WeakHashMap<SocketStreamInterface, HTTPKeepAliveSocket>();
-    protected static final Object                                                  LOCK             = new Object();
-    protected static final DelayedRunnable                                         keepAliveCleanup = new DelayedRunnable(10000, 30000) {
+    protected static final HashMap<String, LinkedList<HTTPKeepAliveSocket>>        KEEPALIVEPOOL                = new HashMap<String, LinkedList<HTTPKeepAliveSocket>>();
+    protected static final WeakHashMap<SocketStreamInterface, HTTPKeepAliveSocket> KEEPALIVESOCKETS             = new WeakHashMap<SocketStreamInterface, HTTPKeepAliveSocket>();
+    protected static final Object                                                  LOCK                         = new Object();
+    protected static final DelayedRunnable                                         keepAliveCleanup             = new DelayedRunnable(10000, 30000) {
 
         @Override
         public void delayedrun() {
@@ -215,6 +216,8 @@ public class HTTPConnectionImpl implements HTTPConnection {
             }
         }
     };
+
+    public static final SimulationEntry                                            TEST_SIMULATE_SOCKET_TIMEOUT = SimulationEntry.create("http_socket_connect_exception");
 
     public HTTPConnectionImpl(final URL url) {
         this(url, null);
@@ -617,6 +620,10 @@ public class HTTPConnectionImpl implements HTTPConnection {
                                 this.connectionSocket = createConnectionSocket(bindInetAddress);
                                 final long beforeConnect = System.currentTimeMillis();
                                 try {
+                                    if (org.appwork.utils.net.httpconnection.HTTPConnectionImpl.TEST_SIMULATE_SOCKET_TIMEOUT != null) {
+
+                                        throw new ConnectException(org.appwork.utils.net.httpconnection.HTTPConnectionImpl.TEST_SIMULATE_SOCKET_TIMEOUT.toString());
+                                    }
                                     this.connectionSocket.getSocket().connect(connectedInetSocketAddress, connectTimeout);
                                     break;
                                 } catch (final ConnectException e) {

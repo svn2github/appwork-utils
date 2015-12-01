@@ -59,10 +59,18 @@ public class TimeTrackerController {
     public synchronized TimeTracker getTracker(String typeID) {
         TimeTracker tracker = map.get(typeID);
         if (tracker == null) {
-            tracker = new TimeTracker(typeID);
+            tracker = createTracker(typeID);
             map.put(typeID, tracker);
         }
         return tracker;
+    }
+
+    /**
+     * @param typeID
+     * @return
+     */
+    protected TimeTracker createTracker(String typeID) {
+        return new TimeTracker(typeID);
     }
 
 }

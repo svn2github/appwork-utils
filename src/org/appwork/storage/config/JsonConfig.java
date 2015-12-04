@@ -124,7 +124,6 @@ public class JsonConfig {
                 return ret;
             } catch (final RuntimeException e) {
                 e.printStackTrace();
-
                 if (!Application.isJared(JsonConfig.class)) {
 
                     new Thread() {
@@ -174,6 +173,7 @@ public class JsonConfig {
                 }
                 return ret;
             } catch (final RuntimeException e) {
+                e.printStackTrace();
                 if (!Application.isJared(JsonConfig.class)) {
                     new Thread() {
                         public void run() {

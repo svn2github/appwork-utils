@@ -84,16 +84,20 @@ import org.appwork.utils.swing.dialog.Dialog;
  *
  */
 public class StorageHandler<T extends ConfigInterface> implements InvocationHandler {
-    private final static LinkedHashMap<String, Runnable> DELAYEDWRITES = new LinkedHashMap<String, Runnable>();
+    private final static LinkedHashMap<String, Runnable>    DELAYEDWRITES = new LinkedHashMap<String, Runnable>();
 
-    protected static final DelayedRunnable               SAVEDELAYER   = new DelayedRunnable(5000, 30000) {
+    protected static final DelayedRunnable                  SAVEDELAYER   = new DelayedRunnable(5000, 30000) {
 
-        @Override
-        public void delayedrun() {
-            StorageHandler.saveAll();
-        }
-    };
+                                                                              @Override
+                                                                              public void delayedrun() {
+                                                                                  StorageHandler.saveAll();
+                                                                              }
+                                                                          };
+    private static final HashMap<StorageHandler<?>, String> STORAGEMAP;
     static {
+        // important, because getDefaultLogger might initialize StorageHandler and access to STORAGEMAP must be ensured in constructor of
+        // StorageHandler
+        STORAGEMAP = new HashMap<StorageHandler<?>, String>();
         ShutdownController.getInstance().addShutdownEvent(new ShutdownEvent() {
             final LogInterface logger = org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger();
 
@@ -239,28 +243,26 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
         }
     }
 
-    private final Class<T>                                  configInterface;
-    protected final HashMap<Method, KeyHandler<?>>          methodMap                 = new HashMap<Method, KeyHandler<?>>();
-    protected final Storage                                 primitiveStorage;
-    private final File                                      path;
+    private final Class<T>                         configInterface;
+    protected final HashMap<Method, KeyHandler<?>> methodMap                 = new HashMap<Method, KeyHandler<?>>();
+    protected final Storage                        primitiveStorage;
+    private final File                             path;
 
-    private ConfigEventSender<Object>                       eventSender               = null;
+    private ConfigEventSender<Object>              eventSender               = null;
 
-    private String                                          relativCPPath;
+    private String                                 relativCPPath;
 
     // set externaly to start profiling
-    public static HashMap<String, Long>                     PROFILER_MAP              = null;
-    public static HashMap<String, Long>                     PROFILER_CALLNUM_MAP      = null;
+    public static HashMap<String, Long>            PROFILER_MAP              = null;
+    public static HashMap<String, Long>            PROFILER_CALLNUM_MAP      = null;
 
-    private volatile WriteStrategy                          writeStrategy             = null;
-    private boolean                                         objectCacheEnabled        = true;
+    private volatile WriteStrategy                 writeStrategy             = null;
+    private boolean                                objectCacheEnabled        = true;
 
-    private final String                                    storageID;
+    private final String                           storageID;
 
-    private static final HashMap<StorageHandler<?>, String> STORAGEMAP                = new HashMap<StorageHandler<?>, String>();
-
-    boolean                                                 saveInShutdownHookEnabled = true;
-    private DefaultFactoryInterface                         defaultFactory;
+    boolean                                        saveInShutdownHookEnabled = true;
+    private DefaultFactoryInterface                defaultFactory;
 
     public DefaultFactoryInterface getDefaultFactory() {
         return defaultFactory;

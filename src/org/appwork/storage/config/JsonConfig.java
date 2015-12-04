@@ -39,13 +39,10 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.swing.JOptionPane;
-
 import org.appwork.exceptions.WTFException;
 import org.appwork.storage.config.annotations.CustomStorageName;
 import org.appwork.storage.config.handler.StorageHandler;
 import org.appwork.utils.Application;
-import org.appwork.utils.Exceptions;
 import org.appwork.utils.swing.dialog.Dialog;
 
 /**
@@ -55,11 +52,11 @@ import org.appwork.utils.swing.dialog.Dialog;
 public class JsonConfig {
 
     private static class LockObject {
-        private final String id;
+        private final String        id;
 
-        private final AtomicInteger lock = new AtomicInteger(0);
+        private final AtomicInteger lock           = new AtomicInteger(0);
 
-        private StorageHandler storageHandler = null;
+        private StorageHandler      storageHandler = null;
 
         private LockObject(final String id) {
             this.id = id;
@@ -85,7 +82,7 @@ public class JsonConfig {
 
     private static final HashMap<String, ConfigInterface> CACHE = new HashMap<String, ConfigInterface>();
 
-    private static final HashMap<String, LockObject> LOCKS = new HashMap<String, LockObject>();
+    private static final HashMap<String, LockObject>      LOCKS = new HashMap<String, LockObject>();
 
     /**
      * @param <T>
@@ -127,8 +124,13 @@ public class JsonConfig {
                 return ret;
             } catch (final RuntimeException e) {
                 e.printStackTrace();
-                JOptionPane.showMessageDialog(null, Exceptions.getStackTrace(e), "Error!", 0, null);
-                Dialog.getInstance().showExceptionDialog(e.getClass().getSimpleName(), e.getMessage(), e);
+                if (!Application.isJared(JsonConfig.class)) {
+                    new Thread() {
+                        public void run() {
+                            Dialog.getInstance().showExceptionDialog(e.getClass().getSimpleName(), e.getMessage(), e);
+                        };
+                    }.start();
+                }
                 throw e;
             } finally {
                 JsonConfig.unLock(lock);
@@ -170,7 +172,13 @@ public class JsonConfig {
                 }
                 return ret;
             } catch (final RuntimeException e) {
-                Dialog.getInstance().showExceptionDialog(e.getClass().getSimpleName(), e.getMessage(), e);
+                if (!Application.isJared(JsonConfig.class)) {
+                    new Thread() {
+                        public void run() {
+                            Dialog.getInstance().showExceptionDialog(e.getClass().getSimpleName(), e.getMessage(), e);
+                        };
+                    }.start();
+                }
                 throw e;
             } finally {
                 JsonConfig.unLock(lock);

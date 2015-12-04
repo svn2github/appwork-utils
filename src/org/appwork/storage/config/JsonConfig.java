@@ -39,10 +39,13 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.swing.JOptionPane;
+
 import org.appwork.exceptions.WTFException;
 import org.appwork.storage.config.annotations.CustomStorageName;
 import org.appwork.storage.config.handler.StorageHandler;
 import org.appwork.utils.Application;
+import org.appwork.utils.Exceptions;
 import org.appwork.utils.swing.dialog.Dialog;
 
 /**
@@ -124,7 +127,10 @@ public class JsonConfig {
                 return ret;
             } catch (final RuntimeException e) {
                 e.printStackTrace();
+                JOptionPane.showMessageDialog(null, Exceptions.getStackTrace(e), "Error!", 0, null);
+                Dialog.getInstance().showExceptionDialog(e.getClass().getSimpleName(), e.getMessage(), e);
                 if (!Application.isJared(JsonConfig.class)) {
+
                     new Thread() {
                         public void run() {
                             Dialog.getInstance().showExceptionDialog(e.getClass().getSimpleName(), e.getMessage(), e);

@@ -603,6 +603,14 @@ public class JSonStorage {
         }
     }
 
+    public static byte[] serializeToJsonByteArray(final Object list) throws StorageException {
+        try {
+            return JSonStorage.JSON_MAPPER.objectToByteArray(list);
+        } catch (final Exception e) {
+            throw new StorageException(e);
+        }
+    }
+
     public static void setMapper(final JSONMapper mapper) {
         JSonStorage.JSON_MAPPER = mapper;
     }

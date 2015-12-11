@@ -148,10 +148,10 @@ public abstract class LogSourceProvider {
 
             } else {
                 // it is important that folders start with " + timeStamp + "_" !. the rest does not matter.
-                File llogFolder = Application.getResource("logs/" + timeStamp + "_" + new SimpleDateFormat("EEE, MMM d, yyyy HH.mm z", Locale.ENGLISH).format(new Date(timeStamp)) + "/");
+                File llogFolder = Application.getResource("logs/" + timeStamp + "_" + new SimpleDateFormat("EEE, MMM d, yyyy HH.mm Z", Locale.ENGLISH).format(new Date(timeStamp)) + "/");
                 int i = 2;
                 while (llogFolder.exists()) {
-                    llogFolder = Application.getResource("logs/" + timeStamp + "_" + new SimpleDateFormat("EEE, MMM d, yyyy HH.mm z", Locale.ENGLISH).format(new Date(timeStamp)) + "_" + (i++) + "/");
+                    llogFolder = Application.getResource("logs/" + timeStamp + "_" + new SimpleDateFormat("EEE, MMM d, yyyy HH.mm Z", Locale.ENGLISH).format(new Date(timeStamp)) + "_" + (i++) + "/");
                 }
                 this.logFolder = llogFolder;
             }

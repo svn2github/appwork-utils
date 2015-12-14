@@ -1,5 +1,5 @@
 /**
- * 
+ *
  * ====================================================================================================================================================
  *         "AppWork Utilities" License
  *         The "AppWork Utilities" will be called [The Product] from now on.
@@ -7,16 +7,16 @@
  *         Copyright (c) 2009-2015, AppWork GmbH <e-mail@appwork.org>
  *         Schwabacher Straße 117
  *         90763 Fürth
- *         Germany   
+ *         Germany
  * === Preamble ===
  *     This license establishes the terms under which the [The Product] Source Code & Binary files may be used, copied, modified, distributed, and/or redistributed.
  *     The intent is that the AppWork GmbH is able to provide their utilities library for free to non-commercial projects whereas commercial usage is only permitted after obtaining a commercial license.
  *     These terms apply to all files that have the [The Product] License header (IN the file), a <filename>.license or <filename>.info (like mylib.jar.info) file that contains a reference to this license.
- * 	
+ *
  * === 3rd Party Licences ===
  *     Some parts of the [The Product] use or reference 3rd party libraries and classes. These parts may have different licensing conditions. Please check the *.license and *.info files of included libraries
- *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header. 	
- * 	
+ *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header.
+ *
  * === Definition: Commercial Usage ===
  *     If anybody or any organization is generating income (directly or indirectly) by using [The Product] or if there's any commercial interest or aspect in what you are doing, we consider this as a commercial usage.
  *     If your use-case is neither strictly private nor strictly educational, it is commercial. If you are unsure whether your use-case is commercial or not, consider it as commercial or contact us.
@@ -25,9 +25,9 @@
  *     If you want to use [The Product] in a commercial way (see definition above), you have to obtain a paid license from AppWork GmbH.
  *     Contact AppWork for further details: <e-mail@appwork.org>
  * === Non-Commercial Usage ===
- *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the 
+ *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the
  *     "GNU Affero General Public License" (http://www.gnu.org/licenses/agpl-3.0.en.html).
- * 	
+ *
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
@@ -72,7 +72,45 @@ public class HttpConnection implements Runnable {
         GET,
         POST,
         OPTIONS,
-        UNKNOWN
+        UNKNOWN;
+
+        private final byte[] requestTypeBytes;
+
+        private HttpConnectionType() {
+            byte[] bytes = null;
+            try {
+                bytes = this.name().getBytes("ISO-8859-1");
+            } catch (final Throwable e) {
+                bytes = this.name().getBytes();
+            }
+            this.requestTypeBytes = bytes;
+        }
+
+        public final boolean isRequestType(final byte[] input) {
+            if (input.length < this.requestTypeBytes.length) {
+                return false;
+            }
+            for (int i = 0; i < this.requestTypeBytes.length; i++) {
+                if (this.requestTypeBytes[i] != input[i]) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public static HttpConnectionType get(final byte[] input) {
+            for (HttpConnectionType type : values()) {
+                if (type.isRequestType(input)) {
+                    return type;
+                }
+            }
+            return HttpConnectionType.UNKNOWN;
+        }
+
+        public final int length() {
+            return this.requestTypeBytes.length;
+        }
+
     }
 
     public static List<KeyValuePair> parseParameterList(final String requestedParameters) throws IOException {
@@ -102,14 +140,14 @@ public class HttpConnection implements Runnable {
     }
 
     protected final HttpServer   server;
-    protected Socket             clientSocket        = null;
+    protected final Socket       clientSocket;
     protected boolean            responseHeadersSent = false;
 
     protected HttpResponse       response            = null;
 
-    protected InputStream        is                  = null;
+    protected final InputStream  is;
 
-    protected OutputStream       os                  = null;
+    protected final OutputStream os;
     protected HttpRequest        request;
 
     private static final Pattern METHOD              = Pattern.compile("(GET|POST|HEAD|OPTIONS)");
@@ -119,16 +157,26 @@ public class HttpConnection implements Runnable {
 
     private static final Pattern REQUESTPARAM        = Pattern.compile("\\?(.+)");
 
-    public HttpConnection(final HttpServer server, final InputStream is, final OutputStream os) {
+    protected HttpConnection(final HttpServer server, final Socket clientSocket, final InputStream is, final OutputStream os) throws IOException {
         this.server = server;
-        this.is = is;
-        this.os = os;
+        this.clientSocket = clientSocket;
+        if (is == null) {
+            this.is = clientSocket.getInputStream();
+        } else {
+            this.is = is;
+        }
+        if (os == null) {
+            this.os = clientSocket.getOutputStream();
+        } else {
+            this.os = os;
+        }
+        if (clientSocket != null) {
+            this.clientSocket.setSoTimeout(60 * 1000);
+        }
     }
 
     public HttpConnection(final HttpServer server, final Socket clientSocket) throws IOException {
-        this(server, clientSocket.getInputStream(), clientSocket.getOutputStream());
-        this.clientSocket = clientSocket;
-        this.clientSocket.setSoTimeout(60 * 1000);
+        this(server, clientSocket, null, null);
     }
 
     protected GetRequest buildGetRequest() throws IOException {
@@ -213,11 +261,11 @@ public class HttpConnection implements Runnable {
         if (this.clientSocket != null) {
             try {
                 this.clientSocket.shutdownOutput();
-            } catch (final Throwable nothing) {
+            } catch (final Throwable ignore) {
             }
             try {
                 this.clientSocket.close();
-            } catch (final Throwable nothing) {
+            } catch (final Throwable ignore) {
             }
         }
     }

@@ -113,29 +113,35 @@ public class MimeWindows extends MimeDefault {
         return ret;
     }
 
-    /**
-     * https://msdn.microsoft.com/en-us/library/windows/desktop/hh127427%28v=vs.85%29.aspx
-     *
-     * TODO: check ROOT_Class
-     */
-    private boolean registryContainsFileIcon(final String extension) {
+    private static boolean registryContainsFileIcon(final String extension) {
         if (StringUtils.isNotEmpty(extension)) {
             try {
                 final Preferences userRoot = Preferences.userRoot();
                 final Class<?> clz = userRoot.getClass();
-                final Method openKey = clz.getDeclaredMethod("openKey", byte[].class, int.class, int.class);
-                openKey.setAccessible(true);
-                final Method closeKey = clz.getDeclaredMethod("closeKey", int.class);
-                closeKey.setAccessible(true);
+                final Method windowsRegOpenKey = clz.getDeclaredMethod("WindowsRegOpenKey", int.class, byte[].class, int.class);
+                windowsRegOpenKey.setAccessible(true);
+                final Method windowsRegCloseKey = clz.getDeclaredMethod("WindowsRegCloseKey", int.class);
+                windowsRegCloseKey.setAccessible(true);
+                final Method rootNativeHandle = clz.getDeclaredMethod("rootNativeHandle", new Class[0]);
+                rootNativeHandle.setAccessible(true);
+                final Integer rootNativeHdl = (Integer) rootNativeHandle.invoke(userRoot);
                 final String key = "Software\\Classes\\." + extension.toLowerCase(Locale.ENGLISH);
-                Integer handle = null;
-                try {
-                    handle = (Integer) openKey.invoke(userRoot, toCstr(key), 0x20019, 0x20019);
+                final int KEY_READ = 0x20019;
+                final int ERROR_SUCCESS = 0;
+                final int ERROR_FILE_NOT_FOUND = 2;
+                final int ERROR_ACCESS_DENIED = 5;
+                final int NATIVE_HANDLE = 0;
+                final int ERROR_CODE = 1;
+                final int[] result = (int[]) windowsRegOpenKey.invoke(userRoot, rootNativeHdl, toCstr(key), KEY_READ);
+                if (result[ERROR_CODE] == ERROR_SUCCESS) {
+                    windowsRegCloseKey.invoke(userRoot, result[NATIVE_HANDLE]);
                     return true;
-                } finally {
-                    if (handle != null) {
-                        closeKey.invoke(userRoot, handle);
-                    }
+                } else if (result[ERROR_CODE] == ERROR_FILE_NOT_FOUND) {
+                    return false;
+                } else if (result[ERROR_CODE] == ERROR_ACCESS_DENIED) {
+                    return false;
+                } else {
+                    return false;
                 }
             } catch (final Throwable e) {
             }
@@ -143,7 +149,7 @@ public class MimeWindows extends MimeDefault {
         return false;
     }
 
-    private byte[] toCstr(final String str) {
+    private static byte[] toCstr(final String str) {
         final byte[] result = new byte[str.length() + 1];
         for (int i = 0; i < str.length(); i++) {
             result[i] = (byte) str.charAt(i);

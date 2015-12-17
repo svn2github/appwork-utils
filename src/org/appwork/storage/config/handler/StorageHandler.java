@@ -94,6 +94,7 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
                                                                               }
                                                                           };
     private static final HashMap<StorageHandler<?>, String> STORAGEMAP;
+
     static {
         // important, because getDefaultLogger might initialize StorageHandler and access to STORAGEMAP must be ensured in constructor of
         // StorageHandler

@@ -275,13 +275,20 @@ public class Subversion implements ISVNEventHandler {
      * @throws SVNException
      */
     public SVNCommitInfo commit(final File dstPath, final String message) throws SVNException {
+        return commit(message, dstPath);
+    }
+
+    public SVNCommitInfo commit(final String message, final File... dstPathes) throws SVNException {
         return new LocaleRunnable<SVNCommitInfo, SVNException>() {
 
             @Override
             protected SVNCommitInfo run() throws SVNException {
-                getWCClient().doAdd(dstPath, true, false, true, SVNDepth.INFINITY, false, false);
+                for (File f : dstPathes) {
+                    getWCClient().doAdd(f, true, false, true, SVNDepth.INFINITY, false, false);
+                }
+
                 org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Create CommitPacket");
-                final SVNCommitPacket packet = getCommitClient().doCollectCommitItems(new File[] { dstPath }, false, false, SVNDepth.INFINITY, null);
+                final SVNCommitPacket packet = getCommitClient().doCollectCommitItems(dstPathes, false, false, SVNDepth.INFINITY, null);
                 org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Transfer Package");
                 if (packet == SVNCommitPacket.EMPTY) {
                     return null;
@@ -392,6 +399,7 @@ public class Subversion implements ISVNEventHandler {
         if (clientManager == null) {
             final DefaultSVNOptions options = new DefaultSVNOptions(null, true) {
                 private String[] ignorePatterns;
+
                 {
                     ignorePatterns = new String[] {};
                 }
@@ -622,7 +630,7 @@ public class Subversion implements ISVNEventHandler {
         } else if (action == SVNEventAction.UPDATE_UPDATE) {
             /*
              * Find out in details what state the item is (after having been updated).
-             * 
+             *
              * Gets the status of file/directory item contents. It is SVNStatusType who contains information on the state of an item.
              */
             final SVNStatusType contentsStatus = event.getContentsStatus();

@@ -72,6 +72,7 @@ import javax.swing.JSeparator;
 import javax.swing.JTable;
 import javax.swing.JViewport;
 import javax.swing.KeyStroke;
+import javax.swing.ListSelectionModel;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
@@ -1259,7 +1260,6 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
                 }
             }
         }
-
     }
 
     /**
@@ -1274,23 +1274,30 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
             final List<E> selectedObjects = this.getModel().getSelectedObjects();
             final ExtColumn<E> firstColumn = this.getModel().getExtColumnByModelIndex(0);
             final Point point = new Point(firstColumn.getWidth() / 2, 0);
+            final int scrollPosition = -this.getY();
+            final JViewport viewport = (JViewport) this.getParent();
+            final int viewportHeight = viewport == null ? this.getHeight() : viewport.getHeight();
             if (this.getSelectedRow() == -1) {
                 // find vertical position for no selection
                 point.y = this.getRowCount() * rowHeight;
-                if (point.y + rowHeight / 2 < this.getHeight()) {
+                if (point.y + (rowHeight - 1) / 2 < viewportHeight) {
                     // center in next possible row (non-existent)
-                    point.y += rowHeight / 2;
-                } else if (point.y < this.getHeight()) {
+                    point.y += (rowHeight - 1) / 2;
+                } else if (point.y < viewportHeight) {
                     // center in remaining space not covered by rows
-                    point.y += (this.getHeight() - point.y) / 2;
+                    point.y += (viewportHeight - point.y) / 2;
                 } else {
                     // center in table
-                    point.y = this.getHeight() / 2;
+                    point.y = scrollPosition + (viewportHeight - 1) / 2;
                 }
             } else {
                 // find vertical position with rows selected (centered between first and last selected row)
                 int[] selectedRows = this.getSelectedRows();
-                point.y += (selectedRows[0] + (double) (selectedRows[selectedRows.length - 1] + 1 - selectedRows[0]) / 2) * rowHeight;
+                int upperY = Math.max(selectedRows[0] * rowHeight, scrollPosition);
+                upperY = Math.min(upperY, scrollPosition + viewportHeight - 1);
+                int lowerY = Math.max((selectedRows[selectedRows.length - 1] + 1) * rowHeight - 1, scrollPosition);
+                lowerY = Math.min(lowerY, scrollPosition + viewportHeight - 1);
+                point.y = (upperY + lowerY) / 2;
             }
             final Point absolutePoint = (Point) point.clone();
             SwingUtilities.convertPointToScreen(absolutePoint, this);
@@ -1304,6 +1311,16 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
         }
         if (evt.isControlDown() && evt.getKeyCode() == KeyEvent.VK_END) {
             return false;
+        }
+        if (evt.getModifiers() == KeyEvent.SHIFT_MASK && evt.getKeyCode() == KeyEvent.VK_HOME && pressed && this.getSelectionModel().getSelectionMode() != ListSelectionModel.SINGLE_SELECTION) {
+            // extend selection to beginning of list
+            this.changeSelection(0, 0, false, true);
+            return true;
+        }
+        if (evt.getModifiers() == KeyEvent.SHIFT_MASK && evt.getKeyCode() == KeyEvent.VK_END && pressed && this.getSelectionModel().getSelectionMode() != ListSelectionModel.SINGLE_SELECTION) {
+            // extend selection to end of list
+            this.changeSelection(this.getRowCount() - 1, 0, false, true);
+            return true;
         }
         if (!evt.isControlDown() && evt.getKeyCode() == KeyEvent.VK_ENTER && pressed) {
             // edit

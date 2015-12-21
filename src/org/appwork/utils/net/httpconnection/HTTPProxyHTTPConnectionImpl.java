@@ -38,6 +38,7 @@ import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 
 import org.appwork.utils.Regex;
@@ -81,6 +82,9 @@ public class HTTPProxyHTTPConnectionImpl extends HTTPConnectionImpl {
                     this.requestProperties.put("Proxy-Authorization", "Basic " + new String(Base64.encodeToByte((user + ":" + pass).getBytes(), false)));
                 }
                 if (hosts == null) {
+                    if (StringUtils.isEmpty(proxy.getHost())) {
+                        throw new ProxyConnectException(new UnknownHostException("Could not resolve: -empty host-"), this.proxy);
+                    }
                     hosts = this.resolvHostIP(this.proxy.getHost());
                 }
                 IOException ee = null;

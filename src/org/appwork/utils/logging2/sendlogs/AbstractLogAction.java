@@ -190,14 +190,12 @@ public abstract class AbstractLogAction extends BasicAction {
     public static ArrayList<LogFolder> getLogFolders() {
         final File[] logs = Application.getResource("logs").listFiles();
         final ArrayList<LogFolder> folders = new ArrayList<LogFolder>();
-
         if (logs != null) {
             for (final File f : logs) {
                 final String timestampString = new Regex(f.getName(), "(\\d{7,})_").getMatch(0);
                 if (timestampString != null) {
                     final long timestamp = Long.parseLong(timestampString);
-                    LogFolder lf;
-                    lf = new LogFolder(f, timestamp);
+                    final LogFolder lf = new LogFolder(f, timestamp);
                     if (Files.getFiles(new FileFilter() {
                         @Override
                         public boolean accept(final File pathname) {
@@ -206,7 +204,6 @@ public abstract class AbstractLogAction extends BasicAction {
                     }, f).size() == 0) {
                         continue;
                     }
-
                     folders.add(lf);
                 }
             }

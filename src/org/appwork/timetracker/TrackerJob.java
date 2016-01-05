@@ -40,7 +40,7 @@ package org.appwork.timetracker;
  */
 public class TrackerJob {
 
-    private int weight;
+    private final int weight;
 
     public int getWeight() {
         return weight;
@@ -57,8 +57,6 @@ public class TrackerJob {
      *
      */
     public void run() {
-        // TODO Auto-generated method stub
-
     }
 
     /**

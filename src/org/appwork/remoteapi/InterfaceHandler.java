@@ -297,7 +297,7 @@ public class InterfaceHandler<T> {
                     if (Application.getJavaVersion() >= Application.JAVA18) {
                         final java.lang.reflect.Parameter param = m.getParameters()[i];
                         if (param.isNamePresent()) {
-                            paramName = param.getName();
+                            paramName = paramName + "-" + param.getName();
                         }
                     }
                 } catch (final Throwable e) {

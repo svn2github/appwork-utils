@@ -59,7 +59,6 @@ import org.appwork.remoteapi.annotations.ApiSignatureRequired;
 import org.appwork.storage.InvalidTypeException;
 import org.appwork.storage.JSonStorage;
 import org.appwork.storage.config.annotations.AllowStorage;
-import org.appwork.utils.Application;
 import org.appwork.utils.net.HTTPHeader;
 
 /**
@@ -298,15 +297,15 @@ public class InterfaceHandler<T> {
                 num++;
                 call += paramClass.getSimpleName() + num;
                 String paramName = paramClass.getSimpleName() + num;
-                try {
-                    if (Application.getJavaVersion() >= Application.JAVA18) {
-                        final java.lang.reflect.Parameter param = m.getParameters()[i];
-                        if (param.isNamePresent()) {
-                            paramName = paramClass.getSimpleName() + "-" + param.getName();
-                        }
-                    }
-                } catch (final Throwable e) {
-                }
+                // try {
+                // if (Application.getJavaVersion() >= Application.JAVA18) {
+                // final java.lang.reflect.Parameter param = m.getParameters()[i];
+                // if (param.isNamePresent()) {
+                // paramName = paramClass.getSimpleName() + "-" + param.getName();
+                // }
+                // }
+                // } catch (final Throwable e) {
+                // }
                 sb.append("\r\n      Parameter: " + count + " - " + paramName);
                 map.put(paramClass, num);
             }

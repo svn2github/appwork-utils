@@ -40,6 +40,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -249,6 +250,7 @@ public class InterfaceHandler<T> {
             sb.append("\r\n");
         }
         sb.append("\r\n");
+        final HashSet<Class<?>> enumClasses = new HashSet<Class<?>>();
         for (final Method m : this.methods.values()) {
             if (m == InterfaceHandler.HELP) {
                 sb.append("\r\n====- " + m.getName() + " -====");
@@ -285,6 +287,9 @@ public class InterfaceHandler<T> {
                     call += "?";
                 }
                 final Class<?> paramClass = m.getParameterTypes()[i];
+                if (paramClass.isEnum()) {
+                    enumClasses.add(paramClass);
+                }
                 Integer num = map.get(paramClass);
                 if (num == null) {
                     map.put(paramClass, 0);
@@ -306,6 +311,14 @@ public class InterfaceHandler<T> {
                 map.put(paramClass, num);
             }
             sb.append("\r\n           Call: " + call);
+            sb.append("\r\n");
+        }
+        if (enumClasses.size() > 0) {
+            sb.append("\r\n====- Enums -====\r\n");
+            for (Class<?> enumClass : enumClasses) {
+                final Class<? extends Enum<?>> num = (Class<? extends Enum<?>>) enumClass;
+                sb.append("\r\n      Enum: " + num.getSimpleName() + " - " + Arrays.toString(num.getEnumConstants()));
+            }
             sb.append("\r\n");
         }
         return sb.toString();

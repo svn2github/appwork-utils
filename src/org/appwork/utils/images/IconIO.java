@@ -59,6 +59,7 @@ import java.awt.image.ImageProducer;
 import java.awt.image.Kernel;
 import java.awt.image.RGBImageFilter;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -68,6 +69,7 @@ import javax.imageio.ImageIO;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
+import org.appwork.exceptions.WTFException;
 import org.appwork.swing.components.IDIcon;
 import org.appwork.swing.components.IconIdentifier;
 import org.appwork.utils.URLStream;
@@ -793,6 +795,39 @@ public class IconIO {
         final ImageProducer ip = new FilteredImageSource(image.getSource(), filter);
         final Image img = Toolkit.getDefaultToolkit().createImage(ip);
         return img;
+    }
+
+    /**
+     * Save image as a compresssed jpeg and returns the bytes
+     * 
+     * @param read
+     * @return
+     * @throws IOException
+     */
+    public static byte[] toJpgBytes(Image image) {
+        try {
+            final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            BufferedImage jpg = new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_RGB);
+            Graphics g = jpg.getGraphics();
+            g.drawImage(image, 0, 0, null);
+            g.dispose();
+            ImageIO.write(jpg, "jpg", bos);
+            bos.close();
+            return bos.toByteArray();
+        } catch (Throwable e) {
+            throw new WTFException(e);
+        }
+    }
+
+    /**
+     * reads image converts to a compresssed jpeg and returns the bytes
+     * 
+     * @param imageFile
+     * @return
+     * @throws IOException
+     */
+    public static byte[] toJpgBytes(File file) throws IOException {
+        return toJpgBytes(ImageIO.read(file));
     }
 
 }

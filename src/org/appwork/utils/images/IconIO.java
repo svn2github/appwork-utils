@@ -105,7 +105,7 @@ public class IconIO {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see javax.swing.Icon#getIconHeight()
          */
         @Override
@@ -116,7 +116,7 @@ public class IconIO {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see javax.swing.Icon#getIconWidth()
          */
         @Override
@@ -127,7 +127,7 @@ public class IconIO {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see javax.swing.Icon#paintIcon(java.awt.Component, java.awt.Graphics, int, int)
          */
         @Override
@@ -145,7 +145,7 @@ public class IconIO {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see org.appwork.swing.components.IdentifierInterface#toIdentifier()
          */
         @Override
@@ -701,7 +701,7 @@ public class IconIO {
      * @throws IOException
      */
     public static String toDataUrl(Icon icon) throws IOException {
-        return toDataUrl(IconIO.convertIconToBufferedImage(icon), "png");
+        return toDataUrl(IconIO.convertIconToBufferedImage(icon));
 
     }
 
@@ -711,12 +711,16 @@ public class IconIO {
      * @return
      * @throws IOException
      */
-    public static String toDataUrl(BufferedImage image, String mime) throws IOException {
+    public static String toDataUrl(BufferedImage image) throws IOException {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         final Base64OutputStream b64os = new Base64OutputStream(bos);
-        ImageIO.write(image, "png", b64os);
+        BufferedImage jpg = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
+        Graphics g = jpg.getGraphics();
+        g.drawImage(image, 0, 0, null);
+        g.dispose();
+        ImageIO.write(jpg, "jpg", b64os);
         b64os.close();
-        final String ret = mime + ";base64," + bos.toString("UTF-8");
+        final String ret = "image/jpeg" + ";base64," + bos.toString("UTF-8");
         return ret;
     }
 

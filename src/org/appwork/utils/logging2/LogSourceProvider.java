@@ -92,7 +92,7 @@ public abstract class LogSourceProvider {
         return debugMode;
     }
 
-    private final long                     initTime;
+    private long                           initTime;
     private final boolean                  writeLogs;
     private static List<LogSourceProvider> INSTANCES = new ArrayList<LogSourceProvider>();
 
@@ -108,6 +108,7 @@ public abstract class LogSourceProvider {
 
     private final static AtomicBoolean TRASHLOCK = new AtomicBoolean(false);
     private static final Object        INIT_LOCK = new Object();
+
     static {
         ShutdownController.getInstance().addShutdownEvent(new ShutdownEvent() {
 
@@ -143,8 +144,11 @@ public abstract class LogSourceProvider {
                 }
                 System.out.println("Multiple LogControllers Detected: " + getClass().getName());
                 logFolder = INSTANCES.get(0).getLogFolder();
+                final int currentLength = String.valueOf(System.currentTimeMillis()).length();
+                final String regex = "^(\\d{" + (currentLength - 1) + "," + (currentLength + 1) + "})_.+";
 
-                System.out.println("Use Shared Log Folder: " + logFolder);
+                final String timeStampString = new Regex(logFolder.getName(), regex).getMatch(0);
+                initTime = Long.parseLong(timeStampString);
 
             } else {
                 // it is important that folders start with " + timeStamp + "_" !. the rest does not matter.

@@ -191,18 +191,18 @@ public class IconIO {
             public final int filterRGB(final int x, final int y, final int rgb) {
 
                 final int r = (rgb & 0xFF0000) >> 16;
-                final int g = (rgb & 0xFF00) >> 8;
-                final int b = rgb & 0xFF;
-                if (r >= r1 && r <= r2 && g >= g1 && g <= g2 && b >= b1 && b <= b2) {
-                    // Set fully transparent but keep color
-                    // calculate a alpha value based on the distance between the
-                    // range borders and the pixel color
-                    final int dist = (Math.abs(r - (r1 + r2) / 2) + Math.abs(g - (g1 + g2) / 2) + Math.abs(b - (b1 + b2) / 2)) * 2;
+        final int g = (rgb & 0xFF00) >> 8;
+        final int b = rgb & 0xFF;
+        if (r >= r1 && r <= r2 && g >= g1 && g <= g2 && b >= b1 && b <= b2) {
+            // Set fully transparent but keep color
+            // calculate a alpha value based on the distance between the
+            // range borders and the pixel color
+            final int dist = (Math.abs(r - (r1 + r2) / 2) + Math.abs(g - (g1 + g2) / 2) + Math.abs(b - (b1 + b2) / 2)) * 2;
 
-                    return new Color(r, g, b, Math.min(255, dist)).getRGB();
-                }
+            return new Color(r, g, b, Math.min(255, dist)).getRGB();
+        }
 
-                return rgb;
+        return rgb;
             }
         };
 
@@ -704,7 +704,6 @@ public class IconIO {
      */
     public static String toDataUrl(Icon icon) throws IOException {
         return toDataUrl(IconIO.convertIconToBufferedImage(icon));
-
     }
 
     /**
@@ -716,13 +715,14 @@ public class IconIO {
     public static String toDataUrl(BufferedImage image) throws IOException {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         final Base64OutputStream b64os = new Base64OutputStream(bos);
-        BufferedImage jpg = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
-        Graphics g = jpg.getGraphics();
+        // removes alpha channel
+        final BufferedImage jpg = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
+        final Graphics g = jpg.getGraphics();
         g.drawImage(image, 0, 0, null);
         g.dispose();
         ImageIO.write(jpg, "jpg", b64os);
         b64os.close();
-        final String ret = "image/jpeg" + ";base64," + bos.toString("UTF-8");
+        final String ret = "image/jpeg;base64," + bos.toString("UTF-8");
         return ret;
     }
 

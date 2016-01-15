@@ -33,6 +33,7 @@
  * ==================================================================================================================================================== */
 package org.appwork.utils.swing.dialog;
 
+import java.awt.Dialog.ModalityType;
 import java.awt.HeadlessException;
 import java.awt.Image;
 import java.util.List;
@@ -895,15 +896,25 @@ public class Dialog {
      * @param bufferedImage
      */
     public void showImage(Image image) {
-        try {
-            showConfirmDialog(UIOManager.BUTTONS_HIDE_CANCEL, "Image", "" + image.getWidth(null) + "x" + image.getHeight(null), new ImageIcon(image), null, null);
-        } catch (DialogClosedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (DialogCanceledException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+
+        final ConfirmDialog d = new ConfirmDialog(UIOManager.BUTTONS_HIDE_CANCEL, "Image", "" + image.getWidth(null) + "x" + image.getHeight(null), new ImageIcon(image), null, null) {
+            /*
+             * (non-Javadoc)
+             *
+             * @see org.appwork.utils.swing.dialog.AbstractDialog#getModalityType()
+             */
+            @Override
+            public ModalityType getModalityType() {
+                // TODO Auto-generated method stub
+                return ModalityType.MODELESS;
+            }
+        };
+
+        new Thread("Image Dialog") {
+            public void run() {
+                UIOManager.I().show(null, d);
+            };
+        }.start();
 
     }
 

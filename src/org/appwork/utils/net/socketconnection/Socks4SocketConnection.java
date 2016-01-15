@@ -1,5 +1,5 @@
 /**
- * 
+ *
  * ====================================================================================================================================================
  *         "AppWork Utilities" License
  *         The "AppWork Utilities" will be called [The Product] from now on.
@@ -7,16 +7,16 @@
  *         Copyright (c) 2009-2015, AppWork GmbH <e-mail@appwork.org>
  *         Schwabacher Straße 117
  *         90763 Fürth
- *         Germany   
+ *         Germany
  * === Preamble ===
  *     This license establishes the terms under which the [The Product] Source Code & Binary files may be used, copied, modified, distributed, and/or redistributed.
  *     The intent is that the AppWork GmbH is able to provide their utilities library for free to non-commercial projects whereas commercial usage is only permitted after obtaining a commercial license.
  *     These terms apply to all files that have the [The Product] License header (IN the file), a <filename>.license or <filename>.info (like mylib.jar.info) file that contains a reference to this license.
- * 	
+ *
  * === 3rd Party Licences ===
  *     Some parts of the [The Product] use or reference 3rd party libraries and classes. These parts may have different licensing conditions. Please check the *.license and *.info files of included libraries
- *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header. 	
- * 	
+ *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header.
+ *
  * === Definition: Commercial Usage ===
  *     If anybody or any organization is generating income (directly or indirectly) by using [The Product] or if there's any commercial interest or aspect in what you are doing, we consider this as a commercial usage.
  *     If your use-case is neither strictly private nor strictly educational, it is commercial. If you are unsure whether your use-case is commercial or not, consider it as commercial or contact us.
@@ -25,14 +25,15 @@
  *     If you want to use [The Product] in a commercial way (see definition above), you have to obtain a paid license from AppWork GmbH.
  *     Contact AppWork for further details: <e-mail@appwork.org>
  * === Non-Commercial Usage ===
- *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the 
+ *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the
  *     "GNU Affero General Public License" (http://www.gnu.org/licenses/agpl-3.0.en.html).
- * 	
+ *
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
 package org.appwork.utils.net.socketconnection;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -62,7 +63,9 @@ public class Socks4SocketConnection extends SocketConnection {
 
     public Socks4SocketConnection(HTTPProxy proxy, DESTTYPE destType) {
         super(proxy);
-        if (proxy == null || !HTTPProxy.TYPE.SOCKS4.equals(proxy.getType())) { throw new IllegalArgumentException("proxy must be of type socks4"); }
+        if (proxy == null || !HTTPProxy.TYPE.SOCKS4.equals(proxy.getType())) {
+            throw new IllegalArgumentException("proxy must be of type socks4");
+        }
         this.destType = destType;
     }
 
@@ -83,12 +86,13 @@ public class Socks4SocketConnection extends SocketConnection {
     public static Socket establishConnection(final Socket proxySocket, final String userID, final SocketAddress endpoint, DESTTYPE destType, final StringBuffer logger) throws IOException {
         final InetSocketAddress endPointAddress = (InetSocketAddress) endpoint;
         final OutputStream os = proxySocket.getOutputStream();
-        os.write((byte) 1);
+        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        bos.write((byte) 1);
         /* send port */
         /* network byte order */
         final int port = endPointAddress.getPort();
-        os.write(port >> 8 & 0xff);
-        os.write(port & 0xff);
+        bos.write(port >> 8 & 0xff);
+        bos.write(port & 0xff);
         /* send ipv4/domain */
         switch (destType) {
         case IPV4:
@@ -97,7 +101,7 @@ public class Socks4SocketConnection extends SocketConnection {
                 if (logger != null) {
                     logger.append("->SEND tcp connect request by ipv4:" + address.getHostAddress() + "\r\n");
                 }
-                os.write(address.getAddress());
+                bos.write(address.getAddress());
                 break;
             } else {
                 if (logger != null) {
@@ -107,10 +111,10 @@ public class Socks4SocketConnection extends SocketConnection {
         case DOMAIN:
             destType = DESTTYPE.DOMAIN;
             /* we use domain */
-            os.write((byte) 0);
-            os.write((byte) 0);
-            os.write((byte) 0);
-            os.write((byte) 100);
+            bos.write((byte) 0);
+            bos.write((byte) 0);
+            bos.write((byte) 0);
+            bos.write((byte) 100);
             if (logger != null) {
                 logger.append("->SEND tcp connect request by domain:" + SocketConnection.getHostName(endPointAddress) + "\r\n");
             }
@@ -120,22 +124,25 @@ public class Socks4SocketConnection extends SocketConnection {
         }
         /* send user ID string */
         if (userID != null && userID.length() > 0) {
-            os.write(userID.getBytes("ISO-8859-1"));
+            bos.write(userID.getBytes("ISO-8859-1"));
         }
         /* NULL/end */
-        os.write((byte) 0);
+        bos.write((byte) 0);
         if (DESTTYPE.DOMAIN.equals(destType)) {
             final byte[] domainBytes = SocketConnection.getHostName(endPointAddress).getBytes("ISO-8859-1");
             /* send domain as string,socks4a */
-            os.write(domainBytes);
+            bos.write(domainBytes);
             /* NULL/end */
-            os.write((byte) 0);
+            bos.write((byte) 0);
         }
+        bos.writeTo(os);
         os.flush();
         /* read response, 8 bytes */
         final InputStream is = proxySocket.getInputStream();
         final byte[] resp = SocketConnection.ensureRead(is, 2, null);
-        if (resp[0] != 0) { throw new IOException("Invalid response:" + resp[0]); }
+        if (resp[0] != 0) {
+            throw new IOException("Invalid response:" + resp[0]);
+        }
         switch (resp[1]) {
         case 0x5a:
             break;

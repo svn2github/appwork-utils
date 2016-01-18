@@ -64,18 +64,19 @@ import org.appwork.utils.logging2.LogInterface;
 import org.appwork.utils.os.CrossSystem;
 
 /**
- * Application utils provide statis helper functions concerning the applications System integration
+ * Application utils provide status helper functions concerning the applications System integration
  *
  * @author $Author: unknown$
  *
  */
 public class Application {
 
-    private static Boolean              IS_JARED      = null;
+    private static Boolean IS_JARED = null;
 
     static {
         Application.redirectOutputStreams();
     }
+
     private static String               APP_FOLDER    = ".appwork";
     private static String               ROOT;
     private static long                 javaVersion   = 0;
@@ -288,7 +289,7 @@ public class Application {
     }
 
     /**
-     * Returns a ressourcefile relative to the instaldirectory
+     * Returns a resource file relative to the install directory
      *
      * @param relative
      * @return
@@ -313,7 +314,7 @@ public class Application {
 
     /**
      * returns the url for the resource. if The resource can be found in classpath, it will be returned. otherwise the function will return
-     * the fileurl to current wprkingdirectory
+     * the fileurl to current working directory
      *
      * @param string
      * @return
@@ -329,8 +330,8 @@ public class Application {
      *
      * if preferClassPath is true:
      *
-     * we first check if there is a ressource available inside current classpath, for example inside the jar itself. if no such URL exists
-     * we check for file in local filesystem
+     * we first check if there is a resource available inside current classpath, for example inside the jar itself. if no such URL exists we
+     * check for file in local filesystem
      *
      * if preferClassPath if false:
      *
@@ -581,7 +582,7 @@ public class Application {
 
         // System.out.println(caller);
         /*
-         * caller is null in case the ressource is not found or not enough rights, in that case we assume its not jared
+         * caller is null in case the resource is not found or not enough rights, in that case we assume its not jared
          */
         if (caller == null) {
             Application.IS_JARED = false;
@@ -871,8 +872,7 @@ public class Application {
         if (Charset.defaultCharset() == Charset.forName("cp1252")) {
             Application.REDIRECTED = true;
             // workaround.
-            // even 1252 is default codepage, windows console expects cp850
-            // codepage input
+            // even 1252 is default codepage, windows console expects cp850 codepage input
             try {
                 System.setOut(new PrintStream(new FileOutputStream(FileDescriptor.out), true, "CP850"));
             } catch (final UnsupportedEncodingException e) {
@@ -994,7 +994,7 @@ public class Application {
     }
 
     /**
-     * This should alsways run as very first action in an application
+     * This should always run as very first action in an application
      */
     private synchronized static void ensureFrameWorkInit() {
         if (DID_INIT) {

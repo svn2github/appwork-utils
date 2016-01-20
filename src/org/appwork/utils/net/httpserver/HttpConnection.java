@@ -346,13 +346,15 @@ public class HttpConnection implements Runnable {
         if (e instanceof HttpConnectionExceptionHandler) {
             return ((HttpConnectionExceptionHandler) e).handle(response);
         }
-        this.response = new HttpResponse(this);
-        this.response.setResponseCode(ResponseCode.SERVERERROR_INTERNAL);
-        final byte[] bytes = Exceptions.getStackTrace(e).getBytes("UTF-8");
-        this.response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_TYPE, "text; charset=UTF-8"));
-        this.response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_LENGTH, bytes.length + ""));
-        this.response.getOutputStream(true).write(bytes);
-        this.response.getOutputStream(true).flush();
+        if (request != null) {
+            this.response = new HttpResponse(this);
+            this.response.setResponseCode(ResponseCode.SERVERERROR_INTERNAL);
+            final byte[] bytes = Exceptions.getStackTrace(e).getBytes("UTF-8");
+            this.response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_TYPE, "text; charset=UTF-8"));
+            this.response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_LENGTH, bytes.length + ""));
+            this.response.getOutputStream(true).write(bytes);
+            this.response.getOutputStream(true).flush();
+        }
         return true;
     }
 

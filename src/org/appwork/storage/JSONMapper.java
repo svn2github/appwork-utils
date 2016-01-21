@@ -33,6 +33,9 @@
  * ==================================================================================================================================================== */
 package org.appwork.storage;
 
+import java.io.InputStream;
+import java.io.OutputStream;
+
 /**
  * @author thomas
  *
@@ -44,9 +47,20 @@ public interface JSONMapper {
 
     public byte[] objectToByteArray(Object o) throws JSonMapperException;
 
-    public <T> T stringToObject(String jsonString, Class<T> clazz) throws JSonMapperException;
+    public void writeObject(OutputStream os, Object o) throws JSonMapperException;
 
     public <T> T convert(Object jsonString, TypeRef<T> type) throws JSonMapperException;
 
     public <T> T stringToObject(String jsonString, TypeRef<T> type) throws JSonMapperException;
+
+    public <T> T stringToObject(String jsonString, Class<T> clazz) throws JSonMapperException;
+
+    public <T> T inputStreamToObject(final InputStream inputStream, TypeRef<T> type) throws JSonMapperException;
+
+    public <T> T inputStreamToObject(final InputStream inputStream, Class<T> clazz) throws JSonMapperException;
+
+    public <T> T byteArrayToObject(final byte[] byteArray, TypeRef<T> type) throws JSonMapperException;
+
+    public <T> T byteArrayToObject(final byte[] byteArray, Class<T> clazz) throws JSonMapperException;
+
 }

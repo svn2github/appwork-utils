@@ -34,17 +34,31 @@
 package org.appwork.storage;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
 import org.appwork.shutdown.ShutdownController;
 import org.appwork.shutdown.ShutdownEvent;
@@ -53,7 +67,6 @@ import org.appwork.utils.Application;
 import org.appwork.utils.IO;
 import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
-import org.appwork.utils.crypto.Crypto;
 import org.appwork.utils.reflection.Clazz;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -133,7 +146,6 @@ public class JSonStorage {
                 throw new InvalidTypeException(gType, "Void is not accepted: " + path);
             }
             if (type.isPrimitive()) {
-
                 return;
             }
             if (type == Boolean.class || type == Long.class || type == Integer.class || type == Byte.class || type == Double.class || type == Float.class || type == String.class) {
@@ -142,79 +154,58 @@ public class JSonStorage {
             if (type.isEnum()) {
                 return;
             }
-
             if (type.isArray()) {
                 final Class<?> arrayType = type.getComponentType();
-
                 JSonStorage.canStoreIntern(arrayType, path + "[" + arrayType + "]", allowNonStorableObjects, dupeID);
-
                 return;
             }
             // we need an empty constructor
-
             if (List.class.isAssignableFrom(type)) {
-
                 return;
-
             }
             if (Map.class.isAssignableFrom(type)) {
-
                 return;
-
             }
-
             if (HashSet.class.isAssignableFrom(type)) {
-
                 return;
-
             }
             if (Storable.class.isAssignableFrom(type) || allowNonStorableObjects) {
                 try {
-
                     type.getDeclaredConstructor(new Class[] {});
                     for (final Method m : type.getDeclaredMethods()) {
                         if (m.getName().startsWith("get")) {
-
                             if (m.getParameterTypes().length > 0) {
                                 throw new InvalidTypeException(gType, "Getter " + path + "." + m + " has parameters.");
                             }
                             JSonStorage.canStoreIntern(m.getGenericReturnType(), path + "->" + m.getGenericReturnType(), allowNonStorableObjects, dupeID);
-
                         } else if (m.getName().startsWith("set")) {
                             if (m.getParameterTypes().length != 1) {
                                 throw new InvalidTypeException(gType, "Setter " + path + "." + m + " has != 1 Parameters.");
                             }
-
                         }
                     }
-
                     return;
                 } catch (final NoSuchMethodException e) {
                     throw new InvalidTypeException(gType, "Storable " + path + " has no empty Constructor");
                 }
-
             }
         } else if (gType instanceof ParameterizedType) {
             final ParameterizedType ptype = (ParameterizedType) gType;
-
             final Type raw = ((ParameterizedType) gType).getRawType();
             JSonStorage.canStoreIntern(raw, path, allowNonStorableObjects, dupeID);
             for (final Type t : ptype.getActualTypeArguments()) {
                 JSonStorage.canStoreIntern(t, path + "(" + t + ")", allowNonStorableObjects, dupeID);
             }
-
             return;
 
         } else if (gType instanceof GenericArrayType) {
             final GenericArrayType atype = (GenericArrayType) gType;
             final Type t = atype.getGenericComponentType();
             JSonStorage.canStoreIntern(t, path + "[" + t + "]", allowNonStorableObjects, dupeID);
-
             return;
         } else {
             throw new InvalidTypeException(gType, "Generic Type Structure not implemented: " + gType.getClass() + " in " + path);
         }
-
         throw new InvalidTypeException(gType, "Type " + path + " is not supported.");
 
     }
@@ -287,69 +278,29 @@ public class JSonStorage {
     public static <E> E restoreFrom(final File file, final boolean plain, final byte[] key, final TypeRef<E> type, final E def) {
         final Object lock = JSonStorage.requestLock(file);
         synchronized (lock) {
-            String stri = null;
-            byte[] str = null;
+            FileInputStream fis = null;
             try {
-                // I doubt that this helps to solve any bug. remove it if we do not miss it until 2016 ;-P
-                // final File tmpfile = new File(file.getAbsolutePath() + ".tmp");
-                // if (tmpfile.exists() && tmpfile.length() > 0) {
-                // /* tmp files exists, try to restore */
-                // org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("TMP file " +
-                // tmpfile.getAbsolutePath() + " found");
-                // try {
-                // // load it
-                // str = IO.readFile(tmpfile);
-                // E ret;
-                // // try to parse it
-                // if (plain) {
-                // ret = JSonStorage.restoreFromString(stri = new String(str, "UTF-8"), type, def);
-                // } else {
-                // ret = JSonStorage.restoreFromString(stri = Crypto.decrypt(str, key), type, def);
-                // }
-                //
-                // if (ret != def) {
-                // org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Could restore tmp file");
-                // // replace normal file with tmp file
-                // file.delete();
-                // tmpfile.renameTo(file);
-                // if (ret == null) {
-                // return def;
-                // }
-                // return ret;
-                // } else {
-                // // probably bad tmp file
-                // org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Could not restore tmp file. json restore method returned default value.");
-                // }
-                // } catch (final Exception e) {
-                // org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Could not restore tmp file");
-                // org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
-                // } finally {
-                // /* tmp file must be gone after read */
-                // tmpfile.delete();
-                // }
-                // }
                 final File res = file;
                 if (!res.exists() || res.length() == 0) {
                     return def;
                 }
-                str = IO.readFile(res);
+                fis = new FileInputStream(res);
+                final InputStream is;
                 if (plain) {
-                    return JSonStorage.restoreFromString(stri = new String(str, "UTF-8"), type, def);
+                    is = fis;
                 } else {
-                    return JSonStorage.restoreFromString(stri = Crypto.decrypt(str, key), type, def);
+                    is = createCipherInputStream(fis, key, key);
                 }
-
+                return restoreFromInputStream(is, type, def);
             } catch (final Throwable e) {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning(file.getAbsolutePath() + ":read:" + stri);
-                try {
-                    if (str != null) {
-                        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe(file.getAbsolutePath() + ":original:" + new String(str, "UTF-8"));
-                    }
-                } catch (final Throwable e2) {
-                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e2);
-                }
                 org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
             } finally {
+                try {
+                    if (fis != null) {
+                        fis.close();
+                    }
+                } catch (IOException ignore) {
+                }
                 JSonStorage.unLock(file);
             }
             return def;
@@ -388,27 +339,59 @@ public class JSonStorage {
         return JSonStorage.restoreFrom(Application.getResource(relPath), plain, JSonStorage.KEY, null, def);
     }
 
-    public static <E> E restoreFromString(final byte[] data, final boolean plain, final byte[] key, final TypeRef<E> type, final E def) {
-        if (data == null) {
-            return def;
+    public static <E> E restoreFromByteArray(final byte[] jsonByteArray, final boolean plain, final byte[] key, final TypeRef<E> type, final E def) {
+        if (jsonByteArray != null) {
+            try {
+                final byte[] byteArray;
+                if (!plain) {
+                    byteArray = decryptByteArray(jsonByteArray, key, key);
+                } else {
+                    byteArray = jsonByteArray;
+                }
+                return restoreFromByteArray(byteArray, type, def);
+            } catch (final Exception e) {
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            }
         }
-        String string = null;
+        return def;
+    }
+
+    private static byte[] decryptByteArray(final byte[] b, final byte[] key, final byte[] iv) {
         try {
-            if (!plain) {
-                string = Crypto.decrypt(data, key);
-            } else {
-                string = new String(data, "UTF-8");
-            }
-            if (type != null) {
-                return JSonStorage.JSON_MAPPER.stringToObject(string, type);
-            } else {
-                return (E) JSonStorage.JSON_MAPPER.stringToObject(string, def.getClass());
-            }
+            final IvParameterSpec ivSpec = new IvParameterSpec(iv);
+            final SecretKeySpec skeySpec = new SecretKeySpec(key, "AES");
+            final Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            cipher.init(Cipher.DECRYPT_MODE, skeySpec, ivSpec);
+            return cipher.doFinal(b);
         } catch (final Exception e) {
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning(string);
-            return def;
+            final IvParameterSpec ivSpec = new IvParameterSpec(iv);
+            final SecretKeySpec skeySpec = new SecretKeySpec(key, "AES");
+            try {
+                final Cipher cipher = Cipher.getInstance("AES/CBC/nopadding");
+                cipher.init(Cipher.DECRYPT_MODE, skeySpec, ivSpec);
+                cipher.doFinal(b);
+            } catch (final Exception e1) {
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e1);
+            }
         }
+        return null;
+    }
+
+    private static CipherInputStream createCipherInputStream(final InputStream inputStream, final byte[] key, final byte[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
+        final IvParameterSpec ivSpec = new IvParameterSpec(iv);
+        final SecretKeySpec skeySpec = new SecretKeySpec(key, "AES");
+        final Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        cipher.init(Cipher.DECRYPT_MODE, skeySpec, ivSpec);
+        return new CipherInputStream(inputStream, cipher);
+    }
+
+    private static byte[] encryptByteArray(final byte[] data, final byte[] key, final byte[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
+        final Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        final IvParameterSpec ivSpec = new IvParameterSpec(iv);
+        final SecretKeySpec skeySpec = new SecretKeySpec(key, "AES");
+        cipher.init(Cipher.ENCRYPT_MODE, skeySpec, ivSpec);
+        return cipher.doFinal(data);
     }
 
     /**
@@ -432,24 +415,47 @@ public class JSonStorage {
         return JSonStorage.JSON_MAPPER.stringToObject(string, type);
     }
 
-    @SuppressWarnings("unchecked")
     public static <E> E restoreFromString(final String string, final TypeRef<E> type, final E def) {
-        if (string == null || "".equals(string)) {
-            return def;
-        }
-        try {
-            if (type != null) {
-                return JSonStorage.JSON_MAPPER.stringToObject(string, type);
-            } else {
-                return (E) JSonStorage.JSON_MAPPER.stringToObject(string, def.getClass());
+        if (string != null && string.length() > 0) {
+            try {
+                return restoreFromByteArray(string.getBytes("UTF-8"), type, def);
+            } catch (UnsupportedEncodingException e) {
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
             }
-        } catch (final Exception e) {
-            if (string.length() < 32767) {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Error parsing String: " + string);
-            }
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
-            return def;
         }
+        return def;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <E> E restoreFromByteArray(final byte[] byteArray, final TypeRef<E> type, final E def) {
+        if (byteArray != null && byteArray.length > 0) {
+            try {
+                if (type != null) {
+                    return JSonStorage.JSON_MAPPER.byteArrayToObject(byteArray, type);
+                } else {
+                    return (E) JSonStorage.JSON_MAPPER.byteArrayToObject(byteArray, def.getClass());
+                }
+            } catch (final Exception e) {
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            }
+        }
+        return def;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <E> E restoreFromInputStream(final InputStream is, final TypeRef<E> type, final E def) {
+        if (is != null) {
+            try {
+                if (type != null) {
+                    return JSonStorage.JSON_MAPPER.inputStreamToObject(is, type);
+                } else {
+                    return (E) JSonStorage.JSON_MAPPER.inputStreamToObject(is, def.getClass());
+                }
+            } catch (final Exception e) {
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            }
+        }
+        return def;
     }
 
     private static void close() {
@@ -475,32 +481,10 @@ public class JSonStorage {
     }
 
     public static void saveTo(final File file, final boolean plain, final byte[] key, final String json) throws StorageException {
-        final Object lock = JSonStorage.requestLock(file);
-        synchronized (lock) {
-            final File tmp = new File(file.getAbsolutePath() + ".tmp");
-            try {
-                tmp.getParentFile().mkdirs();
-                tmp.delete();
-                if (plain) {
-                    /* uncrypted */
-                    IO.writeToFile(tmp, json.getBytes("UTF-8"));
-                } else {
-                    /* encrypted */
-                    IO.writeToFile(tmp, Crypto.encrypt(json, key));
-                }
-                if (file.exists()) {
-                    if (!file.delete()) {
-                        throw new StorageException("Could not overwrite file: " + file.getAbsolutePath());
-                    }
-                }
-                if (!tmp.renameTo(file)) {
-                    throw new StorageException("Could not rename file: " + tmp + " to " + file);
-                }
-            } catch (final Exception e) {
-                throw new StorageException("Can not write to " + tmp.getAbsolutePath(), e);
-            } finally {
-                JSonStorage.unLock(file);
-            }
+        try {
+            saveTo(file, plain, key, json.getBytes("UTF-8"));
+        } catch (final IOException e) {
+            throw new StorageException(e);
         }
     }
 
@@ -516,7 +500,7 @@ public class JSonStorage {
                     IO.writeToFile(tmp, data);
                 } else {
                     /* encrypted */
-                    IO.writeToFile(tmp, Crypto.encrypt(data, key));
+                    IO.writeToFile(tmp, encryptByteArray(data, key, key));
                 }
                 if (file.exists()) {
                     if (!file.delete()) {
@@ -540,7 +524,7 @@ public class JSonStorage {
      */
     public static void saveTo(final File file, final Object packageData) {
         final boolean plain = file.getName().toLowerCase().endsWith(".json");
-        JSonStorage.saveTo(file, plain, JSonStorage.KEY, JSonStorage.serializeToJson(packageData));
+        JSonStorage.saveTo(file, plain, JSonStorage.KEY, JSonStorage.serializeToJsonByteArray(packageData));
     }
 
     /**
@@ -548,16 +532,23 @@ public class JSonStorage {
      * @param json
      * @throws StorageException
      */
-    public static void saveTo(final String pathname, final String json) throws StorageException {
-        JSonStorage.saveTo(pathname, json, JSonStorage.KEY);
+    public static void saveTo(final String pathname, final String jsonString) throws StorageException {
+        JSonStorage.saveTo(pathname, jsonString, JSonStorage.KEY);
     }
 
-    /**
-     * @param pathname
-     * @param json
-     * @param kEY2
-     */
-    public static void saveTo(final String pathname, final String json, final byte[] key) {
+    public static void saveTo(final String pathName, final String jsonString, final byte[] key) {
+        try {
+            saveTo(pathName, jsonString.getBytes("UTF-8"), key);
+        } catch (final IOException e) {
+            throw new StorageException(e);
+        }
+    }
+
+    public static void saveTo(final String pathname, final byte[] jsonBytes) throws StorageException {
+        JSonStorage.saveTo(pathname, jsonBytes, JSonStorage.KEY);
+    }
+
+    public static void saveTo(final String pathname, final byte[] jsonBytes, final byte[] key) {
         final File file = Application.getResource(pathname);
         final Object lock = JSonStorage.requestLock(file);
         synchronized (lock) {
@@ -567,10 +558,10 @@ public class JSonStorage {
                 tmp.delete();
                 if (new Regex(pathname, ".+\\.json").matches()) {
                     /* uncrypted */
-                    IO.writeToFile(tmp, json.getBytes("UTF-8"));
+                    IO.writeToFile(tmp, jsonBytes);
                 } else {
                     /* encrypted */
-                    IO.writeToFile(tmp, Crypto.encrypt(json, key));
+                    IO.writeToFile(tmp, encryptByteArray(jsonBytes, key, key));
                 }
                 if (file.exists()) {
                     if (!file.delete()) {
@@ -580,7 +571,7 @@ public class JSonStorage {
                 if (!tmp.renameTo(file)) {
                     throw new StorageException("Could not rename file: " + tmp + " to " + file);
                 }
-            } catch (final IOException e) {
+            } catch (final Exception e) {
                 throw new StorageException(e);
             } finally {
                 JSonStorage.unLock(file);
@@ -621,7 +612,7 @@ public class JSonStorage {
      */
     public static void storeTo(final String string, final Object list) {
         try {
-            JSonStorage.saveTo(string, JSonStorage.serializeToJson(list));
+            JSonStorage.saveTo(string, JSonStorage.serializeToJsonByteArray(list));
         } catch (final Exception e) {
             throw new StorageException(e);
         }
@@ -635,6 +626,7 @@ public class JSonStorage {
      * @param def
      * @return
      */
+    @SuppressWarnings("unchecked")
     public static <E> E stringToObject(final String string, final TypeRef<E> type, final E def) {
         if (StringUtils.isEmpty(string)) {
             throw new IllegalArgumentException("cannot stringToObject from empty string");
@@ -655,7 +647,6 @@ public class JSonStorage {
      */
     public static String toString(final Object list) {
         try {
-
             return JSonStorage.JSON_MAPPER.objectToString(list);
         } catch (final Throwable e) {
             e.printStackTrace();
@@ -679,8 +670,6 @@ public class JSonStorage {
      * @return
      */
     public static <E> E convert(Object o, TypeRef<E> typeRef) {
-        // TODO Auto-generated method stub SimpleMapper m = new SimpleMapper();
-
         return JSON_MAPPER.convert(o, typeRef);
     }
 

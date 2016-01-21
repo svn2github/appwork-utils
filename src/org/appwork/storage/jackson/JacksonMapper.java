@@ -34,19 +34,18 @@
 package org.appwork.storage.jackson;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Type;
 
 import org.appwork.storage.JSONMapper;
 import org.appwork.storage.JSonMapperException;
 import org.appwork.storage.JsonSerializer;
 import org.appwork.storage.TypeRef;
-import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.Version;
 import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializerProvider;
 import org.codehaus.jackson.map.module.SimpleModule;
@@ -78,25 +77,15 @@ public class JacksonMapper implements JSONMapper {
             public void serialize(final T arg0, final JsonGenerator jgen, final SerializerProvider arg2) throws IOException, JsonProcessingException {
                 jgen.writeRawValue(jsonSerializer.toJSonString(arg0));
             }
-        }
-
-        );
-
+        });
         mapper.registerModule(mod);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.appwork.storage.JSONMapper#objectToString(java.lang.Object)
-     */
     @Override
     public String objectToString(final Object value) throws JSonMapperException {
         try {
             return mapper.writeValueAsString(value);
-        } catch (final JsonGenerationException e) {
-            throw new JSonMapperException(e);
-        } catch (final JsonMappingException e) {
+        } catch (final JsonProcessingException e) {
             throw new JSonMapperException(e);
         } catch (final IOException e) {
             throw new JSonMapperException(e);
@@ -107,21 +96,13 @@ public class JacksonMapper implements JSONMapper {
     public <T> T stringToObject(final String jsonString, final Class<T> clazz) throws JSonMapperException {
         try {
             return mapper.readValue(jsonString, clazz);
-        } catch (final JsonParseException e) {
-            throw new JSonMapperException(e);
-        } catch (final JsonMappingException e) {
+        } catch (final JsonProcessingException e) {
             throw new JSonMapperException(e);
         } catch (final IOException e) {
             throw new JSonMapperException(e);
         }
-
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.appwork.storage.JSONMapper#stringToObject(java.lang.String, org.appwork.storage.TypeRef)
-     */
     @SuppressWarnings("unchecked")
     @Override
     public <T> T stringToObject(final String jsonString, final TypeRef<T> type) throws JSonMapperException {
@@ -136,20 +117,13 @@ public class JacksonMapper implements JSONMapper {
             // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6302954
             // (compiles in eclipse, but not with javac)
             return (T) mapper.readValue(jsonString, tr);
-        } catch (final JsonParseException e) {
-            throw new JSonMapperException(e);
-        } catch (final JsonMappingException e) {
+        } catch (final JsonProcessingException e) {
             throw new JSonMapperException(e);
         } catch (final IOException e) {
             throw new JSonMapperException(e);
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.appwork.storage.JSONMapper#convert(java.lang.Object, org.appwork.storage.TypeRef)
-     */
     @Override
     public <T> T convert(Object jsonString, final TypeRef<T> type) throws JSonMapperException {
         final TypeReference<T> tr = new TypeReference<T>() {
@@ -165,9 +139,114 @@ public class JacksonMapper implements JSONMapper {
     public byte[] objectToByteArray(final Object value) throws JSonMapperException {
         try {
             return mapper.writeValueAsBytes(value);
-        } catch (final JsonGenerationException e) {
+        } catch (final JsonProcessingException e) {
             throw new JSonMapperException(e);
-        } catch (final JsonMappingException e) {
+        } catch (final IOException e) {
+            throw new JSonMapperException(e);
+        }
+    }
+
+    /**
+     * closes inputStream
+     *
+     * @param inputStream
+     * @param type
+     * @return
+     * @throws JSonMapperException
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T inputStreamToObject(final InputStream inputStream, final TypeRef<T> type) throws JSonMapperException {
+        try {
+            try {
+                final TypeReference<T> tr = new TypeReference<T>() {
+                    @Override
+                    public Type getType() {
+                        return type.getType();
+                    }
+                };
+                // this (T) is required because of java bug
+                // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6302954
+                // (compiles in eclipse, but not with javac)
+                return (T) mapper.readValue(inputStream, tr);
+            } finally {
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+            }
+        } catch (final JsonProcessingException e) {
+            throw new JSonMapperException(e);
+        } catch (final IOException e) {
+            throw new JSonMapperException(e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T byteArrayToObject(final byte[] byteArray, final TypeRef<T> type) throws JSonMapperException {
+        try {
+            final TypeReference<T> tr = new TypeReference<T>() {
+                @Override
+                public Type getType() {
+                    return type.getType();
+                }
+            };
+            // this (T) is required because of java bug
+            // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6302954
+            // (compiles in eclipse, but not with javac)
+            return (T) mapper.readValue(byteArray, tr);
+        } catch (final JsonProcessingException e) {
+            throw new JSonMapperException(e);
+        } catch (final IOException e) {
+            throw new JSonMapperException(e);
+        }
+    }
+
+    /**
+     * closes outputStream
+     */
+    @Override
+    public void writeObject(OutputStream outputStream, Object value) throws JSonMapperException {
+        try {
+            try {
+                mapper.writeValue(outputStream, value);
+            } finally {
+                if (outputStream != null) {
+                    outputStream.close();
+                }
+            }
+        } catch (final JsonProcessingException e) {
+            throw new JSonMapperException(e);
+        } catch (final IOException e) {
+            throw new JSonMapperException(e);
+        }
+    }
+
+    @Override
+    public <T> T byteArrayToObject(byte[] byteArray, Class<T> clazz) throws JSonMapperException {
+        try {
+            return mapper.readValue(byteArray, clazz);
+        } catch (final JsonProcessingException e) {
+            throw new JSonMapperException(e);
+        } catch (final IOException e) {
+            throw new JSonMapperException(e);
+        }
+    }
+
+    /**
+     * closes inputStream
+     */
+    @Override
+    public <T> T inputStreamToObject(InputStream inputStream, Class<T> clazz) throws JSonMapperException {
+        try {
+            try {
+                return mapper.readValue(inputStream, clazz);
+            } finally {
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+            }
+        } catch (final JsonProcessingException e) {
             throw new JSonMapperException(e);
         } catch (final IOException e) {
             throw new JSonMapperException(e);

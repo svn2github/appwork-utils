@@ -226,7 +226,7 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
             if (readObject == dummyObject || !exists) {
                 if (this.url != null) {
                     org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Read Config: " + this.url);
-                    readObject = JSonStorage.restoreFromString(IO.readURL(this.url), this.cryptKey == null, this.cryptKey, this.typeRef, dummyObject);
+                    readObject = JSonStorage.restoreFromByteArray(IO.readURL(this.url), this.cryptKey == null, this.cryptKey, this.typeRef, dummyObject);
                     exists = true;
                 }
             }
@@ -276,12 +276,12 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
      * @param object
      */
     protected void write(final T object) {
-        final byte[] json = JSonStorage.getMapper().objectToByteArray(object);
+        final byte[] jsonBytes = JSonStorage.getMapper().objectToByteArray(object);
         final Runnable run = new Runnable() {
 
             @Override
             public void run() {
-                JSonStorage.saveTo(path, cryptKey == null, cryptKey, json);
+                JSonStorage.saveTo(path, cryptKey == null, cryptKey, jsonBytes);
             }
         };
         StorageHandler.enqueueWrite(run, path.getAbsolutePath(), isDelayedWriteAllowed());

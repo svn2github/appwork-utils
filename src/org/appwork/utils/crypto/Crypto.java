@@ -33,7 +33,15 @@
  * ==================================================================================================================================================== */
 package org.appwork.utils.crypto;
 
+import java.io.UnsupportedEncodingException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -70,58 +78,35 @@ public class Crypto {
      * @return
      */
     public static String decrypt(final byte[] b, final byte[] key, final byte[] iv) {
-        Cipher cipher;
-        try {
-            final IvParameterSpec ivSpec = new IvParameterSpec(iv);
-            final SecretKeySpec skeySpec = new SecretKeySpec(key, "AES");
-
-            cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-            cipher.init(Cipher.DECRYPT_MODE, skeySpec, ivSpec);
-            return new String(cipher.doFinal(b), "UTF-8");
-        } catch (final Exception e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
-            final IvParameterSpec ivSpec = new IvParameterSpec(iv);
-            final SecretKeySpec skeySpec = new SecretKeySpec(key, "AES");
-
+        final byte[] ret = decryptAsByteArray(b, key, iv);
+        if (ret != null) {
             try {
-                cipher = Cipher.getInstance("AES/CBC/nopadding");
-
-                cipher.init(Cipher.DECRYPT_MODE, skeySpec, ivSpec);
-                return new String(cipher.doFinal(b), "UTF-8");
-            } catch (final Exception e1) {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e1);
+                return new String(ret, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
             }
-
         }
         return null;
     }
 
-    /**
-     * Encrypts a String
-     *
-     * @param string
-     *            data to encrypt
-     * @param key
-     *            Key for encryption. Use 128 Bit (16 Byte) key
-     * @return
-     */
-    public static byte[] encrypt(final String string, final byte[] key) {
-        return Crypto.encrypt(string, key, key);
-    }
-
-    public static byte[] encrypt(final byte[] data, final byte[] key) {
-        return Crypto.encrypt(data, key, key);
-    }
-
-    public static byte[] encrypt(final byte[] data, final byte[] key, final byte[] iv) {
+    protected static byte[] decryptAsByteArray(final byte[] b, final byte[] key, final byte[] iv) {
         try {
-            final Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
             final IvParameterSpec ivSpec = new IvParameterSpec(iv);
             final SecretKeySpec skeySpec = new SecretKeySpec(key, "AES");
-            cipher.init(Cipher.ENCRYPT_MODE, skeySpec, ivSpec);
-            return cipher.doFinal(data);
+            final Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            cipher.init(Cipher.DECRYPT_MODE, skeySpec, ivSpec);
+            return cipher.doFinal(b);
         } catch (final Exception e) {
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            final IvParameterSpec ivSpec = new IvParameterSpec(iv);
+            final SecretKeySpec skeySpec = new SecretKeySpec(key, "AES");
+            try {
+                final Cipher cipher = Cipher.getInstance("AES/CBC/nopadding");
+                cipher.init(Cipher.DECRYPT_MODE, skeySpec, ivSpec);
+                cipher.doFinal(b);
+            } catch (final Exception e1) {
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e1);
+            }
         }
         return null;
     }
@@ -139,15 +124,19 @@ public class Crypto {
      */
     public static byte[] encrypt(final String string, final byte[] key, final byte[] iv) {
         try {
-            final Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-            final IvParameterSpec ivSpec = new IvParameterSpec(iv);
-            final SecretKeySpec skeySpec = new SecretKeySpec(key, "AES");
-            cipher.init(Cipher.ENCRYPT_MODE, skeySpec, ivSpec);
-            return cipher.doFinal(string.getBytes("UTF-8"));
+            return encryptByteArray(string.getBytes("UTF-8"), key, iv);
         } catch (final Exception e) {
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
         }
         return null;
+    }
+
+    protected static byte[] encryptByteArray(final byte[] data, final byte[] key, final byte[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
+        final Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        final IvParameterSpec ivSpec = new IvParameterSpec(iv);
+        final SecretKeySpec skeySpec = new SecretKeySpec(key, "AES");
+        cipher.init(Cipher.ENCRYPT_MODE, skeySpec, ivSpec);
+        return cipher.doFinal(data);
     }
 
 }

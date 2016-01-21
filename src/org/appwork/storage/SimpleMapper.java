@@ -33,15 +33,19 @@
  * ==================================================================================================================================================== */
 package org.appwork.storage;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.appwork.storage.simplejson.JSonFactory;
 import org.appwork.storage.simplejson.JSonNode;
 import org.appwork.storage.simplejson.ParserException;
 import org.appwork.storage.simplejson.mapper.JSonMapper;
 import org.appwork.storage.simplejson.mapper.MapperException;
+import org.appwork.utils.IO;
 
 /**
  * @author thomas
@@ -52,11 +56,7 @@ public class SimpleMapper implements JSONMapper {
 
     public SimpleMapper() {
         mapper = new JSonMapper() {
-            /*
-             * (non-Javadoc)
-             *
-             * @see org.appwork.storage.simplejson.mapper.JSonMapper#create(java. lang.Object)
-             */
+
             @Override
             public JSonNode create(final Object obj) throws MapperException {
                 for (final JsonSerializerEntry se : serializer) {
@@ -90,32 +90,19 @@ public class SimpleMapper implements JSONMapper {
             serializer = jsonSerializer;
         }
 
-        JsonSerializer serializer;
-        Class<?>       clazz;
+        final protected JsonSerializer serializer;
+        final protected Class<?>       clazz;
     }
 
-    private List<JsonSerializerEntry> serializer = new ArrayList<JsonSerializerEntry>();
+    private final List<JsonSerializerEntry> serializer = new CopyOnWriteArrayList<JsonSerializerEntry>();
 
     /**
      * @param jsonSerializer
      */
     public <T> void addSerializer(final Class<T> clazz, final JsonSerializer<T> jsonSerializer) {
-
-        final ArrayList<JsonSerializerEntry> newList = new ArrayList<JsonSerializerEntry>();
-        synchronized (serializer) {
-            newList.addAll(serializer);
-
-        }
-        newList.add(new JsonSerializerEntry(clazz, jsonSerializer));
-        serializer = newList;
-
+        serializer.add(new JsonSerializerEntry(clazz, jsonSerializer));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.appwork.storage.JSONMapper#objectToString(java.lang.Object)
-     */
     @Override
     public String objectToString(final Object value) throws JSonMapperException {
         try {
@@ -125,11 +112,6 @@ public class SimpleMapper implements JSONMapper {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.appwork.storage.JSONMapper#stringToObject(java.lang.String, java.lang.Class)
-     */
     @SuppressWarnings("unchecked")
     @Override
     public <T> T stringToObject(final String jsonString, final Class<T> clazz) throws JSonMapperException {
@@ -142,11 +124,6 @@ public class SimpleMapper implements JSONMapper {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.appwork.storage.JSONMapper#stringToObject(java.lang.String, org.appwork.storage.TypeRef)
-     */
     @Override
     public <T> T stringToObject(final String jsonString, final TypeRef<T> type) throws JSonMapperException {
         try {
@@ -158,11 +135,6 @@ public class SimpleMapper implements JSONMapper {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.appwork.storage.JSONMapper#convert(java.lang.Object, org.appwork.storage.TypeRef)
-     */
     @Override
     public <T> T convert(Object object, TypeRef<T> type) throws JSonMapperException {
 
@@ -173,11 +145,6 @@ public class SimpleMapper implements JSONMapper {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.appwork.storage.JSONMapper#objectToByteArray(java.lang.Object)
-     */
     @Override
     public byte[] objectToByteArray(Object value) throws JSonMapperException {
         final String ret = objectToString(value);
@@ -188,6 +155,88 @@ public class SimpleMapper implements JSONMapper {
                 return ret.getBytes("UTF-8");
             }
         } catch (UnsupportedEncodingException e) {
+            throw new JSonMapperException(e);
+        }
+    }
+
+    /**
+     * closes outputStream
+     */
+    @Override
+    public void writeObject(OutputStream outputStream, Object value) throws JSonMapperException {
+        try {
+            try {
+                outputStream.write(objectToByteArray(value));
+            } finally {
+                if (outputStream != null) {
+                    outputStream.close();
+                }
+            }
+        } catch (IOException e) {
+            throw new JSonMapperException(e);
+        }
+    }
+
+    /**
+     * closes inputStream
+     *
+     * @param inputStream
+     * @param type
+     * @return
+     * @throws JSonMapperException
+     */
+    @Override
+    public <T> T inputStreamToObject(InputStream inputStream, TypeRef<T> type) throws JSonMapperException {
+        try {
+            try {
+                return byteArrayToObject(IO.readStream(-1, inputStream), type);
+            } finally {
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+            }
+        } catch (IOException e) {
+            throw new JSonMapperException(e);
+        }
+    }
+
+    @Override
+    public <T> T byteArrayToObject(byte[] byteArray, TypeRef<T> type) throws JSonMapperException {
+        try {
+            return stringToObject(new String(byteArray, "UTF-8"), type);
+        } catch (UnsupportedEncodingException e) {
+            throw new JSonMapperException(e);
+        }
+    }
+
+    @Override
+    public <T> T byteArrayToObject(byte[] byteArray, Class<T> clazz) throws JSonMapperException {
+        try {
+            return stringToObject(new String(byteArray, "UTF-8"), clazz);
+        } catch (UnsupportedEncodingException e) {
+            throw new JSonMapperException(e);
+        }
+    }
+
+    /**
+     * closes inputStream
+     *
+     * @param inputStream
+     * @param clazz
+     * @return
+     * @throws JSonMapperException
+     */
+    @Override
+    public <T> T inputStreamToObject(InputStream inputStream, Class<T> clazz) throws JSonMapperException {
+        try {
+            try {
+                return byteArrayToObject(IO.readStream(-1, inputStream), clazz);
+            } finally {
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+            }
+        } catch (IOException e) {
             throw new JSonMapperException(e);
         }
     }

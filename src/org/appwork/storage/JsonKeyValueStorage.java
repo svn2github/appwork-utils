@@ -104,7 +104,7 @@ public class JsonKeyValueStorage extends Storage {
         if (resource != null) {
             getDefaultLogger().info("Load JSon Storage from Classpath url: " + resource);
             try {
-                final HashMap<String, Object> load = JSonStorage.restoreFromString(IO.readURL(resource), plain, key, TypeRef.HASHMAP, new HashMap<String, Object>());
+                final HashMap<String, Object> load = JSonStorage.restoreFromByteArray(IO.readURL(resource), plain, key, TypeRef.HASHMAP, new HashMap<String, Object>());
                 this.putAll(load);
             } catch (final IOException e) {
                 throw new WTFException(e);
@@ -519,9 +519,9 @@ public class JsonKeyValueStorage extends Storage {
         final long lastSetMark = this.setMark.get();
         if (this.writeMark.getAndSet(lastSetMark) != lastSetMark) {
             final boolean readL = getLock().readLock();
-            final byte[] json;
+            final byte[] jsonBytes;
             try {
-                json = JSonStorage.getMapper().objectToByteArray(getMap());
+                jsonBytes = JSonStorage.getMapper().objectToByteArray(getMap());
                 writeMark.set(setMark.get());
             } finally {
                 getLock().readUnlock(readL);
@@ -530,7 +530,7 @@ public class JsonKeyValueStorage extends Storage {
 
                 @Override
                 public void run() {
-                    JSonStorage.saveTo(file, plain, key, json);
+                    JSonStorage.saveTo(file, plain, key, jsonBytes);
                 }
 
             };

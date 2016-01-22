@@ -250,9 +250,11 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
 
         } else {
             final JPopupMenu ret = new JPopupMenu();
-            LockColumnWidthAction action;
-            ret.add(new JCheckBoxMenuItem(action = new LockColumnWidthAction(this)));
-            ret.add(new JSeparator());
+            if (getModel().getTable().isColumnLockingFeatureEnabled()) {
+                LockColumnWidthAction action;
+                ret.add(new JCheckBoxMenuItem(action = new LockColumnWidthAction(this)));
+                ret.add(new JSeparator());
+            }
             return ret;
         }
 
@@ -698,7 +700,7 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
     }
 
     public boolean isResizable() {
-        return getModel().getTable().isResizeableColumns() && !this.getModel().getTable().getColumnStore("ColumnWidthLocked_", this.getID(), !this.isDefaultResizable());
+        return getModel().getTable().isResizeableColumns() && (!this.getModel().getTable().getColumnStore("ColumnWidthLocked_", this.getID(), !this.isDefaultResizable()) || !getModel().getTable().isColumnLockingFeatureEnabled());
     }
 
     /**

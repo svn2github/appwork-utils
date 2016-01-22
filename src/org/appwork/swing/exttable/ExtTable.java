@@ -1950,4 +1950,12 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
         return this.lastTooltipCol != col || this.lastTooltipRow != row;
     }
 
+    /**
+     * @return
+     */
+    public boolean isColumnLockingFeatureEnabled() {
+
+        return true;
+    }
+
 }

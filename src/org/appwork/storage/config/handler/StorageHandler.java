@@ -46,6 +46,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.appwork.exceptions.WTFException;
 import org.appwork.scheduler.DelayedRunnable;
@@ -100,7 +101,6 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
         // StorageHandler
         STORAGEMAP = new HashMap<StorageHandler<?>, String>();
         ShutdownController.getInstance().addShutdownEvent(new ShutdownEvent() {
-            final LogInterface logger = org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger();
 
             @Override
             public long getMaxDuration() {
@@ -114,23 +114,7 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
 
             @Override
             public void onShutdown(final ShutdownRequest shutdownRequest) {
-                while (true) {
-                    synchronized (DELAYEDWRITES) {
-                        final Iterator<Runnable> it = DELAYEDWRITES.values().iterator();
-                        if (it.hasNext()) {
-                            final Runnable next = it.next();
-                            it.remove();
-                            try {
-                                next.run();
-                            } catch (final Throwable th) {
-                                logger.log(th);
-                            }
-                        } else {
-                            return;
-                        }
-                    }
-
-                }
+                flushWrites();
             }
 
             @Override
@@ -193,21 +177,59 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
         return ret;
     }
 
+    public static void flushWrites() {
+        final LogInterface logger = org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger();
+        while (true) {
+            synchronized (DELAYEDWRITES) {
+                final Iterator<Runnable> it = DELAYEDWRITES.values().iterator();
+                if (it.hasNext()) {
+                    final Runnable next = it.next();
+                    try {
+                        next.run();
+                    } catch (final Throwable th) {
+                        logger.log(th);
+                    } finally {
+                        it.remove();
+                    }
+                } else {
+                    return;
+                }
+            }
+        }
+    }
+
+    private static final AtomicBoolean DELAYED_WRITES = new AtomicBoolean(false);
+
+    public static void setDelayedWritesEnabled(final boolean enabled) {
+        if (DELAYED_WRITES.compareAndSet(!enabled, enabled)) {
+            if (!enabled) {
+                flushWrites();
+            }
+        }
+    }
+
+    public static boolean isDelayedWritesEnabled() {
+        return DELAYED_WRITES.get();
+    }
+
     public static void enqueueWrite(final Runnable run, final String ID, final boolean delayWrite) {
-        // final boolean write;
-        // synchronized (DELAYEDWRITES) {
-        // final boolean isShuttingDown = ShutdownController.getInstance().isShuttingDown();
-        // if (true || isShuttingDown || !delayWrite) {
-        // DELAYEDWRITES.remove(ID);
-        // write = true;
-        // } else {
-        // DELAYEDWRITES.put(ID, run);
-        // write = false;
-        // }
-        // }
-        // if (write) {
-        run.run();
-        // }
+        final boolean write;
+        synchronized (DELAYEDWRITES) {
+            final boolean isShuttingDown = ShutdownController.getInstance().isShuttingDown();
+            final boolean isDelayedWritesEnabled = isDelayedWritesEnabled();
+            if (isShuttingDown || !delayWrite || !isDelayedWritesEnabled) {
+                if (DELAYEDWRITES.size() > 0) {
+                    DELAYEDWRITES.remove(ID);
+                }
+                write = true;
+            } else {
+                DELAYEDWRITES.put(ID, run);
+                write = false;
+            }
+        }
+        if (write) {
+            run.run();
+        }
     }
 
     /**

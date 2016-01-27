@@ -58,6 +58,7 @@ import java.awt.image.ImageFilter;
 import java.awt.image.ImageProducer;
 import java.awt.image.Kernel;
 import java.awt.image.RGBImageFilter;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -74,6 +75,7 @@ import org.appwork.swing.components.IDIcon;
 import org.appwork.swing.components.IconIdentifier;
 import org.appwork.utils.URLStream;
 import org.appwork.utils.ImageProvider.ImageProvider;
+import org.appwork.utils.net.Base64InputStream;
 import org.appwork.utils.net.Base64OutputStream;
 
 public class IconIO {
@@ -191,18 +193,18 @@ public class IconIO {
             public final int filterRGB(final int x, final int y, final int rgb) {
 
                 final int r = (rgb & 0xFF0000) >> 16;
-        final int g = (rgb & 0xFF00) >> 8;
-        final int b = rgb & 0xFF;
-        if (r >= r1 && r <= r2 && g >= g1 && g <= g2 && b >= b1 && b <= b2) {
-            // Set fully transparent but keep color
-            // calculate a alpha value based on the distance between the
-            // range borders and the pixel color
-            final int dist = (Math.abs(r - (r1 + r2) / 2) + Math.abs(g - (g1 + g2) / 2) + Math.abs(b - (b1 + b2) / 2)) * 2;
+                final int g = (rgb & 0xFF00) >> 8;
+                final int b = rgb & 0xFF;
+                if (r >= r1 && r <= r2 && g >= g1 && g <= g2 && b >= b1 && b <= b2) {
+                    // Set fully transparent but keep color
+                    // calculate a alpha value based on the distance between the
+                    // range borders and the pixel color
+                    final int dist = (Math.abs(r - (r1 + r2) / 2) + Math.abs(g - (g1 + g2) / 2) + Math.abs(b - (b1 + b2) / 2)) * 2;
 
-            return new Color(r, g, b, Math.min(255, dist)).getRGB();
-        }
+                    return new Color(r, g, b, Math.min(255, dist)).getRGB();
+                }
 
-        return rgb;
+                return rgb;
             }
         };
 
@@ -799,7 +801,7 @@ public class IconIO {
 
     /**
      * Save image as a compresssed jpeg and returns the bytes
-     * 
+     *
      * @param read
      * @return
      * @throws IOException
@@ -821,13 +823,35 @@ public class IconIO {
 
     /**
      * reads image converts to a compresssed jpeg and returns the bytes
-     * 
+     *
      * @param imageFile
      * @return
      * @throws IOException
      */
     public static byte[] toJpgBytes(File file) throws IOException {
         return toJpgBytes(ImageIO.read(file));
+    }
+
+    public static Icon getIconFromDataUrl(String dataURL) throws IOException {
+
+        return new ImageIcon(getImageFromDataUrl(dataURL));
+
+    }
+
+    /**
+     * @param exampleDataUrl
+     * @return
+     * @throws IOException
+     */
+    public static Image getImageFromDataUrl(String dataURL) throws IOException {
+
+        final int base64Index = dataURL.indexOf(";base64,");
+        if (base64Index > 0 && base64Index + 8 < dataURL.length()) {
+            dataURL = dataURL.substring(base64Index + 8);
+        }
+        Base64InputStream is = new Base64InputStream(new ByteArrayInputStream(dataURL.getBytes("UTF-8")));
+        return ImageIO.read(is);
+
     }
 
 }

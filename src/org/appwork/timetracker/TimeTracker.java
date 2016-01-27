@@ -73,6 +73,7 @@ public class TimeTracker {
     }
 
     public void wait(final TrackerJob job) throws InterruptedException {
+
         if (rules.size() == 0 || job == null) {
             return;
         }

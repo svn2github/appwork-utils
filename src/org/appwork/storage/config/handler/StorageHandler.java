@@ -89,11 +89,11 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
 
     protected static final DelayedRunnable                  SAVEDELAYER   = new DelayedRunnable(5000, 30000) {
 
-                                                                              @Override
-                                                                              public void delayedrun() {
-                                                                                  StorageHandler.saveAll();
-                                                                              }
-                                                                          };
+        @Override
+        public void delayedrun() {
+            StorageHandler.saveAll();
+        }
+    };
     private static final HashMap<StorageHandler<?>, String> STORAGEMAP;
 
     static {

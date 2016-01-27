@@ -117,20 +117,27 @@ public abstract class SocksHTTPconnection extends HTTPConnectionImpl {
                 this.sendRequest();
                 return;
             } catch (final javax.net.ssl.SSLException e) {
-                this.connectExceptions.add(this.proxyInetSocketAddress + "|" + e.getMessage());
-                this.disconnect();
+                try {
+                    this.connectExceptions.add(this.proxyInetSocketAddress + "|" + e.getMessage());
+                } finally {
+                    this.disconnect();
+                }
                 if (sslSNIWorkAround == false && e.getMessage().contains("unrecognized_name")) {
                     sslSNIWorkAround = true;
                     continue connect;
                 }
                 throw new ProxyConnectException(e, this.proxy);
             } catch (final IOException e) {
-                this.disconnect();
+                try {
+                    this.connectExceptions.add(this.proxyInetSocketAddress + "|" + e.getMessage());
+                } finally {
+                    this.disconnect();
+                }
                 if (e instanceof HTTPProxyException) {
                     throw e;
+                } else {
+                    throw new ProxyConnectException(e, this.proxy);
                 }
-                this.connectExceptions.add(this.proxyInetSocketAddress + "|" + e.getMessage());
-                throw new ProxyConnectException(e, this.proxy);
             }
         }
     }

@@ -712,8 +712,11 @@ public class HTTPConnectionImpl implements HTTPConnection {
                 this.sendRequest();
                 return;
             } catch (final javax.net.ssl.SSLException e) {
-                this.disconnect();
-                this.connectExceptions.add(lastConnectionSocket.getInetAddress() + "|" + e.getMessage());
+                try {
+                    this.connectExceptions.add(lastConnectionSocket.getInetAddress() + "|" + e.getMessage());
+                } finally {
+                    this.disconnect();
+                }
                 if (sslSNIWorkAround == false && e.getMessage().contains("unrecognized_name")) {
                     sslSNIWorkAround = true;
                     continue connect;

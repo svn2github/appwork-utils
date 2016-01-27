@@ -221,8 +221,11 @@ public class HTTPProxyHTTPConnectionImpl extends HTTPConnectionImpl {
                 this.sendRequest();
                 return;
             } catch (final javax.net.ssl.SSLException e) {
-                this.connectExceptions.add(this.proxyInetSocketAddress + "|" + e.getMessage());
-                this.disconnect();
+                try {
+                    this.connectExceptions.add(this.proxyInetSocketAddress + "|" + e.getMessage());
+                } finally {
+                    this.disconnect();
+                }
                 if (sslSNIWorkAround == false && e.getMessage().contains("unrecognized_name")) {
                     sslSNIWorkAround = true;
                     continue connect;
@@ -230,14 +233,15 @@ public class HTTPProxyHTTPConnectionImpl extends HTTPConnectionImpl {
                 throw new ProxyConnectException(e, this.proxy);
             } catch (final IOException e) {
                 try {
+                    this.connectExceptions.add(this.proxyInetSocketAddress + "|" + e.getMessage());
+                } finally {
                     this.disconnect();
-                } catch (final Throwable e2) {
                 }
                 if (e instanceof HTTPProxyException) {
                     throw e;
+                } else {
+                    throw new ProxyConnectException(e, this.proxy);
                 }
-                this.connectExceptions.add(this.proxyInetSocketAddress + "|" + e.getMessage());
-                throw new ProxyConnectException(e, this.proxy);
             }
         }
     }

@@ -37,18 +37,17 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
-import java.net.SocketException;
 import java.nio.ByteBuffer;
 
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.net.httpconnection.HTTPProxy;
 import org.appwork.utils.net.httpconnection.ProxyAuthException;
 import org.appwork.utils.net.httpconnection.ProxyConnectException;
+import org.appwork.utils.net.httpconnection.ProxyEndpointConnectException;
 import org.appwork.utils.net.httpconnection.SocksHTTPconnection.AUTH;
 import org.appwork.utils.net.httpconnection.SocksHTTPconnection.DESTTYPE;
 
@@ -75,43 +74,40 @@ public class Socks5SocketConnection extends SocketConnection {
     @Override
     protected Socket connectProxySocket(final Socket proxySocket, final SocketAddress endpoint, final StringBuffer logger) throws IOException {
         final AUTH authOffer;
-        final String userName = this.getProxy().getUser();
-        final String passWord = this.getProxy().getPass();
+        final HTTPProxy proxy = getProxy();
+        final String userName = proxy.getUser();
+        final String passWord = proxy.getPass();
         if (!StringUtils.isEmpty(userName) || !StringUtils.isEmpty(passWord)) {
             authOffer = AUTH.PLAIN;
         } else {
             authOffer = AUTH.NONE;
         }
-        final AUTH authRequest;
         try {
-            authRequest = Socks5SocketConnection.sayHello(proxySocket, authOffer, logger);
-        } catch (final IOException e) {
-            throw new ProxyConnectException(e, this.getProxy());
-        }
-        switch (authRequest) {
-        case PLAIN:
-            switch (authOffer) {
-            case NONE:
-                throw new ProxyAuthException(this.getProxy());
+            final AUTH authRequest = Socks5SocketConnection.sayHello(proxySocket, authOffer, logger);
+            switch (authRequest) {
             case PLAIN:
-                try {
+                switch (authOffer) {
+                case NONE:
+                    throw new InvalidAuthException();
+                case PLAIN:
                     Socks5SocketConnection.authPlain(proxySocket, userName, passWord, logger);
-                } catch (final IOException e) {
-                    throw new ProxyAuthException(e, this.getProxy());
+                    break;
                 }
+                break;
+            default:
+                break;
             }
-            break;
-        default:
-            break;
-        }
-        try {
             return Socks5SocketConnection.establishConnection(proxySocket, endpoint, this.getDestType(), logger);
+        } catch (final InvalidAuthException e) {
+            throw new ProxyAuthException(e, proxy);
+        } catch (final EndpointConnectException e) {
+            throw new ProxyEndpointConnectException(e, getProxy(), endpoint);
         } catch (final IOException e) {
             throw new ProxyConnectException(e, this.getProxy());
         }
     }
 
-    public static Socket establishConnection(final Socket proxySocket, final SocketAddress endpoint, DESTTYPE destType, final StringBuffer logger) throws IOException {
+    protected static Socket establishConnection(final Socket proxySocket, final SocketAddress endpoint, DESTTYPE destType, final StringBuffer logger) throws IOException {
         final InetSocketAddress endPointAddress = (InetSocketAddress) endpoint;
         final OutputStream os = proxySocket.getOutputStream();
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -169,19 +165,19 @@ public class Socks5SocketConnection extends SocketConnection {
         case 0:
             break;
         case 3:
-            throw new SocketException("Network is unreachable");
+            throw new EndpointConnectException("Network is unreachable");
         case 4:
-            throw new SocketException("Host is unreachable");
+            throw new EndpointConnectException("Host is unreachable");
         case 5:
-            throw new ConnectException("Connection refused");
+            throw new EndpointConnectException("Connection refused");
         case 1:
             throw new IOException("Socks5 general server failure");
         case 2:
-            throw new IOException("Socks5 connection not allowed by ruleset");
+            throw new EndpointConnectException("Socks5 connection not allowed by ruleset");
         case 6:
         case 7:
         case 8:
-            throw new IOException("Socks5 could not establish connection, status=" + resp[1]);
+            throw new EndpointConnectException("Socks5 could not establish connection, status=" + resp[1]);
         }
         if (resp[3] == 1) {
             /* ip4v response */
@@ -207,7 +203,7 @@ public class Socks5SocketConnection extends SocketConnection {
         return proxySocket;
     }
 
-    public static void authPlain(final Socket proxySocket, String userName, String passWord, final StringBuffer logger) throws IOException {
+    protected static void authPlain(final Socket proxySocket, String userName, String passWord, final StringBuffer logger) throws IOException {
         final String user = userName == null ? "" : userName;
         final String pass = passWord == null ? "" : passWord;
         if (logger != null) {
@@ -241,7 +237,7 @@ public class Socks5SocketConnection extends SocketConnection {
             if (logger != null) {
                 logger.append("<-AUTH Invalid!\r\n");
             }
-            throw new IOException("Socks5 auth invalid");
+            throw new InvalidAuthException("Socks5 auth invalid");
         } else {
             if (logger != null) {
                 logger.append("<-AUTH Valid!\r\n");

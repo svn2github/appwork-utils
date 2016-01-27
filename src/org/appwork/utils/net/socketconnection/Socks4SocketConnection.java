@@ -37,16 +37,16 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
-import java.net.SocketException;
 import java.nio.ByteBuffer;
 
 import org.appwork.utils.net.httpconnection.HTTPProxy;
+import org.appwork.utils.net.httpconnection.ProxyAuthException;
 import org.appwork.utils.net.httpconnection.ProxyConnectException;
+import org.appwork.utils.net.httpconnection.ProxyEndpointConnectException;
 import org.appwork.utils.net.httpconnection.SocksHTTPconnection.DESTTYPE;
 
 /**
@@ -70,21 +70,22 @@ public class Socks4SocketConnection extends SocketConnection {
     }
 
     @Override
-    protected Socket connectProxySocket(final Socket proxySocket, final SocketAddress endpoint, final StringBuffer logger) throws IOException {
+    protected Socket connectProxySocket(final Socket proxySocket, final SocketAddress endPoint, final StringBuffer logger) throws IOException {
+        final HTTPProxy proxy = getProxy();
         try {
             Socks4SocketConnection.sayHello(proxySocket, logger);
+            return Socks4SocketConnection.establishConnection(proxySocket, proxy.getUser(), endPoint, this.getDestType(), logger);
+        } catch (final InvalidAuthException e) {
+            throw new ProxyAuthException(e, proxy);
+        } catch (final EndpointConnectException e) {
+            throw new ProxyEndpointConnectException(e, proxy, endPoint);
         } catch (final IOException e) {
-            throw new ProxyConnectException(e, this.getProxy());
-        }
-        try {
-            return Socks4SocketConnection.establishConnection(proxySocket, this.getProxy().getUser(), endpoint, this.getDestType(), logger);
-        } catch (final IOException e) {
-            throw new ProxyConnectException(e, this.getProxy());
+            throw new ProxyConnectException(e, proxy);
         }
     }
 
-    public static Socket establishConnection(final Socket proxySocket, final String userID, final SocketAddress endpoint, DESTTYPE destType, final StringBuffer logger) throws IOException {
-        final InetSocketAddress endPointAddress = (InetSocketAddress) endpoint;
+    public static Socket establishConnection(final Socket proxySocket, final String userID, final SocketAddress endPoint, DESTTYPE destType, final StringBuffer logger) throws IOException {
+        final InetSocketAddress endPointAddress = (InetSocketAddress) endPoint;
         final OutputStream os = proxySocket.getOutputStream();
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         bos.write((byte) 1);
@@ -147,13 +148,13 @@ public class Socks4SocketConnection extends SocketConnection {
         case 0x5a:
             break;
         case 0x5b:
-            throw new SocketException("Socks4 request rejected or failed");
+            throw new EndpointConnectException("Socks4 request rejected or failed");
         case 0x5c:
-            throw new SocketException("Socks4 request failed because client is not running identd (or not reachable from the server)");
+            throw new EndpointConnectException("Socks4 request failed because client is not running identd (or not reachable from the server)");
         case 0x5d:
-            throw new ConnectException("Socks4 request failed because client's identd could not confirm the user ID string in the request");
+            throw new EndpointConnectException("Socks4 request failed because client's identd could not confirm the user ID string in the request");
         default:
-            throw new IOException("Socks4 could not establish connection, status=" + resp[1]);
+            throw new EndpointConnectException("Socks4 could not establish connection, status=" + resp[1]);
         }
         /* port */
         final byte[] connectedPort = SocketConnection.ensureRead(is, 2, null);
@@ -170,7 +171,7 @@ public class Socks4SocketConnection extends SocketConnection {
         if (logger != null) {
             logger.append("->SOCKS4 Hello\r\n");
         }
-        /* socks5 */
+        /* socks4 */
         os.write((byte) 4);
     }
 

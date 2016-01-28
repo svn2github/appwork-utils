@@ -209,12 +209,14 @@ public class SyntheticaHelper {
             JDialog.setDefaultLookAndFeelDecorated(false);
             final LanguageFileSetup locale = TranslationFactory.create(LanguageFileSetup.class);
             final SyntheticaSettings config = JsonConfig.create(SyntheticaSettings.class);
-            de.javasoft.plaf.synthetica.SyntheticaLookAndFeel.setWindowsDecorated(false);
+            boolean decorated = config.isWindowDecorationEnabled();
+            de.javasoft.plaf.synthetica.SyntheticaLookAndFeel.setWindowsDecorated(decorated);
             // final HashMap<String, String> dummy = new HashMap<String,
             // String>();
             // dummy.put("defaultlaf","BlaBlaLeberLAF");
             // AppContext.getAppContext().put("swing.lafdata", dummy);
-            UIManager.put("Synthetica.window.decoration", config.isWindowDecorationEnabled());
+
+            UIManager.put("Synthetica.window.decoration", decorated);
             UIManager.put("Synthetica.text.antialias", config.isTextAntiAliasEnabled());
             UIManager.put("Synthetica.extendedFileChooser.rememberPreferences", Boolean.FALSE);
             UIManager.put("Synthetica.extendedFileChooser.rememberLastDirectory", Boolean.FALSE);

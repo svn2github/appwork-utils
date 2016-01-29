@@ -1,5 +1,5 @@
 /**
- * 
+ *
  * ====================================================================================================================================================
  *         "AppWork Utilities" License
  *         The "AppWork Utilities" will be called [The Product] from now on.
@@ -7,16 +7,16 @@
  *         Copyright (c) 2009-2015, AppWork GmbH <e-mail@appwork.org>
  *         Schwabacher Straße 117
  *         90763 Fürth
- *         Germany   
+ *         Germany
  * === Preamble ===
  *     This license establishes the terms under which the [The Product] Source Code & Binary files may be used, copied, modified, distributed, and/or redistributed.
  *     The intent is that the AppWork GmbH is able to provide their utilities library for free to non-commercial projects whereas commercial usage is only permitted after obtaining a commercial license.
  *     These terms apply to all files that have the [The Product] License header (IN the file), a <filename>.license or <filename>.info (like mylib.jar.info) file that contains a reference to this license.
- * 	
+ *
  * === 3rd Party Licences ===
  *     Some parts of the [The Product] use or reference 3rd party libraries and classes. These parts may have different licensing conditions. Please check the *.license and *.info files of included libraries
- *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header. 	
- * 	
+ *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header.
+ *
  * === Definition: Commercial Usage ===
  *     If anybody or any organization is generating income (directly or indirectly) by using [The Product] or if there's any commercial interest or aspect in what you are doing, we consider this as a commercial usage.
  *     If your use-case is neither strictly private nor strictly educational, it is commercial. If you are unsure whether your use-case is commercial or not, consider it as commercial or contact us.
@@ -25,9 +25,9 @@
  *     If you want to use [The Product] in a commercial way (see definition above), you have to obtain a paid license from AppWork GmbH.
  *     Contact AppWork for further details: <e-mail@appwork.org>
  * === Non-Commercial Usage ===
- *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the 
+ *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the
  *     "GNU Affero General Public License" (http://www.gnu.org/licenses/agpl-3.0.en.html).
- * 	
+ *
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
@@ -50,7 +50,6 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.WeakHashMap;
-import java.util.logging.Level;
 
 import javax.imageio.IIOException;
 import javax.imageio.ImageIO;
@@ -63,7 +62,6 @@ import org.appwork.storage.config.MinTimeWeakReferenceCleanup;
 import org.appwork.sunwrapper.sun.awt.image.ToolkitImageWrapper;
 import org.appwork.utils.Application;
 import org.appwork.utils.URLStream;
-
 
 /**
  * This class grants easy access to images stored in APPROOT/images/**.png
@@ -172,8 +170,8 @@ public class ImageProvider {
 
      /**
       * this creates a new BufferedImage from an existing Image. Is used for dereferencing the sourceImage in scaled Images created with
-     * image.getScaledInstance, which always keeps a reference to its original image
-     *
+      * image.getScaledInstance, which always keeps a reference to its original image
+      *
       * @param image
       * @return
       * @throws IOException
@@ -205,13 +203,13 @@ public class ImageProvider {
 
                  final MinTimeWeakReference<BufferedImage> cache = ImageProvider.IMAGE_CACHE.get(name);
                  if (cache.get() != null) {
-                    return cache.get();
-                }
+                     return cache.get();
+                 }
              }
 
              final URL absolutePath = Application.getRessourceURL("images/" + name + ".png");
              try {
-                       org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Init Image: " + name + ": " + absolutePath);
+                 org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Init Image: " + name + ": " + absolutePath);
                  final BufferedImage image = ImageProvider.read(absolutePath);
                  if (putIntoCache) {
                      if (image.getHeight() * image.getWidth() > 100 * 100) {
@@ -222,7 +220,7 @@ public class ImageProvider {
                  }
                  return image;
              } catch (final IOException e) {
-                       org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Could not Init Image: " + absolutePath);
+                 org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Could not Init Image: " + absolutePath);
                  if (createDummy) {
                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
                      return ImageProvider.createIcon(name.toUpperCase(Locale.ENGLISH), 48, 48);
@@ -230,7 +228,7 @@ public class ImageProvider {
                      throw e;
                  }
              } catch (final Throwable e) {
-                       org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Could not Init Image: " + absolutePath);
+                 org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Could not Init Image: " + absolutePath);
                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
                  return ImageProvider.createIcon(name.toUpperCase(Locale.ENGLISH), 48, 48);
              }
@@ -245,8 +243,8 @@ public class ImageProvider {
       */
      public static Icon getDisabledIcon(Icon icon) {
          if (icon == null) {
-            return null;
-        }
+             return null;
+         }
          synchronized (ImageProvider.LOCK) {
              final MinTimeWeakReference<Icon> cache = ImageProvider.DISABLED_ICON_CACHE.get(icon);
              Icon ret = cache == null ? null : cache.get();
@@ -284,7 +282,7 @@ public class ImageProvider {
 
      /**
       * Loads the image, scales it to the desired size and returns it as an imageicon
-     *
+      *
       * @param name
       * @param width
       * @param height
@@ -309,8 +307,8 @@ public class ImageProvider {
              if (ImageProvider.IMAGEICON_CACHE.containsKey(key = SB.toString())) {
                  final MinTimeWeakReference<ImageIcon> cache = ImageProvider.IMAGEICON_CACHE.get(key);
                  if (cache.get() != null) {
-                    return cache.get();
-                }
+                     return cache.get();
+                 }
              }
              final BufferedImage image = ImageProvider.getBufferedImage(name, createDummy, putIntoCache);
              final double faktor = Math.max((double) image.getWidth(null) / width, (double) image.getHeight(null) / height);
@@ -342,7 +340,7 @@ public class ImageProvider {
 
      /**
       * Taken from http://today.java.net/pub/a/today/2007/04/03/perils-of-image- getscaledinstance.html License: unknown Convenience method
-     * that returns a scaled instance of the provided {@code BufferedImage}.
+      * that returns a scaled instance of the provided {@code BufferedImage}.
       *
       * @param img
       *            the original image to be scaled
@@ -356,17 +354,17 @@ public class ImageProvider {
       *            {@code RenderingHints.VALUE_INTERPOLATION_BICUBIC})
       * @param higherQuality
       *            if true, this method will use a multi-step scaling technique that provides higher quality than the usual one-step
-     *            technique (only useful in downscaling cases, where {@code targetWidth} or {@code targetHeight} is smaller than the
-     *            original dimensions, and generally only when the {@code BILINEAR} hint is specified)
-     * @return a scaled version of the original {@code BufferedImage}
+      *            technique (only useful in downscaling cases, where {@code targetWidth} or {@code targetHeight} is smaller than the
+      *            original dimensions, and generally only when the {@code BILINEAR} hint is specified)
+      * @return a scaled version of the original {@code BufferedImage}
       */
      public static BufferedImage getScaledInstance(final BufferedImage img, int width, int height, final Object hint, final boolean higherQuality) {
          final double faktor = Math.max((double) img.getWidth() / width, (double) img.getHeight() / height);
          width = (int) (img.getWidth() / faktor);
          height = (int) (img.getHeight() / faktor);
          if (faktor == 1.0) {
-            return img;
-        }
+             return img;
+         }
 
          BufferedImage ret = img;
          int w, h;
@@ -480,8 +478,8 @@ public class ImageProvider {
      /* copied from ImageIO, to close the inputStream */
      public static BufferedImage read(final File input) throws IOException {
          if (!input.canRead()) {
-            throw new IIOException("Can't read input file!");
-        }
+             throw new IIOException("Can't read input file!");
+         }
          FileInputStream is = null;
          try {
              is = new FileInputStream(input);
@@ -503,15 +501,15 @@ public class ImageProvider {
       */
      private static BufferedImage read(final URL absolutePath) throws IOException {
          if (absolutePath == null) {
-            throw new IllegalArgumentException("input == null!");
-        }
+             throw new IllegalArgumentException("input == null!");
+         }
          InputStream is = null;
          BufferedImage bi = null;
          try {
              is = URLStream.openStream(absolutePath);
              if (is == null) {
-                throw new IIOException("Can't create an ImageInputStream!");
-            }
+                 throw new IIOException("Can't create an ImageInputStream!");
+             }
              bi = ImageIO.read(is);
          } finally {
              try {
@@ -547,7 +545,7 @@ public class ImageProvider {
 
      /**
       * Scales a buffered Image to the given size. This method is NOT cached. so take care to cache it externally if you use it frequently
-     *
+      *
       * @param img
       * @param width
       * @param height
@@ -555,14 +553,14 @@ public class ImageProvider {
       */
      public static Image scaleBufferedImage(final BufferedImage img, int width, int height) {
          if (img == null) {
-            return null;
-        }
+             return null;
+         }
          final double faktor = Math.max((double) img.getWidth() / width, (double) img.getHeight() / height);
          width = (int) (img.getWidth() / faktor);
          height = (int) (img.getHeight() / faktor);
          if (faktor == 1.0) {
-            return img;
-        }
+             return img;
+         }
          final Image image = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
          try {
              return ImageProvider.dereferenceImage(image);
@@ -576,8 +574,8 @@ public class ImageProvider {
      /**
       * Scales an imageicon to w x h.<br>
       * like {@link #scaleBufferedImage(BufferedImage, int, int)}, this Function is NOT cached. USe an external cache if you use it
-     * frequently
-     *
+      * frequently
+      *
       * @param img
       * @param w
       * @param h
@@ -586,8 +584,8 @@ public class ImageProvider {
      public static ImageIcon scaleImageIcon(final ImageIcon img, final int w, final int h) {
          // already has the desired size?
          if (img.getIconHeight() == h && img.getIconWidth() == w) {
-            return img;
-        }
+             return img;
+         }
 
          BufferedImage dest;
          boolean sunToolkitImage = false;
@@ -613,8 +611,8 @@ public class ImageProvider {
      public static ImageIcon toImageIcon(final Icon icon) {
 
          if (icon == null) {
-            return null;
-        }
+             return null;
+         }
          if (icon instanceof ImageIcon) {
              return (ImageIcon) icon;
          } else {
@@ -625,7 +623,17 @@ public class ImageProvider {
              g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
              // g.setColor(Color.RED);
              // g.fillRect(0, 0, w, h);
-             icon.paintIcon(null, g, 0, 0);
+             try {
+                 icon.paintIcon(null, g, 0, 0);
+             } catch (final NullPointerException e) {
+                 // java.lang.NullPointerException when WindowDecoration is enabled
+                 // at
+                // de.javasoft.plaf.synthetica.simple2D.iconPainter.RootPaneMaximizeIconPainter.paint2D(RootPaneMaximizeIconPainter.java:42)
+                 // at de.javasoft.plaf.synthetica.painter.SyntheticaBasicIconPainter.paintIcon_(SyntheticaBasicIconPainter.java:173)
+                 // at de.javasoft.plaf.synthetica.painter.SyntheticaBasicIconPainter.paintIcon(SyntheticaBasicIconPainter.java:143)
+                 // at de.javasoft.plaf.synthetica.painter.SyntheticaBasicIconPainter.paintIcon(SyntheticaBasicIconPainter.java:131)
+                 e.printStackTrace();
+            }
              g.dispose();
              return new ImageIcon(image);
 

@@ -195,7 +195,7 @@ public abstract class AbstractLogAction extends BasicAction {
                 final String timestampString = new Regex(f.getName(), "(\\d{7,})_").getMatch(0);
                 if (timestampString != null) {
                     final long timestamp = Long.parseLong(timestampString);
-                    final LogFolder lf = new LogFolder(f, timestamp);
+                    final LogFolder logFolder = new LogFolder(f, timestamp);
                     if (Files.getFiles(new FileFilter() {
                         @Override
                         public boolean accept(final File pathname) {
@@ -204,7 +204,7 @@ public abstract class AbstractLogAction extends BasicAction {
                     }, f).size() == 0) {
                         continue;
                     }
-                    folders.add(lf);
+                    folders.add(logFolder);
                 }
             }
         }

@@ -73,6 +73,7 @@ import org.appwork.storage.config.events.ConfigEvent;
 import org.appwork.storage.config.events.ConfigEventSender;
 import org.appwork.utils.Application;
 import org.appwork.utils.Files;
+import org.appwork.utils.ReflectionUtils;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.logging2.LogInterface;
 import org.appwork.utils.logging2.extmanager.LoggerFactory;
@@ -89,11 +90,11 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
 
     protected static final DelayedRunnable                  SAVEDELAYER   = new DelayedRunnable(5000, 30000) {
 
-        @Override
-        public void delayedrun() {
-            StorageHandler.saveAll();
-        }
-    };
+                                                                              @Override
+                                                                              public void delayedrun() {
+                                                                                  StorageHandler.saveAll();
+                                                                              }
+                                                                          };
     private static final HashMap<StorageHandler<?>, String> STORAGEMAP;
 
     static {
@@ -795,7 +796,11 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
                 final KeyHandler<?> handler = this.methodMap.get(m);
                 if (handler != null) {
                     if (handler.isGetter(m)) {
-                        return handler.getValue();
+                        Object ret = handler.getValue();
+                        if (ret instanceof Number) {
+                            ret = ReflectionUtils.castNumber((Number) ret, handler.getRawClass());
+                        }
+                        return ret;
                     } else {
                         ((KeyHandler<Object>) handler).setValue(parameter[0]);
                         if (this.writeStrategy != null) {

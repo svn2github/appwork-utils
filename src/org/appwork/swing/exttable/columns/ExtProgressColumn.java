@@ -1,5 +1,5 @@
 /**
- * 
+ *
  * ====================================================================================================================================================
  *         "AppWork Utilities" License
  *         The "AppWork Utilities" will be called [The Product] from now on.
@@ -7,16 +7,16 @@
  *         Copyright (c) 2009-2015, AppWork GmbH <e-mail@appwork.org>
  *         Schwabacher Straße 117
  *         90763 Fürth
- *         Germany   
+ *         Germany
  * === Preamble ===
  *     This license establishes the terms under which the [The Product] Source Code & Binary files may be used, copied, modified, distributed, and/or redistributed.
  *     The intent is that the AppWork GmbH is able to provide their utilities library for free to non-commercial projects whereas commercial usage is only permitted after obtaining a commercial license.
  *     These terms apply to all files that have the [The Product] License header (IN the file), a <filename>.license or <filename>.info (like mylib.jar.info) file that contains a reference to this license.
- * 	
+ *
  * === 3rd Party Licences ===
  *     Some parts of the [The Product] use or reference 3rd party libraries and classes. These parts may have different licensing conditions. Please check the *.license and *.info files of included libraries
- *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header. 	
- * 	
+ *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header.
+ *
  * === Definition: Commercial Usage ===
  *     If anybody or any organization is generating income (directly or indirectly) by using [The Product] or if there's any commercial interest or aspect in what you are doing, we consider this as a commercial usage.
  *     If your use-case is neither strictly private nor strictly educational, it is commercial. If you are unsure whether your use-case is commercial or not, consider it as commercial or contact us.
@@ -25,9 +25,9 @@
  *     If you want to use [The Product] in a commercial way (see definition above), you have to obtain a paid license from AppWork GmbH.
  *     Contact AppWork for further details: <e-mail@appwork.org>
  * === Non-Commercial Usage ===
- *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the 
+ *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the
  *     "GNU Affero General Public License" (http://www.gnu.org/licenses/agpl-3.0.en.html).
- * 	
+ *
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
@@ -42,20 +42,22 @@ import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.border.Border;
 
+import org.appwork.swing.MigPanel;
 import org.appwork.swing.exttable.ExtColumn;
 import org.appwork.swing.exttable.ExtDefaultRowSorter;
 import org.appwork.swing.exttable.ExtTableModel;
 import org.appwork.swing.exttable.renderercomponents.RendererProgressBar;
+import org.appwork.utils.swing.renderer.RendererMigPanel;
 
 abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
     /**
      * @author Thomas
-     * 
+     *
      * @param <E>
      */
     public static final class IndeterminatedRenderer<E> extends RendererProgressBar {
         /**
-         * 
+         *
          */
         private static final long    serialVersionUID = 1L;
         private long                 cleanupTimer     = 0;
@@ -154,24 +156,43 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
     protected RendererProgressBar determinatedRenderer;
     protected Border              defaultBorder;
     private RendererProgressBar   indeterminatedRenderer;
-    private RendererProgressBar   renderer;
+    private MigPanel              renderer;
     private HashMap<E, Long>      map;
 
     private int                   columnIndex = -1;
+    protected MigPanel            determinedRendererPanel;
+    protected MigPanel            indeterminedRendererPanel;
+    protected RendererProgressBar rendererBar;
 
     /**
-     * 
+     *
      */
     public ExtProgressColumn(final String title) {
         this(title, null);
     }
 
+    protected MigPanel wrapDeterminedRenderer(RendererProgressBar renderer) {
+        RendererMigPanel ret = new RendererMigPanel("ins 0 0 0 0", "[grow,fill]", "[grow,fill]");
+        ret.add(renderer);
+        return ret;
+    }
+
+    protected MigPanel wrapIndeterminedRenderer(RendererProgressBar renderer) {
+        RendererMigPanel ret = new RendererMigPanel("ins 0 0 0 0", "[grow,fill]", "[grow,fill]");
+        ret.add(renderer);
+        return ret;
+    }
+
     public ExtProgressColumn(final String name, final ExtTableModel<E> extModel) {
         super(name, extModel);
+        preInit();
         this.map = new HashMap<E, Long>();
+
         this.determinatedRenderer = initDeterminatedRenderer();
 
         this.indeterminatedRenderer = initIndeterminatedRenderer();
+        this.determinedRendererPanel = this.wrapDeterminedRenderer(determinatedRenderer);
+        this.indeterminedRendererPanel = this.wrapIndeterminedRenderer(indeterminatedRenderer);
 
         // this.getModel().addTableModelListener(new TableModelListener() {
         //
@@ -188,7 +209,7 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
         //
         // }
         // });
-        this.renderer = this.determinatedRenderer;
+        this.renderer = this.determinedRendererPanel;
         this.defaultBorder = BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(1, 1, 2, 1), this.determinatedRenderer.getBorder());
 
         this.setRowSorter(new ExtDefaultRowSorter<E>() {
@@ -211,6 +232,14 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
         });
     }
 
+    /**
+     *
+     */
+    protected void preInit() {
+        // TODO Auto-generated method stub
+
+    }
+
     protected IndeterminatedRenderer<E> initIndeterminatedRenderer() {
         return new IndeterminatedRenderer<E>(this);
     }
@@ -220,7 +249,7 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
     }
 
     /**
-     * 
+     *
      */
 
     @Override
@@ -232,7 +261,7 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
     @Override
     public void configureRendererComponent(final E value, final boolean isSelected, final boolean hasFocus, final int row, final int column) {
         this.prepareGetter(value);
-        if (this.renderer == this.determinatedRenderer) {
+        if (this.renderer == this.determinedRendererPanel) {
             // Normalize value and maxvalue to fit in the integer range
             long m = this.getMax(value);
             long v = 0;
@@ -247,22 +276,27 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
             }
             v = Math.min(m, v);
             // take care to set the maximum before the value!!
-            this.renderer.setMaximum((int) m);
-            this.renderer.setValue((int) v);
-            this.renderer.setMinimum(0);
-            this.renderer.setString(this.getString(value, v, m));
+            this.rendererBar.setMaximum((int) m);
+            this.rendererBar.setValue((int) v);
+            this.rendererBar.setMinimum(0);
+            setStringValue(value, m, v);
         } else {
-            this.renderer.setString(this.getString(value, -1, -1));
-            if (!this.renderer.isIndeterminate()) {
-                this.renderer.setIndeterminate(true);
+            setStringValue(value, -1, -1);
+
+            if (!this.rendererBar.isIndeterminate()) {
+                this.rendererBar.setIndeterminate(true);
             }
         }
 
     }
 
+    protected void setStringValue(final E value, long m, long v) {
+        this.rendererBar.setString(this.getString(value, v, m));
+    }
+
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.rapidshare.rsmanager.gui.components.table.ExtColumn#getCellEditorValue ()
      */
     @Override
@@ -297,7 +331,8 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
     public JComponent getRendererComponent(final E value, final boolean isSelected, final boolean hasFocus, final int row, final int column) {
         this.columnIndex = column;
         if (this.isIndeterminated(value, isSelected, hasFocus, row, column)) {
-            this.renderer = this.indeterminatedRenderer;
+
+            chooseIndeterminated();
             if (this.map.size() == 0) {
                 if (!this.indeterminatedRenderer.isIndeterminate()) {
                     this.map.put(value, System.currentTimeMillis());
@@ -306,7 +341,7 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
             }
             this.map.put(value, System.currentTimeMillis());
         } else {
-            this.renderer = this.determinatedRenderer;
+            chooseDeterminated();
             this.map.remove(value);
             if (this.map.size() == 0) {
                 if (this.indeterminatedRenderer.isIndeterminate()) {
@@ -315,6 +350,16 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
             }
         }
         return this.renderer;
+    }
+
+    protected void chooseDeterminated() {
+        this.renderer = this.determinedRendererPanel;
+        this.rendererBar = this.determinatedRenderer;
+    }
+
+    protected void chooseIndeterminated() {
+        this.renderer = this.indeterminedRendererPanel;
+        this.rendererBar = this.indeterminatedRenderer;
     }
 
     abstract protected String getString(E value, long current, long total);
@@ -336,7 +381,7 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.rapidshare.rsmanager.gui.components.table.ExtColumn#isEditable(java .lang.Object)
      */
     @Override
@@ -347,7 +392,7 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.rapidshare.rsmanager.gui.components.table.ExtColumn#isEnabled(java .lang.Object)
      */
     @Override
@@ -371,7 +416,7 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.rapidshare.rsmanager.gui.components.table.ExtColumn#isSortable(java .lang.Object)
      */
     @Override
@@ -395,14 +440,15 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
     @Override
     public void resetRenderer() {
         this.renderer.setOpaque(false);
-        this.renderer.setStringPainted(true);
-        this.renderer.setBorder(this.defaultBorder);
+        rendererBar.setStringPainted(true);
+        rendererBar.setOpaque(false);
+        this.rendererBar.setBorder(this.defaultBorder);
 
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.rapidshare.rsmanager.gui.components.table.ExtColumn#setValue(java .lang.Object, java.lang.Object)
      */
     @Override

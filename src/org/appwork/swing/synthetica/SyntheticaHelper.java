@@ -215,6 +215,8 @@ public class SyntheticaHelper {
             // String>();
             // dummy.put("defaultlaf","BlaBlaLeberLAF");
             // AppContext.getAppContext().put("swing.lafdata", dummy);
+            UIManager.put("Synthetica.table.rowMargin", 15);
+            UIManager.put("Synthetica.table.columnMargin", 15);
 
             UIManager.put("Synthetica.window.decoration", decorated);
             UIManager.put("Synthetica.text.antialias", config.isTextAntiAliasEnabled());

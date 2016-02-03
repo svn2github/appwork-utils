@@ -48,6 +48,7 @@ import java.lang.reflect.Field;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -160,7 +161,7 @@ public abstract class SearchComboBox<T> extends JComboBox {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see javax.swing.ComboBoxEditor#addActionListener(java.awt.event. ActionListener)
          */
         @Override
@@ -288,7 +289,7 @@ public abstract class SearchComboBox<T> extends JComboBox {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see javax.swing.event.DocumentListener#changedUpdate(javax.swing.event .DocumentEvent)
          */
         @Override
@@ -321,7 +322,7 @@ public abstract class SearchComboBox<T> extends JComboBox {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see javax.swing.ComboBoxEditor#getEditorComponent()
          */
         @Override
@@ -333,7 +334,7 @@ public abstract class SearchComboBox<T> extends JComboBox {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see javax.swing.ComboBoxEditor#getItem()
          */
         @Override
@@ -348,7 +349,7 @@ public abstract class SearchComboBox<T> extends JComboBox {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see javax.swing.event.DocumentListener#insertUpdate(javax.swing.event .DocumentEvent)
          */
         @Override
@@ -359,7 +360,7 @@ public abstract class SearchComboBox<T> extends JComboBox {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see javax.swing.ComboBoxEditor#removeActionListener(java.awt.event. ActionListener)
          */
         @Override
@@ -369,7 +370,7 @@ public abstract class SearchComboBox<T> extends JComboBox {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see javax.swing.event.DocumentListener#removeUpdate(javax.swing.event .DocumentEvent)
          */
         @Override
@@ -394,7 +395,7 @@ public abstract class SearchComboBox<T> extends JComboBox {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see javax.swing.ComboBoxEditor#selectAll()
          */
         @Override
@@ -404,7 +405,7 @@ public abstract class SearchComboBox<T> extends JComboBox {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see javax.swing.ComboBoxEditor#setItem(java.lang.Object)
          */
         @SuppressWarnings("unchecked")
@@ -514,17 +515,17 @@ public abstract class SearchComboBox<T> extends JComboBox {
         return a != null && b != null && (a.startsWith(b) || this.isSearchCaseSensitive() == false && a.toLowerCase(Locale.ENGLISH).startsWith(b));
     }
 
-    private int               actualMaximumRowCount  = 8;
-    public boolean            autoCompletionEnabled  = true;
+    private int               actualMaximumRowCount = 8;
+    public boolean            autoCompletionEnabled = true;
     /**
      *
      */
-    private static final long serialVersionUID       = 6475635443708682554L;
-    private final ColorState  helpColorSet           = new ColorState(Color.LIGHT_GRAY);
+    private static final long serialVersionUID      = 6475635443708682554L;
+    private final ColorState  helpColorSet          = new ColorState(Color.LIGHT_GRAY);
 
-    private final ColorState  badColorSet            = new ColorState(Color.RED);
+    private final ColorState  badColorSet           = new ColorState(Color.RED);
 
-    private final ColorState  normalColorSet         = new ColorState(Color.BLACK);
+    private final ColorState  normalColorSet        = new ColorState(Color.BLACK);
 
     {
 
@@ -536,19 +537,24 @@ public abstract class SearchComboBox<T> extends JComboBox {
 
     }
 
-    private String            helptext;
+    private String      helptext;
 
-    private boolean           unkownTextInputAllowed = false;
+    private boolean     unkownTextInputAllowed = false;
 
-    protected ImageIcon       badgeIcon;
+    protected ImageIcon badgeIcon;
 
-    private ColorState        currentColorSet;
+    private ColorState  currentColorSet;
 
     /**
      * @param plugins
      */
     public SearchComboBox() {
-        this(null);
+        this((List<T>) null);
+    }
+
+    public SearchComboBox(final T... elements) {
+        this(Arrays.asList(elements));
+
     }
 
     public SearchComboBox(final List<T> plugins) {

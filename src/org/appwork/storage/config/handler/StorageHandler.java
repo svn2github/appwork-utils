@@ -90,11 +90,11 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
 
     protected static final DelayedRunnable                  SAVEDELAYER   = new DelayedRunnable(5000, 30000) {
 
-                                                                              @Override
-                                                                              public void delayedrun() {
-                                                                                  StorageHandler.saveAll();
-                                                                              }
-                                                                          };
+        @Override
+        public void delayedrun() {
+            StorageHandler.saveAll();
+        }
+    };
     private static final HashMap<StorageHandler<?>, String> STORAGEMAP;
 
     static {
@@ -796,11 +796,12 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
                 final KeyHandler<?> handler = this.methodMap.get(m);
                 if (handler != null) {
                     if (handler.isGetter(m)) {
-                        Object ret = handler.getValue();
+                        final Object ret = handler.getValue();
                         if (ret instanceof Number) {
-                            ret = ReflectionUtils.castNumber((Number) ret, handler.getRawClass());
+                            return ReflectionUtils.castNumber((Number) ret, handler.getRawClass());
+                        } else {
+                            return ret;
                         }
-                        return ret;
                     } else {
                         ((KeyHandler<Object>) handler).setValue(parameter[0]);
                         if (this.writeStrategy != null) {

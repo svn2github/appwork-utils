@@ -240,7 +240,6 @@ public class JsonKeyValueStorage extends Storage {
                 }
                 ret = def;
             } catch (final Throwable e) {
-
                 getDefaultLogger().log(e);
                 if (this.autoPutValues) {
                     this.put(key, (Enum<?>) def);
@@ -265,7 +264,7 @@ public class JsonKeyValueStorage extends Storage {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.storage.Storage#getID()
      */
     @Override
@@ -553,7 +552,7 @@ public class JsonKeyValueStorage extends Storage {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.storage.Storage#size()
      */
     @Override

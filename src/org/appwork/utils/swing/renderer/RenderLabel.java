@@ -73,10 +73,6 @@ public class RenderLabel extends JLabel {
     public void invalidate() {
     }
 
-    // @Override
-    // public boolean isVisible() {
-    // return true;
-    // }
     @Override
     public boolean isEnabled() {
         return _enabled;
@@ -127,13 +123,11 @@ public class RenderLabel extends JLabel {
                 return ico;
             }
         }
-
         return customDisabledIcon;
     }
 
     @Override
     public void setDisabledIcon(final Icon disabledIcon) {
-
         if (disabledIcon == customDisabledIcon) {
             return;
         }
@@ -186,7 +180,6 @@ public class RenderLabel extends JLabel {
 
     @Override
     public void setText(final String text) {
-
         if (text == null && getText() == null) {
             return;
         }
@@ -203,13 +196,6 @@ public class RenderLabel extends JLabel {
 
     @Override
     public void show(final boolean b) {
-
-        // if (b) {
-        // show();
-        // } else {
-        // hide();
-        // }
-
     }
 
     /**

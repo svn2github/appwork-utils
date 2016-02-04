@@ -51,7 +51,6 @@ import org.appwork.storage.config.handler.StorageHandler;
 import org.appwork.utils.Application;
 import org.appwork.utils.IO;
 import org.appwork.utils.ModifyLock;
-import org.appwork.utils.logging2.ConsoleLogImpl;
 import org.appwork.utils.logging2.LogInterface;
 import org.appwork.utils.logging2.extmanager.LoggerFactory;
 
@@ -121,11 +120,7 @@ public class JsonKeyValueStorage extends Storage {
      * @return
      */
     protected LogInterface getDefaultLogger() {
-        LoggerFactory instance = LoggerFactory.I();
-        if (instance != null) {
-            return instance.getDefaultLogger();
-        }
-        return new ConsoleLogImpl();
+        return LoggerFactory.getDefaultLogger();
     }
 
     public JsonKeyValueStorage(final String name) throws StorageException {
@@ -163,11 +158,16 @@ public class JsonKeyValueStorage extends Storage {
         this.closed = true;
     }
 
+    public <E> E get(final String key, final E def) throws StorageException {
+        return get(key, def, null);
+    }
+
     @SuppressWarnings("unchecked")
     @Override
-    public <E> E get(final String key, final E def) throws StorageException {
+    public <E> E get(final String key, final E def, final Boolean autoPutValue) throws StorageException {
         final boolean readL = getLock().readLock();
         final boolean contains;
+        final boolean autoPutDefaultValue = (autoPutValue != null && Boolean.TRUE.equals(autoPutValue)) || isAutoPutValues();
         Object ret = null;
         try {
             contains = getMap().containsKey(key);
@@ -203,7 +203,7 @@ public class JsonKeyValueStorage extends Storage {
         // put entry if we have no entry
         if (!contains) {
             ret = def;
-            if (this.autoPutValues) {
+            if (autoPutDefaultValue) {
                 if (def instanceof Boolean) {
                     this.put(key, (Boolean) def);
                 } else if (def instanceof Long) {
@@ -229,19 +229,17 @@ public class JsonKeyValueStorage extends Storage {
         if (def instanceof Enum<?> && ret instanceof String) {
             try {
                 ret = Enum.valueOf(((Enum<?>) def).getDeclaringClass(), (String) ret);
-                if (this.isEnumCacheEnabled()) {
+                if (autoPutDefaultValue && this.isEnumCacheEnabled()) {
                     this.put(key, (Enum<?>) ret);
                 }
-            } catch (final IllegalArgumentException e) {
-                getDefaultLogger().info("Could not restore the enum. There is no value for " + ret + " in " + ((Enum<?>) def).getDeclaringClass());
-                getDefaultLogger().log(e);
-                if (this.autoPutValues) {
-                    this.put(key, (Enum<?>) def);
-                }
-                ret = def;
             } catch (final Throwable e) {
-                getDefaultLogger().log(e);
-                if (this.autoPutValues) {
+                if (e instanceof IllegalArgumentException) {
+                    getDefaultLogger().info("Could not restore the enum. There is no value for " + ret + " in " + ((Enum<?>) def).getDeclaringClass());
+                    getDefaultLogger().log(e);
+                } else {
+                    getDefaultLogger().log(e);
+                }
+                if (autoPutDefaultValue) {
                     this.put(key, (Enum<?>) def);
                 }
                 ret = def;
@@ -264,7 +262,7 @@ public class JsonKeyValueStorage extends Storage {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.storage.Storage#getID()
      */
     @Override
@@ -552,7 +550,7 @@ public class JsonKeyValueStorage extends Storage {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.storage.Storage#size()
      */
     @Override

@@ -126,7 +126,8 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
         if (this.storageHandler.getRelativCPPath() != null && !this.path.exists()) {
             // Remember: Application.getResourceUrl returns an url to the classpath (bin/jar) or to a file on the harddisk (cfg folder)
             // we do only want urls to the classpath here
-            this.url = Application.class.getClassLoader().getResource(this.storageHandler.getRelativCPPath() + "." + this.getKey() + "." + (this.cryptKey != null ? "ejs" : "json"));
+            String rel = this.storageHandler.getRelativCPPath() + "." + this.getKey() + "." + (this.cryptKey != null ? "ejs" : "json");
+            this.url = Application.class.getClassLoader().getResource(rel);
         }
 
         this.useObjectCache = this.getAnnotation(DisableObjectCache.class) == null;
@@ -257,7 +258,8 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
             }
             return readObject;
         } finally {
-            if (!exists && this.url == null) {
+            if (!exists && this.url == null && isAllowWriteDefaultObjects()) {
+
                 this.write(this.getDefaultValue());
             }
         }

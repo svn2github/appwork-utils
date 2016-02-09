@@ -80,7 +80,7 @@ public abstract class KeyHandler<RawClass> {
     private static final String                 PACKAGE_NAME            = PlainStorage.class.getPackage().getName();
     private final String                        key;
     protected Method                            getMethod               = null;
-    protected Method                            setMethod               = null;                                        ;
+    protected Method                            setMethod               = null;;
     protected final StorageHandler<?>           storageHandler;
     private boolean                             primitive;
     protected RawClass                          defaultValue;
@@ -230,6 +230,7 @@ public abstract class KeyHandler<RawClass> {
 
     @SuppressWarnings("unchecked")
     public RawClass getDefaultValue() {
+
         try {
             final DefaultFactory df = this.getAnnotation(DefaultFactory.class);
             if (df != null) {
@@ -500,7 +501,19 @@ public abstract class KeyHandler<RawClass> {
                 }
             }
         }
-        return storage.get(this.getKey(), this.getDefaultValue());
+
+        return storage.get(this.getKey(), this.getDefaultValue(), isAllowWriteDefaultObjects());
+
+    }
+
+    private boolean allowWriteDefaultObjects = true;
+
+    public boolean isAllowWriteDefaultObjects() {
+        return allowWriteDefaultObjects;
+    }
+
+    public void setAllowWriteDefaultObjects(boolean allowWriteDefaultObjects) {
+        this.allowWriteDefaultObjects = allowWriteDefaultObjects;
     }
 
     public synchronized boolean hasEventListener() {

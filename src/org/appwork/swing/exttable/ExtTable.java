@@ -1931,6 +1931,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
     }
 
     public void updateColumns() {
+
         new EDTRunner() {
 
             @Override

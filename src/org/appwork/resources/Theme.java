@@ -45,9 +45,11 @@ import javax.swing.JComponent;
 
 import org.appwork.storage.config.MinTimeWeakReference;
 import org.appwork.storage.config.MinTimeWeakReferenceCleanup;
+import org.appwork.swing.components.CheckBoxIcon;
 import org.appwork.utils.Application;
 import org.appwork.utils.Exceptions;
 import org.appwork.utils.IO;
+import org.appwork.utils.StringUtils;
 import org.appwork.utils.ImageProvider.ImageProvider;
 import org.appwork.utils.images.IconIO;
 import org.appwork.utils.images.Interpolation;
@@ -187,11 +189,36 @@ public class Theme implements MinTimeWeakReferenceCleanup {
         if (this.delegate != null) {
             this.delegate.getIcon(relativePath, size, useCache);
         }
+
         Icon ret = null;
         String key = null;
         if (useCache) {
             key = this.getCacheKey(relativePath, size);
             ret = this.getCached(key);
+        }
+        if (StringUtils.equalsIgnoreCase(relativePath, "disabled") || StringUtils.equalsIgnoreCase(relativePath, "checkbox_false")) {
+            ret = CheckBoxIcon.FALSE;
+
+            ret = IconIO.getScaledInstance(ret, size, size);
+            if (useCache) {
+                this.cache(ret, key);
+            }
+        } else if (StringUtils.equalsIgnoreCase(relativePath, "enabled") || StringUtils.equalsIgnoreCase(relativePath, "checkbox_true")) {
+            ret = CheckBoxIcon.TRUE;
+
+            ret = IconIO.getScaledInstance(ret, size, size);
+            if (useCache) {
+                this.cache(ret, key);
+            }
+
+        } else if (StringUtils.equalsIgnoreCase(relativePath, "checkbox_undefined")) {
+            ret = CheckBoxIcon.UNDEFINED;
+
+            ret = IconIO.getScaledInstance(ret, size, size);
+            if (useCache) {
+                this.cache(ret, key);
+            }
+
         }
         if (ret == null) {
             URL url = this.getURL("images/", relativePath + "_" + size, ".png");

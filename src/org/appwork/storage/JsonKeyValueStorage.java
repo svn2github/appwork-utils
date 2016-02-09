@@ -167,7 +167,7 @@ public class JsonKeyValueStorage extends Storage {
     public <E> E get(final String key, final E def, final Boolean autoPutValue) throws StorageException {
         final boolean readL = getLock().readLock();
         final boolean contains;
-        final boolean autoPutDefaultValue = (autoPutValue != null && Boolean.TRUE.equals(autoPutValue)) || isAutoPutValues();
+        final boolean autoPutDefaultValue = autoPutValue == null ? isAutoPutValues() : Boolean.TRUE.equals(autoPutValue);
         Object ret = null;
         try {
             contains = getMap().containsKey(key);

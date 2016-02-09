@@ -189,51 +189,35 @@ public class Theme implements MinTimeWeakReferenceCleanup {
         if (this.delegate != null) {
             this.delegate.getIcon(relativePath, size, useCache);
         }
-
         Icon ret = null;
         String key = null;
         if (useCache) {
             key = this.getCacheKey(relativePath, size);
             ret = this.getCached(key);
         }
-        if (StringUtils.equalsIgnoreCase(relativePath, "disabled") || StringUtils.equalsIgnoreCase(relativePath, "checkbox_false")) {
-            ret = CheckBoxIcon.FALSE;
-
-            ret = IconIO.getScaledInstance(ret, size, size);
-            if (useCache) {
-                this.cache(ret, key);
-            }
-        } else if (StringUtils.equalsIgnoreCase(relativePath, "enabled") || StringUtils.equalsIgnoreCase(relativePath, "checkbox_true")) {
-            ret = CheckBoxIcon.TRUE;
-
-            ret = IconIO.getScaledInstance(ret, size, size);
-            if (useCache) {
-                this.cache(ret, key);
-            }
-
-        } else if (StringUtils.equalsIgnoreCase(relativePath, "checkbox_undefined")) {
-            ret = CheckBoxIcon.UNDEFINED;
-
-            ret = IconIO.getScaledInstance(ret, size, size);
-            if (useCache) {
-                this.cache(ret, key);
-            }
-
-        }
         if (ret == null) {
-            URL url = this.getURL("images/", relativePath + "_" + size, ".png");
-            if (url == null) {
-                url = this.getURL("images/", relativePath, ".png");
+            if (StringUtils.equalsIgnoreCase(relativePath, "disabled") || StringUtils.equalsIgnoreCase(relativePath, "checkbox_false")) {
+                ret = CheckBoxIcon.FALSE;
+                ret = IconIO.getScaledInstance(ret, size, size);
+            } else if (StringUtils.equalsIgnoreCase(relativePath, "enabled") || StringUtils.equalsIgnoreCase(relativePath, "checkbox_true")) {
+                ret = CheckBoxIcon.TRUE;
+                ret = IconIO.getScaledInstance(ret, size, size);
+            } else if (StringUtils.equalsIgnoreCase(relativePath, "checkbox_undefined")) {
+                ret = CheckBoxIcon.UNDEFINED;
+                ret = IconIO.getScaledInstance(ret, size, size);
             }
-
-            ret = IconIO.getImageIcon(url, size);
-            ret = this.modify(ret, relativePath);
-            if (url == null) {
-
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(new Exception("Icon missing: " + this.getPath("images/", relativePath, ".png", false)));
-
+            if (ret == null) {
+                URL url = this.getURL("images/", relativePath + "_" + size, ".png");
+                if (url == null) {
+                    url = this.getURL("images/", relativePath, ".png");
+                }
+                ret = IconIO.getImageIcon(url, size);
+                ret = this.modify(ret, relativePath);
+                if (url == null) {
+                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(new Exception("Icon missing: " + this.getPath("images/", relativePath, ".png", false)));
+                }
             }
-            if (useCache) {
+            if (useCache && ret != null) {
                 this.cache(ret, key);
             }
         }
@@ -463,7 +447,7 @@ public class Theme implements MinTimeWeakReferenceCleanup {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.storage.config.MinTimeWeakReferenceCleanup# onMinTimeWeakReferenceCleanup
      * (org.appwork.storage.config.MinTimeWeakReference)
      */

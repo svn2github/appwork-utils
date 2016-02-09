@@ -41,6 +41,7 @@ import java.net.URL;
 import java.util.HashMap;
 
 import javax.swing.Icon;
+import javax.swing.JComponent;
 
 import org.appwork.storage.config.MinTimeWeakReference;
 import org.appwork.storage.config.MinTimeWeakReferenceCleanup;
@@ -150,6 +151,10 @@ public class Theme implements MinTimeWeakReferenceCleanup {
     }
 
     public Icon getDisabledIcon(final Icon _getIcon) {
+        return getDisabledIcon(null, _getIcon);
+    }
+
+    public Icon getDisabledIcon(final JComponent component, final Icon _getIcon) {
         if (_getIcon != null) {
             if (this.delegate != null) {
                 this.delegate.getDisabledIcon(_getIcon);
@@ -157,7 +162,7 @@ public class Theme implements MinTimeWeakReferenceCleanup {
             final String key = this.getCacheKey(_getIcon, "disabled");
             Icon ret = this.getCached(key);
             if (ret == null) {
-                final Icon ico = ImageProvider.getDisabledIcon(_getIcon);
+                final Icon ico = ImageProvider.getDisabledIcon(component, _getIcon);
                 ret = ico;
                 ret = this.modify(ret, key);
                 this.cache(ret, key);

@@ -852,6 +852,7 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
      */
     public void setTableColumn(final TableColumn tableColumn, final boolean updateSize) {
         this.tableColumn = tableColumn;
+
         if (updateSize) {
             // Set stored columnwidth
             int w = ExtColumn.this.getDefaultWidth();
@@ -866,6 +867,11 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
                 tableColumn.setWidth(w);
             }
             this.updateColumnGui();
+        }
+        if (forcedWidth > 0) {
+            tableColumn.setWidth(forcedWidth);
+            tableColumn.setPreferredWidth(forcedWidth);
+
         }
 
     }
@@ -997,8 +1003,11 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
      */
     public void setForcedWidth(int value) {
         forcedWidth = value;
-        getInternalColumn().setWidth(value);
-        getInternalColumn().setPreferredWidth(value);
+        TableColumn in = getInternalColumn();
+        if (in != null) {
+            in.setWidth(value);
+            in.setPreferredWidth(value);
+        }
     }
 
     public int getForcedWidth() {

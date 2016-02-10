@@ -463,9 +463,11 @@ public class Theme implements MinTimeWeakReferenceCleanup {
     }
 
     public void setNameSpace(final String nameSpace) {
-        this.nameSpace = nameSpace;
-        updatePath();
-        this.clearCache();
+        if (!StringUtils.equals(getNameSpace(), nameSpace)) {
+            this.nameSpace = nameSpace;
+            updatePath();
+            this.clearCache();
+        }
     }
 
     /**
@@ -488,9 +490,11 @@ public class Theme implements MinTimeWeakReferenceCleanup {
      * @param theme
      */
     public void setTheme(final String theme) {
-        this.theme = theme;
-        updatePath();
-        this.clearCache();
+        if (!StringUtils.equals(getTheme(), theme)) {
+            this.theme = theme;
+            updatePath();
+            this.clearCache();
+        }
     }
 
 }

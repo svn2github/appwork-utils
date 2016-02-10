@@ -447,7 +447,7 @@ public class Theme implements MinTimeWeakReferenceCleanup {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.storage.config.MinTimeWeakReferenceCleanup# onMinTimeWeakReferenceCleanup
      * (org.appwork.storage.config.MinTimeWeakReference)
      */
@@ -463,7 +463,7 @@ public class Theme implements MinTimeWeakReferenceCleanup {
     }
 
     public void setNameSpace(final String nameSpace) {
-        if (!StringUtils.equals(getNameSpace(), nameSpace)) {
+        if (!StringUtils.equals(getNameSpace(), nameSpace) && StringUtils.isNotEmpty(nameSpace)) {
             this.nameSpace = nameSpace;
             updatePath();
             this.clearCache();
@@ -490,7 +490,7 @@ public class Theme implements MinTimeWeakReferenceCleanup {
      * @param theme
      */
     public void setTheme(final String theme) {
-        if (!StringUtils.equals(getTheme(), theme)) {
+        if (!StringUtils.equals(getTheme(), theme) && StringUtils.isNotEmpty(theme)) {
             this.theme = theme;
             updatePath();
             this.clearCache();

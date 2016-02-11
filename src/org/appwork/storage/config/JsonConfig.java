@@ -84,14 +84,21 @@ public class JsonConfig {
 
     private static final HashMap<String, LockObject>      LOCKS = new HashMap<String, LockObject>();
 
+    public static <T extends ConfigInterface> T create(final Class<T> configInterface) {
+        return create(configInterface, null);
+
+    }
+
     /**
      * @param <T>
      * @param class1
      * @return
      */
     @SuppressWarnings("unchecked")
-    public static <T extends ConfigInterface> T create(final Class<T> configInterface) {
-        String path = configInterface.getName();
+    public static <T extends ConfigInterface> T create(final Class<T> configInterface, StorageHandlerFactory<T> factory) {
+
+        checkPreconditions(configInterface, factory);
+        String path = configInterface.getName() + (factory == null ? "" : factory.toString());
         CustomStorageName anno = configInterface.getAnnotation(CustomStorageName.class);
         if (anno != null) {
             path = anno.value();
@@ -113,7 +120,7 @@ public class JsonConfig {
                 }
                 final ClassLoader cl = configInterface.getClassLoader();
                 if (lock.getStorageHandler() == null) {
-                    lock.setStorageHandler(new StorageHandler<T>(Application.getResource("cfg/" + path), configInterface));
+                    lock.setStorageHandler(factory == null ? new StorageHandler<T>(Application.getResource("cfg/" + path), configInterface) : factory.create(Application.getResource("cfg/" + path), configInterface));
                 }
                 final T ret = (T) Proxy.newProxyInstance(cl, new Class<?>[] { configInterface }, lock.getStorageHandler());
                 synchronized (JsonConfig.CACHE) {
@@ -139,13 +146,28 @@ public class JsonConfig {
         }
     }
 
+    private static <T extends ConfigInterface> void checkPreconditions(final Class<T> configInterface, StorageHandlerFactory<T> factory) {
+        if (factory == null && StorageHandlerFactoryRequired.class.isAssignableFrom(configInterface)) {
+            throw new WTFException("Interface requires StorageHandler Factory. Check if there is a CFG_" + configInterface.getSimpleName() + " static reference and use it.");
+        }
+    }
+
     /**
      * @param name
      * @param class1
      */
-    @SuppressWarnings("unchecked")
     public static <T extends ConfigInterface> T create(final File path, final Class<T> configInterface) {
-        final String id = path.getAbsolutePath() + configInterface.getName();
+        return create(path, configInterface, null);
+
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T extends ConfigInterface> T create(final File path, final Class<T> configInterface, StorageHandlerFactory<T> factory) {
+        checkPreconditions(configInterface, factory);
+        String id = path.getAbsolutePath() + configInterface.getName();
+        if (factory != null) {
+            id += factory;
+        }
         synchronized (JsonConfig.CACHE) {
             final ConfigInterface ret = JsonConfig.CACHE.get(id);
             if (ret != null) {
@@ -163,7 +185,7 @@ public class JsonConfig {
                 }
                 final ClassLoader cl = configInterface.getClassLoader();
                 if (lock.getStorageHandler() == null) {
-                    lock.setStorageHandler(new StorageHandler<T>(path, configInterface));
+                    lock.setStorageHandler(factory == null ? new StorageHandler<T>(path, configInterface) : factory.create(path, configInterface));
                 }
                 final T ret = (T) Proxy.newProxyInstance(cl, new Class<?>[] { configInterface }, lock.getStorageHandler());
                 synchronized (JsonConfig.CACHE) {

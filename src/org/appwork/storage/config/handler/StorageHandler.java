@@ -68,7 +68,6 @@ import org.appwork.storage.config.annotations.DefaultDoubleArrayValue;
 import org.appwork.storage.config.annotations.DefaultFloatArrayValue;
 import org.appwork.storage.config.annotations.DefaultIntArrayValue;
 import org.appwork.storage.config.annotations.DefaultLongArrayValue;
-import org.appwork.storage.config.annotations.InitHook;
 import org.appwork.storage.config.events.ConfigEvent;
 import org.appwork.storage.config.events.ConfigEventSender;
 import org.appwork.utils.Application;
@@ -302,16 +301,10 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
      * @param configInterface
      */
     public StorageHandler(final File filePath, final Class<T> configInterface) {
-        final InitHook initHook = configInterface.getAnnotation(InitHook.class);
-        if (initHook != null) {
-            try {
-                initHook.value().newInstance().doHook(filePath, configInterface);
-            } catch (final Exception e) {
-                throw new WTFException(e);
-            }
-        }
+
         this.configInterface = configInterface;
         this.path = filePath;
+        preInit(path, configInterface);
         if (filePath.getName().endsWith(".json") || filePath.getName().endsWith(".ejs")) {
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning(filePath + " should not have an extension!!");
         }
@@ -349,8 +342,18 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
         this.addStorageHandler(this, configInterface.getName(), storageID);
     }
 
+    /**
+     * @param configInterfac
+     * @param path
+     *
+     */
+    protected void preInit(File path, Class<T> configInterfac) {
+        // TODO Auto-generated method stub
+
+    }
+
     public StorageHandler(final Storage storage, final Class<T> configInterface) {
-        final InitHook initHook = configInterface.getAnnotation(InitHook.class);
+
         String storagePath = storage.getID();
         if (storagePath.endsWith(".json")) {
             storagePath = storagePath.replaceFirst("\\.json$", "");
@@ -359,14 +362,9 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
         }
         this.primitiveStorage = storage;
         this.path = new File(storagePath);
-        if (initHook != null) {
-            try {
-                initHook.value().newInstance().doHook(this.path, configInterface);
-            } catch (final Exception e) {
-                throw new WTFException(e);
-            }
-        }
         this.configInterface = configInterface;
+        preInit(path, configInterface);
+
         final File expected = Application.getResource("cfg/" + configInterface.getName());
         String storageID = null;
         if (!this.path.equals(expected)) {
@@ -399,20 +397,14 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
      * @throws URISyntaxException
      */
     public StorageHandler(final String classPath, final Class<T> configInterface) throws URISyntaxException {
-        final InitHook initHook = configInterface.getAnnotation(InitHook.class);
-        if (initHook != null) {
-            try {
-                initHook.value().newInstance().doHook(classPath, configInterface);
-            } catch (final Exception e) {
-                throw new WTFException(e);
-            }
-        }
+
         this.configInterface = configInterface;
         this.relativCPPath = classPath;
         if (classPath.endsWith(".json") || classPath.endsWith(".ejs")) {
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning(classPath + " should not have an extension!!");
         }
         this.path = Application.getResource(classPath);
+        preInit(path, configInterface);
         final File expected = Application.getResource("cfg/" + configInterface.getName());
         String storageID = null;
         if (!this.path.equals(expected)) {

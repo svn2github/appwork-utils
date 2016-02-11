@@ -51,4 +51,11 @@ public interface StorageHandlerFactory<T extends ConfigInterface> {
      */
     StorageHandler<T> create(File resource, Class<T> configInterface);
 
+    /**
+     * @param urlPath
+     * @param configInterface
+     * @return
+     */
+    StorageHandler<T> create(String urlPath, Class<T> configInterface);
+
 }

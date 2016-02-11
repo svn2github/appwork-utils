@@ -35,12 +35,12 @@ package org.appwork.storage.config;
 
 import java.io.File;
 import java.lang.reflect.Proxy;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.appwork.exceptions.WTFException;
 import org.appwork.storage.config.annotations.CustomStorageName;
+import org.appwork.storage.config.annotations.StorageHandlerFactoryAnnotation;
 import org.appwork.storage.config.handler.StorageHandler;
 import org.appwork.utils.Application;
 import org.appwork.utils.swing.dialog.Dialog;
@@ -84,21 +84,15 @@ public class JsonConfig {
 
     private static final HashMap<String, LockObject>      LOCKS = new HashMap<String, LockObject>();
 
-    public static <T extends ConfigInterface> T create(final Class<T> configInterface) {
-        return create(configInterface, null);
-
-    }
-
     /**
      * @param <T>
      * @param class1
      * @return
      */
     @SuppressWarnings("unchecked")
-    public static <T extends ConfigInterface> T create(final Class<T> configInterface, StorageHandlerFactory<T> factory) {
+    public static <T extends ConfigInterface> T create(final Class<T> configInterface) {
 
-        checkPreconditions(configInterface, factory);
-        String path = configInterface.getName() + (factory == null ? "" : factory.toString());
+        String path = configInterface.getName();
         CustomStorageName anno = configInterface.getAnnotation(CustomStorageName.class);
         if (anno != null) {
             path = anno.value();
@@ -120,7 +114,15 @@ public class JsonConfig {
                 }
                 final ClassLoader cl = configInterface.getClassLoader();
                 if (lock.getStorageHandler() == null) {
-                    lock.setStorageHandler(factory == null ? new StorageHandler<T>(Application.getResource("cfg/" + path), configInterface) : factory.create(Application.getResource("cfg/" + path), configInterface));
+
+                    StorageHandlerFactoryAnnotation factoryClass = configInterface.getAnnotation(StorageHandlerFactoryAnnotation.class);
+                    File f = Application.getResource("cfg/" + path);
+                    if (factoryClass != null) {
+                        lock.setStorageHandler(((StorageHandlerFactory<T>) factoryClass.value().newInstance()).create(f, configInterface));
+                    } else {
+                        lock.setStorageHandler(new StorageHandler<T>(f, configInterface));
+                    }
+
                 }
                 final T ret = (T) Proxy.newProxyInstance(cl, new Class<?>[] { configInterface }, lock.getStorageHandler());
                 synchronized (JsonConfig.CACHE) {
@@ -129,45 +131,30 @@ public class JsonConfig {
                     }
                 }
                 return ret;
-            } catch (final RuntimeException e) {
+            } catch (final Throwable e) {
                 e.printStackTrace();
                 if (!Application.isJared(JsonConfig.class)) {
-
                     new Thread() {
                         public void run() {
                             Dialog.getInstance().showExceptionDialog(e.getClass().getSimpleName(), e.getMessage(), e);
                         };
                     }.start();
                 }
-                throw e;
+                if (e instanceof RuntimeException) {
+                    throw (RuntimeException) e;
+                }
+                throw new WTFException(e);
             } finally {
                 JsonConfig.unLock(lock);
             }
         }
     }
 
-    private static <T extends ConfigInterface> void checkPreconditions(final Class<T> configInterface, StorageHandlerFactory<T> factory) {
-        if (factory == null && StorageHandlerFactoryRequired.class.isAssignableFrom(configInterface)) {
-            throw new WTFException("Interface requires StorageHandler Factory. Check if there is a CFG_" + configInterface.getSimpleName() + " static reference and use it.");
-        }
-    }
-
-    /**
-     * @param name
-     * @param class1
-     */
-    public static <T extends ConfigInterface> T create(final File path, final Class<T> configInterface) {
-        return create(path, configInterface, null);
-
-    }
-
     @SuppressWarnings("unchecked")
-    public static <T extends ConfigInterface> T create(final File path, final Class<T> configInterface, StorageHandlerFactory<T> factory) {
-        checkPreconditions(configInterface, factory);
+    public static <T extends ConfigInterface> T create(final File path, final Class<T> configInterface) {
+
         String id = path.getAbsolutePath() + configInterface.getName();
-        if (factory != null) {
-            id += factory;
-        }
+
         synchronized (JsonConfig.CACHE) {
             final ConfigInterface ret = JsonConfig.CACHE.get(id);
             if (ret != null) {
@@ -185,7 +172,13 @@ public class JsonConfig {
                 }
                 final ClassLoader cl = configInterface.getClassLoader();
                 if (lock.getStorageHandler() == null) {
-                    lock.setStorageHandler(factory == null ? new StorageHandler<T>(path, configInterface) : factory.create(path, configInterface));
+
+                    StorageHandlerFactoryAnnotation factoryClass = configInterface.getAnnotation(StorageHandlerFactoryAnnotation.class);
+                    if (factoryClass != null) {
+                        lock.setStorageHandler(((StorageHandlerFactory<T>) factoryClass.value().newInstance()).create(path, configInterface));
+                    } else {
+                        lock.setStorageHandler(new StorageHandler<T>(path, configInterface));
+                    }
                 }
                 final T ret = (T) Proxy.newProxyInstance(cl, new Class<?>[] { configInterface }, lock.getStorageHandler());
                 synchronized (JsonConfig.CACHE) {
@@ -194,7 +187,7 @@ public class JsonConfig {
                     }
                 }
                 return ret;
-            } catch (final RuntimeException e) {
+            } catch (final Throwable e) {
                 e.printStackTrace();
                 if (!Application.isJared(JsonConfig.class)) {
                     new Thread() {
@@ -203,7 +196,10 @@ public class JsonConfig {
                         };
                     }.start();
                 }
-                throw e;
+                if (e instanceof RuntimeException) {
+                    throw (RuntimeException) e;
+                }
+                throw new WTFException(e);
             } finally {
                 JsonConfig.unLock(lock);
             }
@@ -230,7 +226,13 @@ public class JsonConfig {
                 }
                 final ClassLoader cl = configInterface.getClassLoader();
                 if (lock.getStorageHandler() == null) {
-                    lock.setStorageHandler(new StorageHandler<T>(urlPath, configInterface));
+
+                    StorageHandlerFactoryAnnotation factoryClass = configInterface.getAnnotation(StorageHandlerFactoryAnnotation.class);
+                    if (factoryClass != null) {
+                        lock.setStorageHandler(((StorageHandlerFactory<T>) factoryClass.value().newInstance()).create(urlPath, configInterface));
+                    } else {
+                        lock.setStorageHandler(new StorageHandler<T>(urlPath, configInterface));
+                    }
                 }
                 final T ret = (T) Proxy.newProxyInstance(cl, new Class<?>[] { configInterface }, lock.getStorageHandler());
                 synchronized (JsonConfig.CACHE) {
@@ -239,11 +241,18 @@ public class JsonConfig {
                     }
                 }
                 return ret;
-            } catch (final RuntimeException e) {
-                Dialog.getInstance().showExceptionDialog(e.getClass().getSimpleName(), e.getMessage(), e);
-                throw e;
-            } catch (final URISyntaxException e) {
-                Dialog.getInstance().showExceptionDialog(e.getClass().getSimpleName(), e.getMessage(), e);
+            } catch (final Throwable e) {
+                e.printStackTrace();
+                if (!Application.isJared(JsonConfig.class)) {
+                    new Thread() {
+                        public void run() {
+                            Dialog.getInstance().showExceptionDialog(e.getClass().getSimpleName(), e.getMessage(), e);
+                        };
+                    }.start();
+                }
+                if (e instanceof RuntimeException) {
+                    throw (RuntimeException) e;
+                }
                 throw new WTFException(e);
             } finally {
                 JsonConfig.unLock(lock);

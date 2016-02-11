@@ -439,11 +439,14 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
 
     @Override
     public void resetRenderer() {
-        this.renderer.setOpaque(false);
-        rendererBar.setStringPainted(true);
-        rendererBar.setOpaque(false);
-        this.rendererBar.setBorder(this.defaultBorder);
-
+        if (renderer != null) {
+            this.renderer.setOpaque(false);
+        }
+        if (rendererBar != null) {
+            rendererBar.setStringPainted(true);
+            rendererBar.setOpaque(false);
+            rendererBar.setBorder(this.defaultBorder);
+        }
     }
 
     /*

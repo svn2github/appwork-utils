@@ -67,7 +67,6 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
 import java.util.HashMap;
-import java.util.Locale;
 
 import javax.imageio.ImageIO;
 import javax.swing.Icon;
@@ -76,6 +75,7 @@ import javax.swing.ImageIcon;
 import org.appwork.exceptions.WTFException;
 import org.appwork.swing.components.IDIcon;
 import org.appwork.swing.components.IconIdentifier;
+import org.appwork.utils.StringUtils;
 import org.appwork.utils.URLStream;
 import org.appwork.utils.ImageProvider.ImageProvider;
 import org.appwork.utils.logging2.extmanager.LoggerFactory;
@@ -146,12 +146,10 @@ public class IconIO {
             final Graphics2D g2 = (Graphics2D) g;
             g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, this.interpolation.getHint());
             final AffineTransform old = g2.getTransform();
-
             g2.translate(x, y);
             g2.scale(this.faktor, this.faktor);
             this.source.paintIcon(c, g, 0, 0);
             g2.setTransform(old);
-
         }
 
         /*
@@ -200,18 +198,18 @@ public class IconIO {
             public final int filterRGB(final int x, final int y, final int rgb) {
 
                 final int r = (rgb & 0xFF0000) >> 16;
-                final int g = (rgb & 0xFF00) >> 8;
-                final int b = rgb & 0xFF;
-                if (r >= r1 && r <= r2 && g >= g1 && g <= g2 && b >= b1 && b <= b2) {
-                    // Set fully transparent but keep color
-                    // calculate a alpha value based on the distance between the
-                    // range borders and the pixel color
-                    final int dist = (Math.abs(r - (r1 + r2) / 2) + Math.abs(g - (g1 + g2) / 2) + Math.abs(b - (b1 + b2) / 2)) * 2;
+        final int g = (rgb & 0xFF00) >> 8;
+        final int b = rgb & 0xFF;
+        if (r >= r1 && r <= r2 && g >= g1 && g <= g2 && b >= b1 && b <= b2) {
+            // Set fully transparent but keep color
+            // calculate a alpha value based on the distance between the
+            // range borders and the pixel color
+            final int dist = (Math.abs(r - (r1 + r2) / 2) + Math.abs(g - (g1 + g2) / 2) + Math.abs(b - (b1 + b2) / 2)) * 2;
 
-                    return new Color(r, g, b, Math.min(255, dist)).getRGB();
-                }
+            return new Color(r, g, b, Math.min(255, dist)).getRGB();
+        }
 
-                return rgb;
+        return rgb;
             }
         };
 
@@ -375,17 +373,14 @@ public class IconIO {
      * @return
      */
     public static ImageIcon getImageIcon(final URL resource, final int size) {
-        if (resource.getPath().toLowerCase(Locale.ENGLISH).endsWith(".svg")) {
+        if (StringUtils.endsWithCaseInsensitive(resource.getPath(), ".svg")) {
             try {
                 return new ImageIcon(getImageFromSVG(resource, size, size));
             } catch (IOException e) {
                 LoggerFactory.getDefaultLogger().log(e);
                 return new ImageIcon(ImageProvider.createIcon("DUMMY", size, size));
-
             }
-
         }
-
         if (size <= 0) {
             return new ImageIcon(IconIO.getImage(resource));
         } else {
@@ -394,7 +389,6 @@ public class IconIO {
     }
 
     public static Icon getScaledInstance(final Icon icon, final int width, final int height) {
-        // TODO Auto-generated method stub
         return IconIO.getScaledInstance(icon, width, height, Interpolation.BICUBIC);
     }
 
@@ -422,7 +416,6 @@ public class IconIO {
      * @return
      */
     public static BufferedImage getScaledInstance(final Image img, final int width, final int height) {
-        // TODO Auto-generated method stub
         return IconIO.getScaledInstance(img, width, height, Interpolation.BICUBIC, true);
     }
 
@@ -450,7 +443,6 @@ public class IconIO {
         if (faktor == 1.0 && img instanceof BufferedImage) {
             return (BufferedImage) img;
         }
-
         Image ret = img;
         int w, h;
         if (higherQuality) {
@@ -465,7 +457,6 @@ public class IconIO {
             w = width;
             h = height;
         }
-
         do {
             if (higherQuality && w > width) {
                 w /= 2;
@@ -473,7 +464,6 @@ public class IconIO {
                     w = width;
                 }
             }
-
             if (higherQuality && h > height) {
                 h /= 2;
                 if (h < height) {
@@ -497,10 +487,8 @@ public class IconIO {
             g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, interpolation.getHint());
             g2.drawImage(ret, 0, 0, w, h, null);
             g2.dispose();
-
             ret = tmp;
         } while (w != width || h != height);
-
         return (BufferedImage) ret;
     }
 
@@ -526,7 +514,6 @@ public class IconIO {
      * @return
      */
     public static ImageIcon getTransparentIcon(final Image src, final float f) {
-
         return new ImageIcon(IconIO.getTransparent(src, f));
     }
 
@@ -539,7 +526,6 @@ public class IconIO {
      * @return
      */
     public static BufferedImage paint(final BufferedImage paintTo, final Image image, final int xoffset, final int yoffset) {
-
         final Graphics2D g2 = paintTo.createGraphics();
         g2.drawImage(image, xoffset, yoffset, null);
         g2.dispose();
@@ -555,7 +541,6 @@ public class IconIO {
      * @return
      */
     public static BufferedImage removeBackground(final BufferedImage image, final double tollerance) {
-
         final HashMap<Integer, Integer> map = new HashMap<Integer, Integer>();
         int biggestValue = 0;
         int color = -1;
@@ -572,7 +557,6 @@ public class IconIO {
             }
         }
         final Color col = new Color(color);
-
         final int r = col.getRed();
         final int g = col.getGreen();
         final int b = col.getBlue();
@@ -588,15 +572,12 @@ public class IconIO {
     public static BufferedImage rotate(final BufferedImage src, final int degree) {
         final int w = src.getWidth(null);
         final int h = src.getHeight(null);
-
         // final Graphics2D g = image.createGraphics();
         // g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
         // RenderingHints.VALUE_ANTIALIAS_ON);
-
         final AffineTransform at = new AffineTransform();
         at.rotate(degree * Math.PI / 180.0);
         Point2D p2din, p2dout;
-
         p2din = new Point2D.Double(0.0, 0.0);
         p2dout = at.transform(p2din, null);
         double ytrans = p2dout.getY();
@@ -613,17 +594,12 @@ public class IconIO {
         p2dout = at.transform(p2din, null);
         ytrans = Math.min(ytrans, p2dout.getY());
         xtrans = Math.min(xtrans, p2dout.getX());
-
         final AffineTransform tat = new AffineTransform();
         tat.translate(-xtrans, -ytrans);
-
         at.preConcatenate(tat);
         final AffineTransformOp bio = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
-
         final Rectangle r = bio.getBounds2D(src).getBounds();
-
         BufferedImage image = new BufferedImage(r.width, r.height, BufferedImage.TYPE_INT_ARGB);
-
         image = bio.filter(src, image);
         // final Graphics g = image.getGraphics();
         // g.setColor(Color.RED);
@@ -656,7 +632,6 @@ public class IconIO {
         final int w = icon.getIconWidth();
         final int h = icon.getIconHeight();
         if (org.appwork.utils.Application.isHeadless()) {
-
             final BufferedImage image = new BufferedImage(w, h, Transparency.TRANSLUCENT);
             final Graphics2D g = image.createGraphics();
             g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
@@ -664,7 +639,6 @@ public class IconIO {
             // g.fillRect(0, 0, w, h);
             icon.paintIcon(null, g, 0, 0);
             g.dispose();
-
             return image;
         } else {
             // not sure why we use this here, but this does not work in headless
@@ -673,14 +647,12 @@ public class IconIO {
             final GraphicsDevice gd = ge.getDefaultScreenDevice();
             final GraphicsConfiguration gc = gd.getDefaultConfiguration();
             final BufferedImage image = gc.createCompatibleImage(w, h, Transparency.TRANSLUCENT);
-
             final Graphics2D g = image.createGraphics();
             g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
             // g.setColor(Color.RED);
             // g.fillRect(0, 0, w, h);
             icon.paintIcon(null, g, 0, 0);
             g.dispose();
-
             return image;
         }
     }
@@ -713,7 +685,6 @@ public class IconIO {
             return (ImageIcon) icon;
         } else {
             return new ImageIcon(IconIO.toBufferedImage(icon));
-
         }
     }
 
@@ -753,14 +724,11 @@ public class IconIO {
      * @return
      */
     public static BufferedImage colorRangeToTransparency(BufferedImage image, Color col, double tollerance) {
-
         final int r = col.getRed();
         final int g = col.getGreen();
         final int b = col.getBlue();
         final int a = col.getAlpha();
-
         return IconIO.colorRangeToTransparency(image, new Color(Math.max((int) (r * (1d - tollerance)), 0), Math.max((int) (g * (1d - tollerance)), 0), Math.max((int) (b * (1d - tollerance)), 0), a), new Color(Math.min(255, (int) (r * (1d + tollerance))), Math.min(255, (int) (g * (1d + tollerance))), Math.min(255, (int) (b * (1d + tollerance))), a));
-
     }
 
     /**
@@ -771,7 +739,6 @@ public class IconIO {
      * @return
      */
     public static Icon replaceColor(Icon icon, final Color search, final int tollerance, final Color replace, boolean keepBrightness) {
-
         return new ImageIcon(replaceColor(toBufferedImage(icon), search, tollerance, replace, keepBrightness));
     }
 
@@ -851,9 +818,7 @@ public class IconIO {
     }
 
     public static Icon getIconFromDataUrl(String dataURL) throws IOException {
-
         return new ImageIcon(getImageFromDataUrl(dataURL));
-
     }
 
     /**
@@ -862,14 +827,12 @@ public class IconIO {
      * @throws IOException
      */
     public static Image getImageFromDataUrl(String dataURL) throws IOException {
-
         final int base64Index = dataURL.indexOf(";base64,");
         if (base64Index > 0 && base64Index + 8 < dataURL.length()) {
             dataURL = dataURL.substring(base64Index + 8);
         }
         Base64InputStream is = new Base64InputStream(new ByteArrayInputStream(dataURL.getBytes("UTF-8")));
         return ImageIO.read(is);
-
     }
 
     public static Image getImageFromSVG(URL url, int w, int h) throws IOException {

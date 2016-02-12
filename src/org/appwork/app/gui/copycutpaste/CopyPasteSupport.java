@@ -74,7 +74,6 @@ public class CopyPasteSupport implements AWTEventListener {
         if (!(event instanceof MouseEvent)) {
             return;
         }
-
         lastMouseEvent = System.currentTimeMillis();
         final MouseEvent mouseEvent = (MouseEvent) event;
 
@@ -84,12 +83,10 @@ public class CopyPasteSupport implements AWTEventListener {
         if (mouseEvent.getComponent() == null) {
             return;
         }
-        System.out.println(event);
         // get deepest component
         // Component c = null;
         final Point point = mouseEvent.getPoint();
-
-        Component c;
+        final Component c;
         if (mouseEvent.getSource() instanceof JDialog) {
             c = SwingUtilities.getDeepestComponentAt((JDialog) mouseEvent.getSource(), (int) point.getX(), (int) point.getY());
         } else if (mouseEvent.getSource() instanceof JFrame) {
@@ -100,10 +97,8 @@ public class CopyPasteSupport implements AWTEventListener {
         } else if (mouseEvent.getSource() instanceof Component) {
             c = (Component) mouseEvent.getSource();
         } else {
-
             return;
         }
-        System.out.println("Point " + c);
         // Check if deepest component is a textcomponent
         if (!(c instanceof JTextComponent) && !(c instanceof ContextMenuAdapter)) {
             return;
@@ -111,20 +106,17 @@ public class CopyPasteSupport implements AWTEventListener {
         if (MenuSelectionManager.defaultManager().getSelectedPath().length > 0) {
             return;
         }
-
-        JPopupMenu menu;
         final JTextComponent t = (JTextComponent) c;
         t.requestFocus();
+        final JPopupMenu menu;
         if (c instanceof ContextMenuAdapter) {
             menu = ((ContextMenuAdapter) c).getPopupMenu(createCutAction(t), createCopyAction(t), createPasteAction(t), createDeleteAction(t), createSelectAction(t));
             if (menu == null) {
                 return;
             }
         } else {
-
             // create menu
             menu = new JPopupMenu();
-
             menu.add(createCutAction(t));
             menu.add(createCopyAction(t));
             menu.add(createPasteAction(t));
@@ -133,7 +125,6 @@ public class CopyPasteSupport implements AWTEventListener {
         }
         final Point pt = SwingUtilities.convertPoint(mouseEvent.getComponent(), mouseEvent.getPoint(), c);
         menu.show(c, pt.x, pt.y);
-
     }
 
     protected AbstractAction createSelectAction(final JTextComponent t) {

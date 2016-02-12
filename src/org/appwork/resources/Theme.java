@@ -97,7 +97,6 @@ public class Theme implements MinTimeWeakReferenceCleanup {
      */
     public void setDelegate(Theme i) {
         this.delegate = i;
-
     }
 
     /**
@@ -167,7 +166,6 @@ public class Theme implements MinTimeWeakReferenceCleanup {
 
     public Icon getIcon(final String relativePath, final int size) {
         return this.getIcon(relativePath, size, true);
-
     }
 
     /**
@@ -225,7 +223,6 @@ public class Theme implements MinTimeWeakReferenceCleanup {
         }
         if (url == null) {
             url = this.getURL("images/", relativePath, ".svg", false);
-
         }
         if (url == null) {
             url = this.getURL("images/", relativePath + "_" + size, ".png", true);
@@ -235,21 +232,9 @@ public class Theme implements MinTimeWeakReferenceCleanup {
         }
         if (url == null) {
             url = this.getURL("images/", relativePath, ".svg", true);
-
         }
         return url;
     }
-
-    //
-    // public ImageIcon getIcon(final URL ressourceURL) {
-    // final String key = getCacheKey(ressourceURL);
-    // ImageIcon ret = getCached(key);
-    // if (ret == null) {
-    // ret = IconIO.getImageIcon(ressourceURL);
-    // cache(ret, key);
-    // }
-    // return ret;
-    // }
 
     /**
      * @param relativePath
@@ -262,9 +247,7 @@ public class Theme implements MinTimeWeakReferenceCleanup {
             if (!res.exists()) {
                 return;
             }
-            File helperRoot;
-
-            helperRoot = new File(file.getParentFile(), "themes/");
+            File helperRoot = new File(file.getParentFile(), "themes/");
             if (RESOURCE_HELPER_ROOT != null) {
                 helperRoot = RESOURCE_HELPER_ROOT;
             }
@@ -290,12 +273,10 @@ public class Theme implements MinTimeWeakReferenceCleanup {
                     break;
                 }
                 relativePath = relativePath.substring(in + 1);
-
             }
         } catch (Throwable e) {
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe(Exceptions.getStackTrace(e));
         }
-
     }
 
     /**
@@ -324,7 +305,6 @@ public class Theme implements MinTimeWeakReferenceCleanup {
         if (nfo.exists() && !t.exists()) {
             t.getParentFile().mkdirs();
             IO.copyFile(nfo, t);
-
         }
     }
 
@@ -334,11 +314,9 @@ public class Theme implements MinTimeWeakReferenceCleanup {
      */
     protected Icon modify(Icon ret, String relativePath) {
         return ret;
-
     }
 
     public Image getImage(final String relativePath, final int size) {
-
         return this.getImage(relativePath, size, false);
     }
 
@@ -364,7 +342,6 @@ public class Theme implements MinTimeWeakReferenceCleanup {
      * @return
      */
     public String getPath() {
-
         return this.path;
     }
 
@@ -435,10 +412,8 @@ public class Theme implements MinTimeWeakReferenceCleanup {
         }
         final String path = this.getPath(pre, relativePath, ext, fallback);
         try {
-
             // first lookup in home dir. .jd_home or installdirectory
             final File file = Application.getResource(path);
-
             if (file.exists()) {
                 return file.toURI().toURL();
             }
@@ -446,8 +421,7 @@ public class Theme implements MinTimeWeakReferenceCleanup {
             e.printStackTrace();
         }
         // afterwards, we lookup in classpath. jar or bin folders
-        URL url = Theme.class.getResource(path);
-
+        final URL url = Theme.class.getResource(path);
         return url;
     }
 
@@ -462,7 +436,6 @@ public class Theme implements MinTimeWeakReferenceCleanup {
         if (this.delegate != null) {
             this.delegate.hasIcon(string);
         }
-
         return lookupImageUrl(string, -1) != null;
     }
 
@@ -497,7 +470,6 @@ public class Theme implements MinTimeWeakReferenceCleanup {
     private void updatePath() {
         this.path = "/themes/" + this.getTheme() + "/" + this.getNameSpace();
         this.defaultPath = "/themes/" + "standard" + "/" + this.getNameSpace();
-
     }
 
     // public void setPath(final String path) {

@@ -676,6 +676,11 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
         return true;
     }
 
+    /**
+     * returns true while a cell is prepared for painting
+     * 
+     * @return
+     */
     public boolean isModifying() {
         return this.modifying;
     }

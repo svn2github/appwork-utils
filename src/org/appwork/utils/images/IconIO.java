@@ -48,6 +48,7 @@ import java.awt.Toolkit;
 import java.awt.Transparency;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
@@ -63,8 +64,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Locale;
 
 import javax.imageio.ImageIO;
 import javax.swing.Icon;
@@ -75,8 +78,12 @@ import org.appwork.swing.components.IDIcon;
 import org.appwork.swing.components.IconIdentifier;
 import org.appwork.utils.URLStream;
 import org.appwork.utils.ImageProvider.ImageProvider;
+import org.appwork.utils.logging2.extmanager.LoggerFactory;
 import org.appwork.utils.net.Base64InputStream;
 import org.appwork.utils.net.Base64OutputStream;
+
+import com.kitfox.svg.SVGDiagram;
+import com.kitfox.svg.SVGUniverse;
 
 public class IconIO {
 
@@ -368,6 +375,17 @@ public class IconIO {
      * @return
      */
     public static ImageIcon getImageIcon(final URL resource, final int size) {
+        if (resource.getPath().toLowerCase(Locale.ENGLISH).endsWith(".svg")) {
+            try {
+                return new ImageIcon(getImageFromSVG(resource, size, size));
+            } catch (IOException e) {
+                LoggerFactory.getDefaultLogger().log(e);
+                return new ImageIcon(ImageProvider.createIcon("DUMMY", size, size));
+
+            }
+
+        }
+
         if (size <= 0) {
             return new ImageIcon(IconIO.getImage(resource));
         } else {
@@ -852,6 +870,53 @@ public class IconIO {
         Base64InputStream is = new Base64InputStream(new ByteArrayInputStream(dataURL.getBytes("UTF-8")));
         return ImageIO.read(is);
 
+    }
+
+    public static Image getImageFromSVG(URL url, int w, int h) throws IOException {
+        try {
+            SVGUniverse universe = new SVGUniverse();
+
+            InputStream is = null;
+            try {
+                URI uri = universe.loadSVG(is = url.openStream(), "dummy.svg");
+
+                SVGDiagram diagram = universe.getDiagram(uri);
+
+                diagram.updateTime(0d);
+                diagram.setIgnoringClipHeuristic(true);
+                double faktor = 1d / Math.max((double) diagram.getWidth() / w, (double) diagram.getHeight() / h);
+                int width = Math.max((int) (diagram.getWidth() * faktor), 1);
+                int height = Math.max((int) (diagram.getHeight() * faktor), 1);
+
+                BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+                Graphics2D g = bi.createGraphics();
+                g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                int x = 0;
+                int y = 0;
+
+                g.translate(x, y);
+                final Rectangle2D.Double rect = new Rectangle2D.Double();
+                diagram.getViewRect(rect);
+                AffineTransform scaleXform = new AffineTransform();
+                scaleXform.setToScale(width / rect.width, height / rect.height);
+
+                AffineTransform oldXform = g.getTransform();
+                g.transform(scaleXform);
+
+                diagram.render(g);
+
+                g.setTransform(oldXform);
+
+                g.translate(-x, -y);
+
+                g.dispose();
+                return bi;
+            } finally {
+                is.close();
+            }
+        } catch (Throwable e) {
+            throw new IOException(e);
+        }
     }
 
 }

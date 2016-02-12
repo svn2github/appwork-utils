@@ -42,6 +42,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.border.Border;
 
+import org.appwork.exceptions.WTFException;
 import org.appwork.swing.MigPanel;
 import org.appwork.swing.exttable.ExtColumn;
 import org.appwork.swing.exttable.ExtDefaultRowSorter;
@@ -85,7 +86,7 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
 
         @Override
         public boolean isVisible() {
-            return false;
+            return true;
         }
 
         @Override
@@ -280,12 +281,15 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
             this.rendererBar.setValue((int) v);
             this.rendererBar.setMinimum(0);
             setStringValue(value, m, v);
-        } else {
+        } else if (renderer == indeterminedRendererPanel) {
             setStringValue(value, -1, -1);
 
             if (!this.rendererBar.isIndeterminate()) {
                 this.rendererBar.setIndeterminate(true);
             }
+
+        } else {
+            throw new WTFException();
         }
 
     }
@@ -350,6 +354,7 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
             }
         }
         return this.renderer;
+
     }
 
     protected void chooseDeterminated() {

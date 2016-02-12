@@ -143,15 +143,6 @@ public class Theme implements MinTimeWeakReferenceCleanup {
         return this.cacheLifetime;
     }
 
-    private String getDefaultPath(final String pre, final String path, final String ext) {
-        final StringBuilder sb = new StringBuilder();
-        sb.append(this.path);
-        sb.append(pre);
-        sb.append(path);
-        sb.append(ext);
-        return sb.toString();
-    }
-
     public Icon getDisabledIcon(final Icon _getIcon) {
         return getDisabledIcon(null, _getIcon);
     }
@@ -207,10 +198,8 @@ public class Theme implements MinTimeWeakReferenceCleanup {
                 ret = IconIO.getScaledInstance(ret, size, size);
             }
             if (ret == null) {
-                URL url = this.getURL("images/", relativePath + "_" + size, ".png");
-                if (url == null) {
-                    url = this.getURL("images/", relativePath, ".png");
-                }
+                URL url = lookupImageUrl(relativePath, size);
+
                 ret = IconIO.getImageIcon(url, size);
                 ret = this.modify(ret, relativePath);
                 if (url == null) {
@@ -222,6 +211,33 @@ public class Theme implements MinTimeWeakReferenceCleanup {
             }
         }
         return ret;
+    }
+
+    /**
+     * @param relativePath
+     * @param size
+     * @return
+     */
+    protected URL lookupImageUrl(String relativePath, int size) {
+        URL url = this.getURL("images/", relativePath + "_" + size, ".png", false);
+        if (url == null) {
+            url = this.getURL("images/", relativePath, ".png", false);
+        }
+        if (url == null) {
+            url = this.getURL("images/", relativePath, ".svg", false);
+
+        }
+        if (url == null) {
+            url = this.getURL("images/", relativePath + "_" + size, ".png", true);
+        }
+        if (url == null) {
+            url = this.getURL("images/", relativePath, ".png", true);
+        }
+        if (url == null) {
+            url = this.getURL("images/", relativePath, ".svg", true);
+
+        }
+        return url;
     }
 
     //
@@ -333,12 +349,12 @@ public class Theme implements MinTimeWeakReferenceCleanup {
         return IconIO.toBufferedImage(this.getIcon(key, size, useCache));
     }
 
-    public URL getImageUrl(final String relativePath) {
-        if (this.delegate != null) {
-            this.delegate.getImageUrl(relativePath);
-        }
-        return this.getURL("images/", relativePath, ".png");
-    }
+    // public URL getImageUrl(final String relativePath) {
+    // if (this.delegate != null) {
+    // this.delegate.getImageUrl(relativePath);
+    // }
+    // return this.getURL("images/", relativePath, ".png");
+    // }
 
     public String getNameSpace() {
         return this.nameSpace;
@@ -406,14 +422,17 @@ public class Theme implements MinTimeWeakReferenceCleanup {
      * @return
      */
     public URL getURL(final String pre, final String relativePath, final String ext) {
-        if (this.delegate != null) {
-            return this.delegate.getURL(pre, relativePath, ext);
+        URL ret = getURL(pre, relativePath, ext, false);
+        if (ret != null) {
+            return ret;
         }
-        return getURL(pre, relativePath, ext, false);
+        return getURL(pre, relativePath, ext, true);
     }
 
     private URL getURL(final String pre, final String relativePath, final String ext, boolean fallback) {
-
+        if (this.delegate != null) {
+            return this.delegate.getURL(pre, relativePath, ext, fallback);
+        }
         final String path = this.getPath(pre, relativePath, ext, fallback);
         try {
 
@@ -428,21 +447,23 @@ public class Theme implements MinTimeWeakReferenceCleanup {
         }
         // afterwards, we lookup in classpath. jar or bin folders
         URL url = Theme.class.getResource(path);
-        if (url == null) {
-            url = Theme.class.getResource(this.getDefaultPath(pre, relativePath, ext));
-        }
 
-        if (url == null && !fallback) {
-            url = getURL(pre, relativePath, ext, true);
-        }
         return url;
+    }
+
+    public File getImagesDirectory() {
+        if (this.delegate != null) {
+            this.delegate.getImagesDirectory();
+        }
+        return Application.getResource(getPath("images/", "image", ".file", false)).getParentFile();
     }
 
     public boolean hasIcon(final String string) {
         if (this.delegate != null) {
             this.delegate.hasIcon(string);
         }
-        return this.getURL("images/", string, ".png") != null;
+
+        return lookupImageUrl(string, -1) != null;
     }
 
     /*

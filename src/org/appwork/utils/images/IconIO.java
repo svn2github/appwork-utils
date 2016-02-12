@@ -198,18 +198,18 @@ public class IconIO {
             public final int filterRGB(final int x, final int y, final int rgb) {
 
                 final int r = (rgb & 0xFF0000) >> 16;
-        final int g = (rgb & 0xFF00) >> 8;
-        final int b = rgb & 0xFF;
-        if (r >= r1 && r <= r2 && g >= g1 && g <= g2 && b >= b1 && b <= b2) {
-            // Set fully transparent but keep color
-            // calculate a alpha value based on the distance between the
-            // range borders and the pixel color
-            final int dist = (Math.abs(r - (r1 + r2) / 2) + Math.abs(g - (g1 + g2) / 2) + Math.abs(b - (b1 + b2) / 2)) * 2;
+                final int g = (rgb & 0xFF00) >> 8;
+                final int b = rgb & 0xFF;
+                if (r >= r1 && r <= r2 && g >= g1 && g <= g2 && b >= b1 && b <= b2) {
+                    // Set fully transparent but keep color
+                    // calculate a alpha value based on the distance between the
+                    // range borders and the pixel color
+                    final int dist = (Math.abs(r - (r1 + r2) / 2) + Math.abs(g - (g1 + g2) / 2) + Math.abs(b - (b1 + b2) / 2)) * 2;
 
-            return new Color(r, g, b, Math.min(255, dist)).getRGB();
-        }
+                    return new Color(r, g, b, Math.min(255, dist)).getRGB();
+                }
 
-        return rgb;
+                return rgb;
             }
         };
 
@@ -373,7 +373,7 @@ public class IconIO {
      * @return
      */
     public static ImageIcon getImageIcon(final URL resource, final int size) {
-        if (StringUtils.endsWithCaseInsensitive(resource.getPath(), ".svg")) {
+        if (resource != null && StringUtils.endsWithCaseInsensitive(resource.getPath(), ".svg")) {
             try {
                 return new ImageIcon(getImageFromSVG(resource, size, size));
             } catch (IOException e) {

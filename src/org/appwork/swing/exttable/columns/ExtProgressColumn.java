@@ -210,7 +210,8 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
         //
         // }
         // });
-        this.renderer = this.determinedRendererPanel;
+        chooseDeterminated();
+
         this.defaultBorder = BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(1, 1, 2, 1), this.determinatedRenderer.getBorder());
 
         this.setRowSorter(new ExtDefaultRowSorter<E>() {
@@ -360,6 +361,7 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
     protected void chooseDeterminated() {
         this.renderer = this.determinedRendererPanel;
         this.rendererBar = this.determinatedRenderer;
+
     }
 
     protected void chooseIndeterminated() {

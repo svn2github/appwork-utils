@@ -188,32 +188,12 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
         super(name, extModel);
         preInit();
         this.map = new HashMap<E, Long>();
-
         this.determinatedRenderer = initDeterminatedRenderer();
-
         this.indeterminatedRenderer = initIndeterminatedRenderer();
         this.determinedRendererPanel = this.wrapDeterminedRenderer(determinatedRenderer);
         this.indeterminedRendererPanel = this.wrapIndeterminedRenderer(indeterminatedRenderer);
-
-        // this.getModel().addTableModelListener(new TableModelListener() {
-        //
-        // @Override
-        // public void tableChanged(final TableModelEvent e) {
-        // switch (e.getType()) {
-        // case TableModelEvent.DELETE:
-        // case TableModelEvent.UPDATE:
-        // System.out.println(e);
-        // if (ExtProgressColumn.this.map.size() == 0) {
-        // ExtProgressColumn.this.indeterminatedRenderer.setIndeterminate(false);
-        // }
-        // }
-        //
-        // }
-        // });
         chooseDeterminated();
-
         this.defaultBorder = BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(1, 1, 2, 1), this.determinatedRenderer.getBorder());
-
         this.setRowSorter(new ExtDefaultRowSorter<E>() {
 
             @Override
@@ -256,8 +236,6 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
 
     @Override
     public void configureEditorComponent(final E value, final boolean isSelected, final int row, final int column) {
-        // TODO Auto-generated method stub
-
     }
 
     @Override
@@ -270,7 +248,6 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
             if (m >= 0) {
                 v = this.getValue(value);
                 final double factor = Math.max(v / (double) Integer.MAX_VALUE, m / (double) Integer.MAX_VALUE);
-
                 if (factor >= 1.0) {
                     v /= factor;
                     m /= factor;
@@ -284,15 +261,12 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
             setStringValue(value, m, v);
         } else if (renderer == indeterminedRendererPanel) {
             setStringValue(value, -1, -1);
-
             if (!this.rendererBar.isIndeterminate()) {
                 this.rendererBar.setIndeterminate(true);
             }
-
         } else {
             throw new WTFException();
         }
-
     }
 
     protected void setStringValue(final E value, long m, long v) {
@@ -306,7 +280,6 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
      */
     @Override
     public Object getCellEditorValue() {
-
         return null;
     }
 
@@ -336,7 +309,6 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
     public JComponent getRendererComponent(final E value, final boolean isSelected, final boolean hasFocus, final int row, final int column) {
         this.columnIndex = column;
         if (this.isIndeterminated(value, isSelected, hasFocus, row, column)) {
-
             chooseIndeterminated();
             if (this.map.size() == 0) {
                 if (!this.indeterminatedRenderer.isIndeterminate()) {
@@ -355,13 +327,11 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
             }
         }
         return this.renderer;
-
     }
 
     protected void chooseDeterminated() {
         this.renderer = this.determinedRendererPanel;
         this.rendererBar = this.determinatedRenderer;
-
     }
 
     protected void chooseIndeterminated() {
@@ -376,7 +346,6 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
         long v = this.getValue(value);
         long m = this.getMax(value);
         final double factor = Math.max(v / (double) Integer.MAX_VALUE, m / (double) Integer.MAX_VALUE);
-
         if (factor >= 1.0) {
             v /= factor;
             m /= factor;
@@ -393,7 +362,6 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
      */
     @Override
     public boolean isEditable(final E obj) {
-
         return false;
     }
 
@@ -404,7 +372,6 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
      */
     @Override
     public boolean isEnabled(final E obj) {
-
         return true;
     }
 
@@ -417,7 +384,6 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
      * @return
      */
     protected boolean isIndeterminated(final E value, final boolean isSelected, final boolean hasFocus, final int row, final int column) {
-        // TODO Auto-generated method stub
         return false;
     }
 
@@ -428,7 +394,6 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
      */
     @Override
     public boolean isSortable(final E obj) {
-
         return true;
     }
 
@@ -440,20 +405,14 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
 
     @Override
     public void resetEditor() {
-        // TODO Auto-generated method stub
-
     }
 
     @Override
     public void resetRenderer() {
-        if (renderer != null) {
-            this.renderer.setOpaque(false);
-        }
-        if (rendererBar != null) {
-            rendererBar.setStringPainted(true);
-            rendererBar.setOpaque(false);
-            rendererBar.setBorder(this.defaultBorder);
-        }
+        this.renderer.setOpaque(false);
+        rendererBar.setStringPainted(true);
+        rendererBar.setOpaque(false);
+        rendererBar.setBorder(this.defaultBorder);
     }
 
     /*

@@ -57,7 +57,23 @@ import org.appwork.utils.os.CrossSystem;
 
 public class SyntheticaHelper {
 
-    public static String getDefaultFont() {
+    public SyntheticaSettings config;
+
+    /**
+     *
+     */
+    public SyntheticaHelper() {
+        this(JsonConfig.create(SyntheticaSettings.class));
+    }
+
+    /**
+     * @param create
+     */
+    public SyntheticaHelper(SyntheticaSettings settings) {
+        this.config = settings;
+    }
+
+    public String getDefaultFont() {
         switch (CrossSystem.getOS()) {
         case WINDOWS_7:
         case WINDOWS_8:
@@ -73,7 +89,7 @@ public class SyntheticaHelper {
      * @param locale
      * @return
      */
-    public static String getFontName(final SyntheticaSettings config, final LanguageFileSetup locale) {
+    public String getFontName(final SyntheticaSettings config, final LanguageFileSetup locale) {
         final String fontName = config.getFontName();
 
         final String fontFromTranslation = locale.config_fontname();
@@ -90,12 +106,12 @@ public class SyntheticaHelper {
             newFontName = fontName;
         }
         if (newFontName == null) {
-            newFontName = SyntheticaHelper.getDefaultFont();
+            newFontName = getDefaultFont();
         }
         return newFontName;
     }
 
-    public static int getFontScaleFaktor(final SyntheticaSettings config, final LanguageFileSetup translationFileConfig) {
+    public int getFontScaleFaktor(final SyntheticaSettings config, final LanguageFileSetup translationFileConfig) {
         int fontScale = -1;
         try {
             fontScale = Integer.parseInt(translationFileConfig.config_fontscale_faktor());
@@ -107,25 +123,29 @@ public class SyntheticaHelper {
         return fontScale;
     }
 
+    public static void init() throws IOException {
+        new SyntheticaHelper().load();
+    }
+
     /**
      * @throws IOException
      *
      */
-    public static void init() throws IOException {
-        SyntheticaHelper.init("de.javasoft.plaf.synthetica.SyntheticaSimple2DLookAndFeel");
+    public void load() throws IOException {
+        load("de.javasoft.plaf.synthetica.SyntheticaSimple2DLookAndFeel");
 
     }
 
-    public static void init(final String laf) throws IOException {
+    public void load(final String laf) throws IOException {
 
-        SyntheticaHelper.init(laf, SyntheticaHelper.readLicense());
+        load(laf, readLicense());
     }
 
     /**
      * @return
      * @throws IOException
      */
-    private static String readLicense() throws IOException {
+    private String readLicense() throws IOException {
         final URL url = Application.getRessourceURL("cfg/synthetica-license.key");
         if (url == null) {
 
@@ -146,7 +166,7 @@ public class SyntheticaHelper {
      * @param string
      * @throws IOException
      */
-    public static void init(final String laf, String license) throws IOException {
+    public void load(final String laf, String license) throws IOException {
         if (UIManager.get("Synthetica.animation.enabled") != null) {
             LoggerFactory.getDefaultLogger().info("Synthetica Look And Feel is already Set");
             return;
@@ -154,16 +174,16 @@ public class SyntheticaHelper {
         }
         if (CrossSystem.isMac()) {
 
-            if (SyntheticaHelper.checkIfMacInitWillFail()) {
+            if (checkIfMacInitWillFail()) {
                 System.runFinalization();
                 System.gc();
-                if (SyntheticaHelper.checkIfMacInitWillFail()) {
+                if (checkIfMacInitWillFail()) {
                     throw new IOException("Cannot Init LookAndFeel. Windows Are Open");
                 }
             }
         }
         if (StringUtils.isEmpty(license)) {
-            license = SyntheticaHelper.readLicense();
+            license = readLicense();
         }
         org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("LaF init: " + laf);
         final long start = System.currentTimeMillis();
@@ -208,7 +228,7 @@ public class SyntheticaHelper {
             JFrame.setDefaultLookAndFeelDecorated(false);
             JDialog.setDefaultLookAndFeelDecorated(false);
             final LanguageFileSetup locale = TranslationFactory.create(LanguageFileSetup.class);
-            final SyntheticaSettings config = JsonConfig.create(SyntheticaSettings.class);
+
             boolean decorated = config.isWindowDecorationEnabled();
             de.javasoft.plaf.synthetica.SyntheticaLookAndFeel.setWindowsDecorated(decorated);
 
@@ -220,7 +240,7 @@ public class SyntheticaHelper {
             // /* http://www.jyloo.com/news/?pubId=1297681728000 */
             // /* we want our own FontScaling, not SystemDPI */
             UIManager.put("Synthetica.font.respectSystemDPI", config.isFontRespectsSystemDPI());
-            final int fontScale = SyntheticaHelper.getFontScaleFaktor(config, locale);
+            final int fontScale = getFontScaleFaktor(config, locale);
             UIManager.put("Synthetica.font.scaleFactor", fontScale);
             if (config.isFontRespectsSystemDPI() && fontScale != 100) {
                 org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("SystemDPI might interfere with JD's FontScaling");
@@ -256,7 +276,7 @@ public class SyntheticaHelper {
             // });
             de.javasoft.plaf.synthetica.SyntheticaLookAndFeel.setExtendedFileChooserEnabled(false);
 
-            final String fontName = SyntheticaHelper.getFontName(config, locale);
+            final String fontName = getFontName(config, locale);
 
             int fontSize = de.javasoft.plaf.synthetica.SyntheticaLookAndFeel.getFont().getSize();
             fontSize = fontScale * fontSize / 100;
@@ -278,7 +298,7 @@ public class SyntheticaHelper {
         }
     }
 
-    protected static boolean checkIfMacInitWillFail() {
+    protected boolean checkIfMacInitWillFail() {
 
         // synthetica init fails on mac if there are already active windows
         Window awindow[];

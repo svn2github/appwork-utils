@@ -37,6 +37,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -86,6 +87,10 @@ public class JsonKeyValueStorage extends Storage {
 
     public JsonKeyValueStorage(final File file, final boolean plain, final byte[] key) throws StorageException {
         this(file, null, plain, key);
+    }
+
+    public List<String> getKeys() {
+        return new ArrayList<String>(internalMap.keySet());
     }
 
     /**

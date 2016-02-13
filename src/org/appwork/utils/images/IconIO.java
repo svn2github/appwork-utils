@@ -844,14 +844,23 @@ public class IconIO {
                 URI uri = universe.loadSVG(is = url.openStream(), "dummy.svg");
 
                 SVGDiagram diagram = universe.getDiagram(uri);
+                // Rectangle dp = diagram.getDeviceViewport();
+                // Rectangle2D vr = diagram.getViewRect();
+                // Rectangle2D bb = diagram.getRoot().getBoundingBox();
 
                 diagram.updateTime(0d);
                 diagram.setIgnoringClipHeuristic(true);
+                if (w <= 0) {
+                    w = (int) diagram.getWidth();
+                }
+                if (h <= 0) {
+                    h = (int) diagram.getHeight();
+                }
                 double faktor = 1d / Math.max((double) diagram.getWidth() / w, (double) diagram.getHeight() / h);
                 int width = Math.max((int) (diagram.getWidth() * faktor), 1);
                 int height = Math.max((int) (diagram.getHeight() * faktor), 1);
 
-                BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+                BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
                 Graphics2D g = bi.createGraphics();
                 g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 int x = 0;

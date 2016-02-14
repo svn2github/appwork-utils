@@ -48,6 +48,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
@@ -73,29 +74,29 @@ abstract public class Graph extends JPanel implements ToolTipHandler {
     private transient NullsafeAtomicReference<Thread> fetcherThread    = new NullsafeAtomicReference<Thread>(null);
     private int                                       interval         = 1000;
 
-    private final Object                              LOCK             = new Object();
+    private final Object LOCK = new Object();
 
-    private Color                                     currentColorTop;
-    private Color                                     currentColorBottom;
+    private Color currentColorTop;
+    private Color currentColorBottom;
 
-    public long                                       average;
+    public long average;
 
-    private int[]                                     averageCache;
+    private int[] averageCache;
 
-    private Color                                     averageColor     = new Color(0x333333);
-    private Color                                     averageTextColor = new Color(0);
-    private int                                       capacity         = 0;
-    private Color                                     textColor        = new Color(0);
+    private Color averageColor     = new Color(0x333333);
+    private Color averageTextColor = new Color(0);
+    private int   capacity         = 0;
+    private Color textColor        = new Color(0);
 
-    protected int                                     value;
+    protected int value;
 
-    private Font                                      textFont;
+    private Font textFont;
 
-    private int                                       all;
+    private int all;
 
-    private Limiter[]                                 limiter;
-    private TooltipTextDelegateFactory                tooltipFactory;
-    private boolean                                   antiAliasing     = false;
+    private Limiter[]                  limiter;
+    private TooltipTextDelegateFactory tooltipFactory;
+    private boolean                    antiAliasing = false;
 
     public Graph() {
         this(60, 1000);
@@ -111,6 +112,7 @@ abstract public class Graph extends JPanel implements ToolTipHandler {
         this.setCapacity(capacity);
 
         this.setOpaque(false);
+        setTextFont(new JLabel().getFont());
 
     }
 
@@ -266,6 +268,7 @@ abstract public class Graph extends JPanel implements ToolTipHandler {
             } else {
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             }
+
             g2.setStroke(new BasicStroke(1));
 
             int id = this.i;

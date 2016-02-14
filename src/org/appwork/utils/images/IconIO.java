@@ -760,9 +760,9 @@ public class IconIO {
                 final int r = (rgb >> 16) & 0xff;
                 final int g = (rgb >> 8) & 0xff;
                 final int b = (rgb >> 0) & 0xff;
-                System.out.println(a);
+                // System.out.println(a);
                 if (r == 0 && b == 0 && g == 0) {
-                    System.out.println(1);
+                    // System.out.println(1);
                 }
                 if (Math.abs(r - r1) <= tollerance && Math.abs(g - g1) <= tollerance && Math.abs(b - b1) <= tollerance && Math.abs(a - a1) <= tollerance) {
                     if (!keepBrightness) {

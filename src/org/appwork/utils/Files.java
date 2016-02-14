@@ -45,6 +45,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
+import org.appwork.utils.logging2.extmanager.LoggerFactory;
 import org.appwork.utils.os.CrossSystem;
 
 public class Files {
@@ -106,7 +107,7 @@ public class Files {
                 }
             }
         }
-        System.out.println(" Delete file " + file);
+        LoggerFactory.getDefaultLogger().finer(" Delete file " + file);
         final boolean fd = file.delete();
         if (file.exists() && !fd && breakOnError) {
             throw new IOException("Could not delete " + file);

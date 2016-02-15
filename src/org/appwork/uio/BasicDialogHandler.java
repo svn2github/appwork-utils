@@ -47,7 +47,7 @@ public class BasicDialogHandler implements UserIOHandlerInterface {
     @Override
     public boolean showConfirmDialog(int flags, String title, String message, Icon icon, String ok, String cancel, String dontShowAgainKey) {
         try {
-            D.showConfirmDialog(flags, title, message, icon, ok, cancel);
+            D.showConfirmDialog(flags, title, message, icon, ok, cancel, dontShowAgainKey);
             return true;
         } catch (final DialogNoAnswerException e) {
         }

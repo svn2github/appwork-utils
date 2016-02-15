@@ -47,6 +47,7 @@ import javax.swing.SwingUtilities;
 import org.appwork.resources.AWUTheme;
 import org.appwork.uio.UIOManager;
 import org.appwork.utils.BinaryLogic;
+import org.appwork.utils.StringUtils;
 import org.appwork.utils.interfaces.ValueConverter;
 import org.appwork.utils.locale._AWU;
 import org.appwork.utils.swing.EDTRunner;
@@ -468,14 +469,33 @@ public class Dialog {
      * @throws DialogClosedException
      */
     public int showConfirmDialog(final int flag, final String title, final String message, final Icon tmpicon, final String okOption, final String cancelOption) throws DialogClosedException, DialogCanceledException {
+        return showConfirmDialog(flag, title, message, tmpicon, okOption, cancelOption, null);
+    }
 
+    public int showConfirmDialog(final int flag, final String title, final String message, final Icon tmpicon, final String okOption, final String cancelOption, final String dontShowAgainKey) throws DialogClosedException, DialogCanceledException {
         final Icon icon;
         if (tmpicon == null) {
             icon = Dialog.getIconByText(title + message);
         } else {
             icon = tmpicon;
         }
-        return this.showDialog(new ConfirmDialog(flag, title, message, icon, okOption, cancelOption));
+        final ConfirmDialog dialog;
+        if (StringUtils.isEmpty(dontShowAgainKey)) {
+            dialog = new ConfirmDialog(flag, title, message, icon, okOption, cancelOption);
+        } else {
+            dialog = new ConfirmDialog(flag, title, message, icon, okOption, cancelOption) {
+                /*
+                 * (non-Javadoc)
+                 * 
+                 * @see org.appwork.utils.swing.dialog.AbstractDialog#getDontShowAgainKey()
+                 */
+                @Override
+                public String getDontShowAgainKey() {
+                    return dontShowAgainKey;
+                }
+            };
+        }
+        return this.showDialog(dialog);
     }
 
     /**
@@ -900,7 +920,7 @@ public class Dialog {
         final ConfirmDialog d = new ConfirmDialog(UIOManager.BUTTONS_HIDE_CANCEL, "Image", "" + image.getWidth(null) + "x" + image.getHeight(null), new ImageIcon(image), null, null) {
             /*
              * (non-Javadoc)
-             *
+             * 
              * @see org.appwork.utils.swing.dialog.AbstractDialog#getModalityType()
              */
             @Override

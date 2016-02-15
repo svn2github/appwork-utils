@@ -43,6 +43,7 @@ import org.appwork.utils.swing.dialog.ConfirmDialog;
 import org.appwork.utils.swing.dialog.Dialog;
 import org.appwork.utils.swing.dialog.DialogCanceledException;
 import org.appwork.utils.swing.dialog.DialogClosedException;
+import org.appwork.utils.swing.dialog.DialogNoAnswerException;
 
 /**
  * @author Thomas
@@ -50,15 +51,9 @@ import org.appwork.utils.swing.dialog.DialogClosedException;
  */
 public class HeadlessDialogHandler implements UserIOHandlerInterface {
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.appwork.uio.UserIOHandlerInterface#show(java.lang.Class, org.appwork.uio.UserIODefinition)
-     */
     @SuppressWarnings("unchecked")
     @Override
     public <T extends UserIODefinition> T show(Class<T> class1, T impl) {
-
         if (impl instanceof ConfirmDialog) {
             final CloseReason cr;
             if (BinaryLogic.containsAll(impl.getFlags(), UIOManager.BUTTONS_HIDE_CANCEL)) {
@@ -71,7 +66,6 @@ public class HeadlessDialogHandler implements UserIOHandlerInterface {
                     cr = CloseReason.CANCEL;
                 }
             }
-
             return (T) new ConfirmDialogInterface() {
 
                 @Override
@@ -93,60 +87,50 @@ public class HeadlessDialogHandler implements UserIOHandlerInterface {
 
                 @Override
                 public void setCloseReason(CloseReason closeReason) {
-
                 }
 
                 @Override
                 public boolean isRemoteAPIEnabled() {
-
                     return false;
                 }
 
                 @Override
                 public boolean isDontShowAgainSelected() {
-
                     return false;
                 }
 
                 @Override
                 public String getTitle() {
-
                     return null;
                 }
 
                 @Override
                 public int getTimeout() {
-
                     return 0;
                 }
 
                 @Override
                 public int getFlags() {
-
                     return 0;
                 }
 
                 @Override
                 public CloseReason getCloseReason() {
-
                     return cr;
                 }
 
                 @Override
                 public String getOKButtonText() {
-
                     return null;
                 }
 
                 @Override
                 public String getMessage() {
-
                     return null;
                 }
 
                 @Override
                 public String getCancelButtonText() {
-
                     return null;
                 }
             };
@@ -154,26 +138,16 @@ public class HeadlessDialogHandler implements UserIOHandlerInterface {
         return impl;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.appwork.uio.UserIOHandlerInterface#showConfirmDialog(int, java.lang.String, java.lang.String)
-     */
     @Override
     public boolean showConfirmDialog(int flag, String title, String message) {
         synchronized (AbstractConsole.LOCK) {
-            ConsoleDialog cd = new ConsoleDialog(title);
+            final ConsoleDialog cd = new ConsoleDialog(title);
             cd.start();
             cd.printLines(message);
             try {
                 cd.waitYesOrNo(flag, "ok", "cancel");
                 return true;
-            } catch (DialogCanceledException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (DialogClosedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+            } catch (DialogNoAnswerException e) {
             } finally {
                 cd.end();
             }
@@ -181,105 +155,67 @@ public class HeadlessDialogHandler implements UserIOHandlerInterface {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.appwork.uio.UserIOHandlerInterface#showConfirmDialog(int, java.lang.String, java.lang.String, javax.swing.Icon,
-     * java.lang.String, java.lang.String)
-     */
     @Override
-    public boolean showConfirmDialog(int flags, String title, String message, Icon icon, String ok, String cancel) {
+    public boolean showConfirmDialog(int flags, String title, String message, Icon icon, String ok, String cancel, String dontShowAgainKey) {
         synchronized (AbstractConsole.LOCK) {
-            ConsoleDialog cd = new ConsoleDialog(title);
+            final ConsoleDialog cd = new ConsoleDialog(title);
             cd.start();
             cd.printLines(message);
             try {
                 cd.waitYesOrNo(flags, ok, cancel);
                 return true;
-            } catch (DialogCanceledException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (DialogClosedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+            } catch (DialogNoAnswerException e) {
             } finally {
                 cd.end();
             }
-
         }
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.appwork.uio.UserIOHandlerInterface#showErrorMessage(java.lang.String)
-     */
+    @Override
+    public boolean showConfirmDialog(int flags, String title, String message, Icon icon, String ok, String cancel) {
+        return showConfirmDialog(flags, title, message, icon, ok, cancel, null);
+    }
+
     @Override
     public void showErrorMessage(String message) {
         synchronized (AbstractConsole.LOCK) {
-            ConsoleDialog cd = new ConsoleDialog("Error!");
+            final ConsoleDialog cd = new ConsoleDialog("Error!");
             cd.printLines(message);
             cd.start();
             try {
                 cd.waitYesOrNo(UIOManager.BUTTONS_HIDE_OK, null, null);
-
-            } catch (DialogCanceledException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (DialogClosedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+            } catch (DialogNoAnswerException e) {
             } finally {
                 cd.end();
             }
         }
-
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.appwork.uio.UserIOHandlerInterface#showMessageDialog(java.lang.String )
-     */
     @Override
     public void showMessageDialog(String message) {
-        ConsoleDialog cd = new ConsoleDialog("Message");
-        cd.printLines(message);
-        try {
-            cd.waitYesOrNo(UIOManager.BUTTONS_HIDE_OK, null, null);
-
-        } catch (DialogCanceledException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (DialogClosedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        synchronized (AbstractConsole.LOCK) {
+            final ConsoleDialog cd = new ConsoleDialog("Message");
+            cd.printLines(message);
+            try {
+                cd.waitYesOrNo(UIOManager.BUTTONS_HIDE_OK, null, null);
+            } catch (DialogNoAnswerException e) {
+            } finally {
+                cd.end();
+            }
         }
-
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.appwork.uio.UserIOHandlerInterface#showException(java.lang.String, java.lang.Throwable)
-     */
     @Override
     public void showException(String message, Throwable e1) {
         synchronized (AbstractConsole.LOCK) {
-            ConsoleDialog cd = new ConsoleDialog(message);
+            final ConsoleDialog cd = new ConsoleDialog(message);
             cd.printLines(message);
             cd.printLines(Exceptions.getStackTrace(e1));
             cd.start();
             try {
                 cd.waitYesOrNo(UIOManager.BUTTONS_HIDE_OK, null, null);
-
-            } catch (DialogCanceledException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (DialogClosedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+            } catch (DialogNoAnswerException e) {
             } finally {
                 cd.end();
             }

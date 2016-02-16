@@ -187,13 +187,20 @@ public class Theme implements MinTimeWeakReferenceCleanup {
         if (ret == null) {
             if (StringUtils.equalsIgnoreCase(relativePath, "disabled") || StringUtils.equalsIgnoreCase(relativePath, "checkbox_false")) {
                 ret = CheckBoxIcon.FALSE;
-                ret = IconIO.getScaledInstance(ret, size, size);
+                if (ret != null) {
+                    // may be null during calss loading static init of the CheckBoxIconClass
+                    ret = IconIO.getScaledInstance(ret, size, size);
+                }
             } else if (StringUtils.equalsIgnoreCase(relativePath, "enabled") || StringUtils.equalsIgnoreCase(relativePath, "checkbox_true")) {
                 ret = CheckBoxIcon.TRUE;
-                ret = IconIO.getScaledInstance(ret, size, size);
+                if (ret != null) {// may be null during calss loading static init of the CheckBoxIconClass
+                    ret = IconIO.getScaledInstance(ret, size, size);
+                }
             } else if (StringUtils.equalsIgnoreCase(relativePath, "checkbox_undefined")) {
                 ret = CheckBoxIcon.UNDEFINED;
-                ret = IconIO.getScaledInstance(ret, size, size);
+                if (ret != null) {// may be null during calss loading static init of the CheckBoxIconClass
+                    ret = IconIO.getScaledInstance(ret, size, size);
+                }
             }
             if (ret == null) {
                 URL url = lookupImageUrl(relativePath, size);

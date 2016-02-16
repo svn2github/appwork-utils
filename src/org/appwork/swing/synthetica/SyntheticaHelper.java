@@ -188,42 +188,7 @@ public class SyntheticaHelper {
         org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("LaF init: " + laf);
         final long start = System.currentTimeMillis();
         try {
-            /* we save around x-400 ms here by not using AES */
-            if (license == null) {
-
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Missing Look And Feel License. Reverted to your System Look And Feel!");
-
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Missing Look And Feel License. Reverted to your System Look And Feel!");
-
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Missing Look And Feel License.");
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("You can only use Synthetica Look and Feel in official JDownloader versions.");
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Reverted to your System Look And Feel!");
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("If you are a developer, and want to do some gui work on the offical JDownloader Look And Feel, write e-mail@appwork.org to get a developer Look And Feel Key");
-                throw new WTFException("No Synthetica License Found!");
-            }
-            /*
-             * NOTE: This Licensee Information may only be used by AppWork UG. If you like to create derived creation based on this
-             * sourcecode, you have to remove this license key. Instead you may use the FREE Version of synthetica found on javasoft.de
-             */
-            String[] licenseLines = Regex.getLines(license);
-            // final String[] li = { };
-            final ArrayList<String> valids = new ArrayList<String>();
-            for (final String s : licenseLines) {
-                if (!s.trim().startsWith("#") && !s.trim().startsWith("//")) {
-                    valids.add(s);
-                }
-            }
-            licenseLines = valids.toArray(new String[] {});
-            final String key = licenseLines[0];
-            if (key.split("-").length == 5) {
-                throw new WTFException("Outdated Licensefile: " + Application.getRessourceURL("cfg/synthetica-license.key"));
-            }
-            final String[] li = new String[licenseLines.length - 1];
-            System.arraycopy(licenseLines, 1, li, 0, li.length);
-            if (key != null) {
-                UIManager.put("Synthetica.license.info", li);
-                UIManager.put("Synthetica.license.key", key);
-            }
+            setLicense(license);
 
             JFrame.setDefaultLookAndFeelDecorated(false);
             JDialog.setDefaultLookAndFeelDecorated(false);
@@ -256,7 +221,9 @@ public class SyntheticaHelper {
             UIManager.put("Synthetica.menu.toolTipEnabled", true);
             UIManager.put("Synthetica.menuItem.toolTipEnabled", true);
 
-            de.javasoft.plaf.synthetica.SyntheticaLookAndFeel.setLookAndFeel(laf);
+            if (!Application.isHeadless()) {
+                de.javasoft.plaf.synthetica.SyntheticaLookAndFeel.setLookAndFeel(laf);
+            }
 
             // final SynthStyleFactory factiory = SyntheticaLookAndFeel.getStyleFactory();
             //
@@ -295,6 +262,45 @@ public class SyntheticaHelper {
             final long time = System.currentTimeMillis() - start;
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("LAF Init duration: " + time + "ms");
 
+        }
+    }
+
+    public void setLicense(String license) {
+        /* we save around x-400 ms here by not using AES */
+        if (license == null) {
+
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Missing Look And Feel License. Reverted to your System Look And Feel!");
+
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Missing Look And Feel License. Reverted to your System Look And Feel!");
+
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Missing Look And Feel License.");
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("You can only use Synthetica Look and Feel in official JDownloader versions.");
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Reverted to your System Look And Feel!");
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("If you are a developer, and want to do some gui work on the offical JDownloader Look And Feel, write e-mail@appwork.org to get a developer Look And Feel Key");
+            throw new WTFException("No Synthetica License Found!");
+        }
+        /*
+         * NOTE: This Licensee Information may only be used by AppWork UG. If you like to create derived creation based on this sourcecode,
+         * you have to remove this license key. Instead you may use the FREE Version of synthetica found on javasoft.de
+         */
+        String[] licenseLines = Regex.getLines(license);
+        // final String[] li = { };
+        final ArrayList<String> valids = new ArrayList<String>();
+        for (final String s : licenseLines) {
+            if (!s.trim().startsWith("#") && !s.trim().startsWith("//")) {
+                valids.add(s);
+            }
+        }
+        licenseLines = valids.toArray(new String[] {});
+        final String key = licenseLines[0];
+        if (key.split("-").length == 5) {
+            throw new WTFException("Outdated Licensefile: " + Application.getRessourceURL("cfg/synthetica-license.key"));
+        }
+        final String[] li = new String[licenseLines.length - 1];
+        System.arraycopy(licenseLines, 1, li, 0, li.length);
+        if (key != null) {
+            UIManager.put("Synthetica.license.info", li);
+            UIManager.put("Synthetica.license.key", key);
         }
     }
 

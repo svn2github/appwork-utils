@@ -538,7 +538,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
 
         final JButton button;
 
-        button = new JButton(AWUTheme.I().getIcon("exttable/columnButton", 12));
+        button = new JButton(AWUTheme.I().getIcon("exttable/columnButton", 10));
 
         button.setBorderPainted(false);
 

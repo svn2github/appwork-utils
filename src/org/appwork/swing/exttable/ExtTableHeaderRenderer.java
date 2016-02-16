@@ -61,9 +61,9 @@ public class ExtTableHeaderRenderer extends DefaultTableCellRenderer implements 
     private final ExtColumn<?> column;
     private boolean            paintIcon;
 
-    private Color focusForeground;
-    private Color focusBackground;
-    private Color foregroundC;
+    private Color              focusForeground;
+    private Color              focusBackground;
+    private Color              foregroundC;
 
     public Color getFocusForeground() {
         return focusForeground;
@@ -128,6 +128,7 @@ public class ExtTableHeaderRenderer extends DefaultTableCellRenderer implements 
         column = extColumn;
         // this.setHorizontalTextPosition(10);
         lockedWidth = AWUTheme.I().getIcon("exttable/widthLocked", 14);
+
         try {
 
             focusForeground = DefaultLookupWrapper.getColor(this, ui, "TableHeader.focusCellForeground");

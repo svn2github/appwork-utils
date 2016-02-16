@@ -837,8 +837,9 @@ public class IconIO {
 
     public static Image getImageFromSVG(URL url, int w, int h) throws IOException {
         try {
-            SVGUniverse universe = new SVGUniverse();
 
+            SVGUniverse universe = new SVGUniverse();
+            // String svg = IO.readURLToString(url);
             InputStream is = null;
             try {
                 URI uri = universe.loadSVG(is = url.openStream(), "dummy.svg");

@@ -203,8 +203,7 @@ public class Theme implements MinTimeWeakReferenceCleanup {
                 }
             }
             if (ret == null) {
-                URL url = lookupImageUrl(relativePath, size);
-
+                final URL url = lookupImageUrl(relativePath, size);
                 ret = IconIO.getImageIcon(url, size);
                 ret = this.modify(ret, relativePath);
                 if (url == null) {
@@ -448,7 +447,7 @@ public class Theme implements MinTimeWeakReferenceCleanup {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.storage.config.MinTimeWeakReferenceCleanup# onMinTimeWeakReferenceCleanup
      * (org.appwork.storage.config.MinTimeWeakReference)
      */

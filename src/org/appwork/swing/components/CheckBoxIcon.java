@@ -47,29 +47,29 @@ public final class CheckBoxIcon implements Icon {
     public static final CheckBoxIcon FALSE     = new CheckBoxIcon(false);
     public static final CheckBoxIcon TRUE      = new CheckBoxIcon(true);
     public static final CheckBoxIcon UNDEFINED = new CheckBoxIcon(true, false);
-    private JCheckBox                cb;
-    private Icon                     internalIcon;
-    private int                      size;
+    private final JCheckBox          cb;
+    private final Icon               internalIcon;
+    private final int                size;
 
     public CheckBoxIcon(boolean selected, boolean enabled) {
-
         // we need this workaround.
         // if we would use cb.paint(g); for every paintIcon call, this might
         // habe sideeffects on the LAF painter.
         this.size = 14;
         if (Application.isHeadless()) {
-            Icon icon;
+            cb = null;
+            final Icon icon;
             if (selected) {
                 icon = AWUTheme.getInstance().getIcon("checkbox_true", size);
             } else {
                 icon = AWUTheme.getInstance().getIcon("checkbox_false", size);
             }
             if (!enabled) {
-                icon = AWUTheme.getInstance().getDisabledIcon(icon);
+                internalIcon = AWUTheme.getInstance().getDisabledIcon(icon);
+            } else {
+                internalIcon = icon;
             }
-            internalIcon = icon;
         } else {
-
             cb = new JCheckBox() {
                 {
                     setSelected(true);
@@ -90,14 +90,11 @@ public final class CheckBoxIcon implements Icon {
                     return true;
                 }
             };
-
-            ;
             cb.setSelected(selected);
-            internalIcon = ImageProvider.toImageIcon(this);
-
             if (!enabled) {
-
                 internalIcon = AWUTheme.getInstance().getDisabledIcon(this);
+            } else {
+                internalIcon = ImageProvider.toImageIcon(this);
             }
         }
 
@@ -111,24 +108,13 @@ public final class CheckBoxIcon implements Icon {
     public void paintIcon(Component c, Graphics g, int x, int y) {
         if (internalIcon != null) {
             internalIcon.paintIcon(c, g, x, y);
-
             return;
+        } else {
+            g = g.create(x, y, 14, 14);
+            g.translate(-4, -4);
+            cb.paint(g);
+            g.dispose();
         }
-
-        // g.setColor(Color.RED);
-        // g.drawRect(0, 0, 14, 14);
-        g = g.create(x, y, 14, 14);
-        // g.translate(x, y);
-        g.translate(-4, -4);
-        cb.paint(g);
-        g.dispose();
-
-        // g.translate(4, 4);
-        // g.translate(-x, -y);
-
-        // g.dispose();
-        // g.translate(0, -10);
-
     }
 
     @Override

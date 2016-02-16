@@ -90,7 +90,12 @@ public class JsonKeyValueStorage extends Storage {
     }
 
     public List<String> getKeys() {
-        return new ArrayList<String>(internalMap.keySet());
+        final boolean readL = getLock().readLock();
+        try {
+            return new ArrayList<String>(getMap().keySet());
+        } finally {
+            getLock().readUnlock(readL);
+        }
     }
 
     /**
@@ -267,7 +272,7 @@ public class JsonKeyValueStorage extends Storage {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.storage.Storage#getID()
      */
     @Override
@@ -555,7 +560,7 @@ public class JsonKeyValueStorage extends Storage {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.storage.Storage#size()
      */
     @Override

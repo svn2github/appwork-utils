@@ -57,7 +57,7 @@ import org.appwork.utils.os.CrossSystem;
 
 public class SyntheticaHelper {
 
-    public SyntheticaSettings config;
+    public final SyntheticaSettings config;
 
     /**
      *
@@ -80,7 +80,6 @@ public class SyntheticaHelper {
         case WINDOWS_VISTA:
             return "Segoe UI";
         }
-
         return null;
     }
 
@@ -91,11 +90,8 @@ public class SyntheticaHelper {
      */
     public String getFontName(final SyntheticaSettings config, final LanguageFileSetup locale) {
         final String fontName = config.getFontName();
-
         final String fontFromTranslation = locale.config_fontname();
-
         String newFontName = null;
-
         if (fontFromTranslation != null && !"default".equalsIgnoreCase(fontFromTranslation)) {
             /* we have customized fontName in translation */
             /* lower priority than fontName in settings */
@@ -133,11 +129,9 @@ public class SyntheticaHelper {
      */
     public void load() throws IOException {
         load("de.javasoft.plaf.synthetica.SyntheticaSimple2DLookAndFeel");
-
     }
 
     public void load(final String laf) throws IOException {
-
         load(laf, readLicense());
     }
 
@@ -148,11 +142,8 @@ public class SyntheticaHelper {
     private String readLicense() throws IOException {
         final URL url = Application.getRessourceURL("cfg/synthetica-license.key");
         if (url == null) {
-
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Missing Look And Feel License. Reverted to your System Look And Feel!");
-
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Missing Look And Feel License. Reverted to your System Look And Feel!");
-
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Missing Look And Feel License.");
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("You can only use Synthetica Look and Feel in official JDownloader versions.");
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Reverted to your System Look And Feel!");
@@ -170,10 +161,8 @@ public class SyntheticaHelper {
         if (UIManager.get("Synthetica.animation.enabled") != null) {
             LoggerFactory.getDefaultLogger().info("Synthetica Look And Feel is already Set");
             return;
-
         }
         if (CrossSystem.isMac()) {
-
             if (checkIfMacInitWillFail()) {
                 System.runFinalization();
                 System.gc();
@@ -189,19 +178,15 @@ public class SyntheticaHelper {
         final long start = System.currentTimeMillis();
         try {
             setLicense(license);
-
             JFrame.setDefaultLookAndFeelDecorated(false);
             JDialog.setDefaultLookAndFeelDecorated(false);
             final LanguageFileSetup locale = TranslationFactory.create(LanguageFileSetup.class);
-
             boolean decorated = config.isWindowDecorationEnabled();
             de.javasoft.plaf.synthetica.SyntheticaLookAndFeel.setWindowsDecorated(decorated);
-
             UIManager.put("Synthetica.window.decoration", decorated);
             UIManager.put("Synthetica.text.antialias", config.isTextAntiAliasEnabled());
             UIManager.put("Synthetica.extendedFileChooser.rememberPreferences", Boolean.FALSE);
             UIManager.put("Synthetica.extendedFileChooser.rememberLastDirectory", Boolean.FALSE);
-
             // /* http://www.jyloo.com/news/?pubId=1297681728000 */
             // /* we want our own FontScaling, not SystemDPI */
             UIManager.put("Synthetica.font.respectSystemDPI", config.isFontRespectsSystemDPI());
@@ -220,59 +205,31 @@ public class SyntheticaHelper {
             }
             UIManager.put("Synthetica.menu.toolTipEnabled", true);
             UIManager.put("Synthetica.menuItem.toolTipEnabled", true);
-
             if (!Application.isHeadless()) {
                 de.javasoft.plaf.synthetica.SyntheticaLookAndFeel.setLookAndFeel(laf);
             }
-
-            // final SynthStyleFactory factiory = SyntheticaLookAndFeel.getStyleFactory();
-            //
-            // SyntheticaLookAndFeel.setStyleFactory(new de.javasoft.plaf.synthetica.StyleFactory(factiory) {
-            //
-            // @Override
-            // public SynthStyle getStyle(JComponent c, Region id) {
-            //
-            // SynthStyle ret = factiory.getStyle(c, id);
-            // if (c instanceof ExtTooltip) {
-            // System.out.println(id + " " + c);
-            // ((ToolTipStyle) ret).getClass();
-            //
-            // }
-            // return ret;
-            // }
-            // });
             de.javasoft.plaf.synthetica.SyntheticaLookAndFeel.setExtendedFileChooserEnabled(false);
-
             final String fontName = getFontName(config, locale);
-
             int fontSize = de.javasoft.plaf.synthetica.SyntheticaLookAndFeel.getFont().getSize();
             fontSize = fontScale * fontSize / 100;
-
             if (fontName != null) {
-
                 /* change Font */
                 final int oldStyle = de.javasoft.plaf.synthetica.SyntheticaLookAndFeel.getFont().getStyle();
                 final Font newFont = new Font(fontName, oldStyle, fontSize);
                 de.javasoft.plaf.synthetica.SyntheticaLookAndFeel.setFont(newFont, false);
             }
-
             ExtPasswordField.MASK = "*******";
-
         } finally {
             final long time = System.currentTimeMillis() - start;
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("LAF Init duration: " + time + "ms");
-
         }
     }
 
     public void setLicense(String license) {
         /* we save around x-400 ms here by not using AES */
         if (license == null) {
-
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Missing Look And Feel License. Reverted to your System Look And Feel!");
-
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Missing Look And Feel License. Reverted to your System Look And Feel!");
-
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Missing Look And Feel License.");
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("You can only use Synthetica Look and Feel in official JDownloader versions.");
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Reverted to your System Look And Feel!");
@@ -305,19 +262,15 @@ public class SyntheticaHelper {
     }
 
     protected boolean checkIfMacInitWillFail() {
-
         // synthetica init fails on mac if there are already active windows
-        Window awindow[];
-        final int j = (awindow = Window.getWindows()).length;
-
+        final Window awindow[] = Window.getWindows();
+        final int j = awindow.length;
         for (int i = 0; i < j; i++) {
             final Window window = awindow[i];
-
             final boolean flag = !(window instanceof JWindow) && !(window instanceof JFrame) && !(window instanceof JDialog);
             if (!window.getClass().getName().contains("Popup$HeavyWeightWindow") && !flag) {
                 return true;
             }
-
         }
         return false;
     }

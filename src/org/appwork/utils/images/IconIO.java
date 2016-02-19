@@ -61,7 +61,6 @@ import java.awt.image.Kernel;
 import java.awt.image.RGBImageFilter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -198,18 +197,18 @@ public class IconIO {
             public final int filterRGB(final int x, final int y, final int rgb) {
 
                 final int r = (rgb & 0xFF0000) >> 16;
-                final int g = (rgb & 0xFF00) >> 8;
-                final int b = rgb & 0xFF;
-                if (r >= r1 && r <= r2 && g >= g1 && g <= g2 && b >= b1 && b <= b2) {
-                    // Set fully transparent but keep color
-                    // calculate a alpha value based on the distance between the
-                    // range borders and the pixel color
-                    final int dist = (Math.abs(r - (r1 + r2) / 2) + Math.abs(g - (g1 + g2) / 2) + Math.abs(b - (b1 + b2) / 2)) * 2;
+        final int g = (rgb & 0xFF00) >> 8;
+        final int b = rgb & 0xFF;
+        if (r >= r1 && r <= r2 && g >= g1 && g <= g2 && b >= b1 && b <= b2) {
+            // Set fully transparent but keep color
+            // calculate a alpha value based on the distance between the
+            // range borders and the pixel color
+            final int dist = (Math.abs(r - (r1 + r2) / 2) + Math.abs(g - (g1 + g2) / 2) + Math.abs(b - (b1 + b2) / 2)) * 2;
 
-                    return new Color(r, g, b, Math.min(255, dist)).getRGB();
-                }
+            return new Color(r, g, b, Math.min(255, dist)).getRGB();
+        }
 
-                return rgb;
+        return rgb;
             }
         };
 
@@ -664,6 +663,9 @@ public class IconIO {
      * @return
      */
     public static BufferedImage toBufferedImage(final Image src) {
+        if (src instanceof BufferedImage) {
+            return (BufferedImage) src;
+        }
         final int w = src.getWidth(null);
         final int h = src.getHeight(null);
         final BufferedImage image = new BufferedImage(w, h, Transparency.TRANSLUCENT);
@@ -688,32 +690,43 @@ public class IconIO {
         }
     }
 
-    /**
-     * @param icon
-     * @return
-     * @throws IOException
-     */
-    public static String toDataUrl(Icon icon) throws IOException {
-        return toDataUrl(IconIO.convertIconToBufferedImage(icon));
+    public static enum DataURLFormat {
+        JPG,
+        PNG
     }
 
-    /**
-     * @param convertIconToBufferedImage
-     * @param string
-     * @return
-     * @throws IOException
-     */
-    public static String toDataUrl(BufferedImage image) throws IOException {
+    public static String toDataUrl(BufferedImage image, DataURLFormat dataURLFormat) throws IOException {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         final Base64OutputStream b64os = new Base64OutputStream(bos);
-        // removes alpha channel
-        final BufferedImage jpg = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
-        final Graphics g = jpg.getGraphics();
+        final BufferedImage ouput;
+        switch (dataURLFormat) {
+        case JPG:
+            // removes alpha channel
+            ouput = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
+            break;
+        default:
+        case PNG:
+            // keeps alpha channel
+            ouput = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
+            break;
+        }
+        final Graphics g = ouput.getGraphics();
         g.drawImage(image, 0, 0, null);
         g.dispose();
-        ImageIO.write(jpg, "jpg", b64os);
-        b64os.close();
-        final String ret = "image/jpeg;base64," + bos.toString("UTF-8");
+        final String ret;
+        switch (dataURLFormat) {
+        case JPG:
+            ImageIO.write(ouput, "jpg", b64os);
+            b64os.close();
+            ret = "image/jpeg;base64," + bos.toString("UTF-8");
+            break;
+        default:
+        case PNG:
+            ImageIO.write(ouput, "png", b64os);
+            b64os.close();
+            ret = "image/png;base64," + bos.toString("UTF-8");
+            break;
+        }
         return ret;
     }
 
@@ -806,17 +819,6 @@ public class IconIO {
         }
     }
 
-    /**
-     * reads image converts to a compresssed jpeg and returns the bytes
-     *
-     * @param imageFile
-     * @return
-     * @throws IOException
-     */
-    public static byte[] toJpgBytes(File file) throws IOException {
-        return toJpgBytes(ImageIO.read(file));
-    }
-
     public static Icon getIconFromDataUrl(String dataURL) throws IOException {
         return new ImageIcon(getImageFromDataUrl(dataURL));
     }
@@ -831,7 +833,7 @@ public class IconIO {
         if (base64Index > 0 && base64Index + 8 < dataURL.length()) {
             dataURL = dataURL.substring(base64Index + 8);
         }
-        Base64InputStream is = new Base64InputStream(new ByteArrayInputStream(dataURL.getBytes("UTF-8")));
+        final Base64InputStream is = new Base64InputStream(new ByteArrayInputStream(dataURL.getBytes("UTF-8")));
         return ImageIO.read(is);
     }
 

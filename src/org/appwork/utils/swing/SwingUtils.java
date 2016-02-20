@@ -50,6 +50,8 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.text.JTextComponent;
 
+import org.appwork.utils.StringUtils;
+
 public class SwingUtils {
     /**
      * Calculates the position of a frame to be in the center of an other frame.
@@ -256,6 +258,29 @@ public class SwingUtils {
 
         }
         return (biggestIntersection == null || biggestIntersection.width * biggestIntersection.height == 0) ? null : bestScreen;
+    }
+
+    /**
+     * @param screenID
+     * @return
+     */
+    public static GraphicsDevice getScreenByID(String screenID) {
+        if (StringUtils.isEmpty(screenID)) {
+            return null;
+        }
+        final GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+
+        final GraphicsDevice[] screens = ge.getScreenDevices();
+
+        for (final GraphicsDevice screen : screens) {
+
+            if (StringUtils.equals(screen.getIDstring(), screenID)) {
+                return screen;
+
+            }
+
+        }
+        return null;
     }
 
 }

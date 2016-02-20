@@ -61,16 +61,9 @@ public class CenterOfScreenLocator extends AbstractLocator {
     public Point getLocationOnScreen(final Window dialog) {
         if (dialog.getParent() == null || !dialog.getParent().isDisplayable() || !dialog.getParent().isVisible()) {
 
-            GraphicsDevice screen = SwingUtils.getScreenByBounds(dialog.getBounds());
-            if (screen != null) {
-                Rectangle bounds = SwingUtils.getUsableScreenBounds(screen);
+            Rectangle windowBounds = dialog.getBounds();
 
-                return correct(new Point((int) (bounds.getWidth() - dialog.getWidth()) / 2 + bounds.x, (int) (bounds.getHeight() - dialog.getHeight()) / 2 + bounds.y), dialog);
-
-            }
-            final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-
-            return correct(new Point((int) (screenSize.getWidth() - dialog.getWidth()) / 2, (int) (screenSize.getHeight() - dialog.getHeight()) / 2), dialog);
+            return getCenterLocationByWindowBounds(windowBounds);
 
         } else if (dialog.getParent() instanceof Frame && ((Frame) dialog.getParent()).getExtendedState() == Frame.ICONIFIED) {
             // dock dialog at bottom right if mainframe is not visible
@@ -135,6 +128,19 @@ public class CenterOfScreenLocator extends AbstractLocator {
         // return SwingUtils.getCenter(frame.getParent(), frame);
         // }
 
+    }
+
+    public Point getCenterLocationByWindowBounds(Rectangle windowBounds) {
+        GraphicsDevice screen = SwingUtils.getScreenByBounds(windowBounds);
+        if (screen != null) {
+            Rectangle bounds = SwingUtils.getUsableScreenBounds(screen);
+
+            return correct(new Point((int) (bounds.getWidth() - windowBounds.getWidth()) / 2 + bounds.x, (int) (bounds.getHeight() - windowBounds.getHeight()) / 2 + bounds.y), new Dimension(windowBounds.width, windowBounds.height));
+
+        }
+        final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+
+        return correct(new Point((int) (screenSize.getWidth() - windowBounds.getWidth()) / 2, (int) (screenSize.getHeight() - windowBounds.getHeight()) / 2), new Dimension(windowBounds.width, windowBounds.height));
     }
 
     /*

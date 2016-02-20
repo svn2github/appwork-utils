@@ -36,6 +36,8 @@ package org.appwork.utils.swing.windowmanager;
 import java.awt.Frame;
 import java.awt.Window;
 
+import javax.swing.JFrame;
+
 import org.appwork.utils.os.CrossSystem;
 
 /**
@@ -52,9 +54,19 @@ public abstract class WindowManager {
     }
 
     public static enum WindowExtendedState {
-        NORMAL,
-        MAXIMIZED_BOTH,
-        ICONIFIED;
+        NORMAL(JFrame.NORMAL),
+        MAXIMIZED_BOTH(JFrame.MAXIMIZED_BOTH),
+        ICONIFIED(JFrame.ICONIFIED);
+
+        private int id;
+
+        public int getId() {
+            return id;
+        }
+
+        private WindowExtendedState(int i) {
+            this.id = i;
+        }
 
         /**
          * @param state
@@ -64,18 +76,20 @@ public abstract class WindowManager {
             if ((state & Frame.MAXIMIZED_BOTH) != 0) {
                 return MAXIMIZED_BOTH;
             }
-            if ((state & Frame.NORMAL) != 0) {
-                return NORMAL;
-            }
             if ((state & Frame.ICONIFIED) != 0) {
                 return ICONIFIED;
             }
+
             return NORMAL;
         }
 
     }
 
     static WindowManager INSTANCE = WindowManager.createOsWindowManager();
+
+    public static void setCustom(WindowManager instance) {
+        INSTANCE = instance;
+    }
 
     /**
      * @return
@@ -146,13 +160,15 @@ public abstract class WindowManager {
         }
         switch (state) {
         case NORMAL:
-            w.setExtendedState(Frame.NORMAL);
+            w.setExtendedState(JFrame.NORMAL);
             break;
         case ICONIFIED:
-            w.setExtendedState(Frame.ICONIFIED);
+
+            w.setExtendedState(JFrame.ICONIFIED);
+
             break;
         case MAXIMIZED_BOTH:
-            w.setExtendedState(Frame.MAXIMIZED_BOTH);
+            w.setExtendedState(JFrame.MAXIMIZED_BOTH);
             break;
         }
 

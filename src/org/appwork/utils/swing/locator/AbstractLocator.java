@@ -40,6 +40,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Window;
 
+import org.appwork.utils.os.CrossSystem;
 import org.appwork.utils.swing.SwingUtils;
 
 /**
@@ -64,7 +65,23 @@ public abstract class AbstractLocator implements Locator {
             biggestInteresctionScreem = ge.getDefaultScreenDevice();
         }
         final Rectangle bounds = SwingUtils.getUsableScreenBounds(biggestInteresctionScreem);
+        switch (CrossSystem.getOS()) {
+        case WINDOWS_10:
+        case WINDOWS_8:
+            /*
+             * IT seems that for windows 10 (i guess 8 as well) windows have a huge border (Probably the shadow).<br> That results in a
+             * strange behaviour:<br> screen specs: with bounds 0 0 1920 1080 the window is in the top left corner. The window's content
+             * panes x location is 0, but the windows x location is -8 <br> this workaround increases the usably space for 16 pixel to each
+             * size. this is not correct, and windows might not be correced 100%, but ar least correctly positioned windows will not get
+             * corrected badly
+             * 
+             */
+            bounds.x -= 16;
+            bounds.y -= 16;
+            bounds.width += 32;
+            bounds.height += 32;
 
+        }
         if (preferedRect.x + preferedRect.width > bounds.x + bounds.width) {
             preferedRect.x = bounds.x + bounds.width - preferedRect.width;
         }

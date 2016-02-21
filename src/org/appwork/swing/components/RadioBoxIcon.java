@@ -1,5 +1,5 @@
 /**
- * 
+ *
  * ====================================================================================================================================================
  *         "AppWork Utilities" License
  *         The "AppWork Utilities" will be called [The Product] from now on.
@@ -25,9 +25,9 @@
  *     If you want to use [The Product] in a commercial way (see definition above), you have to obtain a paid license from AppWork GmbH.
  *     Contact AppWork for further details: <e-mail@appwork.org>
  * === Non-Commercial Usage ===
- *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the 
+ *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the
  *     "GNU Affero General Public License" (http://www.gnu.org/licenses/agpl-3.0.en.html).
- * 	
+ *
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
@@ -45,7 +45,7 @@ public final class RadioBoxIcon implements Icon {
     public static final RadioBoxIcon FALSE     = new RadioBoxIcon(false);
     public static final RadioBoxIcon TRUE      = new RadioBoxIcon(true);
     public static final RadioBoxIcon UNDEFINED = new RadioBoxIcon(true, false);
-    private JRadioButton                cb;
+    private JRadioButton             cb;
     private Icon                     internalIcon;
     private int                      size;
 
@@ -71,12 +71,13 @@ public final class RadioBoxIcon implements Icon {
                 return true;
             }
         };
-    
+
         ;
         cb.setSelected(selected);
         // we need this workaround.
         // if we would use cb.paint(g); for every paintIcon call, this might habe sideeffects on the LAF painter.
-        size = 14;
+
+        size = 16;
 
         internalIcon = ImageProvider.toImageIcon(this);
 
@@ -99,7 +100,7 @@ public final class RadioBoxIcon implements Icon {
         }
         // g.setColor(Color.RED);
         // g.drawRect(0, 0, 14, 14);
-        g = g.create(x, y, 14, 14);
+        g = g.create(x, y, size, size);
         // g.translate(x, y);
         g.translate(-4, -4);
         cb.paint(g);

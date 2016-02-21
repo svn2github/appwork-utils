@@ -88,6 +88,7 @@ public class LogConsoleHandler extends ConsoleHandler {
                     final StringBuilder sb = new StringBuilder(length + ((length / lineLength) * 12));
                     position = 0;
                     boolean wrapText = false;
+                    boolean isWrapped = false;
                     outerLoop: while (position < length) {
                         if (position > 0) {
                             sb.append("\r\n");
@@ -98,7 +99,7 @@ public class LogConsoleHandler extends ConsoleHandler {
                             if (ch == '\r' || ch == '\n' || index == length - 1) {
                                 if (position != index) {
                                     if (wrapText) {
-                                        sb.append("AUTO-WRAP:");
+                                        isWrapped = true;
                                         wrapText = false;
                                     }
                                     sb.append(ret.substring(position, index));
@@ -107,10 +108,14 @@ public class LogConsoleHandler extends ConsoleHandler {
                                 continue outerLoop;
                             }
                         }
-                        sb.append("AUTO-WRAP: ");
+
                         wrapText = true;
+                        isWrapped = true;
                         sb.append(ret.substring(position, max));
                         position = position + lineLength;
+                    }
+                    if (isWrapped) {
+                        return "AUTO_WRAPPED>\r\n" + sb.toString();
                     }
                     return sb.toString();
                 }

@@ -1,5 +1,5 @@
 /**
- * 
+ *
  * ====================================================================================================================================================
  *         "AppWork Utilities" License
  *         The "AppWork Utilities" will be called [The Product] from now on.
@@ -25,9 +25,9 @@
  *     If you want to use [The Product] in a commercial way (see definition above), you have to obtain a paid license from AppWork GmbH.
  *     Contact AppWork for further details: <e-mail@appwork.org>
  * === Non-Commercial Usage ===
- *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the 
+ *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the
  *     "GNU Affero General Public License" (http://www.gnu.org/licenses/agpl-3.0.en.html).
- * 	
+ *
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
@@ -59,11 +59,11 @@ public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> impl
 
     /**
      * @author Thomas
-     * 
+     *
      */
     public static class RendererPanel extends RendererMigPanel {
         private boolean editable = false;
-        private Icon    downIcon;         ;
+        private Icon    downIcon;;
 
         /**
          * @param downIcon
@@ -83,7 +83,7 @@ public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> impl
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see javax.swing.JComponent#paintComponent(java.awt.Graphics)
          */
         @Override
@@ -134,7 +134,7 @@ public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> impl
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.swing.exttable.columns.ExtTextColumn#createEditorPanel()
      */
     @Override
@@ -142,7 +142,7 @@ public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> impl
         return new MigPanel("ins 0", "[]5[grow,fill]", "[grow,fill]") {
             /*
              * (non-Javadoc)
-             * 
+             *
              * @see javax.swing.JComponent#paintComponent(java.awt.Graphics)
              */
             @Override
@@ -161,9 +161,8 @@ public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> impl
 
     /*
      * (non-Javadoc)
-     * 
-     * @see
-     * org.appwork.swing.exttable.columns.ExtTextColumn#createRendererPanel()
+     *
+     * @see org.appwork.swing.exttable.columns.ExtTextColumn#createRendererPanel()
      */
     @Override
     protected RendererMigPanel createRendererPanel() {
@@ -194,7 +193,8 @@ public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> impl
 
         rendererPanel.setEditable(isEditable(value));
         rendererPanel.setIcon(editing == value ? iconUp : iconDown);
-        rendererIcon.setIcon(this.modelItemToIcon(selected));
+        Icon icon = this.modelItemToIcon(selected);
+        rendererIcon.setIcon(icon);
 
         String str = modelItemToString(selected);
         if (str == null) {
@@ -205,8 +205,9 @@ public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> impl
 
         if (getTableColumn() != null) {
             try {
-
-                rendererField.setText(org.appwork.sunwrapper.sun.swing.SwingUtilities2Wrapper.clipStringIfNecessary(rendererField, rendererField.getFontMetrics(rendererField.getFont()), str, getTableColumn().getWidth() - 18 - 5));
+                int upDownIconWidth = rendererPanel.getIcon() != null ? rendererPanel.getIcon().getIconWidth() : 0;
+                int iconWidth = icon != null ? icon.getIconWidth() : 0;
+                rendererField.setText(org.appwork.sunwrapper.sun.swing.SwingUtilities2Wrapper.clipStringIfNecessary(rendererField, rendererField.getFontMetrics(rendererField.getFont()), str, getTableColumn().getWidth() - upDownIconWidth - iconWidth - 5 - 10));
             } catch (Throwable e) {
                 // fallback if org.appwork.swing.sunwrapper.SwingUtilities2 disappears someday
                 e.printStackTrace();
@@ -228,7 +229,9 @@ public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> impl
     }
 
     public boolean onDoubleClick(final MouseEvent e, final E value) {
-        if (!isEditable(value)) { return false; }
+        if (!isEditable(value)) {
+            return false;
+        }
 
         final int row = getModel().getTable().rowAtPoint(new Point(e.getX(), e.getY()));
         // int column = getModel().getTable().columnAtPoint(new Point(e.getX(),
@@ -239,7 +242,9 @@ public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> impl
 
     @Override
     public boolean onRenameClick(final MouseEvent e, final E value) {
-        if (!isEditable(value)) { return false; }
+        if (!isEditable(value)) {
+            return false;
+        }
 
         final int row = getModel().getTable().rowAtPoint(new Point(e.getX(), e.getY()));
         // int column = getModel().getTable().columnAtPoint(new Point(e.getX(),
@@ -249,7 +254,9 @@ public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> impl
     }
 
     public boolean onSingleClick(final MouseEvent e, final E value) {
-        if (!isEditable(value)) { return false; }
+        if (!isEditable(value)) {
+            return false;
+        }
 
         final int row = getModel().getTable().rowAtPoint(new Point(e.getX(), e.getY()));
         // int column = getModel().getTable().columnAtPoint(new Point(e.getX(),
@@ -389,7 +396,9 @@ public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> impl
      * @return
      */
     protected String modelItemToString(final ModelType selectedItem) {
-        if (selectedItem == null) { return null; }
+        if (selectedItem == null) {
+            return null;
+        }
         return selectedItem.toString();
     }
 
@@ -431,7 +440,7 @@ public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> impl
 
     /**
      * overwrite this method to implement different dropdown boxes
-     * 
+     *
      * @param dataModel
      */
     public ComboBoxModel<ModelType> updateModel(final ComboBoxModel<ModelType> dataModel, final E value) {

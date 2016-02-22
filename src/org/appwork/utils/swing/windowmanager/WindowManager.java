@@ -50,7 +50,6 @@ public abstract class WindowManager {
         TO_FRONT,
         TO_BACK,
         TO_FRONT_FOCUSED;
-
     }
 
     public static enum WindowExtendedState {
@@ -79,7 +78,6 @@ public abstract class WindowManager {
             if ((state & Frame.ICONIFIED) != 0) {
                 return ICONIFIED;
             }
-
             return NORMAL;
         }
 
@@ -104,7 +102,6 @@ public abstract class WindowManager {
         } else {
             return new DefaultWindowManager();
         }
-
     }
 
     public static WindowManager getInstance() {
@@ -115,7 +112,6 @@ public abstract class WindowManager {
      * @return
      */
     public WindowExtendedState getExtendedState(final Frame w) {
-
         return WindowExtendedState.get(w.getExtendedState());
     }
 
@@ -129,32 +125,25 @@ public abstract class WindowManager {
         }
         if (window != null && window.getFocusOwner() != null) {
             return true;
-
         }
         if (window != null && window.isFocused()) {
             return true;
-
         }
         if (window != null && window.hasFocus()) {
             return true;
-
         }
         return false;
-
     }
 
     public void hide(final Window w) {
         this.setVisible(w, false, FrameState.OS_DEFAULT);
-
     }
 
     public void hide(final Window w, final FrameState state) {
         this.setVisible(w, false, state);
-
     }
 
     public void setExtendedState(final Frame w, final WindowExtendedState state) {
-
         if (state == null) {
             throw new NullPointerException("State is null");
         }
@@ -163,15 +152,12 @@ public abstract class WindowManager {
             w.setExtendedState(JFrame.NORMAL);
             break;
         case ICONIFIED:
-
             w.setExtendedState(JFrame.ICONIFIED);
-
             break;
         case MAXIMIZED_BOTH:
             w.setExtendedState(JFrame.MAXIMIZED_BOTH);
             break;
         }
-
     }
 
     public void setVisible(final Window w, final boolean visible) {
@@ -187,12 +173,10 @@ public abstract class WindowManager {
 
     public void show(final Window w) {
         this.setVisible(w, true, FrameState.OS_DEFAULT);
-
     }
 
     public void show(final Window w, final FrameState state) {
         this.setVisible(w, true, state);
-
     }
 
     /**

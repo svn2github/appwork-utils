@@ -1,5 +1,5 @@
 /**
- * 
+ *
  * ====================================================================================================================================================
  *         "AppWork Utilities" License
  *         The "AppWork Utilities" will be called [The Product] from now on.
@@ -7,16 +7,16 @@
  *         Copyright (c) 2009-2015, AppWork GmbH <e-mail@appwork.org>
  *         Schwabacher Straße 117
  *         90763 Fürth
- *         Germany   
+ *         Germany
  * === Preamble ===
  *     This license establishes the terms under which the [The Product] Source Code & Binary files may be used, copied, modified, distributed, and/or redistributed.
  *     The intent is that the AppWork GmbH is able to provide their utilities library for free to non-commercial projects whereas commercial usage is only permitted after obtaining a commercial license.
  *     These terms apply to all files that have the [The Product] License header (IN the file), a <filename>.license or <filename>.info (like mylib.jar.info) file that contains a reference to this license.
- * 	
+ *
  * === 3rd Party Licences ===
  *     Some parts of the [The Product] use or reference 3rd party libraries and classes. These parts may have different licensing conditions. Please check the *.license and *.info files of included libraries
- *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header. 	
- * 	
+ *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header.
+ *
  * === Definition: Commercial Usage ===
  *     If anybody or any organization is generating income (directly or indirectly) by using [The Product] or if there's any commercial interest or aspect in what you are doing, we consider this as a commercial usage.
  *     If your use-case is neither strictly private nor strictly educational, it is commercial. If you are unsure whether your use-case is commercial or not, consider it as commercial or contact us.
@@ -25,9 +25,9 @@
  *     If you want to use [The Product] in a commercial way (see definition above), you have to obtain a paid license from AppWork GmbH.
  *     Contact AppWork for further details: <e-mail@appwork.org>
  * === Non-Commercial Usage ===
- *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the 
+ *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the
  *     "GNU Affero General Public License" (http://www.gnu.org/licenses/agpl-3.0.en.html).
- * 	
+ *
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
@@ -48,14 +48,13 @@ import org.appwork.utils.swing.renderer.RenderLabel;
 public abstract class ExtFileSizeColumn<E> extends ExtColumn<E> {
 
     /**
-     * 
+     *
      */
-    private static final long serialVersionUID = -5812486934156037376L;
-    protected RenderLabel     renderer;
-    protected long            sizeValue;
-    private StringBuffer      sb;
-    private DecimalFormat     formatter;
-    private final String      zeroString       = "~";
+    private static final long     serialVersionUID = -5812486934156037376L;
+    protected final RenderLabel   renderer;
+    private final StringBuffer    sb;
+    protected final DecimalFormat formatter;
+    protected final String        zeroString       = "~";
 
     /**
      * @param createtablemodel_column_size
@@ -68,7 +67,7 @@ public abstract class ExtFileSizeColumn<E> extends ExtColumn<E> {
         super(name, table);
         this.renderer = new RenderLabel() {
             /**
-             * 
+             *
              */
             private static final long serialVersionUID = 1045896241157027789L;
 
@@ -91,7 +90,9 @@ public abstract class ExtFileSizeColumn<E> extends ExtColumn<E> {
             public int compare(final E o1, final E o2) {
                 final long s1 = ExtFileSizeColumn.this.getBytes(o1);
                 final long s2 = ExtFileSizeColumn.this.getBytes(o2);
-                if (s1 == s2) { return 0; }
+                if (s1 == s2) {
+                    return 0;
+                }
                 if (getSortOrderIdentifier() != ExtColumn.SORT_ASC) {
                     return s1 > s2 ? -1 : 1;
                 } else {
@@ -106,7 +107,7 @@ public abstract class ExtFileSizeColumn<E> extends ExtColumn<E> {
         this.formatter = new DecimalFormat("0.00") {
 
             /**
-             * 
+             *
              */
             private static final long serialVersionUID = 1L;
 
@@ -126,10 +127,11 @@ public abstract class ExtFileSizeColumn<E> extends ExtColumn<E> {
 
     @Override
     public void configureRendererComponent(final E value, final boolean isSelected, final boolean hasFocus, final int row, final int column) {
-        if ((this.sizeValue = this.getBytes(value)) < 0) {
+        final long sizeValue = this.getBytes(value);
+        if (sizeValue < 0) {
             this.renderer.setText(this.getInvalidValue());
         } else {
-            this.renderer.setText(this.getSizeString(this.sizeValue));
+            this.renderer.setText(this.getSizeString(sizeValue));
         }
 
     }
@@ -164,22 +166,35 @@ public abstract class ExtFileSizeColumn<E> extends ExtColumn<E> {
         return this.renderer;
     }
 
-    private String getSizeString(final long fileSize) {
-        if (fileSize >= 1024 * 1024 * 1024 * 1024l) { return this.formatter.format(fileSize / (1024 * 1024 * 1024 * 1024.0)) + " TiB"; }
-        if (fileSize >= 1024 * 1024 * 1024l) { return this.formatter.format(fileSize / (1024 * 1024 * 1024.0)) + " GiB"; }
-        if (fileSize >= 1024 * 1024l) { return this.formatter.format(fileSize / (1024 * 1024.0)) + " MiB"; }
-        if (fileSize >= 1024l) { return this.formatter.format(fileSize / 1024.0) + " KiB"; }
-        if (fileSize == 0) { return "0 B"; }
-        if (fileSize < 0) { return zeroString; }
+    protected String getSizeString(final long fileSize) {
+        if (fileSize >= 1024 * 1024 * 1024 * 1024l) {
+            return this.formatter.format(fileSize / (1024 * 1024 * 1024 * 1024.0)) + " TiB";
+        }
+        if (fileSize >= 1024 * 1024 * 1024l) {
+            return this.formatter.format(fileSize / (1024 * 1024 * 1024.0)) + " GiB";
+        }
+        if (fileSize >= 1024 * 1024l) {
+            return this.formatter.format(fileSize / (1024 * 1024.0)) + " MiB";
+        }
+        if (fileSize >= 1024l) {
+            return this.formatter.format(fileSize / 1024.0) + " KiB";
+        }
+        if (fileSize == 0) {
+            return "0 B";
+        }
+        if (fileSize < 0) {
+            return zeroString;
+        }
         return fileSize + " B";
     }
 
     @Override
     protected String getTooltipText(final E value) {
-        if ((this.sizeValue = this.getBytes(value)) < 0) {
+        final long sizeValue = this.getBytes(value);
+        if (sizeValue < 0) {
             return this.getInvalidValue();
         } else {
-            return this.getSizeString(this.sizeValue);
+            return this.getSizeString(sizeValue);
         }
 
     }

@@ -388,6 +388,27 @@ public abstract class LogSourceProvider {
         return instantFlushDefault || isWriteLogs() == false;
     }
 
+    public void addConsoleHandler() {
+        synchronized (this.logSinks) {
+            if (this.consoleHandler != null) {
+                return;
+            }
+
+            this.consoleHandler = new LogConsoleHandler();
+            final Iterator<LogSink> it = this.logSinks.values().iterator();
+            while (it.hasNext()) {
+                final LogSink next = it.next();
+                if (next.hasLogSources()) {
+                    next.addHandler(this.consoleHandler);
+                } else {
+                    next.close();
+                    it.remove();
+                }
+            }
+
+        }
+    }
+
     public void removeConsoleHandler() {
         synchronized (this.logSinks) {
             if (this.consoleHandler == null) {

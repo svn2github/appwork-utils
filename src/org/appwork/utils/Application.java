@@ -912,7 +912,7 @@ public class Application {
         Application.ROOT = null;
         Application.APP_FOLDER = newAppFolder;
         Application.ensureFrameWorkInit();
-        LoggerFactory.getDefaultLogger().info("Application Root: " + getRoot(null));
+        LoggerFactory.getDefaultLogger().info("Application Root: " + getRoot(Application.class));
     }
 
     /**

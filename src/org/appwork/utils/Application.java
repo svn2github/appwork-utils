@@ -61,6 +61,7 @@ import javax.swing.UIManager;
 
 import org.appwork.exceptions.WTFException;
 import org.appwork.utils.logging2.LogInterface;
+import org.appwork.utils.logging2.extmanager.LoggerFactory;
 import org.appwork.utils.os.CrossSystem;
 
 /**
@@ -414,16 +415,16 @@ public class Application {
             try {
                 appRoot = urlToFile(loc);
                 Application.ROOT = appRoot.getAbsolutePath();
-                System.out.println("Application Root: " + Application.ROOT + " (jared) " + rootOfClazz);
+                // System.out.println("Application Root: " + Application.ROOT + " (jared) " + rootOfClazz);
             } catch (final URISyntaxException e) {
                 org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
                 Application.ROOT = System.getProperty("user.home") + System.getProperty("file.separator") + Application.APP_FOLDER + System.getProperty("file.separator");
-                System.out.println("Application Root: " + Application.ROOT + " (jared but error) " + rootOfClazz);
+                // System.out.println("Application Root: " + Application.ROOT + " (jared but error) " + rootOfClazz);
             }
         } else {
             Application.ROOT = System.getProperty("user.home") + System.getProperty("file.separator") + Application.APP_FOLDER;
 
-            System.out.println("Application Root: " + Application.ROOT + " (DEV) " + rootOfClazz);
+            // System.out.println("Application Root: " + Application.ROOT + " (DEV) " + rootOfClazz);
         }
         // do not use Log.L here. this might be null
         return Application.ROOT;
@@ -895,8 +896,9 @@ public class Application {
             System.setOut(o = new PrintStream(Application.STD_OUT));
             PrintStream e;
             System.setErr(e = new PrintStream(Application.ERR_OUT));
-            System.out.println("SetOut " + o);
-            System.out.println("SetErr " + e);
+
+            // System.out.println("SetOut " + o);
+            // System.out.println("SetErr " + e);
         }
     }
 
@@ -910,6 +912,7 @@ public class Application {
         Application.ROOT = null;
         Application.APP_FOLDER = newAppFolder;
         Application.ensureFrameWorkInit();
+        LoggerFactory.getDefaultLogger().info("Application Root: " + getRoot(null));
     }
 
     /**

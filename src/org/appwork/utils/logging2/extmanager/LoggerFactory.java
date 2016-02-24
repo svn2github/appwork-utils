@@ -131,7 +131,7 @@ public class LoggerFactory extends LogSourceProvider {
         return INSTANCE;
     }
 
-    private LogInterface defaultLogInterface = new ConsoleLogImpl();
+    private LogInterface defaultLogInterface = null;
 
     public LogInterface getDefaultLogInterface() {
         return defaultLogInterface;
@@ -145,35 +145,7 @@ public class LoggerFactory extends LogSourceProvider {
 
     public LoggerFactory() {
         super(System.currentTimeMillis());
-        // try {
-        // Log.closeLogfile();
-        // } catch (final Throwable e) {
-        // }
-        // try {
-        // for (final Handler handler : org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().getHandlers()) {
-        // org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().removeHandler(handler);
-        // }
-        // } catch (final Throwable e) {
-        // }
-        // org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().setUseParentHandlers(true);
-        // org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().setLevel(Level.ALL);
-        defaultLogInterface = getLogger("Log.L");
-        // org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().addHandler(new Handler() {
-        //
-        // @Override
-        // public void close() throws SecurityException {
-        // }
-        //
-        // @Override
-        // public void flush() {
-        // }
-        //
-        // @Override
-        // public void publish(final LogRecord record) {
-        // final LogSource logger = defaultLogger;
-        // logger.log(record);
-        // }
-        // });
+
         Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
 
             @Override
@@ -191,7 +163,16 @@ public class LoggerFactory extends LogSourceProvider {
      */
     public static LogInterface getDefaultLogger() {
         if (INSTANCE == null) {
+            if ("true".equalsIgnoreCase(System.getProperty(LOG_NO_CONSOLE))) {
+                return new DevNullLogger();
+            }
             return new ConsoleLogImpl();
+        }
+        synchronized (INSTANCE) {
+            if (INSTANCE.defaultLogInterface == null) {
+                INSTANCE.defaultLogInterface = INSTANCE.getLogger("Log.L");
+
+            }
         }
         return INSTANCE.defaultLogInterface;
     }
@@ -249,23 +230,6 @@ public class LoggerFactory extends LogSourceProvider {
             return;
         }
         logger.log(e);
-
-    }
-
-    /**
-     * call this method after Application.setApplication and all logs will go into a single logger
-     * 
-     * @param string
-     */
-    public static void enableSingleLog(final String logName) {
-        LoggerFactory.getInstance().setDelegate(new LoggerFactory() {
-            @Override
-            public LogSource getLogger(String name) {
-                name = logName;
-                return super.getLogger(name);
-            }
-        });
-        LoggerFactory.getInstance().setDefaultLogInterface(LoggerFactory.getInstance().getLogger(logName));
 
     }
 

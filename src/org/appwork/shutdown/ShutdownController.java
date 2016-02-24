@@ -45,7 +45,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.appwork.utils.Exceptions;
-import org.appwork.utils.logging2.LogSource;
+import org.appwork.utils.logging2.LogInterface;
+import org.appwork.utils.logging2.extmanager.LoggerFactory;
 
 public class ShutdownController extends Thread {
     class ShutdownEventWrapper extends ShutdownEvent {
@@ -77,7 +78,7 @@ public class ShutdownController extends Thread {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see org.appwork.shutdown.ShutdownEvent#run()
          */
         @Override
@@ -93,6 +94,7 @@ public class ShutdownController extends Thread {
     }
 
     private static final ShutdownController INSTANCE = new ShutdownController();
+
     static {
         org.appwork.utils.Application.warnInit();
     }
@@ -177,7 +179,7 @@ public class ShutdownController extends Thread {
             }
 
         } catch (final Throwable e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            LoggerFactory.getDefaultLogger().log(e);
             Runtime.getRuntime().addShutdownHook(this);
         }
 
@@ -185,7 +187,7 @@ public class ShutdownController extends Thread {
 
     public void addShutdownEvent(final ShutdownEvent event) {
         if (this.isAlive()) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(new IllegalStateException("Cannot add hooks during shutdown"));
+            LoggerFactory.getDefaultLogger().log(new IllegalStateException("Cannot add hooks during shutdown"));
             return;
         }
         if (event instanceof ShutdownEventWrapper) {
@@ -216,7 +218,7 @@ public class ShutdownController extends Thread {
             if (this.vetoListeners.contains(listener)) {
                 return;
             }
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finest("ADD " + listener);
+            log("ADD " + listener);
             this.vetoListeners.add(listener);
             try {
                 java.util.Collections.sort(this.vetoListeners, new Comparator<ShutdownVetoListener>() {
@@ -228,7 +230,7 @@ public class ShutdownController extends Thread {
                     }
                 });
             } catch (final Throwable e) {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                LoggerFactory.getDefaultLogger().log(e);
             }
         }
     }
@@ -339,7 +341,7 @@ public class ShutdownController extends Thread {
 
     public void removeShutdownVetoListener(final ShutdownVetoListener listener) {
         synchronized (this.vetoListeners) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finest("Remove " + listener);
+            log("Remove " + listener);
             this.vetoListeners.remove(listener);
         }
     }
@@ -372,30 +374,30 @@ public class ShutdownController extends Thread {
 
             if (vetos.size() == 0) {
 
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("No Vetos");
+                LoggerFactory.getDefaultLogger().info("No Vetos");
                 ShutdownVetoListener[] localList = null;
                 synchronized (this.vetoListeners) {
                     localList = this.vetoListeners.toArray(new ShutdownVetoListener[] {});
                 }
 
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Fire onShutDownEvents");
+                LoggerFactory.getDefaultLogger().info("Fire onShutDownEvents");
                 for (final ShutdownVetoListener v : localList) {
                     try {
-                        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Call onShutdown: " + v);
+                        LoggerFactory.getDefaultLogger().info("Call onShutdown: " + v);
                         v.onShutdown(request);
                     } catch (final Throwable e) {
-                        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                        LoggerFactory.getDefaultLogger().log(e);
 
                     } finally {
-                        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Call onShutdown done: " + v);
+                        LoggerFactory.getDefaultLogger().info("Call onShutdown done: " + v);
                     }
                 }
                 if (this.shutDown.compareAndSet(false, true)) {
-                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Create ExitThread");
+                    LoggerFactory.getDefaultLogger().info("Create ExitThread");
                     try {
                         request.onShutdown();
                     } catch (final Throwable e) {
-                        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe(Exceptions.getStackTrace(e));
+                        LoggerFactory.getDefaultLogger().severe(Exceptions.getStackTrace(e));
                     }
                     this.exitThread = new Thread("ShutdownThread") {
 
@@ -403,13 +405,13 @@ public class ShutdownController extends Thread {
                         public void run() {
                             ShutdownController.this.shutdownRequest = request;
 
-                            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Exit Now: Code: " + ShutdownController.this.getExitCode());
+                            LoggerFactory.getDefaultLogger().info("Exit Now: Code: " + ShutdownController.this.getExitCode());
                             System.exit(ShutdownController.this.getExitCode());
                         }
                     };
                     this.exitThread.start();
                 }
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Wait");
+                LoggerFactory.getDefaultLogger().info("Wait");
                 while (this.exitThread.isAlive()) {
                     try {
                         Thread.sleep(500);
@@ -417,10 +419,10 @@ public class ShutdownController extends Thread {
                         return true;
                     }
                 }
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finest("DONE");
+                log("DONE");
                 return true;
             } else {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Vetos found");
+                LoggerFactory.getDefaultLogger().info("Vetos found");
                 ShutdownVetoListener[] localList = null;
                 synchronized (this.vetoListeners) {
                     localList = this.vetoListeners.toArray(new ShutdownVetoListener[] {});
@@ -430,7 +432,7 @@ public class ShutdownController extends Thread {
                         /* make sure noone changes content of vetos */
                         v.onShutdownVeto(request);
                     } catch (final Throwable e) {
-                        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                        LoggerFactory.getDefaultLogger().log(e);
                     }
                 }
                 request.onShutdownVeto();
@@ -441,13 +443,13 @@ public class ShutdownController extends Thread {
         }
     }
 
-    private LogSource logger;
+    private LogInterface logger;
 
-    public LogSource getLogger() {
+    public LogInterface getLogger() {
         return this.logger;
     }
 
-    public void setLogger(final LogSource logger) {
+    public void setLogger(final LogInterface logger) {
         this.logger = logger;
     }
 
@@ -458,9 +460,11 @@ public class ShutdownController extends Thread {
         try {
             // code may run in the shutdown hook. Classloading problems are
             // possible
-            System.out.println(string);
+
             if (this.logger != null) {
                 this.logger.info(string);
+            } else {
+                System.out.println(string);
             }
         } catch (final Throwable e) {
 
@@ -472,7 +476,6 @@ public class ShutdownController extends Thread {
         /*
          * Attention. This runs in shutdownhook. make sure, that we do not have to load previous unloaded classes here.
          */
-        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finest("TEST");
         try {
 
             java.util.List<ShutdownEvent> list;
@@ -490,8 +493,7 @@ public class ShutdownController extends Thread {
 
                     final long started = System.currentTimeMillis();
 
-                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finest("[" + i + "/" + list.size() + "|Priority: " + e.getHookPriority() + "]" + "ShutdownController: start item->" + e);
-                    System.out.println("[" + i + "/" + list.size() + "|Priority: " + e.getHookPriority() + "]" + "ShutdownController: start item->" + e);
+                    log("[" + i + "/" + list.size() + "|Priority: " + e.getHookPriority() + "]" + "ShutdownController: start item->" + e);
 
                     final Thread thread = new Thread(new Runnable() {
 
@@ -511,20 +513,20 @@ public class ShutdownController extends Thread {
 
                     }
                     if (thread.isAlive()) {
-                        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finest("[" + i + "/" + list.size() + "|Priority: " + e.getHookPriority() + "]" + "ShutdownController: " + e + "->is still running after " + e.getMaxDuration() + " ms");
-                        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finest("[" + i + "/" + list.size() + "|Priority: " + e.getHookPriority() + "]" + "ShutdownController: " + e + "->StackTrace:\r\n" + this.getStackTrace(thread));
+                        log("[" + i + "/" + list.size() + "|Priority: " + e.getHookPriority() + "]" + "ShutdownController: " + e + "->is still running after " + e.getMaxDuration() + " ms");
+                        log("[" + i + "/" + list.size() + "|Priority: " + e.getHookPriority() + "]" + "ShutdownController: " + e + "->StackTrace:\r\n" + this.getStackTrace(thread));
                     } else {
-                        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finest("[" + i + "/" + list.size() + "|Priority: " + e.getHookPriority() + "]" + "ShutdownController: item ended after->" + (System.currentTimeMillis() - started));
+                        log("[" + i + "/" + list.size() + "|Priority: " + e.getHookPriority() + "]" + "ShutdownController: item ended after->" + (System.currentTimeMillis() - started));
                     }
-                    System.out.println("[Done:" + i + "/" + list.size());
+                    log("[Done:" + i + "/" + list.size() + "]");
                 } catch (final Throwable e1) {
                     e1.printStackTrace();
                 }
             }
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Shutdown Hooks Finished");
+            log("Shutdown Hooks Finished");
 
         } catch (final Throwable e1) {
-            // do not use Log here. If org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e1); throws an
+            // do not use Log here. If LoggerFactory.getDefaultLogger().log(e1); throws an
             // exception,
             // we have to catch it here without the risk of another exception.
 

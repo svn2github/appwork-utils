@@ -66,7 +66,11 @@ import org.appwork.utils.os.CrossSystem;
 
 public abstract class LogSourceProvider {
 
-    protected final HashMap<String, LogSink> logSinks = new HashMap<String, LogSink>();
+    /**
+     *
+     */
+    protected static final String            LOG_INIT_DONE = "LOG_INIT_DONE";
+    protected final HashMap<String, LogSink> logSinks      = new HashMap<String, LogSink>();
     private final int                        maxSize;
     private final int                        maxLogs;
     // Do not set final!
@@ -92,9 +96,10 @@ public abstract class LogSourceProvider {
         return debugMode;
     }
 
-    private long                           initTime;
-    private final boolean                  writeLogs;
-    private static List<LogSourceProvider> INSTANCES = new ArrayList<LogSourceProvider>();
+    private long                   initTime;
+    private final boolean          writeLogs;
+    private File                   logBaseFolder;
+    static List<LogSourceProvider> INSTANCES = new ArrayList<LogSourceProvider>();
 
     protected static List<LogSourceProvider> getInstances() {
         synchronized (INIT_LOCK) {
@@ -106,8 +111,11 @@ public abstract class LogSourceProvider {
         return writeLogs;
     }
 
-    private final static AtomicBoolean TRASHLOCK = new AtomicBoolean(false);
-    private static final Object        INIT_LOCK = new Object();
+    private final static AtomicBoolean TRASHLOCK              = new AtomicBoolean(false);
+    static final Object                INIT_LOCK              = new Object();
+    public static final String         LOG_NO_CONSOLE         = "LOG_NO_CONSOLE";
+    public static final String         LOG_NO_FILE            = "LOG_NO_FILE";
+    public static final String         LOG_SINGLE_LOGGER_NAME = "LOG_SINGLE_LOGGER_NAME";
 
     static {
         ShutdownController.getInstance().addShutdownEvent(new ShutdownEvent() {
@@ -129,14 +137,20 @@ public abstract class LogSourceProvider {
         synchronized (INIT_LOCK) {
 
             this.initTime = timeStamp;
-            this.consoleHandler = new LogConsoleHandler();
+            if (!"true".equalsIgnoreCase(System.getProperty(LOG_NO_CONSOLE))) {
+                this.consoleHandler = new LogConsoleHandler();
+            }
             final LogConfig config = JsonConfig.create(LogConfig.class);
             this.maxSize = config.getMaxLogFileSize();
-            this.writeLogs = maxSize > 100 * 1024;
+            this.writeLogs = maxSize > 100 * 1024 && !"true".equalsIgnoreCase(System.getProperty(LOG_NO_FILE));
             this.maxLogs = config.getMaxLogFiles();
             this.logTimeout = config.getLogFlushTimeout() * 1000l;
             debugMode = config.isDebugModeEnabled();
             instantFlushDefault = debugMode;
+            logBaseFolder = Application.getResource("logs");
+            if (System.getProperty("LOG_BASE_DIRECTORY") != null) {
+                logBaseFolder = new File(System.getProperty("LOG_BASE_DIRECTORY"));
+            }
             if (INSTANCES.size() > 0) {
 
                 for (LogSourceProvider p : INSTANCES) {
@@ -152,10 +166,10 @@ public abstract class LogSourceProvider {
 
             } else {
                 // it is important that folders start with " + timeStamp + "_" !. the rest does not matter.
-                File llogFolder = Application.getResource("logs/" + timeStamp + "_" + new SimpleDateFormat("EEE, MMM d, yyyy HH.mm Z", Locale.ENGLISH).format(new Date(timeStamp)) + "/");
+                File llogFolder = new File(logBaseFolder, timeStamp + "_" + new SimpleDateFormat("EEE, MMM d, yyyy HH.mm Z", Locale.ENGLISH).format(new Date(timeStamp)) + "/");
                 int i = 2;
                 while (llogFolder.exists()) {
-                    llogFolder = Application.getResource("logs/" + timeStamp + "_" + new SimpleDateFormat("EEE, MMM d, yyyy HH.mm Z", Locale.ENGLISH).format(new Date(timeStamp)) + "_" + (i++) + "/");
+                    llogFolder = new File(logBaseFolder, timeStamp + "_" + new SimpleDateFormat("EEE, MMM d, yyyy HH.mm Z", Locale.ENGLISH).format(new Date(timeStamp)) + "_" + (i++) + "/");
                 }
                 this.logFolder = llogFolder;
             }
@@ -170,7 +184,7 @@ public abstract class LogSourceProvider {
 
                     @Override
                     public void run() {
-                        final File oldLogs[] = Application.getResource("logs/").listFiles(new FilenameFilter() {
+                        final File oldLogs[] = logBaseFolder.listFiles(new FilenameFilter() {
                             final long   removeTimeStamp = timeStamp - config.getCleanupLogsOlderThanXDays() * 24 * 60 * 60 * 1000l;
                             final int    currentLength   = String.valueOf(System.currentTimeMillis()).length();
                             final String regex           = "^(\\d{" + (currentLength - 1) + "," + (currentLength + 1) + "})_.+";
@@ -212,6 +226,7 @@ public abstract class LogSourceProvider {
                 }.start();
             }
             INSTANCES.add(this);
+            System.setProperty(LOG_INIT_DONE, INSTANCES.size() + " instances");
         }
     }
 
@@ -317,7 +332,7 @@ public abstract class LogSourceProvider {
 
     public LogSource getLogger(String name) {
         LogSink sink = null;
-
+        name = System.getProperty(LOG_SINGLE_LOGGER_NAME, name);
         name = CrossSystem.alleviatePathParts(name);
         if (StringUtils.isEmpty(name)) {
             return null;
@@ -386,27 +401,6 @@ public abstract class LogSourceProvider {
 
     public boolean isInstantFlushDefault() {
         return instantFlushDefault || isWriteLogs() == false;
-    }
-
-    public void addConsoleHandler() {
-        synchronized (this.logSinks) {
-            if (this.consoleHandler != null) {
-                return;
-            }
-
-            this.consoleHandler = new LogConsoleHandler();
-            final Iterator<LogSink> it = this.logSinks.values().iterator();
-            while (it.hasNext()) {
-                final LogSink next = it.next();
-                if (next.hasLogSources()) {
-                    next.addHandler(this.consoleHandler);
-                } else {
-                    next.close();
-                    it.remove();
-                }
-            }
-
-        }
     }
 
     public void removeConsoleHandler() {

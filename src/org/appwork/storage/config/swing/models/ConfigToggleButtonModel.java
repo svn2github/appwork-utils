@@ -49,15 +49,13 @@ public class ConfigToggleButtonModel extends ToggleButtonModel implements Generi
     /**
      *
      */
-    private static final long serialVersionUID = -3517910678740645735L;
-    private BooleanKeyHandler keyHandler;
+    private static final long       serialVersionUID = -3517910678740645735L;
+    private final BooleanKeyHandler keyHandler;
 
     public ConfigToggleButtonModel(final BooleanKeyHandler keyHandler) {
-
         this.keyHandler = keyHandler;
         keyHandler.getEventSender().addListener(this, true);
         setSelected(keyHandler.isEnabled());
-
     }
 
     public BooleanKeyHandler getKeyHandler() {
@@ -65,22 +63,18 @@ public class ConfigToggleButtonModel extends ToggleButtonModel implements Generi
     }
 
     public boolean isSelected() {
-
         return keyHandler.isEnabled();
     }
 
     public void setSelected(final boolean b) {
-
         // else this would hook into the button focus logic an might result in additional unwanted toggle calls
         SwingUtilities.invokeLater(new Runnable() {
 
             @Override
             public void run() {
                 keyHandler.setValue(b);
-
             }
         });
-
     }
 
     private void fireItemStateChanged() {
@@ -92,13 +86,10 @@ public class ConfigToggleButtonModel extends ToggleButtonModel implements Generi
 
             @Override
             protected void runInEDT() {
-
                 fireStateChanged();
                 fireItemStateChanged();
-
             }
         };
-
     }
 
     public void onConfigValueModified(final KeyHandler<Boolean> keyHandler, final Boolean newValue) {
@@ -106,13 +97,10 @@ public class ConfigToggleButtonModel extends ToggleButtonModel implements Generi
 
             @Override
             protected void runInEDT() {
-
                 fireStateChanged();
                 fireItemStateChanged();
-
             }
         };
-
     }
 
 }

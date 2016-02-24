@@ -135,7 +135,6 @@ public abstract class LogSourceProvider {
 
     public LogSourceProvider(final long timeStamp) {
         synchronized (INIT_LOCK) {
-
             this.initTime = timeStamp;
             if (!"true".equalsIgnoreCase(System.getProperty(LOG_NO_CONSOLE))) {
                 this.consoleHandler = new LogConsoleHandler();
@@ -152,7 +151,6 @@ public abstract class LogSourceProvider {
                 logBaseFolder = new File(System.getProperty("LOG_BASE_DIRECTORY"));
             }
             if (INSTANCES.size() > 0) {
-
                 for (LogSourceProvider p : INSTANCES) {
                     System.out.println("Multiple LogControllers Detected: " + p.getClass().getName());
                 }
@@ -160,10 +158,8 @@ public abstract class LogSourceProvider {
                 logFolder = INSTANCES.get(0).getLogFolder();
                 final int currentLength = String.valueOf(System.currentTimeMillis()).length();
                 final String regex = "^(\\d{" + (currentLength - 1) + "," + (currentLength + 1) + "})_.+";
-
                 final String timeStampString = new Regex(logFolder.getName(), regex).getMatch(0);
                 initTime = Long.parseLong(timeStampString);
-
             } else {
                 // it is important that folders start with " + timeStamp + "_" !. the rest does not matter.
                 File llogFolder = new File(logBaseFolder, timeStamp + "_" + new SimpleDateFormat("EEE, MMM d, yyyy HH.mm Z", Locale.ENGLISH).format(new Date(timeStamp)) + "/");
@@ -173,11 +169,9 @@ public abstract class LogSourceProvider {
                 }
                 this.logFolder = llogFolder;
             }
-
             if (!logFolder.exists() && isWriteLogs()) {
                 logFolder.mkdirs();
             }
-
             if (LogSourceProvider.TRASHLOCK.compareAndSet(false, true)) {
                 new Thread("LogsCleanup") {
                     long newestTimeStamp = -1;
@@ -191,7 +185,6 @@ public abstract class LogSourceProvider {
 
                             @Override
                             public boolean accept(final File dir, final String name) {
-
                                 if (dir.exists() && dir.isDirectory() && name.matches(regex)) {
                                     final String timeStamp = new Regex(name, regex).getMatch(0);
                                     long times = 0;
@@ -222,7 +215,6 @@ public abstract class LogSourceProvider {
                             }
                         }
                     }
-
                 }.start();
             }
             INSTANCES.add(this);

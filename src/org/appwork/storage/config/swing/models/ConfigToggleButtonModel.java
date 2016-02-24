@@ -107,7 +107,8 @@ public class ConfigToggleButtonModel extends ToggleButtonModel implements Generi
             @Override
             protected void runInEDT() {
 
-                setSelected(ConfigToggleButtonModel.this.keyHandler.isEnabled());
+                fireStateChanged();
+                fireItemStateChanged();
 
             }
         };

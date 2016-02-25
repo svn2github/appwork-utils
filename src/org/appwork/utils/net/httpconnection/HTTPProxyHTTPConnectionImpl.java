@@ -175,7 +175,7 @@ public class HTTPProxyHTTPConnectionImpl extends HTTPConnectionImpl {
                         }
                         bytes = new byte[header.limit()];
                         header.get(bytes);
-                        final String temp = new String(bytes, "UTF-8").trim();
+                        final String temp = fromBytes(bytes, -1, -1);
                         this.proxyRequest.append(temp + "\r\n");
                     }
                     this.httpPort = this.httpURL.getPort();

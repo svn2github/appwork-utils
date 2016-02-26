@@ -233,17 +233,23 @@ public class Application {
             return Application.javaVersion;
         }
         try {
-            /* this version info contains more information */
-            String version = System.getProperty("java.runtime.version");
-            if (version == null || version.trim().length() == 0) {
-                version = System.getProperty("java.version");
-            }
+            final String version = getJVMVersion();
             final long ret = parseJavaVersionString(version);
             Application.javaVersion = ret;
             return ret;
         } catch (final Exception e) {
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
             return -1;
+        }
+    }
+
+    public static String getJVMVersion() {
+        /* this version info contains more information */
+        final String version = System.getProperty("java.runtime.version");
+        if (version == null || version.trim().length() == 0) {
+            return System.getProperty("java.version");
+        } else {
+            return version;
         }
     }
 
@@ -592,7 +598,7 @@ public class Application {
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Java 1.6 Update 18 has a serious bug in garbage collector!");
             /*
              * java 1.6 update 18 has a bug in garbage collector, causes java crashes
-             *
+             * 
              * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6847956
              */
             return true;
@@ -615,7 +621,7 @@ public class Application {
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("freezing AppKit thread bug");
             /*
              * http://bugs.java.com/view_bug.do?bug_id=8025588
-             *
+             * 
              * Frozen AppKit thread
              */
             return true;
@@ -673,7 +679,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see java.io.OutputStream#write(int)
          */
         @Override
@@ -697,7 +703,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see java.io.OutputStream#write(byte[])
          */
         @Override
@@ -720,7 +726,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see java.io.OutputStream#write(byte[], int, int)
          */
         @Override
@@ -744,7 +750,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see java.io.OutputStream#flush()
          */
         @Override
@@ -767,7 +773,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see java.io.OutputStream#close()
          */
         @Override

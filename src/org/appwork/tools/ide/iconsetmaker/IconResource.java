@@ -111,7 +111,7 @@ public class IconResource {
                 g.drawRect(0, 0, image.getWidth(null) - 1, image.getHeight(null) - 1);
                 g.dispose();
                 return new ImageIcon(image);
-            } catch (IOException e) {
+            } catch (Throwable e) {
 
                 return null;
             }

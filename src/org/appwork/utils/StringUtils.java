@@ -241,7 +241,7 @@ public class StringUtils {
      * @param ip
      * @return
      */
-    public static boolean isEmpty(final String... values) {
+    public static boolean isEmpty(final String[] values) {
         for (final String value : values) {
             if (value != null && value.trim().length() > 0) {
                 return false;
@@ -254,7 +254,7 @@ public class StringUtils {
      * @param value
      * @return
      */
-    public static boolean isNotEmpty(final String... values) {
+    public static boolean isNotEmpty(final String[] values) {
         for (final String value : values) {
             if (StringUtils.isEmpty(value)) {
                 return false;

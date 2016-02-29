@@ -225,6 +225,16 @@ public class StringUtils {
         return a.substring(0, i);
     }
 
+    // Keep for compatibility in webinstaller!
+    public static boolean isEmpty(final String ip) {
+        return ip == null || ip.trim().length() == 0;
+    }
+
+    // Keep for compatibility in webinstaller!
+    public static boolean isNotEmpty(final String value) {
+        return !StringUtils.isEmpty(value);
+    }
+
     /**
      * Returns wether a String is null,empty, or contains whitespace only
      *
@@ -232,8 +242,8 @@ public class StringUtils {
      * @return
      */
     public static boolean isEmpty(final String... values) {
-        for (String s : values) {
-            if (s != null && s.trim().length() > 0) {
+        for (final String value : values) {
+            if (value != null && value.trim().length() > 0) {
                 return false;
             }
         }
@@ -245,8 +255,8 @@ public class StringUtils {
      * @return
      */
     public static boolean isNotEmpty(final String... values) {
-        for (String s : values) {
-            if (StringUtils.isEmpty(s)) {
+        for (final String value : values) {
+            if (StringUtils.isEmpty(value)) {
                 return false;
             }
         }

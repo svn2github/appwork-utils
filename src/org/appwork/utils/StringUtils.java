@@ -74,64 +74,64 @@ public class StringUtils {
      * taken from http://stackoverflow.com/questions/4731055/whitespace-matching-regex-java
      */
     final private static String whitespace_chars = "[" /*
-                                                        * dummy empty string for homogeneity
-                                                        */
-            + "\\u0009" // CHARACTER
-    // TABULATION
-            + "\\u000A" // LINE
-    // FEED
-    // (LF)
-            + "\\u000B" // LINE
-    // TABULATION
-            + "\\u000C" // FORM
-    // FEED
-    // (FF)
-            + "\\u000D" // CARRIAGE
-    // RETURN
-    // (CR)
-            + "\\u0020" // SPACE
-            + "\\u0085" // NEXT
-    // LINE
-    // (NEL)
-            + "\\u00A0" // NO-BREAK
-    // SPACE
-            + "\\u1680" // OGHAM
-    // SPACE
-    // MARK
-            + "\\u180E" // MONGOLIAN
-    // VOWEL
-    // SEPARATOR
-            + "\\u2000" // EN QUAD
-            + "\\u2001" // EM QUAD
-            + "\\u2002" // EN SPACE
-            + "\\u2003" // EM SPACE
-            + "\\u2004" // THREE-PER-EM
-    // SPACE
-            + "\\u2005" // FOUR-PER-EM
-    // SPACE
-            + "\\u2006" // SIX-PER-EM
-    // SPACE
-            + "\\u2007" // FIGURE
-    // SPACE
-            + "\\u2008" // PUNCTUATION
-    // SPACE
-            + "\\u2009" // THIN
-    // SPACE
-            + "\\u200A" // HAIR
-    // SPACE
-            + "\\u2028" // LINE
-    // SEPARATOR
-            + "\\u2029" // PARAGRAPH
-    // SEPARATOR
-            + "\\u202F" // NARROW
-    // NO-BREAK
-    // SPACE
-            + "\\u205F" // MEDIUM
-    // MATHEMATICAL
-    // SPACE
-            + "\\u3000" // IDEOGRAPHIC
-    // SPACE
-            + "]";
+     * dummy empty string for homogeneity
+     */
+                                                         + "\\u0009" // CHARACTER
+                                                         // TABULATION
+                                                         + "\\u000A" // LINE
+                                                         // FEED
+                                                         // (LF)
+                                                         + "\\u000B" // LINE
+                                                         // TABULATION
+                                                         + "\\u000C" // FORM
+                                                         // FEED
+                                                         // (FF)
+                                                         + "\\u000D" // CARRIAGE
+                                                         // RETURN
+                                                         // (CR)
+                                                         + "\\u0020" // SPACE
+                                                         + "\\u0085" // NEXT
+                                                         // LINE
+                                                         // (NEL)
+                                                         + "\\u00A0" // NO-BREAK
+                                                         // SPACE
+                                                         + "\\u1680" // OGHAM
+                                                         // SPACE
+                                                         // MARK
+                                                         + "\\u180E" // MONGOLIAN
+                                                         // VOWEL
+                                                         // SEPARATOR
+                                                         + "\\u2000" // EN QUAD
+                                                         + "\\u2001" // EM QUAD
+                                                         + "\\u2002" // EN SPACE
+                                                         + "\\u2003" // EM SPACE
+                                                         + "\\u2004" // THREE-PER-EM
+                                                         // SPACE
+                                                         + "\\u2005" // FOUR-PER-EM
+                                                         // SPACE
+                                                         + "\\u2006" // SIX-PER-EM
+                                                         // SPACE
+                                                         + "\\u2007" // FIGURE
+                                                         // SPACE
+                                                         + "\\u2008" // PUNCTUATION
+                                                         // SPACE
+                                                         + "\\u2009" // THIN
+                                                         // SPACE
+                                                         + "\\u200A" // HAIR
+                                                         // SPACE
+                                                         + "\\u2028" // LINE
+                                                         // SEPARATOR
+                                                         + "\\u2029" // PARAGRAPH
+                                                         // SEPARATOR
+                                                         + "\\u202F" // NARROW
+                                                         // NO-BREAK
+                                                         // SPACE
+                                                         + "\\u205F" // MEDIUM
+                                                         // MATHEMATICAL
+                                                         // SPACE
+                                                         + "\\u3000" // IDEOGRAPHIC
+                                                         // SPACE
+                                                         + "]";
 
     public static String trim(String input) {
         if (input != null) {
@@ -226,12 +226,12 @@ public class StringUtils {
     }
 
     // Keep for compatibility in webinstaller!
-    public static boolean isEmpty(final String ip) {
+    public final static boolean isEmpty(final String ip) {
         return ip == null || ip.trim().length() == 0;
     }
 
     // Keep for compatibility in webinstaller!
-    public static boolean isNotEmpty(final String value) {
+    public final static boolean isNotEmpty(final String value) {
         return !StringUtils.isEmpty(value);
     }
 
@@ -241,7 +241,7 @@ public class StringUtils {
      * @param ip
      * @return
      */
-    public static boolean isEmpty(final String[] values) {
+    public final static boolean isAllEmpty(final String... values) {
         for (final String value : values) {
             if (value != null && value.trim().length() > 0) {
                 return false;
@@ -254,7 +254,7 @@ public class StringUtils {
      * @param value
      * @return
      */
-    public static boolean isNotEmpty(final String[] values) {
+    public final static boolean isAllNotEmpty(final String... values) {
         for (final String value : values) {
             if (StringUtils.isEmpty(value)) {
                 return false;

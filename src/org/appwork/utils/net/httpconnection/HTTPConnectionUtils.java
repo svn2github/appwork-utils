@@ -1,5 +1,5 @@
 /**
- * 
+ *
  * ====================================================================================================================================================
  *         "AppWork Utilities" License
  *         The "AppWork Utilities" will be called [The Product] from now on.
@@ -7,16 +7,16 @@
  *         Copyright (c) 2009-2015, AppWork GmbH <e-mail@appwork.org>
  *         Schwabacher Straße 117
  *         90763 Fürth
- *         Germany   
+ *         Germany
  * === Preamble ===
  *     This license establishes the terms under which the [The Product] Source Code & Binary files may be used, copied, modified, distributed, and/or redistributed.
  *     The intent is that the AppWork GmbH is able to provide their utilities library for free to non-commercial projects whereas commercial usage is only permitted after obtaining a commercial license.
  *     These terms apply to all files that have the [The Product] License header (IN the file), a <filename>.license or <filename>.info (like mylib.jar.info) file that contains a reference to this license.
- * 	
+ *
  * === 3rd Party Licences ===
  *     Some parts of the [The Product] use or reference 3rd party libraries and classes. These parts may have different licensing conditions. Please check the *.license and *.info files of included libraries
- *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header. 	
- * 	
+ *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header.
+ *
  * === Definition: Commercial Usage ===
  *     If anybody or any organization is generating income (directly or indirectly) by using [The Product] or if there's any commercial interest or aspect in what you are doing, we consider this as a commercial usage.
  *     If your use-case is neither strictly private nor strictly educational, it is commercial. If you are unsure whether your use-case is commercial or not, consider it as commercial or contact us.
@@ -25,9 +25,9 @@
  *     If you want to use [The Product] in a commercial way (see definition above), you have to obtain a paid license from AppWork GmbH.
  *     Contact AppWork for further details: <e-mail@appwork.org>
  * === Non-Commercial Usage ===
- *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the 
+ *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the
  *     "GNU Affero General Public License" (http://www.gnu.org/licenses/agpl-3.0.en.html).
- * 	
+ *
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
@@ -41,10 +41,10 @@ import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.regex.Matcher;
 
+import org.appwork.utils.Application;
 import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.encoding.Base64;
-
 
 public class HTTPConnectionUtils {
 
@@ -58,12 +58,12 @@ public class HTTPConnectionUtils {
                 /* RFC2231 */
                 final String encoding = new Regex(contentdisposition, "(?:;| |^)filename\\*\\s*=\\s*(.+?)''").getMatch(0);
                 if (encoding == null) {
-                          org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Missing encoding: " + contentdisposition);
+                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Missing encoding: " + contentdisposition);
                     return null;
                 }
                 final String filename = new Regex(contentdisposition, "(?:;| |^)filename\\*\\s*=\\s*.+?''(.*?)($|;\\s*|;$)").getMatch(0);
                 if (filename == null) {
-                          org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Broken/Unsupported: " + contentdisposition);
+                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Broken/Unsupported: " + contentdisposition);
                     return null;
                 } else {
                     try {
@@ -75,7 +75,7 @@ public class HTTPConnectionUtils {
                             return null;
                         }
                     } catch (final Exception e) {
-                              org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Decoding Error: " + filename + "|" + encoding + "|" + contentdisposition);
+                        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Decoding Error: " + filename + "|" + encoding + "|" + contentdisposition);
                         return null;
                     }
                 }
@@ -93,13 +93,13 @@ public class HTTPConnectionUtils {
                             return null;
                         }
                     } catch (final Exception e) {
-                              org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Decoding(Base64) Error: " + contentdisposition);
+                        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Decoding(Base64) Error: " + contentdisposition);
                         return null;
                     }
                 }
                 final String filename = new Regex(contentdisposition, "(?:;| |^)(filename|file_name|name)\\s*=\\s*(\"|'|)(.*?)(\\2$|\\2;$|\\2;.)").getMatch(2);
                 if (filename == null) {
-                          org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Broken/Unsupported: " + contentdisposition);
+                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Broken/Unsupported: " + contentdisposition);
                 } else {
                     String ret = filename.trim();
                     ret = ret.replaceFirst("^" + Matcher.quoteReplacement("\\") + "+", Matcher.quoteReplacement("_"));
@@ -113,7 +113,7 @@ public class HTTPConnectionUtils {
             if (contentdisposition.matches("(?i).*xfilename.*")) {
                 return null;
             }
-                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Broken/Unsupported: " + contentdisposition);
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Broken/Unsupported: " + contentdisposition);
         }
         return null;
     }
@@ -174,13 +174,18 @@ public class HTTPConnectionUtils {
         if (StringUtils.isEmpty(host)) {
             throw new UnknownHostException("Could not resolve: -empty host-");
         }
-        /* remove spaces....so literal IP's work without resolving */
-        host = host.trim();
+        final String resolvHost;
+        if (!host.matches("^[a-zA-Z0-9\\-\\.]+$") && Application.getJavaVersion() >= Application.JAVA16) {
+            resolvHost = java.net.IDN.toASCII(host.trim());
+        } else {
+            /* remove spaces....so literal IP's work without resolving */
+            resolvHost = host.trim();
+        }
         InetAddress hosts[] = null;
         for (int resolvTry = 0; resolvTry < 2; resolvTry++) {
             try {
                 /* resolv all possible ip's */
-                hosts = InetAddress.getAllByName(host);
+                hosts = InetAddress.getAllByName(resolvHost);
                 return hosts;
             } catch (final UnknownHostException e) {
                 try {
@@ -190,6 +195,6 @@ public class HTTPConnectionUtils {
                 }
             }
         }
-        throw new UnknownHostException("Could not resolve: -" + host + "-");
+        throw new UnknownHostException("Could not resolve: -" + host + "<->" + resolvHost + "-");
     }
 }

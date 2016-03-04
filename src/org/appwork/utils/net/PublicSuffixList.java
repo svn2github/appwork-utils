@@ -76,14 +76,6 @@ public class PublicSuffixList {
 
     private final Map<String, List<String>> map;
 
-    public static void main(String[] args) throws Throwable {
-        PublicSuffixList test = new PublicSuffixList();
-        System.out.println(test.getTopLevelDomain("test.teledata.mz"));
-        System.out.println(test.getDomain("test.teledata.mz"));
-        System.out.println(test.getTopLevelDomain("jdownloader.org"));
-        System.out.println(test.getDomain("super.jdownloader.org"));
-    }
-
     public PublicSuffixList(URL publicSuffixList) throws IOException {
         this.map = this.parse(publicSuffixList);
     }
@@ -149,45 +141,46 @@ public class PublicSuffixList {
 
     protected Map<String, List<String>> parse(final URL publicSuffixList) throws IOException {
         final HashMap<String, List<String>> map = new HashMap<String, List<String>>();
-        if (publicSuffixList == null) {
-            return map;
-        }
-        final InputStream is = URLStream.openStream(publicSuffixList);
-        try {
-            final BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-            final List<String> emptyList = new ArrayList<String>(0);
-            String line = null;
-            while ((line = reader.readLine()) != null) {
-                if (!line.startsWith("//") && line.length() > 0) {
-                    final String tld;
-                    final int tldIndex = line.lastIndexOf('.');
-                    if (tldIndex == -1) {
-                        tld = line;
-                    } else {
-                        tld = line.substring(tldIndex + 1);
-                    }
-                    List<String> list = map.get(tld);
-                    if (list == null) {
-                        list = emptyList;
-                        map.put(tld, list);
-                    }
-                    if (tldIndex > 0) {
-                        if (list == emptyList) {
-                            list = new ArrayList<String>();
-                            map.put(tld, list);
+        if (publicSuffixList != null) {
+            final InputStream is = URLStream.openStream(publicSuffixList);
+            if (is != null) {
+                try {
+                    final BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+                    final List<String> emptyList = new ArrayList<String>(0);
+                    String line = null;
+                    while ((line = reader.readLine()) != null) {
+                        if (!line.startsWith("//") && line.length() > 0) {
+                            final String tld;
+                            final int tldIndex = line.lastIndexOf('.');
+                            if (tldIndex == -1) {
+                                tld = line;
+                            } else {
+                                tld = line.substring(tldIndex + 1);
+                            }
+                            List<String> list = map.get(tld);
+                            if (list == null) {
+                                list = emptyList;
+                                map.put(tld, list);
+                            }
+                            if (tldIndex > 0) {
+                                if (list == emptyList) {
+                                    list = new ArrayList<String>();
+                                    map.put(tld, list);
+                                }
+                                list.add(line);
+                            }
                         }
-                        list.add(line);
                     }
+                    for (List<String> list : map.values()) {
+                        if (list != emptyList) {
+                            ((ArrayList) list).trimToSize();
+                        }
+                    }
+                } finally {
+                    is.close();
                 }
             }
-            for (List<String> list : map.values()) {
-                if (list != emptyList) {
-                    ((ArrayList) list).trimToSize();
-                }
-            }
-            return map;
-        } finally {
-            is.close();
         }
+        return map;
     }
 }

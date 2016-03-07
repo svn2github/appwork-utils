@@ -52,6 +52,7 @@ import org.appwork.utils.Application;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.ImageProvider.ImageProvider;
 import org.appwork.utils.images.IconIO;
+import org.appwork.utils.logging2.extmanager.LoggerFactory;
 
 public class MimeWindows extends MimeDefault {
 
@@ -87,7 +88,7 @@ public class MimeWindows extends MimeDefault {
                         fos = new FileOutputStream(path);
                         ImageIO.write((RenderedImage) image, "png", fos);
                     } catch (final Throwable e) {
-                        // e.printStackTrace();
+                        LoggerFactory.I().getCurrentClassLogger().log(e);
                         // http://www.oracle.com/technetwork/java/faq-sun-packages-142232.html
                         ret = ImageProvider.toImageIcon(FileSystemView.getFileSystemView().getSystemIcon(tempFile));
                     } finally {
@@ -103,6 +104,7 @@ public class MimeWindows extends MimeDefault {
                     }
                 }
             } catch (final Throwable e) {
+                LoggerFactory.I().getCurrentClassLogger().log(e);
             }
         }
         if (ret == null || ret.getIconWidth() < width || ret.getIconHeight() < height) {

@@ -55,7 +55,7 @@ public class ConfigToggleButtonModel extends ToggleButtonModel implements Generi
     public ConfigToggleButtonModel(final BooleanKeyHandler keyHandler) {
         this.keyHandler = keyHandler;
         keyHandler.getEventSender().addListener(this, true);
-        setSelected(keyHandler.isEnabled());
+        super.setSelected(keyHandler.isEnabled()); // we do not want to throw events, just change the gui!
     }
 
     public BooleanKeyHandler getKeyHandler() {
@@ -77,8 +77,8 @@ public class ConfigToggleButtonModel extends ToggleButtonModel implements Generi
         });
     }
 
-    private void fireItemStateChanged() {
-        fireItemStateChanged(new ItemEvent(ConfigToggleButtonModel.this, ItemEvent.ITEM_STATE_CHANGED, ConfigToggleButtonModel.this, ConfigToggleButtonModel.this.isSelected() ? ItemEvent.SELECTED : ItemEvent.DESELECTED));
+    private void fireItemStateChanged(final boolean selected) {
+        fireItemStateChanged(new ItemEvent(ConfigToggleButtonModel.this, ItemEvent.ITEM_STATE_CHANGED, ConfigToggleButtonModel.this, selected ? ItemEvent.SELECTED : ItemEvent.DESELECTED));
     }
 
     public void onConfigValidatorError(final KeyHandler<Boolean> keyHandler, final Boolean invalidValue, final ValidationException validateException) {
@@ -87,7 +87,7 @@ public class ConfigToggleButtonModel extends ToggleButtonModel implements Generi
             @Override
             protected void runInEDT() {
                 fireStateChanged();
-                fireItemStateChanged();
+                fireItemStateChanged(getKeyHandler().isEnabled());
             }
         };
     }
@@ -98,7 +98,7 @@ public class ConfigToggleButtonModel extends ToggleButtonModel implements Generi
             @Override
             protected void runInEDT() {
                 fireStateChanged();
-                fireItemStateChanged();
+                fireItemStateChanged(Boolean.TRUE.equals(newValue));
             }
         };
     }

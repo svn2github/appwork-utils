@@ -47,7 +47,6 @@ import org.appwork.utils.encoding.Base64;
 
 public class HTTPProxyHTTPConnectionImpl extends HTTPConnectionImpl {
     private int                 httpPort;
-    private String              httpHost;
     private StringBuilder       proxyRequest;
 
     private final boolean       preferConnectMethod;
@@ -57,6 +56,9 @@ public class HTTPProxyHTTPConnectionImpl extends HTTPConnectionImpl {
         super(url, p);
         this.preferConnectMethod = p.isConnectMethodPrefered();
         this.setRequestProperty("Proxy-Connection", "close");
+        if (!url.getProtocol().startsWith("https") && !preferConnectMethod) {
+            this.httpPath = getRequestPath(url, true);
+        }
     }
 
     /*
@@ -71,6 +73,9 @@ public class HTTPProxyHTTPConnectionImpl extends HTTPConnectionImpl {
                 return;/* oder fehler */
             }
             this.resetConnection();
+            if (!isHostnameResolved()) {
+                setHostname(resolveHostname(httpURL.getHost()));
+            }
             try {
                 if (this.proxy == null || !this.proxy.getType().equals(HTTPProxy.TYPE.HTTP)) {
                     throw new IOException("HTTPProxyHTTPConnection: invalid HTTP Proxy!");
@@ -115,7 +120,7 @@ public class HTTPProxyHTTPConnectionImpl extends HTTPConnectionImpl {
                     /* build CONNECT request */
                     this.proxyRequest = new StringBuilder();
                     this.proxyRequest.append("CONNECT ");
-                    this.proxyRequest.append(this.httpURL.getHost() + ":" + (this.httpURL.getPort() != -1 ? this.httpURL.getPort() : this.httpURL.getDefaultPort()));
+                    this.proxyRequest.append(getHostname() + ":" + (this.httpURL.getPort() != -1 ? this.httpURL.getPort() : this.httpURL.getDefaultPort()));
                     this.proxyRequest.append(" HTTP/1.1\r\n");
                     if (this.requestProperties.get("User-Agent") != null) {
                         this.proxyRequest.append("User-Agent: " + this.requestProperties.get("User-Agent") + "\r\n");
@@ -179,7 +184,6 @@ public class HTTPProxyHTTPConnectionImpl extends HTTPConnectionImpl {
                         this.proxyRequest.append(temp + "\r\n");
                     }
                     this.httpPort = this.httpURL.getPort();
-                    this.httpHost = this.httpURL.getHost();
                     if (this.httpPort == -1) {
                         this.httpPort = this.httpURL.getDefaultPort();
                     }
@@ -190,7 +194,7 @@ public class HTTPProxyHTTPConnectionImpl extends HTTPConnectionImpl {
                                 /* wrong configured SNI at serverSide */
                                 this.connectionSocket = factory.create(connectionSocket, "", httpPort, true, isSSLTrustALL());
                             } else {
-                                this.connectionSocket = factory.create(connectionSocket, this.httpURL.getHost(), httpPort, true, isSSLTrustALL());
+                                this.connectionSocket = factory.create(connectionSocket, getHostname(), httpPort, true, isSSLTrustALL());
                             }
                         } catch (final IOException e) {
                             this.connectExceptions.add(this.connectionSocket + "|" + e.getMessage());
@@ -205,17 +209,12 @@ public class HTTPProxyHTTPConnectionImpl extends HTTPConnectionImpl {
                     /*
                      * httpPath needs to be like normal http request, eg /index.html
                      */
-                    this.httpPath = new org.appwork.utils.Regex(this.httpURL.toString(), "https?://.*?(/.+)").getMatch(0);
-                    if (this.httpPath == null) {
-                        this.httpPath = "/";
-                    }
                 } else {
                     /* direct connect via proxy */
                     /*
                      * httpPath needs to include complete path here, eg http://google.de/
                      */
                     this.proxyRequest = new StringBuilder("DIRECT\r\n");
-                    this.httpPath = this.httpURL.toString();
                 }
                 /* now send Request */
                 this.sendRequest();

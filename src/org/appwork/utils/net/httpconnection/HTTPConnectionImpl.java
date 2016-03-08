@@ -68,6 +68,7 @@ import java.util.zip.GZIPInputStream;
 import org.appwork.net.protocol.http.HTTPConstants;
 import org.appwork.scheduler.DelayedRunnable;
 import org.appwork.tests.SimulationEntry;
+import org.appwork.utils.Application;
 import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.net.Base64InputStream;
@@ -159,6 +160,8 @@ public class HTTPConnectionImpl implements HTTPConnection {
     protected boolean                            sslTrustALL          = true;
     protected InetAddress                        lastConnection       = null;
     protected int                                lastConnectionPort   = -1;
+
+    protected String                             hostName;
     private final static PublicSuffixList        PSL                  = PublicSuffixList.getInstance();
 
     public KEEPALIVE getKeepAlive() {
@@ -228,11 +231,29 @@ public class HTTPConnectionImpl implements HTTPConnection {
         this.proxy = p;
         this.requestProperties = new HTTPHeaderMap<String>();
         this.headers = new HTTPHeaderMap<List<String>>();
-        final String httpPath = new org.appwork.utils.Regex(this.httpURL.toString(), "https?://.*?(/.+)").getMatch(0);
+        this.httpPath = getRequestPath(url, false);
+    }
+
+    protected String getRequestPath(final URL url, final boolean includeAll) {
+        final String httpPath = new org.appwork.utils.Regex(url.toString(), "https?://.*?(/.+)").getMatch(0);
+        final String ret;
         if (httpPath == null) {
-            this.httpPath = "/";
+            ret = "/";
         } else {
-            this.httpPath = httpPath;
+            ret = httpPath;
+        }
+        if (includeAll) {
+            final StringBuilder sb = new StringBuilder();
+            sb.append(url.getProtocol());
+            sb.append("://");
+            sb.append(resolveHostname(url.getHost()));
+            if (url.getPort() != -1) {
+                sb.append(":").append(url.getPort());
+            }
+            sb.append(ret);
+            return sb.toString();
+        } else {
+            return ret;
         }
     }
 
@@ -303,9 +324,8 @@ public class HTTPConnectionImpl implements HTTPConnection {
                                  } else {
                                      localIP = null;
                                  }
-                                 final String host = this.httpURL.getHost().toLowerCase(Locale.ENGLISH);
                                  final boolean ssl = StringUtils.equalsIgnoreCase("https", this.httpURL.getProtocol());
-                                 keepAliveSocket = new HTTPKeepAliveSocket(host, ssl, socketStream, maxKeepAliveTimeout, maxKeepAliveRequests, localIP, this.remoteIPs);
+                                 keepAliveSocket = new HTTPKeepAliveSocket(getHostname(), ssl, socketStream, maxKeepAliveTimeout, maxKeepAliveRequests, localIP, this.remoteIPs);
                              }
                              keepAliveSocket.increaseRequests();
                              if (keepAliveSocket.getRequestsLeft() > 0) {
@@ -354,7 +374,7 @@ public class HTTPConnectionImpl implements HTTPConnection {
         } else {
             port = this.httpURL.getPort();
         }
-        final String host = this.httpURL.getHost().toLowerCase(Locale.ENGLISH);
+        final String host = getHostname();
         final boolean ssl = StringUtils.equalsIgnoreCase("https", this.httpURL.getProtocol());
         String domain = null;
         if (HTTPConnectionImpl.PSL != null) {
@@ -415,7 +435,7 @@ public class HTTPConnectionImpl implements HTTPConnection {
         if (usedPort != -1 && defaultPort != -1 && usedPort != defaultPort) {
             port = ":" + usedPort;
         }
-        this.requestProperties.put("Host", this.httpURL.getHost() + port);
+        this.requestProperties.put("Host", getHostname() + port);
     }
 
     protected void resetConnection() {
@@ -568,6 +588,25 @@ public class HTTPConnectionImpl implements HTTPConnection {
         }
     }
 
+    protected String resolveHostname(final String hostName) {
+        final String resolvHost;
+        if (!hostName.matches("^[a-zA-Z0-9\\-\\.]+$") && Application.getJavaVersion() >= Application.JAVA16) {
+            resolvHost = java.net.IDN.toASCII(hostName.trim());
+        } else {
+            /* remove spaces....so literal IP's work without resolving */
+            resolvHost = hostName.trim();
+        }
+        return resolvHost.toLowerCase(Locale.ENGLISH);
+    }
+
+    protected void setHostname(String hostName) {
+        this.hostName = hostName;
+    }
+
+    protected boolean isHostnameResolved() {
+        return this.hostName != null;
+    }
+
     public void connect() throws IOException {
         boolean sslSNIWorkAround = false;
         connect: while (true) {
@@ -575,10 +614,13 @@ public class HTTPConnectionImpl implements HTTPConnection {
                 return;/* oder fehler */
             }
             this.resetConnection();
+            if (!isHostnameResolved()) {
+                setHostname(resolveHostname(this.httpURL.getHost()));
+            }
             this.connectionSocket = this.getKeepAliveSocket();
             if (this.connectionSocket == null) {
                 if (this.remoteIPs == null) {
-                    this.remoteIPs = this.resolvHostIP(this.httpURL.getHost());
+                    this.remoteIPs = this.resolvHostIP(getHostname());
                 }
                 this.connectionSocket = this.getKeepAliveSocket();
             }
@@ -621,7 +663,6 @@ public class HTTPConnectionImpl implements HTTPConnection {
                                 final long beforeConnect = System.currentTimeMillis();
                                 try {
                                     if (org.appwork.utils.net.httpconnection.HTTPConnectionImpl.TEST_SIMULATE_SOCKET_TIMEOUT != null) {
-
                                         throw new ConnectException(org.appwork.utils.net.httpconnection.HTTPConnectionImpl.TEST_SIMULATE_SOCKET_TIMEOUT.toString());
                                     }
                                     this.connectionSocket.getSocket().connect(connectedInetSocketAddress, connectTimeout);
@@ -679,7 +720,7 @@ public class HTTPConnectionImpl implements HTTPConnection {
                                 /* wrong configured SNI at serverSide */
                                 this.connectionSocket = factory.create(connectionSocket, "", port, true, isSSLTrustALL());
                             } else {
-                                this.connectionSocket = factory.create(connectionSocket, this.httpURL.getHost(), port, true, isSSLTrustALL());
+                                this.connectionSocket = factory.create(connectionSocket, getHostname(), port, true, isSSLTrustALL());
                             }
                         }
                         this.connectTime = System.currentTimeMillis() - startTime;
@@ -1133,6 +1174,14 @@ public class HTTPConnectionImpl implements HTTPConnection {
         return this.ranges;
     }
 
+    protected String getHostname() {
+        if (isHostnameResolved()) {
+            return this.hostName;
+        } else {
+            return resolveHostname(httpURL.getHost());
+        }
+    }
+
     protected String getRequestInfo() {
         final StringBuilder sb = new StringBuilder();
         sb.append("----------------Request Information-------------\r\n");
@@ -1154,7 +1203,7 @@ public class HTTPConnectionImpl implements HTTPConnection {
         } else if (lLastConnection != null) {
             sb.append("ConnectIP: ").append(lLastConnection).append(":").append(this.lastConnectionPort).append("\r\n");
         } else {
-            sb.append("Host: ").append(this.getURL().getHost()).append("\r\n");
+            sb.append("Host: ").append(getHostname()).append("\r\n");
         }
         if (this.proxy != null && this.proxy.isDirect()) {
             if (lhttpSocket != null) {

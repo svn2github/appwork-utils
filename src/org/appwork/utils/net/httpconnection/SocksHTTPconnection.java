@@ -56,7 +56,6 @@ public abstract class SocksHTTPconnection extends HTTPConnectionImpl {
     protected SocketStreamInterface sockssocket            = null;
 
     protected int                   httpPort;
-    protected String                httpHost;
     protected StringBuffer          proxyRequest           = null;
     protected InetSocketAddress     proxyInetSocketAddress = null;
 
@@ -68,9 +67,11 @@ public abstract class SocksHTTPconnection extends HTTPConnectionImpl {
     public void connect() throws IOException {
         /* establish to destination through socks */
         this.httpPort = this.httpURL.getPort();
-        this.httpHost = this.httpURL.getHost();
         if (this.httpPort == -1) {
             this.httpPort = this.httpURL.getDefaultPort();
+        }
+        if (!isHostnameResolved()) {
+            setHostname(resolveHostname(httpURL.getHost()));
         }
         boolean sslSNIWorkAround = false;
         connect: while (true) {
@@ -91,7 +92,7 @@ public abstract class SocksHTTPconnection extends HTTPConnectionImpl {
                             /* wrong configured SNI at serverSide */
                             this.connectionSocket = factory.create(sockssocket, "", httpPort, true, isSSLTrustALL());
                         } else {
-                            this.connectionSocket = factory.create(sockssocket, this.httpURL.getHost(), httpPort, true, isSSLTrustALL());
+                            this.connectionSocket = factory.create(sockssocket, getHostname(), httpPort, true, isSSLTrustALL());
                         }
                     } catch (final IOException e) {
                         this.connectExceptions.add(this.sockssocket + "|" + e.getMessage());
@@ -109,10 +110,6 @@ public abstract class SocksHTTPconnection extends HTTPConnectionImpl {
                 this.setReadTimeout(this.readTimeout);
                 this.httpResponseCode = -1;
                 this.connectTime = System.currentTimeMillis() - startTime;
-                this.httpPath = new org.appwork.utils.Regex(this.httpURL.toString(), "https?://.*?(/.+)").getMatch(0);
-                if (this.httpPath == null) {
-                    this.httpPath = "/";
-                }
                 /* now send Request */
                 this.sendRequest();
                 return;

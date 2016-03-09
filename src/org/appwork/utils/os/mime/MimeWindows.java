@@ -59,7 +59,7 @@ public class MimeWindows extends MimeDefault {
 
     @Override
     public Icon getFileIcon(final String extension, final int width, final int height) throws IOException {
-        final String iconKey = "fileIcon_" + super.getIconKey(extension, width, height);
+        final String iconKey = "osFileIcon_" + super.getIconKey(extension, width, height);
         Icon ret = super.getCacheIcon(iconKey);
         if (ret != null) {
             return ret;
@@ -118,17 +118,31 @@ public class MimeWindows extends MimeDefault {
     }
 
     private static boolean registryContainsFileIcon(final String extension) {
+        if (registryContainsFileIcon(extension, true)) {
+            return true;
+        } else if (registryContainsFileIcon(extension, false)) {
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean registryContainsFileIcon(final String extension, final boolean userRootOrSystemRoot) {
         if (StringUtils.isNotEmpty(extension)) {
             try {
-                final Preferences userRoot = Preferences.userRoot();
-                final Class<?> clz = userRoot.getClass();
+                final Preferences root;
+                if (userRootOrSystemRoot) {
+                    root = Preferences.userRoot();
+                } else {
+                    root = Preferences.systemRoot();
+                }
+                final Class<?> clz = root.getClass();
                 final Method windowsRegOpenKey = clz.getDeclaredMethod("WindowsRegOpenKey", int.class, byte[].class, int.class);
                 windowsRegOpenKey.setAccessible(true);
                 final Method windowsRegCloseKey = clz.getDeclaredMethod("WindowsRegCloseKey", int.class);
                 windowsRegCloseKey.setAccessible(true);
                 final Method rootNativeHandle = clz.getDeclaredMethod("rootNativeHandle", new Class[0]);
                 rootNativeHandle.setAccessible(true);
-                final Integer rootNativeHdl = (Integer) rootNativeHandle.invoke(userRoot);
+                final Integer rootNativeHdl = (Integer) rootNativeHandle.invoke(root);
                 final String key = "Software\\Classes\\." + extension.toLowerCase(Locale.ENGLISH);
                 final int KEY_READ = 0x20019;
                 final int ERROR_SUCCESS = 0;
@@ -136,19 +150,19 @@ public class MimeWindows extends MimeDefault {
                 final int ERROR_ACCESS_DENIED = 5;
                 final int NATIVE_HANDLE = 0;
                 final int ERROR_CODE = 1;
-                final int[] result = (int[]) windowsRegOpenKey.invoke(userRoot, rootNativeHdl, toCstr(key), KEY_READ);
+                final int[] result = (int[]) windowsRegOpenKey.invoke(root, rootNativeHdl, toCstr(key), KEY_READ);
                 if (result[ERROR_CODE] == ERROR_SUCCESS) {
-                    System.out.println("ERROR_SUCCESS:" + extension);
-                    windowsRegCloseKey.invoke(userRoot, result[NATIVE_HANDLE]);
+                    System.out.println("ERROR_SUCCESS(" + userRootOrSystemRoot + "):" + extension);
+                    windowsRegCloseKey.invoke(root, result[NATIVE_HANDLE]);
                     return true;
                 } else if (result[ERROR_CODE] == ERROR_FILE_NOT_FOUND) {
-                    System.out.println("ERROR_FILE_NOT_FOUND:" + extension);
+                    System.out.println("ERROR_FILE_NOT_FOUND(" + userRootOrSystemRoot + "):" + extension);
                     return false;
                 } else if (result[ERROR_CODE] == ERROR_ACCESS_DENIED) {
-                    System.out.println("ERROR_ACCESS_DENIED:" + extension);
+                    System.out.println("ERROR_ACCESS_DENIED(" + userRootOrSystemRoot + "):" + extension);
                     return false;
                 } else {
-                    System.out.println("ERROR:" + Arrays.toString(result) + ":" + extension);
+                    System.out.println("ERROR(" + userRootOrSystemRoot + "):" + Arrays.toString(result) + ":" + extension);
                     return false;
                 }
             } catch (final Throwable e) {

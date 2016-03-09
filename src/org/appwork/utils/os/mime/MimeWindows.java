@@ -39,6 +39,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.prefs.Preferences;
 
@@ -64,7 +65,6 @@ public class MimeWindows extends MimeDefault {
             return ret;
         }
         final boolean registryContainsFileIcon = registryContainsFileIcon(extension);
-        System.out.println("Registry contains FileIcon:" + extension + "|" + registryContainsFileIcon);
         if (!registryContainsFileIcon) {
             ret = super.getFileIcon(extension, width, height);
         } else {
@@ -138,13 +138,17 @@ public class MimeWindows extends MimeDefault {
                 final int ERROR_CODE = 1;
                 final int[] result = (int[]) windowsRegOpenKey.invoke(userRoot, rootNativeHdl, toCstr(key), KEY_READ);
                 if (result[ERROR_CODE] == ERROR_SUCCESS) {
+                    System.out.println("ERROR_SUCCESS:" + extension);
                     windowsRegCloseKey.invoke(userRoot, result[NATIVE_HANDLE]);
                     return true;
                 } else if (result[ERROR_CODE] == ERROR_FILE_NOT_FOUND) {
+                    System.out.println("ERROR_FILE_NOT_FOUND:" + extension);
                     return false;
                 } else if (result[ERROR_CODE] == ERROR_ACCESS_DENIED) {
+                    System.out.println("ERROR_ACCESS_DENIED:" + extension);
                     return false;
                 } else {
+                    System.out.println("ERROR:" + Arrays.toString(result) + ":" + extension);
                     return false;
                 }
             } catch (final Throwable e) {

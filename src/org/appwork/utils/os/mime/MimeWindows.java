@@ -58,12 +58,14 @@ public class MimeWindows extends MimeDefault {
 
     @Override
     public Icon getFileIcon(final String extension, final int width, final int height) throws IOException {
-        final String iconKey = super.getIconKey(extension, width, height);
+        final String iconKey = "fileIcon_" + super.getIconKey(extension, width, height);
         Icon ret = super.getCacheIcon(iconKey);
         if (ret != null) {
             return ret;
         }
-        if (!registryContainsFileIcon(extension)) {
+        final boolean registryContainsFileIcon = registryContainsFileIcon(extension);
+        System.out.println("Registry contains FileIcon:" + extension + "|" + registryContainsFileIcon);
+        if (!registryContainsFileIcon) {
             ret = super.getFileIcon(extension, width, height);
         } else {
             final File path = Application.getTempResource("images/" + extension + ".png");

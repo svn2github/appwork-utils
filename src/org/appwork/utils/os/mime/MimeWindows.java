@@ -146,6 +146,7 @@ public class MimeWindows extends MimeDefault {
                     return false;
                 }
             } catch (final Throwable e) {
+                LoggerFactory.I().getCurrentClassLogger().log(e);
             }
         }
         return false;

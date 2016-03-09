@@ -39,7 +39,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.Locale;
 import java.util.prefs.Preferences;
 
@@ -118,22 +117,17 @@ public class MimeWindows extends MimeDefault {
     }
 
     private static boolean registryContainsFileIcon(final String extension) {
-        if (registryContainsFileIcon(extension, true)) {
-            return true;
-        } else if (registryContainsFileIcon(extension, false)) {
-            return true;
-        }
-        return false;
+        return registryContainsFileIcon(extension, null);
     }
 
-    private static boolean registryContainsFileIcon(final String extension, final boolean userRootOrSystemRoot) {
+    private static boolean registryContainsFileIcon(final String extension, final Preferences rootNode) {
         if (StringUtils.isNotEmpty(extension)) {
             try {
                 final Preferences root;
-                if (userRootOrSystemRoot) {
+                if (rootNode == null) {
                     root = Preferences.userRoot();
                 } else {
-                    root = Preferences.systemRoot();
+                    root = rootNode;
                 }
                 final Class<?> clz = root.getClass();
                 final Method windowsRegOpenKey = clz.getDeclaredMethod("WindowsRegOpenKey", int.class, byte[].class, int.class);
@@ -152,17 +146,19 @@ public class MimeWindows extends MimeDefault {
                 final int ERROR_CODE = 1;
                 final int[] result = (int[]) windowsRegOpenKey.invoke(root, rootNativeHdl, toCstr(key), KEY_READ);
                 if (result[ERROR_CODE] == ERROR_SUCCESS) {
-                    System.out.println("ERROR_SUCCESS(" + userRootOrSystemRoot + "):" + extension);
                     windowsRegCloseKey.invoke(root, result[NATIVE_HANDLE]);
                     return true;
                 } else if (result[ERROR_CODE] == ERROR_FILE_NOT_FOUND) {
-                    System.out.println("ERROR_FILE_NOT_FOUND(" + userRootOrSystemRoot + "):" + extension);
-                    return false;
+                    final Preferences nextRoot = Preferences.systemRoot();
+                    if (nextRoot != null && rootNode == null) {
+                        return registryContainsFileIcon(extension, nextRoot);
+                    } else {
+                        // avoid endless recursion
+                        return false;
+                    }
                 } else if (result[ERROR_CODE] == ERROR_ACCESS_DENIED) {
-                    System.out.println("ERROR_ACCESS_DENIED(" + userRootOrSystemRoot + "):" + extension);
                     return false;
                 } else {
-                    System.out.println("ERROR(" + userRootOrSystemRoot + "):" + Arrays.toString(result) + ":" + extension);
                     return false;
                 }
             } catch (final Throwable e) {

@@ -1,5 +1,5 @@
 /**
- * 
+ *
  * ====================================================================================================================================================
  *         "AppWork Utilities" License
  *         The "AppWork Utilities" will be called [The Product] from now on.
@@ -7,16 +7,16 @@
  *         Copyright (c) 2009-2015, AppWork GmbH <e-mail@appwork.org>
  *         Schwabacher Straße 117
  *         90763 Fürth
- *         Germany   
+ *         Germany
  * === Preamble ===
  *     This license establishes the terms under which the [The Product] Source Code & Binary files may be used, copied, modified, distributed, and/or redistributed.
  *     The intent is that the AppWork GmbH is able to provide their utilities library for free to non-commercial projects whereas commercial usage is only permitted after obtaining a commercial license.
  *     These terms apply to all files that have the [The Product] License header (IN the file), a <filename>.license or <filename>.info (like mylib.jar.info) file that contains a reference to this license.
- * 	
+ *
  * === 3rd Party Licences ===
  *     Some parts of the [The Product] use or reference 3rd party libraries and classes. These parts may have different licensing conditions. Please check the *.license and *.info files of included libraries
- *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header. 	
- * 	
+ *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header.
+ *
  * === Definition: Commercial Usage ===
  *     If anybody or any organization is generating income (directly or indirectly) by using [The Product] or if there's any commercial interest or aspect in what you are doing, we consider this as a commercial usage.
  *     If your use-case is neither strictly private nor strictly educational, it is commercial. If you are unsure whether your use-case is commercial or not, consider it as commercial or contact us.
@@ -25,9 +25,9 @@
  *     If you want to use [The Product] in a commercial way (see definition above), you have to obtain a paid license from AppWork GmbH.
  *     Contact AppWork for further details: <e-mail@appwork.org>
  * === Non-Commercial Usage ===
- *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the 
+ *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the
  *     "GNU Affero General Public License" (http://www.gnu.org/licenses/agpl-3.0.en.html).
- * 	
+ *
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
@@ -92,12 +92,13 @@ public class BasicHTTP {
 
     /**
      * @throws IOException
-     * 
+     *
      */
     protected void checkResponseCode() throws InvalidResponseCode {
         if (this.allowedResponseCodes != null && !this.allowedResponseCodes.contains(this.connection.getResponseCode())) {
 
-        throw this.createInvalidResponseCodeException(); }
+            throw this.createInvalidResponseCodeException();
+        }
     }
 
     public void clearRequestHeader() {
@@ -172,9 +173,9 @@ public class BasicHTTP {
     }
 
     /**
-     * 
+     *
      * Please do not forget to close the output stream.
-     * 
+     *
      * @param url
      * @param progress
      * @param maxSize
@@ -227,7 +228,9 @@ public class BasicHTTP {
 
                 if (this.connection.getCompleteContentLength() >= 0) {
                     /* contentLength is known */
-                    if (maxSize > 0 && this.connection.getCompleteContentLength() > maxSize) { throw new IOException("Max size exeeded!"); }
+                    if (maxSize > 0 && this.connection.getCompleteContentLength() > maxSize) {
+                        throw new IOException("Max size exeeded!");
+                    }
                     if (progress != null) {
                         progress.setTotal(this.connection.getCompleteContentLength());
                     }
@@ -247,7 +250,7 @@ public class BasicHTTP {
                     }
                     if (Thread.interrupted()) {
 
-                    throw new InterruptedException();
+                        throw new InterruptedException();
 
                     }
                     if (len > 0) {
@@ -259,7 +262,9 @@ public class BasicHTTP {
                         baos.write(b, 0, len);
 
                         loaded += len;
-                        if (maxSize > 0 && loaded > maxSize) { throw new IOException("Max size exeeded!"); }
+                        if (maxSize > 0 && loaded > maxSize) {
+                            throw new IOException("Max size exeeded!");
+                        }
                         if (progress != null) {
                             progress.increaseLoaded(len);
                         }
@@ -267,15 +272,21 @@ public class BasicHTTP {
                 }
                 ioExceptionWhere = 0;
                 if (this.connection.getCompleteContentLength() >= 0) {
-                    if (loaded != this.connection.getCompleteContentLength()) { throw new IOException("Incomplete download! " + loaded + " from " + this.connection.getCompleteContentLength()); }
+                    if (loaded != this.connection.getCompleteContentLength()) {
+                        throw new IOException("Incomplete download! " + loaded + " from " + this.connection.getCompleteContentLength());
+                    }
                 }
             } catch (final BasicHTTPException e) {
                 throw e;
             } catch (final InterruptedException e) {
                 throw e;
             } catch (final Exception e) {
-                if (ioExceptionWhere == 1) { throw new BasicHTTPException(this.connection, new ReadIOException(e)); }
-                if (ioExceptionWhere == 2) { throw new BasicHTTPException(this.connection, new WriteIOException(e)); }
+                if (ioExceptionWhere == 1) {
+                    throw new BasicHTTPException(this.connection, new ReadIOException(e));
+                }
+                if (ioExceptionWhere == 2) {
+                    throw new BasicHTTPException(this.connection, new WriteIOException(e));
+                }
                 throw new BasicHTTPException(this.connection, e);
             } finally {
                 try {
@@ -336,7 +347,9 @@ public class BasicHTTP {
                         this.connection.connect();
                         break;
                     } catch (final UnknownHostException e) {
-                        if (++lookupTry > 3) { throw e; }
+                        if (++lookupTry > 3) {
+                            throw e;
+                        }
                         /* dns lookup failed, short wait and try again */
                         Thread.sleep(200);
                     }
@@ -402,7 +415,9 @@ public class BasicHTTP {
 
     public String getResponseHeader(final String string) {
         synchronized (this.lock) {
-            if (this.connection == null) { return null; }
+            if (this.connection == null) {
+                return null;
+            }
             return this.connection.getHeaderField(string);
 
         }
@@ -434,7 +449,9 @@ public class BasicHTTP {
                             this.connection.connect();
                             break;
                         } catch (final UnknownHostException e) {
-                            if (++lookupTry > 3) { throw e; }
+                            if (++lookupTry > 3) {
+                                throw e;
+                            }
                             /* dns lookup failed, short wait and try again */
                             Thread.sleep(200);
                         }
@@ -497,7 +514,9 @@ public class BasicHTTP {
                             this.connection.connect();
                             break;
                         } catch (final UnknownHostException e) {
-                            if (++lookupTry > 3) { throw e; }
+                            if (++lookupTry > 3) {
+                                throw e;
+                            }
                             /* dns lookup failed, short wait and try again */
                             Thread.sleep(200);
                         }
@@ -517,7 +536,9 @@ public class BasicHTTP {
                         progress.onBytesUploaded(buffer, read);
                         progress.increaseUploaded(read);
                     }
-                    if (Thread.interrupted()) { throw new InterruptedException(); }
+                    if (Thread.interrupted()) {
+                        throw new InterruptedException();
+                    }
                 }
                 try {
                     outputStream.flush();
@@ -593,7 +614,9 @@ public class BasicHTTP {
                         this.connection.connect();
                         break;
                     } catch (final UnknownHostException e) {
-                        if (++lookupTry > 3) { throw e; }
+                        if (++lookupTry > 3) {
+                            throw e;
+                        }
                         /* dns lookup failed, short wait and try again */
                         Thread.sleep(200);
                     }
@@ -648,7 +671,9 @@ public class BasicHTTP {
                     } catch (final IOException e) {
                         throw new ReadIOException(e);
                     }
-                    if (Thread.interrupted()) { throw new InterruptedException(); }
+                    if (Thread.interrupted()) {
+                        throw new InterruptedException();
+                    }
                     if (len > 0) {
                         try {
                             baos.write(b, 0, len);
@@ -663,7 +688,9 @@ public class BasicHTTP {
                     }
                 }
                 if (this.connection.getCompleteContentLength() >= 0) {
-                    if (loaded != this.connection.getCompleteContentLength()) { throw new IOException("Incomplete download! " + loaded + " from " + this.connection.getCompleteContentLength()); }
+                    if (loaded != this.connection.getCompleteContentLength()) {
+                        throw new IOException("Incomplete download! " + loaded + " from " + this.connection.getCompleteContentLength());
+                    }
                 }
                 return;
             } catch (final IOException e) {

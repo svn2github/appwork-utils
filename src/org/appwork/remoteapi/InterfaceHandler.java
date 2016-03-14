@@ -221,12 +221,10 @@ public class InterfaceHandler<T> {
         for (final Method m : this.methods.values()) {
             final RemoteAPIMethodDefinition mDef = new RemoteAPIMethodDefinition();
             mDef.setMethodName(m.getName());
-
             final ApiDoc an = m.getAnnotation(ApiDoc.class);
             if (an != null) {
                 mDef.setDescription(an.value());
             }
-
             final List<String> parameters = new ArrayList<String>();
 
             for (int i = 0; i < m.getGenericParameterTypes().length; i++) {
@@ -236,7 +234,6 @@ public class InterfaceHandler<T> {
                 parameters.add(m.getParameterTypes()[i].getSimpleName());
             }
             mDef.setParameters(parameters);
-
             methodDefinitions.add(mDef);
         }
         return JSonStorage.serializeToJson(methodDefinitions);
@@ -386,12 +383,31 @@ public class InterfaceHandler<T> {
                     name = methodname.value();
                 }
                 if (this.methods.put(name + paramCounter, m) != null) {
-
                     throw new ParseException(interfaceClass + " already contains method: \r\n" + name + "\r\n");
                 }
-
                 if (m.getAnnotation(ApiRawMethod.class) != null) {
-                    this.methods.put(name, m);
+                    final Method existing = methods.get(name);
+                    // prefer method with less(more generic) parameters, so best method would be
+                    //
+                    // xy method(RemoteAPIRequest,RemoteAPIResponse) signature
+                    // see example for Cnl2APIFlash.add
+                    if (existing == null) {
+                        this.methods.put(name, m);
+                    } else {
+                        int existingParamCounter = 0;
+                        boolean hasRemoteAPIRequest = false;
+                        for (final Class<?> c : existing.getParameterTypes()) {
+                            if (c == RemoteAPIRequest.class) {
+                                hasRemoteAPIRequest = true;
+                            }
+                            if (c != RemoteAPIRequest.class && c != RemoteAPIResponse.class) {
+                                existingParamCounter++;
+                            }
+                        }
+                        if (hasRemoteAPIRequest && paramCounter < existingParamCounter) {
+                            this.methods.put(name, m);
+                        }
+                    }
                 }
                 this.parameterCountMap.put(m, paramCounter);
 

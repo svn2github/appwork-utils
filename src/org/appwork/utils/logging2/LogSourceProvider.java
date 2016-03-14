@@ -50,9 +50,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.FileHandler;
-import java.util.logging.Handler;
-import java.util.logging.Level;
 
 import org.appwork.shutdown.ShutdownController;
 import org.appwork.shutdown.ShutdownEvent;
@@ -343,14 +340,11 @@ public abstract class LogSourceProvider {
                      */
                     sink.addHandler(this.consoleHandler);
                 }
-
                 try {
                     if (isWriteLogs()) {
-                        final Handler fileHandler = new FileHandler(new File(this.logFolder, name).getAbsolutePath(), this.maxSize, this.maxLogs, true);
-                        sink.addHandler(fileHandler);
-                        fileHandler.setEncoding("UTF-8");
-                        fileHandler.setLevel(Level.ALL);
+                        final LogSinkFileHandler fileHandler = new LogSinkFileHandler(new File(this.logFolder, name), this.maxSize, this.maxLogs);
                         fileHandler.setFormatter(new LogSourceFormatter());
+                        sink.addHandler(fileHandler);
                     }
                 } catch (final Throwable e) {
                     e.printStackTrace();

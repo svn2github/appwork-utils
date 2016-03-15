@@ -36,6 +36,7 @@ package org.appwork.utils.logging2;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.FileHandler;
+import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
@@ -85,7 +86,13 @@ public class LogSinkFileHandler extends Handler {
         if (!closed) {
             if (this.fileHandler == null) {
                 try {
-                    fileHandler = new FileHandler(file.getAbsolutePath(), this.maxSize, this.maxLogs, true);
+                    fileHandler = new FileHandler(file.getAbsolutePath(), this.maxSize, this.maxLogs, true) {
+                        @Override
+                        public Formatter getFormatter() {
+                            return LogSinkFileHandler.this.getFormatter();
+                        }
+
+                    };
                     fileHandler.setEncoding("UTF-8");
                     fileHandler.setLevel(Level.ALL);
                 } catch (IOException e) {

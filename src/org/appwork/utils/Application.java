@@ -72,7 +72,7 @@ import org.appwork.utils.os.CrossSystem;
  */
 public class Application {
 
-    private static Boolean              IS_JARED      = null;
+    private static Boolean IS_JARED = null;
 
     static {
         Application.redirectOutputStreams();
@@ -598,7 +598,7 @@ public class Application {
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Java 1.6 Update 18 has a serious bug in garbage collector!");
             /*
              * java 1.6 update 18 has a bug in garbage collector, causes java crashes
-             * 
+             *
              * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6847956
              */
             return true;
@@ -621,7 +621,7 @@ public class Application {
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("freezing AppKit thread bug");
             /*
              * http://bugs.java.com/view_bug.do?bug_id=8025588
-             * 
+             *
              * Frozen AppKit thread
              */
             return true;
@@ -679,7 +679,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.io.OutputStream#write(int)
          */
         @Override
@@ -703,7 +703,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.io.OutputStream#write(byte[])
          */
         @Override
@@ -726,7 +726,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.io.OutputStream#write(byte[], int, int)
          */
         @Override
@@ -750,7 +750,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.io.OutputStream#flush()
          */
         @Override
@@ -773,7 +773,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.io.OutputStream#close()
          */
         @Override
@@ -939,12 +939,12 @@ public class Application {
             return ret;
         }
         try {
+
             final Class<? extends LookAndFeel> lafClass = UIManager.getLookAndFeel().getClass();
-            if (lafClass != null && lafClass.getName().startsWith("de.javasoft.plaf.synthetica")) {
-                // this loads the Synthetica class and triggers the license check. we should only do this if we are pretty sure
-                final Class<?> cls = Class.forName("de.javasoft.plaf.synthetica.SyntheticaLookAndFeel");
-                ret = cls != null && cls.isAssignableFrom(lafClass);
-            }
+            Class<?> cls = Class.forName("de.javasoft.plaf.synthetica.SyntheticaLookAndFeel", false, Application.class.getClassLoader());
+
+            ret = cls != null && cls.isAssignableFrom(lafClass);
+
         } catch (Throwable e) {
         } finally {
             if (ret != null) {

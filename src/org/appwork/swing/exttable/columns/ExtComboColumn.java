@@ -7,16 +7,16 @@
  *         Copyright (c) 2009-2015, AppWork GmbH <e-mail@appwork.org>
  *         Schwabacher Straße 117
  *         90763 Fürth
- *         Germany   
+ *         Germany
  * === Preamble ===
  *     This license establishes the terms under which the [The Product] Source Code & Binary files may be used, copied, modified, distributed, and/or redistributed.
  *     The intent is that the AppWork GmbH is able to provide their utilities library for free to non-commercial projects whereas commercial usage is only permitted after obtaining a commercial license.
  *     These terms apply to all files that have the [The Product] License header (IN the file), a <filename>.license or <filename>.info (like mylib.jar.info) file that contains a reference to this license.
- * 	
+ *
  * === 3rd Party Licences ===
  *     Some parts of the [The Product] use or reference 3rd party libraries and classes. These parts may have different licensing conditions. Please check the *.license and *.info files of included libraries
- *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header. 	
- * 	
+ *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header.
+ *
  * === Definition: Commercial Usage ===
  *     If anybody or any organization is generating income (directly or indirectly) by using [The Product] or if there's any commercial interest or aspect in what you are doing, we consider this as a commercial usage.
  *     If your use-case is neither strictly private nor strictly educational, it is commercial. If you are unsure whether your use-case is commercial or not, consider it as commercial or contact us.
@@ -193,10 +193,10 @@ public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> impl
 
         rendererPanel.setEditable(isEditable(value));
         rendererPanel.setIcon(editing == value ? iconUp : iconDown);
-        Icon icon = this.modelItemToIcon(selected);
+        Icon icon = this.modelItemToIcon(selected, value);
         rendererIcon.setIcon(icon);
 
-        String str = modelItemToString(selected);
+        String str = modelItemToString(selected, value);
         if (str == null) {
             // under substance, setting setText(null) somehow sets the label
             // opaque.
@@ -221,9 +221,11 @@ public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> impl
 
     /**
      * @param selected
+     * @param value
+     *            TODO
      * @return
      */
-    protected Icon modelItemToIcon(final ModelType selected) {
+    protected Icon modelItemToIcon(final ModelType selected, E value) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -329,7 +331,7 @@ public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> impl
 
         for (int i = 0; i < dm.getSize(); i++) {
             final ModelType o = dm.getElementAt(i);
-            final JComponent bt = getPopupElement(o, selected.equals(o));
+            final JComponent bt = getPopupElement(o, selected.equals(o), value);
             if (bt instanceof AbstractButton) {
                 ((AbstractButton) bt).addActionListener(new ActionListener() {
 
@@ -346,15 +348,17 @@ public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> impl
     }
 
     /**
+     * @param value
+     *            TODO
      * @param b
      * @param o2
      * @return
      */
-    protected JComponent getPopupElement(final ModelType o, final boolean selected) {
+    protected JComponent getPopupElement(final ModelType o, final boolean selected, final E value) {
         return new JMenuItem(new BasicAction(o.toString()) {
             {
 
-                setName(modelItemToString(o));
+                setName(modelItemToString(o, value));
 
                 if (selected) {
                     setSmallIcon(RadioBoxIcon.TRUE);
@@ -373,13 +377,13 @@ public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> impl
     }
 
     final protected Icon getIcon(final E value) {
-        return modelItemToIcon(getSelectedItem(value));
+        return modelItemToIcon(getSelectedItem(value), value);
     }
 
     @Override
     public String getStringValue(final E value) {
 
-        return modelItemToString(getSelectedItem(value));
+        return modelItemToString(getSelectedItem(value), value);
     }
 
     /**
@@ -393,9 +397,11 @@ public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> impl
 
     /**
      * @param selectedItem
+     * @param value
+     *            TODO
      * @return
      */
-    protected String modelItemToString(final ModelType selectedItem) {
+    protected String modelItemToString(final ModelType selectedItem, E value) {
         if (selectedItem == null) {
             return null;
         }

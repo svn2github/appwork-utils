@@ -347,6 +347,12 @@ public class JScrollPopupMenu extends JPopupMenu {
             Insets insets = parent.getInsets();
             dim.height = Math.min(dim.height + insets.top + insets.bottom, visibleAmount);
 
+            if (Application.isSyntheticaLookAndFeel()) {
+                // workaround for a bug with synthetica.
+                dim.width += 10;
+
+            }
+
             return dim;
         }
 

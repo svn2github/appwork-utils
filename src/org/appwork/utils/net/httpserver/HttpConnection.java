@@ -175,6 +175,13 @@ public class HttpConnection implements Runnable {
         }
     }
 
+    protected HttpConnection() {
+        this.server = null;
+        this.clientSocket = null;
+        this.is = null;
+        this.os = null;
+    }
+
     public HttpConnection(final HttpServer server, final Socket clientSocket) throws IOException {
         this(server, clientSocket, null, null);
     }

@@ -84,6 +84,15 @@ public class JsonConfig {
 
     private static final HashMap<String, LockObject>      LOCKS = new HashMap<String, LockObject>();
 
+    public static <T extends ConfigInterface> String getStorageName(Class<T> configInterface) {
+        String id = configInterface.getName();
+        CustomStorageName anno = configInterface.getAnnotation(CustomStorageName.class);
+        if (anno != null) {
+            id = anno.value();
+        }
+        return id;
+    }
+
     /**
      * @param <T>
      * @param class1
@@ -92,11 +101,8 @@ public class JsonConfig {
     @SuppressWarnings("unchecked")
     public static <T extends ConfigInterface> T create(final Class<T> configInterface) {
 
-        String path = configInterface.getName();
-        CustomStorageName anno = configInterface.getAnnotation(CustomStorageName.class);
-        if (anno != null) {
-            path = anno.value();
-        }
+        String path = getStorageName(configInterface);
+
         synchronized (JsonConfig.CACHE) {
             final ConfigInterface ret = JsonConfig.CACHE.get(path);
             if (ret != null) {

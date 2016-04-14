@@ -159,7 +159,7 @@ public class JsonConfig {
     @SuppressWarnings("unchecked")
     public static <T extends ConfigInterface> T create(final File path, final Class<T> configInterface) {
 
-        String id = path.getAbsolutePath() + configInterface.getName();
+        String id = path.getAbsolutePath() + getStorageName(configInterface);
 
         synchronized (JsonConfig.CACHE) {
             final ConfigInterface ret = JsonConfig.CACHE.get(id);
@@ -214,7 +214,7 @@ public class JsonConfig {
 
     @SuppressWarnings("unchecked")
     public static <T extends ConfigInterface> T create(final String urlPath, final Class<T> configInterface) {
-        final String id = urlPath + configInterface.getName();
+        final String id = urlPath + getStorageName(configInterface);
         synchronized (JsonConfig.CACHE) {
             final ConfigInterface ret = JsonConfig.CACHE.get(id);
             if (ret != null) {

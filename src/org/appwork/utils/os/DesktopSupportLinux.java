@@ -1,5 +1,5 @@
 /**
- * 
+ *
  * ====================================================================================================================================================
  *         "AppWork Utilities" License
  *         The "AppWork Utilities" will be called [The Product] from now on.
@@ -7,16 +7,16 @@
  *         Copyright (c) 2009-2015, AppWork GmbH <e-mail@appwork.org>
  *         Schwabacher Straße 117
  *         90763 Fürth
- *         Germany   
+ *         Germany
  * === Preamble ===
  *     This license establishes the terms under which the [The Product] Source Code & Binary files may be used, copied, modified, distributed, and/or redistributed.
  *     The intent is that the AppWork GmbH is able to provide their utilities library for free to non-commercial projects whereas commercial usage is only permitted after obtaining a commercial license.
  *     These terms apply to all files that have the [The Product] License header (IN the file), a <filename>.license or <filename>.info (like mylib.jar.info) file that contains a reference to this license.
- * 	
+ *
  * === 3rd Party Licences ===
  *     Some parts of the [The Product] use or reference 3rd party libraries and classes. These parts may have different licensing conditions. Please check the *.license and *.info files of included libraries
- *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header. 	
- * 	
+ *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header.
+ *
  * === Definition: Commercial Usage ===
  *     If anybody or any organization is generating income (directly or indirectly) by using [The Product] or if there's any commercial interest or aspect in what you are doing, we consider this as a commercial usage.
  *     If your use-case is neither strictly private nor strictly educational, it is commercial. If you are unsure whether your use-case is commercial or not, consider it as commercial or contact us.
@@ -25,9 +25,9 @@
  *     If you want to use [The Product] in a commercial way (see definition above), you have to obtain a paid license from AppWork GmbH.
  *     Contact AppWork for further details: <e-mail@appwork.org>
  * === Non-Commercial Usage ===
- *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the 
+ *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the
  *     "GNU Affero General Public License" (http://www.gnu.org/licenses/agpl-3.0.en.html).
- * 	
+ *
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
@@ -40,7 +40,6 @@ import java.net.URL;
 import java.util.ArrayList;
 
 import org.appwork.utils.StringUtils;
-
 import org.appwork.utils.processes.ProcessBuilderFactory;
 import org.appwork.utils.processes.ProcessOutput;
 
@@ -72,9 +71,11 @@ public class DesktopSupportLinux implements DesktopSupport {
         final String GNOME_DESKTOP_SESSION_ID = System.getenv("GNOME_DESKTOP_SESSION_ID");
         /* returns true in case we have running KDE */
         final String KDE_FULL_SESSION = System.getenv("KDE_FULL_SESSION");
+        final String KDE_SESSION_VERSION = System.getenv("KDE_SESSION_VERSION");
         /* gnome session */
         final String GDMSESSION = System.getenv("GDMSESSION");
         final String DESKTOP_SESSION = System.getenv("DESKTOP_SESSION");
+        final String[] openCommand;
         if ("Unity".equals(XDG_CURRENT_DESKTOP) || "ubuntu".equals(GDMSESSION) || "ubuntu-2d".equals(GDMSESSION)) {
             if ("ubuntu-2d".equals(GDMSESSION)) {
                 System.out.println("Unity-2D Desktop detected");
@@ -82,37 +83,53 @@ public class DesktopSupportLinux implements DesktopSupport {
                 System.out.println("Unity-3D Desktop detected");
             }
             this.windowManager = WINDOW_MANAGER.UNITY;
-            this.customFile = new String[] { "gnome-open", "%s" };
-            this.customBrowse = new String[] { "gnome-open", "%s" };
+            openCommand = new String[] { "gnome-open", "%s" };
         } else if ("GNOME".equalsIgnoreCase(XDG_CURRENT_DESKTOP) || StringUtils.isNotEmpty(GNOME_DESKTOP_SESSION_ID) || "GNOME".equalsIgnoreCase(GDMSESSION) || "gnome-shell".equals(GDMSESSION) || "gnome-classic".equals(GDMSESSION) || "gnome-fallback".equals(GDMSESSION) || "cinnamon".equals(GDMSESSION)) {
             System.out.println("Gnome Desktop detected");
             this.windowManager = WINDOW_MANAGER.GNOME;
-            this.customFile = new String[] { "gnome-open", "%s" };
-            this.customBrowse = new String[] { "gnome-open", "%s" };
+            openCommand = new String[] { "gnome-open", "%s" };
         } else if ("mate".equalsIgnoreCase(XDG_CURRENT_DESKTOP) || "mate".equalsIgnoreCase(DESKTOP_SESSION)) {
             System.out.println("Mate Desktop detected");
             this.windowManager = WINDOW_MANAGER.MATE;
-            this.customFile = new String[] { "gnome-open", "%s" };
-            this.customBrowse = new String[] { "gnome-open", "%s" };
+            openCommand = new String[] { "gnome-open", "%s" };
         } else if ("true".equals(KDE_FULL_SESSION) || "kde-plasma".equals(DESKTOP_SESSION)) {
-            System.out.println("KDE detected");
+            if (KDE_SESSION_VERSION != null) {
+                System.out.println("KDE Version " + KDE_SESSION_VERSION + " detected");
+            } else {
+                System.out.println("KDE detected");
+            }
             this.windowManager = WINDOW_MANAGER.KDE;
-            this.customFile = new String[] { "kde-open", "%s" };
-            this.customBrowse = new String[] { "kde-open", "%s" };
+            String kdeOpenCommand = "kde-open";
+            if (KDE_SESSION_VERSION != null) {
+                try {
+                    if (Integer.parseInt(KDE_SESSION_VERSION) >= 5) {
+                        kdeOpenCommand = "kde-open5";
+                    }
+                } catch (final Throwable e) {
+                }
+            }
+            openCommand = new String[] { kdeOpenCommand, "%s" };
         } else if ("XFCE".equals(XDG_CURRENT_DESKTOP)) {
             System.out.println("XFCE detected");
             this.windowManager = WINDOW_MANAGER.XFCE;
-            this.customFile = new String[] { "xdg-open", "%s" };
-            this.customBrowse = new String[] { "xdg-open", "%s" };
+            openCommand = new String[] { "xdg-open", "%s" };
         } else {
             System.out.println("sun.Desktop: " + sunDesktop);
             System.out.println("XDG_CURRENT_DESKTOP: " + XDG_CURRENT_DESKTOP);
-            System.out.println("GNOME_DESKTOP_SESSION_ID: " + GNOME_DESKTOP_SESSION_ID);
             System.out.println("KDE_FULL_SESSION: " + KDE_FULL_SESSION);
+            System.out.println("KDE_SESSION_VERSION: " + KDE_SESSION_VERSION);
             System.out.println("DESKTOP_SESSION: " + DESKTOP_SESSION);
+            System.out.println("GNOME_DESKTOP_SESSION_ID: " + GNOME_DESKTOP_SESSION_ID);
             this.windowManager = WINDOW_MANAGER.UNKNOWN;
-            this.customFile = null;
-            this.customBrowse = null;
+            openCommand = null;
+        }
+
+        if (StringUtils.isNotEmpty(XDG_CURRENT_DESKTOP)) {
+            this.customFile = new String[] { "xdg-open", "%s" };
+            this.customBrowse = new String[] { "xdg-open", "%s" };
+        } else {
+            this.customFile = openCommand;
+            this.customBrowse = openCommand;
         }
     }
 
@@ -142,16 +159,18 @@ public class DesktopSupportLinux implements DesktopSupport {
         case MATE:
         case UNITY:
             return true;
+        default:
+            return false;
         }
-        return false;
     }
 
     public boolean isKDEDesktop() {
         switch (this.windowManager) {
         case KDE:
             return true;
+        default:
+            return false;
         }
-        return false;
     }
 
     @Override
@@ -166,8 +185,9 @@ public class DesktopSupportLinux implements DesktopSupport {
         switch (this.windowManager) {
         case XFCE:
             return true;
+        default:
+            return false;
         }
-        return false;
     }
 
     private boolean openCustom(final String[] custom, final String what) throws IOException {
@@ -202,22 +222,27 @@ public class DesktopSupportLinux implements DesktopSupport {
     public boolean shutdown(boolean force) {
         try {
             dbusPowerState("Shutdown");
-        } catch (Exception e) {
+        } catch (Throwable e) {
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
         }
         try {
             ProcessBuilderFactory.runCommand(new String[] { "dcop", "--all-sessions", "--all-users", "ksmserver", "ksmserver", "logout", "0", "2", "0" });
-        } catch (Exception e) {
+        } catch (Throwable e) {
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
         }
         try {
             ProcessBuilderFactory.runCommand("poweroff");
-        } catch (Exception e) {
+        } catch (Throwable e) {
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
         }
         try {
             ProcessBuilderFactory.runCommand(new String[] { "sudo", "shutdown", "-P", "now" });
-        } catch (Exception e) {
+        } catch (Throwable e) {
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+        }
+        try {
+            ProcessBuilderFactory.runCommand(new String[] { "sudo", "shutdown", "-Ph", "now" });
+        } catch (Throwable e) {
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
         }
         return true;
@@ -230,7 +255,7 @@ public class DesktopSupportLinux implements DesktopSupport {
                 // compatible to newer dbus versions
                 ProcessBuilderFactory.runCommand("dbus-send", "--system", "--print-reply", "--dest=org.freedesktop.login1", "/org/freedesktop/login1", "org.freedesktop.login1.Manager." + command, "boolean:true");
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
         }
     }
@@ -240,9 +265,9 @@ public class DesktopSupportLinux implements DesktopSupport {
         try {
             dbusPowerState("Suspend");
             return true;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
-                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("no standby support, use shutdown");
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("no standby support, use shutdown");
             return false;
         }
     }
@@ -252,9 +277,9 @@ public class DesktopSupportLinux implements DesktopSupport {
         try {
             dbusPowerState("Hibernate");
             return true;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
-                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("no hibernate support, use shutdown");
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("no hibernate support, use shutdown");
             return false;
         }
 

@@ -98,7 +98,7 @@ public abstract class SimpleUseNet {
      * rfc3977 nntp
      */
 
-    private Socket socket = null;
+    private volatile Socket socket = null;
 
     public static class CommandResponse {
         private final int responseCode;
@@ -129,12 +129,12 @@ public abstract class SimpleUseNet {
         return socket;
     }
 
-    private OutputStream       outputStream = null;
-    private InputStream        inputStream  = null;
-    private final byte[]       CRLF         = "\r\n".getBytes();
+    private volatile OutputStream outputStream = null;
+    private volatile InputStream  inputStream  = null;
+    private final byte[]          CRLF         = "\r\n".getBytes();
 
-    private final LogInterface logger;
-    private final HTTPProxy    proxy;
+    private final LogInterface    logger;
+    private final HTTPProxy       proxy;
 
     public HTTPProxy getProxy() {
         return proxy;
@@ -191,7 +191,7 @@ public abstract class SimpleUseNet {
                         socket = sslSocket;
                         break;
                     } catch (final IOException e) {
-                        silentDisconnect();
+                        silentDisconnect(e);
                         if (useSNIWorkaround == false && e.getMessage().contains("unrecognized_name")) {
                             useSNIWorkaround = true;
                             continue;
@@ -220,7 +220,7 @@ public abstract class SimpleUseNet {
                 authenticate(username, password);
             }
         } catch (final IOException e) {
-            silentDisconnect();
+            silentDisconnect(e);
             throw e;
         }
     }
@@ -253,11 +253,11 @@ public abstract class SimpleUseNet {
     }
 
     private final ByteArrayOutputStream lineBuffer = new ByteArrayOutputStream() {
-        @Override
-        public synchronized byte[] toByteArray() {
-            return buf;
-        };
-    };
+                                                       @Override
+                                                       public synchronized byte[] toByteArray() {
+                                                           return buf;
+                                                       };
+                                                   };
 
     protected synchronized String readLine() throws IOException {
         return readLine(lineBuffer);
@@ -274,7 +274,7 @@ public abstract class SimpleUseNet {
             logger.info("Read Response:" + ret);
             return ret;
         } catch (final IOException e) {
-            silentDisconnect();
+            silentDisconnect(e);
             throw e;
         }
     }
@@ -313,7 +313,7 @@ public abstract class SimpleUseNet {
             }
             return length;
         } catch (final IOException e) {
-            silentDisconnect();
+            silentDisconnect(e);
             throw e;
         }
     }
@@ -404,13 +404,16 @@ public abstract class SimpleUseNet {
     }
 
     private synchronized void sendCommand(String request) throws IOException {
+        if (!isConnected()) {
+            throw new IOException("not connected");
+        }
         try {
             logger.info("Send Command:" + request);
             outputStream.write(request.getBytes("ISO-8859-1"));
             outputStream.write(CRLF);
             outputStream.flush();
         } catch (IOException e) {
-            silentDisconnect();
+            silentDisconnect(e);
             throw e;
         }
     }
@@ -435,6 +438,10 @@ public abstract class SimpleUseNet {
         return response;
     }
 
+    public boolean isConnected() {
+        return socket != null;
+    }
+
     public void quit() throws IOException {
         try {
             final CommandResponse response = sendCmd(COMMAND.QUIT, null);
@@ -447,13 +454,20 @@ public abstract class SimpleUseNet {
     }
 
     public void disconnect() throws IOException {
-        socket.close();
+        final Socket socket = this.socket;
+        this.socket = null;
+        if (socket != null) {
+            socket.close();
+        }
     }
 
-    private void silentDisconnect() {
+    private void silentDisconnect(Exception e) {
         try {
             disconnect();
         } catch (final IOException ignore) {
+            if (e != null) {
+                e.addSuppressed(ignore);
+            }
         }
     }
 

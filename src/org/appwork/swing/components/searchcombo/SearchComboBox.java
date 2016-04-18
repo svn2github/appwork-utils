@@ -85,6 +85,7 @@ import org.appwork.app.gui.BasicGui;
 import org.appwork.resources.AWUTheme;
 import org.appwork.swing.MigPanel;
 import org.appwork.utils.StringUtils;
+import org.appwork.utils.swing.EDTHelper;
 import org.appwork.utils.swing.EDTRunner;
 import org.appwork.utils.swing.SwingUtils;
 
@@ -214,12 +215,9 @@ public abstract class SearchComboBox<T> extends JComboBox {
                 return true;
             }
             final java.util.List<T> found = new ArrayList<T>();
-            for (int i = 0; i < SearchComboBox.this.getModel().getSize(); i++) {
-                final String text = SearchComboBox.this.getTextForValue((T) SearchComboBox.this.getModel().getElementAt(i));
-                if (this.searchComboBox.matches(text, txt)) {
-                    found.add((T) SearchComboBox.this.getModel().getElementAt(i));
-                }
-            }
+            final java.util.List<T> all = new ArrayList<T>();
+            final ComboBoxModel model = SearchComboBox.this.getModel();
+            this.searchComboBox.searchAutoComplete(model, txt, found, all);
 
             SearchComboBox.this.sortFound(found);
             new EDTRunner() {
@@ -229,6 +227,17 @@ public abstract class SearchComboBox<T> extends JComboBox {
                     final int pos = Editor.this.tf.getCaretPosition();
                     if (found.size() == 0) {
                         SearchComboBox.this.hidePopup();
+                        if (replaceAutoCompletePopupList()) {
+                            try {
+                                final Object popup = SearchComboBox.this.getUI().getAccessibleChild(SearchComboBox.this, 0);
+                                if (popup instanceof ComboPopup) {
+                                    final JList jlist = ((ComboPopup) popup).getList();
+                                    jlist.setModel(new DefaultComboBoxModel(all.toArray(new Object[] {})));
+                                }
+                            } catch (final Throwable e) {
+                                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                            }
+                        }
                         if (SearchComboBox.this.getSelectedIndex() != -1) {
                             SearchComboBox.this.setSelectedIndex(-1);
                             Editor.this.safeSet(finalRaw);
@@ -239,7 +248,9 @@ public abstract class SearchComboBox<T> extends JComboBox {
                         Editor.this.tf.setForeground(SearchComboBox.this.getForeground());
 
                         // Editor.this.setItem(found.get(0));
+
                         SearchComboBox.this.setSelectedItem(found.get(0));
+
                         Editor.this.setItem(found.get(0));
                         Editor.this.tf.setCaretPosition(pos);
                         Editor.this.tf.select(txt.length(), Editor.this.tf.getText().length());
@@ -259,12 +270,34 @@ public abstract class SearchComboBox<T> extends JComboBox {
                                     final Component scrollPane = ((Container) popup).getComponent(0);
                                     if (popup instanceof ComboPopup) {
                                         final JList jlist = ((ComboPopup) popup).getList();
+                                        final int selectedIndex;
+                                        if (replaceAutoCompletePopupList()) {
+                                            final ArrayList<T> newList = new ArrayList<T>();
+                                            newList.addAll(found);
+                                            all.removeAll(found);
+                                            newList.addAll(all);
+                                            jlist.setModel(new DefaultComboBoxModel(newList.toArray(new Object[] {})) {
+                                                protected void fireContentsChanged(Object source, int index0, int index1) {
+                                                };
+                                            });
+                                            selectedIndex = 0;
+                                            jlist.setSelectedIndex(selectedIndex);
+                                        } else {
+                                            selectedIndex = SearchComboBox.this.getSelectedIndex();
+                                        }
                                         if (scrollPane instanceof JScrollPane) {
-                                            final Rectangle cellBounds = jlist.getCellBounds(SearchComboBox.this.getSelectedIndex(), SearchComboBox.this.getSelectedIndex() + found.size() - 1);
-                                            if (cellBounds != null) {
-                                                jlist.scrollRectToVisible(cellBounds);
-                                            }
+                                            new EDTHelper<Void>() {
 
+                                                @Override
+                                                public Void edtRun() {
+                                                    final Rectangle cellBounds = jlist.getCellBounds(selectedIndex, selectedIndex + found.size() - 1);
+                                                    if (cellBounds != null) {
+                                                        jlist.scrollRectToVisible(cellBounds);
+                                                    }
+                                                    return null;
+                                                }
+
+                                            }.start(true);
                                         }
                                     }
                                 }
@@ -509,23 +542,40 @@ public abstract class SearchComboBox<T> extends JComboBox {
     }
 
     /**
-     * @return
+     * @param model
+     * @param txt
+     * @param found
+     * @param all
      */
-    protected boolean matches(String a, String b) {
-        return a != null && b != null && (a.startsWith(b) || this.isSearchCaseSensitive() == false && a.toLowerCase(Locale.ENGLISH).startsWith(b));
+    protected void searchAutoComplete(ComboBoxModel model, String txt, List<T> found, List<T> all) {
+        for (int i = 0; i < model.getSize(); i++) {
+            final T element = (T) SearchComboBox.this.getModel().getElementAt(i);
+            all.add(element);
+            final String text = SearchComboBox.this.getTextForValue(element);
+            if (matches(text, txt)) {
+                found.add(element);
+            }
+        }
     }
 
-    private int               actualMaximumRowCount = 8;
-    public boolean            autoCompletionEnabled = true;
+    /**
+     * @return
+     */
+    protected boolean matches(String element, String matches) {
+        return element != null && matches != null && (element.startsWith(matches) || this.isSearchCaseSensitive() == false && element.toLowerCase(Locale.ENGLISH).startsWith(matches));
+    }
+
+    private int               actualMaximumRowCount  = 8;
+    public boolean            autoCompletionEnabled  = true;
     /**
      *
      */
-    private static final long serialVersionUID      = 6475635443708682554L;
-    private final ColorState  helpColorSet          = new ColorState(Color.LIGHT_GRAY);
+    private static final long serialVersionUID       = 6475635443708682554L;
+    private final ColorState  helpColorSet           = new ColorState(Color.LIGHT_GRAY);
 
-    private final ColorState  badColorSet           = new ColorState(Color.RED);
+    private final ColorState  badColorSet            = new ColorState(Color.RED);
 
-    private final ColorState  normalColorSet        = new ColorState(Color.BLACK);
+    private final ColorState  normalColorSet         = new ColorState(Color.BLACK);
 
     {
 
@@ -537,13 +587,13 @@ public abstract class SearchComboBox<T> extends JComboBox {
 
     }
 
-    private String      helptext;
+    private String            helptext;
 
-    private boolean     unkownTextInputAllowed = false;
+    private boolean           unkownTextInputAllowed = false;
 
-    protected ImageIcon badgeIcon;
+    protected ImageIcon       badgeIcon;
 
-    private ColorState  currentColorSet;
+    private ColorState        currentColorSet;
 
     /**
      * @param plugins
@@ -620,7 +670,6 @@ public abstract class SearchComboBox<T> extends JComboBox {
             }
         });
         this.setColorState(this.normalColorSet);
-
     }
 
     /**
@@ -944,7 +993,10 @@ public abstract class SearchComboBox<T> extends JComboBox {
      */
     protected void sortFound(final List<T> found) {
         // TODO Auto-generated method stub
+    }
 
+    protected boolean replaceAutoCompletePopupList() {
+        return false;
     }
 
     /**

@@ -227,17 +227,6 @@ public abstract class SearchComboBox<T> extends JComboBox {
                     final int pos = Editor.this.tf.getCaretPosition();
                     if (found.size() == 0) {
                         SearchComboBox.this.hidePopup();
-                        if (replaceAutoCompletePopupList()) {
-                            try {
-                                final Object popup = SearchComboBox.this.getUI().getAccessibleChild(SearchComboBox.this, 0);
-                                if (popup instanceof ComboPopup) {
-                                    final JList jlist = ((ComboPopup) popup).getList();
-                                    jlist.setModel(new DefaultComboBoxModel(all.toArray(new Object[] {})));
-                                }
-                            } catch (final Throwable e) {
-                                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
-                            }
-                        }
                         if (SearchComboBox.this.getSelectedIndex() != -1) {
                             SearchComboBox.this.setSelectedIndex(-1);
                             Editor.this.safeSet(finalRaw);
@@ -270,21 +259,7 @@ public abstract class SearchComboBox<T> extends JComboBox {
                                     final Component scrollPane = ((Container) popup).getComponent(0);
                                     if (popup instanceof ComboPopup) {
                                         final JList jlist = ((ComboPopup) popup).getList();
-                                        final int selectedIndex;
-                                        if (replaceAutoCompletePopupList()) {
-                                            final ArrayList<T> newList = new ArrayList<T>();
-                                            newList.addAll(found);
-                                            all.removeAll(found);
-                                            newList.addAll(all);
-                                            jlist.setModel(new DefaultComboBoxModel(newList.toArray(new Object[] {})) {
-                                                protected void fireContentsChanged(Object source, int index0, int index1) {
-                                                };
-                                            });
-                                            selectedIndex = 0;
-                                            jlist.setSelectedIndex(selectedIndex);
-                                        } else {
-                                            selectedIndex = SearchComboBox.this.getSelectedIndex();
-                                        }
+                                        final int selectedIndex = SearchComboBox.this.getSelectedIndex();
                                         if (scrollPane instanceof JScrollPane) {
                                             new EDTHelper<Void>() {
 
@@ -993,10 +968,6 @@ public abstract class SearchComboBox<T> extends JComboBox {
      */
     protected void sortFound(final List<T> found) {
         // TODO Auto-generated method stub
-    }
-
-    protected boolean replaceAutoCompletePopupList() {
-        return false;
     }
 
     /**

@@ -33,23 +33,6 @@
  * ==================================================================================================================================================== */
 package org.appwork.storage.config.annotations;
 
-import java.util.Comparator;
-
-public interface LabelInterface {
-    public static final Comparator<LabelInterface> COMPARATOR_ASC  = new Comparator<LabelInterface>() {
-
-                                                                       @Override
-                                                                       public int compare(LabelInterface o1, LabelInterface o2) {
-                                                                           return o1.getLabel().compareToIgnoreCase(o2.getLabel());
-                                                                       }
-                                                                   };
-    public static final Comparator<LabelInterface> COMPARATOR_DESC = new Comparator<LabelInterface>() {
-
-                                                                       @Override
-                                                                       public int compare(LabelInterface o1, LabelInterface o2) {
-                                                                           return o2.getLabel().compareToIgnoreCase(o1.getLabel());
-                                                                       }
-                                                                   };
-
-    public String getLabel();
+public interface TooltipInterface {
+    public String getTooltip();
 }

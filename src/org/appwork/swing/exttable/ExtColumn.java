@@ -143,10 +143,8 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
             renderer = getModel().getTable().getTableHeader().getDefaultRenderer();
         }
         Component component = renderer.getTableCellRendererComponent(getModel().getTable(), this.getName(), false, false, -1, 2);
-        // if (Application.isSyntheticaLookAndFeel()) {
-        // return component.getPreferredSize().width + 6;
-        // }
-        return component.getPreferredSize().width;
+        Dimension pref = component.getPreferredSize();
+        return pref.width;
     }
 
     protected void repaint() {
@@ -678,7 +676,7 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
 
     /**
      * returns true while a cell is prepared for painting
-     * 
+     *
      * @return
      */
     public boolean isModifying() {
@@ -874,6 +872,7 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
             this.updateColumnGui();
         }
         if (forcedWidth > 0) {
+
             tableColumn.setWidth(forcedWidth);
             tableColumn.setPreferredWidth(forcedWidth);
 

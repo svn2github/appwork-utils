@@ -1,5 +1,5 @@
 /**
- * 
+ *
  * ====================================================================================================================================================
  *         "AppWork Utilities" License
  *         The "AppWork Utilities" will be called [The Product] from now on.
@@ -7,16 +7,16 @@
  *         Copyright (c) 2009-2015, AppWork GmbH <e-mail@appwork.org>
  *         Schwabacher Straße 117
  *         90763 Fürth
- *         Germany   
+ *         Germany
  * === Preamble ===
  *     This license establishes the terms under which the [The Product] Source Code & Binary files may be used, copied, modified, distributed, and/or redistributed.
  *     The intent is that the AppWork GmbH is able to provide their utilities library for free to non-commercial projects whereas commercial usage is only permitted after obtaining a commercial license.
  *     These terms apply to all files that have the [The Product] License header (IN the file), a <filename>.license or <filename>.info (like mylib.jar.info) file that contains a reference to this license.
- * 	
+ *
  * === 3rd Party Licences ===
  *     Some parts of the [The Product] use or reference 3rd party libraries and classes. These parts may have different licensing conditions. Please check the *.license and *.info files of included libraries
- *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header. 	
- * 	
+ *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header.
+ *
  * === Definition: Commercial Usage ===
  *     If anybody or any organization is generating income (directly or indirectly) by using [The Product] or if there's any commercial interest or aspect in what you are doing, we consider this as a commercial usage.
  *     If your use-case is neither strictly private nor strictly educational, it is commercial. If you are unsure whether your use-case is commercial or not, consider it as commercial or contact us.
@@ -25,9 +25,9 @@
  *     If you want to use [The Product] in a commercial way (see definition above), you have to obtain a paid license from AppWork GmbH.
  *     Contact AppWork for further details: <e-mail@appwork.org>
  * === Non-Commercial Usage ===
- *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the 
+ *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the
  *     "GNU Affero General Public License" (http://www.gnu.org/licenses/agpl-3.0.en.html).
- * 	
+ *
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
@@ -40,19 +40,20 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.logging.Level;
 
+import org.appwork.storage.config.annotations.IntegerInterface;
+import org.appwork.storage.config.annotations.LabelInterface;
+import org.appwork.storage.config.annotations.TooltipInterface;
 import org.appwork.utils.Application;
-
 
 /**
  * @author thomas
- * 
+ *
  */
 public class TranslationHandler implements InvocationHandler {
 
     private final Class<? extends TranslateInterface> tInterface;
-    private java.util.List<TranslateResource>              lookup;
+    private java.util.List<TranslateResource>         lookup;
 
     private HashMap<Method, String>                   cache;
     private final Method[]                            methods;
@@ -83,8 +84,12 @@ public class TranslationHandler implements InvocationHandler {
      */
     private boolean checkTypes(final Method m, final Class<?>[] types) {
         final Class<?>[] parameters = m.getParameterTypes();
-        if (parameters.length != types.length) { return false; }
-        if (types.length == 0) { return true; }
+        if (parameters.length != types.length) {
+            return false;
+        }
+        if (types.length == 0) {
+            return true;
+        }
         for (int i = 0; i < types.length; i++) {
             if (types[i] != parameters[i]) {
                 if (Number.class.isAssignableFrom(types[i])) {
@@ -94,7 +99,9 @@ public class TranslationHandler implements InvocationHandler {
                         return false;
                     }
 
-                } else if (types[i] == Boolean.class && parameters[i] == boolean.class) { return true; }
+                } else if (types[i] == Boolean.class && parameters[i] == boolean.class) {
+                    return true;
+                }
                 return false;
             }
 
@@ -159,7 +166,9 @@ public class TranslationHandler implements InvocationHandler {
      */
     private TranslateResource createTranslationResource(final String string) throws IOException, InstantiationException, IllegalAccessException {
         TranslateResource ret = this.resourceCache.get(string);
-        if (ret != null) { return ret; }
+        if (ret != null) {
+            return ret;
+        }
         final DynamicResourcePath rPath = this.tInterface.getAnnotation(DynamicResourcePath.class);
         String path = null;
         URL url = null;
@@ -169,14 +178,14 @@ public class TranslationHandler implements InvocationHandler {
             path = rPath != null ? "translations/custom/" + rPath.value().newInstance().getPath() + "." + string + ".lng" : "translations/custom/" + this.tInterface.getName().replace(".", "/") + "." + string + ".lng";
             url = Application.getRessourceURL(path, false);
             if (url != null) {
-                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Load Custom Translation " + url);
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Load Custom Translation " + url);
             }
         }
         if (url == null) {
             path = rPath != null ? "translations/" + rPath.value().newInstance().getPath() + "." + string + ".lng" : "translations/" + this.tInterface.getName().replace(".", "/") + "." + string + ".lng";
             url = Application.getRessourceURL(path, false);
             if (url != null) {
-                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Load Translation " + url);
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Load Translation " + url);
             }
         }
         if (url == null) {
@@ -186,7 +195,7 @@ public class TranslationHandler implements InvocationHandler {
             url = Application.getRessourceURL(path, false);
 
             if (url != null) {
-                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Load Neighbour Translation " + url);
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Load Neighbour Translation " + url);
             }
         }
 
@@ -195,7 +204,7 @@ public class TranslationHandler implements InvocationHandler {
             url = Application.getRessourceURL(path, false);
 
             if (url != null) {
-                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Load DynamicResourcePath Translation " + url);
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Load DynamicResourcePath Translation " + url);
             }
         }
         miss: if (url == null) {
@@ -205,7 +214,7 @@ public class TranslationHandler implements InvocationHandler {
                 for (final String d : ann.lngs()) {
                     if (d.equals(string)) {
                         // defaults
-                              org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Translation file missing:" + path + "Use Annotation Dev fallback");
+                        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Translation file missing:" + path + "Use Annotation Dev fallback");
                         break miss;
                     }
                 }
@@ -236,7 +245,7 @@ public class TranslationHandler implements InvocationHandler {
                 res = this.createTranslationResource(o);
                 ret.add(res);
             } catch (final NullPointerException e) {
-                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning(e.getMessage());
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning(e.getMessage());
 
             } catch (final Throwable e) {
                 org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
@@ -263,7 +272,20 @@ public class TranslationHandler implements InvocationHandler {
             int i = 0;
             for (final Object o : args) {
                 i++;
-                ret = ret.replace("%s" + i, o == null ? "null" : o.toString());
+                if (o != null) {
+                    if (o instanceof LabelInterface) {
+                        ret = ret.replace("%s" + i, ((LabelInterface) o).getLabel());
+                    } else if (o instanceof IntegerInterface) {
+                        ret = ret.replace("%s" + i, String.valueOf(((IntegerInterface) o).getInt()));
+
+                    } else if (o instanceof TooltipInterface) {
+                        ret = ret.replace("%s" + i, ((TooltipInterface) o).getTooltip());
+                    } else {
+                        ret = ret.replace("%s" + i, o.toString());
+                    }
+                } else {
+                    ret = ret.replace("%s" + i, "null");
+                }
             }
         }
         return ret;
@@ -282,9 +304,8 @@ public class TranslationHandler implements InvocationHandler {
 
     /*
      * (non-Javadoc)
-     * 
-     * @see java.lang.reflect.InvocationHandler#invoke(java.lang.Object,
-     * java.lang.reflect.Method, java.lang.Object[])
+     *
+     * @see java.lang.reflect.InvocationHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
      */
 
     /**
@@ -334,9 +355,11 @@ public class TranslationHandler implements InvocationHandler {
             try {
 
                 ret = res.getEntry(method);
-                if (ret != null) { return ret; }
+                if (ret != null) {
+                    return ret;
+                }
             } catch (final Throwable e) {
-                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Exception in translation: " + this.tInterface.getName() + "." + res.getName());
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Exception in translation: " + this.tInterface.getName() + "." + res.getName());
                 org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
             }
         }
@@ -351,9 +374,13 @@ public class TranslationHandler implements InvocationHandler {
         final java.util.List<TranslateResource> lookup = this.lookup;
         // for speed reasons let all controller methods (@see
         // TRanslationINterface.java) start with _
-        if (method.getDeclaringClass() == Object.class) { return method.invoke(this, args); }
+        if (method.getDeclaringClass() == Object.class) {
+            return method.invoke(this, args);
+        }
         // else if (method.getName().startsWith("_")) {
-        if (method.getName().equals("_getHandler")) { return this; }
+        if (method.getName().equals("_getHandler")) {
+            return this;
+        }
         // if (method.getName().equals("_getSupportedLanguages")) {
         //
         // return TranslationFactory.listAvailableTranslations(this.tInterface);
@@ -381,11 +408,11 @@ public class TranslationHandler implements InvocationHandler {
 
     /**
      * Tells the TranslationHandler to use this language from now on.clears
-     * 
+     *
      * cache.
-     * 
+     *
      * for speed reasons, cache access is not synchronized
-     * 
+     *
      * @param loc
      */
     public void setLanguage(final String loc) {
@@ -407,9 +434,11 @@ public class TranslationHandler implements InvocationHandler {
             try {
 
                 ret = res.getSource(method);
-                if (ret != null) { return ret; }
+                if (ret != null) {
+                    return ret;
+                }
             } catch (final Throwable e) {
-                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Exception in translation: " + this.tInterface.getName() + "." + res.getName());
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Exception in translation: " + this.tInterface.getName() + "." + res.getName());
                 org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
             }
         }
@@ -431,7 +460,9 @@ public class TranslationHandler implements InvocationHandler {
     public TranslateResource getResource(String id) {
 
         for (TranslateResource tr : lookup) {
-            if (tr.getName().equals(id)) return tr;
+            if (tr.getName().equals(id)) {
+                return tr;
+            }
         }
         return null;
     }

@@ -76,55 +76,55 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
     /**
      *
      */
-    public static final String             SORT_ORDER_ID_KEY = "SORT_ORDER_ID";
+    public static final String                                     SORT_ORDER_ID_KEY      = "SORT_ORDER_ID";
     /**
      *
      */
-    public static final String             SORTCOLUMN_KEY    = "SORTCOLUMN";
+    public static final String                                     SORTCOLUMN_KEY         = "SORTCOLUMN";
     /**
      *
      */
-    private static final long              serialVersionUID  = 939549808899567618L;
+    private static final long                                      serialVersionUID       = 939549808899567618L;
     /**
      * complete table structure has changed
      */
-    protected static final int             UPDATE_STRUCTURE  = 1;
+    protected static final int                                     UPDATE_STRUCTURE       = 1;
     /**
      * Column instances
      */
-    protected java.util.List<ExtColumn<E>> columns           = new ArrayList<ExtColumn<E>>();
+    protected java.util.List<ExtColumn<E>>                         columns                = new ArrayList<ExtColumn<E>>();
 
     /**
      * Modelid to have an seperate key for database savong
      */
-    private String modelID;
+    private String                                                 modelID;
 
     /**
      * the table that uses this model
      */
-    private ExtTable<E> table = null;
+    private ExtTable<E>                                            table                  = null;
 
     /**
      * a list of objects. Each object represents one table row
      */
-    protected List<E> tableData = new ArrayList<E>();
+    protected List<E>                                              tableData              = new ArrayList<E>();
 
-    protected volatile ExtColumn<E> sortColumn;
+    protected volatile ExtColumn<E>                                sortColumn;
 
     private volatile java.util.List<ExtComponentRowHighlighter<E>> extComponentRowHighlighters;
-    private Object                                                 highlighterLock = new Object();
+    private Object                                                 highlighterLock        = new Object();
 
-    private Icon                   iconAsc;
-    private Icon                   iconDesc;
-    private PropertyChangeListener replaceDelayer;
-    private volatile boolean       replaceDelayerSet      = false;
-    private volatile List<E>       delayedNewTableData    = null;
-    private boolean                debugTableModel        = false;
-    private AtomicBoolean          tableStructureChanging = new AtomicBoolean(false);
-    private AtomicBoolean          tableSelectionClearing = new AtomicBoolean(false);
+    private Icon                                                   iconAsc;
+    private Icon                                                   iconDesc;
+    private PropertyChangeListener                                 replaceDelayer;
+    private volatile boolean                                       replaceDelayerSet      = false;
+    private volatile List<E>                                       delayedNewTableData    = null;
+    private boolean                                                debugTableModel        = false;
+    private AtomicBoolean                                          tableStructureChanging = new AtomicBoolean(false);
+    private AtomicBoolean                                          tableSelectionClearing = new AtomicBoolean(false);
 
-    private ExtTableModelEventSender eventSender;
-    private boolean                  autoWidthEnabled = false;
+    private ExtTableModelEventSender                               eventSender;
+    private boolean                                                autoWidthEnabled       = false;
 
     /**
      * Create a new ExtTableModel.
@@ -231,7 +231,7 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
             }
 
             for (Entry<ExtColumn, Integer> es : map.entrySet()) {
-                es.getKey().setForcedWidth(es.getValue());
+                es.getKey().setForcedWidth(es.getKey().adjustWidth(es.getValue()));
 
             }
             // borders

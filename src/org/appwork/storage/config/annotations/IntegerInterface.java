@@ -35,21 +35,23 @@ package org.appwork.storage.config.annotations;
 
 import java.util.Comparator;
 
-public interface LabelInterface {
-    public static final Comparator<LabelInterface> COMPARATOR_ASC  = new Comparator<LabelInterface>() {
+import org.appwork.utils.CompareUtils;
 
-                                                                       @Override
-                                                                       public int compare(LabelInterface o1, LabelInterface o2) {
-                                                                           return o1.getLabel().compareToIgnoreCase(o2.getLabel());
-                                                                       }
-                                                                   };
-    public static final Comparator<LabelInterface> COMPARATOR_DESC = new Comparator<LabelInterface>() {
+public interface IntegerInterface {
+    final static Comparator<IntegerInterface> COMPARATOR_ASC  = new Comparator<IntegerInterface>() {
 
-                                                                       @Override
-                                                                       public int compare(LabelInterface o1, LabelInterface o2) {
-                                                                           return o2.getLabel().compareToIgnoreCase(o1.getLabel());
-                                                                       }
-                                                                   };
+                                                                  @Override
+                                                                  public int compare(IntegerInterface o1, IntegerInterface o2) {
+                                                                      return CompareUtils.compare(o1.getInt(), o2.getInt());
+                                                                  }
+                                                              };
+    final static Comparator<IntegerInterface> COMPARATOR_DESC = new Comparator<IntegerInterface>() {
 
-    public String getLabel();
+                                                                  @Override
+                                                                  public int compare(IntegerInterface o1, IntegerInterface o2) {
+                                                                      return CompareUtils.compare(o2.getInt(), o1.getInt());
+                                                                  }
+                                                              };
+
+    public int getInt();
 }

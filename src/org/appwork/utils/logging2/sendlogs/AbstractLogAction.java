@@ -133,11 +133,6 @@ public abstract class AbstractLogAction extends BasicAction {
                 latestLog.setSelected(true);
             }
         }
-
-        if (folders.size() == 0) {
-            Dialog.getInstance().showExceptionDialog("WTF!", "At Least the current Log should be available", new WTFException());
-            return;
-        }
         final SendLogDialog d = new SendLogDialog(folders);
 
         Dialog.getInstance().showDialog(d);

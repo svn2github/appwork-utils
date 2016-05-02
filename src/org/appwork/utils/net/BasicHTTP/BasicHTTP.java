@@ -57,6 +57,7 @@ import org.appwork.txtresource.TranslationFactory;
 import org.appwork.utils.Application;
 import org.appwork.utils.logging2.LogInterface;
 import org.appwork.utils.net.DownloadProgress;
+import org.appwork.utils.net.URLHelper;
 import org.appwork.utils.net.UploadProgress;
 import org.appwork.utils.net.httpconnection.HTTPConnection;
 import org.appwork.utils.net.httpconnection.HTTPConnection.RequestMethod;
@@ -218,7 +219,7 @@ public class BasicHTTP {
                             this.connection.disconnect();
                         } catch (final Throwable e) {
                         }
-                        this.download(new URL(red), progress, maxSize, baos, resumePosition);
+                        this.download(new URL(URLHelper.parseLocation(url, red)), progress, maxSize, baos, resumePosition);
                         return;
                     }
                     throw new IOException("302 without locationHeader!");

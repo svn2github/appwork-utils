@@ -1,6 +1,9 @@
 package org.appwork.utils.encoding;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
+
+import org.appwork.exceptions.WTFException;
 
 /**
  * A very fast and memory efficient class to encode and decode to and from BASE64 in full accordance with RFC 2045.<br>
@@ -61,6 +64,7 @@ import java.util.Arrays;
 public class Base64 {
     private static final char[] CA = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray();
     private static final int[]  IA = new int[256];
+
     static {
         Arrays.fill(IA, -1);
         for (int i = 0, iS = CA.length; i < iS; i++) {
@@ -198,7 +202,8 @@ public class Base64 {
      * Decodes a BASE64 encoded char array that is known to be resonably well formatted. The method is about twice as fast as
      * {@link #decode(char[])}. The preconditions are:<br>
      * + The array must have a line length of 76 chars OR no line separators at all (one line).<br>
-     * + Line separator must be "\r\n", as specified in RFC 2045 + The array must not contain illegal characters within the encoded string<br>
+     * + Line separator must be "\r\n", as specified in RFC 2045 + The array must not contain illegal characters within the encoded string
+     * <br>
      * + The array CAN have illegal characters at the beginning and end, those will be dealt with appropriately.<br>
      *
      * @param sArr
@@ -393,7 +398,8 @@ public class Base64 {
      * Decodes a BASE64 encoded byte array that is known to be resonably well formatted. The method is about twice as fast as
      * {@link #decode(byte[])}. The preconditions are:<br>
      * + The array must have a line length of 76 chars OR no line separators at all (one line).<br>
-     * + Line separator must be "\r\n", as specified in RFC 2045 + The array must not contain illegal characters within the encoded string<br>
+     * + Line separator must be "\r\n", as specified in RFC 2045 + The array must not contain illegal characters within the encoded string
+     * <br>
      * + The array CAN have illegal characters at the beginning and end, those will be dealt with appropriately.<br>
      *
      * @param sArr
@@ -556,7 +562,8 @@ public class Base64 {
      * Decodes a BASE64 encoded string that is known to be resonably well formatted. The method is about twice as fast as
      * {@link #decode(String)}. The preconditions are:<br>
      * + The array must have a line length of 76 chars OR no line separators at all (one line).<br>
-     * + Line separator must be "\r\n", as specified in RFC 2045 + The array must not contain illegal characters within the encoded string<br>
+     * + Line separator must be "\r\n", as specified in RFC 2045 + The array must not contain illegal characters within the encoded string
+     * <br>
      * + The array CAN have illegal characters at the beginning and end, those will be dealt with appropriately.<br>
      *
      * @param s
@@ -625,5 +632,30 @@ public class Base64 {
         }
 
         return dArr;
+    }
+
+    /**
+     * @param storableString
+     * @return
+     */
+    public static String encode(String storableString) {
+        try {
+            return encodeToString(storableString.getBytes("UTF-8"), false);
+        } catch (UnsupportedEncodingException e) {
+            throw new WTFException();
+        }
+    }
+
+    /**
+     * @param requestedVariantString
+     * @return
+     */
+    public static String decodeToString(String base64) {
+
+        try {
+            return new String(decode(base64), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new WTFException();
+        }
     }
 }

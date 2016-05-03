@@ -43,10 +43,10 @@ import org.appwork.utils.StringUtils;
 import org.appwork.utils.logging2.LogSource;
 
 public class ExtLogManager extends LogManager {
-    public static String[] WHITELIST = new String[] { "org.fourthline", "com.mongo" };
-    public static String[] BLACKLIST = new String[] { "com.mongodb.driver.cluster", "org.fourthline", "org.fourthline.cling.registry.Registry", "org.fourthline.cling.model.message.header", "org.fourthline.cling.model.message.UpnpHeaders", "org.fourthline.cling.transport" };
+    public static String[] WHITELIST     = new String[] { "org.fourthline", "com.mongo" };
+    public static String[] BLACKLIST     = new String[] { "com.mongodb.driver.cluster", "org.fourthline", "org.fourthline.cling.registry.Registry", "org.fourthline.cling.model.message.header", "org.fourthline.cling.model.message.UpnpHeaders", "org.fourthline.cling.transport" };
 
-    private LoggerFactory loggerFactory = null;
+    private LoggerFactory  loggerFactory = null;
 
     public LoggerFactory getLoggerFactory() {
         return loggerFactory;
@@ -133,21 +133,21 @@ public class ExtLogManager extends LogManager {
         if (loggerFactory != null) {
             for (final String b : BLACKLIST) {
                 if (name.startsWith(b)) {
-                    System.out.println("Ignored (BL): " + name);
+                    LoggerFactory.getDefaultLogger().finer("Ignored (BL): " + name);
                     return super.getLogger(name);
                 }
             }
 
             for (final String w : WHITELIST) {
                 if (name.startsWith(w)) {
-                    System.out.println("Redirect Logger (WL): " + name);
+                    LoggerFactory.getDefaultLogger().finer("Redirect Logger (WL): " + name);
                     return loggerFactory.getLogger(name);
 
                 }
             }
 
         }
-        System.out.println("Ignored: " + name);
+        LoggerFactory.getDefaultLogger().finer("Ignored: " + name);
         return super.getLogger(name);
     }
 

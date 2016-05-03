@@ -467,7 +467,7 @@ public abstract class KeyHandler<RawClass> {
         synchronized (this) {
             final RawClass value = this.getValueStorage();
             if (this.customValueGetter != null) {
-                return this.customValueGetter.getValue(value);
+                return this.customValueGetter.getValue(this, value);
             }
             return value;
         }

@@ -57,6 +57,17 @@ public class StringKeyHandler extends KeyHandler<String> {
      * @see org.appwork.storage.config.KeyHandler#initHandler()
      */
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.appwork.storage.config.handler.KeyHandler#getValue()
+     */
+    @Override
+    public String getValue() {
+        return super.getValue();
+
+    }
+
     @Override
     protected Class<? extends Annotation> getDefaultAnnotation() {
         return DefaultStringValue.class;
@@ -90,7 +101,7 @@ public class StringKeyHandler extends KeyHandler<String> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.storage.config.KeyHandler#validateValue(java.lang.Object)
      */
     @Override

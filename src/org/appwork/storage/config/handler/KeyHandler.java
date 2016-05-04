@@ -76,19 +76,19 @@ import org.appwork.utils.reflection.Clazz;
  */
 public abstract class KeyHandler<RawClass> {
 
-    private static final String                 ANNOTATION_PACKAGE_NAME = CryptedStorage.class.getPackage().getName();
-    private static final String                 PACKAGE_NAME            = PlainStorage.class.getPackage().getName();
-    private final String                        key;
-    protected Method                            getMethod               = null;
-    protected Method                            setMethod               = null;;
-    protected final StorageHandler<?>           storageHandler;
-    private boolean                             primitive;
-    protected RawClass                          defaultValue;
+    private static final String                   ANNOTATION_PACKAGE_NAME = CryptedStorage.class.getPackage().getName();
+    private static final String                   PACKAGE_NAME            = PlainStorage.class.getPackage().getName();
+    private final String                          key;
+    protected Method                              getMethod               = null;
+    protected Method                              setMethod               = null;;
+    protected final StorageHandler<?>             storageHandler;
+    private boolean                               primitive;
+    protected RawClass                            defaultValue;
 
-    private ConfigEventSender<RawClass>         eventSender;
-    private AbstractValidator<RawClass>         validatorFactory;
-    private AbstractCustomValueGetter<RawClass> customValueGetter;
-    protected String[]                          backwardsCompatibilityLookupKeys;
+    private ConfigEventSender<RawClass>           eventSender;
+    private AbstractValidator<RawClass>           validatorFactory;
+    protected AbstractCustomValueGetter<RawClass> customValueGetter;
+    protected String[]                            backwardsCompatibilityLookupKeys;
 
     /**
      * @param storageHandler

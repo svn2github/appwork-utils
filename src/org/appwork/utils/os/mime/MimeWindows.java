@@ -84,11 +84,15 @@ public class MimeWindows extends MimeDefault {
                     File tempFile = null;
                     FileOutputStream fos = null;
                     try {
-                        tempFile = File.createTempFile("icon", "." + extension);
+                        tempFile = File.createTempFile("icon" + System.nanoTime(), "." + extension);
                         final Image image = ShellFolderWrapper.getIcon(tempFile);
-                        ret = new ImageIcon(image);
-                        fos = new FileOutputStream(path);
-                        ImageIO.write((RenderedImage) image, "png", fos);
+                        if (image != null) {
+                            ret = new ImageIcon(image);
+                            fos = new FileOutputStream(path);
+                            ImageIO.write((RenderedImage) image, "png", fos);
+                        } else {
+                            ret = ImageProvider.toImageIcon(FileSystemView.getFileSystemView().getSystemIcon(tempFile));
+                        }
                     } catch (final Throwable e) {
                         final LogSource logger = LoggerFactory.I().getCurrentClassLogger();
                         logger.log(e);

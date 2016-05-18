@@ -775,7 +775,7 @@ public class IconIO {
                 final int b = (rgb >> 0) & 0xff;
                 // System.out.println(a);
                 if (r == 0 && b == 0 && g == 0) {
-                    // 
+                    //
                 }
                 if (Math.abs(r - r1) <= tollerance && Math.abs(g - g1) <= tollerance && Math.abs(b - b1) <= tollerance && Math.abs(a - a1) <= tollerance) {
                     if (!keepBrightness) {
@@ -865,26 +865,28 @@ public class IconIO {
 
                 BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
                 Graphics2D g = bi.createGraphics();
-                g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                int x = 0;
-                int y = 0;
+                try {
+                    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    int x = 0;
+                    int y = 0;
 
-                g.translate(x, y);
-                final Rectangle2D.Double rect = new Rectangle2D.Double();
-                diagram.getViewRect(rect);
-                AffineTransform scaleXform = new AffineTransform();
-                scaleXform.setToScale(width / rect.width, height / rect.height);
+                    g.translate(x, y);
+                    final Rectangle2D.Double rect = new Rectangle2D.Double();
+                    diagram.getViewRect(rect);
+                    AffineTransform scaleXform = new AffineTransform();
+                    scaleXform.setToScale(width / rect.width, height / rect.height);
 
-                AffineTransform oldXform = g.getTransform();
-                g.transform(scaleXform);
+                    AffineTransform oldXform = g.getTransform();
+                    g.transform(scaleXform);
 
-                diagram.render(g);
+                    diagram.render(g);
 
-                g.setTransform(oldXform);
+                    g.setTransform(oldXform);
 
-                g.translate(-x, -y);
-
-                g.dispose();
+                    g.translate(-x, -y);
+                } finally {
+                    g.dispose();
+                }
                 return bi;
             } finally {
                 is.close();

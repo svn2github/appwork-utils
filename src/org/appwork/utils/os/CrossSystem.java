@@ -593,7 +593,7 @@ public class CrossSystem {
                 return ARCHFamily.PPC;
             } else if (arch.contains("sparc")) {
                 return ARCHFamily.SPARC;
-            } else if (arch.contains("arm")) {
+            } else if (arch.contains("arm") || arch.contains("aarch")) {
                 return ARCHFamily.ARM;
             } else if (arch.contains("ia64")) {
                 return ARCHFamily.IA64;
@@ -750,6 +750,8 @@ public class CrossSystem {
             } else if ("x86_64".equals(osArch)) {
                 is64bit = true;
             } else if ("sparcv9".equals(osArch)) {
+                is64bit = true;
+            } else if ("aarch64".equals(osArch)) {
                 is64bit = true;
             } else {
                 is64bit = false;

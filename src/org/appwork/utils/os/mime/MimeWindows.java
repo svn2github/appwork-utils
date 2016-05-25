@@ -84,7 +84,7 @@ public class MimeWindows extends MimeDefault {
                     File tempFile = null;
                     FileOutputStream fos = null;
                     try {
-                        tempFile = File.createTempFile("icon" + System.nanoTime(), "." + extension);
+                        tempFile = Application.getTempResource("icon" + System.nanoTime() + "." + extension);
                         final Image image = ShellFolderWrapper.getIcon(tempFile);
                         if (image != null) {
                             ret = new ImageIcon(image);
@@ -107,7 +107,9 @@ public class MimeWindows extends MimeDefault {
                         } catch (final Throwable e) {
                         }
                         if (tempFile != null) {
-                            tempFile.delete();
+                            if (!tempFile.delete()) {
+                                tempFile.deleteOnExit();
+                            }
                         }
                     }
                 }

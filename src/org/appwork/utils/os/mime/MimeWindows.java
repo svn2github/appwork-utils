@@ -49,6 +49,8 @@ import javax.swing.filechooser.FileSystemView;
 
 import org.appwork.sunwrapper.sun.awt.shell.ShellFolderWrapper;
 import org.appwork.utils.Application;
+import org.appwork.utils.IO;
+import org.appwork.utils.IO.SYNC;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.ImageProvider.ImageProvider;
 import org.appwork.utils.images.IconIO;
@@ -85,6 +87,9 @@ public class MimeWindows extends MimeDefault {
                     FileOutputStream fos = null;
                     try {
                         tempFile = Application.getTempResource("icon" + System.nanoTime() + "." + extension);
+                        if (!tempFile.exists()) {
+                            IO.writeToFile(tempFile, new byte[0], SYNC.NONE);
+                        }
                         final Image image = ShellFolderWrapper.getIcon(tempFile);
                         if (image != null) {
                             ret = new ImageIcon(image);

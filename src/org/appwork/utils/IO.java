@@ -47,6 +47,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URL;
@@ -312,7 +313,26 @@ public class IO {
                 }
             }
         }
+    }
 
+    public static RandomAccessFile open(File file, String mode) throws IOException {
+        try {
+            return new RandomAccessFile(file, "rw");
+        } catch (final FileNotFoundException e) {
+            if (CrossSystem.isWindows()) {
+                /**
+                 * too fast file opening/extraction (eg image gallery) can result in "access denied" exception
+                 */
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e1) {
+                    throw e;
+                }
+                return new RandomAccessFile(file, "rw");
+            } else {
+                throw e;
+            }
+        }
     }
 
     public static byte[] readFile(final File ressource) throws IOException {
@@ -326,7 +346,7 @@ public class IO {
     /*
      * this function reads a line from a bufferedinputstream up to a maxLength. in case the line is longer than maxLength the rest of the
      * line is read but not returned
-     * 
+     *
      * this function skips emtpy lines
      */
 

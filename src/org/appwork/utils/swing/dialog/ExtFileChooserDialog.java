@@ -338,7 +338,7 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.utils.swing.dialog.AbstractDialog#createReturnValue()
      */
     @Override
@@ -381,7 +381,7 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.utils.swing.dialog.AbstractDialog#setDisposed(boolean)
      */
     @Override
@@ -634,7 +634,7 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.utils.swing.dialog.AbstractDialog#layoutDialogContent()
      */
     @Override
@@ -756,7 +756,7 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
                 // UIManager.put("FileChooser.saveInLabelText",
                 // _AWU.T.DIALOG_FILECHOOSER_saveInLabelText());
 
-                putClientProperty("FileChooser.useShellFolder", false);
+                putClientProperty("FileChooser.useShellFolder", Boolean.FALSE);
 
                 super.updateUI();
                 final FileChooserUI myUi = getUI();

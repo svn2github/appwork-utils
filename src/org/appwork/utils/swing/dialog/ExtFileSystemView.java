@@ -47,6 +47,7 @@ import javax.swing.Icon;
 import javax.swing.filechooser.FileSystemView;
 
 import org.appwork.resources.AWUTheme;
+import org.appwork.storage.config.JsonConfig;
 import org.appwork.sunwrapper.sun.awt.shell.ShellFolderWrapper;
 import org.appwork.utils.locale._AWU;
 import org.appwork.utils.logging2.extmanager.LoggerFactory;
@@ -95,6 +96,7 @@ public class ExtFileSystemView extends FileSystemView {
     private File[]               roots;
     private NetWorkFolder        networkFolder;
     private HashMap<File, File>  specialsMap;
+    private final boolean        useFileIcons;
 
     /**
      *
@@ -110,7 +112,7 @@ public class ExtFileSystemView extends FileSystemView {
             new Exception("run ExtFileSystemView.runSambaScanner() as early as possible in your app!");
             ExtFileSystemView.runSambaScanner();
         }
-
+        this.useFileIcons = JsonConfig.create(ExtFileSystemViewSettings.class).isUseSystemIcons();
     }
 
     @Override
@@ -125,7 +127,7 @@ public class ExtFileSystemView extends FileSystemView {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see javax.swing.filechooser.FileSystemView#createNewFolder(java.io.File)
      */
     @Override
@@ -259,7 +261,7 @@ public class ExtFileSystemView extends FileSystemView {
             final LinkedHashSet<File> unique = new LinkedHashSet<File>() {
                 /*
                  * (non-Javadoc)
-                 *
+                 * 
                  * @see java.util.HashSet#add(java.lang.Object)
                  */
                 @Override
@@ -350,12 +352,17 @@ public class ExtFileSystemView extends FileSystemView {
     public Icon getSystemIcon(final File f) {
         try {
             if (f instanceof VirtualRoot) {
-
                 return AWUTheme.I().getIcon("root", 18);
             }
-
-            return this.org.getSystemIcon(f);
-
+            if (useFileIcons) {
+                return this.org.getSystemIcon(f);
+            } else {
+                if (f.isDirectory()) {
+                    return AWUTheme.I().getIcon("folder", 18);
+                } else {
+                    return AWUTheme.I().getIcon("fileIcon", 18);
+                }
+            }
         } catch (final Exception e) {
             // seems like getSystemIcon can throw a FileNotFoundException or a
             // Nullpointerfor

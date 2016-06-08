@@ -316,22 +316,28 @@ public class IO {
     }
 
     public static RandomAccessFile open(File file, String mode) throws IOException {
-        try {
-            return new RandomAccessFile(file, "rw");
-        } catch (final FileNotFoundException e) {
-            if (CrossSystem.isWindows()) {
-                /**
-                 * too fast file opening/extraction (eg image gallery) can result in "access denied" exception
-                 */
+        if (CrossSystem.isWindows()) {
+            int retry = 1;
+            while (true) {
                 try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e1) {
-                    throw e;
+                    return new RandomAccessFile(file, "rw");
+                } catch (final FileNotFoundException e) {
+                    /**
+                     * too fast file opening/extraction (eg image gallery) can result in "access denied" exception
+                     */
+                    if (retry < 3) {
+                        try {
+                            Thread.sleep(500 * retry++);
+                        } catch (InterruptedException e1) {
+                            throw e;
+                        }
+                    } else {
+                        throw e;
+                    }
                 }
-                return new RandomAccessFile(file, "rw");
-            } else {
-                throw e;
             }
+        } else {
+            return new RandomAccessFile(file, "rw");
         }
     }
 

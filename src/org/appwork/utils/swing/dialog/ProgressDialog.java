@@ -74,8 +74,6 @@ public class ProgressDialog extends AbstractDialog<Integer> implements ProgressI
         public String getLabelString();
     }
 
-    private boolean              disposed;
-
     private Thread               executer;
     private final ProgressGetter getter;
     private final String         message;
@@ -126,11 +124,10 @@ public class ProgressDialog extends AbstractDialog<Integer> implements ProgressI
 
     @Override
     public void dispose() {
-        if (this.disposed) {
+        if (isDisposed()) {
             return;
         }
         System.out.println("Dispose Progressdialog");
-        this.disposed = true;
         if (this.executer.isAlive()) {
             this.executer.interrupt();
             final long waitFor = this.getWaitForTermination();

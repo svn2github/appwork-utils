@@ -54,6 +54,10 @@ public class TimeFormatter {
     static {
         try {
             SimpleDateFormat sdf;
+            TimeFormatter.dateformats.add(sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.UK));// RFC1123
+            sdf.setLenient(false);
+            TimeFormatter.dateformats.add(sdf = new SimpleDateFormat("EEEE, dd-MMM-yy HH:mm:ss zzz", Locale.UK)); // RFC1036
+            sdf.setLenient(false);
             TimeFormatter.dateformats.add(sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss yyyy z", Locale.UK));
             sdf.setLenient(false);
             TimeFormatter.dateformats.add(sdf = new SimpleDateFormat("EEE, dd-MMM-yy HH:mm:ss z", Locale.UK));

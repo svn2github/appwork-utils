@@ -10,7 +10,7 @@
  *         Germany
  * === Preamble ===
  *     This license establishes the terms under which the [The Product] Source Code & Binary files may be used, copied, modified, distributed, and/or redistributed.
- *     The intent is that the AppWork GmbH is able to provide their utilities library for free to non-commercial projects whereas commercial usage is only permitted after obtaining a commercial license.
+ *     The intent is that the AppWork GmbH is able to provide  their utilities library for free to non-commercial projects whereas commercial usage is only permitted after obtaining a commercial license.
  *     These terms apply to all files that have the [The Product] License header (IN the file), a <filename>.license or <filename>.info (like mylib.jar.info) file that contains a reference to this license.
  *
  * === 3rd Party Licences ===
@@ -19,11 +19,11 @@
  *
  * === Definition: Commercial Usage ===
  *     If anybody or any organization is generating income (directly or indirectly) by using [The Product] or if there's any commercial interest or aspect in what you are doing, we consider this as a commercial usage.
- *     If your use-case is neither strictly private nor strictly educational, it is commercial. If you are unsure whether your use-case is commercial or not, consider it as commercial or contact us.
+ *     If your use-case is neither strictly private nor strictly educational, it is commercial. If you are unsure whether your use-case is commercial or not, consider it as commercial or contact as.
  * === Dual Licensing ===
  * === Commercial Usage ===
  *     If you want to use [The Product] in a commercial way (see definition above), you have to obtain a paid license from AppWork GmbH.
- *     Contact AppWork for further details: <e-mail@appwork.org>
+ *     Contact AppWork for further details: e-mail@appwork.org
  * === Non-Commercial Usage ===
  *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the
  *     "GNU Affero General Public License" (http://www.gnu.org/licenses/agpl-3.0.en.html).
@@ -31,23 +31,20 @@
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
-package org.appwork.utils.swing.dialog;
+package org.appwork.utils.processes;
 
-import javax.swing.Icon;
+/**
+ * @author thomas
+ * @date 01.06.2016
+ *
+ */
+public interface ProcessHandler {
 
-import org.appwork.uio.MessageDialogInterface;
-import org.appwork.uio.UIOManager;
-import org.appwork.utils.locale._AWU;
-
-public class MessageDialogImpl extends ConfirmDialog implements MessageDialogInterface {
-
-    public MessageDialogImpl(final int flags, final String msg) {
-        this(UIOManager.BUTTONS_HIDE_CANCEL | flags, _AWU.T.DIALOG_MESSAGE_TITLE(), msg, null, null);
-    }
-
-    public MessageDialogImpl(final int flag, final String title, final String msg, final Icon icon, final String okText) {
-        super(UIOManager.BUTTONS_HIDE_CANCEL | flag, title, msg, icon == null ? Dialog.getIconByText(title + msg) : icon, okText, null);
-
-    }
+    /**
+     * return true if the handler cares about the outputstream. otherwise the backend will close it.
+     *
+     * @param process
+     */
+    boolean setProcess(Process process);
 
 }

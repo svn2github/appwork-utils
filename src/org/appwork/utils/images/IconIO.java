@@ -197,18 +197,18 @@ public class IconIO {
             public final int filterRGB(final int x, final int y, final int rgb) {
 
                 final int r = (rgb & 0xFF0000) >> 16;
-        final int g = (rgb & 0xFF00) >> 8;
-        final int b = rgb & 0xFF;
-        if (r >= r1 && r <= r2 && g >= g1 && g <= g2 && b >= b1 && b <= b2) {
-            // Set fully transparent but keep color
-            // calculate a alpha value based on the distance between the
-            // range borders and the pixel color
-            final int dist = (Math.abs(r - (r1 + r2) / 2) + Math.abs(g - (g1 + g2) / 2) + Math.abs(b - (b1 + b2) / 2)) * 2;
+                final int g = (rgb & 0xFF00) >> 8;
+                final int b = rgb & 0xFF;
+                if (r >= r1 && r <= r2 && g >= g1 && g <= g2 && b >= b1 && b <= b2) {
+                    // Set fully transparent but keep color
+                    // calculate a alpha value based on the distance between the
+                    // range borders and the pixel color
+                    final int dist = (Math.abs(r - (r1 + r2) / 2) + Math.abs(g - (g1 + g2) / 2) + Math.abs(b - (b1 + b2) / 2)) * 2;
 
-            return new Color(r, g, b, Math.min(255, dist)).getRGB();
-        }
+                    return new Color(r, g, b, Math.min(255, dist)).getRGB();
+                }
 
-        return rgb;
+                return rgb;
             }
         };
 
@@ -229,11 +229,16 @@ public class IconIO {
         }
         final int w = icon.getIconWidth();
         final int h = icon.getIconHeight();
-        final GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        final GraphicsDevice gd = ge.getDefaultScreenDevice();
-        final GraphicsConfiguration gc = gd.getDefaultConfiguration();
-        final BufferedImage image = gc.createCompatibleImage(w, h, Transparency.TRANSLUCENT);
+        final BufferedImage image;
+        if (org.appwork.utils.Application.isHeadless()) {
+            image = new BufferedImage(w, h, Transparency.TRANSLUCENT);
 
+        } else {
+            final GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+            final GraphicsDevice gd = ge.getDefaultScreenDevice();
+            final GraphicsConfiguration gc = gd.getDefaultConfiguration();
+            image = gc.createCompatibleImage(w, h, Transparency.TRANSLUCENT);
+        }
         final Graphics2D g = image.createGraphics();
         g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
         // g.setColor(Color.RED);

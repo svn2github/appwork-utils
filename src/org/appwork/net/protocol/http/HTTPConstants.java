@@ -61,6 +61,7 @@ public class HTTPConstants {
          * The server successfully processed the request, but is not returning any content.[2
          */
         SUCCESS_NO_CONTENT(204, "No Content"),
+        MOVED_PERMANENTLY(301, "Moved Permanently"),
         /**
          * This is the most popular redirect code[citation needed], but also an example of industrial practice contradicting the
          * standard.[2] HTTP/1.0 specification (RFC 1945) required the client to perform a temporary redirect (the original describing

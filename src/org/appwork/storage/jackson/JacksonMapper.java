@@ -42,15 +42,16 @@ import org.appwork.storage.JSONMapper;
 import org.appwork.storage.JSonMapperException;
 import org.appwork.storage.JsonSerializer;
 import org.appwork.storage.TypeRef;
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.JsonProcessingException;
-import org.codehaus.jackson.Version;
-import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.SerializationConfig;
-import org.codehaus.jackson.map.SerializerProvider;
-import org.codehaus.jackson.map.module.SimpleModule;
-import org.codehaus.jackson.type.TypeReference;
+
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.Version;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 
 /**
  * @author thomas
@@ -62,8 +63,8 @@ public class JacksonMapper implements JSONMapper {
 
     public JacksonMapper() {
         mapper = new ObjectMapper(new ExtJsonFactory());
-        mapper.getSerializationConfig().set(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS, false);
-        mapper.getDeserializationConfig().set(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
     /**
@@ -73,7 +74,8 @@ public class JacksonMapper implements JSONMapper {
      */
     public <T> void addSerializer(final Class<T> clazz, final JsonSerializer<T> jsonSerializer) {
         final SimpleModule mod = new SimpleModule("MyModule", new Version(1, 0, 0, null));
-        mod.addSerializer(clazz, new org.codehaus.jackson.map.JsonSerializer<T>() {
+
+        mod.addSerializer(clazz, new com.fasterxml.jackson.databind.JsonSerializer<T>() {
 
             @Override
             public void serialize(final T arg0, final JsonGenerator jgen, final SerializerProvider arg2) throws IOException, JsonProcessingException {
@@ -254,4 +256,5 @@ public class JacksonMapper implements JSONMapper {
             throw new JSonMapperException(e);
         }
     }
+
 }

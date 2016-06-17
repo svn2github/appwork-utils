@@ -109,11 +109,11 @@ public class CrossSystem {
             this.family = family;
         }
 
-        public OSFamily getFamily() {
+        public final OSFamily getFamily() {
             return this.family;
         }
 
-        public boolean isMinimum(OperatingSystem os) {
+        public final boolean isMinimum(final OperatingSystem os) {
             if (os.getFamily().equals(getFamily())) {
                 final int minimum = os.ordinal();
                 return ordinal() >= minimum;

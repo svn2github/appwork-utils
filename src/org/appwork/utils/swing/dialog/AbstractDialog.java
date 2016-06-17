@@ -298,6 +298,14 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
     private boolean                                        callerIsEDT   = false;
 
     protected JComponent                                   focusButton;
+    // document modal:
+    // if there are several window stacks, the dialog blocks only it's own
+    // windowstack.
+    private ModalityType                                   modalityType  = ModalityType.DOCUMENT_MODAL;
+
+    public void setModalityType(ModalityType modalityType) {
+        this.modalityType = modalityType;
+    }
 
     public AbstractDialog(final int flag, final String title, final Icon icon, final String okOption, final String cancelOption) {
         super();
@@ -1112,10 +1120,8 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
      * @return
      */
     public ModalityType getModalityType() {
-        // document modal:
-        // if there are several window stacks, the dialog blocks only it's own
-        // windowstack.
-        return ModalityType.DOCUMENT_MODAL;
+
+        return modalityType;
     }
 
     public String getOKButtonText() {

@@ -64,6 +64,8 @@ public class JacksonMapper implements JSONMapper {
     public JacksonMapper() {
         mapper = new ObjectMapper(new ExtJsonFactory());
         mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        mapper.configure(SerializationFeature.INDENT_OUTPUT, true);// needed as MyJDownloader Clients may use regex and fail because of
+                                                                   // changed ident
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 

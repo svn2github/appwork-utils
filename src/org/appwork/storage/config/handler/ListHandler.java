@@ -106,21 +106,19 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
                 } catch (final Throwable e) {
                     throw new WTFException(e);
                 }
-
                 this.putCachedValue(value);
             }
             if (ListHandler.NULL == value) {
-                if (this.customValueGetter != null) {
-                    value = this.customValueGetter.getValue(this, null);
-                    return (T) value;
-                }
-                return null;
-            } else {
-                if (this.customValueGetter != null) {
-                    value = this.customValueGetter.getValue(this, (T) value);
-                }
-                return (T) value;
+                value = null;
             }
+            if (this.customValueGetter != null) {
+                value = this.customValueGetter.getValue(this, (T) value);
+            }
+            if (value == null && isDefaultOnNull()) {
+                value = getDefaultValue();
+            }
+            return (T) value;
+
         }
     }
 

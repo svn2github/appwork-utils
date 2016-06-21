@@ -57,6 +57,7 @@ import org.appwork.storage.config.annotations.CryptedStorage;
 import org.appwork.storage.config.annotations.CustomValueGetter;
 import org.appwork.storage.config.annotations.DefaultFactory;
 import org.appwork.storage.config.annotations.DefaultJsonObject;
+import org.appwork.storage.config.annotations.DefaultOnNull;
 import org.appwork.storage.config.annotations.DescriptionForConfigEntry;
 import org.appwork.storage.config.annotations.DevConfig;
 import org.appwork.storage.config.annotations.HexColorString;
@@ -80,7 +81,7 @@ public abstract class KeyHandler<RawClass> {
     private static final String                   PACKAGE_NAME            = PlainStorage.class.getPackage().getName();
     private final String                          key;
     protected Method                              getMethod               = null;
-    protected Method                              setMethod               = null;;
+    protected Method                              setMethod               = null;                                        ;
     protected final StorageHandler<?>             storageHandler;
     private boolean                               primitive;
     protected RawClass                            defaultValue;
@@ -89,6 +90,7 @@ public abstract class KeyHandler<RawClass> {
     private AbstractValidator<RawClass>           validatorFactory;
     protected AbstractCustomValueGetter<RawClass> customValueGetter;
     protected String[]                            backwardsCompatibilityLookupKeys;
+    private boolean                               defaultOnNull           = false;
 
     /**
      * @param storageHandler
@@ -97,6 +99,10 @@ public abstract class KeyHandler<RawClass> {
     protected KeyHandler(final StorageHandler<?> storageHandler, final String key) {
         this.storageHandler = storageHandler;
         this.key = key;
+    }
+
+    protected boolean isDefaultOnNull() {
+        return defaultOnNull;
     }
 
     protected void checkBadAnnotations(final Class<? extends Annotation>... class1) {
@@ -126,7 +132,7 @@ public abstract class KeyHandler<RawClass> {
      */
     private void checkBadAnnotations(final Method m, final Class<? extends Annotation>... classes) {
 
-        final Class<?>[] okForAll = new Class<?>[] { HexColorString.class, CustomValueGetter.class, ValidatorFactory.class, DefaultJsonObject.class, DefaultFactory.class, AboutConfig.class, NoHeadless.class, DevConfig.class, RequiresRestart.class, AllowStorage.class, DescriptionForConfigEntry.class, ConfigEntryKeywords.class, CryptedStorage.class, PlainStorage.class };
+        final Class<?>[] okForAll = new Class<?>[] { DefaultOnNull.class, HexColorString.class, CustomValueGetter.class, ValidatorFactory.class, DefaultJsonObject.class, DefaultFactory.class, AboutConfig.class, NoHeadless.class, DevConfig.class, RequiresRestart.class, AllowStorage.class, DescriptionForConfigEntry.class, ConfigEntryKeywords.class, CryptedStorage.class, PlainStorage.class };
         final Class<?>[] clazzes = new Class<?>[classes.length + okForAll.length];
         System.arraycopy(classes, 0, clazzes, 0, classes.length);
         System.arraycopy(okForAll, 0, clazzes, classes.length, okForAll.length);
@@ -465,9 +471,12 @@ public abstract class KeyHandler<RawClass> {
 
     public RawClass getValue() {
         synchronized (this) {
-            final RawClass value = this.getValueStorage();
+            RawClass value = this.getValueStorage();
             if (this.customValueGetter != null) {
-                return this.customValueGetter.getValue(this, value);
+                value = this.customValueGetter.getValue(this, value);
+            }
+            if (value == null && isDefaultOnNull()) {
+                value = getDefaultValue();
             }
             return value;
         }
@@ -574,6 +583,10 @@ public abstract class KeyHandler<RawClass> {
             if (anno != null) {
                 this.customValueGetter = (AbstractCustomValueGetter<RawClass>) anno.value().newInstance();
             }
+        } catch (final Throwable e) {
+        }
+        try {
+            this.defaultOnNull = this.getAnnotation(DefaultOnNull.class) != null;
         } catch (final Throwable e) {
         }
         this.checkBadAnnotations(this.getAllowedAnnotations());

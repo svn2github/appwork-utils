@@ -43,7 +43,7 @@ import org.appwork.utils.StringUtils;
 import org.appwork.utils.logging2.LogSource;
 
 public class ExtLogManager extends LogManager {
-    public static String[] WHITELIST     = new String[] { "org.fourthline", "com.mongo" };
+    public static String[] WHITELIST     = new String[] { "org.fourthline", "com.mongo", "javax.mail", "com.sun.xml.internal.messaging.saaj" };
     public static String[] BLACKLIST     = new String[] { "com.mongodb.driver.cluster", "org.fourthline", "org.fourthline.cling.registry.Registry", "org.fourthline.cling.model.message.header", "org.fourthline.cling.model.message.UpnpHeaders", "org.fourthline.cling.transport" };
 
     private LoggerFactory  loggerFactory = null;

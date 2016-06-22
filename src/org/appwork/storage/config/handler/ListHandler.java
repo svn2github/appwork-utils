@@ -118,7 +118,6 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
                 value = getDefaultValue();
             }
             return (T) value;
-
         }
     }
 
@@ -273,7 +272,7 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.storage.config.KeyHandler#validateValue(java.lang.Object)
      */
     @Override

@@ -74,29 +74,29 @@ abstract public class Graph extends JPanel implements ToolTipHandler {
     private transient NullsafeAtomicReference<Thread> fetcherThread    = new NullsafeAtomicReference<Thread>(null);
     private int                                       interval         = 1000;
 
-    private final Object LOCK = new Object();
+    private final Object                              LOCK             = new Object();
 
-    private Color currentColorTop;
-    private Color currentColorBottom;
+    private Color                                     currentColorTop;
+    private Color                                     currentColorBottom;
 
-    public long average;
+    public long                                       average;
 
-    private int[] averageCache;
+    private int[]                                     averageCache;
 
-    private Color averageColor     = new Color(0x333333);
-    private Color averageTextColor = new Color(0);
-    private int   capacity         = 0;
-    private Color textColor        = new Color(0);
+    private Color                                     averageColor     = new Color(0x333333);
+    private Color                                     averageTextColor = new Color(0);
+    private int                                       capacity         = 0;
+    private Color                                     textColor        = new Color(0);
 
-    protected int value;
+    protected int                                     value;
 
-    private Font textFont;
+    private Font                                      textFont;
 
-    private int all;
+    private int                                       all;
 
-    private Limiter[]                  limiter;
-    private TooltipTextDelegateFactory tooltipFactory;
-    private boolean                    antiAliasing = false;
+    private Limiter[]                                 limiter;
+    private TooltipTextDelegateFactory                tooltipFactory;
+    private boolean                                   antiAliasing     = false;
 
     public Graph() {
         this(60, 1000);
@@ -377,7 +377,7 @@ abstract public class Graph extends JPanel implements ToolTipHandler {
                 String speedString = this.getSpeedString();
                 if (speedString != null && thread != null) {
                     g2.setColor(this.getTextColor());
-                    // align right. move left
+                    // align left. move right
                     xText = xText - 3 - g2.getFontMetrics().stringWidth(speedString);
                     g2.drawString(speedString, xText, textHeight);
                 }
@@ -386,8 +386,8 @@ abstract public class Graph extends JPanel implements ToolTipHandler {
                     speedString = this.getAverageSpeedString();
                     if (speedString != null && thread != null) {
                         g2.setColor(this.getAverageTextColor());
-                        xText = xText - 3 - g2.getFontMetrics().stringWidth(speedString);
-                        g2.drawString(speedString, xText, textHeight);
+                        // xText = xText - 3 - g2.getFontMetrics().stringWidth(speedString);
+                        g2.drawString(speedString, 0, textHeight);
                     }
                 }
             }

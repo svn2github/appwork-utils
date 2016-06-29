@@ -20,6 +20,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 import javax.swing.Box;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JSeparator;
@@ -300,9 +301,15 @@ public abstract class AbstractTray implements MouseListener, MouseMotionListener
     }
 
     protected JMenuItem createMenuItem(BasicAction a) {
-        JMenuItem m = new JMenuItem(a);
-        m.setPreferredSize(new Dimension(m.getPreferredSize().width, 24));
-        return m;
+        if (a.isToggle()) {
+            JMenuItem m = new JCheckBoxMenuItem(a);
+            m.setPreferredSize(new Dimension(m.getPreferredSize().width, 24));
+            return m;
+        } else {
+            JMenuItem m = new JMenuItem(a);
+            m.setPreferredSize(new Dimension(m.getPreferredSize().width, 24));
+            return m;
+        }
 
     }
 

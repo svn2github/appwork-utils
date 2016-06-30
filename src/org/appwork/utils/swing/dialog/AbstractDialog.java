@@ -1870,4 +1870,22 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
     public void windowOpened(final WindowEvent arg0) {
     }
 
+    /**
+     * @param currentTimeout
+     * @return
+     */
+    public String formatCountdown(long currentTimeout) {
+
+        return TimeFormatter.formatMilliSeconds(currentTimeout, 0);
+    }
+
+    /**
+     * @param currentTimeout
+     * @return
+     */
+    public boolean isExpired(long currentTimeout) {
+
+        return currentTimeout < 0;
+    }
+
 }

@@ -85,6 +85,8 @@ public class CrossSystem {
         OPENBSD(OSFamily.BSD),
         KFREEBSD(OSFamily.BSD),
         FREEBSD(OSFamily.BSD),
+        DRAGONFLYBSD(OSFamily.BSD),
+        BSD(OSFamily.BSD),
         LINUX(OSFamily.LINUX),
         MAC(OSFamily.MAC),
         OS2(OSFamily.OS2),
@@ -573,6 +575,10 @@ public class CrossSystem {
                 return OperatingSystem.NETBSD;
             } else if (os.contains("openbsd")) {
                 return OperatingSystem.OPENBSD;
+            } else if (os.contains("dragonflybsd")) {
+                return OperatingSystem.DRAGONFLYBSD;
+            } else if (os.contains("bsd")) {
+                return OperatingSystem.BSD;
             } else {
                 return OperatingSystem.LINUX;
             }

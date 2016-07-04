@@ -19,10 +19,10 @@ import org.appwork.utils.net.URLHelper;
 
 public class UrlQuery {
     public static UrlQuery parse(String query) throws MalformedURLException {
-        if (query == null) {
-            return null;
-        }
         final UrlQuery ret = new UrlQuery();
+        if (query == null) {
+            return ret;
+        }
         if (StringUtils.startsWithCaseInsensitive(query, "https://") || StringUtils.startsWithCaseInsensitive(query, "http://")) {
             try {
                 query = URLHelper.createURL(query).getQuery();

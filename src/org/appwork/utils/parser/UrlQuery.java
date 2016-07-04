@@ -218,7 +218,9 @@ public class UrlQuery {
     }
 
     public void addAll(List<KeyValueStringEntry> post) {
-        this.list.addAll(post);
+        if (post != null) {
+            this.list.addAll(post);
+        }
     }
 
     public LinkedHashMap<String, String> toMap() {
@@ -231,10 +233,13 @@ public class UrlQuery {
 
     public UrlQuery append(String key, String value, boolean urlencode) {
         try {
-            this.addAndReplace(key, urlencode ? URLEncode.encodeRFC2396(value) : value);
+            if (value == null) {
+                this.addAndReplace(key, "");
+            } else {
+                this.addAndReplace(key, urlencode ? URLEncode.encodeRFC2396(value) : value);
+            }
         } catch (UnsupportedEncodingException e) {
             throw new WTFException(e);
-
         }
         return this;
     }

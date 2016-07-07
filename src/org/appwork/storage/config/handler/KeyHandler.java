@@ -81,7 +81,7 @@ public abstract class KeyHandler<RawClass> {
     private static final String                   PACKAGE_NAME            = PlainStorage.class.getPackage().getName();
     private final String                          key;
     protected Method                              getMethod               = null;
-    protected Method                              setMethod               = null;                                        ;
+    protected Method                              setMethod               = null;;
     protected final StorageHandler<?>             storageHandler;
     private boolean                               primitive;
     protected RawClass                            defaultValue;
@@ -814,5 +814,25 @@ public abstract class KeyHandler<RawClass> {
      * @param object
      */
     protected abstract void validateValue(RawClass object) throws Throwable;
+
+    /**
+     * @return
+     */
+    public String getReadableName() {
+        String getterName = getGetMethod().getName();
+        if (getterName.startsWith("is")) {
+            getterName = getterName.substring(2);
+        } else if (getterName.startsWith("get")) {
+            getterName = getterName.substring(3);
+        }
+        getterName = getterName.replaceAll("([a-z])([A-Z])", "$1 $2");
+        getterName = getterName.replaceAll("(\\D)(\\d+)", "$1 $2");
+        getterName = getterName.replaceAll("(\\d+)(\\D)", "$1 $2");
+        getterName = getterName.replaceAll("(\\S)([A-Z][a-z])", "$1 $2");
+        if (getterName.endsWith(" Enabled")) {
+            getterName = getterName.substring(0, getterName.length() - 8);
+        }
+        return getterName;
+    }
 
 }

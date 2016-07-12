@@ -33,11 +33,8 @@
  * ==================================================================================================================================================== */
 package org.appwork.storage.config;
 
-import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.HashMap;
-import java.util.HashSet;
 
 import org.appwork.exceptions.WTFException;
 import org.appwork.storage.config.annotations.DescriptionForConfigEntry;
@@ -85,12 +82,8 @@ public class ConfigUtils {
 
         // public static final BooleanKeyHandler LINK_FILTER_ENABLED =
         // SH.getKeyHandler("LinkFilterEnabled", BooleanKeyHandler.class);
-        final HashSet<KeyHandler<?>> unique = new HashSet<KeyHandler<?>>();
-        final HashMap<Method, KeyHandler<?>> map = JsonConfig.create(configInterface)._getStorageHandler().getMap();
-        for (final KeyHandler<?> kh : map.values()) {
-            if (!unique.add(kh)) {
-                continue;
-            }
+
+        for (final KeyHandler<?> kh : JsonConfig.create(configInterface)._getStorageHandler().getKeyHandler()) {
             strBuild.append("\r\n");
 
             // String key = kh.getKey();

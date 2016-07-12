@@ -189,24 +189,24 @@ public class JsonKeyValueStorage extends Storage {
         if (ret != null && def != null && ret.getClass() != def.getClass()) {
             /* ret class different from def class, so we have to convert */
             if (def instanceof Long) {
-                if (ret instanceof Integer) {
-                    ret = ((Integer) ret).longValue();
+                if (ret instanceof Number) {
+                    ret = ((Number) ret).longValue();
                 } else if (ret instanceof String) {
                     ret = Long.parseLong((String) ret);
                 }
             } else if (def instanceof Integer) {
-                if (ret instanceof Long) {
-                    ret = ((Long) ret).intValue();
+                if (ret instanceof Number) {
+                    ret = ((Number) ret).intValue();
                 } else if (ret instanceof String) {
                     ret = Integer.parseInt((String) ret);
                 }
             } else if (def instanceof Double) {
                 if (ret instanceof Float) {
-                    ret = ((Float) ret).doubleValue();
+                    ret = ((Double) ret).doubleValue();
                 }
             } else if (def instanceof Float) {
                 if (ret instanceof Double) {
-                    ret = ((Double) ret).floatValue();
+                    ret = ((Float) ret).floatValue();
                 }
             }
         }
@@ -249,7 +249,7 @@ public class JsonKeyValueStorage extends Storage {
                 } else {
                     getDefaultLogger().log(e);
                 }
-                if (autoPutDefaultValue) {
+                if (autoPutDefaultValue && this.isEnumCacheEnabled()) {
                     this.put(key, (Enum<?>) def);
                 }
                 ret = def;
@@ -272,7 +272,7 @@ public class JsonKeyValueStorage extends Storage {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.storage.Storage#getID()
      */
     @Override
@@ -560,7 +560,7 @@ public class JsonKeyValueStorage extends Storage {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.storage.Storage#size()
      */
     @Override

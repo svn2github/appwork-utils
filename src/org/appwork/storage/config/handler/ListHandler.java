@@ -87,13 +87,17 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
     }
 
     protected Object getCachedValue() {
-        if (this.useObjectCache && this.getStorageHandler().isObjectCacheEnabled()) {
+        if (isCachingAllowed()) {
             final ListHandlerCache<Object> lCache = this.cache;
             if (lCache != null) {
                 return lCache.get();
             }
         }
         return null;
+    }
+
+    protected boolean isCachingAllowed() {
+        return this.useObjectCache && this.getStorageHandler().isObjectCacheEnabled();
     }
 
     @Override
@@ -127,15 +131,6 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
 
     @Override
     protected void initHandler() throws Throwable {
-        this.path = new File(this.storageHandler.getPath() + "." + this.getKey() + "." + (this.cryptKey != null ? "ejs" : "json"));
-        if (this.storageHandler.getRelativCPPath() != null && !this.path.exists()) {
-            // Remember: Application.getResourceUrl returns an url to the classpath (bin/jar) or to a file on the harddisk (cfg folder)
-            // we do only want urls to the classpath here
-            String rel = this.storageHandler.getRelativCPPath() + "." + this.getKey() + "." + (this.cryptKey != null ? "ejs" : "json");
-            this.url = Application.class.getClassLoader().getResource(rel);
-        }
-
-        this.useObjectCache = this.getAnnotation(DisableObjectCache.class) == null;
         final CryptedStorage cryptedStorage = this.getAnnotation(CryptedStorage.class);
         if (cryptedStorage != null) {
             /* use key from CryptedStorage */
@@ -149,6 +144,19 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
                 this.cryptKey = null;
             }
         }
+        this.path = new File(this.storageHandler.getPath() + "." + this.getKey() + "." + (getCryptKey() != null ? "ejs" : "json"));
+        if (this.storageHandler.getRelativCPPath() != null && !this.path.exists()) {
+            // Remember: Application.getResourceUrl returns an url to the classpath (bin/jar) or to a file on the harddisk (cfg folder)
+            // we do only want urls to the classpath here
+            String rel = this.storageHandler.getRelativCPPath() + "." + this.getKey() + "." + (getCryptKey() != null ? "ejs" : "json");
+            this.url = Application.class.getClassLoader().getResource(rel);
+        }
+        this.useObjectCache = this.getAnnotation(DisableObjectCache.class) == null;
+    }
+
+    @Override
+    protected byte[] getCryptKey() {
+        return cryptKey;
     }
 
     protected void putCachedValue(final Object value) {
@@ -158,7 +166,7 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
         } else {
             finalValue = value;
         }
-        if (isDelayedWriteAllowed()) {
+        if (getStorageHandler().isDelayedWriteAllowed(this)) {
             this.cache = new ListHandlerCache<Object>() {
 
                 @Override
@@ -167,7 +175,7 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
                 }
 
             };
-        } else if (this.useObjectCache && this.getStorageHandler().isObjectCacheEnabled()) {
+        } else if (isCachingAllowed()) {
             this.cache = new ListHandlerCache<Object>() {
                 final MinTimeWeakReference<Object> minTimeWeakReference = new MinTimeWeakReference<Object>(finalValue, ListHandler.MIN_LIFETIME, "Storage " + getKey());
 
@@ -264,7 +272,6 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
             return readObject;
         } finally {
             if (!exists && this.url == null && isAllowWriteDefaultObjects()) {
-
                 this.write(this.getDefaultValue());
             }
         }
@@ -283,16 +290,7 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
      * @param object
      */
     protected void write(final T object) {
-        final byte[] jsonBytes = JSonStorage.getMapper().objectToByteArray(object);
-        final Runnable run = new Runnable() {
-
-            @Override
-            public void run() {
-                JSonStorage.saveTo(path, cryptKey == null, cryptKey, jsonBytes);
-            }
-        };
-        StorageHandler.enqueueWrite(run, path.getAbsolutePath(), isDelayedWriteAllowed());
+        getStorageHandler().writeObject(this, object);
         this.url = null;
     }
-
 }

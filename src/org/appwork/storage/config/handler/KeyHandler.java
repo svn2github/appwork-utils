@@ -80,7 +80,7 @@ public abstract class KeyHandler<RawClass> {
     private static final String                   PACKAGE_NAME            = PlainStorage.class.getPackage().getName();
     private final String                          key;
     protected Method                              getMethod               = null;
-    protected Method                              setMethod               = null;;
+    protected Method                              setMethod               = null;                                        ;
     protected final StorageHandler<?>             storageHandler;
     private boolean                               primitive;
     protected RawClass                            defaultValue;
@@ -121,6 +121,10 @@ public abstract class KeyHandler<RawClass> {
         if (setMethod != null) {
             this.checkBadAnnotations(setMethod, class1);
         }
+    }
+
+    protected byte[] getCryptKey() {
+        return getStorageHandler().getPrimitiveStorage().getCryptKey();
     }
 
     /**

@@ -86,9 +86,7 @@ import org.appwork.utils.swing.dialog.Dialog;
  */
 public class StorageHandler<T extends ConfigInterface> implements InvocationHandler {
     private final static LinkedHashMap<String, Runnable>    DELAYEDWRITES = new LinkedHashMap<String, Runnable>();
-
     protected static final DelayedRunnable                  SAVEDELAYER   = new DelayedRunnable(5000, 30000) {
-
                                                                               @Override
                                                                               public void delayedrun() {
                                                                                   StorageHandler.saveAll();
@@ -101,7 +99,6 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
         // StorageHandler
         STORAGEMAP = new HashMap<StorageHandler<?>, String>();
         ShutdownController.getInstance().addShutdownEvent(new ShutdownEvent() {
-
             @Override
             public long getMaxDuration() {
                 return 0;
@@ -125,7 +122,6 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
             }
         });
         ShutdownController.getInstance().addShutdownEvent(new ShutdownEvent() {
-
             @Override
             public long getMaxDuration() {
                 return 0;
@@ -270,20 +266,14 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
     protected final HashMap<Method, KeyHandler<?>> methodMap                 = new HashMap<Method, KeyHandler<?>>();
     protected final Storage                        primitiveStorage;
     private final File                             path;
-
     private ConfigEventSender<Object>              eventSender               = null;
-
     private String                                 relativCPPath;
-
     // set externaly to start profiling
     public static HashMap<String, Long>            PROFILER_MAP              = null;
     public static HashMap<String, Long>            PROFILER_CALLNUM_MAP      = null;
-
     private volatile WriteStrategy                 writeStrategy             = null;
     private boolean                                objectCacheEnabled        = true;
-
     private final String                           storageID;
-
     boolean                                        saveInShutdownHookEnabled = true;
     private DefaultFactoryInterface                defaultFactory;
 
@@ -301,7 +291,6 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
      * @param configInterface
      */
     public StorageHandler(final File filePath, final Class<T> configInterface) {
-
         this.configInterface = configInterface;
         this.path = filePath;
         preInit(path, configInterface);
@@ -318,7 +307,6 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
         }
         this.storageID = storageID;
         String relativePath = null;
-
         try {
             // this way the config system reads default values from the classpath (bin folder or jar)
             relativePath = Files.getRelativePath(Application.getResource(""), filePath);
@@ -349,11 +337,9 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
      */
     protected void preInit(File path, Class<T> configInterfac) {
         // TODO Auto-generated method stub
-
     }
 
     public StorageHandler(final Storage storage, final Class<T> configInterface) {
-
         String storagePath = storage.getID();
         if (storagePath.endsWith(".json")) {
             storagePath = storagePath.replaceFirst("\\.json$", "");
@@ -364,7 +350,6 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
         this.path = new File(storagePath);
         this.configInterface = configInterface;
         preInit(path, configInterface);
-
         final File expected = Application.getResource("cfg/" + configInterface.getName());
         String storageID = null;
         if (!this.path.equals(expected)) {
@@ -397,7 +382,6 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
      * @throws URISyntaxException
      */
     public StorageHandler(final String classPath, final Class<T> configInterface) throws URISyntaxException {
-
         this.configInterface = configInterface;
         this.relativCPPath = classPath;
         if (classPath.endsWith(".json") || classPath.endsWith(".ejs")) {
@@ -461,7 +445,6 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
             return new DoubleKeyHandler(this, key);
         } else if (Clazz.isFloat(type)) {
             return new FloatKeyHandler(this, key);
-
         } else if (Clazz.isInteger(type)) {
             return new IntegerKeyHandler(this, key);
         } else if (type instanceof Class && ((Class<?>) type).isEnum()) {
@@ -470,72 +453,55 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
             return new StringKeyHandler(this, key);
         } else if (Clazz.isLong(type)) {
             return new LongKeyHandler(this, key);
-
         } else if (type instanceof Class && ((Class<?>) type).isArray()) {
-
             final Class<?> ct = ((Class<?>) type).getComponentType();
             final boolean p = ct.isPrimitive();
             if (Clazz.isBoolean(ct)) {
-
                 if (p) {
                     return new ListHandler<boolean[]>(this, key, type) {
                         @Override
                         protected Class<? extends Annotation> getDefaultAnnotation() {
-
                             return DefaultBooleanArrayValue.class;
                         }
-
                     };
                 } else {
                     return new ListHandler<Boolean[]>(this, key, type) {
                         @Override
                         protected Class<? extends Annotation> getDefaultAnnotation() {
-
                             return DefaultBooleanArrayValue.class;
                         }
-
                     };
                 }
-
             } else if (Clazz.isLong(ct)) {
                 if (p) {
                     return new ListHandler<long[]>(this, key, type) {
                         @Override
                         protected Class<? extends Annotation> getDefaultAnnotation() {
-
                             return DefaultLongArrayValue.class;
                         }
-
                     };
                 } else {
                     return new ListHandler<Long[]>(this, key, type) {
                         @Override
                         protected Class<? extends Annotation> getDefaultAnnotation() {
-
                             return DefaultLongArrayValue.class;
                         }
-
                     };
                 }
-
             } else if (Clazz.isInteger(ct)) {
                 if (p) {
                     return new ListHandler<int[]>(this, key, type) {
                         @Override
                         protected Class<? extends Annotation> getDefaultAnnotation() {
-
                             return DefaultIntArrayValue.class;
                         }
-
                     };
                 } else {
                     return new ListHandler<Integer[]>(this, key, type) {
                         @Override
                         protected Class<? extends Annotation> getDefaultAnnotation() {
-
                             return DefaultIntArrayValue.class;
                         }
-
                     };
                 }
             } else if (Clazz.isByte(ct)) {
@@ -543,73 +509,57 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
                     return new ListHandler<byte[]>(this, key, type) {
                         @Override
                         protected Class<? extends Annotation> getDefaultAnnotation() {
-
                             return DefaultByteArrayValue.class;
                         }
-
                     };
                 } else {
                     return new ListHandler<Byte[]>(this, key, type) {
                         @Override
                         protected Class<? extends Annotation> getDefaultAnnotation() {
-
                             return DefaultByteArrayValue.class;
                         }
-
                     };
                 }
             } else if (Clazz.isFloat(ct)) {
-
                 if (p) {
                     return new ListHandler<float[]>(this, key, type) {
                         @Override
                         protected Class<? extends Annotation> getDefaultAnnotation() {
-
                             return DefaultFloatArrayValue.class;
                         }
-
                     };
                 } else {
                     return new ListHandler<Float[]>(this, key, type) {
                         @Override
                         protected Class<? extends Annotation> getDefaultAnnotation() {
-
                             return DefaultFloatArrayValue.class;
                         }
-
                     };
                 }
             } else if (ct == String.class) {
                 return new StringListHandler(this, key, type);
             } else if (ct.isEnum()) {
                 return new EnumListHandler(this, key, type);
-
             } else if (Clazz.isDouble(ct)) {
                 if (p) {
                     return new ListHandler<double[]>(this, key, type) {
                         @Override
                         protected Class<? extends Annotation> getDefaultAnnotation() {
-
                             return DefaultDoubleArrayValue.class;
                         }
-
                     };
                 } else {
                     return new ListHandler<Double[]>(this, key, type) {
                         @Override
                         protected Class<? extends Annotation> getDefaultAnnotation() {
-
                             return DefaultDoubleArrayValue.class;
                         }
-
                     };
                 }
             } else {
-
                 return new ObjectKeyHandler(this, key, type);
             }
         } else {
-
             return new ObjectKeyHandler(this, key, type);
         }
     }
@@ -652,7 +602,6 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
     @SuppressWarnings("unchecked")
     public KeyHandler<Object> getKeyHandler(final String key) {
         return this.getKeyHandler(key, KeyHandler.class);
-
     }
 
     /**
@@ -706,7 +655,6 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
                 // return this.get(getter.getKey(),
                 // getter.getDefaultStringArray());
             } else if (keyHandler.getRawClass().isEnum()) {
-
                 return this.getPrimitive(keyHandler.getKey(), keyHandler.getDefaultValue());
             } else if (keyHandler.getRawClass() == Double.class | keyHandler.getRawClass() == double.class) {
                 return this.getPrimitive(keyHandler.getKey(), 0.0d);
@@ -767,7 +715,6 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
      * @param string
      * @return
      */
-
     public Object getValue(final String key) {
         return this.getKeyHandler(key).getValue();
     }
@@ -833,7 +780,6 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
                     final Long g = StorageHandler.PROFILER_CALLNUM_MAP.get(id);
                     StorageHandler.PROFILER_CALLNUM_MAP.put(id, g == null ? 1 : g + 1);
                 }
-
             }
         } else {
             // yes.... Method m may be null. this happens if we call a
@@ -884,7 +830,6 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
                             // overridden method. that's ok
                             LoggerFactory.getDefaultLogger().info("Overridden Config Key found " + keyGetterMap.get(key) + "<-->" + m);
                             continue;
-
                         }
                         this.error(new InterfaceParseException("Key " + key + " Dupe found! " + keyGetterMap.get(key) + "<-->" + m));
                         continue;
@@ -944,7 +889,6 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
                             // overridden method. that's ok
                             LoggerFactory.getDefaultLogger().info("Overridden Config Key found " + keyGetterMap.get(key) + "<-->" + m);
                             continue;
-
                         }
                         this.error(new InterfaceParseException("Key " + key + " Dupe found! " + keyGetterMap.get(key) + "<-->" + m));
                         continue;
@@ -976,7 +920,6 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
                             // overridden method. that's ok
                             LoggerFactory.getDefaultLogger().info("Overridden Config Key found " + keyGetterMap.get(key) + "<-->" + m);
                             continue;
-
                         }
                         this.error(new InterfaceParseException("Key " + key + " Dupe found! " + keySetterMap.get(key) + "<-->" + m));
                         continue;
@@ -986,7 +929,6 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
                         this.error(new InterfaceParseException("Setter " + m + " has !=1 parameters."));
                         keySetterMap.remove(key);
                         continue;
-
                     }
                     if (m.getReturnType() != void.class) {
                         this.error(new InterfaceParseException("Setter " + m + " has a returntype != void"));
@@ -1076,9 +1018,7 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
     public void write() {
         this.getPrimitiveStorage().save();
     }
-
     /**
      * @param key2
      */
-
 }

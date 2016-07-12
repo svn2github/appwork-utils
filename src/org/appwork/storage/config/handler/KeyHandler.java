@@ -76,7 +76,6 @@ import org.appwork.utils.reflection.Clazz;
  *
  */
 public abstract class KeyHandler<RawClass> {
-
     private static final String                   ANNOTATION_PACKAGE_NAME = CryptedStorage.class.getPackage().getName();
     private static final String                   PACKAGE_NAME            = PlainStorage.class.getPackage().getName();
     private final String                          key;
@@ -85,7 +84,6 @@ public abstract class KeyHandler<RawClass> {
     protected final StorageHandler<?>             storageHandler;
     private boolean                               primitive;
     protected RawClass                            defaultValue;
-
     private ConfigEventSender<RawClass>           eventSender;
     private AbstractValidator<RawClass>           validatorFactory;
     protected AbstractCustomValueGetter<RawClass> customValueGetter;
@@ -119,7 +117,6 @@ public abstract class KeyHandler<RawClass> {
         if (checker > 1) {
             throw new InterfaceParseException("Make sure that you use only one  of getDefaultAnnotation,DefaultObjectValue or DefaultValue ");
         }
-
         this.checkBadAnnotations(getMethod, class1);
         if (setMethod != null) {
             this.checkBadAnnotations(setMethod, class1);
@@ -131,7 +128,6 @@ public abstract class KeyHandler<RawClass> {
      * @param class1
      */
     private void checkBadAnnotations(final Method m, final Class<? extends Annotation>... classes) {
-
         final Class<?>[] okForAll = new Class<?>[] { DefaultOnNull.class, HexColorString.class, CustomValueGetter.class, ValidatorFactory.class, DefaultJsonObject.class, DefaultFactory.class, AboutConfig.class, NoHeadless.class, DevConfig.class, RequiresRestart.class, AllowStorage.class, DescriptionForConfigEntry.class, ConfigEntryKeywords.class, CryptedStorage.class, PlainStorage.class };
         final Class<?>[] clazzes = new Class<?>[classes.length + okForAll.length];
         System.arraycopy(classes, 0, clazzes, 0, classes.length);
@@ -158,7 +154,6 @@ public abstract class KeyHandler<RawClass> {
             }
             throw new InterfaceParseException("Bad Annotation: " + a + " for " + m);
         }
-
     }
 
     /**
@@ -236,7 +231,6 @@ public abstract class KeyHandler<RawClass> {
 
     @SuppressWarnings("unchecked")
     public RawClass getDefaultValue() {
-
         try {
             final DefaultFactory df = this.getAnnotation(DefaultFactory.class);
             if (df != null) {
@@ -489,10 +483,8 @@ public abstract class KeyHandler<RawClass> {
             // the defaultvalue.
             return storage.get(this.getKey(), this.defaultValue);
         }
-
         // we have no value yet. call the getDefaultMethod to calculate the
         // default value
-
         if (this.backwardsCompatibilityLookupKeys != null) {
             for (final String key : this.backwardsCompatibilityLookupKeys) {
                 if (storage.hasProperty(key)) {
@@ -510,9 +502,7 @@ public abstract class KeyHandler<RawClass> {
                 }
             }
         }
-
         return storage.get(this.getKey(), this.getDefaultValue(), isAllowWriteDefaultObjects());
-
     }
 
     private boolean allowWriteDefaultObjects = true;
@@ -538,7 +528,6 @@ public abstract class KeyHandler<RawClass> {
         if (getMethod == null) {
             throw new InterfaceParseException("Getter Method is Missing for " + setMethod);
         }
-
         // read local cryptinfos
         this.primitive = JSonStorage.canStorePrimitive(getMethod.getReturnType());
         final CryptedStorage cryptedStorage = this.getAnnotation(CryptedStorage.class);
@@ -570,7 +559,6 @@ public abstract class KeyHandler<RawClass> {
             }
             // parent crypted, but plain for this single entry
         }
-
         try {
             final ValidatorFactory anno = this.getAnnotation(ValidatorFactory.class);
             if (anno != null) {
@@ -592,7 +580,6 @@ public abstract class KeyHandler<RawClass> {
         this.checkBadAnnotations(this.getAllowedAnnotations());
         this.initDefaults();
         this.initHandler();
-
         final String kk = "CFG:" + this.storageHandler.getConfigInterface().getName() + "." + this.key;
         final String sys = System.getProperty(kk);
         if (sys != null) {
@@ -601,12 +588,10 @@ public abstract class KeyHandler<RawClass> {
             this.setValue((RawClass) JSonStorage.restoreFromString(sys, new TypeRef<Object>(this.getRawClass()) {
             }, null));
         }
-
         final LookUpKeys lookups = this.getAnnotation(LookUpKeys.class);
         if (lookups != null) {
             this.backwardsCompatibilityLookupKeys = lookups.value();
         }
-
     }
 
     protected boolean isDelayedWriteAllowed() {
@@ -769,7 +754,6 @@ public abstract class KeyHandler<RawClass> {
                         return false;
                     }
                 }
-
                 final boolean xCArray = xC.isArray();
                 final boolean yCArray = yC.isArray();
                 if (xCArray && yCArray) {
@@ -834,5 +818,4 @@ public abstract class KeyHandler<RawClass> {
         }
         return getterName;
     }
-
 }

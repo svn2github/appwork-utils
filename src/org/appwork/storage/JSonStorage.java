@@ -379,7 +379,7 @@ public class JSonStorage {
         return null;
     }
 
-    private static CipherInputStream createCipherInputStream(final InputStream inputStream, final byte[] key, final byte[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
+    public static CipherInputStream createCipherInputStream(final InputStream inputStream, final byte[] key, final byte[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
         final IvParameterSpec ivSpec = new IvParameterSpec(iv);
         final SecretKeySpec skeySpec = new SecretKeySpec(key, "AES");
         final Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
@@ -387,7 +387,7 @@ public class JSonStorage {
         return new CipherInputStream(inputStream, cipher);
     }
 
-    private static byte[] encryptByteArray(final byte[] data, final byte[] key, final byte[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
+    public static byte[] encryptByteArray(final byte[] data, final byte[] key, final byte[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
         final Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         final IvParameterSpec ivSpec = new IvParameterSpec(iv);
         final SecretKeySpec skeySpec = new SecretKeySpec(key, "AES");

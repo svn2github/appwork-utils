@@ -33,6 +33,7 @@
  * ==================================================================================================================================================== */
 package org.appwork.storage.config.handler;
 
+import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
@@ -103,6 +104,10 @@ public abstract class KeyHandler<RawClass> {
         return defaultOnNull;
     }
 
+    public File getPath() {
+        return null;
+    }
+
     protected void checkBadAnnotations(final Class<? extends Annotation>... class1) {
         int checker = 0;
         if (this.getAnnotation(this.getDefaultAnnotation()) != null) {
@@ -123,7 +128,7 @@ public abstract class KeyHandler<RawClass> {
         }
     }
 
-    protected byte[] getCryptKey() {
+    public byte[] getCryptKey() {
         return getStorageHandler().getPrimitiveStorage().getCryptKey();
     }
 

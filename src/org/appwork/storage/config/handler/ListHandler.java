@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.net.URL;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.appwork.exceptions.WTFException;
 import org.appwork.storage.JSonStorage;
@@ -61,15 +62,20 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
         public T get();
     }
 
-    public static final int                   MIN_LIFETIME   = 10000;
+    public static final int                   MIN_LIFETIME = 10000;
     private volatile ListHandlerCache<Object> cache;
     private final TypeRef<Object>             typeRef;
-    private final static Object               NULL           = new Object();
 
-    private File                              path;
-    private URL                               url;
-    private boolean                           useObjectCache = false;
-    private byte[]                            cryptKey       = null;
+    public TypeRef<Object> getTypeRef() {
+        return typeRef;
+    }
+
+    private final static Object NULL           = new Object();
+
+    private File                path;
+    private URL                 url;
+    private boolean             useObjectCache = false;
+    private byte[]              cryptKey       = null;
 
     /**
      * @param storageHandler
@@ -144,18 +150,35 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
                 this.cryptKey = null;
             }
         }
-        this.path = new File(this.storageHandler.getPath() + "." + this.getKey() + "." + (getCryptKey() != null ? "ejs" : "json"));
-        if (this.storageHandler.getRelativCPPath() != null && !this.path.exists()) {
+        final File storageHandlerPath = this.storageHandler.getPath();
+        if (storageHandlerPath != null) {
+            this.path = new File(storageHandlerPath + "." + this.getKey() + "." + (getCryptKey() != null ? "ejs" : "json"));
+        } else {
+            this.path = null;
+        }
+        final String relativeClassPath = this.storageHandler.getRelativCPPath();
+        if (relativeClassPath != null && (path == null || !this.path.exists())) {
             // Remember: Application.getResourceUrl returns an url to the classpath (bin/jar) or to a file on the harddisk (cfg folder)
             // we do only want urls to the classpath here
-            String rel = this.storageHandler.getRelativCPPath() + "." + this.getKey() + "." + (getCryptKey() != null ? "ejs" : "json");
-            this.url = Application.class.getClassLoader().getResource(rel);
+            final String ressource = relativeClassPath + "." + this.getKey() + "." + (getCryptKey() != null ? "ejs" : "json");
+            this.url = Application.class.getClassLoader().getResource(ressource);
+        } else {
+            this.url = null;
         }
         this.useObjectCache = this.getAnnotation(DisableObjectCache.class) == null;
     }
 
     @Override
-    protected byte[] getCryptKey() {
+    public File getPath() {
+        return path;
+    }
+
+    public URL getURL() {
+        return url;
+    }
+
+    @Override
+    public byte[] getCryptKey() {
         return cryptKey;
     }
 
@@ -219,6 +242,28 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
         return false;
     }
 
+    protected Object readObject(final Object dummyObject, AtomicBoolean readFlag) throws InstantiationException, IllegalAccessException, IOException {
+        Object readObject = getStorageHandler().readObject(this, readFlag);
+        if (!readFlag.get()) {
+            final File jsonPath = getPath();
+            final byte[] cryptKey = getCryptKey();
+            if (jsonPath != null && jsonPath.exists()) {
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Read Config(File): " + jsonPath.getAbsolutePath());
+                readObject = JSonStorage.restoreFrom(jsonPath, cryptKey == null, cryptKey, getTypeRef(), dummyObject);
+                readFlag.set(jsonPath.exists());
+            }
+            if (readObject == dummyObject || !readFlag.get()) {
+                final URL jsonURL = getURL();
+                if (jsonURL != null) {
+                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Read Config(URL): " + jsonURL);
+                    readObject = JSonStorage.restoreFromByteArray(IO.readURL(jsonURL), cryptKey == null, cryptKey, getTypeRef(), dummyObject);
+                    readFlag.set(true);
+                }
+            }
+        }
+        return readObject;
+    }
+
     /**
      * @return
      * @throws IllegalAccessException
@@ -227,24 +272,11 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
      */
     @SuppressWarnings("unchecked")
     protected Object read() throws InstantiationException, IllegalAccessException, IOException {
-        boolean exists = false;
+        final AtomicBoolean readFlag = new AtomicBoolean(false);
         try {
             final Object dummyObject = new Object();
-            Object readObject = null;
-            // prefer local file. like primitive storage does as well.
-            if (path.exists()) {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Read Config: " + this.path.getAbsolutePath());
-                readObject = JSonStorage.restoreFrom(this.path, this.cryptKey == null, this.cryptKey, this.typeRef, dummyObject);
-                exists = path.exists();
-            }
-            if (readObject == dummyObject || !exists) {
-                if (this.url != null) {
-                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Read Config: " + this.url);
-                    readObject = JSonStorage.restoreFromByteArray(IO.readURL(this.url), this.cryptKey == null, this.cryptKey, this.typeRef, dummyObject);
-                    exists = true;
-                }
-            }
-            if (readObject == dummyObject || !exists) {
+            Object readObject = readObject(dummyObject, readFlag);
+            if (readObject == dummyObject || !readFlag.get()) {
                 final T def = this.getDefaultValue();
                 if (def != null) {
                     return def;
@@ -253,7 +285,7 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
                 final DefaultJsonObject defaultJson = this.getAnnotation(DefaultJsonObject.class);
                 final DefaultFactory df = this.getAnnotation(DefaultFactory.class);
                 if (defaultJson != null) {
-                    this.setDefaultValue((T) JSonStorage.restoreFromString(defaultJson.value(), this.typeRef, null));
+                    this.setDefaultValue((T) JSonStorage.restoreFromString(defaultJson.value(), getTypeRef(), null));
                     return this.getDefaultValue();
                 } else if (df != null) {
                     this.setDefaultValue((T) df.value().newInstance().getDefaultValue());
@@ -271,7 +303,7 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
             }
             return readObject;
         } finally {
-            if (!exists && this.url == null && isAllowWriteDefaultObjects()) {
+            if (!readFlag.get() && getURL() == null && isAllowWriteDefaultObjects()) {
                 this.write(this.getDefaultValue());
             }
         }

@@ -702,9 +702,10 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
         }
     }
 
-    protected void writeObject(final KeyHandler<?> keyHandler, final Object object) {
+    protected void writeObject(final ListHandler<?> keyHandler, final Object object) {
         final byte[] jsonBytes = JSonStorage.getMapper().objectToByteArray(object);
         final byte[] cryptKey = keyHandler.getCryptKey();
+        final File path = keyHandler.getPath();
         final Runnable run = new Runnable() {
 
             @Override
@@ -713,6 +714,10 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
             }
         };
         StorageHandler.enqueueWrite(run, path.getAbsolutePath(), isDelayedWriteAllowed(keyHandler));
+    }
+
+    protected Object readObject(final ListHandler<?> keyHandler, final AtomicBoolean readFlag) {
+        return null;
     }
 
     protected boolean isDelayedWriteAllowed(final KeyHandler<?> keyHandler) {

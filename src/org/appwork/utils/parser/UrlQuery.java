@@ -18,6 +18,7 @@ import org.appwork.utils.encoding.URLEncode;
 import org.appwork.utils.net.URLHelper;
 
 public class UrlQuery {
+    // TODO: Compare/merge with HttpConnection.parseParameterList
     public static UrlQuery parse(String query) throws MalformedURLException {
         final UrlQuery ret = new UrlQuery();
         if (query == null) {
@@ -59,7 +60,6 @@ public class UrlQuery {
             ret.add(key, sb.toString());
         }
         return ret;
-
     }
 
     private final List<KeyValueStringEntry> list = new ArrayList<KeyValueStringEntry>();
@@ -247,5 +247,4 @@ public class UrlQuery {
     public UrlQuery appendEncoded(String key, String value) {
         return this.append(key, value, true);
     }
-
 }

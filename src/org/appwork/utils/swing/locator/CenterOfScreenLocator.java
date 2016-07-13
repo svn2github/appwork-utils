@@ -40,6 +40,7 @@ import java.awt.GraphicsEnvironment;
 import java.awt.Insets;
 import java.awt.MouseInfo;
 import java.awt.Point;
+import java.awt.PointerInfo;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.Window;
@@ -51,7 +52,6 @@ import org.appwork.utils.swing.SwingUtils;
  *
  */
 public class CenterOfScreenLocator extends AbstractLocator {
-
     /*
      * (non-Javadoc)
      *
@@ -59,38 +59,28 @@ public class CenterOfScreenLocator extends AbstractLocator {
      */
     @Override
     public Point getLocationOnScreen(final Window dialog) {
+        PointerInfo mouse = MouseInfo.getPointerInfo();
         if (dialog.getParent() == null || !dialog.getParent().isDisplayable() || !dialog.getParent().isVisible()) {
-
             Rectangle windowBounds = dialog.getBounds();
-
             return getCenterLocationByWindowBounds(windowBounds);
-
-        } else if (dialog.getParent() instanceof Frame && ((Frame) dialog.getParent()).getExtendedState() == Frame.ICONIFIED) {
+        } else if (dialog.getParent() instanceof Frame && ((Frame) dialog.getParent()).getExtendedState() == Frame.ICONIFIED && mouse != null) {
             // dock dialog at bottom right if mainframe is not visible
-
             final GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
             final GraphicsDevice[] screens = ge.getScreenDevices();
-
             for (final GraphicsDevice screen : screens) {
                 final Rectangle bounds = screen.getDefaultConfiguration().getBounds();
                 screen.getDefaultConfiguration().getDevice();
-
                 final Insets insets = Toolkit.getDefaultToolkit().getScreenInsets(screen.getDefaultConfiguration());
-                if (bounds.contains(MouseInfo.getPointerInfo().getLocation())) {
-
+                if (bounds.contains(mouse.getLocation())) {
                     return correct(new Point((int) (bounds.x + bounds.getWidth() - dialog.getWidth() - 20 - insets.right), (int) (bounds.y + bounds.getHeight() - dialog.getHeight() - 20 - insets.bottom)), dialog);
-
                 }
-
             }
             final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
             return correct(new Point((int) (screenSize.getWidth() - dialog.getWidth() - 20), (int) (screenSize.getHeight() - dialog.getHeight() - 60)), dialog);
         } else {
             final Point ret = SwingUtils.getCenter(dialog.getParent(), dialog);
-
             return correct(ret, dialog);
         }
-
         // if (frame.getParent() == null || !frame.getParent().isDisplayable()
         // || !frame.getParent().isVisible()) {
         // final Dimension screenSize =
@@ -127,19 +117,15 @@ public class CenterOfScreenLocator extends AbstractLocator {
         // } else {
         // return SwingUtils.getCenter(frame.getParent(), frame);
         // }
-
     }
 
     public Point getCenterLocationByWindowBounds(Rectangle windowBounds) {
         GraphicsDevice screen = SwingUtils.getScreenByBounds(windowBounds);
         if (screen != null) {
             Rectangle bounds = SwingUtils.getUsableScreenBounds(screen);
-
             return correct(new Point((int) (bounds.getWidth() - windowBounds.getWidth()) / 2 + bounds.x, (int) (bounds.getHeight() - windowBounds.getHeight()) / 2 + bounds.y), new Dimension(windowBounds.width, windowBounds.height));
-
         }
         final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-
         return correct(new Point((int) (screenSize.getWidth() - windowBounds.getWidth()) / 2, (int) (screenSize.getHeight() - windowBounds.getHeight()) / 2), new Dimension(windowBounds.width, windowBounds.height));
     }
 
@@ -151,7 +137,5 @@ public class CenterOfScreenLocator extends AbstractLocator {
     @Override
     public void onClose(final Window abstractDialog) {
         // TODO Auto-generated method stub
-
     }
-
 }

@@ -59,7 +59,7 @@ import org.appwork.utils.net.httpserver.handler.HttpRequestHandler;
  */
 public class HttpServer implements Runnable {
 
-    private final int                                      port;
+    private final int                                      wishPort;
     private final AtomicReference<ServerSocket>            controlSocket   = new AtomicReference<ServerSocket>(null);
     private volatile Thread                                serverThread    = null;
     private boolean                                        localhostOnly   = false;
@@ -67,7 +67,7 @@ public class HttpServer implements Runnable {
     private final CopyOnWriteArrayList<HttpRequestHandler> requestHandlers = new CopyOnWriteArrayList<HttpRequestHandler>();
 
     public HttpServer(final int port) {
-        this.port = port;
+        this.wishPort = port;
     }
 
     protected Runnable createConnectionHandler(final Socket clientSocket) throws IOException {
@@ -105,11 +105,11 @@ public class HttpServer implements Runnable {
             }
         } catch (final Throwable e) {
         }
-        return this.port;
+        return this.getWishedPort();
     }
 
     public int getWishedPort() {
-        return port;
+        return wishPort;
     }
 
     /**
@@ -268,16 +268,24 @@ public class HttpServer implements Runnable {
         }
     }
 
+    private int lastPort = -1;
+
     public synchronized void start() throws IOException {
         final ServerSocket controlSocket;
+        final int port;
+        if (lastPort != -1) {
+            port = lastPort;
+        } else {
+            port = getWishedPort();
+        }
         if (this.isLocalhostOnly()) {
             /* we only want localhost bound here */
-            final SocketAddress socketAddress = new InetSocketAddress(this.getLocalHost(), this.port);
+            final SocketAddress socketAddress = new InetSocketAddress(this.getLocalHost(), port);
             controlSocket = new ServerSocket();
             controlSocket.setReuseAddress(true);
             controlSocket.bind(socketAddress);
         } else {
-            controlSocket = new ServerSocket(this.port);
+            controlSocket = new ServerSocket(port);
             controlSocket.setReuseAddress(true);
         }
         try {
@@ -287,8 +295,9 @@ public class HttpServer implements Runnable {
             }
         } catch (final Throwable e) {
         }
+        lastPort = controlSocket.getLocalPort();
         final Thread serverThread = new Thread(this);
-        serverThread.setName("HttpServerThread:" + this.port + ":" + this.localhostOnly);
+        serverThread.setName("HttpServerThread|Port:" + getWishedPort() + "->" + getPort() + "|LocalHost:" + this.localhostOnly);
         this.serverThread = serverThread;
         serverThread.start();
     }
@@ -301,6 +310,7 @@ public class HttpServer implements Runnable {
             }
         } catch (final Throwable e) {
         }
+        lastPort = -1;
     }
 
     /*

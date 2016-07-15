@@ -759,6 +759,8 @@ public class CrossSystem {
                 is64bit = true;
             } else if ("aarch64".equals(osArch)) {
                 is64bit = true;
+            } else if ("arm64".equals(osArch)) {
+                is64bit = true;
             } else {
                 is64bit = false;
             }

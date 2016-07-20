@@ -80,7 +80,7 @@ public class HTTPConnectionUtils {
                     }
                 }
             } else if (contentdisposition.matches("(?i).*(;| |^)(filename|file_name|name).+")) {
-                final String special[] = new Regex(contentdisposition, "(?:;| |^)(?:filename|file_name|name)\\s*==\\?(.*?)\\?B\\?([a-z0-9+/=]+)\\?=").getRow(0);
+                final String special[] = new Regex(contentdisposition, "(?:;| |^)(?:filename|file_name|name)\\s*=\"?=\\?(.*?)\\?B\\?([a-z0-9+/=]+)\\?=").getRow(0);
                 if (special != null) {
                     try {
                         final String base64 = special[1] != null ? special[1].trim() : null;

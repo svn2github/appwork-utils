@@ -105,15 +105,13 @@ abstract public class Graph extends JPanel implements ToolTipHandler {
     public Graph(final int capacity, final int interval) {
         this.tooltipFactory = new TooltipTextDelegateFactory(this);
         // ToolTipController.getInstance().
-        this.currentColorTop = new Color(100, 100, 100, 40);
-        this.currentColorBottom = new Color(100, 100, 100, 80);
+        setCurrentColorTop(new Color(100, 100, 100, 40));
+        setCurrentColorBottom(new Color(100, 100, 100, 80));
         this.average = 0;
         this.setInterval(interval);
         this.setCapacity(capacity);
-
         this.setOpaque(false);
         setTextFont(new JLabel().getFont());
-
     }
 
     public ExtTooltip createExtTooltip(final Point mousePosition) {
@@ -465,8 +463,11 @@ abstract public class Graph extends JPanel implements ToolTipHandler {
      *            the colorB to set
      */
     public void setCurrentColorBottom(final Color colorB) {
-        this.currentColorBottom = colorB;
-
+        if (colorB != null) {
+            this.currentColorBottom = colorB;
+        } else {
+            this.currentColorBottom = new Color(100, 100, 100, 80);
+        }
     }
 
     /**
@@ -474,7 +475,11 @@ abstract public class Graph extends JPanel implements ToolTipHandler {
      *            the colorA to set
      */
     public void setCurrentColorTop(final Color colorA) {
-        this.currentColorTop = colorA;
+        if (colorA != null) {
+            this.currentColorTop = colorA;
+        } else {
+            this.currentColorTop = new Color(100, 100, 100, 40);
+        }
     }
 
     public void setInterval(final int interval) {

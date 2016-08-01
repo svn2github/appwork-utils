@@ -125,13 +125,16 @@ public class Application {
      */
     public static void addFolderToClassPath(final File file) throws IOException {
         try {
+            if (file == null) {
+                throw new IllegalArgumentException("file==null");
+            }
             // hack to add an url to the system classpath
             final Method method = URLClassLoader.class.getDeclaredMethod("addURL", new Class[] { URL.class });
             method.setAccessible(true);
             method.invoke(Application.class.getClassLoader(), new Object[] { file.toURI().toURL() });
         } catch (final Throwable t) {
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(t);
-            throw new IOException("Error, could not add URL to system classloader");
+            throw new IOException("Failed to add File(URL) to system classloader: File:" + file + "|URL:" + file.toURI().toURL(), t);
         }
     }
 
@@ -143,13 +146,19 @@ public class Application {
      */
     public static void addUrlToClassPath(final URL url, final ClassLoader cl) throws IOException {
         try {
+            if (url == null) {
+                throw new IllegalArgumentException("file==null");
+            }
+            if (cl == null) {
+                throw new IllegalArgumentException("cl==null");
+            }
             // hack to add an url to the system classpath
             final Method method = URLClassLoader.class.getDeclaredMethod("addURL", new Class[] { URL.class });
             method.setAccessible(true);
             method.invoke(cl, new Object[] { url });
         } catch (final Throwable t) {
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(t);
-            throw new IOException("Error, could not add URL to system classloader");
+            throw new IOException("Failed to add URL to system classloader: URL:" + url, t);
         }
     }
 
@@ -599,7 +608,7 @@ public class Application {
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Java 1.6 Update 18 has a serious bug in garbage collector!");
             /*
              * java 1.6 update 18 has a bug in garbage collector, causes java crashes
-             * 
+             *
              * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6847956
              */
             return true;
@@ -622,7 +631,7 @@ public class Application {
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("freezing AppKit thread bug");
             /*
              * http://bugs.java.com/view_bug.do?bug_id=8025588
-             * 
+             *
              * Frozen AppKit thread
              */
             return true;
@@ -680,7 +689,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.io.OutputStream#write(int)
          */
         @Override
@@ -704,7 +713,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.io.OutputStream#write(byte[])
          */
         @Override
@@ -727,7 +736,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.io.OutputStream#write(byte[], int, int)
          */
         @Override
@@ -751,7 +760,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.io.OutputStream#flush()
          */
         @Override
@@ -774,7 +783,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.io.OutputStream#close()
          */
         @Override

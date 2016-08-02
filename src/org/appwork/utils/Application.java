@@ -124,18 +124,10 @@ public class Application {
      * @throws IOException
      */
     public static void addFolderToClassPath(final File file) throws IOException {
-        try {
-            if (file == null) {
-                throw new IllegalArgumentException("file==null");
-            }
-            // hack to add an url to the system classpath
-            final Method method = URLClassLoader.class.getDeclaredMethod("addURL", new Class[] { URL.class });
-            method.setAccessible(true);
-            method.invoke(Application.class.getClassLoader(), new Object[] { file.toURI().toURL() });
-        } catch (final Throwable t) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(t);
-            throw new IOException("Failed to add File(URL) to system classloader: File:" + file + "|URL:" + file.toURI().toURL(), t);
+        if (file == null) {
+            throw new IllegalArgumentException("file==null");
         }
+        addUrlToClassPath(file.toURI().toURL(), Application.class.getClassLoader());
     }
 
     /**
@@ -149,16 +141,13 @@ public class Application {
             if (url == null) {
                 throw new IllegalArgumentException("file==null");
             }
-            if (cl == null) {
-                throw new IllegalArgumentException("cl==null");
-            }
             // hack to add an url to the system classpath
             final Method method = URLClassLoader.class.getDeclaredMethod("addURL", new Class[] { URL.class });
             method.setAccessible(true);
             method.invoke(cl, new Object[] { url });
         } catch (final Throwable t) {
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(t);
-            throw new IOException("Failed to add URL to system classloader: URL:" + url, t);
+            throw new IOException("Failed to add URL to system classloader: URL:" + url + "ClassLoader:" + cl, t);
         }
     }
 

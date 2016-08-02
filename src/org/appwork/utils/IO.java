@@ -317,7 +317,7 @@ public class IO {
 
     public static RandomAccessFile open(File file, String mode) throws IOException {
         if (CrossSystem.isWindows()) {
-            int retry = 1;
+            int retry = 0;
             while (true) {
                 try {
                     return new RandomAccessFile(file, "rw");
@@ -326,6 +326,11 @@ public class IO {
                      * too fast file opening/extraction (eg image gallery) can result in "access denied" exception
                      */
                     if (retry < 3) {
+                        if (retry == 2 && CrossSystem.isWindows()) {
+                            // http://stackoverflow.com/questions/10516472/file-createnewfile-randomly-fails
+                            // http://bugs.java.com/bugdatabase/view_bug.do?bug_id=6213298
+                            System.gc();
+                        }
                         try {
                             Thread.sleep(500 * retry++);
                         } catch (InterruptedException e1) {
@@ -352,7 +357,7 @@ public class IO {
     /*
      * this function reads a line from a bufferedinputstream up to a maxLength. in case the line is longer than maxLength the rest of the
      * line is read but not returned
-     *
+     * 
      * this function skips emtpy lines
      */
 

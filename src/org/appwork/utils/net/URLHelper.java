@@ -47,31 +47,45 @@ import org.appwork.utils.StringUtils;
  */
 public class URLHelper {
 
+    public static String createURL(final String protocol, final String userInfo, final String host, final int port, final String path, final String query, final String ref) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append(protocol);
+        sb.append("://");
+        if (userInfo != null) {
+            sb.append(userInfo);
+            sb.append("@");
+        }
+        sb.append(host);
+        if (port != -1) {
+            sb.append(":");
+            sb.append(port);
+        }
+        if (path != null) {
+            if (path.startsWith("/")) {
+                sb.append(path);
+            } else {
+                sb.append("/");
+                sb.append(path);
+            }
+        } else {
+            sb.append("/");
+        }
+        if (query != null) {
+            sb.append("?");
+            sb.append(query);
+        }
+        if (ref != null) {
+            sb.append("#");
+            sb.append(ref);
+        }
+        return sb.toString();
+    }
+
     public static URL createURL(final String url) throws MalformedURLException {
         URL ret = new URL(url.trim().replaceAll(" ", "%20"));
         if (StringUtils.isEmpty(ret.getPath())) {
-            final StringBuilder sb = new StringBuilder();
-            sb.append(ret.getProtocol());
-            sb.append("://");
-            if (ret.getUserInfo() != null) {
-                sb.append(ret.getUserInfo());
-                sb.append("@");
-            }
-            sb.append(ret.getHost());
-            if (ret.getPort() != -1) {
-                sb.append(":");
-                sb.append(ret.getPort());
-            }
-            sb.append("/");
-            if (ret.getQuery() != null) {
-                sb.append("?");
-                sb.append(ret.getQuery());
-            }
-            if (ret.getRef() != null) {
-                sb.append("#");
-                sb.append(ret.getRef());
-            }
-            ret = new URL(sb.toString());
+            final String newURL = createURL(ret.getProtocol(), ret.getUserInfo(), ret.getHost(), ret.getPort(), ret.getPath(), ret.getQuery(), ret.getRef());
+            ret = new URL(newURL);
         }
         return ret;
     }

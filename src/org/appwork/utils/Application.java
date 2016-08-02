@@ -258,21 +258,40 @@ public class Application {
      */
     public static long parseJavaVersionString(String version) {
         String v = new Regex(version, "^(\\d+\\.\\d+\\.\\d+)").getMatch(0);
-        final String u = new Regex(version, "^.*?_(\\d+)").getMatch(0);
-        final String b = new Regex(version, "^.*?(_|-)b(\\d+)$").getMatch(1);
-        v = v.replaceAll("\\.", "");
-        /* 170uubbb */
-        /* eg 1.6 = 16000000 */
-        long ret = Long.parseLong(v) * 100000;
-        if (u != null) {
-            /* append update number */
-            ret = ret + Long.parseLong(u) * 1000;
+        if (v == null) {
+            if (version.startsWith("9")) {
+                long ret = 19000000l;
+                final String u = new Regex(version, "u(\\d+)").getMatch(0);
+                if (u != null) {
+                    /* append update number */
+                    ret = ret + Long.parseLong(u) * 1000;
+                }
+                final String b = new Regex(version, "\\+(\\d+)$").getMatch(0);
+                if (b != null) {
+                    /* append build number */
+                    ret = ret + Long.parseLong(b);
+                }
+                return ret;
+            }
+            // fallback to Java 1.6
+            return 16000000l;
+        } else {
+            final String u = new Regex(version, "^.*?_(\\d+)").getMatch(0);
+            final String b = new Regex(version, "^.*?(_|-)b(\\d+)$").getMatch(1);
+            v = v.replaceAll("\\.", "");
+            /* 170uubbb */
+            /* eg 1.6 = 16000000 */
+            long ret = Long.parseLong(v) * 100000;
+            if (u != null) {
+                /* append update number */
+                ret = ret + Long.parseLong(u) * 1000;
+            }
+            if (b != null) {
+                /* append build number */
+                ret = ret + Long.parseLong(b);
+            }
+            return ret;
         }
-        if (b != null) {
-            /* append build number */
-            ret = ret + Long.parseLong(b);
-        }
-        return ret;
     }
 
     /**
@@ -597,7 +616,7 @@ public class Application {
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Java 1.6 Update 18 has a serious bug in garbage collector!");
             /*
              * java 1.6 update 18 has a bug in garbage collector, causes java crashes
-             *
+             * 
              * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6847956
              */
             return true;
@@ -620,7 +639,7 @@ public class Application {
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("freezing AppKit thread bug");
             /*
              * http://bugs.java.com/view_bug.do?bug_id=8025588
-             *
+             * 
              * Frozen AppKit thread
              */
             return true;
@@ -678,7 +697,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see java.io.OutputStream#write(int)
          */
         @Override
@@ -702,7 +721,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see java.io.OutputStream#write(byte[])
          */
         @Override
@@ -725,7 +744,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see java.io.OutputStream#write(byte[], int, int)
          */
         @Override
@@ -749,7 +768,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see java.io.OutputStream#flush()
          */
         @Override
@@ -772,7 +791,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see java.io.OutputStream#close()
          */
         @Override

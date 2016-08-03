@@ -43,6 +43,9 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.Window;
+import java.awt.font.FontRenderContext;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
 
 import javax.swing.AbstractButton;
 import javax.swing.JComponent;
@@ -258,6 +261,20 @@ public class SwingUtils {
 
         }
         return (biggestIntersection == null || biggestIntersection.width * biggestIntersection.height == 0) ? null : bestScreen;
+    }
+
+    public static Rectangle2D getStringSizeForFont(final String string, final Font font) {
+        if (font == null) {
+            return null;
+        } else if (string == null || string.length() == 0) {
+            return new Rectangle2D.Double(0, 0, 0, 0);
+        } else {
+            final AffineTransform affinetransform = new AffineTransform();
+            final FontRenderContext frc = new FontRenderContext(affinetransform, true, true);
+            double w = font.getStringBounds(string, frc).getWidth();
+            double h = font.getStringBounds(string, frc).getHeight();
+            return new Rectangle2D.Double(0, 0, w, h);
+        }
     }
 
     /**

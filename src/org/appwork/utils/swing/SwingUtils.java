@@ -269,11 +269,10 @@ public class SwingUtils {
         } else if (string == null || string.length() == 0) {
             return new Rectangle2D.Double(0, 0, 0, 0);
         } else {
-            final AffineTransform affinetransform = new AffineTransform();
-            final FontRenderContext frc = new FontRenderContext(affinetransform, true, true);
-            double w = font.getStringBounds(string, frc).getWidth();
-            double h = font.getStringBounds(string, frc).getHeight();
-            return new Rectangle2D.Double(0, 0, w, h);
+            final FontRenderContext fontRenderContext = new FontRenderContext(new AffineTransform(), true, true);
+            final double width = font.getStringBounds(string, fontRenderContext).getWidth();
+            final double height = font.getStringBounds(string, fontRenderContext).getHeight();
+            return new Rectangle2D.Double(0, 0, width, height);
         }
     }
 

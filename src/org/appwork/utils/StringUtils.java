@@ -148,6 +148,14 @@ public class StringUtils {
         }
     }
 
+    public static String nullify(String string) {
+        if (string == null || "null".equals(string)) {
+            return null;
+        } else {
+            return string;
+        }
+    }
+
     /**
      * @param x
      * @param y

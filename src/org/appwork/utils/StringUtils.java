@@ -140,6 +140,14 @@ public class StringUtils {
         return null;
     }
 
+    public static String nullOrNonEmpty(String x) {
+        if (StringUtils.isNotEmpty(x)) {
+            return x;
+        } else {
+            return null;
+        }
+    }
+
     /**
      * @param x
      * @param y

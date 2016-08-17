@@ -65,26 +65,18 @@ import org.appwork.utils.net.httpconnection.HTTPConnectionFactory;
 import org.appwork.utils.net.httpconnection.HTTPProxy;
 
 public class BasicHTTP {
-
     public static void main(final String[] args) throws MalformedURLException, IOException, InterruptedException {
-
         final BasicHTTP client = new BasicHTTP();
         System.out.println(client.getPage(new URL("http://ipcheck0.jdownloader.org")));
     }
 
     private HashSet<Integer>              allowedResponseCodes;
-
     private final HashMap<String, String> requestHeader;
-
     protected HTTPConnection              connection;
-
     private int                           connectTimeout = 15000;
-
     private int                           readTimeout    = 30000;
-
     private HTTPProxy                     proxy          = HTTPProxy.NONE;
     protected LogInterface                logger         = null;
-
     private final Object                  lock           = new Object();
 
     public BasicHTTP() {
@@ -97,7 +89,6 @@ public class BasicHTTP {
      */
     protected void checkResponseCode() throws InvalidResponseCode {
         if (this.allowedResponseCodes != null && !this.allowedResponseCodes.contains(this.connection.getResponseCode())) {
-
             throw this.createInvalidResponseCodeException();
         }
     }
@@ -123,7 +114,6 @@ public class BasicHTTP {
     public void download(final URL url, final DownloadProgress progress, final File file) throws BasicHTTPException, InterruptedException {
         FileOutputStream fos = null;
         try {
-
             fos = new FileOutputStream(file, true);
             try {
                 this.download(url, progress, 0, fos, file.length());
@@ -134,7 +124,6 @@ public class BasicHTTP {
             } catch (final Exception e) {
                 // we cannot say if read or write
                 throw new BasicHTTPException(this.connection, e);
-
             }
         } catch (final FileNotFoundException e) {
             throw new BasicHTTPException(this.connection, new WriteIOException(e));
@@ -149,7 +138,6 @@ public class BasicHTTP {
     public byte[] download(final URL url, final DownloadProgress progress, final long maxSize) throws BasicHTTPException, InterruptedException {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
-
             this.download(url, progress, maxSize, baos, -1);
             // if(getProxy()==null||getProxy().equals(HTTPProxy.NONE)) {
             // throw new IOException("Direct is pfui!");
@@ -185,12 +173,10 @@ public class BasicHTTP {
      * @throws InterruptedException
      */
     public void download(final URL url, final DownloadProgress progress, final long maxSize, final OutputStream baos, final long resumePosition) throws BasicHTTPException, InterruptedException {
-
         synchronized (this.lock) {
             InputStream input = null;
             int ioExceptionWhere = 0;
             try {
-
                 this.connection = HTTPConnectionFactory.createHTTPConnection(url, this.proxy);
                 this.setAllowedResponseCodes(this.connection);
                 this.connection.setConnectTimeout(this.getConnectTimeout());
@@ -200,12 +186,10 @@ public class BasicHTTP {
                 for (final Entry<String, String> next : this.requestHeader.entrySet()) {
                     this.connection.setRequestProperty(next.getKey(), next.getValue());
                 }
-
                 if (resumePosition > 0) {
                     this.connection.setRequestProperty("Range", "bytes=" + resumePosition + "-");
                 }
                 this.connection.setRequestProperty("Connection", "Close");
-
                 this.connection.connect();
                 final boolean ranged = this.connection.getRequestProperty("Range") != null;
                 if (ranged && this.connection.getResponseCode() == 200) {
@@ -226,7 +210,6 @@ public class BasicHTTP {
                 }
                 this.checkResponseCode();
                 input = this.connection.getInputStream();
-
                 if (this.connection.getCompleteContentLength() >= 0) {
                     /* contentLength is known */
                     if (maxSize > 0 && this.connection.getCompleteContentLength() > maxSize) {
@@ -250,9 +233,7 @@ public class BasicHTTP {
                         break;
                     }
                     if (Thread.interrupted()) {
-
                         throw new InterruptedException();
-
                     }
                     if (len > 0) {
                         if (progress != null) {
@@ -261,7 +242,6 @@ public class BasicHTTP {
                         }
                         ioExceptionWhere = 2;
                         baos.write(b, 0, len);
-
                         loaded += len;
                         if (maxSize > 0 && loaded > maxSize) {
                             throw new IOException("Max size exeeded!");
@@ -330,7 +310,6 @@ public class BasicHTTP {
             BufferedReader in = null;
             InputStreamReader isr = null;
             try {
-
                 this.connection = HTTPConnectionFactory.createHTTPConnection(url, this.proxy);
                 this.setAllowedResponseCodes(this.connection);
                 this.connection.setConnectTimeout(this.getConnectTimeout());
@@ -357,7 +336,6 @@ public class BasicHTTP {
                 }
                 this.checkResponseCode();
                 in = new BufferedReader(isr = new InputStreamReader(this.connection.getInputStream(), "UTF-8"));
-
                 String str;
                 final StringBuilder sb = new StringBuilder();
                 while ((str = in.readLine()) != null) {
@@ -365,9 +343,7 @@ public class BasicHTTP {
                         sb.append("\r\n");
                     }
                     sb.append(str);
-
                 }
-
                 return sb.toString();
             } catch (final IOException e) {
                 throw new BasicHTTPException(this.connection, new ReadIOException(e));
@@ -390,7 +366,6 @@ public class BasicHTTP {
                     this.connection.disconnect();
                 } catch (final Throwable e) {
                 }
-
             }
         }
     }
@@ -420,7 +395,6 @@ public class BasicHTTP {
                 return null;
             }
             return this.connection.getHeaderField(string);
-
         }
     }
 
@@ -507,7 +481,6 @@ public class BasicHTTP {
                 for (final Entry<String, String> next : this.requestHeader.entrySet()) {
                     this.connection.setRequestProperty(next.getKey(), next.getValue());
                 }
-
                 int lookupTry = 0;
                 try {
                     while (true) {
@@ -550,7 +523,6 @@ public class BasicHTTP {
                 this.checkResponseCode();
                 close = false;
                 return this.connection;
-
             } catch (final IOException e) {
                 throw new BasicHTTPException(this.connection, new ReadIOException(e));
             } finally {
@@ -574,7 +546,6 @@ public class BasicHTTP {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         this.postPage(url, byteData, baos, null, null);
         return baos.toByteArray();
-
     }
 
     /**
@@ -586,9 +557,7 @@ public class BasicHTTP {
      * @throws BasicHTTPException
      */
     public void postPage(final URL url, byte[] byteData, final OutputStream baos, final DownloadProgress uploadProgress, final DownloadProgress downloadProgress) throws InterruptedException, BasicHTTPException {
-
         synchronized (this.lock) {
-
             final OutputStreamWriter writer = null;
             final BufferedReader reader = null;
             OutputStream outputStream = null;
@@ -627,7 +596,6 @@ public class BasicHTTP {
                 if (uploadProgress != null) {
                     uploadProgress.setTotal(byteData.length);
                 }
-
                 if (this.connection.getCompleteContentLength() >= 0) {
                     /* contentLength is known */
                     if (downloadProgress != null) {
@@ -636,7 +604,6 @@ public class BasicHTTP {
                 } else {
                     /* no contentLength is known */
                 }
-
                 // write upload in 50*1024 steps
                 if (byteData.length > 0) {
                     int offset = 0;
@@ -656,7 +623,6 @@ public class BasicHTTP {
                         }
                     }
                 }
-
                 outputStream.flush();
                 this.connection.finalizeConnect();
                 this.checkResponseCode();
@@ -682,7 +648,6 @@ public class BasicHTTP {
                             throw new WriteIOException(e);
                         }
                         loaded += len;
-
                         if (downloadProgress != null) {
                             downloadProgress.increaseLoaded(len);
                         }
@@ -723,7 +688,6 @@ public class BasicHTTP {
                     this.connection.disconnect();
                 } catch (final Throwable e) {
                 }
-
             }
         }
     }
@@ -732,11 +696,9 @@ public class BasicHTTP {
         byte[] byteData;
         try {
             byteData = data.getBytes("UTF-8");
-
             final ByteArrayOutputStream baos = new ByteArrayOutputStream();
             this.postPage(url, byteData, baos, null, null);
             return new String(baos.toByteArray(), "UTF-8");
-
         } catch (final UnsupportedEncodingException e) {
             throw new BasicHTTPException(this.connection, e);
         }
@@ -750,7 +712,6 @@ public class BasicHTTP {
         final HashSet<Integer> loc = this.getAllowedResponseCodes();
         if (loc != null) {
             final ArrayList<Integer> allowed = new ArrayList<Integer>(loc);
-
             final int[] ret = new int[allowed.size()];
             for (int i = 0; i < ret.length; i++) {
                 ret[i] = allowed.get(i);
@@ -781,5 +742,4 @@ public class BasicHTTP {
     public void setReadTimeout(final int readTimeout) {
         this.readTimeout = Math.max(1000, readTimeout);
     }
-
 }

@@ -31,18 +31,26 @@
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
-package org.appwork.remoteapi.annotations;
+package org.appwork.utils.net.httpserver.requests;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.appwork.utils.net.httpconnection.HTTPConnection.RequestMethod;
+import org.appwork.utils.net.httpserver.HttpConnection;
 
-/**
- * @author daniel
- * 
- */
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.METHOD })
-public @interface ApiHiddenMethod {
+public class DeleteRequest extends PostRequest {
+    /**
+     * @param connection
+     */
+    public DeleteRequest(HttpConnection connection) {
+        super(connection);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.appwork.utils.net.httpserver.requests.PostRequest#getRequestMethod()
+     */
+    @Override
+    protected RequestMethod getRequestMethod() {
+        return RequestMethod.DELETE;
+    }
 }

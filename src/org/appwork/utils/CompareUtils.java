@@ -1,7 +1,6 @@
 package org.appwork.utils;
 
 public class CompareUtils {
-
     /**
      * @param x
      * @param y
@@ -20,11 +19,13 @@ public class CompareUtils {
         return (x < y) ? -1 : ((x == y) ? 0 : 1);
     }
 
-    public static int compare(double x, double y) {
+    public static int compare(long x, long y) {
+        return (x < y) ? -1 : ((x == y) ? 0 : 1);
+    }
 
+    public static int compare(double x, double y) {
         // since 1.4
         return Double.compare(x, y);
-
     }
 
     /**
@@ -44,5 +45,4 @@ public class CompareUtils {
         }
         return x.compareTo(y);
     }
-
 }

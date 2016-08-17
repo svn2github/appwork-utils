@@ -41,18 +41,25 @@ import java.util.List;
 import java.util.Map;
 
 public interface HTTPConnection {
-
     public static enum RequestMethod {
-        NOTIFY,
-        MSEARCH,
-        SUBSCRIBE,
-        UNSUBSCRIBE,
-        PUT,
-        DELETE,
-        OPTIONS,
-        GET,
-        POST,
-        HEAD
+        NOTIFY(false),
+        MSEARCH(false),
+        SUBSCRIBE(false),
+        UNSUBSCRIBE(false),
+        PUT(true),
+        DELETE(true),
+        OPTIONS(false),
+        GET(false),
+        POST(true),
+        HEAD(false);
+        public final boolean requiresOutputStream;
+
+        /**
+         *
+         */
+        private RequestMethod(boolean requiresOutputStream) {
+            this.requiresOutputStream = requiresOutputStream;
+        }
     }
 
     /**
@@ -146,5 +153,4 @@ public interface HTTPConnection {
     void setSSLTrustALL(boolean trustALL);
 
     boolean isSSLTrustALL();
-
 }

@@ -92,13 +92,11 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
     private boolean                                     connected            = false;
     private boolean                                     wasConnected         = false;
     private boolean                                     sslTrustALL          = false;
-
     private final static WeakHashMap<Thread, HTTPProxy> availableProxies     = new WeakHashMap<Thread, HTTPProxy>();
 
     static {
         try {
             Authenticator.setDefault(new Authenticator() {
-
                 @Override
                 protected PasswordAuthentication getPasswordAuthentication() {
                     HTTPProxy foundProxy = null;
@@ -120,7 +118,6 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
                     }
                     return null;
                 }
-
             });
         } catch (final Throwable e) {
             e.printStackTrace();
@@ -178,13 +175,11 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
             synchronized (NativeHTTPConnectionImpl.availableProxies) {
                 NativeHTTPConnectionImpl.availableProxies.put(Thread.currentThread(), this.proxy);
             }
-
             /** http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6626700 **/
             /**
              * Request for ability to turn off authentication caching in HttpURLConnection
              **/
             org.appwork.sunwrapper.sun.net.www.protocol.http.AuthCacheValueWrapper.setAuthCacheImpl();
-
             this.con = (HttpURLConnection) this.httpURL.openConnection(this.nativeProxy);
         } else {
             synchronized (NativeHTTPConnectionImpl.availableProxies) {
@@ -198,7 +193,6 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
             final String urlHost = httpURL.getHost();
             scon.setSSLSocketFactory(JavaSSLSocketStreamFactory.getSSLSocketFactory(trustAll));
             scon.setHostnameVerifier(new HostnameVerifier() {
-
                 @Override
                 public boolean verify(String host, SSLSession sslSession) {
                     if (trustAll) {
@@ -214,7 +208,7 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
         this.con.setRequestMethod(this.httpMethod.name());
         this.con.setAllowUserInteraction(false);
         this.con.setInstanceFollowRedirects(false);
-        if (this.requiresOutputStream()) {
+        if (this.isRequiresOutputStream()) {
             this.con.setDoOutput(true);
         } else {
             this.outputClosed = true;
@@ -236,7 +230,7 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
         this.connected = true;
         this.wasConnected = true;
         this.requestTime = System.currentTimeMillis() - startTime;
-        if (this.requiresOutputStream() == false) {
+        if (this.isRequiresOutputStream() == false) {
             this.outputStream = new NullOutputStream();
             this.outputClosed = true;
             this.connectInputStream();
@@ -246,7 +240,7 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
     }
 
     protected synchronized void connectInputStream() throws IOException {
-        if (this.requiresOutputStream()) {
+        if (this.isRequiresOutputStream()) {
             final long done = ((CountingOutputStream) this.outputStream).transferedBytes();
             if (done != this.postTodoLength) {
                 throw new IOException("Content-Length " + this.postTodoLength + " does not match send " + done + " bytes");
@@ -255,7 +249,7 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
         if (this.inputStreamConnected) {
             return;
         }
-        if (this.requiresOutputStream()) {
+        if (this.isRequiresOutputStream()) {
             /* flush outputstream in case some buffers are not flushed yet */
             this.outputStream.flush();
         }
@@ -269,7 +263,6 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
         this.inputStreamConnected = true;
         this.httpResponseCode = this.con.getResponseCode();
         this.httpResponseMessage = this.con.getResponseMessage();
-
         final Iterator<Entry<String, List<String>>> it = this.con.getHeaderFields().entrySet().iterator();
         while (it.hasNext()) {
             final Entry<String, List<String>> next = it.next();
@@ -285,7 +278,6 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
         if (this.inputStream == null && inputException != null) {
             if (this.getContentLength() == 0) {
                 this.inputStream = new InputStream() {
-
                     @Override
                     public int read() throws IOException {
                         return -1;
@@ -434,7 +426,7 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
 
     @Override
     public OutputStream getOutputStream() throws IOException {
-        if (this.outputStream != null && this.requiresOutputStream()) {
+        if (this.outputStream != null && this.isRequiresOutputStream()) {
             return this.outputStream;
         }
         throw new IOException("OutputStream is not available");
@@ -489,7 +481,6 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
         sb.append("----------------(Native)Request Information-------------\r\n");
         sb.append("URL: ").append(this.getURL()).append("\r\n");
         sb.append("Host: ").append(this.getURL().getHost()).append("\r\n");
-
         if (this.nativeProxy != null) {
             final SocketAddress proxyInetSocketAddress = this.nativeProxy.address();
             if (proxyInetSocketAddress != null) {
@@ -501,7 +492,6 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
         sb.append("----------------(Native)Request-------------------------\r\n");
         if (this.isConnected() || this.wasConnected()) {
             sb.append(this.httpMethod.toString()).append(' ').append(this.getURL().getPath()).append(" HTTP/1.1\r\n");
-
             final Iterator<Entry<String, String>> it = this.getRequestProperties().entrySet().iterator();
             while (it.hasNext()) {
                 final Entry<String, String> next = it.next();
@@ -634,8 +624,8 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
         return false;
     }
 
-    protected boolean requiresOutputStream() {
-        return this.httpMethod == RequestMethod.POST || this.httpMethod == RequestMethod.PUT;
+    protected boolean isRequiresOutputStream() {
+        return httpMethod.requiresOutputStream;
     }
 
     public InetAddress[] resolvHostIP(final String host) throws IOException {
@@ -728,5 +718,4 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
     public boolean isSSLTrustALL() {
         return this.sslTrustALL;
     }
-
 }

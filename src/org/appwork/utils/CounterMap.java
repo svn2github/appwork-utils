@@ -7,7 +7,6 @@ import org.appwork.utils.CounterMap.WrappedInteger;
 
 public class CounterMap<KeyType> extends HashMap<KeyType, WrappedInteger> {
     public static class WrappedInteger implements IntegerInterface {
-
         private int i = 0;
 
         /*
@@ -28,6 +27,15 @@ public class CounterMap<KeyType> extends HashMap<KeyType, WrappedInteger> {
             return i;
         }
 
+        /*
+         * (non-Javadoc)
+         *
+         * @see java.lang.Object#toString()
+         */
+        @Override
+        public String toString() {
+            return String.valueOf(i);
+        }
     }
 
     /*
@@ -35,7 +43,6 @@ public class CounterMap<KeyType> extends HashMap<KeyType, WrappedInteger> {
      *
      * @see java.util.HashMap#get(java.lang.Object)
      */
-
     public WrappedInteger getEnsureValue(KeyType key) {
         WrappedInteger ret = super.get(key);
         if (ret == null) {
@@ -74,7 +81,16 @@ public class CounterMap<KeyType> extends HashMap<KeyType, WrappedInteger> {
             return ret.getInt();
         }
         return 0;
-
     }
 
+    /**
+     * @return
+     */
+    public HashMap<KeyType, Integer> toMap() {
+        HashMap<KeyType, Integer> ret = new HashMap<KeyType, Integer>();
+        for (java.util.Map.Entry<KeyType, WrappedInteger> es : entrySet()) {
+            ret.put(es.getKey(), es.getValue().getInt());
+        }
+        return ret;
+    }
 }

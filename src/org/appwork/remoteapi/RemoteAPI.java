@@ -46,6 +46,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
 
+import org.appwork.exceptions.WTFException;
 import org.appwork.net.protocol.http.HTTPConstants;
 import org.appwork.net.protocol.http.HTTPConstants.ResponseCode;
 import org.appwork.remoteapi.annotations.AllowResponseAccess;
@@ -74,22 +75,32 @@ import org.appwork.utils.reflection.Clazz;
 
 /**
  * @author daniel
- * 
+ *
  */
 public class RemoteAPI implements HttpRequestHandler {
     public static class RemoteAPIMethod {
-
-        private final InterfaceHandler<?> interfaceHandler;
-
-        private final String methodName;
-
-        private final String nameSpace;
+        protected final InterfaceHandler<?> interfaceHandler;
+        protected final String              methodName;
+        protected final String              nameSpace;
 
         public RemoteAPIMethod(final String nameSpace, final InterfaceHandler<?> interfaceHandler, final String methodName) {
             this.nameSpace = nameSpace;
             this.interfaceHandler = interfaceHandler;
             this.methodName = methodName;
         }
+        //
+        // protected void registerRootInterface() {
+        // try {
+        // this.register(this);
+        // } catch (ParseException e) {
+        // throw new WTFException(e);
+        // }
+        // }
+        //
+        // @Override
+        // public void help(RemoteAPIRequest request, RemoteAPIResponse response) {
+        // // TODO Auto-generated method stub
+        // }
 
         public final InterfaceHandler<?> getInterfaceHandler() {
             return this.interfaceHandler;
@@ -142,7 +153,6 @@ public class RemoteAPI implements HttpRequestHandler {
             if ("null".equals(string)) {
                 return null;
             }
-
             // string = "\"" + string.replace("\\", "\\\\").replace("\"",
             // "\\\"") + "\"";
             string = JSonStorage.serializeToJson(string);
@@ -151,7 +161,6 @@ public class RemoteAPI implements HttpRequestHandler {
             @SuppressWarnings({ "unchecked", "rawtypes" })
             final Object v = JSonStorage.restoreFromString(string, new TypeRef(type) {
             });
-
             if (type instanceof Class && Clazz.isPrimitive(type)) {
                 return RemoteAPI.cast(v, (Class<?>) type);
             } else {
@@ -194,7 +203,7 @@ public class RemoteAPI implements HttpRequestHandler {
         }
         return new OutputStream() {
             boolean wrapperHeader = wrapJQuery && request != null && request.getJqueryCallback() != null;
-            boolean wrapperEnd = wrapJQuery && request != null && request.getJqueryCallback() != null;
+            boolean wrapperEnd    = wrapJQuery && request != null && request.getJqueryCallback() != null;
 
             @Override
             public void close() throws IOException {
@@ -253,15 +262,14 @@ public class RemoteAPI implements HttpRequestHandler {
 
     /* hashmap that holds all registered interfaces and their paths */
     private HashMap<String, InterfaceHandler<RemoteAPIInterface>> interfaces = new HashMap<String, InterfaceHandler<RemoteAPIInterface>>();
+    private DefaultDocsPageFactory                                helpBuilder;
 
     public RemoteAPI() {
-
     }
 
     @SuppressWarnings("unchecked")
     protected void _handleRemoteAPICall(final RemoteAPIRequest request, final RemoteAPIResponse response) throws BasicRemoteAPIException {
         Object responseData = null;
-
         final Method method = request.getMethod();
         try {
             if (method == null) {
@@ -269,9 +277,7 @@ public class RemoteAPI implements HttpRequestHandler {
                 System.out.println("No API Method Found: " + request.getRequestedURL() + " Parameter: " + request.getParameters().length);
                 throw new ApiCommandNotAvailable(request.getRequestedURL());
             }
-
             this.authenticate(method, request, response);
-
             final Object[] parameters = new Object[method.getParameterTypes().length];
             boolean methodHasReturnTypeAndAResponseParameter = false;
             boolean methodHasResponseParameter = false;
@@ -435,7 +441,6 @@ public class RemoteAPI implements HttpRequestHandler {
     public RemoteAPIMethod getRemoteAPIMethod(final HttpRequest request) throws BasicRemoteAPIException {
         final String path = request.getRequestedPath();
         final String[] intf = new Regex(path, RemoteAPI.INTF).getRow(0);
-
         if (intf == null || intf.length != 3) {
             return null;
         }
@@ -452,13 +457,32 @@ public class RemoteAPI implements HttpRequestHandler {
         if (intf[1] == null) {
             intf[1] = "";
         }
-
-        final InterfaceHandler<RemoteAPIInterface> ret = this.interfaces.get(intf[1]);
-
+        String namespace = intf[1];
+        String methodName = intf[2];
+        if (isHelpRequest(methodName)) {
+            try {
+                if (helpBuilder == null) {
+                    helpBuilder = createHelpBuilder(request, namespace);
+                }
+                return new HelpMethod(helpBuilder);
+            } catch (Throwable e) {
+                throw new WTFException(e);
+            }
+        }
+        final InterfaceHandler<RemoteAPIInterface> ret = this.interfaces.get(namespace);
         if (ret != null) {
-            return new RemoteAPIMethod(intf[1], ret, intf[2]);
+            return new RemoteAPIMethod(namespace, ret, methodName);
         }
         return null;
+    }
+
+    protected DefaultDocsPageFactory createHelpBuilder(final HttpRequest request, String namespace) throws NoSuchMethodException {
+        DefaultDocsPageFactory helpBuilder = new DefaultDocsPageFactory(this, namespace, request);
+        return helpBuilder;
+    }
+
+    protected boolean isHelpRequest(String methodName) {
+        return "help".equalsIgnoreCase(methodName);
     }
 
     /**
@@ -476,7 +500,7 @@ public class RemoteAPI implements HttpRequestHandler {
 
     /**
      * override this if you want to authorize usage of methods
-     * 
+     *
      * @param request
      * @return
      */
@@ -541,6 +565,12 @@ public class RemoteAPI implements HttpRequestHandler {
         return e;
     }
 
+    protected HashMap<String, InterfaceHandler<RemoteAPIInterface>> getHandlerMap() {
+        synchronized (this) {
+            return new HashMap<String, InterfaceHandler<RemoteAPIInterface>>(this.interfaces);
+        }
+    }
+
     @SuppressWarnings("unchecked")
     public void register(final RemoteAPIInterface x) throws ParseException {
         final HashSet<Class<?>> interfaces = new HashSet<Class<?>>();
@@ -558,7 +588,6 @@ public class RemoteAPI implements HttpRequestHandler {
                         }
                         interfaces.add(c);
                         String namespace = c.getName();
-
                         final ApiNamespace a = c.getAnnotation(ApiNamespace.class);
                         if (a != null) {
                             namespace = a.value();
@@ -567,12 +596,9 @@ public class RemoteAPI implements HttpRequestHandler {
                             try {
                                 Method method = x.getClass().getMethod("getAPINamespace", new Class[] { Class.class });
                                 if (method != null) {
-
                                     namespace = (String) method.invoke(x, new Object[] { c });
-
                                 }
                             } catch (NoSuchMethodException e) {
-
                                 // ok
                             }
                             int defaultAuthLevel = 0;
@@ -588,17 +614,18 @@ public class RemoteAPI implements HttpRequestHandler {
                             // System.out.println("Register: " + c.getName() +
                             // "->" + namespace);
                             // try {
-
                             // System.out.println("Register: " + c.getName() +
                             // "->" + namespace);
-
                             LoggerFactory.getDefaultLogger().info("Try to register API namespace /" + namespace + " = " + c);
                             InterfaceHandler<RemoteAPIInterface> handler = linterfaces.get(namespace);
                             if (handler == null) {
-                                handler = InterfaceHandler.create((Class<RemoteAPIInterface>) c, x, defaultAuthLevel);
+                                handler = createHandler(x, c, defaultAuthLevel);
                                 handler.setSessionRequired(c.getAnnotation(ApiSessionRequired.class) != null);
                                 linterfaces.put(namespace, handler);
                             } else {
+                                if (handler.isSessionRequired() != (c.getAnnotation(ApiSessionRequired.class) != null)) {
+                                    throw new WTFException("Session API Interface Mismatch");
+                                }
                                 handler.add((Class<RemoteAPIInterface>) c, x, defaultAuthLevel);
                             }
                         } catch (IllegalAccessException e) {
@@ -618,6 +645,10 @@ public class RemoteAPI implements HttpRequestHandler {
                 this.interfaces = linterfaces;
             }
         }
+    }
+
+    protected InterfaceHandler<RemoteAPIInterface> createHandler(final RemoteAPIInterface x, final Class<?> c, int defaultAuthLevel) throws ParseException, NoSuchMethodException {
+        return InterfaceHandler.create((Class<RemoteAPIInterface>) c, x, defaultAuthLevel);
     }
 
     /**
@@ -686,7 +717,6 @@ public class RemoteAPI implements HttpRequestHandler {
      */
     protected void validateRequest(final RemoteAPIRequest ret) throws BasicRemoteAPIException {
         // TODO Auto-generated method stub
-
     }
 
     public void writeStringResponse(Object responseData, final Method method, final RemoteAPIRequest request, final RemoteAPIResponse response) throws BasicRemoteAPIException {
@@ -700,7 +730,6 @@ public class RemoteAPI implements HttpRequestHandler {
             } else {
                 text = this.toString(request, response, responseData);
             }
-
             this.sendText(request, response, text);
         } catch (final Throwable e) {
             final InternalApiException internal = new InternalApiException(e);

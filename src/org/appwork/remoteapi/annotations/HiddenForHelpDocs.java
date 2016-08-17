@@ -39,10 +39,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * @author daniel
- * 
+ * will not be visible in the docs
+ *
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.METHOD })
-public @interface ApiHiddenMethod {
+@Target({ ElementType.METHOD, ElementType.TYPE })
+public @interface HiddenForHelpDocs {
 }

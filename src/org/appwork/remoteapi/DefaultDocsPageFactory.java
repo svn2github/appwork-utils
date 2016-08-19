@@ -484,7 +484,8 @@ public class DefaultDocsPageFactory extends InterfaceHandler<Object> {
                         header = true;
                     }
                     nav.append("<li class='type-enum'>");
-                    addMenuEntry(content, nav, 3, typeToString(null, enumClass, false), getReservedID(enumClass), htmlEncode(enumClass.getTypeName()));
+                    // addMenuEntry(content, nav, 3, typeToString(null, enumClass, false), getReservedID(enumClass),
+                    // htmlEncode(enumClass.getTypeName()));
                     nav.append("</li>");
                     final Class<? extends Enum<?>> num = (Class<? extends Enum<?>>) enumClass;
                     int i = 0;
@@ -542,7 +543,8 @@ public class DefaultDocsPageFactory extends InterfaceHandler<Object> {
                         header = true;
                     }
                     nav.append("<li class='type-object'>");
-                    addMenuEntry(content, nav, 3, typeToString(null, enumClass, false), getReservedID(enumClass), htmlEncode(enumClass.getTypeName()));
+                    // addMenuEntry(content, nav, 3, typeToString(null, enumClass, false), getReservedID(enumClass),
+                    // htmlEncode(enumClass.getTypeName()));
                     nav.append("</li>");
                     ClassCache cc;
                     try {

@@ -65,7 +65,6 @@ import org.appwork.uio.UIOManager;
 import org.appwork.utils.Application;
 import org.appwork.utils.IO;
 import org.appwork.utils.Regex;
-import org.appwork.utils.StringUtils;
 
 /**
  * @author thomas
@@ -373,23 +372,24 @@ public class InterfaceHandler<T> {
             int i = 0;
             boolean update = false;
             StringBuilder sb = new StringBuilder();
-            for (final Type t : m.getGenericParameterTypes()) {
-                final java.lang.reflect.Parameter param = m.getParameters()[i];
-                if (param.isNamePresent()) {
-                    namesFrom18.add(param.getName());
-                    if (typeDescription == null || !StringUtils.equals(typeDescription[i], param.getName())) {
-                        update = true;
-                    }
-                    if (sb.length() > 0) {
-                        sb.append(",");
-                    }
-                    sb.append("\"").append(param.getName()).append("\"");
-                } else {
-                    namesFrom18 = null;
-                    break;
-                }
-                i++;
-            }
+            // for (final Type t : m.getGenericParameterTypes()) {
+            // final java.lang.reflect.Parameter param = m.getParameters()[i];
+            // if (param.isNamePresent()) {
+            // namesFrom18.add(param.getName());
+            // if (typeDescription == null || !StringUtils.equals(typeDescription[i], param.getName())) {
+            // update = true;
+            // }
+            // if (sb.length() > 0) {
+            // sb.append(",");
+            // }
+            // sb.append("\"").append(param.getName()).append("\"");
+            // } else {
+            // namesFrom18 = null;
+            // break;
+            // }
+            // i++;
+            // }
+            namesFrom18 = null;
             if (update && namesFrom18 != null) {
                 File srcFile = null;
                 srcFile = getSourceFile(m.getDeclaringClass());

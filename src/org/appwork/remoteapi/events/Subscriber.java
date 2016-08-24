@@ -40,31 +40,49 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
-
-import org.appwork.utils.Regex;
+import java.util.regex.Pattern;
 
 /**
  * @author daniel
- * 
+ *
  */
 public class Subscriber {
 
-    protected static final AtomicLong       SUBSCRIBER          = new AtomicLong(0);
-    protected String[]                      subscriptions;
-    protected String[]                      exclusions;
+    protected static final AtomicLong ID = new AtomicLong(System.currentTimeMillis());
+
+    private static long createUniqueAlltimeID() {
+        long id = -1;
+        while (true) {
+            final long lastID = ID.get();
+            id = System.currentTimeMillis();
+            if (id < lastID) {
+                /* WTF?! timestamp is smaller as previous timestamp */
+                id = lastID + 1;
+            } else if (id == lastID) {
+                /* same timestamp, increase by 1 */
+                id = id + 1;
+            }
+            if (ID.compareAndSet(lastID, id)) {
+                return id;
+            }
+        }
+    }
+
+    protected volatile Pattern[]            subscriptions;
+    protected volatile Pattern[]            exclusions;
     protected final ArrayDeque<EventObject> events              = new ArrayDeque<EventObject>();
     protected final long                    subscriptionID;
-    protected long                          lastPolledTimestamp = System.currentTimeMillis();
+    protected volatile long                 lastPolledTimestamp = System.currentTimeMillis();
     protected long                          pollTimeout         = 25 * 1000l;
     protected long                          maxKeepalive        = 120 * 1000l;
 
-    protected Subscriber(final String[] subscriptions, final String[] exclusions) {
+    protected Subscriber(final Pattern[] subscriptions, final Pattern[] exclusions) {
         this.setSubscriptions(subscriptions);
         this.setExclusions(exclusions);
-        this.subscriptionID = Subscriber.SUBSCRIBER.incrementAndGet();
+        this.subscriptionID = createUniqueAlltimeID();
     }
 
-    public String[] getExclusions() {
+    public Pattern[] getExclusions() {
         return this.exclusions.clone();
     }
 
@@ -94,7 +112,7 @@ public class Subscriber {
         return this.subscriptionID;
     }
 
-    public String[] getSubscriptions() {
+    public Pattern[] getSubscriptions() {
         return this.subscriptions.clone();
     }
 
@@ -103,18 +121,18 @@ public class Subscriber {
             /* no subscriptions = no interest in any event */
             return false;
         }
-        final String eventID = event.getPublisher().getPublisherName() + "." + event.getEventid();
+        final String eventID = event.getPublisher().getPublisherName().concat(".").concat(event.getEventid());
         return isSubscribed(eventID);
     }
 
     public boolean isSubscribed(final String eventID) {
-        for (final String subscription : this.subscriptions) {
+        for (final Pattern subscription : this.subscriptions) {
             try {
-                if (new Regex(eventID, subscription).matches()) {
+                if (subscription.matcher(eventID).matches()) {
                     /* we have a subscription match */
-                    for (final String exclusion : this.exclusions) {
+                    for (final Pattern exclusion : this.exclusions) {
                         try {
-                            if (new Regex(eventID, exclusion).matches()) {
+                            if (exclusion.matcher(eventID).matches()) {
                                 /*
                                  * there exists an exclusion, no interest in this event
                                  */
@@ -225,9 +243,9 @@ public class Subscriber {
         }
     }
 
-    protected void setExclusions(final String[] exclusions) {
+    protected void setExclusions(final Pattern[] exclusions) {
         if (exclusions == null) {
-            this.exclusions = new String[0];
+            this.exclusions = new Pattern[0];
         } else {
             this.exclusions = this.uniquify(exclusions);
         }
@@ -256,9 +274,9 @@ public class Subscriber {
         this.pollTimeout = pollTimeout;
     }
 
-    protected void setSubscriptions(final String[] subscriptions) {
+    protected void setSubscriptions(final Pattern[] subscriptions) {
         if (subscriptions == null) {
-            this.subscriptions = new String[0];
+            this.subscriptions = new Pattern[0];
         } else {
             this.subscriptions = this.uniquify(subscriptions);
         }
@@ -270,11 +288,11 @@ public class Subscriber {
         }
     }
 
-    private String[] uniquify(final String[] input) {
-        if (input == null) {
-            return null;
+    private Pattern[] uniquify(final Pattern[] input) {
+        if (input == null || input.length == 0) {
+            return new Pattern[0];
         }
-        return new HashSet<String>(Arrays.asList(input)).toArray(new String[] {});
+        return new HashSet<Pattern>(Arrays.asList(input)).toArray(new Pattern[] {});
     }
 
 }

@@ -72,11 +72,11 @@ public class Subscriber {
     protected volatile Pattern[]            subscriptions;
     protected volatile Pattern[]            exclusions;
     protected final ArrayDeque<EventObject> events              = new ArrayDeque<EventObject>();
-    protected final long                    subscriptionID;
+    protected final long                    subscriptionID      = createUniqueAlltimeID();
     protected volatile long                 lastPolledTimestamp = System.currentTimeMillis();
     protected long                          pollTimeout         = 25 * 1000l;
     protected long                          maxKeepalive        = 120 * 1000l;
-    protected AtomicBoolean                 alive               = new AtomicBoolean(true);
+    protected final AtomicBoolean           alive               = new AtomicBoolean(true);
 
     public boolean isAlive() {
         return alive.get();
@@ -89,7 +89,6 @@ public class Subscriber {
     protected Subscriber(final Pattern[] subscriptions, final Pattern[] exclusions) {
         this.setSubscriptions(subscriptions);
         this.setExclusions(exclusions);
-        this.subscriptionID = createUniqueAlltimeID();
     }
 
     public Pattern[] getExclusions() {

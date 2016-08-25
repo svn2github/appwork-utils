@@ -39,6 +39,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 
@@ -75,6 +76,15 @@ public class Subscriber {
     protected volatile long                 lastPolledTimestamp = System.currentTimeMillis();
     protected long                          pollTimeout         = 25 * 1000l;
     protected long                          maxKeepalive        = 120 * 1000l;
+    protected AtomicBoolean                 alive               = new AtomicBoolean(true);
+
+    public boolean isAlive() {
+        return alive.get();
+    }
+
+    public void kill() {
+        this.alive.set(false);
+    }
 
     protected Subscriber(final Pattern[] subscriptions, final Pattern[] exclusions) {
         this.setSubscriptions(subscriptions);
@@ -117,7 +127,7 @@ public class Subscriber {
     }
 
     protected boolean isSubscribed(final EventObject event) {
-        if (this.subscriptions.length == 0) {
+        if (this.subscriptions.length == 0 || !isAlive()) {
             /* no subscriptions = no interest in any event */
             return false;
         }
@@ -126,26 +136,28 @@ public class Subscriber {
     }
 
     public boolean isSubscribed(final String eventID) {
-        for (final Pattern subscription : this.subscriptions) {
-            try {
-                if (subscription.matcher(eventID).matches()) {
-                    /* we have a subscription match */
-                    for (final Pattern exclusion : this.exclusions) {
-                        try {
-                            if (exclusion.matcher(eventID).matches()) {
-                                /*
-                                 * there exists an exclusion, no interest in this event
-                                 */
-                                return false;
+        if (isAlive() && this.subscriptions.length > 0) {
+            for (final Pattern subscription : this.subscriptions) {
+                try {
+                    if (subscription.matcher(eventID).matches()) {
+                        /* we have a subscription match */
+                        for (final Pattern exclusion : this.exclusions) {
+                            try {
+                                if (exclusion.matcher(eventID).matches()) {
+                                    /*
+                                     * there exists an exclusion, no interest in this event
+                                     */
+                                    return false;
+                                }
+                            } catch (final Throwable e) {
+                                e.printStackTrace();
                             }
-                        } catch (final Throwable e) {
-                            e.printStackTrace();
                         }
+                        return true;
                     }
-                    return true;
+                } catch (final Throwable e) {
+                    e.printStackTrace();
                 }
-            } catch (final Throwable e) {
-                e.printStackTrace();
             }
         }
         return false;

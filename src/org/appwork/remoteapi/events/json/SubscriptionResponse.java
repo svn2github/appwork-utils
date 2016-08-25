@@ -76,6 +76,7 @@ public class SubscriptionResponse implements Storable {
             this.exclusions = convert(subscriber.getExclusions());
             this.maxKeepalive = subscriber.getMaxKeepalive();
             this.setMaxPolltimeout(subscriber.getPollTimeout());
+            this.setSubscribed(subscriber.isAlive());
         }
     }
 

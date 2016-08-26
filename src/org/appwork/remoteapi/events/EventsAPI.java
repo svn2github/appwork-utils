@@ -58,7 +58,7 @@ import org.appwork.utils.logging2.extmanager.LoggerFactory;
  *
  */
 public class EventsAPI implements EventsAPIInterface, RemoteAPIEventsSender {
-    private LocalEventsAPIEventSender localEventSender;
+    private final LocalEventsAPIEventSender localEventSender;
 
     /**
      *
@@ -100,7 +100,10 @@ public class EventsAPI implements EventsAPIInterface, RemoteAPIEventsSender {
                 }
             }
             final SubscriptionResponse ret = new SubscriptionResponse(subscriber);
-            localEventSender.fireEvent(new LocalEventsAPIEvent(this, LocalEventsAPIEvent.Type.CHANNEL_UPDATE, subscriber));
+            try {
+                localEventSender.fireEvent(new LocalEventsAPIEvent(this, LocalEventsAPIEvent.Type.CHANNEL_UPDATE, subscriber));
+            } catch (final Throwable e) {
+            }
             return ret;
         }
     }
@@ -142,7 +145,10 @@ public class EventsAPI implements EventsAPIInterface, RemoteAPIEventsSender {
             subscriber.setPollTimeout(polltimeout);
             subscriber.notifyListener();
             final SubscriptionResponse ret = new SubscriptionResponse(subscriber);
-            localEventSender.fireEvent(new LocalEventsAPIEvent(this, LocalEventsAPIEvent.Type.CHANNEL_UPDATE, subscriber));
+            try {
+                localEventSender.fireEvent(new LocalEventsAPIEvent(this, LocalEventsAPIEvent.Type.CHANNEL_UPDATE, subscriber));
+            } catch (final Throwable e) {
+            }
             return ret;
         }
     }
@@ -284,7 +290,10 @@ public class EventsAPI implements EventsAPIInterface, RemoteAPIEventsSender {
                 }
             }
             final SubscriptionResponse ret = new SubscriptionResponse(subscriber);
-            localEventSender.fireEvent(new LocalEventsAPIEvent(this, LocalEventsAPIEvent.Type.CHANNEL_UPDATE, subscriber));
+            try {
+                localEventSender.fireEvent(new LocalEventsAPIEvent(this, LocalEventsAPIEvent.Type.CHANNEL_UPDATE, subscriber));
+            } catch (final Throwable e) {
+            }
             return ret;
         }
     }
@@ -308,17 +317,37 @@ public class EventsAPI implements EventsAPIInterface, RemoteAPIEventsSender {
                 subscriber.setSubscriptions(newSubscriptions.toArray(new Pattern[] {}));
             }
             final SubscriptionResponse ret = new SubscriptionResponse(subscriber);
-            localEventSender.fireEvent(new LocalEventsAPIEvent(this, LocalEventsAPIEvent.Type.CHANNEL_UPDATE, subscriber));
+            try {
+                localEventSender.fireEvent(new LocalEventsAPIEvent(this, LocalEventsAPIEvent.Type.CHANNEL_UPDATE, subscriber));
+            } catch (final Throwable e) {
+            }
             return ret;
         }
     }
 
     public boolean addSubscriber(Subscriber subscriber) {
         if (subscriber != null && subscriber.isAlive()) {
-            this.subscribers.add(subscriber);
-            this.subscribersCleanupThread();
-            final SubscriptionResponse ret = new SubscriptionResponse(subscriber);
-            localEventSender.fireEvent(new LocalEventsAPIEvent(this, LocalEventsAPIEvent.Type.CHANNEL_OPENED, subscriber));
+            final Subscriber existing = getSubscriber(subscriber.getSubscriptionID());
+            if (existing == null && subscribers.addIfAbsent(subscriber)) {
+                this.subscribersCleanupThread();
+                try {
+                    localEventSender.fireEvent(new LocalEventsAPIEvent(this, LocalEventsAPIEvent.Type.CHANNEL_OPENED, subscriber));
+                } catch (final Throwable e) {
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean removeSubscriber(Subscriber subscriber) {
+        if (subscriber != null && subscribers.remove(subscriber)) {
+            subscriber.kill();
+            subscriber.notifyListener();
+            try {
+                localEventSender.fireEvent(new LocalEventsAPIEvent(this, LocalEventsAPIEvent.Type.CHANNEL_CLOSED, subscriber));
+            } catch (final Throwable e) {
+            }
             return true;
         }
         return false;
@@ -330,13 +359,16 @@ public class EventsAPI implements EventsAPIInterface, RemoteAPIEventsSender {
         this.subscribers.add(subscriber);
         this.subscribersCleanupThread();
         final SubscriptionResponse ret = new SubscriptionResponse(subscriber);
-        localEventSender.fireEvent(new LocalEventsAPIEvent(this, LocalEventsAPIEvent.Type.CHANNEL_OPENED, subscriber));
+        try {
+            localEventSender.fireEvent(new LocalEventsAPIEvent(this, LocalEventsAPIEvent.Type.CHANNEL_OPENED, subscriber));
+        } catch (final Throwable e) {
+        }
         return ret;
     }
 
     /*
      * starts a cleanupThread (if needed) to remove subscribers that are no longer alive
-     * 
+     *
      * current implementation has a minimum delay of 1 minute
      */
     protected void subscribersCleanupThread() {
@@ -356,7 +388,7 @@ public class EventsAPI implements EventsAPIInterface, RemoteAPIEventsSender {
                                 final Iterator<Subscriber> it = subscribers.iterator();
                                 while (it.hasNext()) {
                                     final Subscriber subscriber = it.next();
-                                    if (!subscriber.isAlive() || (subscriber.getLastPolledTimestamp() + subscriber.getMaxKeepalive() < System.currentTimeMillis())) {
+                                    if (!subscriber.isAlive() || subscriber.isExpired()) {
                                         if (subscribers.remove(subscriber)) {
                                             subscriber.kill();
                                             subscriber.notifyListener();

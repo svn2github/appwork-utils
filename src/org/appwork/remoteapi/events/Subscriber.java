@@ -73,7 +73,7 @@ public class Subscriber {
     protected volatile Pattern[]            exclusions;
     protected final ArrayDeque<EventObject> events              = new ArrayDeque<EventObject>();
     protected final long                    subscriptionID      = createUniqueAlltimeID();
-    protected volatile long                 lastPolledTimestamp = System.currentTimeMillis();
+    protected long                          lastPolledTimestamp = System.currentTimeMillis();
     protected long                          pollTimeout         = 25 * 1000l;
     protected long                          maxKeepalive        = 120 * 1000l;
     protected final AtomicBoolean           alive               = new AtomicBoolean(true);
@@ -126,7 +126,7 @@ public class Subscriber {
     }
 
     protected boolean isSubscribed(final EventObject event) {
-        if (this.subscriptions.length == 0 || !isAlive()) {
+        if (this.subscriptions.length == 0 || !isAlive() || isExpired()) {
             /* no subscriptions = no interest in any event */
             return false;
         }
@@ -135,7 +135,7 @@ public class Subscriber {
     }
 
     public boolean isSubscribed(final String eventID) {
-        if (isAlive() && this.subscriptions.length > 0) {
+        if (isAlive() && !isExpired() && this.subscriptions.length > 0) {
             for (final Pattern subscription : this.subscriptions) {
                 try {
                     if (subscription.matcher(eventID).matches()) {
@@ -166,6 +166,10 @@ public class Subscriber {
         this.lastPolledTimestamp = System.currentTimeMillis();
     }
 
+    public boolean isExpired() {
+        return lastPolledTimestamp + maxKeepalive < System.currentTimeMillis();
+    }
+
     protected void notifyListener() {
         synchronized (this.events) {
             this.events.notifyAll();
@@ -174,7 +178,7 @@ public class Subscriber {
 
     protected EventObject poll(final long waitfor) throws InterruptedException {
         synchronized (this.events) {
-            this.lastPolledTimestamp = System.currentTimeMillis();
+            keepAlive();
             EventObject ret = this.events.poll();
             if (ret == null && waitfor > 0) {
                 this.events.wait(waitfor);

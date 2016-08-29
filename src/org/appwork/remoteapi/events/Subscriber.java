@@ -138,11 +138,11 @@ public class Subscriber {
         if (isAlive() && !isExpired() && this.subscriptions.length > 0) {
             for (final Pattern subscription : this.subscriptions) {
                 try {
-                    if (subscription.matcher(eventID).matches()) {
+                    if (subscription.matcher(eventID).find()) {
                         /* we have a subscription match */
                         for (final Pattern exclusion : this.exclusions) {
                             try {
-                                if (exclusion.matcher(eventID).matches()) {
+                                if (exclusion.matcher(eventID).find()) {
                                     /*
                                      * there exists an exclusion, no interest in this event
                                      */

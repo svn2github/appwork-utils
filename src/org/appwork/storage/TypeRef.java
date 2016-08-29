@@ -45,7 +45,6 @@ import org.appwork.storage.simplejson.mapper.CompiledTypeRef;
  *
  */
 public abstract class TypeRef<T> {
-
     public static final TypeRef<String>                   STRING          = new TypeRef<String>() {
                                                                               public Type getType() {
                                                                                   return String.class;
@@ -62,7 +61,6 @@ public abstract class TypeRef<T> {
                                                                           };
     public static final TypeRef<HashMap<String, String>>  HASHMAP_STRING  = new TypeRef<HashMap<String, String>>() {
                                                                           };
-
     public static final TypeRef<HashMap<String, Integer>> HASHMAP_INTEGER = new TypeRef<HashMap<String, Integer>>() {
                                                                           };
     public static final TypeRef<Boolean>                  BOOLEAN         = new TypeRef<Boolean>() {
@@ -79,22 +77,23 @@ public abstract class TypeRef<T> {
                                                                                   return Object.class;
                                                                               };
                                                                           };
+    public static final TypeRef<int[]>                    INT_ARRAY       = new TypeRef<int[]>() {
+                                                                              public Type getType() {
+                                                                                  return int[].class;
+                                                                              };
+                                                                          };;
     private final Type                                    type;
 
     public TypeRef() {
         final Type superClass = this.getClass().getGenericSuperclass();
-
         if (superClass instanceof Class) {
             throw new IllegalArgumentException("Wrong TypeRef Construct");
         }
         this.type = ((ParameterizedType) superClass).getActualTypeArguments()[0];
-
     }
 
     public TypeRef(final Type t) {
-
         this.type = t;
-
     }
 
     public Type getType() {
@@ -108,5 +107,4 @@ public abstract class TypeRef<T> {
         final CompiledTypeRef ret = new CompiledTypeRef(getType());
         return ret;
     }
-
 }

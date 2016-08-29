@@ -29,7 +29,6 @@ import org.appwork.utils.swing.dialog.DialogClosedException;
 import com.kitfox.svg.SVGException;
 
 public class IconSetMaker {
-
     private File projectFolder;
 
     public File getProjectFolder() {
@@ -47,7 +46,7 @@ public class IconSetMaker {
      */
     public IconSetMaker(File projectFolder) {
         this.projectFolder = projectFolder;
-        themesFolder = new File(projectFolder, "themes");
+        themesFolder = new File(projectFolder, "setup/jlr");
     }
 
     public static void main(String[] args) throws Throwable {
@@ -56,7 +55,6 @@ public class IconSetMaker {
             throw new WTFException("This is an IDE utility only.");
         }
         new EDTRunner() {
-
             @Override
             protected void runInEDT() {
                 try {
@@ -65,12 +63,9 @@ public class IconSetMaker {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
-
             }
         }.waitForEDT();
-
         // WORKSPACE = IDEUtils.getProjectFolder();
-
         new IconSetMaker(IDEUtils.getProjectFolder(Class.forName(new Exception().getStackTrace()[1].getClassName()))).run();
     }
 
@@ -86,7 +81,6 @@ public class IconSetMaker {
         this.gui = initGui();
         scanThemes();
         gui.onThemesScanned();
-
         // SimpleHTTP br = new SimpleHTTP();
         // for (IconResource ir : list) {
         // String xml = br.getPage(new URL("https://api.icons8.com/api/iconsets/search?term=" + Encoding.urlEncode(ir.getTags()) +
@@ -148,7 +142,6 @@ public class IconSetMaker {
 
     private IconSetterGui initGui() {
         return new EDTHelper<IconSetterGui>() {
-
             @Override
             public IconSetterGui edtRun() {
                 return new IconSetterGui(IconSetMaker.this);
@@ -158,17 +151,13 @@ public class IconSetMaker {
 
     private void scanThemes() throws MalformedURLException, IOException, InterruptedException, SVGException, DialogClosedException, DialogCanceledException, URISyntaxException {
         final HashMap<String, IconResource> map = new HashMap<String, IconResource>();
-
         final File jdHome = Application.getResource("themes");
         if (jdHome.exists()) {
             Files.deleteRecursiv(jdHome);
         }
-
         File standard = new File(themesFolder, "themes/standard");
         standardSet = scanTheme(map, standard);
-
         for (File folder : new File(themesFolder, "themes/").listFiles(new FileFilter() {
-
             @Override
             public boolean accept(File pathname) {
                 return pathname.isDirectory();
@@ -179,18 +168,15 @@ public class IconSetMaker {
             }
             scanTheme(map, folder);
         }
-
     }
 
     private ArrayList<ResourceSet> resources = new ArrayList<ResourceSet>();
     private ResourceSet            resourceSet;
 
     private ResourceSet scanTheme(final HashMap<String, IconResource> map, final File theme) throws MalformedURLException, IOException, InterruptedException, SVGException, DialogClosedException, DialogCanceledException {
-
         final ResourceSet set;
         resources.add(set = new ResourceSet(theme.getName()));
         Files.walkThroughStructure(new FileHandler<RuntimeException>() {
-
             @Override
             public void intro(File f) throws RuntimeException {
             }
@@ -262,14 +248,11 @@ public class IconSetMaker {
     public ResourceSet createNewResourceSet(String text) {
         ResourceSet set;
         resources.add(set = new ResourceSet(text));
-
         new File(themesFolder, "themes/" + text + "/org/jdownloader/images/").mkdirs();
-
         return set;
     }
 
     public ResourceSet getResoureSet() {
         return resourceSet;
     }
-
 }

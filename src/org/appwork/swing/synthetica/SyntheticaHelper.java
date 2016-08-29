@@ -56,7 +56,6 @@ import org.appwork.utils.logging2.extmanager.LoggerFactory;
 import org.appwork.utils.os.CrossSystem;
 
 public class SyntheticaHelper {
-
     public final SyntheticaSettings config;
 
     /**
@@ -139,7 +138,7 @@ public class SyntheticaHelper {
      * @return
      * @throws IOException
      */
-    private String readLicense() throws IOException {
+    public String readLicense() throws IOException {
         final URL url = Application.getRessourceURL("cfg/synthetica-license.key");
         if (url == null) {
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Missing Look And Feel License. Reverted to your System Look And Feel!");
@@ -274,5 +273,4 @@ public class SyntheticaHelper {
         }
         return false;
     }
-
 }

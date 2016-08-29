@@ -44,10 +44,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.regex.Pattern;
 
-import org.appwork.exceptions.WTFException;
-import org.appwork.remoteapi.annotations.APIParameterNames;
 import org.appwork.remoteapi.annotations.AllowNonStorableObjects;
 import org.appwork.remoteapi.annotations.AllowResponseAccess;
 import org.appwork.remoteapi.annotations.ApiAuthLevel;
@@ -63,8 +60,6 @@ import org.appwork.storage.JSonStorage;
 import org.appwork.storage.config.annotations.AllowStorage;
 import org.appwork.uio.UIOManager;
 import org.appwork.utils.Application;
-import org.appwork.utils.IO;
-import org.appwork.utils.Regex;
 
 /**
  * @author thomas
@@ -365,72 +360,7 @@ public class InterfaceHandler<T> {
             throw new ParseException(m + " is reserved for internal usage");
         }
         boolean responseIsParamater = false;
-        if (!Application.isJared(null) && Application.getJavaVersion() >= Application.JAVA18) {
-            APIParameterNames anno = m.getAnnotation(APIParameterNames.class);
-            String[] typeDescription = anno != null ? anno.value() : null;
-            ArrayList<String> namesFrom18 = new ArrayList<String>();
-            int i = 0;
-            boolean update = false;
-            StringBuilder sb = new StringBuilder();
-            // for (final Type t : m.getGenericParameterTypes()) {
-            // final java.lang.reflect.Parameter param = m.getParameters()[i];
-            // if (param.isNamePresent()) {
-            // namesFrom18.add(param.getName());
-            // if (typeDescription == null || !StringUtils.equals(typeDescription[i], param.getName())) {
-            // update = true;
-            // }
-            // if (sb.length() > 0) {
-            // sb.append(",");
-            // }
-            // sb.append("\"").append(param.getName()).append("\"");
-            // } else {
-            // namesFrom18 = null;
-            // break;
-            // }
-            // i++;
-            // }
-            namesFrom18 = null;
-            if (update && namesFrom18 != null) {
-                File srcFile = null;
-                srcFile = getSourceFile(m.getDeclaringClass());
-                if (srcFile != null) {
-                    String src;
-                    try {
-                        src = IO.readFileToString(srcFile);
-                        String paramRegex = "";
-                        for (int ii = 0; ii < m.getParameterTypes().length; ii++) {
-                            if (ii > 0) {
-                                paramRegex += ",\\s*";
-                            }
-                            paramRegex += "\\s*(?:final )?" + REGEX_CLS + "\\s+[a-zA-Z0-9_\\[\\]]+\\s*";
-                        }
-                        // String createDonation(RemoteAPIRequest request, String provider, Currency currency, double amount, boolean
-                        // recurring, HashMap<String, String> custom, String[] categories, String note, String email) throws
-                        // RemoteAPIException;
-                        //
-                        String reg = "[\r\n]{1,2}(\\s*)(?:public )?(?:protected )?(" + REGEX_CLS + "\\s+" + m.getName() + "\\s*\\(" + paramRegex + "\\))";
-                        int matches = new Regex(src, reg).getMatches().length;
-                        if (matches == 1) {
-                            String an = "@APIParameterNames({" + sb.toString() + "})";
-                            if (new Regex(src, Pattern.quote(an) + "\\s*[\r\n]+\\s*[a-zA-Z0-9_ ]+" + m.getName()).getMatch(-1) == null) {
-                                src = src.replaceFirst("\\@APIParameterNames\\s*\\(.*?\\)\\s*(" + reg + ")", "$1");
-                                src = src.replaceFirst(reg, "\r\n$1" + an + "\r\n$1$2");
-                                srcUpdate = true;
-                                srcFile.delete();
-                                IO.writeStringToFile(srcFile, src);
-                            }
-                        } else {
-                            throw new WTFException("Regex Matches Mismatch " + matches);
-                        }
-                    } catch (Throwable e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                } else {
-                    System.out.println("Could not find source file: " + m);
-                }
-            }
-        }
+        srcUpdate = ideAnnotate(m);
         for (final Type t : m.getGenericParameterTypes()) {
             if (RemoteAPIRequest.class == t) {
                 continue;
@@ -492,6 +422,81 @@ public class InterfaceHandler<T> {
                 throw new ParseException("return Type of " + m + " is invalid", e);
             }
         }
+        return srcUpdate;
+    }
+
+    /**
+     * @param m
+     * @return
+     */
+    private boolean ideAnnotate(Method m) {
+        boolean srcUpdate = false;
+        // if (!Application.isJared(null) && Application.getJavaVersion() >= Application.JAVA18) {
+        // APIParameterNames anno = m.getAnnotation(APIParameterNames.class);
+        // String[] typeDescription = anno != null ? anno.value() : null;
+        // ArrayList<String> namesFrom18 = new ArrayList<String>();
+        // int i = 0;
+        // boolean update = false;
+        // StringBuilder sb = new StringBuilder();
+        // for (final Type t : m.getGenericParameterTypes()) {
+        // final java.lang.reflect.Parameter param = m.getParameters()[i];
+        // if (param.isNamePresent()) {
+        // namesFrom18.add(param.getName());
+        // if (typeDescription == null || !StringUtils.equals(typeDescription[i], param.getName())) {
+        // update = true;
+        // }
+        // if (sb.length() > 0) {
+        // sb.append(",");
+        // }
+        // sb.append("\"").append(param.getName()).append("\"");
+        // } else {
+        // namesFrom18 = null;
+        // break;
+        // }
+        // i++;
+        // }
+        // if (update && namesFrom18 != null) {
+        // File srcFile = null;
+        // srcFile = getSourceFile(m.getDeclaringClass());
+        // if (srcFile != null) {
+        // String src;
+        // try {
+        // src = IO.readFileToString(srcFile);
+        // String paramRegex = "";
+        // for (int ii = 0; ii < m.getParameterTypes().length; ii++) {
+        // if (ii > 0) {
+        // paramRegex += ",\\s*";
+        // }
+        // paramRegex += "\\s*(?:final )?" + REGEX_CLS + "\\s+[a-zA-Z0-9_\\[\\]]+\\s*";
+        // }
+        // // String createDonation(RemoteAPIRequest request, String provider, Currency currency, double amount, boolean
+        // // recurring, HashMap<String, String> custom, String[] categories, String note, String email) throws
+        // // RemoteAPIException;
+        // //
+        // String reg = "[\r\n]{1,2}(\\s*)(?:public )?(?:protected )?(" + REGEX_CLS + "\\s+" + m.getName() + "\\s*\\(" + paramRegex +
+        // "\\))";
+        // int matches = new Regex(src, reg).getMatches().length;
+        // if (matches == 1) {
+        // String an = "@APIParameterNames({" + sb.toString() + "})";
+        // if (new Regex(src, Pattern.quote(an) + "\\s*[\r\n]+\\s*[a-zA-Z0-9_ ]+" + m.getName()).getMatch(-1) == null) {
+        // src = src.replaceFirst("\\@APIParameterNames\\s*\\(.*?\\)\\s*(" + reg + ")", "$1");
+        // src = src.replaceFirst(reg, "\r\n$1" + an + "\r\n$1$2");
+        // srcUpdate = true;
+        // srcFile.delete();
+        // IO.writeStringToFile(srcFile, src);
+        // }
+        // } else {
+        // throw new WTFException("Regex Matches Mismatch " + matches);
+        // }
+        // } catch (Throwable e) {
+        // // TODO Auto-generated catch block
+        // e.printStackTrace();
+        // }
+        // } else {
+        // System.out.println("Could not find source file: " + m);
+        // }
+        // }
+        // }
         return srcUpdate;
     }
 

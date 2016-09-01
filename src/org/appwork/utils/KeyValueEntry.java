@@ -3,7 +3,6 @@ package org.appwork.utils;
 import java.util.Map.Entry;
 
 public class KeyValueEntry<KeyType, ValueType> {
-
     private KeyType key;
 
     public KeyType getKey() {
@@ -26,12 +25,11 @@ public class KeyValueEntry<KeyType, ValueType> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#toString()
      */
     @Override
     public String toString() {
-
         return key + "=" + value;
     }
 
@@ -51,4 +49,10 @@ public class KeyValueEntry<KeyType, ValueType> {
         this(entry.getKey(), entry.getValue());
     }
 
+    /**
+     *
+     */
+    public KeyValueEntry(/* STorable */) {
+        // TODO Auto-generated constructor stub
+    }
 }

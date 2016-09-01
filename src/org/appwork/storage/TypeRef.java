@@ -37,6 +37,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import org.appwork.storage.simplejson.mapper.CompiledTypeRef;
 
@@ -81,6 +82,8 @@ public abstract class TypeRef<T> {
                                                                               public Type getType() {
                                                                                   return int[].class;
                                                                               };
+                                                                          };
+    public static final TypeRef<HashSet<String>>          STRING_HASHSET  = new TypeRef<HashSet<String>>() {
                                                                           };;
     private final Type                                    type;
 

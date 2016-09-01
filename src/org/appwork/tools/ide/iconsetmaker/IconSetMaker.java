@@ -46,7 +46,7 @@ public class IconSetMaker {
      */
     public IconSetMaker(File projectFolder) {
         this.projectFolder = projectFolder;
-        themesFolder = new File(projectFolder, "setup/jlr");
+        themesFolder = new File(projectFolder, "setup/devAVL");
     }
 
     public static void main(String[] args) throws Throwable {

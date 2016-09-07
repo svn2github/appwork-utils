@@ -57,7 +57,7 @@ public class HTTPProxy {
     }
 
     public static final HTTPProxy NONE = new HTTPProxy(TYPE.NONE) {
-                                           @Override
+        @Override
         public void setConnectMethodPrefered(final boolean value) {
         }
 
@@ -81,7 +81,7 @@ public class HTTPProxy {
         @Override
         public void setUser(final String user) {
         }
-                                       };
+    };
 
     public static List<HTTPProxy> getFromSystemProperties() {
         final java.util.List<HTTPProxy> ret = new ArrayList<HTTPProxy>();
@@ -106,6 +106,27 @@ public class HTTPProxy {
                             }
                             ret.add(pr);
                         }
+            }
+            {
+                /* try to parse http proxy from system properties */
+                final String host = System.getProperties().getProperty("https.proxyHost");
+                if (!StringUtils.isEmpty(host)) {
+                    int port = 443;
+                    final String ports = System.getProperty("https.proxyPort");
+                    if (!StringUtils.isEmpty(ports)) {
+                        port = Integer.parseInt(ports);
+                    }
+                    final HTTPProxy pr = new HTTPProxy(HTTPProxy.TYPE.HTTPS, host, port);
+                    final String user = System.getProperty("https.proxyUser");
+                    final String pass = System.getProperty("https.proxyPassword");
+                    if (!StringUtils.isEmpty(user)) {
+                        pr.setUser(user);
+                    }
+                    if (!StringUtils.isEmpty(pass)) {
+                        pr.setPass(pass);
+                    }
+                    ret.add(pr);
+                }
             }
             {
                 /* try to parse socks5 proxy from system properties */
@@ -251,10 +272,8 @@ public class HTTPProxy {
             final String val = new Regex(result, " ProxyServer\\s+REG_SZ\\s+([^\r\n]+)").getMatch(0);
             if (val != null) {
                 for (final String vals : val.split(";")) {
-                    if (vals.toLowerCase(Locale.ENGLISH).startsWith("ftp=")) {
-                        continue;
-                    }
-                    if (vals.toLowerCase(Locale.ENGLISH).startsWith("https=")) {
+                    final String lowerCaseVals = vals.toLowerCase(Locale.ENGLISH);
+                    if (lowerCaseVals.startsWith("ftp=")) {
                         continue;
                     }
                     /* parse ip */
@@ -269,13 +288,19 @@ public class HTTPProxy {
                     }
                     final String port = new Regex(vals, ":(\\d+)").getMatch(0);
                     if (proxyurl != null) {
-                        if (vals.trim().contains("socks")) {
+                        if (lowerCaseVals.startsWith("socks")) {
                             final int rPOrt = port != null ? Integer.parseInt(port) : 1080;
                             final HTTPProxy pd = new HTTPProxy(HTTPProxy.TYPE.SOCKS5);
                             pd.setHost(proxyurl);
                             pd.setPort(rPOrt);
                             ret.add(pd);
-                        } else {
+                        } else if (lowerCaseVals.startsWith("https")) {
+                            final int rPOrt = port != null ? Integer.parseInt(port) : 443;
+                            final HTTPProxy pd = new HTTPProxy(HTTPProxy.TYPE.HTTPS);
+                            pd.setHost(proxyurl);
+                            pd.setPort(rPOrt);
+                            ret.add(pd);
+                        } else if (lowerCaseVals.startsWith("http")) {
                             final int rPOrt = port != null ? Integer.parseInt(port) : 8080;
                             final HTTPProxy pd = new HTTPProxy(HTTPProxy.TYPE.HTTP);
                             pd.setHost(proxyurl);
@@ -299,7 +324,10 @@ public class HTTPProxy {
         final String auth = new Regex(s, "://(.+)@").getMatch(0);
         final String host = new Regex(s, "://(.+@)?(.*?)(/|$)").getMatch(1);
         HTTPProxy ret = null;
-        if ("http".equalsIgnoreCase(type) || "https".equalsIgnoreCase(type)) {
+        if ("https".equalsIgnoreCase(type)) {
+            ret = new HTTPProxy(TYPE.HTTPS);
+            ret.setPort(443);
+        } else if ("http".equalsIgnoreCase(type)) {
             ret = new HTTPProxy(TYPE.HTTP);
             ret.setPort(8080);
         } else if ("socks5".equalsIgnoreCase(type)) {
@@ -609,7 +637,11 @@ public class HTTPProxy {
                             System.out.println("Cannot handle Proxy address: " + p.address());
                             continue;
                         }
-                        lst.add(new HTTPProxy(TYPE.HTTP, host, port));
+                        if (port == 443) {
+                            lst.add(new HTTPProxy(TYPE.HTTPS, host, port));
+                        } else {
+                            lst.add(new HTTPProxy(TYPE.HTTP, host, port));
+                        }
                         break;
                     case SOCKS:
                         host = null;

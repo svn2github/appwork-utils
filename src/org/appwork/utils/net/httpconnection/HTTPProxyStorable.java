@@ -41,13 +41,13 @@ import org.appwork.storage.Storable;
  *         :-1,"type":null,"preferNativeImplementation":false,"username":null}
  */
 public class HTTPProxyStorable implements Storable {
-
     public static enum TYPE {
         NONE,
         DIRECT,
         SOCKS4,
         SOCKS5,
-        HTTP
+        HTTP,
+        HTTPS
     }
 
     private String  username                   = null;

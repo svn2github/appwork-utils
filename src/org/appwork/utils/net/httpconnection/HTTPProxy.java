@@ -1,5 +1,5 @@
 /**
- * 
+ *
  * ====================================================================================================================================================
  *         "AppWork Utilities" License
  *         The "AppWork Utilities" will be called [The Product] from now on.
@@ -7,16 +7,16 @@
  *         Copyright (c) 2009-2015, AppWork GmbH <e-mail@appwork.org>
  *         Schwabacher Straße 117
  *         90763 Fürth
- *         Germany   
+ *         Germany
  * === Preamble ===
  *     This license establishes the terms under which the [The Product] Source Code & Binary files may be used, copied, modified, distributed, and/or redistributed.
  *     The intent is that the AppWork GmbH is able to provide their utilities library for free to non-commercial projects whereas commercial usage is only permitted after obtaining a commercial license.
  *     These terms apply to all files that have the [The Product] License header (IN the file), a <filename>.license or <filename>.info (like mylib.jar.info) file that contains a reference to this license.
- * 	
+ *
  * === 3rd Party Licences ===
  *     Some parts of the [The Product] use or reference 3rd party libraries and classes. These parts may have different licensing conditions. Please check the *.license and *.info files of included libraries
- *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header. 	
- * 	
+ *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header.
+ *
  * === Definition: Commercial Usage ===
  *     If anybody or any organization is generating income (directly or indirectly) by using [The Product] or if there's any commercial interest or aspect in what you are doing, we consider this as a commercial usage.
  *     If your use-case is neither strictly private nor strictly educational, it is commercial. If you are unsure whether your use-case is commercial or not, consider it as commercial or contact us.
@@ -25,9 +25,9 @@
  *     If you want to use [The Product] in a commercial way (see definition above), you have to obtain a paid license from AppWork GmbH.
  *     Contact AppWork for further details: <e-mail@appwork.org>
  * === Non-Commercial Usage ===
- *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the 
+ *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the
  *     "GNU Affero General Public License" (http://www.gnu.org/licenses/agpl-3.0.en.html).
- * 	
+ *
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
@@ -44,46 +44,43 @@ import org.appwork.utils.IO;
 import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.locale._AWU;
-
 import org.appwork.utils.processes.ProcessBuilderFactory;
 
 public class HTTPProxy {
-
     public static enum TYPE {
         NONE,
         DIRECT,
         SOCKS4,
         SOCKS5,
-        HTTP
+        HTTP,
+        HTTPS
     }
 
     public static final HTTPProxy NONE = new HTTPProxy(TYPE.NONE) {
-
                                            @Override
-                                           public void setConnectMethodPrefered(final boolean value) {
-                                           }
+        public void setConnectMethodPrefered(final boolean value) {
+        }
 
-                                           @Override
-                                           public void setLocal(final String local) {
-                                           }
+        @Override
+        public void setLocal(final String local) {
+        }
 
-                                           @Override
-                                           public void setPass(final String pass) {
-                                           }
+        @Override
+        public void setPass(final String pass) {
+        }
 
-                                           @Override
-                                           public void setPort(final int port) {
-                                           }
+        @Override
+        public void setPort(final int port) {
+        }
 
-                                           @Override
-                                           public void setType(final TYPE type) {
-                                               super.setType(TYPE.NONE);
-                                           }
+        @Override
+        public void setType(final TYPE type) {
+            super.setType(TYPE.NONE);
+        }
 
-                                           @Override
-                                           public void setUser(final String user) {
-                                           }
-
+        @Override
+        public void setUser(final String user) {
+        }
                                        };
 
     public static List<HTTPProxy> getFromSystemProperties() {
@@ -92,23 +89,23 @@ public class HTTPProxy {
             {
                 /* try to parse http proxy from system properties */
                 final String host = System.getProperties().getProperty("http.proxyHost");
-                if (!StringUtils.isEmpty(host)) {
-                    int port = 80;
-                    final String ports = System.getProperty("http.proxyPort");
-                    if (!StringUtils.isEmpty(ports)) {
-                        port = Integer.parseInt(ports);
-                    }
-                    final HTTPProxy pr = new HTTPProxy(HTTPProxy.TYPE.HTTP, host, port);
-                    final String user = System.getProperty("http.proxyUser");
-                    final String pass = System.getProperty("http.proxyPassword");
-                    if (!StringUtils.isEmpty(user)) {
-                        pr.setUser(user);
-                    }
-                    if (!StringUtils.isEmpty(pass)) {
-                        pr.setPass(pass);
-                    }
-                    ret.add(pr);
-                }
+                        if (!StringUtils.isEmpty(host)) {
+                            int port = 80;
+                            final String ports = System.getProperty("http.proxyPort");
+                            if (!StringUtils.isEmpty(ports)) {
+                                port = Integer.parseInt(ports);
+                            }
+                            final HTTPProxy pr = new HTTPProxy(HTTPProxy.TYPE.HTTP, host, port);
+                            final String user = System.getProperty("http.proxyUser");
+                            final String pass = System.getProperty("http.proxyPassword");
+                            if (!StringUtils.isEmpty(user)) {
+                                pr.setUser(user);
+                            }
+                            if (!StringUtils.isEmpty(pass)) {
+                                pr.setPass(pass);
+                            }
+                            ret.add(pr);
+                        }
             }
             {
                 /* try to parse socks5 proxy from system properties */
@@ -145,6 +142,10 @@ public class HTTPProxy {
             ret = new HTTPProxy(TYPE.HTTP);
             ret.setHost(storable.getAddress());
             break;
+        case HTTPS:
+            ret = new HTTPProxy(TYPE.HTTPS);
+            ret.setHost(storable.getAddress());
+            break;
         case SOCKS4:
             ret = new HTTPProxy(TYPE.SOCKS4);
             ret.setHost(storable.getAddress());
@@ -178,7 +179,7 @@ public class HTTPProxy {
             if (tmpport != null) {
                 info[1] = "" + tmpport;
             } else {
-                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("No proxyport defined, using default 8080");
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("No proxyport defined, using default 8080");
                 info[1] = "8080";
             }
         }
@@ -204,6 +205,10 @@ public class HTTPProxy {
             ret.setType(HTTPProxyStorable.TYPE.HTTP);
             ret.setAddress(proxy.getHost());
             break;
+        case HTTPS:
+            ret.setType(HTTPProxyStorable.TYPE.HTTPS);
+            ret.setAddress(proxy.getHost());
+            break;
         case SOCKS4:
             ret.setType(HTTPProxyStorable.TYPE.SOCKS4);
             ret.setAddress(proxy.getHost());
@@ -225,23 +230,18 @@ public class HTTPProxy {
      * Checks windows registry for proxy settings
      */
     public static List<HTTPProxy> getWindowsRegistryProxies() {
-
         final java.util.List<HTTPProxy> ret = new ArrayList<HTTPProxy>();
         try {
             final ProcessBuilder pb = ProcessBuilderFactory.create(new String[] { "reg", "query", "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" });
-
             final Process process = pb.start();
             final String result = IO.readInputStreamToString(process.getInputStream());
-
             process.destroy();
             try {
                 final String autoProxy = new Regex(result, "AutoConfigURL\\s+REG_SZ\\s+([^\r\n]+)").getMatch(0);
-
                 if (!StringUtils.isEmpty(autoProxy)) {
-                          org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("AutoProxy.pac Script found: " + autoProxy);
+                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("AutoProxy.pac Script found: " + autoProxy);
                 }
             } catch (final Exception e) {
-
             }
             final String enabledString = new Regex(result, "ProxyEnable\\s+REG_DWORD\\s+(\\d+x\\d+)").getMatch(0);
             if ("0x0".equals(enabledString)) {
@@ -269,7 +269,6 @@ public class HTTPProxy {
                     }
                     final String port = new Regex(vals, ":(\\d+)").getMatch(0);
                     if (proxyurl != null) {
-
                         if (vals.trim().contains("socks")) {
                             final int rPOrt = port != null ? Integer.parseInt(port) : 1080;
                             final HTTPProxy pd = new HTTPProxy(HTTPProxy.TYPE.SOCKS5);
@@ -338,18 +337,12 @@ public class HTTPProxy {
     }
 
     protected String  local                      = null;
-
     protected String  user                       = null;
-
     protected String  pass                       = null;
-
     protected int     port                       = 80;
-
     protected String  host                       = null;
     protected TYPE    type                       = TYPE.DIRECT;
-
     protected boolean useConnectMethod           = false;
-
     protected boolean preferNativeImplementation = false;
 
     protected HTTPProxy() {
@@ -385,6 +378,12 @@ public class HTTPProxy {
                 ret = ret + "(prefer native)";
             }
             return ret;
+        } else if (this.type == TYPE.HTTPS) {
+            String ret = _AWU.T.proxy_https(this.getHost(), this.getPort());
+            if (this.isPreferNativeImplementation()) {
+                ret = ret + "(prefer native)";
+            }
+            return ret;
         } else if (this.type == TYPE.SOCKS5) {
             return _AWU.T.proxy_socks5(this.getHost(), this.getPort());
         } else if (this.type == TYPE.SOCKS4) {
@@ -396,7 +395,7 @@ public class HTTPProxy {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#clone()
      */
     @Override
@@ -439,6 +438,7 @@ public class HTTPProxy {
         if (this.equals(proxy)) {
             switch (this.getType()) {
             case HTTP:
+            case HTTPS:
                 if (this.isConnectMethodPrefered() != proxy.isConnectMethodPrefered()) {
                     return false;
                 }
@@ -484,7 +484,7 @@ public class HTTPProxy {
 
     /**
      * this proxy is DIRECT = using a local bound IP
-     * 
+     *
      * @return
      */
     public boolean isDirect() {
@@ -497,7 +497,7 @@ public class HTTPProxy {
 
     /**
      * this proxy is NONE = uses default gateway
-     * 
+     *
      * @return
      */
     public boolean isNone() {
@@ -513,7 +513,7 @@ public class HTTPProxy {
 
     /**
      * this proxy is REMOTE = using http,socks proxy
-     * 
+     *
      * @return
      */
     public boolean isRemote() {
@@ -631,5 +631,4 @@ public class HTTPProxy {
         }
         return lst;
     }
-
 }

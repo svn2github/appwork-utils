@@ -43,7 +43,6 @@ import org.appwork.txtresource.TranslateInterface;
  */
 @Defaults(lngs = { "en", "de" })
 public interface AWUTranslation extends TranslateInterface {
-
     @Default(lngs = { "en", "de" }, values = { "Cancel", "Abbrechen" })
     String ABSTRACTDIALOG_BUTTON_CANCEL();
 
@@ -230,6 +229,9 @@ public interface AWUTranslation extends TranslateInterface {
     @Default(lngs = { "en", "de" }, values = { "%s1:%s2 (Http Proxy)", "%s1:%s2 (Http Proxy)" })
     String proxy_http(String host, int port);
 
+    @Default(lngs = { "en", "de" }, values = { "%s1:%s2 (Https Proxy)", "%s1:%s2 (Https Proxy)" })
+    String proxy_https(String host, int port);
+
     @Default(lngs = { "en", "de" }, values = { "Direct", "Direkt" })
     String proxy_none();
 
@@ -380,7 +382,6 @@ public interface AWUTranslation extends TranslateInterface {
     String DIALOG_FILECHOOSER_directoryOpenButtonToolTipText();
 
     // FileChooser =Open selected directory
-
     @Default(lngs = { "en", "de" }, values = { "Network", "Netzwerk" })
     String DIALOG_FILECHOOSER_networkfolder();
 

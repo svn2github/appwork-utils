@@ -283,11 +283,23 @@ public class HTTPProxyHTTPConnectionImpl extends HTTPConnectionImpl {
     protected String getRequestInfo() {
         if (this.proxyRequest != null) {
             final StringBuilder sb = new StringBuilder();
-            sb.append("-->HTTPProxy:").append(this.proxy.getHost() + ":" + this.proxy.getPort()).append("\r\n");
-            if (this.proxyInetSocketAddress != null && this.proxyInetSocketAddress.getAddress() != null) {
-                sb.append("-->HTTPProxyIP:").append(this.proxyInetSocketAddress.getAddress().getHostAddress()).append("\r\n");
+            if (HTTPProxy.TYPE.HTTPS.equals(proxy.getType())) {
+                sb.append("-->HTTPSProxy:").append(this.proxy.getHost()).append(":").append(this.proxy.getPort()).append("\r\n");
+            } else {
+                sb.append("-->HTTPProxy:").append(this.proxy.getHost()).append(":").append(this.proxy.getPort()).append("\r\n");
             }
-            sb.append("----------------CONNECTRequest(HTTP)------------\r\n");
+            if (this.proxyInetSocketAddress != null && this.proxyInetSocketAddress.getAddress() != null) {
+                if (HTTPProxy.TYPE.HTTPS.equals(proxy.getType())) {
+                    sb.append("-->HTTPSProxyIP:").append(this.proxyInetSocketAddress.getAddress().getHostAddress()).append("\r\n");
+                } else {
+                    sb.append("-->HTTPProxyIP:").append(this.proxyInetSocketAddress.getAddress().getHostAddress()).append("\r\n");
+                }
+            }
+            if (HTTPProxy.TYPE.HTTPS.equals(proxy.getType())) {
+                sb.append("----------------CONNECTRequest(HTTPS)------------\r\n");
+            } else {
+                sb.append("----------------CONNECTRequest(HTTP)------------\r\n");
+            }
             sb.append(this.proxyRequest.toString());
             sb.append("------------------------------------------------\r\n");
             sb.append(super.getRequestInfo());

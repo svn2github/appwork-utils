@@ -39,7 +39,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 
@@ -47,6 +46,7 @@ import org.appwork.utils.net.httpconnection.HTTPProxy;
 import org.appwork.utils.net.httpconnection.ProxyAuthException;
 import org.appwork.utils.net.httpconnection.ProxyConnectException;
 import org.appwork.utils.net.httpconnection.ProxyEndpointConnectException;
+import org.appwork.utils.net.httpconnection.SocketStreamInterface;
 import org.appwork.utils.net.httpconnection.SocksHTTPconnection.DESTTYPE;
 
 /**
@@ -54,7 +54,6 @@ import org.appwork.utils.net.httpconnection.SocksHTTPconnection.DESTTYPE;
  *
  */
 public class Socks4SocketConnection extends SocketConnection {
-
     private final DESTTYPE destType;
 
     public DESTTYPE getDestType() {
@@ -70,7 +69,7 @@ public class Socks4SocketConnection extends SocketConnection {
     }
 
     @Override
-    protected Socket connectProxySocket(final Socket proxySocket, final SocketAddress endPoint, final StringBuffer logger) throws IOException {
+    protected SocketStreamInterface connectProxySocket(final SocketStreamInterface proxySocket, final SocketAddress endPoint, final StringBuffer logger) throws IOException {
         final HTTPProxy proxy = getProxy();
         try {
             Socks4SocketConnection.sayHello(proxySocket, logger);
@@ -84,7 +83,7 @@ public class Socks4SocketConnection extends SocketConnection {
         }
     }
 
-    public static Socket establishConnection(final Socket proxySocket, final String userID, final SocketAddress endPoint, DESTTYPE destType, final StringBuffer logger) throws IOException {
+    public static SocketStreamInterface establishConnection(final SocketStreamInterface proxySocket, final String userID, final SocketAddress endPoint, DESTTYPE destType, final StringBuffer logger) throws IOException {
         final InetSocketAddress endPointAddress = (InetSocketAddress) endPoint;
         final OutputStream os = proxySocket.getOutputStream();
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -166,7 +165,7 @@ public class Socks4SocketConnection extends SocketConnection {
         return proxySocket;
     }
 
-    public static void sayHello(final Socket proxySocket, final StringBuffer logger) throws IOException {
+    public static void sayHello(final SocketStreamInterface proxySocket, final StringBuffer logger) throws IOException {
         final OutputStream os = proxySocket.getOutputStream();
         if (logger != null) {
             logger.append("->SOCKS4 Hello\r\n");
@@ -174,5 +173,4 @@ public class Socks4SocketConnection extends SocketConnection {
         /* socks4 */
         os.write((byte) 4);
     }
-
 }

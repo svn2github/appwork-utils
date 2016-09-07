@@ -39,7 +39,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 
@@ -48,6 +47,7 @@ import org.appwork.utils.net.httpconnection.HTTPProxy;
 import org.appwork.utils.net.httpconnection.ProxyAuthException;
 import org.appwork.utils.net.httpconnection.ProxyConnectException;
 import org.appwork.utils.net.httpconnection.ProxyEndpointConnectException;
+import org.appwork.utils.net.httpconnection.SocketStreamInterface;
 import org.appwork.utils.net.httpconnection.SocksHTTPconnection.AUTH;
 import org.appwork.utils.net.httpconnection.SocksHTTPconnection.DESTTYPE;
 
@@ -56,7 +56,6 @@ import org.appwork.utils.net.httpconnection.SocksHTTPconnection.DESTTYPE;
  *
  */
 public class Socks5SocketConnection extends SocketConnection {
-
     private final DESTTYPE destType;
 
     public DESTTYPE getDestType() {
@@ -72,7 +71,7 @@ public class Socks5SocketConnection extends SocketConnection {
     }
 
     @Override
-    protected Socket connectProxySocket(final Socket proxySocket, final SocketAddress endpoint, final StringBuffer logger) throws IOException {
+    protected SocketStreamInterface connectProxySocket(final SocketStreamInterface proxySocket, final SocketAddress endpoint, final StringBuffer logger) throws IOException {
         final AUTH authOffer;
         final HTTPProxy proxy = getProxy();
         final String userName = proxy.getUser();
@@ -107,7 +106,7 @@ public class Socks5SocketConnection extends SocketConnection {
         }
     }
 
-    protected static Socket establishConnection(final Socket proxySocket, final SocketAddress endpoint, DESTTYPE destType, final StringBuffer logger) throws IOException {
+    protected static SocketStreamInterface establishConnection(final SocketStreamInterface proxySocket, final SocketAddress endpoint, DESTTYPE destType, final StringBuffer logger) throws IOException {
         final InetSocketAddress endPointAddress = (InetSocketAddress) endpoint;
         final OutputStream os = proxySocket.getOutputStream();
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -199,11 +198,10 @@ public class Socks5SocketConnection extends SocketConnection {
         } else {
             throw new IOException("Socks5 unsupported address Type " + resp[3]);
         }
-
         return proxySocket;
     }
 
-    protected static void authPlain(final Socket proxySocket, String userName, String passWord, final StringBuffer logger) throws IOException {
+    protected static void authPlain(final SocketStreamInterface proxySocket, String userName, String passWord, final StringBuffer logger) throws IOException {
         final String user = userName == null ? "" : userName;
         final String pass = passWord == null ? "" : passWord;
         if (logger != null) {
@@ -247,7 +245,7 @@ public class Socks5SocketConnection extends SocketConnection {
 
     private final static boolean SENDONLYSINGLEAUTHMETHOD = true;
 
-    public static AUTH sayHello(final Socket proxySocket, AUTH auth, final StringBuffer logger) throws IOException {
+    public static AUTH sayHello(final SocketStreamInterface proxySocket, AUTH auth, final StringBuffer logger) throws IOException {
         final OutputStream os = proxySocket.getOutputStream();
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         if (logger != null) {
@@ -308,5 +306,4 @@ public class Socks5SocketConnection extends SocketConnection {
         }
         throw new IOException("Unsupported auth:" + resp[1]);
     }
-
 }

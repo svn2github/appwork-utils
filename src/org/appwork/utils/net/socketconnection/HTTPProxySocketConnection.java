@@ -37,7 +37,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 
@@ -45,26 +44,65 @@ import org.appwork.utils.Regex;
 import org.appwork.utils.encoding.Base64;
 import org.appwork.utils.net.httpconnection.HTTPConnectionUtils;
 import org.appwork.utils.net.httpconnection.HTTPProxy;
+import org.appwork.utils.net.httpconnection.JavaSSLSocketStreamFactory;
 import org.appwork.utils.net.httpconnection.ProxyAuthException;
 import org.appwork.utils.net.httpconnection.ProxyConnectException;
 import org.appwork.utils.net.httpconnection.ProxyEndpointConnectException;
+import org.appwork.utils.net.httpconnection.SSLSocketStreamFactory;
+import org.appwork.utils.net.httpconnection.SocketStreamInterface;
 
 /**
  * @author daniel
  *
  */
 public class HTTPProxySocketConnection extends SocketConnection {
+    private static SSLSocketStreamFactory defaultSSLSocketStreamFactory = null;
+
+    public static void setDefaultSSLSocketStreamFactory(SSLSocketStreamFactory defaultSSLSocketStreamFactory) {
+        HTTPProxySocketConnection.defaultSSLSocketStreamFactory = defaultSSLSocketStreamFactory;
+    }
+
+    protected boolean sslTrustALL = true;
+
+    public void setSSLTrustALL(boolean trustALL) {
+        this.sslTrustALL = trustALL;
+    }
+
+    public boolean isSSLTrustALL() {
+        return this.sslTrustALL;
+    }
 
     public HTTPProxySocketConnection(HTTPProxy proxy) {
         super(proxy);
-        if (proxy == null || !HTTPProxy.TYPE.HTTP.equals(proxy.getType())) {
-            throw new IllegalArgumentException("proxy must be of type http");
+        if (!isProxySupported(proxy)) {
+            throw new IllegalArgumentException("HTTPProxySocketConnection: proxy unsupported");
+        }
+    }
+
+    private boolean isProxySupported(final HTTPProxy p) {
+        return p != null && (HTTPProxy.TYPE.HTTP.equals(p.getType()) || HTTPProxy.TYPE.HTTPS.equals(p.getType()));
+    }
+
+    protected SSLSocketStreamFactory getSSLSocketStreamFactory() {
+        final SSLSocketStreamFactory sslSocketStreamFactory = defaultSSLSocketStreamFactory;
+        if (sslSocketStreamFactory != null) {
+            return sslSocketStreamFactory;
+        } else {
+            return JavaSSLSocketStreamFactory.getInstance();
         }
     }
 
     @Override
-    protected Socket connectProxySocket(final Socket proxySocket, final SocketAddress endPoint, final StringBuffer logger) throws IOException {
+    protected SocketStreamInterface connectProxySocket(SocketStreamInterface proxySocket, final SocketAddress endPoint, final StringBuffer logger) throws IOException {
         final HTTPProxy proxy = getProxy();
+        if (HTTPProxy.TYPE.HTTPS.equals(proxy.getType())) {
+            try {
+                final SSLSocketStreamFactory factory = getSSLSocketStreamFactory();
+                proxySocket = factory.create(proxySocket, "", proxy.getPort(), true, isSSLTrustALL());
+            } catch (final IOException e) {
+                throw new ProxyConnectException(e, proxy);
+            }
+        }
         final InetSocketAddress endPointAddress = (InetSocketAddress) endPoint;
         final OutputStream os = proxySocket.getOutputStream();
         final StringBuilder connectRequest = new StringBuilder();

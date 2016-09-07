@@ -36,7 +36,6 @@ package org.appwork.utils.net.socketconnection;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketTimeoutException;
 
@@ -46,13 +45,13 @@ import org.appwork.utils.net.httpconnection.HTTPProxy;
 import org.appwork.utils.net.httpconnection.ProxyAuthException;
 import org.appwork.utils.net.httpconnection.ProxyConnectException;
 import org.appwork.utils.net.httpconnection.ProxyEndpointConnectException;
+import org.appwork.utils.net.httpconnection.SocketStreamInterface;
 
 /**
  * @author daniel
  *
  */
 public class DirectSocketConnection extends SocketConnection {
-
     public DirectSocketConnection(HTTPProxy proxy) {
         super(proxy);
         if (proxy == null || !proxy.isLocal()) {
@@ -70,8 +69,8 @@ public class DirectSocketConnection extends SocketConnection {
             try {
                 if (connectTimeout == 0) {
                     /** no workaround for infinite connect timeouts **/
-                    final Socket connectSocket = this.createConnectSocket(connectTimeout);
-                    connectSocket.connect(endPoint, connectTimeout);
+                    final SocketStreamInterface connectSocket = this.createConnectSocket(connectTimeout);
+                    connect(connectSocket, endPoint, connectTimeout);
                 } else {
                     /**
                      * workaround for too early connect timeouts
@@ -80,8 +79,8 @@ public class DirectSocketConnection extends SocketConnection {
                     while (true) {
                         final long beforeConnect = System.currentTimeMillis();
                         try {
-                            final Socket connectSocket = this.createConnectSocket(connectTimeout);
-                            connectSocket.connect(endPoint, connectTimeout);
+                            final SocketStreamInterface connectSocket = this.createConnectSocket(connectTimeout);
+                            connect(connectSocket, endPoint, connectTimeout);
                             break;
                         } catch (final ConnectException cE) {
                             closeConnectSocket();
@@ -133,7 +132,7 @@ public class DirectSocketConnection extends SocketConnection {
             } catch (final IOException e) {
                 throw new ProxyEndpointConnectException(e, this.getProxy(), endPoint);
             }
-            final Socket connectedSocket = this.connectProxySocket(this.getConnectSocket(), endPoint, logger);
+            final SocketStreamInterface connectedSocket = this.connectProxySocket(this.getConnectSocket(), endPoint, logger);
             if (connectedSocket != null) {
                 this.proxySocket = connectedSocket;
                 return;
@@ -153,11 +152,13 @@ public class DirectSocketConnection extends SocketConnection {
     }
 
     @Override
-    protected Socket createConnectSocket(int connectTimeout) throws IOException {
-        final Socket socket = super.createConnectSocket(connectTimeout);
+    protected SocketStreamInterface createConnectSocket(int connectTimeout) throws IOException {
+        final SocketStreamInterface socket = super.createConnectSocket(connectTimeout);
         if (this.getProxy().isDirect()) {
             try {
-                socket.bind(new InetSocketAddress(HTTPConnectionImpl.getDirectInetAddress(getProxy()), 0));
+                if (socket.getSocket() != null) {
+                    socket.getSocket().bind(new InetSocketAddress(HTTPConnectionImpl.getDirectInetAddress(getProxy()), 0));
+                }
             } catch (IOException e) {
                 socket.close();
                 throw e;
@@ -167,7 +168,7 @@ public class DirectSocketConnection extends SocketConnection {
     }
 
     @Override
-    protected Socket connectProxySocket(Socket proxySocket, SocketAddress endpoint, StringBuffer logger) throws IOException {
+    protected SocketStreamInterface connectProxySocket(SocketStreamInterface proxySocket, SocketAddress endpoint, StringBuffer logger) throws IOException {
         return proxySocket;
     }
 }

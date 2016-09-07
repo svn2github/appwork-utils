@@ -48,7 +48,6 @@ import org.appwork.utils.encoding.Base64;
 public class HTTPProxyHTTPConnectionImpl extends HTTPConnectionImpl {
     private int                 httpPort;
     private StringBuilder       proxyRequest;
-
     private final boolean       preferConnectMethod;
     protected InetSocketAddress proxyInetSocketAddress = null;
 
@@ -59,6 +58,10 @@ public class HTTPProxyHTTPConnectionImpl extends HTTPConnectionImpl {
         if (!url.getProtocol().startsWith("https") && !preferConnectMethod) {
             this.httpPath = getRequestPath(url, true);
         }
+    }
+
+    private boolean isProxySupported(final HTTPProxy p) {
+        return p != null && (HTTPProxy.TYPE.HTTP.equals(p.getType()) || HTTPProxy.TYPE.HTTPS.equals(p.getType()));
     }
 
     /*
@@ -77,8 +80,8 @@ public class HTTPProxyHTTPConnectionImpl extends HTTPConnectionImpl {
                 setHostname(resolveHostname(httpURL.getHost()));
             }
             try {
-                if (this.proxy == null || !this.proxy.getType().equals(HTTPProxy.TYPE.HTTP)) {
-                    throw new IOException("HTTPProxyHTTPConnection: invalid HTTP Proxy!");
+                if (!isProxySupported(proxy)) {
+                    throw new IOException("HTTPProxyHTTPConnection: proxy unsupported");
                 }
                 if (this.proxy.getPass() != null && this.proxy.getPass().length() > 0 || this.proxy.getUser() != null && this.proxy.getUser().length() > 0) {
                     /* add proxy auth in case username/pw are set */
@@ -113,6 +116,16 @@ public class HTTPProxyHTTPConnectionImpl extends HTTPConnectionImpl {
                 }
                 if (ee != null) {
                     throw new ProxyConnectException(ee, this.proxy);
+                }
+                if (HTTPProxy.TYPE.HTTPS.equals(proxy.getType())) {
+                    final SSLSocketStreamFactory factory = getSSLSocketStreamFactory();
+                    try {
+                        this.connectionSocket = factory.create(connectionSocket, "", proxy.getPort(), true, isSSLTrustALL());
+                    } catch (final IOException e) {
+                        this.connectExceptions.add(this.connectionSocket + "|" + e.getMessage());
+                        this.disconnect();
+                        throw new ProxyConnectException(e, this.proxy);
+                    }
                 }
                 this.connectTime = System.currentTimeMillis() - startTime;
                 if (this.httpURL.getProtocol().startsWith("https") || this.isConnectMethodPrefered()) {
@@ -160,7 +173,6 @@ public class HTTPProxyHTTPConnectionImpl extends HTTPConnectionImpl {
                             /* auth invalid/missing */
                             throw new ProxyAuthException(this.proxy);
                         }
-
                         throw new ProxyConnectException(this.proxy);
                     }
                     /* read rest of CONNECT headers */
@@ -260,7 +272,6 @@ public class HTTPProxyHTTPConnectionImpl extends HTTPConnectionImpl {
         }
         if (this.getResponseCode() == 502 && StringUtils.containsIgnoreCase(getResponseMessage(), "ISA Server denied the specified")) {
             throw new ProxyConnectException(this.getResponseCode() + " " + this.getResponseMessage(), getProxy());
-
         }
         if (this.getResponseCode() == 504) {
             throw new ProxyConnectException(this.getResponseCode() + " " + this.getResponseMessage(), getProxy());
@@ -288,5 +299,4 @@ public class HTTPProxyHTTPConnectionImpl extends HTTPConnectionImpl {
     public boolean isConnectMethodPrefered() {
         return this.preferConnectMethod;
     }
-
 }

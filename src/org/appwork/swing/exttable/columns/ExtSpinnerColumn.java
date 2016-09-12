@@ -1,5 +1,5 @@
 /**
- * 
+ *
  * ====================================================================================================================================================
  *         "AppWork Utilities" License
  *         The "AppWork Utilities" will be called [The Product] from now on.
@@ -7,16 +7,16 @@
  *         Copyright (c) 2009-2015, AppWork GmbH <e-mail@appwork.org>
  *         Schwabacher Straße 117
  *         90763 Fürth
- *         Germany   
+ *         Germany
  * === Preamble ===
  *     This license establishes the terms under which the [The Product] Source Code & Binary files may be used, copied, modified, distributed, and/or redistributed.
  *     The intent is that the AppWork GmbH is able to provide their utilities library for free to non-commercial projects whereas commercial usage is only permitted after obtaining a commercial license.
  *     These terms apply to all files that have the [The Product] License header (IN the file), a <filename>.license or <filename>.info (like mylib.jar.info) file that contains a reference to this license.
- * 	
+ *
  * === 3rd Party Licences ===
  *     Some parts of the [The Product] use or reference 3rd party libraries and classes. These parts may have different licensing conditions. Please check the *.license and *.info files of included libraries
- *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header. 	
- * 	
+ *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header.
+ *
  * === Definition: Commercial Usage ===
  *     If anybody or any organization is generating income (directly or indirectly) by using [The Product] or if there's any commercial interest or aspect in what you are doing, we consider this as a commercial usage.
  *     If your use-case is neither strictly private nor strictly educational, it is commercial. If you are unsure whether your use-case is commercial or not, consider it as commercial or contact us.
@@ -25,9 +25,9 @@
  *     If you want to use [The Product] in a commercial way (see definition above), you have to obtain a paid license from AppWork GmbH.
  *     Contact AppWork for further details: <e-mail@appwork.org>
  * === Non-Commercial Usage ===
- *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the 
+ *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the
  *     "GNU Affero General Public License" (http://www.gnu.org/licenses/agpl-3.0.en.html).
- * 	
+ *
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
@@ -51,61 +51,40 @@ import org.appwork.utils.reflection.Clazz;
 
 public abstract class ExtSpinnerColumn<E> extends ExtTextColumn<E> {
     /**
-     * 
+     *
      */
-    private static final long  serialVersionUID = 1L;
-
-    private JSpinner           editor;
-
-    private NumberEditor       intEditor;
-
-    private NumberEditor       longEditor;
-
-    private NumberEditor       byteEditor;
-
-    private NumberEditor       shortEditor;
-
-    private NumberEditor       doubleEditor;
-
-    private NumberEditor       floatEditor;
-
-    private SpinnerNumberModel intModel;
-
-    private SpinnerNumberModel longModel;
-
-    private SpinnerNumberModel byteModel;
-
-    private SpinnerNumberModel shortModel;
-
-    private SpinnerNumberModel doubleModel;
-
-    private SpinnerNumberModel floatModel;
-
-    private FocusListener      tableFocusLost;
+    private static final long        serialVersionUID = 1L;
+    private final JSpinner           editor;
+    private final NumberEditor       intEditor;
+    private final NumberEditor       longEditor;
+    private final NumberEditor       byteEditor;
+    private final NumberEditor       shortEditor;
+    private final NumberEditor       doubleEditor;
+    private final NumberEditor       floatEditor;
+    private final SpinnerNumberModel intModel;
+    private final SpinnerNumberModel longModel;
+    private final SpinnerNumberModel byteModel;
+    private final SpinnerNumberModel shortModel;
+    private final SpinnerNumberModel doubleModel;
+    private final SpinnerNumberModel floatModel;
+    private FocusListener            tableFocusLost;
 
     public ExtSpinnerColumn(final String name) {
         this(name, null);
-
     }
 
     public ExtSpinnerColumn(final String name, final ExtTableModel<E> table) {
         super(name, table);
-
         this.editor = new JSpinner();
-
         this.intEditor = new JSpinner.NumberEditor(this.editor, "#");
         this.longEditor = this.intEditor;
         this.byteEditor = this.intEditor;
         this.shortEditor = this.intEditor;
         this.doubleEditor = new JSpinner.NumberEditor(this.editor, "###.##");
         this.floatEditor = this.doubleEditor;
-
         this.intEditor.getTextField().addActionListener(this);
-
         this.doubleEditor.getTextField().addActionListener(this);
-
         tableFocusLost = new FocusListener() {
-
             @Override
             public void focusLost(FocusEvent e) {
                 stopCellEditing();
@@ -114,74 +93,40 @@ public abstract class ExtSpinnerColumn<E> extends ExtTextColumn<E> {
             @Override
             public void focusGained(FocusEvent e) {
                 // TODO Auto-generated method stub
-
             }
         };
         this.intModel = new SpinnerNumberModel(0, Integer.MIN_VALUE, Integer.MAX_VALUE, 1);
-        this.longModel = new SpinnerNumberModel(0l, Long.MIN_VALUE, Long.MAX_VALUE, 1l) {
-            /*
-             * (non-Javadoc)
-             * 
-             * @see
-             * javax.swing.SpinnerNumberModel#setMaximum(java.lang.Comparable)
-             */
-            @Override
-            public void setMaximum(Comparable maximum) {
-                // TODO Auto-generated method stub
-                super.setMaximum(maximum);
-            }
-
-            /*
-             * (non-Javadoc)
-             * 
-             * @see
-             * javax.swing.SpinnerNumberModel#setMinimum(java.lang.Comparable)
-             */
-            @Override
-            public void setMinimum(Comparable minimum) {
-                // TODO Auto-generated method stub
-                super.setMinimum(minimum);
-            }
-        };
-        this.byteModel = new SpinnerNumberModel((byte) 0, Byte.MIN_VALUE, Byte.MAX_VALUE, (byte) 1);
-        this.shortModel = new SpinnerNumberModel((short) 0, Short.MIN_VALUE, Short.MAX_VALUE, (short) 1);
-        this.doubleModel = new SpinnerNumberModel(0.0d, Long.MIN_VALUE, Long.MAX_VALUE, 1.0d);
-        this.floatModel = new SpinnerNumberModel(0.0f, Long.MIN_VALUE, Long.MAX_VALUE, 1.0f);
-
+        this.longModel = new SpinnerNumberModel(Long.valueOf(0l), Long.valueOf(Long.MIN_VALUE), Long.valueOf(Long.MAX_VALUE), Long.valueOf(1l));
+        this.byteModel = new SpinnerNumberModel(Byte.valueOf((byte) 0), Byte.valueOf(Byte.MIN_VALUE), Byte.valueOf(Byte.MAX_VALUE), Byte.valueOf((byte) 1));
+        this.shortModel = new SpinnerNumberModel(Short.valueOf((short) 0), Short.valueOf(Short.MIN_VALUE), Short.valueOf(Short.MAX_VALUE), Short.valueOf((short) 1));
+        this.doubleModel = new SpinnerNumberModel(Double.valueOf(0.0d), Double.valueOf(-Double.MAX_VALUE), Double.valueOf(Double.MAX_VALUE), Double.valueOf(1.0d));
+        this.floatModel = new SpinnerNumberModel(Float.valueOf(0.0f), Float.valueOf(-Float.MAX_VALUE), Float.valueOf(Float.MAX_VALUE), Float.valueOf(1.0f));
         this.setRowSorter(new ExtDefaultRowSorter<E>() {
-
             @Override
             public int compare(final E o1, final E o2) {
-
                 final float _1 = ExtSpinnerColumn.this.getNumber(o1).floatValue();
                 final float _2 = ExtSpinnerColumn.this.getNumber(o2).floatValue();
-
                 if (this.getSortOrderIdentifier() == ExtColumn.SORT_ASC) {
                     return _1 == _2 ? 0 : _1 < _2 ? -1 : 1;
                 } else {
                     return _1 == _2 ? 0 : _1 > _2 ? -1 : 1;
                 }
-
             }
-
         });
     }
 
     @Override
     public void actionPerformed(final ActionEvent e) {
-
         this.stopCellEditing();
         super.actionPerformed(e);
     }
 
     @Override
     public void configureEditorComponent(final E value, final boolean isSelected, final int row, final int column) {
-
         final Number n = this.getNumber(value);
         this.editor.setModel(this.getModel(value, n));
         this.editor.setEditor(this.getEditor(value, n, this.editor));
         this.editor.setValue(n);
-
     }
 
     public NumberEditor getByteEditor() {
@@ -233,7 +178,6 @@ public abstract class ExtSpinnerColumn<E> extends ExtTextColumn<E> {
         } else {
             return this.getLongEditor();
         }
-
     }
 
     /**
@@ -241,7 +185,6 @@ public abstract class ExtSpinnerColumn<E> extends ExtTextColumn<E> {
      */
     @Override
     public JComponent getEditorComponent(final E value, final boolean isSelected, final int row, final int column) {
-
         return this.editor;
     }
 
@@ -262,7 +205,6 @@ public abstract class ExtSpinnerColumn<E> extends ExtTextColumn<E> {
     }
 
     public NumberEditor getLongEditor() {
-
         return this.longEditor;
     }
 
@@ -326,7 +268,6 @@ public abstract class ExtSpinnerColumn<E> extends ExtTextColumn<E> {
         if (tableFocusLost != null) {
             // spinner buttons to not throw a focus lost event, so we stop
             // ediing if table los focus
-
             getModel().getTable().addFocusListener(tableFocusLost);
             tableFocusLost = null;
         }
@@ -362,49 +303,8 @@ public abstract class ExtSpinnerColumn<E> extends ExtTextColumn<E> {
 
     @Override
     public void resetRenderer() {
-
         super.resetRenderer();
         this.rendererField.setHorizontalAlignment(SwingConstants.RIGHT);
-    }
-
-    public void setByteEditor(final NumberEditor byteEditor) {
-        this.byteEditor = byteEditor;
-    }
-
-    public void setByteModel(final SpinnerNumberModel byteModel) {
-        this.byteModel = byteModel;
-    }
-
-    public void setDoubleEditor(final NumberEditor doubleEditor) {
-        this.doubleEditor = doubleEditor;
-    }
-
-    public void setDoubleModel(final SpinnerNumberModel doubleModel) {
-        this.doubleModel = doubleModel;
-    }
-
-    public void setFloatEditor(final NumberEditor floatEditor) {
-        this.floatEditor = floatEditor;
-    }
-
-    public void setFloatModel(final SpinnerNumberModel floatModel) {
-        this.floatModel = floatModel;
-    }
-
-    public void setIntEditor(final NumberEditor intEditor) {
-        this.intEditor = intEditor;
-    }
-
-    public void setIntModel(final SpinnerNumberModel intModel) {
-        this.intModel = intModel;
-    }
-
-    public void setLongEditor(final NumberEditor longEditor) {
-        this.longEditor = longEditor;
-    }
-
-    public void setLongModel(final SpinnerNumberModel longModel) {
-        this.longModel = longModel;
     }
 
     /**
@@ -413,18 +313,9 @@ public abstract class ExtSpinnerColumn<E> extends ExtTextColumn<E> {
      */
     abstract protected void setNumberValue(Number value, E object);
 
-    public void setShortEditor(final NumberEditor shortEditor) {
-        this.shortEditor = shortEditor;
-    }
-
-    public void setShortModel(final SpinnerNumberModel shortModel) {
-        this.shortModel = shortModel;
-    }
-
     @Override
     final public void setValue(final Object value, final E object) {
         // TODO Auto-generated method stub
         this.setNumberValue((Number) value, object);
     }
-
 }

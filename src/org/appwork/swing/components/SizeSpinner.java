@@ -1,5 +1,5 @@
 /**
- * 
+ *
  * ====================================================================================================================================================
  *         "AppWork Utilities" License
  *         The "AppWork Utilities" will be called [The Product] from now on.
@@ -7,16 +7,16 @@
  *         Copyright (c) 2009-2015, AppWork GmbH <e-mail@appwork.org>
  *         Schwabacher Straße 117
  *         90763 Fürth
- *         Germany   
+ *         Germany
  * === Preamble ===
  *     This license establishes the terms under which the [The Product] Source Code & Binary files may be used, copied, modified, distributed, and/or redistributed.
  *     The intent is that the AppWork GmbH is able to provide their utilities library for free to non-commercial projects whereas commercial usage is only permitted after obtaining a commercial license.
  *     These terms apply to all files that have the [The Product] License header (IN the file), a <filename>.license or <filename>.info (like mylib.jar.info) file that contains a reference to this license.
- * 	
+ *
  * === 3rd Party Licences ===
  *     Some parts of the [The Product] use or reference 3rd party libraries and classes. These parts may have different licensing conditions. Please check the *.license and *.info files of included libraries
- *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header. 	
- * 	
+ *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header.
+ *
  * === Definition: Commercial Usage ===
  *     If anybody or any organization is generating income (directly or indirectly) by using [The Product] or if there's any commercial interest or aspect in what you are doing, we consider this as a commercial usage.
  *     If your use-case is neither strictly private nor strictly educational, it is commercial. If you are unsure whether your use-case is commercial or not, consider it as commercial or contact us.
@@ -25,9 +25,9 @@
  *     If you want to use [The Product] in a commercial way (see definition above), you have to obtain a paid license from AppWork GmbH.
  *     Contact AppWork for further details: <e-mail@appwork.org>
  * === Non-Commercial Usage ===
- *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the 
+ *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the
  *     "GNU Affero General Public License" (http://www.gnu.org/licenses/agpl-3.0.en.html).
- * 	
+ *
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
@@ -52,16 +52,14 @@ import org.appwork.utils.formatter.SizeFormatter;
 import org.appwork.utils.formatter.SizeFormatter.Unit;
 
 public class SizeSpinner extends ExtSpinner implements FocusListener, ActionListener {
-
     /**
-     * 
+     *
      */
     private static final long  serialVersionUID = -3983659343629867162L;
     private SpinnerNumberModel nm;
 
     public SizeSpinner(final long min, final long max, final long steps) {
-        this(new SpinnerNumberModel(min, min, max, steps));
-
+        this(new SpinnerNumberModel(Long.valueOf(min), Long.valueOf(min), Long.valueOf(max), Long.valueOf(steps)));
     }
 
     /**
@@ -69,12 +67,9 @@ public class SizeSpinner extends ExtSpinner implements FocusListener, ActionList
      */
     public SizeSpinner(final SpinnerNumberModel model) {
         super(model);
-
         // this.addFocusListener(this);
         this.nm = (SpinnerNumberModel) super.getModel();
-
         final DefaultFormatterFactory factory = new DefaultFormatterFactory(new AbstractFormatter() {
-
             private static final long serialVersionUID = 7808117078307243989L;
 
             @Override
@@ -84,10 +79,8 @@ public class SizeSpinner extends ExtSpinner implements FocusListener, ActionList
 
             @Override
             public String valueToString(final Object value) throws ParseException {
-
                 return SizeSpinner.this.longToText(((Number) value).longValue());
             }
-
         });
         ((JSpinner.DefaultEditor) this.getEditor()).getTextField().setFormatterFactory(factory);
         ((JSpinner.DefaultEditor) this.getEditor()).getTextField().addFocusListener(this);
@@ -97,38 +90,32 @@ public class SizeSpinner extends ExtSpinner implements FocusListener, ActionList
     /*
      * (non-Javadoc)
      * 
-     * @see
-     * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+     * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
      */
     @Override
     public void actionPerformed(final ActionEvent e) {
         this.correct();
-
     }
 
     /**
-     * 
+     *
      */
     private void beep() {
         Toolkit.getDefaultToolkit().beep();
         final Color bg = ((JSpinner.DefaultEditor) this.getEditor()).getTextField().getForeground();
         ((JSpinner.DefaultEditor) this.getEditor()).getTextField().setForeground(Color.RED);
-
         new Timer(100, new ActionListener() {
-
             @Override
             public void actionPerformed(final ActionEvent e) {
                 ((JSpinner.DefaultEditor) SizeSpinner.this.getEditor()).getTextField().setForeground(bg);
-
             }
         }).start();
     }
 
     /**
-     * 
+     *
      */
     private void correct() {
-
         final long v = ((Number) this.getValue()).longValue();
         long newValue = v;
         if (this.nm.getMinimum() != null) {
@@ -145,31 +132,28 @@ public class SizeSpinner extends ExtSpinner implements FocusListener, ActionList
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.awt.event.FocusListener#focusGained(java.awt.event.FocusEvent)
      */
     @Override
     public void focusGained(final FocusEvent e) {
         // TODO Auto-generated method stub
-
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.awt.event.FocusListener#focusLost(java.awt.event.FocusEvent)
      */
     @Override
     public void focusLost(final FocusEvent e) {
         this.correct();
-
     }
 
     /**
      * @return
      */
     public long getBytes() {
-
         return ((Number) this.getValue()).longValue();
     }
 
@@ -177,32 +161,26 @@ public class SizeSpinner extends ExtSpinner implements FocusListener, ActionList
     public Object getNextValue() {
         Object ret = getValue();
         long num = ((Number) ret).longValue();
-
         Unit unit = SizeFormatter.getBestUnit(num);
         long add = getStep(num, unit);
-
         long newV;
         if (nm.getMaximum() != null) {
-
-            newV = (long) Math.min(((Number) nm.getMaximum()).longValue(), num + add);
+            newV = Math.min(((Number) nm.getMaximum()).longValue(), num + add);
         } else {
-            newV = (long) (num + add);
+            newV = num + add;
         }
-        Unit newUnit = SizeFormatter.getBestUnit((long) newV);
+        Unit newUnit = SizeFormatter.getBestUnit(newV);
         if (newUnit == unit) {
             if (newV == num) {
                 beep();
             }
             return newV;
         }
-
         newV = newUnit.getBytes1024() * 1;
-
         if (newV == num) {
             beep();
         }
         return newV;
-
     }
 
     public long getStep(long num, Unit unit) {
@@ -211,7 +189,7 @@ public class SizeSpinner extends ExtSpinner implements FocusListener, ActionList
         log -= 1;
         long add = 0;
         if (log < 0) {
-            add = (long) ((unit.getBytes1024() / 1024) * 100);
+            add = (unit.getBytes1024() / 1024) * 100;
         } else {
             add = (long) (Math.pow(10, log) * unit.getBytes1024());
         }
@@ -226,9 +204,9 @@ public class SizeSpinner extends ExtSpinner implements FocusListener, ActionList
         long add = getStep(num, unit);
         long nv;
         if (this.nm.getMinimum() != null) {
-            nv = (long) Math.max(((Number) this.nm.getMinimum()).longValue(), num - add);
+            nv = Math.max(((Number) this.nm.getMinimum()).longValue(), num - add);
         } else {
-            nv = (long) (num - add);
+            nv = num - add;
         }
         final Unit nunit = SizeFormatter.getBestUnit(nv);
         if (nunit == unit) {
@@ -237,7 +215,6 @@ public class SizeSpinner extends ExtSpinner implements FocusListener, ActionList
             }
             return nv;
         }
-
         nv = nunit.getBytes1024() * 1000;
         if (nv == num) {
             this.beep();
@@ -261,5 +238,4 @@ public class SizeSpinner extends ExtSpinner implements FocusListener, ActionList
     protected Object textToObject(final String text) {
         return SizeFormatter.getSize(text, true, true);
     }
-
 }

@@ -89,7 +89,7 @@ public class SizeSpinner extends ExtSpinner implements FocusListener, ActionList
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
      */
     @Override
@@ -104,10 +104,12 @@ public class SizeSpinner extends ExtSpinner implements FocusListener, ActionList
         Toolkit.getDefaultToolkit().beep();
         final Color bg = ((JSpinner.DefaultEditor) this.getEditor()).getTextField().getForeground();
         ((JSpinner.DefaultEditor) this.getEditor()).getTextField().setForeground(Color.RED);
-        new Timer(100, new ActionListener() {
+        new Timer(1000, new ActionListener() {
             @Override
             public void actionPerformed(final ActionEvent e) {
                 ((JSpinner.DefaultEditor) SizeSpinner.this.getEditor()).getTextField().setForeground(bg);
+                final Timer timer = (Timer) e.getSource();
+                timer.stop();
             }
         }).start();
     }

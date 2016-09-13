@@ -77,9 +77,7 @@ import org.appwork.utils.swing.dialog.InputDialog;
  *
  * @author $Author: unknown$
  */
-
 public class CrossSystem {
-
     public static enum OperatingSystem {
         NETBSD(OSFamily.BSD),
         OPENBSD(OSFamily.BSD),
@@ -104,7 +102,6 @@ public class CrossSystem {
         WINDOWS_8(OSFamily.WINDOWS),
         WINDOWS_SERVER_2012(OSFamily.WINDOWS),
         WINDOWS_10(OSFamily.WINDOWS);
-
         private final OSFamily family;
 
         private OperatingSystem(final OSFamily family) {
@@ -192,14 +189,10 @@ public class CrossSystem {
     }
 
     private static final boolean        __HEADLESS                = Application.isHeadless();
-
     private static String[]             BROWSER_COMMANDLINE       = null;
-
     private static DesktopSupport       DESKTOP_SUPPORT           = null;
-
     private static String[]             FILE_COMMANDLINE          = null;
     private static String               JAVAINT                   = null;
-
     /**
      *
      */
@@ -216,61 +209,47 @@ public class CrossSystem {
      *
      */
     private static final KeyStroke      KEY_STROKE_DELETE         = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
-
     /**
      *
      */
     private static final KeyStroke      KEY_STROKE_DOWN           = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0);
-
     /**
      *
      */
     private static final KeyStroke      KEY_STROKE_ESCAPE         = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
-
     /**
      *
      */
     private static final KeyStroke      KEY_STROKE_FORCE_DELETE   = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, ActionEvent.SHIFT_MASK);
-
     /**
      *
      */
     private static final KeyStroke      KEY_STROKE_PASTE          = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_V, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
-
     /**
      *
      */
     private static final KeyStroke      KEY_STROKE_SEARCH         = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_F, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
-
     /**
      *
      */
     private static final KeyStroke      KEY_STROKE_SELECT_ALL     = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_A, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
-
     /**
      *
      */
     private static final KeyStroke      KEY_STROKE_UP             = CrossSystem.__HEADLESS ? null : KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0);
-
     /**
      * Cache to store the Mime Class in
      */
     private static final Mime           MIME;
-
     public static final OperatingSystem OS;
     public static final ARCHFamily      ARCH;
-
     /**
      * Cache to store the OS string in
      */
     private final static String         OS_STRING;
-
     private final static String         ARCH_STRING;
-
     private static Boolean              OS64BIT                   = null;
-
     private static String               WMIC_PATH                 = null;
-
     static {
         /* Init OS_ID */
         OS_STRING = System.getProperty("os.name");
@@ -326,7 +305,6 @@ public class CrossSystem {
         if (!CrossSystem.openCustom(CrossSystem.FILE_COMMANDLINE, file.getAbsolutePath())) {
             CrossSystem.DESKTOP_SUPPORT.openFile(file);
         }
-
     }
 
     /**
@@ -359,10 +337,20 @@ public class CrossSystem {
         }
         pathPart = pathPart.trim();
         /* remove invalid chars */
-        pathPart = pathPart.replaceAll("([\\\\|<|>|\\||\r|\n|\t|\"|:|\\*|\\?|/|\\x00])+", "_");
+        /**
+         * Integer value zero, sometimes referred to as the ASCII NUL character.
+         *
+         * Characters whose integer representations are in the range from 1 through 31->\\x00-\\x1f
+         *
+         * < (less than), * > (greater than), : (colon), " (double quote), / (forward slash), \ (backslash), | (vertical bar or pipe), ?
+         * (question* mark) (asterisk)
+         *
+         * Volume designators (drive letters) are similarly case-insensitive. For example, "D:\" and "d:\" refer to the same volume.
+         */
+        pathPart = pathPart.replaceAll("([\\\\|<|>|\\||\r|\n|\t|\"|:|\\*|\\?|/|\\x00-\\x1f])+", "_");
         if (CrossSystem.isWindows() || CrossSystem.isOS2()) {
             /**
-             * http://msdn.microsoft.com/en-us/library/windows/desktop/aa365247% 28v=vs.85%29.aspx
+             * http://msdn.microsoft.com/en-us/library/windows/desktop/aa365247%28v=vs.85%29.aspx
              */
             if (CrossSystem.isForbiddenFilename(pathPart)) {
                 pathPart = "_" + pathPart;
@@ -374,6 +362,8 @@ public class CrossSystem {
         pathPart = pathPart.replaceFirst("^\\.+", ".");
         /*
          * remove ending dots, not allowed under windows and others os maybe too
+         * 
+         * Do not end a file or directory name with a space or a period.
          */
         pathPart = pathPart.replaceFirst("\\.+$", "");
         pathPart = pathPart.trim();
@@ -387,7 +377,12 @@ public class CrossSystem {
     public static boolean isForbiddenFilename(String name) {
         if (CrossSystem.isWindows() || CrossSystem.isOS2()) {
             /**
-             * http://msdn.microsoft.com/en-us/library/windows/desktop/aa365247% 28v=vs.85%29.aspx
+             * http://msdn.microsoft.com/en-us/library/windows/desktop/aa365247%28v=vs.85%29.aspx
+             *
+             * Do not use the following reserved names for the name of a file:
+             *
+             * CON, PRN, AUX, NUL, COM1, COM2, COM3, COM4, COM5, COM6, COM7, COM8, COM9, LPT1, LPT2, LPT3, LPT4, LPT5, LPT6, LPT7, LPT8, and
+             * LPT9.
              */
             return new Regex(name, "^(CON|PRN|AUX|NUL|COM\\d+|LPT\\d+|CLOCK)\\s*?(\\.|$)").matches();
         }
@@ -464,7 +459,6 @@ public class CrossSystem {
                         /**
                          * this is very fast
                          */
-
                         return CrossSystem17.caseSensitiveFileExists(file);
                     } catch (Throwable e) {
                         e.printStackTrace();
@@ -875,7 +869,6 @@ public class CrossSystem {
      * @param e
      * @return
      */
-
     public static boolean isContextMenuTrigger(final MouseEvent e) {
         if (CrossSystem.isMac()) {
             if (e.getButton() == MouseEvent.BUTTON1 && e.isControlDown()) {
@@ -908,7 +901,6 @@ public class CrossSystem {
      */
     public static boolean isDeleteFinalSelectionTrigger(final KeyStroke ks) {
         if (CrossSystem.isMac()) {
-
             if (ks == KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask() | ActionEvent.SHIFT_MASK)) {
                 return true;
             }
@@ -950,7 +942,6 @@ public class CrossSystem {
      *
      * @return
      */
-
     public static boolean isMac() {
         return CrossSystem.OS.getFamily() == OSFamily.MAC;
     }
@@ -1191,7 +1182,6 @@ public class CrossSystem {
         } catch (final Throwable e) {
             throw new WTFException(e);
         }
-
     }
 
     /**
@@ -1234,7 +1224,6 @@ public class CrossSystem {
         } else {
             CrossSystem.openFile(saveTo.getParentFile());
         }
-
     }
 
     /**
@@ -1255,7 +1244,6 @@ public class CrossSystem {
 
     public static void hibernateSystem() {
         CrossSystem.DESKTOP_SUPPORT.hibernate();
-
     }
 
     public static void shutdownSystem(final boolean force) {
@@ -1393,7 +1381,6 @@ public class CrossSystem {
                 response = ProcessBuilderFactory.runCommand(WMIC_PATH, "process", "where", "executablepath='" + path.replaceAll("[\\/\\\\]+", "\\\\\\\\") + "'", "get", "processID", "/format:value").getStdOutString(charSet);
                 break;
             }
-
             if (StringUtils.isNotEmpty(response) && response.contains("ProcessId=")) {
                 return true;
             } else if (StringUtils.isEmpty(response)) {
@@ -1406,5 +1393,4 @@ public class CrossSystem {
         }
         throw new UnexpectedResponseException("Unexpected Response: " + response);
     }
-
 }

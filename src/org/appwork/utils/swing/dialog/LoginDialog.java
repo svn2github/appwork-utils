@@ -170,7 +170,7 @@ public class LoginDialog extends AbstractDialog<LoginData> implements ActionList
 
         contentpane.setLayout(new MigLayout("ins 5, wrap 2", "[]10[grow,fill]", "[][]"));
         contentpane.add(new JLabel(message), "spanx");
-        contentpane.add(addSettingName(_AWU.T.AccountNew_layoutDialogContent_accountname()));
+        contentpane.add(addSettingName(getTranslationUserName()));
         contentpane.add(accid, "sizegroup g1,width 100:250:n");
         contentpane.add(addSettingName(_AWU.T.AccountNew_layoutDialogContent_password()));
         contentpane.add(pass, "sizegroup g1");
@@ -179,6 +179,10 @@ public class LoginDialog extends AbstractDialog<LoginData> implements ActionList
         pass.setText(prePass);
         save.setSelected(preSave);
         return contentpane;
+    }
+
+    protected String getTranslationUserName() {
+        return _AWU.T.AccountNew_layoutDialogContent_accountname();
     }
 
     protected void addSave(final JPanel contentpane) {

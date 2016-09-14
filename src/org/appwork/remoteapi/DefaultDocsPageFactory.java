@@ -41,6 +41,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -142,9 +143,11 @@ public class DefaultDocsPageFactory extends InterfaceHandler<Object> {
      * @param returnType
      * @param html
      *            TODO
+     * @param addExtends
+     *            TODO
      * @return
      */
-    private String typeToString(HashSet<Type> requiredTypes, Type returnType, boolean html) {
+    private String typeToString(HashSet<Type> requiredTypes, Type returnType, boolean html, boolean addExtends) {
         if (returnType instanceof Class) {
             Class cls = (Class) returnType;
             if (BasicRemoteAPIException.class.isAssignableFrom((Class) returnType)) {
@@ -165,6 +168,14 @@ public class DefaultDocsPageFactory extends InterfaceHandler<Object> {
                 }
             }
             String ret = modifyName(((Class) returnType).getSimpleName());
+            if (addExtends) {
+                Type genSuper = ((Class) returnType).getGenericSuperclass();
+                if (genSuper instanceof ParameterizedType) {
+                    if (genSuper.toString().startsWith("org.appwork.")) {
+                        ret += " extends " + typeToString(requiredTypes, genSuper, html, addExtends);
+                    }
+                }
+            }
             if (requiredTypes != null && requiredTypes.contains(returnType)) {
                 Integer aid = getReservedID(returnType);
                 if (html) {
@@ -186,7 +197,7 @@ public class DefaultDocsPageFactory extends InterfaceHandler<Object> {
             return ret;
         } else if (returnType instanceof ParameterizedType) {
             Type raw = ((ParameterizedType) returnType).getRawType();
-            String ret = typeToString(requiredTypes, raw, html);
+            String ret = typeToString(requiredTypes, raw, html, addExtends);
             ret += html ? htmlEncode("<") : "<";
             boolean first = true;
             for (Type subtype : ((ParameterizedType) returnType).getActualTypeArguments()) {
@@ -194,12 +205,14 @@ public class DefaultDocsPageFactory extends InterfaceHandler<Object> {
                     ret += ", ";
                 }
                 first = false;
-                ret += typeToString(requiredTypes, subtype, html);
+                ret += typeToString(requiredTypes, subtype, html, addExtends);
             }
             ret += html ? htmlEncode(">") : ">";
             return ret;
+        } else if (returnType instanceof TypeVariable) {
+            return ((TypeVariable) returnType).getName();
         }
-        return null;
+        return String.valueOf(returnType);
     }
 
     /**
@@ -347,9 +360,6 @@ public class DefaultDocsPageFactory extends InterfaceHandler<Object> {
             nav.append("<li class='namespace'>");
             addMenuEntry(content, nav, 1, "Namespace /" + handler.getNamespace(), null, htmlEncode(methods.get(0).getDeclaringClass().getName()));
             nav.append("<ul  class='typelist'>");
-            nav.append("<li class='type'>");
-            addMenuEntry(content, nav, 2, "Methods", null, null);
-            nav.append("</li>");
             // nav.append("<li>");
             // addMenuEntry(content, nav, 2, "Methods");
             // nav.append("<ul class='nav-methodname has-sub'>");
@@ -383,7 +393,7 @@ public class DefaultDocsPageFactory extends InterfaceHandler<Object> {
                     count++;
                     final Class<?> paramClass = m.getParameterTypes()[i];
                     requiredTypes.addAll(getTypes(paramClass));
-                    String paramName = typeToString(requiredTypes, paramClass, false);
+                    String paramName = typeToString(requiredTypes, paramClass, false, false);
                     if (parameterNames != null) {
                         call += parameterNames[i];
                         header += parameterNames[i];
@@ -424,7 +434,7 @@ public class DefaultDocsPageFactory extends InterfaceHandler<Object> {
                     // num = 0;
                     // }
                     // num++;
-                    String paramNameHTML = typeToString(requiredTypes, paramClass, true);
+                    String paramNameHTML = typeToString(requiredTypes, paramClass, true, false);
                     addParameter(content, count, i, parameterNames, paramNameHTML);
                     // map.put(paramClass, num);
                 }
@@ -433,7 +443,7 @@ public class DefaultDocsPageFactory extends InterfaceHandler<Object> {
                     addKeyValueEntry(content, "Description", doc);
                 }
                 addKeyValueEntry(content, "Call", call);
-                String returnStr = typeToString(requiredTypes, returnType, true);
+                String returnStr = typeToString(requiredTypes, returnType, true, false);
                 if (!"void".equalsIgnoreCase(returnStr)) {
                     content.append("<li class='keyvalueentry'>");
                     content.append("<span class='key'>" + htmlEncode("Return type") + "</span>").append("<span class='value'>" + returnStr + "</span>");
@@ -464,7 +474,7 @@ public class DefaultDocsPageFactory extends InterfaceHandler<Object> {
                     if (ret != 0) {
                         return ret;
                     }
-                    return typeToString(null, o1, false).compareTo(typeToString(null, o2, false));
+                    return typeToString(null, o1, false, false).compareTo(typeToString(null, o2, false, false));
                 }
             });
             boolean header = false;
@@ -478,14 +488,10 @@ public class DefaultDocsPageFactory extends InterfaceHandler<Object> {
                         nav.append("<li class='namespace'>");
                         addMenuEntry(content, nav, 1, "Enums &amp; Constants", null, null);
                         nav.append("<ul  class='typelist'>");
-                        // nav.append("<li>");
-                        // addMenuEntry(content, nav, 2, "Enums");
-                        // nav.append("<ul class='nav-methodname'>");
                         header = true;
                     }
                     nav.append("<li class='type-enum'>");
-                    // addMenuEntry(content, nav, 3, typeToString(null, enumClass, false), getReservedID(enumClass),
-                    // htmlEncode(enumClass.getTypeName()));
+                    addMenuEntry(content, nav, 3, typeToString(null, enumClass, false, false), getReservedID(enumClass), htmlEncode(enumClass.getTypeName()));
                     nav.append("</li>");
                     final Class<? extends Enum<?>> num = (Class<? extends Enum<?>>) enumClass;
                     int i = 0;
@@ -493,8 +499,15 @@ public class DefaultDocsPageFactory extends InterfaceHandler<Object> {
                     for (Enum<?> c : num.getEnumConstants()) {
                         String docs = "";
                         Field fi;
+                        boolean deprecated = false;
                         try {
                             fi = num.getField(c.name());
+                            if (fi.getAnnotation(HiddenForHelpDocs.class) != null) {
+                                continue;
+                            }
+                            if (fi.getAnnotation(Deprecated.class) != null) {
+                                deprecated = true;
+                            }
                             String doc = getDocByField(fi);
                             if (StringUtils.isNotEmpty(doc)) {
                                 docs = doc;
@@ -515,7 +528,11 @@ public class DefaultDocsPageFactory extends InterfaceHandler<Object> {
                         if (StringUtils.isNotEmpty(docs)) {
                             content.append("<span class='tooltip'>" + c.name() + "<span class='tooltiptext'>" + htmlEncode(docs) + "</span></span>");
                         } else {
-                            content.append(c.name());
+                            if (deprecated) {
+                                content.append(c.name() + " <span class='deprecated'>DEPRECATED! This field will be removed soon. DO NOT USE IT!</span>");
+                            } else {
+                                content.append(c.name());
+                            }
                         }
                         content.append("</li>");
                     }
@@ -525,8 +542,8 @@ public class DefaultDocsPageFactory extends InterfaceHandler<Object> {
             }
             if (header) {
                 // end enums list
-                // nav.comment("End of enums");
-                // nav.append("</ul>");
+                nav.comment("End of enums");
+                nav.append("</ul>");
                 // nav.append("</li>");
             }
             header = false;
@@ -543,8 +560,11 @@ public class DefaultDocsPageFactory extends InterfaceHandler<Object> {
                         header = true;
                     }
                     nav.append("<li class='type-object'>");
-                    // addMenuEntry(content, nav, 3, typeToString(null, enumClass, false), getReservedID(enumClass),
-                    // htmlEncode(enumClass.getTypeName()));
+                    Integer aid = getReservedID(enumClass);
+                    int i = 3;
+                    int id = aid != null ? aid : count.incrementAndGet();
+                    content.append("<div class='header" + i + "'><a class='anchor' id='tag_" + id + "'>" + "</a>" + "<h" + i + " class='tooltip'>" + htmlEncode(typeToString(null, enumClass, false, true)) + "<span class='tooltiptext'>" + htmlEncode(enumClass.getTypeName()) + "</span>" + "</h" + i + "></div>");
+                    nav.append("<div class='menu-h" + i + "'><a href=\"#tag_" + id + "\">" + htmlEncode(typeToString(null, enumClass, false, false)) + "</a></div>");
                     nav.append("</li>");
                     ClassCache cc;
                     try {
@@ -560,7 +580,7 @@ public class DefaultDocsPageFactory extends InterfaceHandler<Object> {
                             // TODO Auto-generated catch block
                             e1.printStackTrace();
                         }
-                        content.appendRaw("          my" + typeToString(null, enumClass, false) + " = ");
+                        content.appendRaw("          my" + typeToString(null, enumClass, false, false) + " = ");
                         content.appendRaw("\r\n                  {");
                         HashSet<String> keySet = new HashSet<String>();
                         int widestKey = 0;
@@ -603,9 +623,9 @@ public class DefaultDocsPageFactory extends InterfaceHandler<Object> {
                             }
                             appendCodeComments(content, desc);
                             if (StringUtils.isNotEmpty(desc)) {
-                                content.appendRaw("\r\n                    <span class='tooltip'>" + StringUtils.fillPost("\"" + key + "\"", " ", widestKey + 2) + " = (" + typeToString(requiredTypes, type, true) + ")<span class='tooltiptext'>" + desc + "</span></span>");
+                                content.appendRaw("\r\n                    <span class='tooltip'>" + StringUtils.fillPost("\"" + key + "\"", " ", widestKey + 2) + " = (" + typeToString(requiredTypes, type, true, false) + ")<span class='tooltiptext'>" + desc + "</span></span>");
                             } else {
-                                content.appendRaw("\r\n                    " + StringUtils.fillPost("\"" + key + "\"", " ", widestKey + 2) + " = (" + typeToString(requiredTypes, type, true) + ")");
+                                content.appendRaw("\r\n                    " + StringUtils.fillPost("\"" + key + "\"", " ", widestKey + 2) + " = (" + typeToString(requiredTypes, type, true, false) + ")");
                             }
                         }
                         content.appendRaw("\r\n                  }");
@@ -619,8 +639,8 @@ public class DefaultDocsPageFactory extends InterfaceHandler<Object> {
             }
             if (header) {
                 // ends objects list
-                // nav.comment("End of enums");
-                // nav.append("</ul>");
+                nav.comment("End of enums");
+                nav.append("</ul>");
                 // nav.append("</li>");
             }
             nav.append("</ul>");
@@ -628,6 +648,20 @@ public class DefaultDocsPageFactory extends InterfaceHandler<Object> {
         addNavigation(nav, template);
         addContent(content, template);
         return template.build();
+    }
+
+    /**
+     * @param type
+     * @param method
+     * @param enumClass
+     * @return
+     */
+    private Type resolveActualType(TypeVariable type, Method method, Type enumClass) {
+        String name = type.getName();
+        Type genSuper = ((Class) enumClass).getGenericSuperclass();
+        Type sClass = (((Class) enumClass).getSuperclass()).getGenericSuperclass();
+        // Type[] genInt = sClass.getGenericInterfaces();
+        return null;
     }
 
     /**
@@ -698,7 +732,7 @@ public class DefaultDocsPageFactory extends InterfaceHandler<Object> {
             f = false;
         }
         sb.append("<li class='keyvalueentry'>");
-        sb.append("<span class='key'>" + htmlEncode(key) + "</span>").append("<span class='value'>" + typeToString(requiredTypes, e, true) + "</span>");
+        sb.append("<span class='key'>" + htmlEncode(key) + "</span>").append("<span class='value'>" + typeToString(requiredTypes, e, true, false) + "</span>");
         sb.append("</li>");
         return f;
     }

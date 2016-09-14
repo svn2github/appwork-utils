@@ -42,20 +42,17 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.appwork.utils.os.CrossSystem;
 
 public class ProcessBuilderFactory {
-
     public static ProcessOutput runCommand(final java.util.List<String> commands) throws IOException, InterruptedException {
-
         return ProcessBuilderFactory.runCommand(ProcessBuilderFactory.create(commands));
     }
 
     public static ProcessOutput runCommand(String... commands) throws IOException, InterruptedException {
-
         return ProcessBuilderFactory.runCommand(ProcessBuilderFactory.create(commands));
     }
 
     public static void readStreamToOutputStream(final InputStream input, final OutputStream baos) throws IOException, Error {
         try {
-            final byte[] buffer = new byte[32767];
+            final byte[] buffer = new byte[1024];
             int len = 0;
             boolean wait = false;
             while (true) {
@@ -107,7 +104,6 @@ public class ProcessBuilderFactory {
     }
 
     public static int runCommand(ProcessBuilder pb, final OutputStream errorStream, final OutputStream sdtStream) throws IOException, InterruptedException {
-
         return runCommand(pb, errorStream, sdtStream, null);
     }
 
@@ -121,17 +117,13 @@ public class ProcessBuilderFactory {
      */
     public static int runCommand(ProcessBuilder pb, final OutputStream errorStream, final OutputStream sdtStream, final ProcessHandler osHandler) throws IOException, InterruptedException {
         // System.out.println("Start Process " + pb.command());
-
         //
         final Process process = pb.start();
         final AtomicReference<IOException> exception = new AtomicReference<IOException>();
-
         if (osHandler == null || !osHandler.setProcess(process)) {
             process.getOutputStream().close();
-
         }
         final Thread reader1 = new Thread("Process-Reader-Std") {
-
             @Override
             public void run() {
                 try {
@@ -151,7 +143,6 @@ public class ProcessBuilderFactory {
                 }
             }
         };
-
         // TODO check if pb.redirectErrorStream()
         final Thread reader2 = new Thread("Process-Reader-Error") {
             @Override
@@ -173,7 +164,6 @@ public class ProcessBuilderFactory {
                 }
             }
         };
-
         if (CrossSystem.isWindows()) {
             reader1.setPriority(Thread.NORM_PRIORITY + 1);
             reader2.setPriority(Thread.NORM_PRIORITY + 1);
@@ -185,9 +175,7 @@ public class ProcessBuilderFactory {
         // System.out.println("Wait for Process");
         final int returnCode = process.waitFor();
         // System.out.println("Process returned: " + returnCode);
-        if (reader1.isAlive())
-
-        {
+        if (reader1.isAlive()) {
             // System.out.println("Wait for Process-Reader-Std");
             reader1.join(5000);
             if (reader1.isAlive()) {
@@ -195,9 +183,7 @@ public class ProcessBuilderFactory {
                 reader1.interrupt();
             }
         }
-        if (reader2.isAlive())
-
-        {
+        if (reader2.isAlive()) {
             // System.out.println("Wait fo Process-Reader-Error");
             reader2.join(5000);
             if (reader2.isAlive()) {
@@ -206,16 +192,13 @@ public class ProcessBuilderFactory {
             }
         }
         return returnCode;
-
     }
 
     public static ProcessBuilder create(final java.util.List<String> splitCommandString) {
         return ProcessBuilderFactory.create(splitCommandString.toArray(new String[] {}));
-
     }
 
     public static ProcessBuilder create(final String... tiny) {
-
         return new ProcessBuilder(ProcessBuilderFactory.escape(tiny));
     }
 
@@ -235,7 +218,6 @@ public class ProcessBuilderFactory {
                     ret[i] = tiny[i];
                 }
             }
-
             return ret;
         } else {
             return tiny;

@@ -491,7 +491,7 @@ public class DefaultDocsPageFactory extends InterfaceHandler<Object> {
                         header = true;
                     }
                     nav.append("<li class='type-enum'>");
-                    addMenuEntry(content, nav, 3, typeToString(null, enumClass, false, false), getReservedID(enumClass), htmlEncode(enumClass.getTypeName()));
+                    addMenuEntry(content, nav, 3, typeToString(null, enumClass, false, false), getReservedID(enumClass), htmlEncode(enumClass.toString()));
                     nav.append("</li>");
                     final Class<? extends Enum<?>> num = (Class<? extends Enum<?>>) enumClass;
                     int i = 0;
@@ -563,7 +563,7 @@ public class DefaultDocsPageFactory extends InterfaceHandler<Object> {
                     Integer aid = getReservedID(enumClass);
                     int i = 3;
                     int id = aid != null ? aid : count.incrementAndGet();
-                    content.append("<div class='header" + i + "'><a class='anchor' id='tag_" + id + "'>" + "</a>" + "<h" + i + " class='tooltip'>" + htmlEncode(typeToString(null, enumClass, false, true)) + "<span class='tooltiptext'>" + htmlEncode(enumClass.getTypeName()) + "</span>" + "</h" + i + "></div>");
+                    content.append("<div class='header" + i + "'><a class='anchor' id='tag_" + id + "'>" + "</a>" + "<h" + i + " class='tooltip'>" + htmlEncode(typeToString(null, enumClass, false, true)) + "<span class='tooltiptext'>" + htmlEncode(enumClass.toString()) + "</span>" + "</h" + i + "></div>");
                     nav.append("<div class='menu-h" + i + "'><a href=\"#tag_" + id + "\">" + htmlEncode(typeToString(null, enumClass, false, false)) + "</a></div>");
                     nav.append("</li>");
                     ClassCache cc;

@@ -190,7 +190,7 @@ public class URLHelper {
                     final URL dummyURL = getURL(url, true, false, false);
                     return createURL(dummyURL.toString()).toString();
                 } else {
-                    final URL dummyURL = getURL(url, false, false, false);
+                    URL dummyURL = getURL(url, false, false, false);
                     final StringBuilder sb = new StringBuilder();
                     sb.append(dummyURL.toString());
                     if (StringUtils.isEmpty(dummyURL.getPath())) {
@@ -204,11 +204,12 @@ public class URLHelper {
                         }
                     }
                     sb.append(query);
-                    return sb.toString();
+                    dummyURL = createURL(sb.toString());
+                    return dummyURL.toString();
                 }
             } else if (location.startsWith("#") || StringUtils.isEmpty(location)) {
                 // ignore empty location or anchor
-                return fixPathTraversal(url).toString();
+                return url.toString();
             } else {
                 final URL dummyURL = createURL(getBaseURL(url) + location);
                 return fixPathTraversal(dummyURL).toString();

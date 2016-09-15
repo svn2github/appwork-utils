@@ -80,7 +80,7 @@ public class URLHelper {
         if (query != null) {
             sb.append("?");
             /**
-             * TODO: implement encodeQuerySegment
+             * TODO: implement encodeURLQuerySegment
              */
             sb.append(query);
         }

@@ -33,8 +33,10 @@
  * ==================================================================================================================================================== */
 package org.appwork.utils.net;
 
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 
 import org.appwork.exceptions.WTFException;
 import org.appwork.utils.Regex;
@@ -46,8 +48,7 @@ import org.appwork.utils.StringUtils;
  *
  */
 public class URLHelper {
-
-    public static String createURL(final String protocol, final String userInfo, final String host, final int port, final String path, final String query, final String ref) {
+    public static String createURL(final String protocol, final String userInfo, final String host, final int port, final String path, final String query, final String ref) throws MalformedURLException {
         final StringBuilder sb = new StringBuilder();
         sb.append(protocol);
         sb.append("://");
@@ -61,17 +62,26 @@ public class URLHelper {
             sb.append(port);
         }
         if (path != null) {
-            if (path.startsWith("/")) {
-                sb.append(path);
+            final String encodedURLPath;
+            try {
+                encodedURLPath = encodeURLPathSegment(path);
+            } catch (UnsupportedEncodingException shouldNeverHappen) {
+                throw new MalformedURLException(shouldNeverHappen.getMessage());
+            }
+            if (encodedURLPath.startsWith("/")) {
+                sb.append(encodedURLPath);
             } else {
                 sb.append("/");
-                sb.append(path);
+                sb.append(encodedURLPath);
             }
         } else {
             sb.append("/");
         }
         if (query != null) {
             sb.append("?");
+            /**
+             * TODO: implement encodeQuerySegment
+             */
             sb.append(query);
         }
         if (ref != null) {
@@ -81,13 +91,58 @@ public class URLHelper {
         return sb.toString();
     }
 
-    public static URL createURL(final String url) throws MalformedURLException {
-        URL ret = new URL(url.trim().replaceAll(" ", "%20"));
-        if (StringUtils.isEmpty(ret.getPath())) {
-            final String newURL = createURL(ret.getProtocol(), ret.getUserInfo(), ret.getHost(), ret.getPort(), ret.getPath(), ret.getQuery(), ret.getRef());
-            ret = new URL(newURL);
+    /**
+     * this method takes care of correct encoding of path segment of an URL
+     *
+     * @param urlPath
+     * @return
+     * @throws UnsupportedEncodingException
+     */
+    private static String encodeURLPathSegment(final String urlPath) throws UnsupportedEncodingException {
+        if (urlPath != null) {
+            boolean encodeRequired = false;
+            for (int index = 0; index < urlPath.length(); index++) {
+                final char c = urlPath.charAt(index);
+                if (c == '"' || c == ' ' || c == '[' || c == ']' || c == '{' || c == '}') {
+                    encodeRequired = true;
+                    break;
+                } else if (c > 127) {
+                    encodeRequired = true;
+                    break;
+                }
+            }
+            if (encodeRequired) {
+                final StringBuilder encodedURLPath = new StringBuilder();
+                for (int index = 0; index < urlPath.length(); index++) {
+                    final char c = urlPath.charAt(index);
+                    if (c == ' ') {
+                        encodedURLPath.append("%20");
+                    } else if (c == '"') {
+                        encodedURLPath.append("%22");
+                    } else if (c == '[') {
+                        encodedURLPath.append("%5B");
+                    } else if (c == ']') {
+                        encodedURLPath.append("%5D");
+                    } else if (c == '{') {
+                        encodedURLPath.append("%7B");
+                    } else if (c == '}') {
+                        encodedURLPath.append("%7D");
+                    } else if (c <= 127) {
+                        encodedURLPath.append(c);
+                    } else {
+                        encodedURLPath.append(URLEncoder.encode(String.valueOf(c), "UTF-8"));
+                    }
+                }
+                return encodedURLPath.toString();
+            }
         }
-        return ret;
+        return urlPath;
+    }
+
+    public static URL createURL(final String url) throws MalformedURLException {
+        final URL tmp = new URL(url.trim().replaceAll(" ", "%20"));
+        final String newURL = createURL(tmp.getProtocol(), tmp.getUserInfo(), tmp.getHost(), tmp.getPort(), tmp.getPath(), tmp.getQuery(), tmp.getRef());
+        return new URL(newURL);
     }
 
     public static String parseLocation(final URL url, final String loc) {
@@ -96,7 +151,7 @@ public class URLHelper {
             if (location.matches("^https?://.+")) {
                 final URL dummyURL = createURL(location);
                 return fixPathTraversal(dummyURL).toString();
-            } else if (location.matches("^:\\d+/.+")) {
+            } else if (location.matches("^:\\d+/.*")) {
                 // scheme + host + loc
                 final URL dummyURL = createURL(url.getProtocol() + "://" + url.getHost() + location);
                 return fixPathTraversal(dummyURL).toString();
@@ -115,10 +170,10 @@ public class URLHelper {
                 final URL dummyURL = createURL(sb.toString());
                 return fixPathTraversal(dummyURL).toString();
             } else if (location.startsWith("?")) {
-                final URL dummyURL = getURL(url, false, false, false);
+                URL dummyURL = getURL(url, false, false, false);
                 final String query = location.substring(1);
                 if (StringUtils.isEmpty(query)) {
-                    return dummyURL.toString();
+                    return createURL(dummyURL.toString()).toString();
                 } else {
                     final StringBuilder sb = new StringBuilder();
                     sb.append(dummyURL.toString());
@@ -126,13 +181,14 @@ public class URLHelper {
                         sb.append("/");
                     }
                     sb.append(location);
-                    return sb.toString();
+                    dummyURL = createURL(sb.toString());
+                    return dummyURL.toString();
                 }
             } else if (location.startsWith("&")) {
                 final String query = location.substring(1);
                 if (StringUtils.isEmpty(query)) {
                     final URL dummyURL = getURL(url, true, false, false);
-                    return dummyURL.toString();
+                    return createURL(dummyURL.toString()).toString();
                 } else {
                     final URL dummyURL = getURL(url, false, false, false);
                     final StringBuilder sb = new StringBuilder();
@@ -271,5 +327,4 @@ public class URLHelper {
             return createURL(sb.toString());
         }
     }
-
 }

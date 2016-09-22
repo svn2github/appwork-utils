@@ -160,8 +160,8 @@ public class ImageProvider {
      * @return
      */
     public static BufferedImage createIcon(final String string, final int width, final int height) {
-        final int w = width;
-        final int h = height;
+        final int w = Math.max(1, width);
+        final int h = Math.max(1, height);
         final BufferedImage image = new BufferedImage(w, h, Transparency.TRANSLUCENT);
         final Graphics2D g = image.createGraphics();
         int size = 1 + width / string.length();

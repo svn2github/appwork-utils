@@ -42,7 +42,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class LogSink extends Logger {
-
     protected java.util.List<WeakReference<LogSource>> logSources     = new ArrayList<WeakReference<LogSource>>();
     protected LogSinkFileHandler                       fileHandler    = null;
     protected ConsoleHandler                           consoleHandler = null;
@@ -73,6 +72,10 @@ public class LogSink extends Logger {
                 source.addHandler(this.consoleHandler);
             }
         }
+    }
+
+    public LogSinkFileHandler getFileHandler() {
+        return fileHandler;
     }
 
     protected void addLogSource(final LogSource source) {
@@ -170,5 +173,4 @@ public class LogSink extends Logger {
     public void setParent(final Logger parent) {
         this.parent = parent;
     }
-
 }

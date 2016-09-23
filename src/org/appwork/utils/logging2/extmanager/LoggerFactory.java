@@ -58,7 +58,8 @@ public class LoggerFactory extends LogSourceProvider {
             // the logmanager should not be initialized here. so setting the
             // property should tell the logmanager to init a ExtLogManager
             // instance.
-            // System.setProperty("java.util.logging.manager", ExtLogManager.class.getName());
+            // TODO: Java 1.9, this will initialize ExtLogManager via ApClassLoader!
+            System.setProperty("java.util.logging.manager", ExtLogManager.class.getName());
             LogManager man = java.util.logging.LogManager.getLogManager();
             // throws an exception if man is not instanceof ExtLogManager
             ((ExtLogManager) man).getClass();
@@ -71,7 +72,7 @@ public class LoggerFactory extends LogSourceProvider {
             if (lm != null) {
                 System.err.println("Logmanager: " + lm + "|" + lm.getClass().getClassLoader());
             } else {
-                System.err.println("Logmanager: " + lm);
+                System.err.println("Logmanager: null");
             }
             try {
                 if (lm != null) {

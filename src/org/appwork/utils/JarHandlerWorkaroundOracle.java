@@ -90,17 +90,27 @@ public class JarHandlerWorkaroundOracle {
                 }
                 {
                     sun.misc.URLClassPath urlClassPath = null;
+                    final ClassLoader cl = JarHandlerWorkaroundOracle.class.getClassLoader();
                     try {
-                        final ClassLoader cl = JarHandlerWorkaroundOracle.class.getClassLoader();
-                        System.out.println(cl);
-                        final Field ucp = cl.getClass().getDeclaredField("ucp");
+                        final Class<?> scl = cl.getClass();
+                        System.out.println("Search ucp in " + scl);
+                        final Field ucp = scl.getDeclaredField("ucp");
                         ucp.setAccessible(true);
                         urlClassPath = (sun.misc.URLClassPath) ucp.get(cl);
                     } catch (final Throwable e) {
                         e.printStackTrace();
-                        final Field bcp = sun.misc.Launcher.class.getDeclaredField("bcp");
-                        bcp.setAccessible(true);
-                        urlClassPath = (sun.misc.URLClassPath) bcp.get(null);
+                        try {
+                            final Class<?> scl = cl.getClass().getSuperclass();
+                            System.out.println("Search ucp in " + scl);
+                            final Field ucp = scl.getDeclaredField("ucp");
+                            ucp.setAccessible(true);
+                            urlClassPath = (sun.misc.URLClassPath) ucp.get(cl);
+                        } catch (final Throwable e2) {
+                            e2.printStackTrace();
+                            final Field bcp = sun.misc.Launcher.class.getDeclaredField("bcp");
+                            bcp.setAccessible(true);
+                            urlClassPath = (sun.misc.URLClassPath) bcp.get(null);
+                        }
                     }
                     if (urlClassPath != null) {
                         System.out.println("JarHandlerWorkaroundOracle:replaceURLClassPath");

@@ -93,23 +93,22 @@ public class JarHandlerWorkaroundOracle {
                     final ClassLoader cl = JarHandlerWorkaroundOracle.class.getClassLoader();
                     try {
                         final Class<?> scl = cl.getClass();
-                        System.out.println("Search ucp in " + scl);
                         final Field ucp = scl.getDeclaredField("ucp");
                         ucp.setAccessible(true);
                         urlClassPath = (sun.misc.URLClassPath) ucp.get(cl);
-                    } catch (final Throwable e) {
-                        e.printStackTrace();
+                    } catch (final NoSuchFieldException e) {
                         try {
                             final Class<?> scl = cl.getClass().getSuperclass();
-                            System.out.println("Search ucp in " + scl);
                             final Field ucp = scl.getDeclaredField("ucp");
                             ucp.setAccessible(true);
                             urlClassPath = (sun.misc.URLClassPath) ucp.get(cl);
-                        } catch (final Throwable e2) {
-                            e2.printStackTrace();
-                            final Field bcp = sun.misc.Launcher.class.getDeclaredField("bcp");
-                            bcp.setAccessible(true);
-                            urlClassPath = (sun.misc.URLClassPath) bcp.get(null);
+                        } catch (final NoSuchFieldException e2) {
+                            try {
+                                final Field bcp = sun.misc.Launcher.class.getDeclaredField("bcp");
+                                bcp.setAccessible(true);
+                                urlClassPath = (sun.misc.URLClassPath) bcp.get(null);
+                            } catch (final NoSuchFieldException e3) {
+                            }
                         }
                     }
                     if (urlClassPath != null) {

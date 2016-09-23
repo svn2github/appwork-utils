@@ -51,9 +51,7 @@ import org.appwork.utils.logging2.LogSourceProvider;
  *
  */
 public class LoggerFactory extends LogSourceProvider {
-
     private static LoggerFactory INSTANCE;
-
     static {
         org.appwork.utils.Application.warnInit();
         try {
@@ -64,21 +62,23 @@ public class LoggerFactory extends LogSourceProvider {
             LogManager man = java.util.logging.LogManager.getLogManager();
             // throws an exception if man is not instanceof ExtLogManager
             ((ExtLogManager) man).getClass();
-
             // The init order is important
             INSTANCE = new LoggerFactory();
             ((ExtLogManager) man).setLoggerFactory(INSTANCE);
         } catch (final Throwable e) {
             e.printStackTrace();
             final java.util.logging.LogManager lm = java.util.logging.LogManager.getLogManager();
-            System.err.println("Logmanager: " + lm);
+            if (lm != null) {
+                System.err.println("Logmanager: " + lm + "|" + lm.getClass().getClassLoader());
+            } else {
+                System.err.println("Logmanager: " + lm);
+            }
             try {
                 if (lm != null) {
                     // seems like the logmanager has already been set, and is
                     // not of type ExtLogManager. try to fix this here
                     // we experiences this bug once on a mac system. may be
                     // caused by mac jvm, or the mac install4j launcher
-
                     // 12.11:
                     // a winxp user had this problem with install4j (exe4j) as
                     // well.
@@ -92,29 +92,22 @@ public class LoggerFactory extends LogSourceProvider {
                     Field modifiersField = Field.class.getDeclaredField("modifiers");
                     modifiersField.setAccessible(true);
                     modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
-
                     field.set(null, manager);
-
                     final Field rootLogger = java.util.logging.LogManager.class.getDeclaredField("rootLogger");
                     rootLogger.setAccessible(true);
-
                     modifiersField.setAccessible(true);
                     modifiersField.setInt(rootLogger, rootLogger.getModifiers() & ~Modifier.FINAL);
                     final Logger rootLoggerInstance = (Logger) rootLogger.get(lm);
                     rootLogger.set(manager, rootLoggerInstance);
                     manager.addLogger(rootLoggerInstance);
-
                     // Adding the global Logger. Doing so in the Logger.<clinit>
                     // would deadlock with the LogManager.<clinit>.
-
                     final Method setLogManager = Logger.class.getDeclaredMethod("setLogManager", new Class[] { java.util.logging.LogManager.class });
                     setLogManager.setAccessible(true);
                     setLogManager.invoke(Logger.global, manager);
-
                     final Enumeration<String> names = lm.getLoggerNames();
                     while (names.hasMoreElements()) {
                         manager.addLogger(lm.getLogger(names.nextElement()));
-
                     }
                 }
             } catch (final Throwable e1) {
@@ -124,7 +117,6 @@ public class LoggerFactory extends LogSourceProvider {
             // e1.printStackTrace();
             // }
         }
-
     }
 
     public static LoggerFactory I() {
@@ -145,9 +137,7 @@ public class LoggerFactory extends LogSourceProvider {
 
     public LoggerFactory() {
         super(System.currentTimeMillis());
-
         Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
-
             @Override
             public void uncaughtException(final Thread t, final Throwable e) {
                 final LogSource logger = getLogger("UncaughtExceptionHandler");
@@ -171,7 +161,6 @@ public class LoggerFactory extends LogSourceProvider {
         synchronized (INSTANCE) {
             if (INSTANCE.defaultLogInterface == null) {
                 INSTANCE.defaultLogInterface = INSTANCE.getLogger("Log.L");
-
             }
         }
         return INSTANCE.defaultLogInterface;
@@ -179,12 +168,11 @@ public class LoggerFactory extends LogSourceProvider {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.utils.logging2.LogSourceProvider#getLogger(java.lang.String)
      */
     @Override
     public LogSource getLogger(String name) {
-
         if (delegate != null) {
             return delegate.getLogger(name);
         }
@@ -196,14 +184,12 @@ public class LoggerFactory extends LogSourceProvider {
      */
     public void setDelegate(LogSourceProvider newLogController) {
         this.delegate = newLogController;
-
     }
 
     /**
      * @return
      */
     public static LoggerFactory getInstance() {
-
         return INSTANCE;
     }
 
@@ -230,7 +216,5 @@ public class LoggerFactory extends LogSourceProvider {
             return;
         }
         logger.log(e);
-
     }
-
 }

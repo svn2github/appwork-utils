@@ -37,7 +37,6 @@ package org.appwork.utils.logging2;
  * @author daniel
  *
  */
-
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -62,7 +61,6 @@ import org.appwork.utils.StringUtils;
 import org.appwork.utils.os.CrossSystem;
 
 public abstract class LogSourceProvider {
-
     /**
      *
      */
@@ -74,7 +72,6 @@ public abstract class LogSourceProvider {
     protected long                           logTimeout;
 
     public long getLogTimeout() {
-
         return logTimeout;
     }
 
@@ -85,7 +82,6 @@ public abstract class LogSourceProvider {
     protected Thread            flushThread = null;
     protected final File        logFolder;
     protected LogConsoleHandler consoleHandler;
-
     protected boolean           instantFlushDefault;
     private final boolean       debugMode;
 
@@ -113,10 +109,8 @@ public abstract class LogSourceProvider {
     public static final String         LOG_NO_CONSOLE         = "LOG_NO_CONSOLE";
     public static final String         LOG_NO_FILE            = "LOG_NO_FILE";
     public static final String         LOG_SINGLE_LOGGER_NAME = "LOG_SINGLE_LOGGER_NAME";
-
     static {
         ShutdownController.getInstance().addShutdownEvent(new ShutdownEvent() {
-
             @Override
             public void onShutdown(final ShutdownRequest shutdownRequest) {
                 LogSourceProvider.flushAllSinks(false, true);
@@ -126,7 +120,6 @@ public abstract class LogSourceProvider {
             public String toString() {
                 return "flushing logs to disk";
             }
-
         });
     }
 
@@ -280,12 +273,17 @@ public abstract class LogSourceProvider {
      */
     public LogSource getCurrentClassLogger() {
         Throwable e = null;
-
         final Throwable stackTrace = new Throwable().fillInStackTrace();
         try {
             for (final StackTraceElement element : stackTrace.getStackTrace()) {
                 final String currentClassName = element.getClassName();
-                final Class<?> currentClass = Class.forName(currentClassName, true, Thread.currentThread().getContextClassLoader());
+                final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+                final Class<?> currentClass;
+                if (classLoader != null) {
+                    currentClass = Class.forName(currentClassName, true, classLoader);
+                } else {
+                    currentClass = Class.forName(currentClassName);
+                }
                 if (Modifier.isAbstract(currentClass.getModifiers())) {
                     /* we dont want the abstract class to be used */
                     continue;
@@ -330,7 +328,6 @@ public abstract class LogSourceProvider {
             name = name + ".log";
         }
         synchronized (INIT_LOCK) {
-
             sink = getGlobalLockSink(name.toLowerCase(Locale.ENGLISH));
             if (sink == null) {
                 sink = new LogSink(name);
@@ -377,7 +374,6 @@ public abstract class LogSourceProvider {
                 }
             }
         }
-
         return ret;
     }
 
@@ -413,7 +409,6 @@ public abstract class LogSourceProvider {
             return;
         }
         this.flushThread = new Thread("LogFlushThread") {
-
             @Override
             public void run() {
                 while (true) {
@@ -432,9 +427,7 @@ public abstract class LogSourceProvider {
                     } catch (final Throwable e) {
                     }
                 }
-
             }
-
         };
         this.flushThread.setDaemon(true);
         this.flushThread.start();
@@ -448,6 +441,5 @@ public abstract class LogSourceProvider {
         for (LogSourceProvider p : getInstances()) {
             p.flushSinks(flushOnly, finalFlush);
         }
-
     }
 }

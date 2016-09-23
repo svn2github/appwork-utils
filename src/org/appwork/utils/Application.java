@@ -71,13 +71,10 @@ import org.appwork.utils.os.CrossSystem;
  *
  */
 public class Application {
-
     private static Boolean              IS_JARED      = null;
-
     static {
         Application.redirectOutputStreams();
     }
-
     private static String               APP_FOLDER    = ".appwork";
     private static String               ROOT;
     private static long                 javaVersion   = 0;
@@ -88,7 +85,6 @@ public class Application {
     public final static long            JAVA19        = 19000000;
     private static Boolean              IS_SYNTHETICA = null;
     private static Boolean              JVM64BIT      = null;
-
     private static boolean              REDIRECTED    = false;
     public static PauseableOutputStream STD_OUT;
     public static PauseableOutputStream ERR_OUT;
@@ -118,11 +114,16 @@ public class Application {
     }
 
     /**
+     *
+     * WARNING: this does no longer work for Java >=1.9
+     *
+     *
      * Adds a folder to the System classloader classpath this might fail if there is a security manager
      *
      * @param file
      * @throws IOException
      */
+    @Deprecated
     public static void addFolderToClassPath(final File file) throws IOException {
         if (file == null) {
             throw new IllegalArgumentException("file==null");
@@ -131,11 +132,16 @@ public class Application {
     }
 
     /**
+     *
+     * WARNING: this does no longer work for Java >=1.9
+     *
+     *
      * Adds a url to the classloader classpath this might fail if there is a security manager
      *
      * @param file
      * @throws IOException
      */
+    @Deprecated
     public static void addUrlToClassPath(final URL url, final ClassLoader cl) throws IOException {
         try {
             if (url == null) {
@@ -616,7 +622,7 @@ public class Application {
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Java 1.6 Update 18 has a serious bug in garbage collector!");
             /*
              * java 1.6 update 18 has a bug in garbage collector, causes java crashes
-             * 
+             *
              * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6847956
              */
             return true;
@@ -639,7 +645,7 @@ public class Application {
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("freezing AppKit thread bug");
             /*
              * http://bugs.java.com/view_bug.do?bug_id=8025588
-             * 
+             *
              * Frozen AppKit thread
              */
             return true;
@@ -684,7 +690,6 @@ public class Application {
     }
 
     public static class PauseableOutputStream extends OutputStream {
-
         private final PrintStream     _out;
         private ByteArrayOutputStream buffer;
 
@@ -697,7 +702,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.io.OutputStream#write(int)
          */
         @Override
@@ -707,7 +712,6 @@ public class Application {
                     try {
                         os.write(paramInt);
                     } catch (Throwable e) {
-
                     }
                 }
             }
@@ -716,12 +720,11 @@ public class Application {
                 return;
             }
             this._out.write(paramInt);
-
         }
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.io.OutputStream#write(byte[])
          */
         @Override
@@ -731,7 +734,6 @@ public class Application {
                     try {
                         os.write(b);
                     } catch (Throwable e) {
-
                     }
                 }
             }
@@ -744,18 +746,16 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.io.OutputStream#write(byte[], int, int)
          */
         @Override
         public void write(byte[] buff, int off, int len) throws IOException {
-
             if (this.branches != null) {
                 for (OutputStream os : this.branches) {
                     try {
                         os.write(buff, off, len);
                     } catch (Throwable e) {
-
                     }
                 }
             }
@@ -768,7 +768,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.io.OutputStream#flush()
          */
         @Override
@@ -782,7 +782,6 @@ public class Application {
                     try {
                         os.flush();
                     } catch (Throwable e) {
-
                     }
                 }
             }
@@ -791,7 +790,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.io.OutputStream#close()
          */
         @Override
@@ -805,7 +804,6 @@ public class Application {
                     try {
                         os.close();
                     } catch (Throwable e) {
-
                     }
                 }
             }
@@ -819,7 +817,6 @@ public class Application {
         public boolean setBufferEnabled(boolean b) throws IOException {
             synchronized (this) {
                 if (b) {
-
                     if (this.buffer != null) {
                         return true;
                     }
@@ -833,7 +830,6 @@ public class Application {
                     } else {
                         return false;
                     }
-
                 }
             }
         }
@@ -848,9 +844,7 @@ public class Application {
                 this.branches = new ArrayList<OutputStream>();
             }
             this.branches.add(os);
-
         }
-
     }
 
     /**
@@ -903,7 +897,6 @@ public class Application {
      */
     public static boolean isHeadless() {
         return GraphicsEnvironment.isHeadless();
-
     }
 
     /**
@@ -924,7 +917,6 @@ public class Application {
      */
     public static File generateNumberedResource(String string) {
         return Application.generateNumbered(Application.getResource(string));
-
     }
 
     /**
@@ -957,12 +949,9 @@ public class Application {
             return ret;
         }
         try {
-
             final Class<? extends LookAndFeel> lafClass = UIManager.getLookAndFeel().getClass();
             Class<?> cls = Class.forName("de.javasoft.plaf.synthetica.SyntheticaLookAndFeel", false, Application.class.getClassLoader());
-
             ret = cls != null && cls.isAssignableFrom(lafClass);
-
         } catch (Throwable e) {
         } finally {
             if (ret != null) {

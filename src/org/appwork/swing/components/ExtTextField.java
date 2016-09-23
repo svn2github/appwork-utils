@@ -58,7 +58,6 @@ public class ExtTextField extends JTextField implements CaretListener, FocusList
     private static final long serialVersionUID     = -3625278218179478516L;
     protected Color           defaultColor;
     protected Color           helpColor;
-
     {
         this.addCaretListener(this);
         this.addFocusListener(this);
@@ -68,7 +67,6 @@ public class ExtTextField extends JTextField implements CaretListener, FocusList
             this.helpColor = Color.LIGHT_GRAY;
         }
         this.getDocument().addDocumentListener(this);
-
     }
     protected String          helpText             = null;
     private boolean           setting;
@@ -76,12 +74,11 @@ public class ExtTextField extends JTextField implements CaretListener, FocusList
     private boolean           helperEnabled        = true;
 
     public void caretUpdate(final CaretEvent arg0) {
-
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.swing.event.DocumentListener#changedUpdate(javax.swing.event. DocumentEvent)
      */
     @Override
@@ -105,10 +102,8 @@ public class ExtTextField extends JTextField implements CaretListener, FocusList
             } else {
                 this.selectAll();
             }
-
         }
         this.setForeground(this.defaultColor);
-
     }
 
     public void focusLost(final FocusEvent arg0) {
@@ -119,7 +114,6 @@ public class ExtTextField extends JTextField implements CaretListener, FocusList
             this.setText(this.helpText);
             this.setForeground(this.helpColor);
         }
-
     }
 
     /**
@@ -140,7 +134,7 @@ public class ExtTextField extends JTextField implements CaretListener, FocusList
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.app.gui.copycutpaste.ContextMenuAdapter#getPopupMenu(org. appwork.app.gui.copycutpaste.CutAction,
      * org.appwork.app.gui.copycutpaste.CopyAction, org.appwork.app.gui.copycutpaste.PasteAction,
      * org.appwork.app.gui.copycutpaste.DeleteAction, org.appwork.app.gui.copycutpaste.SelectAction)
@@ -148,7 +142,6 @@ public class ExtTextField extends JTextField implements CaretListener, FocusList
     @Override
     public JPopupMenu getPopupMenu(final AbstractAction cutAction, final AbstractAction copyAction, final AbstractAction pasteAction, final AbstractAction deleteAction, final AbstractAction selectAction) {
         final JPopupMenu menu = new JPopupMenu();
-
         menu.add(cutAction);
         menu.add(copyAction);
         menu.add(pasteAction);
@@ -180,7 +173,7 @@ public class ExtTextField extends JTextField implements CaretListener, FocusList
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.swing.event.DocumentListener#insertUpdate(javax.swing.event. DocumentEvent)
      */
     @Override
@@ -211,7 +204,7 @@ public class ExtTextField extends JTextField implements CaretListener, FocusList
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.swing.event.DocumentListener#removeUpdate(javax.swing.event. DocumentEvent)
      */
     @Override
@@ -230,7 +223,6 @@ public class ExtTextField extends JTextField implements CaretListener, FocusList
      */
     public void setClearHelpTextOnFocus(final boolean b) {
         this.clearHelpTextOnFocus = b;
-
     }
 
     public void setHelpColor(final Color helpColor) {
@@ -249,6 +241,7 @@ public class ExtTextField extends JTextField implements CaretListener, FocusList
         this.helpText = helpText;
         if (this.getText().length() == 0 || this.getText().equals(old)) {
             this.setText(this.helpText);
+            this.setToolTipText(this.helpText);
             this.setForeground(this.helpColor);
         }
     }
@@ -262,7 +255,6 @@ public class ExtTextField extends JTextField implements CaretListener, FocusList
 
     @Override
     public void setText(String t) {
-
         if (!this.isHelperEnabled()) {
             if (StringUtils.equals(t == null ? "" : t, getText())) {
                 return;
@@ -284,7 +276,6 @@ public class ExtTextField extends JTextField implements CaretListener, FocusList
                     if (this.helpText.equals(t)) {
                         this.setForeground(this.helpColor);
                     } else {
-
                         this.setForeground(this.defaultColor);
                     }
                 }
@@ -294,5 +285,4 @@ public class ExtTextField extends JTextField implements CaretListener, FocusList
             }
         }
     }
-
 }

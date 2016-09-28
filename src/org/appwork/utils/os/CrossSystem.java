@@ -362,7 +362,7 @@ public class CrossSystem {
         pathPart = pathPart.replaceFirst("^\\.+", ".");
         /*
          * remove ending dots, not allowed under windows and others os maybe too
-         * 
+         *
          * Do not end a file or directory name with a space or a period.
          */
         pathPart = pathPart.replaceFirst("\\.+$", "");
@@ -730,6 +730,20 @@ public class CrossSystem {
     }
 
     public static boolean is64BitArch() {
+        final String wow64Arch = System.getProperty("PROCESSOR_ARCHITEW6432");
+        if (wow64Arch != null) {
+            // cpu architecture
+            // null = 32Bit
+            // AMD64 = 64Bit
+            return wow64Arch.trim().endsWith("64");
+        }
+        final String arch = System.getenv("PROCESSOR_ARCHITECTURE");
+        if (arch != null) {
+            // process architecture
+            // x86 = 32Bit
+            // AMD64 = 64Bit
+            return arch.trim().endsWith("64");
+        }
         final String osArch = System.getProperty("os.arch");
         final boolean is64bit;
         if (osArch != null) {

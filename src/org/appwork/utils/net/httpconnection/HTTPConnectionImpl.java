@@ -839,12 +839,15 @@ public class HTTPConnectionImpl implements HTTPConnection {
                 this.httpHeader = new String(bytes, "ISO-8859-1").trim();
             }
             /* parse response code/message */
-            if (this.httpHeader.startsWith("HTTP")) {
-                final String code = new Regex(this.httpHeader, "HTTP.*? (\\d+)").getMatch(0);
+            if (this.httpHeader.matches("^[a-zA-Z0-9/\\.]+\\s*\\d+.*?")) {
+                /**
+                 * HTTP/1.0 or HTTP/1.1 or HTTP/1.0 compatible header
+                 */
+                final String code = new Regex(this.httpHeader, "[a-zA-Z0-9/\\.]+\\s*(\\d+)").getMatch(0);
                 if (code != null) {
                     this.httpResponseCode = Integer.parseInt(code);
                 }
-                this.httpResponseMessage = new Regex(this.httpHeader, "HTTP.*? \\d+ (.+)").getMatch(0);
+                this.httpResponseMessage = new Regex(this.httpHeader, "[a-zA-Z0-9/\\.]+\\s*\\d+\\s*(.+)").getMatch(0);
                 if (this.httpResponseMessage == null) {
                     this.httpResponseMessage = "";
                 }

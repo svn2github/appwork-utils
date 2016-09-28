@@ -773,6 +773,7 @@ public class CrossSystem {
                 is64bit = false;
             }
         } else {
+            // no os.arch?!
             is64bit = false;
         }
         return is64bit;

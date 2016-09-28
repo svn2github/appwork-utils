@@ -1140,8 +1140,12 @@ public class HTTPConnectionImpl implements HTTPConnection {
                 /* START-/SIZE */
                 /* content-range: bytes 1020054729-/1073741824 */
                 final long gotSB = Long.parseLong(range[0]);
-                final long gotS = "*".equals(range[1]) ? -1 : (Long.parseLong(range[1]) - 1);
-                this.ranges = new long[] { gotSB, gotS, gotS };
+                if ("*".equals(range[1])) {
+                    this.ranges = new long[] { gotSB, -1, -1 };
+                } else {
+                    final long gotS = Long.parseLong(range[1]);
+                    this.ranges = new long[] { gotSB, gotS - 1, gotS };
+                }
             } else if (this.getResponseCode() == 416 && (range = new Regex(contentRange, ".\\s*\\*\\s*/\\s*(\\d+|\\*)").getRow(0)) != null) {
                 /* a 416 may respond with content-range * | content.size answer */
                 this.ranges = new long[] { -1, -1, "*".equals(range[0]) ? -1 : Long.parseLong(range[0]) };

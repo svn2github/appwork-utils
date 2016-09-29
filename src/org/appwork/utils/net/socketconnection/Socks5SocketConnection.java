@@ -156,7 +156,8 @@ public class Socks5SocketConnection extends SocketConnection {
         os.flush();
         /* read response, 4 bytes and then read rest of response */
         final InputStream is = proxySocket.getInputStream();
-        final byte[] resp = SocketConnection.ensureRead(is, 4, null);
+        final byte[] read = SocketConnection.ensureRead(is, 4, null);
+        final int[] resp = SocketConnection.byteArrayToIntArray(read);
         if (resp[0] != 5) {
             throw new IOException("Invalid response:" + resp[0]);
         }
@@ -179,21 +180,29 @@ public class Socks5SocketConnection extends SocketConnection {
             throw new EndpointConnectException("Socks5 could not establish connection, status=" + resp[1]);
         }
         if (resp[3] == 1) {
-            /* ip4v response */
+            /* ipv4 response */
             final byte[] connectedIP = SocketConnection.ensureRead(is, 4, null);
             /* port */
             final byte[] connectedPort = SocketConnection.ensureRead(is, 2, null);
             if (logger != null) {
-                logger.append("<-BOUND IP:" + InetAddress.getByAddress(connectedIP) + ":" + ByteBuffer.wrap(connectedPort).getShort() + "\r\n");
+                logger.append("<-BOUND IPv4:" + InetAddress.getByAddress(connectedIP) + ":" + (ByteBuffer.wrap(connectedPort).getShort() & 0xffff) + "\r\n");
             }
         } else if (resp[3] == 3) {
             /* domain name response */
             final byte[] length = SocketConnection.ensureRead(is, 1, null);
-            final byte[] connectedDomain = SocketConnection.ensureRead(is, length[0], null);
+            final byte[] connectedDomain = SocketConnection.ensureRead(is, SocketConnection.byteToInt(length[0]), null);
             /* port */
             final byte[] connectedPort = SocketConnection.ensureRead(is, 2, null);
             if (logger != null) {
-                logger.append("<-BOUND Domain:" + new String(connectedDomain) + ":" + ByteBuffer.wrap(connectedPort).getShort() + "\r\n");
+                logger.append("<-BOUND Domain:" + new String(connectedDomain) + ":" + (ByteBuffer.wrap(connectedPort).getShort() & 0xffff) + "\r\n");
+            }
+        } else if (resp[3] == 4) {
+            /* ipv6 response */
+            final byte[] connectedIP = SocketConnection.ensureRead(is, 16, null);
+            /* port */
+            final byte[] connectedPort = SocketConnection.ensureRead(is, 2, null);
+            if (logger != null) {
+                logger.append("<-BOUND IPv6:" + InetAddress.getByAddress(connectedIP) + ":" + (ByteBuffer.wrap(connectedPort).getShort() & 0xffff) + "\r\n");
             }
         } else {
             throw new IOException("Socks5 unsupported address Type " + resp[3]);
@@ -227,7 +236,8 @@ public class Socks5SocketConnection extends SocketConnection {
         os.flush();
         /* read response, 2 bytes */
         final InputStream is = proxySocket.getInputStream();
-        final byte[] resp = SocketConnection.ensureRead(is, 2, null);
+        final byte[] read = SocketConnection.ensureRead(is, 2, null);
+        final int[] resp = SocketConnection.byteArrayToIntArray(read);
         if (resp[0] != 1) {
             throw new IOException("Invalid response:" + resp[0]);
         }
@@ -285,7 +295,8 @@ public class Socks5SocketConnection extends SocketConnection {
         os.flush();
         /* read response, 2 bytes */
         final InputStream is = proxySocket.getInputStream();
-        final byte[] resp = SocketConnection.ensureRead(is, 2, null);
+        final byte[] read = SocketConnection.ensureRead(is, 2, null);
+        final int[] resp = SocketConnection.byteArrayToIntArray(read);
         if (resp[0] != 5) {
             throw new IOException("Invalid response:" + resp[0]);
         }

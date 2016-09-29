@@ -139,7 +139,8 @@ public class Socks4SocketConnection extends SocketConnection {
         os.flush();
         /* read response, 8 bytes */
         final InputStream is = proxySocket.getInputStream();
-        final byte[] resp = SocketConnection.ensureRead(is, 2, null);
+        final byte[] read = SocketConnection.ensureRead(is, 2, null);
+        final int[] resp = SocketConnection.byteArrayToIntArray(read);
         if (resp[0] != 0) {
             throw new IOException("Invalid response:" + resp[0]);
         }
@@ -160,7 +161,7 @@ public class Socks4SocketConnection extends SocketConnection {
         /* ip4v response */
         final byte[] connectedIP = SocketConnection.ensureRead(is, 4, null);
         if (logger != null) {
-            logger.append("<-BOUND IP:" + InetAddress.getByAddress(connectedIP) + ":" + ByteBuffer.wrap(connectedPort).getShort() + "\r\n");
+            logger.append("<-BOUND IP:" + InetAddress.getByAddress(connectedIP) + ":" + (ByteBuffer.wrap(connectedPort).getShort() & 0xffff) + "\r\n");
         }
         return proxySocket;
     }

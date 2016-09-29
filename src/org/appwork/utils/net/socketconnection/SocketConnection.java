@@ -128,6 +128,18 @@ public abstract class SocketConnection extends Socket {
         return buf;
     }
 
+    protected static final int byteToInt(byte b) {
+        return b & 0xFF;
+    }
+
+    protected static final int[] byteArrayToIntArray(byte[] b) {
+        final int ret[] = new int[b.length];
+        for (int index = 0; index < b.length; index++) {
+            ret[index] = byteToInt(b[index]);
+        }
+        return ret;
+    }
+
     private SocketAddress                                bindPoint            = null;
     private Boolean                                      keepAlive            = null;
     private Boolean                                      oobInline            = null;

@@ -453,4 +453,7 @@ public interface AWUTranslation extends TranslateInterface {
 
     @Default(lngs = { "en", "de" }, values = { "Close", "Schließen" })
     String lit_close();
+
+    @Default(lngs = { "en", "de" }, values = { "and", "und" })
+    String lit_and();
 }

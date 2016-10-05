@@ -67,6 +67,7 @@ import org.appwork.storage.simplejson.mapper.Getter;
 import org.appwork.storage.simplejson.mapper.Setter;
 import org.appwork.utils.CompareUtils;
 import org.appwork.utils.IO;
+import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.logging2.extmanager.LoggerFactory;
 import org.appwork.utils.net.HTTPHeader;
@@ -395,7 +396,7 @@ public class DefaultDocsPageFactory extends InterfaceHandler<Object> {
                     requiredTypes.addAll(getTypes(paramClass));
                     String paramName = typeToString(requiredTypes, paramClass, false, false);
                     if (parameterNames != null) {
-                        call += parameterNames[i];
+                        call += new Regex(parameterNames[i], "^(\\S+)").getMatch(0);
                         header += parameterNames[i];
                     } else {
                         call += paramName;
@@ -411,7 +412,7 @@ public class DefaultDocsPageFactory extends InterfaceHandler<Object> {
                 }
                 int id = this.count.incrementAndGet();
                 int i = 3;
-                content.append("<a class='anchor' id='tag_" + id + "'></a>" + "<h3 class='main-type-method'>" + "<span  style=''>" + htmlEncode(name) + "</span><span style='position: absolute;right: 20px;'>Parameter: " + count + " " + htmlEncode(header) + "</span>" + "</h" + i + ">");
+                content.append("<a class='anchor' id='tag_" + id + "'></a>" + "<h3 class='main-type-method'>" + "<span  style=''>" + htmlEncode(name) + "</span><span style='position: absolute;right: 20px;'>Parameter: " + count + "</span>" + "</h" + i + ">");
                 nav.append("<div class='menu-h" + i + "'><a href=\"#tag_" + id + "\"><span class='menu-content-h" + i + " tooltip' >" + "<span  style=''>" + htmlEncode(name) + "</span><span class='tooltiptext'>" + htmlEncode("Parameter: " + count + " " + htmlEncode(header)) + "</span>" + "</span></a></div>");
                 nav.append("</li>");
                 content.append("<ul class='keyvalue'>");

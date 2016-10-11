@@ -47,13 +47,11 @@ import org.appwork.utils.logging.LogFormatter;
  *
  */
 public class LogConsoleHandler extends ConsoleHandler {
-
     private HashSet<String> allowedLoggerNames = new HashSet<String>();
 
     public LogConsoleHandler() {
         setLevel(Level.ALL);
         setFormatter(new LogFormatter() {
-
             private final int lineLength = 400;
 
             @Override
@@ -90,8 +88,11 @@ public class LogConsoleHandler extends ConsoleHandler {
                     boolean wrapText = false;
                     boolean isWrapped = false;
                     outerLoop: while (position < length) {
-                        if (position > 0) {
-                            sb.append("\r\n");
+                        if (sb.length() > 0 && position > 0) {
+                            final char lastChar = sb.charAt(sb.length() - 1);
+                            if (lastChar != '\r' && lastChar != '\n') {
+                                sb.append("\r\n");
+                            }
                         }
                         final int max = Math.min(length, position + lineLength);
                         for (int index = position; index < max; index++) {
@@ -108,7 +109,6 @@ public class LogConsoleHandler extends ConsoleHandler {
                                 continue outerLoop;
                             }
                         }
-
                         wrapText = true;
                         isWrapped = true;
                         sb.append(ret.substring(position, max));
@@ -140,7 +140,6 @@ public class LogConsoleHandler extends ConsoleHandler {
         if (allowedLoggerNames.contains(record.getLoggerName().toLowerCase(Locale.ENGLISH))) {
             return true;
         }
-
         return false;
     }
 
@@ -160,5 +159,4 @@ public class LogConsoleHandler extends ConsoleHandler {
     @Override
     public void setFilter(final Filter newFilter) throws SecurityException {
     }
-
 }

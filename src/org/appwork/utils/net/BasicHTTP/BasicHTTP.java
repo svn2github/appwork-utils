@@ -161,6 +161,10 @@ public class BasicHTTP {
         return baos.toByteArray();
     }
 
+    public void download(final URL url, final DownloadProgress progress, final long maxSize, final OutputStream baos, final long resumePosition) throws BasicHTTPException, InterruptedException {
+        download(url, progress, maxSize, baos, resumePosition, System.currentTimeMillis() + (60 * 60 * 1000l));
+    }
+
     /**
      *
      * Please do not forget to close the output stream.
@@ -172,7 +176,7 @@ public class BasicHTTP {
      * @throws IOException
      * @throws InterruptedException
      */
-    public void download(final URL url, final DownloadProgress progress, final long maxSize, final OutputStream baos, final long resumePosition) throws BasicHTTPException, InterruptedException {
+    protected void download(final URL url, final DownloadProgress progress, final long maxSize, final OutputStream baos, final long resumePosition, final long redirectTimeoutTimeStamp) throws BasicHTTPException, InterruptedException {
         synchronized (this.lock) {
             InputStream input = null;
             int ioExceptionWhere = 0;
@@ -193,20 +197,27 @@ public class BasicHTTP {
                 this.connection.connect();
                 final boolean ranged = this.connection.getRequestProperty("Range") != null;
                 if (ranged && this.connection.getResponseCode() == 200) {
-                    //
                     throw new BadRangeResponse(this.connection);
                 }
-                if (this.connection.getResponseCode() == 302) {
+                if (this.connection.getResponseCode() == 301 || this.connection.getResponseCode() == 302 || this.connection.getResponseCode() == 303 || this.connection.getResponseCode() == 307) {
                     final String red = this.connection.getHeaderField("Location");
                     if (red != null) {
                         try {
                             this.connection.disconnect();
                         } catch (final Throwable e) {
                         }
-                        this.download(new URL(URLHelper.parseLocation(url, red)), progress, maxSize, baos, resumePosition);
+                        if (redirectTimeoutTimeStamp > 0 && System.currentTimeMillis() >= redirectTimeoutTimeStamp) {
+                            throw new IOException("RedirectTimeout reached!");
+                        }
+                        if (this.connection.getResponseCode() == 302) {
+                            Thread.sleep(100);
+                        } else {
+                            Thread.sleep(5000);
+                        }
+                        this.download(new URL(URLHelper.parseLocation(url, red)), progress, maxSize, baos, resumePosition, redirectTimeoutTimeStamp);
                         return;
                     }
-                    throw new IOException("302 without locationHeader!");
+                    throw new IOException("Redirect with ResponseCode " + this.connection.getResponseCode() + " but no location header!");
                 }
                 this.checkResponseCode();
                 input = this.connection.getInputStream();

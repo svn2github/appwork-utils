@@ -47,16 +47,19 @@ public class CrossSystem17 {
         try {
             final java.nio.file.Path filePath = file.toPath().toRealPath(java.nio.file.LinkOption.NOFOLLOW_LINKS);
             final String filePathString = filePath.toString();
-            String fileString = file.getAbsolutePath();
-            if (CrossSystem.isWindows()) {
+            final String fileString = file.getAbsolutePath();
+            if (filePathString.equals(fileString)) {
+                return true;
+            } else if (CrossSystem.isWindows()) {
                 final java.nio.file.Path root = filePath.getRoot();
                 if (root != null) {
                     // special handling for c:\\Test.txt vs C:\\Test.txt
                     final String rootString = root.toString();
-                    fileString = fileString.replaceFirst("(?i)^" + Pattern.quote(rootString), Matcher.quoteReplacement(rootString));
+                    final String fileString2 = fileString.replaceFirst("(?i)^" + Pattern.quote(rootString), Matcher.quoteReplacement(rootString));
+                    return filePathString.equals(fileString2);
                 }
             }
-            return filePathString.equals(fileString);
+            return false;
         } catch (java.nio.file.NoSuchFileException e) {
             return false;
         }

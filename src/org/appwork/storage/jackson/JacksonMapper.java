@@ -58,14 +58,13 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
  *
  */
 public class JacksonMapper implements JSONMapper {
-
     private final ObjectMapper mapper;
 
     public JacksonMapper() {
         mapper = new ObjectMapper(new ExtJsonFactory());
         mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         mapper.configure(SerializationFeature.INDENT_OUTPUT, true);// needed as MyJDownloader Clients may use regex and fail because of
-                                                                   // changed ident
+        // changed ident
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
@@ -76,9 +75,7 @@ public class JacksonMapper implements JSONMapper {
      */
     public <T> void addSerializer(final Class<T> clazz, final JsonSerializer<T> jsonSerializer) {
         final SimpleModule mod = new SimpleModule("MyModule", new Version(1, 0, 0, null));
-
         mod.addSerializer(clazz, new com.fasterxml.jackson.databind.JsonSerializer<T>() {
-
             @Override
             public void serialize(final T arg0, final JsonGenerator jgen, final SerializerProvider arg2) throws IOException, JsonProcessingException {
                 jgen.writeRawValue(jsonSerializer.toJSonString(arg0));
@@ -92,8 +89,6 @@ public class JacksonMapper implements JSONMapper {
         try {
             return mapper.writeValueAsString(value);
         } catch (final JsonProcessingException e) {
-            throw new JSonMapperException(e);
-        } catch (final IOException e) {
             throw new JSonMapperException(e);
         }
     }
@@ -146,8 +141,6 @@ public class JacksonMapper implements JSONMapper {
         try {
             return mapper.writeValueAsBytes(value);
         } catch (final JsonProcessingException e) {
-            throw new JSonMapperException(e);
-        } catch (final IOException e) {
             throw new JSonMapperException(e);
         }
     }
@@ -258,5 +251,4 @@ public class JacksonMapper implements JSONMapper {
             throw new JSonMapperException(e);
         }
     }
-
 }

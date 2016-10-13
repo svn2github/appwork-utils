@@ -201,7 +201,6 @@ public class EventsAPI implements EventsAPIInterface, RemoteAPIEventsSender {
         } catch (final Throwable e) {
             subscriber.pushBack(events);
             throw new InternalApiException(e);
-
         }
     }
 
@@ -300,9 +299,14 @@ public class EventsAPI implements EventsAPIInterface, RemoteAPIEventsSender {
 
     @Override
     public SubscriptionResponse setsubscription(final long subscriptionid, final String[] subscriptions, final String[] exclusions) {
-        final Subscriber subscriber = getSubscriber(subscriptionid);
+        Subscriber subscriber = getSubscriber(subscriptionid);
         if (subscriber == null) {
-            return new SubscriptionResponse();
+            subscriber = new Subscriber(subscriptionid, convertToPatternArray(subscriptions), convertToPatternArray(exclusions));
+            if (addSubscriber(subscriber)) {
+                return new SubscriptionResponse(subscriber);
+            } else {
+                return new SubscriptionResponse();
+            }
         } else {
             synchronized (subscriber.getModifyLock()) {
                 final List<Pattern> newExclusions = new ArrayList<Pattern>();

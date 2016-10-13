@@ -48,7 +48,6 @@ import java.util.regex.Pattern;
  *
  */
 public class Subscriber {
-
     protected static final AtomicLong ID = new AtomicLong(System.currentTimeMillis());
 
     private static long createUniqueAlltimeID() {
@@ -72,7 +71,7 @@ public class Subscriber {
     protected volatile Pattern[]            subscriptions;
     protected volatile Pattern[]            exclusions;
     protected final ArrayDeque<EventObject> events              = new ArrayDeque<EventObject>();
-    protected final long                    subscriptionID      = createUniqueAlltimeID();
+    protected final long                    subscriptionID;
     protected long                          lastPolledTimestamp = System.currentTimeMillis();
     protected long                          pollTimeout         = 25 * 1000l;
     protected long                          maxKeepalive        = 120 * 1000l;
@@ -89,6 +88,13 @@ public class Subscriber {
     protected Subscriber(final Pattern[] subscriptions, final Pattern[] exclusions) {
         this.setSubscriptions(subscriptions);
         this.setExclusions(exclusions);
+        subscriptionID = createUniqueAlltimeID();
+    }
+
+    protected Subscriber(final long subscriptionID, final Pattern[] subscriptions, final Pattern[] exclusions) {
+        this.setSubscriptions(subscriptions);
+        this.setExclusions(exclusions);
+        this.subscriptionID = subscriptionID;
     }
 
     public Pattern[] getExclusions() {
@@ -309,5 +315,4 @@ public class Subscriber {
         }
         return new HashSet<Pattern>(Arrays.asList(input)).toArray(new Pattern[] {});
     }
-
 }

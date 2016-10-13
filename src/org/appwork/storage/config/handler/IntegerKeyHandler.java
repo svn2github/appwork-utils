@@ -45,11 +45,8 @@ import org.appwork.storage.config.annotations.SpinnerValidator;
  *
  */
 public class IntegerKeyHandler extends KeyHandler<Integer> {
-
     private SpinnerValidator validator;
-
     private int              min;
-
     private int              max;
 
     /**
@@ -58,7 +55,6 @@ public class IntegerKeyHandler extends KeyHandler<Integer> {
      */
     public IntegerKeyHandler(final StorageHandler<?> storageHandler, final String key) {
         super(storageHandler, key);
-        // TODO Auto-generated constructor stub
     }
 
     @SuppressWarnings("unchecked")
@@ -69,7 +65,6 @@ public class IntegerKeyHandler extends KeyHandler<Integer> {
 
     @Override
     protected Class<? extends Annotation> getDefaultAnnotation() {
-
         return DefaultIntValue.class;
     }
 
@@ -80,7 +75,7 @@ public class IntegerKeyHandler extends KeyHandler<Integer> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.storage.config.KeyHandler#initHandler()
      */
     @Override
@@ -94,7 +89,7 @@ public class IntegerKeyHandler extends KeyHandler<Integer> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.storage.config.KeyHandler#putValue(java.lang.Object)
      */
     @Override
@@ -104,7 +99,7 @@ public class IntegerKeyHandler extends KeyHandler<Integer> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.storage.config.KeyHandler#validateValue(java.lang.Object)
      */
     @Override
@@ -118,7 +113,5 @@ public class IntegerKeyHandler extends KeyHandler<Integer> {
                 throw new ValidationException("value=" + v + " > max=" + max);
             }
         }
-
     }
-
 }

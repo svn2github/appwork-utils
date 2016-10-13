@@ -45,7 +45,6 @@ import org.appwork.storage.config.annotations.SpinnerValidator;
  *
  */
 public class LongKeyHandler extends KeyHandler<Long> {
-
     private SpinnerValidator validator;
     private long             min;
     private long             max;
@@ -56,7 +55,6 @@ public class LongKeyHandler extends KeyHandler<Long> {
      */
     public LongKeyHandler(final StorageHandler<?> storageHandler, final String key) {
         super(storageHandler, key);
-
         // TODO Auto-generated constructor stub
     }
 
@@ -68,7 +66,6 @@ public class LongKeyHandler extends KeyHandler<Long> {
 
     @Override
     protected Class<? extends Annotation> getDefaultAnnotation() {
-
         return DefaultLongValue.class;
     }
 
@@ -79,23 +76,21 @@ public class LongKeyHandler extends KeyHandler<Long> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.storage.config.KeyHandler#initHandler()
      */
     @Override
     protected void initHandler() {
-
         this.validator = this.getAnnotation(SpinnerValidator.class);
         if (this.validator != null) {
             this.min = this.validator.min();
             this.max = this.validator.max();
-
         }
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.storage.config.KeyHandler#putValue(java.lang.Object)
      */
     @Override
@@ -105,7 +100,7 @@ public class LongKeyHandler extends KeyHandler<Long> {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.storage.config.KeyHandler#validateValue(java.lang.Object)
      */
     @Override
@@ -120,5 +115,4 @@ public class LongKeyHandler extends KeyHandler<Long> {
             }
         }
     }
-
 }

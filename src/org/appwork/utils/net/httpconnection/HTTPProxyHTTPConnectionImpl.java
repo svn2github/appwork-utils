@@ -267,7 +267,7 @@ public class HTTPProxyHTTPConnectionImpl extends HTTPConnectionImpl {
         this.connect();
         this.connectInputStream();
         if (this.getResponseCode() == 405) {
-            // Method not allowed
+            // 405 - Method not allowed
             throw new ProxyConnectException(this.getResponseCode() + " " + this.getResponseMessage(), getProxy());
         }
         if (this.getResponseCode() == 407) {

@@ -92,9 +92,23 @@ public class LogSink extends Logger {
         }
     }
 
+    public static enum FLUSH {
+        FINALIZE,
+        CLOSE,
+        FORCE,
+        TIMEOUT
+    }
+
     protected synchronized void close() {
         try {
-            this.flushSources(true);
+            flush(FLUSH.CLOSE);
+        } finally {
+            this.closeAndRemoveFileHandler();
+        }
+    }
+
+    protected synchronized void closeAndRemoveFileHandler() {
+        try {
             if (this.fileHandler != null) {
                 super.removeHandler(this.fileHandler);
             }
@@ -111,16 +125,33 @@ public class LogSink extends Logger {
     @Override
     protected void finalize() throws Throwable {
         try {
-            this.close();
+            try {
+                flush(FLUSH.FINALIZE);
+            } finally {
+                this.closeAndRemoveFileHandler();
+            }
         } finally {
             super.finalize();
         }
     }
 
-    protected void flushSources(final boolean finalFlush) {
+    protected void flush(final FLUSH flush) {
         for (final LogSource source : this.getLogSources()) {
-            if (source.isAllowTimeoutFlush() || finalFlush && source.isFlushOnFinalize()) {
+            switch (flush) {
+            case FORCE:
                 source.flush();
+                break;
+            case TIMEOUT:
+                if (source.isAllowTimeoutFlush()) {
+                    source.flush();
+                }
+                break;
+            case CLOSE:
+            case FINALIZE:
+                if (source.isFlushOnFinalize()) {
+                    source.flush();
+                }
+                break;
             }
         }
     }
@@ -149,7 +180,20 @@ public class LogSink extends Logger {
     }
 
     protected boolean hasLogSources() {
-        return this.getLogSources().size() > 0;
+        synchronized (this.logSources) {
+            if (logSources.size() > 0) {
+                final Iterator<WeakReference<LogSource>> it = this.logSources.iterator();
+                while (it.hasNext()) {
+                    final WeakReference<LogSource> next = it.next();
+                    final LogSource item = next.get();
+                    if (item != null && !item.isClosed()) {
+                        return true;
+                    }
+                }
+                logSources.clear();
+            }
+        }
+        return false;
     }
 
     @Override

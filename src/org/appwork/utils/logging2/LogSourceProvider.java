@@ -58,6 +58,7 @@ import org.appwork.utils.Application;
 import org.appwork.utils.Files;
 import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
+import org.appwork.utils.logging2.LogSink.FLUSH;
 import org.appwork.utils.os.CrossSystem;
 
 public abstract class LogSourceProvider {
@@ -113,7 +114,7 @@ public abstract class LogSourceProvider {
         ShutdownController.getInstance().addShutdownEvent(new ShutdownEvent() {
             @Override
             public void onShutdown(final ShutdownRequest shutdownRequest) {
-                LogSourceProvider.flushAllSinks(false, true);
+                LogSourceProvider.flushAllSinks(FLUSH.CLOSE);
             }
 
             @Override
@@ -225,7 +226,7 @@ public abstract class LogSourceProvider {
         return new LogSource(name, i);
     }
 
-    public void flushSinks(final boolean flushOnly, final boolean finalFlush) {
+    public void flushSinks(final FLUSH flush) {
         java.util.List<LogSink> logSinks2Flush = null;
         java.util.List<LogSink> logSinks2Close = null;
         synchronized (this.logSinks) {
@@ -237,9 +238,11 @@ public abstract class LogSourceProvider {
                 if (next.hasLogSources()) {
                     logSinks2Flush.add(next);
                 } else {
-                    if (flushOnly == false) {
+                    if (FLUSH.CLOSE.equals(flush)) {
                         it.remove();
                         logSinks2Close.add(next);
+                    } else {
+                        logSinks2Flush.add(next);
                     }
                 }
             }
@@ -252,7 +255,7 @@ public abstract class LogSourceProvider {
         }
         for (final LogSink sink : logSinks2Flush) {
             try {
-                sink.flushSources(finalFlush);
+                sink.flush(flush);
             } catch (final Throwable e) {
             }
         }
@@ -423,7 +426,7 @@ public abstract class LogSourceProvider {
                             Thread.sleep(LogSourceProvider.this.logTimeout);
                         } catch (final InterruptedException e) {
                         }
-                        LogSourceProvider.this.flushSinks(true, false);
+                        LogSourceProvider.this.flushSinks(FLUSH.TIMEOUT);
                     } catch (final Throwable e) {
                     }
                 }
@@ -437,9 +440,11 @@ public abstract class LogSourceProvider {
      * @param b
      * @param c
      */
-    public static void flushAllSinks(boolean flushOnly, boolean finalFlush) {
-        for (LogSourceProvider p : getInstances()) {
-            p.flushSinks(flushOnly, finalFlush);
+    public static void flushAllSinks(final FLUSH flush) {
+        for (final LogSourceProvider p : getInstances()) {
+            if (p != null) {
+                p.flushSinks(flush);
+            }
         }
     }
 }

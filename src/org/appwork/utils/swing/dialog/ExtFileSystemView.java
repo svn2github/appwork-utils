@@ -46,7 +46,7 @@ import java.util.List;
 import javax.swing.Icon;
 import javax.swing.filechooser.FileSystemView;
 
-import org.appwork.resources.AWUTheme;
+import org.appwork.resources.AWIcon;
 import org.appwork.storage.config.JsonConfig;
 import org.appwork.sunwrapper.sun.awt.shell.ShellFolderWrapper;
 import org.appwork.utils.locale._AWU;
@@ -70,7 +70,6 @@ public class ExtFileSystemView extends FileSystemView {
             return;
         }
         ExtFileSystemView.SAMBA_SCANNED = true;
-
         // final long tt = System.currentTimeMillis();
         // new Thread("Networkfolder Loader") {
         // @Override
@@ -89,7 +88,6 @@ public class ExtFileSystemView extends FileSystemView {
         // }
         // }
         // }.start();
-
     }
 
     private final FileSystemView org;
@@ -97,7 +95,6 @@ public class ExtFileSystemView extends FileSystemView {
     private NetWorkFolder        networkFolder;
     private HashMap<File, File>  specialsMap;
     private final boolean        useFileIcons;
-
     /**
      *
      */
@@ -127,7 +124,7 @@ public class ExtFileSystemView extends FileSystemView {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.swing.filechooser.FileSystemView#createNewFolder(java.io.File)
      */
     @Override
@@ -137,13 +134,11 @@ public class ExtFileSystemView extends FileSystemView {
 
     @Override
     public File getChild(final File parent, final String fileName) {
-
         return this.org.getChild(parent, fileName);
     }
 
     @Override
     public File getDefaultDirectory() {
-
         return this.org.getDefaultDirectory();
     }
 
@@ -153,7 +148,6 @@ public class ExtFileSystemView extends FileSystemView {
         try {
             final File[] ret;
             if (dir == this.networkFolder) {
-
                 LoggerFactory.I().getDefaultLogger().info("getFilesShellfolder");
                 ret = this.getFilesShellfolder((NetWorkFolder) dir, useFileHiding);
             } else {
@@ -183,17 +177,14 @@ public class ExtFileSystemView extends FileSystemView {
 
     public File[] getFilesShellfolder(final NetWorkFolder network, final boolean useFileHiding) {
         final List<File> files = new ArrayList<File>();
-
         final File[] names = network.listFiles(useFileHiding);
         if (names == null) {
             return new File[0];
         }
-
         for (File f : names) {
             if (Thread.currentThread().isInterrupted()) {
                 break;
             }
-
             if (!ShellFolderWrapper.isInstanceof(f)) {
                 if (this.isFileSystemRoot(f)) {
                     f = this.createFileSystemRoot(f);
@@ -212,18 +203,15 @@ public class ExtFileSystemView extends FileSystemView {
                     continue;
                 }
             }
-
             if (!useFileHiding || !this.isHiddenFile(f)) {
                 files.add(f);
             }
         }
-
         return files.toArray(new File[files.size()]);
     }
 
     @Override
     public File getHomeDirectory() {
-
         return this.org.getHomeDirectory();
     }
 
@@ -244,24 +232,21 @@ public class ExtFileSystemView extends FileSystemView {
     public File[] getRoots() {
         final long t = System.currentTimeMillis();
         LoggerFactory.I().getDefaultLogger().info("Get Roots");
-
         if (this.roots != null) {
             return this.roots;
         }
         try {
-
             // this may take a long time on some systems.
             final File[] baseFolders = AccessController.doPrivileged(new PrivilegedAction<File[]>() {
                 public File[] run() {
                     return (File[]) ShellFolderWrapper.get("fileChooserComboBoxFolders");
                 }
             });
-
             LoggerFactory.I().getDefaultLogger().info("Listed Base folders " + (System.currentTimeMillis() - t));
             final LinkedHashSet<File> unique = new LinkedHashSet<File>() {
                 /*
                  * (non-Javadoc)
-                 * 
+                 *
                  * @see java.util.HashSet#add(java.lang.Object)
                  */
                 @Override
@@ -272,20 +257,17 @@ public class ExtFileSystemView extends FileSystemView {
                     return super.add(e);
                 }
             };
-
             final File desktopPath = new File(System.getProperty("user.home") + "/Desktop");
             if (desktopPath.exists() && desktopPath.isDirectory()) {
                 unique.add(desktopPath);
             }
-
             this.mount(new File("/Volumes"), unique);
             this.mount(new File("/media"), unique);
             String userName = System.getProperty("user.name");
             if (userName != null) {
                 this.mount(new File("/run/media/" + userName), unique);
             }
-
-            final HomeFolder[] homeFolders = new HomeFolder[] { new HomeFolder(HomeFolder.HOME_ROOT, ExtFileChooserDialog.ICON_KEY_HOME), new HomeFolder(HomeFolder.DOCUMENTS, ExtFileChooserDialog.ICON_KEY_DOCUMENTS), new HomeFolder(HomeFolder.DROPBOX, ExtFileChooserDialog.ICON_KEY_BOX), new HomeFolder(HomeFolder.PICTURES, ExtFileChooserDialog.ICON_KEY_IMAGES), new HomeFolder(HomeFolder.VIDEOS, ExtFileChooserDialog.ICON_KEY_VIDEO), new HomeFolder(HomeFolder.DOWNLOADS, ExtFileChooserDialog.ICON_KEY_DOWNLOADS), new HomeFolder(HomeFolder.MUSIC, ExtFileChooserDialog.ICON_KEY_MUSIC) };
+            final HomeFolder[] homeFolders = new HomeFolder[] { new HomeFolder(HomeFolder.HOME_ROOT, AWIcon.FILECHOOSER_HOME.path()), new HomeFolder(HomeFolder.DOCUMENTS, AWIcon.FILECHOOSER_DOCUMENTS.path()), new HomeFolder(HomeFolder.DROPBOX, AWIcon.FILECHOOSER_BOX.path()), new HomeFolder(HomeFolder.PICTURES, AWIcon.FILECHOOSER_IMAGES.path()), new HomeFolder(HomeFolder.VIDEOS, AWIcon.FILECHOOSER_VIDEO.path()), new HomeFolder(HomeFolder.DOWNLOADS, AWIcon.FILECHOOSER_DOWNLOADS.path()), new HomeFolder(HomeFolder.MUSIC, AWIcon.FILECHOOSER_MUSIC.path()) };
             for (final HomeFolder hf : homeFolders) {
                 if (hf.exists()) {
                     unique.add(hf);
@@ -304,7 +286,6 @@ public class ExtFileSystemView extends FileSystemView {
                         this.networkFolder = new NetWorkFolder(f);
                         break;
                     }
-
                 }
             }
             if (this.networkFolder != null) {
@@ -333,7 +314,6 @@ public class ExtFileSystemView extends FileSystemView {
             return this.roots;
         } finally {
             LoggerFactory.I().getDefaultLogger().info("Roots: " + (System.currentTimeMillis() - t));
-
         }
     }
 
@@ -352,15 +332,15 @@ public class ExtFileSystemView extends FileSystemView {
     public Icon getSystemIcon(final File f) {
         try {
             if (f instanceof VirtualRoot) {
-                return AWUTheme.I().getIcon("root", 18);
+                return AWIcon.FILE_SYSTEM_ROOT.get(18);
             }
             if (useFileIcons) {
                 return this.org.getSystemIcon(f);
             } else {
                 if (f.isDirectory()) {
-                    return AWUTheme.I().getIcon("folder", 18);
+                    return AWIcon.EXTFILESYSTEM_folder.get(18);
                 } else {
-                    return AWUTheme.I().getIcon("fileIcon", 18);
+                    return AWIcon.EXTFILESYSTEM_fileIcon.get(18);
                 }
             }
         } catch (final Exception e) {
@@ -373,25 +353,21 @@ public class ExtFileSystemView extends FileSystemView {
 
     @Override
     public String getSystemTypeDescription(final File f) {
-
         return this.org.getSystemTypeDescription(f);
     }
 
     @Override
     public boolean isComputerNode(final File dir) {
-
         return this.org.isComputerNode(dir);
     }
 
     @Override
     public boolean isDrive(final File dir) {
-
         return this.org.isDrive(dir);
     }
 
     @Override
     public boolean isFileSystem(final File f) {
-
         return this.org.isFileSystem(f);
     }
 
@@ -448,5 +424,4 @@ public class ExtFileSystemView extends FileSystemView {
             }
         }
     }
-
 }

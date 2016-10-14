@@ -26,7 +26,8 @@ import javax.swing.JMenuItem;
 import javax.swing.JSeparator;
 import javax.swing.SwingUtilities;
 
-import org.appwork.resources.AWUTheme;
+import org.appwork.resources.AWIcon;
+import org.appwork.resources.IconRef;
 import org.appwork.scheduler.DelayedRunnable;
 import org.appwork.swing.action.BasicAction;
 import org.appwork.utils.images.IconIO;
@@ -66,7 +67,7 @@ public abstract class AbstractTray implements MouseListener, MouseMotionListener
 
     private void runTray() throws AWTException {
         SystemTray systemTray = SystemTray.getSystemTray();
-        Image img = this.createTrayImage("trayicon");
+        Image img = this.createTrayImage(AWIcon.trayicon);
         this.trayIcon = new TrayIcon(img, null, null);
         this.trayIcon.setImageAutoSize(true);
         this.ma = new TrayMouseAdapter(this, this.trayIcon);
@@ -87,7 +88,7 @@ public abstract class AbstractTray implements MouseListener, MouseMotionListener
      * @param systemTray
      * @return
      */
-    protected Image createTrayImage(String id) {
+    protected Image createTrayImage(IconRef id) {
         SystemTray systemTray = SystemTray.getSystemTray();
         Image img = null;
         if (systemTray.getTrayIconSize().getWidth() == 16) {
@@ -98,12 +99,12 @@ public abstract class AbstractTray implements MouseListener, MouseMotionListener
         return img;
     }
 
-    protected Image getImage(String id) {
-        return AWUTheme.I().getImage(id, -1);
+    protected Image getImage(IconRef id) {
+        return id.image(-1);
     }
 
-    protected Image getIcon(String id) {
-        return AWUTheme.I().getImage(id, -1);
+    protected Image getIcon(IconRef id) {
+        return id.image(-1);
     }
 
     public void showAbout() {

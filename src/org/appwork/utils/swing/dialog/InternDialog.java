@@ -38,7 +38,7 @@ import java.awt.Image;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.appwork.resources.AWUTheme;
+import org.appwork.resources.AWIcon;
 import org.appwork.swing.ExtJDialog;
 import org.appwork.utils.os.CrossSystem;
 import org.appwork.utils.swing.EDTRunner;
@@ -46,7 +46,6 @@ import org.appwork.utils.swing.EDTRunner;
 import net.miginfocom.swing.MigLayout;
 
 public class InternDialog<T> extends ExtJDialog {
-
     /**
      *
      */
@@ -57,17 +56,13 @@ public class InternDialog<T> extends ExtJDialog {
     private static final long       serialVersionUID = 1L;
 
     public void setVisible(boolean b) {
-
         super.setVisible(b);
-
         // ((JFrame) owner).setVisible(true);
     }
 
     public InternDialog(final AbstractDialog<T> abstractDialog, final ModalityType modality) {
         super(abstractDialog.getOwner(), modality);
-
         dialogModel = abstractDialog;
-
         setLayout(new MigLayout("ins 5", "[]", "[fill,grow][]"));
         // JPanel contentPane;
         // setContentPane(contentPane = new JPanel());
@@ -80,18 +75,15 @@ public class InternDialog<T> extends ExtJDialog {
         } else {
             if (getOwner() == null) {
                 final ArrayList<Image> l = new ArrayList<Image>();
-                l.add(AWUTheme.I().getImage("dialog/info", 16));
-                l.add(AWUTheme.I().getImage("dialog/info", 32));
-
+                l.add(AWIcon.DIALOG_INFO.image(16));
+                l.add(AWIcon.DIALOG_INFO.image(32));
                 setIconImages(l);
             }
         }
         if (CrossSystem.isMac()) {
             final com.apple.eawt.Application application = com.apple.eawt.Application.getApplication();
-
             application.requestUserAttention(true);
         }
-
     }
 
     public void setTitle(final String title) {
@@ -109,7 +101,6 @@ public class InternDialog<T> extends ExtJDialog {
     public void dispose() {
         System.out.println("Dispose Dialog");
         new EDTRunner() {
-
             @Override
             protected void runInEDT() {
                 InternDialog.this.dialogModel.setDisposed(true);
@@ -117,19 +108,15 @@ public class InternDialog<T> extends ExtJDialog {
                 InternDialog.super.dispose();
             }
         }.waitForEDT();
-
     }
 
     @Override
     public Dimension getPreferredSize() {
         return dialogModel.getPreferredSize();
-
     }
 
     public Dimension getRawPreferredSize() {
-
         return super.getPreferredSize();
-
     }
 
     /**
@@ -137,9 +124,7 @@ public class InternDialog<T> extends ExtJDialog {
      */
     public void realDispose() {
         super.dispose();
-
     }
-
     // @Override
     // public void setLayout(final LayoutManager manager) {
     // super.setLayout(manager);

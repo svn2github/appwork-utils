@@ -10,7 +10,7 @@
  *         Germany
  * === Preamble ===
  *     This license establishes the terms under which the [The Product] Source Code & Binary files may be used, copied, modified, distributed, and/or redistributed.
- *     The intent is that the AppWork GmbH is able to provide their utilities library for free to non-commercial projects whereas commercial usage is only permitted after obtaining a commercial license.
+ *     The intent is that the AppWork GmbH is able to provide  their utilities library for free to non-commercial projects whereas commercial usage is only permitted after obtaining a commercial license.
  *     These terms apply to all files that have the [The Product] License header (IN the file), a <filename>.license or <filename>.info (like mylib.jar.info) file that contains a reference to this license.
  *
  * === 3rd Party Licences ===
@@ -19,11 +19,11 @@
  *
  * === Definition: Commercial Usage ===
  *     If anybody or any organization is generating income (directly or indirectly) by using [The Product] or if there's any commercial interest or aspect in what you are doing, we consider this as a commercial usage.
- *     If your use-case is neither strictly private nor strictly educational, it is commercial. If you are unsure whether your use-case is commercial or not, consider it as commercial or contact us.
+ *     If your use-case is neither strictly private nor strictly educational, it is commercial. If you are unsure whether your use-case is commercial or not, consider it as commercial or contact as.
  * === Dual Licensing ===
  * === Commercial Usage ===
  *     If you want to use [The Product] in a commercial way (see definition above), you have to obtain a paid license from AppWork GmbH.
- *     Contact AppWork for further details: <e-mail@appwork.org>
+ *     Contact AppWork for further details: e-mail@appwork.org
  * === Non-Commercial Usage ===
  *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the
  *     "GNU Affero General Public License" (http://www.gnu.org/licenses/agpl-3.0.en.html).
@@ -31,48 +31,24 @@
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
-package org.appwork.swing.exttable.columnmenu;
+package org.appwork.resources;
 
-import java.awt.event.ActionEvent;
+import java.awt.Image;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-
-import org.appwork.resources.AWIcon;
-import org.appwork.swing.exttable.ExtTable;
-import org.appwork.utils.locale._AWU;
+import javax.swing.Icon;
 
 /**
  * @author thomas
+ * @date 14.10.2016
  *
  */
-public class ResetColumns extends AbstractAction {
-    /**
-     *
-     */
-    private static final long serialVersionUID = 5089651483570517886L;
-    private final ExtTable<?> table;
+public interface IconRef {
+    public Icon icon(int size);
+
+    public Image image(int size);
 
     /**
-     * @param extTable
+     * @return
      */
-    public ResetColumns(final ExtTable<?> extTable) {
-        super(_AWU.T.ResetColumnsAction());
-        this.putValue(Action.SMALL_ICON, AWIcon.TABLE_RESET_COLUMNS.get(extTable.getContextIconSize()));
-        this.table = extTable;
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-     */
-    @Override
-    public void actionPerformed(final ActionEvent e) {
-        this.table.resetColumnLocks();
-        this.table.resetColumnDimensions();
-        this.table.resetColumnOrder();
-        this.table.resetColumnVisibility();
-        this.table.updateColumns();
-    }
+    public String path();
 }

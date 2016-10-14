@@ -12,27 +12,23 @@ import javax.swing.JPopupMenu;
 import javax.swing.SwingConstants;
 
 import org.appwork.resources.AWUTheme;
+import org.appwork.resources.AWIcon;
 import org.appwork.swing.action.BasicAction;
 
 public class PseudoCombo<Type> extends JButton {
-
     protected volatile Type selectedItem = null;
-
     private Type[]          values;
     private boolean         popDown      = false;
 
     public PseudoCombo(Type[] values) {
         super();
         this.addActionListener(new ActionListener() {
-
             public void actionPerformed(ActionEvent e) {
                 onPopup();
             }
         });
-
         this.setHorizontalAlignment(SwingConstants.LEFT);
         setValues(values);
-
     }
 
     @Override
@@ -60,19 +56,17 @@ public class PseudoCombo<Type> extends JButton {
     protected Icon getPopIcon(boolean closed) {
         if (closed) {
             if (isPopDown()) {
-                return AWUTheme.I().getIcon("popDownSmall", -1);
+                return AWIcon.popDownSmall.get(-1);
             } else {
-                return AWUTheme.I().getIcon("popUpSmall", -1);
+                return AWIcon.popUpSmall.get(-1);
             }
         } else {
             if (isPopDown()) {
-                return AWUTheme.I().getIcon("popUpSmall", -1);
+                return AWIcon.popUpSmall.get(-1);
             } else {
-                return AWUTheme.I().getIcon("popDownSmall", -1);
-
+                return AWIcon.popDownSmall.get(-1);
             }
         }
-
     }
 
     public boolean isPopDown() {
@@ -92,7 +86,6 @@ public class PseudoCombo<Type> extends JButton {
     }
 
     private long    lastHide = 0;
-
     private boolean closed   = true;
 
     protected void onPopup() {
@@ -100,11 +93,8 @@ public class PseudoCombo<Type> extends JButton {
         if (timeSinceLastHide < 250) {
             //
             return;
-
         }
-
         JPopupMenu popup = new JPopupMenu() {
-
             @Override
             public void setVisible(boolean b) {
                 if (!b) {
@@ -114,9 +104,7 @@ public class PseudoCombo<Type> extends JButton {
                 closed = true;
                 PseudoCombo.this.repaint();
             }
-
         };
-
         for (final Type sc : values) {
             if (sc == selectedItem && isHideSelf()) {
                 continue;
@@ -132,22 +120,16 @@ public class PseudoCombo<Type> extends JButton {
 
                 public void actionPerformed(ActionEvent e) {
                     setSelectedItem(value);
-
                 }
             });
         }
         Insets insets = getPopupBorderInsets();
-
         Dimension pref = popup.getPreferredSize();
-
         popup.setPreferredSize(new Dimension((int) Math.max(getWidth() + insets.left + insets.right, pref.getWidth()), (int) pref.getHeight()));
-
         if (isPopDown()) {
             popup.show(this, -insets.left, getHeight() + insets.top);
-
         } else {
             popup.show(this, -insets.left, -popup.getPreferredSize().height + insets.bottom);
-
         }
         closed = false;
     }
@@ -170,7 +152,6 @@ public class PseudoCombo<Type> extends JButton {
             icon = AWUTheme.I().getDisabledIcon(icon);
         }
         icon.paintIcon(this, g, getWidth() - icon.getIconWidth() - 5, (getHeight() - icon.getIconHeight()) / 2);
-
     }
 
     public void setSelectedItem(Type value) {
@@ -181,7 +162,6 @@ public class PseudoCombo<Type> extends JButton {
         setText(getLabel(value, true));
         setIcon(getIcon(value, true));
         setToolTipText(getLabel(value, false));
-
     }
 
     public void onChanged(Type newValue) {
@@ -190,5 +170,4 @@ public class PseudoCombo<Type> extends JButton {
     public Type getSelectedItem() {
         return selectedItem;
     }
-
 }

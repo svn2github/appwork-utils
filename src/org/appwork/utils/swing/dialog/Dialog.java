@@ -44,6 +44,7 @@ import javax.swing.ImageIcon;
 import javax.swing.ListCellRenderer;
 import javax.swing.SwingUtilities;
 
+import org.appwork.resources.AWIcon;
 import org.appwork.resources.AWUTheme;
 import org.appwork.uio.UIOManager;
 import org.appwork.utils.BinaryLogic;
@@ -60,48 +61,44 @@ public class Dialog {
      *
      */
     public static final String  LASTSELECTION                       = "LASTSELECTION_";
-
     /**
      *
      */
     public static final String  FILECHOOSER                         = "FILECHOOSER";
-
     /**
      * Icon Key for Error Icons
      *
      * @see org.appwork.utils.ImageProvider.ImageProvider#getIcon(String, int, int, boolean)
      */
-    public static final String  ICON_ERROR                          = "dialog/error";
+    public static final String  ICON_ERROR                          = AWIcon.DIALOG_ERROR.path();
     /**
      * Icon Key for Information Icons
      *
      * @see org.appwork.utils.ImageProvider.ImageProvider#getIcon(String, int, int, boolean)
      */
-    public static final String  ICON_INFO                           = "dialog/info";
+    public static final String  ICON_INFO                           = AWIcon.DIALOG_INFO.path();
     /**
      * Icon Key for Question Icons
      *
      * @see org.appwork.utils.ImageProvider.ImageProvider#getIcon(String, int, int, boolean)
      */
-    public static final String  ICON_QUESTION                       = "dialog/help";
+    public static final String  ICON_QUESTION                       = AWIcon.DIALOG_HELP.path();
     /**
      * Icon Key for Warning Icons
      *
      * @see org.appwork.utils.ImageProvider.ImageProvider#getIcon(String, int, int, boolean)
      */
-    public static final String  ICON_WARNING                        = "dialog/warning";
+    public static final String  ICON_WARNING                        = AWIcon.DIALOG_WARNING.path();
     /**
      * internal singleton instance to access the instance of this class
      */
     private static final Dialog INSTANCE                            = new Dialog();
-
     /**
      *
      * @deprecated Use org.appwork.uio.UIOManager Constants instead
      */
     @Deprecated()
     public static final int     LOGIC_DONOTSHOW_BASED_ON_TITLE_ONLY = 1 << 12;
-
     /**
      * if the user pressed cancel, the return mask will contain this mask
      */
@@ -119,7 +116,6 @@ public class Dialog {
      * Check {@link #RETURN_SKIPPED_BY_DONT_SHOW} to know if the dialog has been visible or autoskipped
      */
     public static final int     RETURN_DONT_SHOW_AGAIN              = 1 << 3;
-
     /**
      * If the user pressed OK, the return mask will contain this flag
      */
@@ -134,7 +130,6 @@ public class Dialog {
      * If the Timeout ({@link UIOManager#LOGIC_COUNTDOWN}) has run out, the return mask contains this flag
      */
     public static final int     RETURN_TIMEOUT                      = 1 << 5;
-
     /**
      * If the dialog has been skiped/closed by ESC key
      */
@@ -146,7 +141,6 @@ public class Dialog {
      */
     public static Dialog I() {
         return Dialog.INSTANCE;
-
     }
 
     public static boolean isClosed(final Object value) {
@@ -172,18 +166,15 @@ public class Dialog {
      * Some dialogs are able to render HTML. Use this switch to enable html
      */
     public static final int       STYLE_HTML                      = 1 << 7;
-
     /**
      * Some dialogs are able to layout themselves in a large mode. E:g. to display a huge text.
      */
     public static final int       STYLE_LARGE                     = 1 << 6;
-
     /**
      * Displays a Checkbox with "do not show this again" text. If the user selects this box, the UserInteraktion class will remember the
      * answer and will not disturb the user with the same question (same title)
      */
     public static final int       STYLE_SHOW_DO_NOT_DISPLAY_AGAIN = 1 << 5;
-
     /**
      * Inputdialogs will use passwordfields instead of textfields
      */
@@ -222,10 +213,8 @@ public class Dialog {
     }
 
     public static void main(final String[] args) throws InterruptedException {
-
         try {
             Dialog.getInstance().showConfirmDialog(0, "Blabla?");
-
             System.out.println("RETURNED OK");
         } catch (final DialogClosedException e) {
             // TODO Auto-generated catch block
@@ -234,28 +223,21 @@ public class Dialog {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-
     }
 
     /**
      * The max counter value for a timeout Dialog
      */
     private int                 defaultTimeout = 20000;
-
     /**
      * Parent window for all dialogs created with abstractdialog
      */
-
     private LAFManagerInterface lafManager;
-
     private DialogHandler       handler        = null;
-
     private DialogHandler       defaultHandler;
 
     private Dialog() {
-
         defaultHandler = new DialogHandler() {
-
             @Override
             public <T> T showDialog(final AbstractDialog<T> dialog) throws DialogClosedException, DialogCanceledException {
                 return Dialog.this.showDialogRaw(dialog);
@@ -357,7 +339,6 @@ public class Dialog {
      * @throws DialogClosedException
      */
     public int showComboDialog(final int flag, final String title, final String question, final Object[] options, final int defaultSelectedIndex, final Icon icon, final String okOption, final String cancelOption, final ListCellRenderer renderer) throws DialogClosedException, DialogCanceledException {
-
         return this.showDialog(new ComboBoxDialog(flag, title, question, options, defaultSelectedIndex, icon, okOption, cancelOption, renderer));
     }
 
@@ -387,18 +368,15 @@ public class Dialog {
      * @throws DialogClosedException
      */
     public Object showComboDialog(final int flag, final String title, final String question, final Object[] options, final Object defaultSelectedItem, final Icon icon, final String okOption, final String cancelOption, final ListCellRenderer renderer) throws DialogClosedException, DialogCanceledException {
-
         int def = 0;
         for (int i = 0; i < options.length; i++) {
             if (options[i] == defaultSelectedItem) {
                 def = i;
                 break;
             }
-
         }
         final Integer returnIndex = this.showDialog(new ComboBoxDialog(flag, title, question, options, def, icon, okOption, cancelOption, renderer));
         return options[returnIndex];
-
     }
 
     /**
@@ -486,7 +464,7 @@ public class Dialog {
             dialog = new ConfirmDialog(flag, title, message, icon, okOption, cancelOption) {
                 /*
                  * (non-Javadoc)
-                 * 
+                 *
                  * @see org.appwork.utils.swing.dialog.AbstractDialog#getDontShowAgainKey()
                  */
                 @Override
@@ -525,13 +503,11 @@ public class Dialog {
         if (dialog == null) {
             return null;
         }
-
         if (SwingUtilities.isEventDispatchThread()) {
             return this.showDialogRawInEDT(dialog);
         } else {
             return this.showDialogRawOutsideEDT(dialog);
         }
-
     }
 
     protected <T> T showDialogRawInEDT(final AbstractDialog<T> dialog) throws DialogClosedException, DialogCanceledException {
@@ -549,7 +525,6 @@ public class Dialog {
             throw new DialogCanceledException(mask);
         }
         return ret;
-
     }
 
     protected <T> T showDialogRawOutsideEDT(final AbstractDialog<T> dialog) throws DialogClosedException, DialogCanceledException {
@@ -557,17 +532,14 @@ public class Dialog {
         if (Thread.interrupted()) {
             throw new DialogClosedException(Dialog.RETURN_INTERRUPT, new InterruptedException());
         }
-
         if (org.appwork.utils.Application.isHeadless()) {
             throw new HeadlessException("No Dialogs in Headless Mode!");
         } else {
             final AtomicBoolean waitingLock = new AtomicBoolean(false);
-
             final EDTRunner edth = new EDTRunner() {
                 @Override
                 protected void runInEDT() {
                     dialog.setDisposedCallback(new DisposeCallBack() {
-
                         @Override
                         public void dialogDisposed(final AbstractDialog<?> dialog) {
                             synchronized (waitingLock) {
@@ -578,9 +550,7 @@ public class Dialog {
                     });
                     dialog.displayDialog();
                 }
-
             };
-
             try {
                 if (Thread.interrupted()) {
                     throw new InterruptedException();
@@ -595,7 +565,6 @@ public class Dialog {
                 // however there may be several CaptchaDialog classes with
                 // overriddden unsave dispose methods...
                 new EDTRunner() {
-
                     @Override
                     protected void runInEDT() {
                         try {
@@ -622,7 +591,6 @@ public class Dialog {
             throw new DialogCanceledException(mask);
         }
         return ret;
-
     }
 
     /**
@@ -642,7 +610,6 @@ public class Dialog {
     }
 
     public int showErrorDialog(final String s) {
-
         try {
             return this.showConfirmDialog(UIOManager.BUTTONS_HIDE_CANCEL | Dialog.STYLE_SHOW_DO_NOT_DISPLAY_AGAIN, _AWU.T.DIALOG_ERROR_TITLE(), s, AWUTheme.I().getIcon(Dialog.ICON_ERROR, 32), null, null);
         } catch (final DialogClosedException e) {
@@ -650,7 +617,6 @@ public class Dialog {
         } catch (final DialogCanceledException e) {
             return Dialog.RETURN_CANCEL;
         }
-
     }
 
     /**
@@ -659,7 +625,6 @@ public class Dialog {
      * @param e
      */
     public int showExceptionDialog(final String title, final String message, final Throwable e) {
-
         try {
             final ExceptionDialog dialog = new ExceptionDialog(UIOManager.LOGIC_DONT_SHOW_AGAIN_DELETE_ON_EXIT | UIOManager.BUTTONS_HIDE_CANCEL, title, message, e, null, null);
             this.showDialog(dialog);
@@ -668,7 +633,6 @@ public class Dialog {
         } catch (final DialogCanceledException e1) {
             return Dialog.RETURN_CANCEL;
         }
-
         return 0;
     }
 
@@ -710,7 +674,6 @@ public class Dialog {
      * @throws DialogClosedException
      */
     public String showInputDialog(final int flag, final String title, final String message, final String defaultMessage, final Icon icon, final String okOption, final String cancelOption) throws DialogClosedException, DialogCanceledException {
-
         return this.showDialog(new InputDialog(flag, title, message, defaultMessage, icon, okOption, cancelOption));
     }
 
@@ -736,9 +699,7 @@ public class Dialog {
      * @throws DialogClosedException
      */
     public void showMessageDialog(final int flag, final String message) {
-
         this.showMessageDialog(flag, _AWU.T.DIALOG_MESSAGE_TITLE(), message);
-
     }
 
     /**
@@ -756,9 +717,7 @@ public class Dialog {
         try {
             this.showConfirmDialog(UIOManager.BUTTONS_HIDE_CANCEL | flag, title, message, Dialog.getIconByText(title + message), null, null);
         } catch (final DialogClosedException e) {
-
         } catch (final DialogCanceledException e) {
-
         }
     }
 
@@ -824,7 +783,6 @@ public class Dialog {
      * @throws DialogClosedException
      */
     protected String showPasswordDialog(final int flag, final String title, final String message, final String defaultMessage, final Icon icon, final String okOption, final String cancelOption) throws DialogClosedException, DialogCanceledException {
-
         return this.showDialog(new PasswordDialog(flag, title, message, icon, okOption, cancelOption));
     }
 
@@ -908,7 +866,6 @@ public class Dialog {
      * @throws DialogClosedException
      */
     protected long showValueDialog(final int flag, final String title, final String message, final long defaultMessage, final Icon icon, final String okOption, final String cancelOption, final long min, final long max, final long step, final ValueConverter valueConverter) throws DialogClosedException, DialogCanceledException {
-
         return this.showDialog(new ValueDialog(flag, title, message, icon, okOption, cancelOption, defaultMessage, min, max, step, valueConverter));
     }
 
@@ -916,11 +873,10 @@ public class Dialog {
      * @param bufferedImage
      */
     public void showImage(Image image) {
-
         final ConfirmDialog d = new ConfirmDialog(UIOManager.BUTTONS_HIDE_CANCEL, "Image", "" + image.getWidth(null) + "x" + image.getHeight(null), new ImageIcon(image), null, null) {
             /*
              * (non-Javadoc)
-             * 
+             *
              * @see org.appwork.utils.swing.dialog.AbstractDialog#getModalityType()
              */
             @Override
@@ -929,13 +885,10 @@ public class Dialog {
                 return ModalityType.MODELESS;
             }
         };
-
         new Thread("Image Dialog") {
             public void run() {
                 UIOManager.I().show(null, d);
             };
         }.start();
-
     }
-
 }

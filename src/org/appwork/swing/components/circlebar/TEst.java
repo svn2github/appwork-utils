@@ -1,5 +1,5 @@
 /**
- * 
+ *
  * ====================================================================================================================================================
  *         "AppWork Utilities" License
  *         The "AppWork Utilities" will be called [The Product] from now on.
@@ -7,16 +7,16 @@
  *         Copyright (c) 2009-2015, AppWork GmbH <e-mail@appwork.org>
  *         Schwabacher Straße 117
  *         90763 Fürth
- *         Germany   
+ *         Germany
  * === Preamble ===
  *     This license establishes the terms under which the [The Product] Source Code & Binary files may be used, copied, modified, distributed, and/or redistributed.
  *     The intent is that the AppWork GmbH is able to provide their utilities library for free to non-commercial projects whereas commercial usage is only permitted after obtaining a commercial license.
  *     These terms apply to all files that have the [The Product] License header (IN the file), a <filename>.license or <filename>.info (like mylib.jar.info) file that contains a reference to this license.
- * 	
+ *
  * === 3rd Party Licences ===
  *     Some parts of the [The Product] use or reference 3rd party libraries and classes. These parts may have different licensing conditions. Please check the *.license and *.info files of included libraries
- *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header. 	
- * 	
+ *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header.
+ *
  * === Definition: Commercial Usage ===
  *     If anybody or any organization is generating income (directly or indirectly) by using [The Product] or if there's any commercial interest or aspect in what you are doing, we consider this as a commercial usage.
  *     If your use-case is neither strictly private nor strictly educational, it is commercial. If you are unsure whether your use-case is commercial or not, consider it as commercial or contact us.
@@ -25,9 +25,9 @@
  *     If you want to use [The Product] in a commercial way (see definition above), you have to obtain a paid license from AppWork GmbH.
  *     Contact AppWork for further details: <e-mail@appwork.org>
  * === Non-Commercial Usage ===
- *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the 
+ *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the
  *     "GNU Affero General Public License" (http://www.gnu.org/licenses/agpl-3.0.en.html).
- * 	
+ *
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
@@ -44,45 +44,39 @@ import javax.swing.BoundedRangeModel;
 import javax.swing.JButton;
 import javax.swing.JProgressBar;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.appwork.app.gui.BasicGui;
-import org.appwork.resources.AWUTheme;
+import org.appwork.resources.AWIcon;
 import org.appwork.swing.components.tooltips.ExtTooltip;
 import org.appwork.swing.components.tooltips.TooltipFactory;
 import org.appwork.swing.components.tooltips.TooltipPanel;
 import org.appwork.utils.swing.EDTRunner;
 
+import net.miginfocom.swing.MigLayout;
+
 /**
  * @author thomas
- * 
+ *
  */
 public class TEst {
     private static boolean RUNNING = true;
 
     public static void main(final String[] args) {
         new EDTRunner() {
-
             @Override
             protected void runInEDT() {
                 new BasicGui("CircledProgressBar") {
-
                     @Override
                     protected void layoutPanel() {
-
                         final JProgressBar bar = new JProgressBar(0, 100);
                         bar.setToolTipText("BLA");
                         final BoundedRangeModel model = bar.getModel();
-
                         final CircledProgressBar cbar = new CircledProgressBar(model);
                         cbar.setTooltipFactory(new TooltipFactory() {
-
                             @Override
                             public ExtTooltip createTooltip() {
                                 final ExtTooltip tt = new ExtTooltip() {
-
                                     /**
-                                     * 
+                                     *
                                      */
                                     private static final long serialVersionUID = -1978297969679347066L;
 
@@ -91,7 +85,7 @@ public class TEst {
                                         final TooltipPanel p = new TooltipPanel("ins 5,wrap 1", "[]", "[]");
                                         p.add(new JButton(new AbstractAction() {
                                             /**
-                                             * 
+                                             *
                                              */
                                             private static final long serialVersionUID = 5385975776993345514L;
 
@@ -101,10 +95,8 @@ public class TEst {
 
                                             @Override
                                             public void actionPerformed(final ActionEvent e) {
-
                                             }
                                         }));
-
                                         return p;
                                     }
 
@@ -114,23 +106,20 @@ public class TEst {
                                         return null;
                                     }
                                 };
-
                                 return tt;
                             }
                         });
                         cbar.setOpaque(false);
                         final CircledProgressBar iconBar = new CircledProgressBar(model);
                         iconBar.setPreferredSize(new Dimension(48, 32));
-                        final ImagePainter painter = new ImagePainter(AWUTheme.I().getIcon("close", 32), 1.0f);
+                        final ImagePainter painter = new ImagePainter(AWIcon.close.get(32), 1.0f);
                         iconBar.setValueClipPainter(painter);
                         painter.setBackground(Color.GREEN);
-                        iconBar.setNonvalueClipPainter(new ImagePainter(AWUTheme.I().getIcon("close", 32), 0.3f));
-                    
-
+                        iconBar.setNonvalueClipPainter(new ImagePainter(AWIcon.close.get(32), 0.3f));
                         final CircledProgressBar test = new CircledProgressBar();
-                        final ImagePainter valuePainter = new ImagePainter(AWUTheme.I().getIcon("dev", 32), 1.0f);
+                        final ImagePainter valuePainter = new ImagePainter(AWIcon.dev.get(32), 1.0f);
                         // valuePainter.setForeground(Color.BLACK);
-                        final ImagePainter nonvaluePainter = new ImagePainter(AWUTheme.I().getIcon("dev", 32), 0.3f);
+                        final ImagePainter nonvaluePainter = new ImagePainter(AWIcon.dev.get(32), 0.3f);
                         test.setValueClipPainter(valuePainter);
                         test.setNonvalueClipPainter(nonvaluePainter);
                         test.setMaximum(360);
@@ -138,21 +127,17 @@ public class TEst {
                         test.setValue(90);
                         test.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, Color.ORANGE));
                         iconBar.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, Color.ORANGE));
-                        
                         bar.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, Color.ORANGE));
                         cbar.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, Color.ORANGE));
                         painter.setForeground(Color.RED);
-   
                         getFrame().getContentPane().setLayout(new MigLayout("ins 4, wrap 3", "[][][grow,fill]", "[grow,fill,32!]"));
-//                        getFrame().getContentPane().add(cbar, "height 32!,width 32!");
-//                        getFrame().getContentPane().add(iconBar,"height 32!,width 128!");
-            
-//                        getFrame().getContentPane().add(bar);
+                        // getFrame().getContentPane().add(cbar, "height 32!,width 32!");
+                        // getFrame().getContentPane().add(iconBar,"height 32!,width 128!");
+                        // getFrame().getContentPane().add(bar);
                         getFrame().getContentPane().add(test, "height 64!,width 64!");
-
                         getFrame().getContentPane().add(new JButton(new AbstractAction() {
                             /**
-                             * 
+                             *
                              */
                             private static final long serialVersionUID = -7967957296219315456L;
 
@@ -168,11 +153,10 @@ public class TEst {
                                 cbar.setIndeterminate(in);
                             }
                         }));
-
                         JButton bt;
                         getFrame().getContentPane().add(bt = new JButton(new AbstractAction() {
                             /**
-                             * 
+                             *
                              */
                             private static final long serialVersionUID = -7726007502976853379L;
 
@@ -186,9 +170,7 @@ public class TEst {
                             }
                         }));
                         bt.setToolTipText("BLA2");
-
                         new Thread(new Runnable() {
-
                             @Override
                             public void run() {
                                 final int direction = 1;
@@ -197,7 +179,6 @@ public class TEst {
                                         Thread.sleep(200);
                                         if (TEst.RUNNING) {
                                             new EDTRunner() {
-
                                                 @Override
                                                 protected void runInEDT() {
                                                     model.setValue(model.getValue() + direction);
@@ -210,13 +191,10 @@ public class TEst {
                                                     }
                                                     if (model.getValue() == model.getMaximum() || model.getValue() == model.getMinimum()) {
                                                         model.setValue(0);
-
                                                     }
                                                 }
                                             };
-
                                         }
-
                                     } catch (final InterruptedException e) {
                                         // TODO Auto-generated catch block
                                         e.printStackTrace();
@@ -224,7 +202,6 @@ public class TEst {
                                 }
                             }
                         }).start();
-
                     }
 
                     @Override
@@ -232,9 +209,7 @@ public class TEst {
                         System.exit(1);
                     }
                 };
-
             }
         };
-
     }
 }

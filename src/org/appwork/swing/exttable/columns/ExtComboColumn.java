@@ -48,7 +48,7 @@ import javax.swing.JComponent;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
-import org.appwork.resources.AWUTheme;
+import org.appwork.resources.AWIcon;
 import org.appwork.swing.MigPanel;
 import org.appwork.swing.action.BasicAction;
 import org.appwork.swing.components.RadioBoxIcon;
@@ -56,7 +56,6 @@ import org.appwork.swing.exttable.ExtTableModel;
 import org.appwork.utils.swing.renderer.RendererMigPanel;
 
 public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> implements ActionListener {
-
     /**
      * @author Thomas
      *
@@ -70,7 +69,6 @@ public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> impl
          */
         public RendererPanel() {
             super("ins 0", "[]0[grow,fill]", "[grow,fill]");
-
         }
 
         /**
@@ -100,7 +98,6 @@ public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> impl
          */
         public void setEditable(final boolean editable) {
             this.editable = editable;
-
         }
 
         /**
@@ -108,28 +105,25 @@ public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> impl
          */
         public void setIcon(final Icon object) {
             downIcon = object;
-
         }
     }
 
     private static final long        serialVersionUID = 2114805529462086691L;
     private ComboBoxModel<ModelType> dataModel;
-
     protected RendererPanel          rendererPanel;
     private Icon                     iconDown;
     private Icon                     iconUp;
 
     public ExtComboColumn(final String name, final ComboBoxModel<ModelType> model) {
         this(name, null, model);
-
     }
 
     protected Icon createDropUpIcon() {
-        return AWUTheme.I().getIcon("popUpLarge", -1);
+        return AWIcon.TABLE_COLUMN_COMBO_popUpLarge.get(-1);
     }
 
     protected Icon createDropDownIcon() {
-        return AWUTheme.I().getIcon("popDownLarge", -1);
+        return AWIcon.TABLE_COLUMN_COMBO_popDownLarge.get(-1);
     }
 
     /*
@@ -155,7 +149,6 @@ public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> impl
             public void requestFocus() {
                 editorField.requestFocus();
             }
-
         };
     }
 
@@ -181,28 +174,23 @@ public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> impl
 
     public ExtComboColumn(final String name, final ExtTableModel<E> table, final ComboBoxModel<ModelType> model) {
         super(name, table);
-
         this.dataModel = model;
-
     }
 
     @Override
     public void configureRendererComponent(final E value, final boolean isSelected, final boolean hasFocus, final int row, final int column) {
         // TODO Auto-generated method stub
         final ModelType selected = getSelectedItem(value);
-
         rendererPanel.setEditable(isEditable(value));
         rendererPanel.setIcon(editing == value ? iconUp : iconDown);
         Icon icon = this.modelItemToIcon(selected, value);
         rendererIcon.setIcon(icon);
-
         String str = modelItemToString(selected, value);
         if (str == null) {
             // under substance, setting setText(null) somehow sets the label
             // opaque.
             str = "";
         }
-
         if (getTableColumn() != null) {
             try {
                 int upDownIconWidth = rendererPanel.getIcon() != null ? rendererPanel.getIcon().getIconWidth() : 0;
@@ -216,7 +204,6 @@ public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> impl
         } else {
             rendererField.setText(str);
         }
-
     }
 
     /**
@@ -234,11 +221,9 @@ public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> impl
         if (!isEditable(value)) {
             return false;
         }
-
         final int row = getModel().getTable().rowAtPoint(new Point(e.getX(), e.getY()));
         // int column = getModel().getTable().columnAtPoint(new Point(e.getX(),
         // e.getY()));
-
         return startEdit(value, row);
     }
 
@@ -247,11 +232,9 @@ public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> impl
         if (!isEditable(value)) {
             return false;
         }
-
         final int row = getModel().getTable().rowAtPoint(new Point(e.getX(), e.getY()));
         // int column = getModel().getTable().columnAtPoint(new Point(e.getX(),
         // e.getY()));
-
         return startEdit(value, row);
     }
 
@@ -259,11 +242,9 @@ public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> impl
         if (!isEditable(value)) {
             return false;
         }
-
         final int row = getModel().getTable().rowAtPoint(new Point(e.getX(), e.getY()));
         // int column = getModel().getTable().columnAtPoint(new Point(e.getX(),
         // e.getY()));
-
         return startEdit(value, row);
     }
 
@@ -277,24 +258,19 @@ public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> impl
     private JPopupMenu popup;
 
     protected boolean startEdit(final E value, final int row) {
-
         final long timeSinceLastHide = System.currentTimeMillis() - lastHide;
         if (timeSinceLastHide < 250 && editing == value) {
             //
-
             editing = null;
             repaint();
             return true;
-
         }
         editing = value;
         popup = createPopupMenu();
-
         try {
             final ModelType selected = getSelectedItem(value);
             final ComboBoxModel<ModelType> dm = updateModel(dataModel, value);
             fillPopup(popup, value, selected, dm);
-
             final Rectangle bounds = getModel().getTable().getCellRect(row, getIndex(), true);
             final Dimension pref = popup.getPreferredSize();
             popup.setPreferredSize(new Dimension(Math.max(pref.width, bounds.width), pref.height));
@@ -312,7 +288,6 @@ public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> impl
     public JPopupMenu createPopupMenu() {
         return new JPopupMenu() {
             public void setVisible(final boolean b) {
-
                 super.setVisible(b);
                 if (!b) {
                     lastHide = System.currentTimeMillis();
@@ -321,25 +296,20 @@ public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> impl
                 } else {
                     // updateIcon(false);
                 }
-
             };
-
         };
     }
 
     protected void fillPopup(final JPopupMenu popup, final E value, final ModelType selected, final ComboBoxModel<ModelType> dm) {
-
         for (int i = 0; i < dm.getSize(); i++) {
             final ModelType o = dm.getElementAt(i);
             final JComponent bt = getPopupElement(o, selected.equals(o), value);
             if (bt instanceof AbstractButton) {
                 ((AbstractButton) bt).addActionListener(new ActionListener() {
-
                     @Override
                     public void actionPerformed(final ActionEvent e) {
                         setValue(o, value);
                         popup.setVisible(false);
-
                     }
                 });
             }
@@ -357,22 +327,17 @@ public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> impl
     protected JComponent getPopupElement(final ModelType o, final boolean selected, final E value) {
         return new JMenuItem(new BasicAction(o.toString()) {
             {
-
                 setName(modelItemToString(o, value));
-
                 if (selected) {
                     setSmallIcon(RadioBoxIcon.TRUE);
                 } else {
                     setSmallIcon(RadioBoxIcon.FALSE);
                 }
-
             }
 
             @Override
             public void actionPerformed(final ActionEvent e) {
-
             }
-
         });
     }
 
@@ -382,7 +347,6 @@ public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> impl
 
     @Override
     public String getStringValue(final E value) {
-
         return modelItemToString(getSelectedItem(value), value);
     }
 
@@ -422,7 +386,6 @@ public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> impl
 
     @Override
     public boolean isEnabled(final E obj) {
-
         return true;
     }
 
@@ -451,7 +414,5 @@ public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> impl
      */
     public ComboBoxModel<ModelType> updateModel(final ComboBoxModel<ModelType> dataModel, final E value) {
         return dataModel;
-
     }
-
 }

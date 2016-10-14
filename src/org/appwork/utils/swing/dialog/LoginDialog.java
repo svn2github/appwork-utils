@@ -46,7 +46,7 @@ import javax.swing.JTextField;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 
-import org.appwork.resources.AWUTheme;
+import org.appwork.resources.AWIcon;
 import org.appwork.utils.BinaryLogic;
 import org.appwork.utils.locale._AWU;
 import org.appwork.utils.swing.EDTHelper;
@@ -88,13 +88,11 @@ public class LoginDialog extends AbstractDialog<LoginData> implements ActionList
 
     public static void main(final String[] args) {
         try {
-
             final LoginDialog d = new LoginDialog(0);
             final LoginData response = Dialog.getInstance().showDialog(d);
             System.out.println("Remember logins: " + response.isSave());
             System.out.println("Username: " + response.getUsername());
             System.out.println("Password: " + response.getPassword());
-
         } catch (final DialogClosedException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -119,7 +117,7 @@ public class LoginDialog extends AbstractDialog<LoginData> implements ActionList
     }
 
     public LoginDialog(final int flag) {
-        this(flag, _AWU.T.AccountNew_AccountNew_title(), _AWU.T.AccountNew_AccountNew_message(), AWUTheme.I().getIcon("dialog/login", 32));
+        this(flag, _AWU.T.AccountNew_AccountNew_title(), _AWU.T.AccountNew_AccountNew_message(), AWIcon.DIALOG_LOGIN.get(32));
     }
 
     public LoginDialog(final int flag, final String title, final String message, final Icon icon) {
@@ -144,7 +142,6 @@ public class LoginDialog extends AbstractDialog<LoginData> implements ActionList
         } else {
             okButton.setEnabled(true);
         }
-
     }
 
     @Override
@@ -157,7 +154,6 @@ public class LoginDialog extends AbstractDialog<LoginData> implements ActionList
 
     @Override
     public JComponent layoutDialogContent() {
-
         final JPanel contentpane = new JPanel();
         titleColor = Color.DARK_GRAY;
         accid = new JTextField(10);
@@ -167,7 +163,6 @@ public class LoginDialog extends AbstractDialog<LoginData> implements ActionList
         if (rememberDisabled) {
             save.setEnabled(false);
         }
-
         contentpane.setLayout(new MigLayout("ins 5, wrap 2", "[]10[grow,fill]", "[][]"));
         contentpane.add(new JLabel(message), "spanx");
         contentpane.add(addSettingName(getTranslationUserName()));
@@ -194,13 +189,11 @@ public class LoginDialog extends AbstractDialog<LoginData> implements ActionList
     protected void packed() {
         super.packed();
         setResizable(false);
-
     }
 
     @Override
     protected void initFocus(final JComponent focus) {
         accid.selectAll();
-
         accid.requestFocusInWindow();
     }
 
@@ -214,7 +207,6 @@ public class LoginDialog extends AbstractDialog<LoginData> implements ActionList
 
     public void setUsernameDefault(final String user) {
         preUser = user;
-
     }
 
     /*
@@ -228,10 +220,8 @@ public class LoginDialog extends AbstractDialog<LoginData> implements ActionList
             return null;
         }
         return new EDTHelper<String>() {
-
             @Override
             public String edtRun() {
-
                 return accid.getText();
             }
         }.getReturnValue();
@@ -248,14 +238,11 @@ public class LoginDialog extends AbstractDialog<LoginData> implements ActionList
             return null;
         }
         return new EDTHelper<String>() {
-
             @Override
             public String edtRun() {
-
                 return new String(pass.getPassword());
             }
         }.getReturnValue();
-
     }
 
     /*
@@ -265,7 +252,6 @@ public class LoginDialog extends AbstractDialog<LoginData> implements ActionList
      */
     @Override
     public String getDefaultUsername() {
-
         return preUser;
     }
 
@@ -286,7 +272,6 @@ public class LoginDialog extends AbstractDialog<LoginData> implements ActionList
      */
     @Override
     public boolean isDefaultRememberSelected() {
-
         return preSave;
     }
 
@@ -302,10 +287,8 @@ public class LoginDialog extends AbstractDialog<LoginData> implements ActionList
         }
         // return new LoginData(accid.getText(), new String(pass.getPassword()), );
         return new EDTHelper<Boolean>() {
-
             @Override
             public Boolean edtRun() {
-
                 return save.isSelected();
             }
         }.getReturnValue() == Boolean.TRUE;
@@ -320,5 +303,4 @@ public class LoginDialog extends AbstractDialog<LoginData> implements ActionList
     public boolean isRememberOptionVisible() {
         return !rememberDisabled;
     }
-
 }

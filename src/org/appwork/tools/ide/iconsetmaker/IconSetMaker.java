@@ -42,11 +42,12 @@ public class IconSetMaker {
     private File themesFolder;
 
     /**
+     * @param rel
      * @param projectFolder
      */
-    public IconSetMaker(File projectFolder) {
+    public IconSetMaker(String rel, File projectFolder) {
         this.projectFolder = projectFolder;
-        themesFolder = new File(projectFolder, "setup/devAVL");
+        themesFolder = new File(projectFolder, rel);
     }
 
     public static void main(String[] args) throws Throwable {
@@ -66,7 +67,7 @@ public class IconSetMaker {
             }
         }.waitForEDT();
         // WORKSPACE = IDEUtils.getProjectFolder();
-        new IconSetMaker(IDEUtils.getProjectFolder(Class.forName(new Exception().getStackTrace()[1].getClassName()))).run();
+        new IconSetMaker(args[0], IDEUtils.getProjectFolder(Class.forName(new Exception().getStackTrace()[1].getClassName()))).run();
     }
 
     private IconSetterGui gui;

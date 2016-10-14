@@ -45,7 +45,7 @@ import javax.swing.border.Border;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 
-import org.appwork.resources.AWUTheme;
+import org.appwork.resources.AWIcon;
 import org.appwork.sunwrapper.sun.swing.DefaultLookupWrapper;
 
 /**
@@ -53,14 +53,12 @@ import org.appwork.sunwrapper.sun.swing.DefaultLookupWrapper;
  *
  */
 public class ExtTableHeaderRenderer extends DefaultTableCellRenderer implements javax.swing.plaf.UIResource {
-
     /**
      *
      */
     private static final long  serialVersionUID = 1L;
     private final ExtColumn<?> column;
     private boolean            paintIcon;
-
     private Color              focusForeground;
     private Color              focusBackground;
     private Color              foregroundC;
@@ -127,32 +125,24 @@ public class ExtTableHeaderRenderer extends DefaultTableCellRenderer implements 
     public ExtTableHeaderRenderer(final ExtColumn<?> extColumn, final JTableHeader header) {
         column = extColumn;
         // this.setHorizontalTextPosition(10);
-        lockedWidth = AWUTheme.I().getIcon("exttable/widthLocked", 14);
-
+        lockedWidth = AWIcon.TABLE_WIDTH_LOCKED.get(14);
         try {
-
             focusForeground = DefaultLookupWrapper.getColor(this, ui, "TableHeader.focusCellForeground");
             focusBackground = DefaultLookupWrapper.getColor(this, ui, "TableHeader.focusCellBackground");
-
         } catch (final Throwable e) {
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
         }
         if (focusForeground == null) {
             focusForeground = header.getForeground();
-
         }
         if (focusBackground == null) {
             focusBackground = header.getBackground();
         }
         foregroundC = header.getForeground();
         backgroundC = header.getBackground();
-
         try {
-
             focusBorder = DefaultLookupWrapper.getBorder(this, ui, "TableHeader.focusCellBorder");
-
             cellBorder = DefaultLookupWrapper.getBorder(this, ui, "TableHeader.cellBorder");
-
         } catch (final Throwable e) {
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
             // avoid that the block above kills edt
@@ -164,7 +154,6 @@ public class ExtTableHeaderRenderer extends DefaultTableCellRenderer implements 
             cellBorder = BorderFactory.createEmptyBorder(0, 10, 0, 10);
         }
         setFont(header.getFont());
-
     }
 
     @Override
@@ -174,15 +163,11 @@ public class ExtTableHeaderRenderer extends DefaultTableCellRenderer implements 
         // sort column is no current column
         if (!this.column.isPaintSortIcon() || (this.column.getModel().getSortColumn() == null || this.column.getModel().getSortColumn() != this.column)) {
             paintIcon = false;
-
         } else {
             paintIcon = true;
-
         }
-
         setText(value == null ? "" : value.toString());
         setBorder(hasFocus ? focusBorder : cellBorder);
-
         // this.setBackground(Color.RED);
         // this.setOpaque(true);
         // System.out.println(this.getPreferredSize());
@@ -195,11 +180,9 @@ public class ExtTableHeaderRenderer extends DefaultTableCellRenderer implements 
         if (!column.isResizable() && column.isPaintWidthLockIcon() && column.getModel().getTable().isColumnLockingFeatureEnabled()) {
             paintLock = true;
         }
-
         final Border orgBorder = getBorder();
         final int widthDif = column.getWidth() - getPreferredSize().width;
         final boolean smallLockIcon = widthDif < lockedWidth.getIconWidth();
-
         try {
             if (paintLock && !smallLockIcon) {
                 setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(0, 0, 0, lockedWidth.getIconWidth()), orgBorder));
@@ -221,11 +204,8 @@ public class ExtTableHeaderRenderer extends DefaultTableCellRenderer implements 
                     // g2.setComposite(comp);
                 }
             }
-
             if (paintLock) {
-
                 // lockedWidth
-
                 final Graphics2D g2 = (Graphics2D) g;
                 // final Composite comp = g2.getComposite();
                 // g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
@@ -243,7 +223,5 @@ public class ExtTableHeaderRenderer extends DefaultTableCellRenderer implements 
         } catch (final RuntimeException e) {
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
         }
-
     }
-
 }

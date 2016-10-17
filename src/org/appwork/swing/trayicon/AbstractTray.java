@@ -26,7 +26,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JSeparator;
 import javax.swing.SwingUtilities;
 
-import org.appwork.resources.AWIcon;
 import org.appwork.resources.IconRef;
 import org.appwork.scheduler.DelayedRunnable;
 import org.appwork.swing.action.BasicAction;
@@ -67,7 +66,7 @@ public abstract class AbstractTray implements MouseListener, MouseMotionListener
 
     private void runTray() throws AWTException {
         SystemTray systemTray = SystemTray.getSystemTray();
-        Image img = this.createTrayImage(AWIcon.trayicon);
+        Image img = this.createTrayImage(TrayIconRef.trayicon);
         this.trayIcon = new TrayIcon(img, null, null);
         this.trayIcon.setImageAutoSize(true);
         this.ma = new TrayMouseAdapter(this, this.trayIcon);

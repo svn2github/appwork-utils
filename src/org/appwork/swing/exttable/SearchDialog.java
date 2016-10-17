@@ -109,7 +109,7 @@ public abstract class SearchDialog extends JDialog implements WindowListener, Ac
         addWindowListener(this);
         okButton = new JButton(_AWU.T.SEARCHDIALOG_BUTTON_FIND());
         okButton.addActionListener(this);
-        this.add(new JLabel(AWIcon.TABLE_SEARCH_DIALOG_FIND.get(32)), "alignx left,aligny center,shrinkx,gapright 10,spany");
+        this.add(new JLabel(ExtTableIcon.TABLE_SEARCH_DIALOG_FIND.get(32)), "alignx left,aligny center,shrinkx,gapright 10,spany");
         input = new JTextField();
         input.setBorder(BorderFactory.createEtchedBorder());
         this.add(input, "pushy,growy,spanx,wrap");

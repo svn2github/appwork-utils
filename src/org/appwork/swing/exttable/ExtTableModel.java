@@ -137,8 +137,8 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
     protected void init(final String id) {
         this.extComponentRowHighlighters = new ArrayList<ExtComponentRowHighlighter<E>>();
         this.modelID = id;
-        this.iconAsc = AWIcon.TABLE_SORT_ASC.get(6);
-        this.iconDesc = AWIcon.TABLE_SORT_DESC.get(6);
+        this.iconAsc = ExtTableIcon.TABLE_SORT_ASC.get(6);
+        this.iconDesc = ExtTableIcon.TABLE_SORT_DESC.get(6);
         this.initModel();
         /**
          * we use this PropertyChangeListener to avoid tableRefresh while the table is in editing mode

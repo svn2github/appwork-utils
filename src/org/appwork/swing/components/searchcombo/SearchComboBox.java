@@ -82,8 +82,8 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
 import org.appwork.app.gui.BasicGui;
-import org.appwork.resources.AWIcon;
 import org.appwork.resources.AWUTheme;
+import org.appwork.resources.IconRefImpl;
 import org.appwork.swing.MigPanel;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.swing.EDTHelper;
@@ -418,7 +418,7 @@ public abstract class SearchComboBox<T> extends JComboBox {
 
                         @Override
                         protected Icon getIconForValue(final String value) {
-                            return value == null ? AWIcon.close.get(28) : AWUTheme.getInstance().getIcon(value, 28);
+                            return value == null ? new IconRefImpl("close").icon(28) : AWUTheme.getInstance().getIcon(value, 28);
                         }
 
                         @Override

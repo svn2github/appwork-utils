@@ -12,13 +12,15 @@ import javax.swing.JPopupMenu;
 import javax.swing.SwingConstants;
 
 import org.appwork.resources.AWUTheme;
-import org.appwork.resources.AWIcon;
+import org.appwork.resources.IconRefImpl;
 import org.appwork.swing.action.BasicAction;
 
 public class PseudoCombo<Type> extends JButton {
     protected volatile Type selectedItem = null;
     private Type[]          values;
     private boolean         popDown      = false;
+    private IconRefImpl     popDownSmall = new IconRefImpl("popDownSmall");
+    private IconRefImpl     popUpSmall   = new IconRefImpl("popUpSmall");
 
     public PseudoCombo(Type[] values) {
         super();
@@ -56,15 +58,15 @@ public class PseudoCombo<Type> extends JButton {
     protected Icon getPopIcon(boolean closed) {
         if (closed) {
             if (isPopDown()) {
-                return AWIcon.popDownSmall.get(-1);
+                return popDownSmall.get(-1);
             } else {
-                return AWIcon.popUpSmall.get(-1);
+                return popUpSmall.get(-1);
             }
         } else {
             if (isPopDown()) {
-                return AWIcon.popUpSmall.get(-1);
+                return popUpSmall.get(-1);
             } else {
-                return AWIcon.popDownSmall.get(-1);
+                return popDownSmall.get(-1);
             }
         }
     }

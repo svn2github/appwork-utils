@@ -42,15 +42,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.zip.GZIPInputStream;
 
-import org.appwork.resources.AWIcon;
-import org.appwork.uio.UIOManager;
-import org.appwork.utils.formatter.SizeFormatter;
-import org.appwork.utils.locale._AWU;
-import org.appwork.utils.swing.EDTHelper;
-import org.appwork.utils.swing.dialog.Dialog;
-import org.appwork.utils.swing.dialog.ProgressDialog;
-import org.appwork.utils.swing.dialog.ProgressDialog.ProgressGetter;
-
 /**
  * @author thomas
  *
@@ -148,75 +139,76 @@ public class HTTP {
             }
         }
     }
-
-    /**
-     * @param file
-     * @param url
-     * @param hash
-     * @throws Exception
-     */
-    public static void downloadInDialog(final File file, final String url, final String hash) throws Exception {
-        final Exception ret = new EDTHelper<Exception>() {
-            @Override
-            public Exception edtRun() {
-                try {
-                    final DownloadProgress progress = new DownloadProgress();
-                    final ProgressGetter pg = new ProgressGetter() {
-                        private long loaded = 0;
-                        private long total  = 0;
-
-                        @Override
-                        public int getProgress() {
-                            this.total = progress.getTotal();
-                            this.loaded = progress.getLoaded();
-                            if (this.total == 0) {
-                                return 0;
-                            }
-                            return (int) (this.loaded * 100 / this.total);
-                        }
-
-                        @Override
-                        public String getString() {
-                            this.total = progress.getTotal();
-                            this.loaded = progress.getLoaded();
-                            if (this.total <= 0) {
-                                return _AWU.T.connecting();
-                            }
-                            return _AWU.T.progress(SizeFormatter.formatBytes(this.loaded), SizeFormatter.formatBytes(this.total), this.loaded * 10000f / this.total / 100.0);
-                        }
-
-                        @Override
-                        public void run() throws Exception {
-                            HTTP.download(new URL(url), file, progress);
-                        }
-
-                        @Override
-                        public String getLabelString() {
-                            // TODO Auto-generated method stub
-                            return null;
-                        }
-                    };
-                    final ProgressDialog dialog = new ProgressDialog(pg, UIOManager.BUTTONS_HIDE_CANCEL | UIOManager.BUTTONS_HIDE_OK, _AWU.T.download_title(), _AWU.T.download_msg(), AWIcon.download.get(32)) {
-                        /**
-                         *
-                         */
-                        private static final long serialVersionUID = 5303387916537596967L;
-
-                        @Override
-                        public boolean closeAllowed() {
-                            Dialog.getInstance().showMessageDialog(_AWU.T.please_wait());
-                            return false;
-                        }
-                    };
-                    Dialog.getInstance().showDialog(dialog);
-                } catch (final Exception e) {
-                    return e;
-                }
-                return null;
-            }
-        }.getReturnValue();
-        if (ret != null) {
-            throw ret;
-        }
-    }
+    // /**
+    // * @param file
+    // * @param url
+    // * @param hash
+    // * @throws Exception
+    // */
+    // public static void downloadInDialog(final File file, final String url, final String hash) throws Exception {
+    // final Exception ret = new EDTHelper<Exception>() {
+    // @Override
+    // public Exception edtRun() {
+    // try {
+    // final DownloadProgress progress = new DownloadProgress();
+    // final ProgressGetter pg = new ProgressGetter() {
+    // private long loaded = 0;
+    // private long total = 0;
+    //
+    // @Override
+    // public int getProgress() {
+    // this.total = progress.getTotal();
+    // this.loaded = progress.getLoaded();
+    // if (this.total == 0) {
+    // return 0;
+    // }
+    // return (int) (this.loaded * 100 / this.total);
+    // }
+    //
+    // @Override
+    // public String getString() {
+    // this.total = progress.getTotal();
+    // this.loaded = progress.getLoaded();
+    // if (this.total <= 0) {
+    // return _AWU.T.connecting();
+    // }
+    // return _AWU.T.progress(SizeFormatter.formatBytes(this.loaded), SizeFormatter.formatBytes(this.total), this.loaded * 10000f /
+    // this.total / 100.0);
+    // }
+    //
+    // @Override
+    // public void run() throws Exception {
+    // HTTP.download(new URL(url), file, progress);
+    // }
+    //
+    // @Override
+    // public String getLabelString() {
+    // // TODO Auto-generated method stub
+    // return null;
+    // }
+    // };
+    // final ProgressDialog dialog = new ProgressDialog(pg, UIOManager.BUTTONS_HIDE_CANCEL | UIOManager.BUTTONS_HIDE_OK,
+    // _AWU.T.download_title(), _AWU.T.download_msg(), AWIcon.download.get(32)) {
+    // /**
+    // *
+    // */
+    // private static final long serialVersionUID = 5303387916537596967L;
+    //
+    // @Override
+    // public boolean closeAllowed() {
+    // Dialog.getInstance().showMessageDialog(_AWU.T.please_wait());
+    // return false;
+    // }
+    // };
+    // Dialog.getInstance().showDialog(dialog);
+    // } catch (final Exception e) {
+    // return e;
+    // }
+    // return null;
+    // }
+    // }.getReturnValue();
+    // if (ret != null) {
+    // throw ret;
+    // }
+    // }
 }

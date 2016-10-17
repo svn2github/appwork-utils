@@ -48,7 +48,7 @@ public class TextAreaDialog extends AbstractDialog<String> {
     protected JTextArea    txtArea;
 
     public TextAreaDialog(final String title, final String message, final String def) {
-        super(0, title, AWIcon.DIALOG_INFO.get(32), null, null);
+        super(0, title, DialogIcon.DIALOG_INFO.get(32), null, null);
         org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Dialog \r\ntitle: " + title + "\r\nmsg:   \r\n" + message + "\r\ndef:   \r\n" + def);
         this.message = message;
         this.def = def;

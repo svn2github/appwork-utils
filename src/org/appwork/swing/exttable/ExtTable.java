@@ -490,7 +490,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
     private JComponent createDefaultColumnButton() {
         final MigPanel p = new MigPanel("ins 0 2 0 0", "[grow,fill]", "[grow,fill]");
         final JButton button;
-        button = new JButton(AWIcon.TABLE_COLUMN_BUTTON.get(10));
+        button = new JButton(ExtTableIcon.TABLE_COLUMN_BUTTON.get(10));
         button.setBorderPainted(false);
         button.setContentAreaFilled(false);
         p.setBackground(null);

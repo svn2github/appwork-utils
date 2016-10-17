@@ -117,7 +117,7 @@ public class LoginDialog extends AbstractDialog<LoginData> implements ActionList
     }
 
     public LoginDialog(final int flag) {
-        this(flag, _AWU.T.AccountNew_AccountNew_title(), _AWU.T.AccountNew_AccountNew_message(), AWIcon.DIALOG_LOGIN.get(32));
+        this(flag, _AWU.T.AccountNew_AccountNew_title(), _AWU.T.AccountNew_AccountNew_message(), DialogIcon.DIALOG_LOGIN.get(32));
     }
 
     public LoginDialog(final int flag, final String title, final String message, final Icon icon) {

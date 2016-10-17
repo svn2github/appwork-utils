@@ -289,7 +289,7 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
                 }
             });
             this.timerLbl.setToolTipText(_AWU.T.TIMERDIALOG_TOOLTIP_TIMERLABEL());
-            this.timerLbl.setIcon(AWIcon.DIALOG_CANCEL.get(16));
+            this.timerLbl.setIcon(DialogIcon.DIALOG_CANCEL.get(16));
         }
         WindowStack windowStack = null;
         InternDialog<T> dialog = null;

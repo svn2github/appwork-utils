@@ -46,7 +46,6 @@ import java.util.List;
 import javax.swing.Icon;
 import javax.swing.filechooser.FileSystemView;
 
-import org.appwork.resources.AWIcon;
 import org.appwork.storage.config.JsonConfig;
 import org.appwork.sunwrapper.sun.awt.shell.ShellFolderWrapper;
 import org.appwork.utils.locale._AWU;
@@ -267,7 +266,7 @@ public class ExtFileSystemView extends FileSystemView {
             if (userName != null) {
                 this.mount(new File("/run/media/" + userName), unique);
             }
-            final HomeFolder[] homeFolders = new HomeFolder[] { new HomeFolder(HomeFolder.HOME_ROOT, AWIcon.FILECHOOSER_HOME.path()), new HomeFolder(HomeFolder.DOCUMENTS, AWIcon.FILECHOOSER_DOCUMENTS.path()), new HomeFolder(HomeFolder.DROPBOX, AWIcon.FILECHOOSER_BOX.path()), new HomeFolder(HomeFolder.PICTURES, AWIcon.FILECHOOSER_IMAGES.path()), new HomeFolder(HomeFolder.VIDEOS, AWIcon.FILECHOOSER_VIDEO.path()), new HomeFolder(HomeFolder.DOWNLOADS, AWIcon.FILECHOOSER_DOWNLOADS.path()), new HomeFolder(HomeFolder.MUSIC, AWIcon.FILECHOOSER_MUSIC.path()) };
+            final HomeFolder[] homeFolders = new HomeFolder[] { new HomeFolder(HomeFolder.HOME_ROOT, ExtFileChooserDialogIcon.FILECHOOSER_HOME.path()), new HomeFolder(HomeFolder.DOCUMENTS, ExtFileChooserDialogIcon.FILECHOOSER_DOCUMENTS.path()), new HomeFolder(HomeFolder.DROPBOX, ExtFileChooserDialogIcon.FILECHOOSER_BOX.path()), new HomeFolder(HomeFolder.PICTURES, ExtFileChooserDialogIcon.FILECHOOSER_IMAGES.path()), new HomeFolder(HomeFolder.VIDEOS, ExtFileChooserDialogIcon.FILECHOOSER_VIDEO.path()), new HomeFolder(HomeFolder.DOWNLOADS, ExtFileChooserDialogIcon.FILECHOOSER_DOWNLOADS.path()), new HomeFolder(HomeFolder.MUSIC, ExtFileChooserDialogIcon.FILECHOOSER_MUSIC.path()) };
             for (final HomeFolder hf : homeFolders) {
                 if (hf.exists()) {
                     unique.add(hf);
@@ -332,15 +331,15 @@ public class ExtFileSystemView extends FileSystemView {
     public Icon getSystemIcon(final File f) {
         try {
             if (f instanceof VirtualRoot) {
-                return AWIcon.FILE_SYSTEM_ROOT.get(18);
+                return ExtFileChooserDialogIcon.FILE_SYSTEM_ROOT.get(18);
             }
             if (useFileIcons) {
                 return this.org.getSystemIcon(f);
             } else {
                 if (f.isDirectory()) {
-                    return AWIcon.EXTFILESYSTEM_folder.get(18);
+                    return ExtFileChooserDialogIcon.EXTFILESYSTEM_folder.get(18);
                 } else {
-                    return AWIcon.EXTFILESYSTEM_fileIcon.get(18);
+                    return ExtFileChooserDialogIcon.EXTFILESYSTEM_fileIcon.get(18);
                 }
             }
         } catch (final Exception e) {

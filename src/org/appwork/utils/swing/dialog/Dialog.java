@@ -70,25 +70,25 @@ public class Dialog {
      *
      * @see org.appwork.utils.ImageProvider.ImageProvider#getIcon(String, int, int, boolean)
      */
-    public static final String  ICON_ERROR                          = AWIcon.DIALOG_ERROR.path();
+    public static final String  ICON_ERROR                          = DialogIcon.DIALOG_ERROR.path();
     /**
      * Icon Key for Information Icons
      *
      * @see org.appwork.utils.ImageProvider.ImageProvider#getIcon(String, int, int, boolean)
      */
-    public static final String  ICON_INFO                           = AWIcon.DIALOG_INFO.path();
+    public static final String  ICON_INFO                           = DialogIcon.DIALOG_INFO.path();
     /**
      * Icon Key for Question Icons
      *
      * @see org.appwork.utils.ImageProvider.ImageProvider#getIcon(String, int, int, boolean)
      */
-    public static final String  ICON_QUESTION                       = AWIcon.DIALOG_HELP.path();
+    public static final String  ICON_QUESTION                       = DialogIcon.DIALOG_HELP.path();
     /**
      * Icon Key for Warning Icons
      *
      * @see org.appwork.utils.ImageProvider.ImageProvider#getIcon(String, int, int, boolean)
      */
-    public static final String  ICON_WARNING                        = AWIcon.DIALOG_WARNING.path();
+    public static final String  ICON_WARNING                        = DialogIcon.DIALOG_WARNING.path();
     /**
      * internal singleton instance to access the instance of this class
      */

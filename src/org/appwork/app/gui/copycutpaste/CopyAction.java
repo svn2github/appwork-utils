@@ -60,7 +60,7 @@ public class CopyAction extends AbstractAction {
     public CopyAction(final JTextComponent c) {
         super(_AWU.T.COPYCUTPASTE_COPY());
         text = c;
-        putValue(Action.SMALL_ICON, AWIcon.copy.get(16));
+        putValue(Action.SMALL_ICON, CutCopyPasteIcon.copy.get(16));
         putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_C, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
     }
 

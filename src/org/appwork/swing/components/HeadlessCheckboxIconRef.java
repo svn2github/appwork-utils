@@ -10,7 +10,7 @@
  *         Germany
  * === Preamble ===
  *     This license establishes the terms under which the [The Product] Source Code & Binary files may be used, copied, modified, distributed, and/or redistributed.
- *     The intent is that the AppWork GmbH is able to provide their utilities library for free to non-commercial projects whereas commercial usage is only permitted after obtaining a commercial license.
+ *     The intent is that the AppWork GmbH is able to provide  their utilities library for free to non-commercial projects whereas commercial usage is only permitted after obtaining a commercial license.
  *     These terms apply to all files that have the [The Product] License header (IN the file), a <filename>.license or <filename>.info (like mylib.jar.info) file that contains a reference to this license.
  *
  * === 3rd Party Licences ===
@@ -19,11 +19,11 @@
  *
  * === Definition: Commercial Usage ===
  *     If anybody or any organization is generating income (directly or indirectly) by using [The Product] or if there's any commercial interest or aspect in what you are doing, we consider this as a commercial usage.
- *     If your use-case is neither strictly private nor strictly educational, it is commercial. If you are unsure whether your use-case is commercial or not, consider it as commercial or contact us.
+ *     If your use-case is neither strictly private nor strictly educational, it is commercial. If you are unsure whether your use-case is commercial or not, consider it as commercial or contact as.
  * === Dual Licensing ===
  * === Commercial Usage ===
  *     If you want to use [The Product] in a commercial way (see definition above), you have to obtain a paid license from AppWork GmbH.
- *     Contact AppWork for further details: <e-mail@appwork.org>
+ *     Contact AppWork for further details: e-mail@appwork.org
  * === Non-Commercial Usage ===
  *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the
  *     "GNU Affero General Public License" (http://www.gnu.org/licenses/agpl-3.0.en.html).
@@ -31,60 +31,62 @@
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
-package org.appwork.app.gui.copycutpaste;
+package org.appwork.swing.components;
 
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
+import java.awt.Image;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.JPasswordField;
-import javax.swing.KeyStroke;
-import javax.swing.text.JTextComponent;
+import javax.swing.Icon;
 
-import org.appwork.resources.AWIcon;
-import org.appwork.utils.locale._AWU;
+import org.appwork.resources.AWUTheme;
+import org.appwork.resources.IconRef;
 
 /**
- * @author $Author: unknown$
+ * @author thomas
+ * @date 14.10.2016
  *
  */
-public class CutAction extends AbstractAction {
+public enum HeadlessCheckboxIconRef implements IconRef {
+    HEADLESS_checkbox_false("checkbox_false"),
+    HEADLESS_checkbox_true("checkbox_true");
+    private String path;
+
     /**
      *
      */
-    private static final long    serialVersionUID = -7350323932196046071L;
-    private final JTextComponent text;
+    private HeadlessCheckboxIconRef(String path) {
+        this.path = path;
+    }
 
-    public CutAction(final JTextComponent c) {
-        super(_AWU.T.COPYCUTPASTE_CUT());
-        text = c;
-        putValue(Action.SMALL_ICON, CutCopyPasteIcon.cut.get(16));
-        putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_X, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+    /**
+     * @param i
+     * @return
+     */
+    public Icon get(int size) {
+        return AWUTheme.I().getIcon(path, size);
+    }
+
+    public Icon icon(int size) {
+        return AWUTheme.I().getIcon(path, size);
     }
 
     /*
      * (non-Javadoc)
      *
-     * @see com.rapidshare.utils.event.Event.ActionListener#actionPerformed(com. rapidshare.utils.event.Event.ActionEvent)
+     * @see org.appwork.resources.IconRef#image(int)
      */
-    public void actionPerformed(final ActionEvent e) {
-        if (text == null) {
-            if (e.getSource() instanceof JTextComponent) {
-                final JTextComponent text = (JTextComponent) e.getSource();
-                text.cut();
-            }
-        } else {
-            text.cut();
-        }
+    @Override
+    public Image image(int size) {
+        return AWUTheme.I().getImage(path, size);
     }
 
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.appwork.resources.IconRef#path()
+     */
     @Override
-    public boolean isEnabled() {
-        if (text == null) {
-            return true;
-        }
-        return !(text instanceof JPasswordField) && text.isEnabled() && text.getSelectedText() != null;
+    public String path() {
+        // TODO Auto-generated method stub
+        return path;
     }
 }

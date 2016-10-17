@@ -39,7 +39,6 @@ import java.awt.Graphics;
 import javax.swing.Icon;
 import javax.swing.JCheckBox;
 
-import org.appwork.resources.AWIcon;
 import org.appwork.resources.AWUTheme;
 import org.appwork.utils.Application;
 import org.appwork.utils.ImageProvider.ImageProvider;
@@ -61,9 +60,9 @@ public final class CheckBoxIcon implements Icon {
             cb = null;
             final Icon icon;
             if (selected) {
-                icon = AWIcon.HEADLESS_checkbox_true.get(size);
+                icon = HeadlessCheckboxIconRef.HEADLESS_checkbox_true.get(size);
             } else {
-                icon = AWIcon.HEADLESS_checkbox_false.get(size);
+                icon = HeadlessCheckboxIconRef.HEADLESS_checkbox_false.get(size);
             }
             if (!enabled) {
                 internalIcon = AWUTheme.getInstance().getDisabledIcon(icon);

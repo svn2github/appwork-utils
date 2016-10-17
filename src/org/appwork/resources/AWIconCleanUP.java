@@ -38,11 +38,17 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import org.appwork.app.gui.copycutpaste.CutCopyPasteIcon;
+import org.appwork.swing.components.HeadlessCheckboxIconRef;
+import org.appwork.swing.exttable.ExtTableIcon;
+import org.appwork.swing.trayicon.TrayIconRef;
 import org.appwork.utils.FileHandler;
 import org.appwork.utils.Files;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.ide.IDEUtils;
 import org.appwork.utils.os.CrossSystem;
+import org.appwork.utils.swing.dialog.DialogIcon;
+import org.appwork.utils.swing.dialog.ExtFileChooserDialogIcon;
 
 /**
  * @author thomas
@@ -51,7 +57,7 @@ import org.appwork.utils.os.CrossSystem;
  */
 public class AWIconCleanUP {
     public static void main(String[] args) throws ClassNotFoundException {
-        cleanup("themes/themes/standard/org/appwork/images", AWIcon.class);
+        cleanup("themes/themes/standard/org/appwork/images", ExtFileChooserDialogIcon.class, TrayIconRef.class, AWIcon.class, CutCopyPasteIcon.class, ExtTableIcon.class, DialogIcon.class, HeadlessCheckboxIconRef.class, HeadlessCheckboxIconRef.class);
     }
 
     /**

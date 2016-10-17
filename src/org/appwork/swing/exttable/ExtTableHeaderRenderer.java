@@ -125,7 +125,7 @@ public class ExtTableHeaderRenderer extends DefaultTableCellRenderer implements 
     public ExtTableHeaderRenderer(final ExtColumn<?> extColumn, final JTableHeader header) {
         column = extColumn;
         // this.setHorizontalTextPosition(10);
-        lockedWidth = AWIcon.TABLE_WIDTH_LOCKED.get(14);
+        lockedWidth = ExtTableIcon.TABLE_WIDTH_LOCKED.get(14);
         try {
             focusForeground = DefaultLookupWrapper.getColor(this, ui, "TableHeader.focusCellForeground");
             focusBackground = DefaultLookupWrapper.getColor(this, ui, "TableHeader.focusCellBackground");

@@ -60,7 +60,7 @@ public class PasteAction extends AbstractAction {
     public PasteAction(final JTextComponent c) {
         super(_AWU.T.COPYCUTPASTE_PASTE());
         text = c;
-        putValue(Action.SMALL_ICON, AWIcon.paste.get(16));
+        putValue(Action.SMALL_ICON, CutCopyPasteIcon.paste.get(16));
         putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_V, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
     }
 

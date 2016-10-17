@@ -57,7 +57,7 @@ public class DeleteAction extends AbstractAction {
     public DeleteAction(final JTextComponent c) {
         super(_AWU.T.COPYCUTPASTE_DELETE());
         this.text = c;
-        this.putValue(Action.SMALL_ICON, AWIcon.delete.get(16));
+        this.putValue(Action.SMALL_ICON, CutCopyPasteIcon.delete.get(16));
         this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("DELETE"));
     }
 

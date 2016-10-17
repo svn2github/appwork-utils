@@ -38,8 +38,8 @@ import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 
-import org.appwork.resources.AWIcon;
 import org.appwork.swing.exttable.ExtColumn;
+import org.appwork.swing.exttable.ExtTableIcon;
 import org.appwork.utils.locale._AWU;
 
 /**
@@ -58,7 +58,7 @@ public class LockColumnWidthAction extends AbstractAction {
      */
     public LockColumnWidthAction(final ExtColumn<?> extColumn) {
         super();
-        putValue(Action.SMALL_ICON, AWIcon.TABLE_LOCK_COLUMN.get(extColumn.getModel().getTable().getContextIconSize()));
+        putValue(Action.SMALL_ICON, ExtTableIcon.TABLE_LOCK_COLUMN.get(extColumn.getModel().getTable().getContextIconSize()));
         this.extColumn = extColumn;
         if (extColumn.isResizable()) {
             putValue(Action.SELECTED_KEY, false);

@@ -45,7 +45,7 @@ import javax.swing.JButton;
 import javax.swing.JProgressBar;
 
 import org.appwork.app.gui.BasicGui;
-import org.appwork.resources.AWIcon;
+import org.appwork.resources.IconRefImpl;
 import org.appwork.swing.components.tooltips.ExtTooltip;
 import org.appwork.swing.components.tooltips.TooltipFactory;
 import org.appwork.swing.components.tooltips.TooltipPanel;
@@ -112,14 +112,14 @@ public class TEst {
                         cbar.setOpaque(false);
                         final CircledProgressBar iconBar = new CircledProgressBar(model);
                         iconBar.setPreferredSize(new Dimension(48, 32));
-                        final ImagePainter painter = new ImagePainter(AWIcon.close.get(32), 1.0f);
+                        final ImagePainter painter = new ImagePainter(new IconRefImpl("close").icon(32), 1.0f);
                         iconBar.setValueClipPainter(painter);
                         painter.setBackground(Color.GREEN);
-                        iconBar.setNonvalueClipPainter(new ImagePainter(AWIcon.close.get(32), 0.3f));
+                        iconBar.setNonvalueClipPainter(new ImagePainter(new IconRefImpl("close").icon(32), 0.3f));
                         final CircledProgressBar test = new CircledProgressBar();
-                        final ImagePainter valuePainter = new ImagePainter(AWIcon.dev.get(32), 1.0f);
+                        final ImagePainter valuePainter = new ImagePainter(new IconRefImpl("dev").icon(32), 1.0f);
                         // valuePainter.setForeground(Color.BLACK);
-                        final ImagePainter nonvaluePainter = new ImagePainter(AWIcon.dev.get(32), 0.3f);
+                        final ImagePainter nonvaluePainter = new ImagePainter(new IconRefImpl("dev").icon(32), 0.3f);
                         test.setValueClipPainter(valuePainter);
                         test.setNonvalueClipPainter(nonvaluePainter);
                         test.setMaximum(360);

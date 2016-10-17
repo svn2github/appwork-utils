@@ -37,7 +37,7 @@ import java.io.File;
 
 import javax.swing.Icon;
 
-import org.appwork.resources.AWIcon;
+import org.appwork.swing.exttable.ExtTableIcon;
 import org.appwork.swing.exttable.ExtTableModel;
 import org.appwork.swing.exttable.columns.ExtFileBrowser;
 import org.appwork.swing.exttable.columns.ExtTextColumn;
@@ -174,7 +174,7 @@ public class ExtTestModel extends ExtTableModel<TextObject> {
 
             @Override
             protected Icon getIcon(final TextObject value) {
-                return AWIcon.DIALOG_HELP.get(14);
+                return ExtTableIcon.TABLE_FINDMENU.get(14);
             }
 
             @Override

@@ -59,7 +59,7 @@ public class SelectAction extends AbstractAction {
     public SelectAction(final JTextComponent c) {
         super(_AWU.T.COPYCUTPASTE_SELECT());
         text = c;
-        putValue(Action.SMALL_ICON, AWIcon.select.get(16));
+        putValue(Action.SMALL_ICON, CutCopyPasteIcon.select.get(16));
         putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_A, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
     }
 

@@ -38,8 +38,8 @@ import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 
-import org.appwork.resources.AWIcon;
 import org.appwork.swing.exttable.ExtTable;
+import org.appwork.swing.exttable.ExtTableIcon;
 import org.appwork.utils.locale._AWU;
 
 /**
@@ -55,7 +55,7 @@ public class SearchContextAction extends AbstractAction {
 
     public SearchContextAction(final ExtTable<?> extTable) {
         super(_AWU.T.SearchContextAction());
-        this.putValue(Action.SMALL_ICON, AWIcon.TABLE_FINDMENU.get(extTable.getContextIconSize()));
+        this.putValue(Action.SMALL_ICON, ExtTableIcon.TABLE_FINDMENU.get(extTable.getContextIconSize()));
         this.table = extTable;
     }
 

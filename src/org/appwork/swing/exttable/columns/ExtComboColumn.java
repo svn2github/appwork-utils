@@ -48,10 +48,10 @@ import javax.swing.JComponent;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
-import org.appwork.resources.AWIcon;
 import org.appwork.swing.MigPanel;
 import org.appwork.swing.action.BasicAction;
 import org.appwork.swing.components.RadioBoxIcon;
+import org.appwork.swing.exttable.ExtTableIcon;
 import org.appwork.swing.exttable.ExtTableModel;
 import org.appwork.utils.swing.renderer.RendererMigPanel;
 
@@ -119,11 +119,11 @@ public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> impl
     }
 
     protected Icon createDropUpIcon() {
-        return AWIcon.TABLE_COLUMN_COMBO_popUpLarge.get(-1);
+        return ExtTableIcon.TABLE_COLUMN_COMBO_popUpLarge.get(-1);
     }
 
     protected Icon createDropDownIcon() {
-        return AWIcon.TABLE_COLUMN_COMBO_popDownLarge.get(-1);
+        return ExtTableIcon.TABLE_COLUMN_COMBO_popDownLarge.get(-1);
     }
 
     /*

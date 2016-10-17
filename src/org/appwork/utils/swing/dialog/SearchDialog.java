@@ -61,7 +61,7 @@ public class SearchDialog extends AbstractDialog<String> implements KeyListener,
     private final JCheckBox regularExpression;
 
     public SearchDialog(final int flag, final String title, final String message) {
-        super(flag | UIOManager.BUTTONS_HIDE_CANCEL, title, AWIcon.DIALOG_FIND.get(32), _AWU.T.SEARCHDIALOG_BUTTON_FIND(), null);
+        super(flag | UIOManager.BUTTONS_HIDE_CANCEL, title, DialogIcon.DIALOG_FIND.get(32), _AWU.T.SEARCHDIALOG_BUTTON_FIND(), null);
         caseSensitive = new JCheckBox(_AWU.T.SEARCHDIALOG_CHECKBOX_CASESENSITIVE());
         regularExpression = new JCheckBox(_AWU.T.SEARCHDIALOG_CHECKBOX_REGULAREXPRESSION());
         caseSensitive.setSelected(JSonStorage.getStorage("SearchDialog").get("caseSensitive", false));

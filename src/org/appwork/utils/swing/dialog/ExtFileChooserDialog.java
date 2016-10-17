@@ -69,7 +69,6 @@ import javax.swing.plaf.FileChooserUI;
 import javax.swing.plaf.basic.BasicDirectoryModel;
 import javax.swing.plaf.basic.BasicFileChooserUI;
 
-import org.appwork.resources.AWIcon;
 import org.appwork.resources.AWUTheme;
 import org.appwork.storage.config.JsonConfig;
 import org.appwork.swing.components.searchcombo.SearchComboBox;
@@ -373,17 +372,17 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
             }
         }
         f = fileSystemView.mapSpecialFolders(f);
-        String key = AWIcon.FILECHOOSER_FOLDER.path();
+        String key = ExtFileChooserDialogIcon.FILECHOOSER_FOLDER.path();
         if (f.getName().equals("Desktop")) {
-            key = AWIcon.FILECHOOSER_DESKTOP.path();
+            key = ExtFileChooserDialogIcon.FILECHOOSER_DESKTOP.path();
         } else if (f.getPath().equals(ExtFileSystemView.VIRTUAL_NETWORKFOLDER_XP) || f.getPath().equals(ExtFileSystemView.VIRTUAL_NETWORKFOLDER) || f.getPath().startsWith("\\") && f.getPath().indexOf("\\", 2) < 0) {
-            key = AWIcon.FILECHOOSER_NETWORK.path();
+            key = ExtFileChooserDialogIcon.FILECHOOSER_NETWORK.path();
         } else if (f.getPath().length() == 3 && f.getPath().charAt(1) == ':' && (f.getPath().charAt(0) + "").matches("[a-zA-Z]{1}")) {
-            key = AWIcon.FILECHOOSER_HARDDRIVE.path();
+            key = ExtFileChooserDialogIcon.FILECHOOSER_HARDDRIVE.path();
         } else if (f instanceof HomeFolder) {
             key = ((HomeFolder) f).getIconKey();
         } else if (f instanceof VirtualRoot) {
-            key = AWIcon.FILECHOOSER_HARDDRIVE.path();
+            key = ExtFileChooserDialogIcon.FILECHOOSER_HARDDRIVE.path();
         }
         if (!AWUTheme.I().hasIcon(key)) {
             return null;
@@ -1022,18 +1021,18 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
      *
      */
     private void putIcons() {
-        putIcon("FileView.directoryIcon", AWIcon.FILECHOOSER_FOLDER.path());
-        putIcon("FileView.fileIcon", AWIcon.FILECHOOSER_FILE.path());
-        putIcon("FileView.computerIcon", AWIcon.FILECHOOSER_COMPUTER.path());
-        putIcon("FileView.hardDriveIcon", AWIcon.FILECHOOSER_HARDDRIVE.path());
-        putIcon("FileView.floppyDriveIcon", AWIcon.FILECHOOSER_FLOPPY.path());
+        putIcon("FileView.directoryIcon", ExtFileChooserDialogIcon.FILECHOOSER_FOLDER.path());
+        putIcon("FileView.fileIcon", ExtFileChooserDialogIcon.FILECHOOSER_FILE.path());
+        putIcon("FileView.computerIcon", ExtFileChooserDialogIcon.FILECHOOSER_COMPUTER.path());
+        putIcon("FileView.hardDriveIcon", ExtFileChooserDialogIcon.FILECHOOSER_HARDDRIVE.path());
+        putIcon("FileView.floppyDriveIcon", ExtFileChooserDialogIcon.FILECHOOSER_FLOPPY.path());
         //
-        putIcon("FileChooser.newFolderIcon", AWIcon.FILECHOOSER_NEW_FOLDER.path());
-        putIcon("FileChooser.upFolderIcon", AWIcon.FILECHOOSER_PARENT.path());
-        putIcon("FileChooser.homeFolderIcon", AWIcon.FILECHOOSER_DESKTOP.path());
-        putIcon("FileChooser.detailsViewIcon", AWIcon.FILECHOOSER_DETAILS_VIEW.path());
-        putIcon("FileChooser.listViewIcon", AWIcon.FILECHOOSER_LIST_VIEW.path());
-        putIcon("FileChooser.viewMenuIcon", AWIcon.FILECHOOSER_VIEW.path());
+        putIcon("FileChooser.newFolderIcon", ExtFileChooserDialogIcon.FILECHOOSER_NEW_FOLDER.path());
+        putIcon("FileChooser.upFolderIcon", ExtFileChooserDialogIcon.FILECHOOSER_PARENT.path());
+        putIcon("FileChooser.homeFolderIcon", ExtFileChooserDialogIcon.FILECHOOSER_DESKTOP.path());
+        putIcon("FileChooser.detailsViewIcon", ExtFileChooserDialogIcon.FILECHOOSER_DETAILS_VIEW.path());
+        putIcon("FileChooser.listViewIcon", ExtFileChooserDialogIcon.FILECHOOSER_LIST_VIEW.path());
+        putIcon("FileChooser.viewMenuIcon", ExtFileChooserDialogIcon.FILECHOOSER_VIEW.path());
     }
 
     /**
@@ -1050,18 +1049,18 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
      *
      */
     private void cleanupIcons() {
-        cleanupIcon("FileView.directoryIcon", AWIcon.FILECHOOSER_FOLDER.path());
-        cleanupIcon("FileView.fileIcon", AWIcon.FILECHOOSER_FILE.path());
-        cleanupIcon("FileView.computerIcon", AWIcon.FILECHOOSER_COMPUTER.path());
-        cleanupIcon("FileView.hardDriveIcon", AWIcon.FILECHOOSER_COMPUTER.path());
-        cleanupIcon("FileView.floppyDriveIcon", AWIcon.FILECHOOSER_FLOPPY.path());
+        cleanupIcon("FileView.directoryIcon", ExtFileChooserDialogIcon.FILECHOOSER_FOLDER.path());
+        cleanupIcon("FileView.fileIcon", ExtFileChooserDialogIcon.FILECHOOSER_FILE.path());
+        cleanupIcon("FileView.computerIcon", ExtFileChooserDialogIcon.FILECHOOSER_COMPUTER.path());
+        cleanupIcon("FileView.hardDriveIcon", ExtFileChooserDialogIcon.FILECHOOSER_COMPUTER.path());
+        cleanupIcon("FileView.floppyDriveIcon", ExtFileChooserDialogIcon.FILECHOOSER_FLOPPY.path());
         //
-        cleanupIcon("FileChooser.newFolderIcon", AWIcon.FILECHOOSER_NEW_FOLDER.path());
-        cleanupIcon("FileChooser.upFolderIcon", AWIcon.FILECHOOSER_PARENT.path());
-        cleanupIcon("FileChooser.homeFolderIcon", AWIcon.FILECHOOSER_DESKTOP.path());
-        cleanupIcon("FileChooser.detailsViewIcon", AWIcon.FILECHOOSER_DETAILS_VIEW.path());
-        cleanupIcon("FileChooser.listViewIcon", AWIcon.FILECHOOSER_LIST_VIEW.path());
-        cleanupIcon("FileChooser.viewMenuIcon", AWIcon.FILECHOOSER_VIEW.path());
+        cleanupIcon("FileChooser.newFolderIcon", ExtFileChooserDialogIcon.FILECHOOSER_NEW_FOLDER.path());
+        cleanupIcon("FileChooser.upFolderIcon", ExtFileChooserDialogIcon.FILECHOOSER_PARENT.path());
+        cleanupIcon("FileChooser.homeFolderIcon", ExtFileChooserDialogIcon.FILECHOOSER_DESKTOP.path());
+        cleanupIcon("FileChooser.detailsViewIcon", ExtFileChooserDialogIcon.FILECHOOSER_DETAILS_VIEW.path());
+        cleanupIcon("FileChooser.listViewIcon", ExtFileChooserDialogIcon.FILECHOOSER_LIST_VIEW.path());
+        cleanupIcon("FileChooser.viewMenuIcon", ExtFileChooserDialogIcon.FILECHOOSER_VIEW.path());
     }
 
     /**

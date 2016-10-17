@@ -33,7 +33,6 @@
  * ==================================================================================================================================================== */
 package org.appwork.utils.swing.dialog.test;
 
-import org.appwork.resources.AWIcon;
 import org.appwork.uio.UIOManager;
 import org.appwork.utils.formatter.SizeFormatter;
 import org.appwork.utils.locale._AWU;
@@ -41,6 +40,7 @@ import org.appwork.utils.swing.EDTRunner;
 import org.appwork.utils.swing.dialog.Dialog;
 import org.appwork.utils.swing.dialog.DialogCanceledException;
 import org.appwork.utils.swing.dialog.DialogClosedException;
+import org.appwork.utils.swing.dialog.DialogIcon;
 import org.appwork.utils.swing.dialog.ProgressDialog;
 import org.appwork.utils.swing.dialog.ProgressDialog.ProgressGetter;
 
@@ -87,7 +87,7 @@ public class TEstProgressDialog {
                         return getProgress() + " %";
                     }
                 };
-                final ProgressDialog dialog = new ProgressDialog(pg, UIOManager.BUTTONS_HIDE_CANCEL | UIOManager.BUTTONS_HIDE_OK, _AWU.T.download_title(), _AWU.T.download_msg(), AWIcon.download.get(32)) {
+                final ProgressDialog dialog = new ProgressDialog(pg, UIOManager.BUTTONS_HIDE_CANCEL | UIOManager.BUTTONS_HIDE_OK, _AWU.T.download_title(), _AWU.T.download_msg(), DialogIcon.DIALOG_FIND.get(32)) {
                     /**
                      *
                      */

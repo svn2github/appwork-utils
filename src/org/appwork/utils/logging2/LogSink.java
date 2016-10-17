@@ -108,13 +108,16 @@ public class LogSink extends Logger {
     }
 
     protected synchronized void closeAndRemoveFileHandler() {
+        final LogSinkFileHandler fileHandler = this.fileHandler;
         try {
-            if (this.fileHandler != null) {
-                super.removeHandler(this.fileHandler);
+            if (fileHandler != null) {
+                super.removeHandler(fileHandler);
             }
         } finally {
             try {
-                this.fileHandler.close();
+                if (fileHandler != null) {
+                    fileHandler.close();
+                }
             } catch (final Throwable e) {
             } finally {
                 this.fileHandler = null;
@@ -135,23 +138,30 @@ public class LogSink extends Logger {
         }
     }
 
-    protected void flush(final FLUSH flush) {
-        for (final LogSource source : this.getLogSources()) {
-            switch (flush) {
-            case FORCE:
-                source.flush();
-                break;
-            case TIMEOUT:
-                if (source.isAllowTimeoutFlush()) {
+    protected synchronized void flush(final FLUSH flush) {
+        try {
+            for (final LogSource source : this.getLogSources()) {
+                switch (flush) {
+                case FORCE:
                     source.flush();
+                    break;
+                case TIMEOUT:
+                    if (source.isAllowTimeoutFlush()) {
+                        source.flush();
+                    }
+                    break;
+                case CLOSE:
+                case FINALIZE:
+                    if (source.isFlushOnFinalize()) {
+                        source.flush();
+                    }
+                    break;
                 }
-                break;
-            case CLOSE:
-            case FINALIZE:
-                if (source.isFlushOnFinalize()) {
-                    source.flush();
-                }
-                break;
+            }
+        } finally {
+            final LogSinkFileHandler fileHandler = this.fileHandler;
+            if (fileHandler != null) {
+                fileHandler.flush();
             }
         }
     }

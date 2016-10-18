@@ -249,7 +249,8 @@ public class CrossSystem {
     private final static String         OS_STRING;
     private final static String         ARCH_STRING;
     private static Boolean              OS64BIT                   = null;
-    private static String               WMIC_PATH                 = null;
+    public final static String          WMIC_PATH;
+
     static {
         /* Init OS_ID */
         OS_STRING = System.getProperty("os.name");
@@ -274,6 +275,8 @@ public class CrossSystem {
             } else {
                 WMIC_PATH = "wmic";
             }
+        } else {
+            WMIC_PATH = null;
         }
     }
 

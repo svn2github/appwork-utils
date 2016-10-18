@@ -215,6 +215,8 @@ public abstract class AbstractTray implements MouseListener, MouseMotionListener
         TrayIconPopup jpopup = createPopup(e);
         MenuHeaderWrapper header;
         jpopup.add(header = new MenuHeaderWrapper(createMenuHeader(e)));
+        header.setOpaque(false);
+        header.setBackground(null);
         createMenuNormal(jpopup);
         createMenuDebug(e, jpopup);
         return jpopup;

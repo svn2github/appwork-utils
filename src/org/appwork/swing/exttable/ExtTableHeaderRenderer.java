@@ -45,7 +45,6 @@ import javax.swing.border.Border;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 
-import org.appwork.resources.AWIcon;
 import org.appwork.sunwrapper.sun.swing.DefaultLookupWrapper;
 
 /**

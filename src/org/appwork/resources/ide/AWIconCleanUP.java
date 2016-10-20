@@ -31,7 +31,7 @@
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
-package org.appwork.resources;
+package org.appwork.resources.ide;
 
 import java.io.File;
 import java.util.Collection;
@@ -39,6 +39,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import org.appwork.app.gui.copycutpaste.CutCopyPasteIcon;
+import org.appwork.resources.AWIcon;
+import org.appwork.resources.IconRef;
 import org.appwork.swing.components.HeadlessCheckboxIconRef;
 import org.appwork.swing.exttable.ExtTableIcon;
 import org.appwork.swing.trayicon.TrayIconRef;

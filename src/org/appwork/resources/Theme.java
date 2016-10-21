@@ -63,16 +63,11 @@ import org.appwork.utils.swing.dialog.Dialog;
  */
 public class Theme implements MinTimeWeakReferenceCleanup {
     private String                                              path;
-
     // private final HashMap<String, MinTimeWeakReference<BufferedImage>>
     // imageCache = new HashMap<String, MinTimeWeakReference<BufferedImage>>();
-
     protected final HashMap<String, MinTimeWeakReference<Icon>> imageIconCache = new HashMap<String, MinTimeWeakReference<Icon>>();
-
     private long                                                cacheLifetime  = 20000l;
-
     private String                                              theme;
-
     private String                                              nameSpace;
 
     public Theme(final String namespace) {
@@ -87,9 +82,7 @@ public class Theme implements MinTimeWeakReferenceCleanup {
     }
 
     private Theme      delegate;
-
     private String     defaultPath;
-
     public static File RESOURCE_HELPER_ROOT;
 
     /**
@@ -132,7 +125,6 @@ public class Theme implements MinTimeWeakReferenceCleanup {
             if (sb.length() > 0) {
                 sb.append("_");
             }
-
             sb.append(o.toString());
         }
         return sb.toString();
@@ -262,7 +254,6 @@ public class Theme implements MinTimeWeakReferenceCleanup {
             while (true) {
                 File check = new File(res, relativePath);
                 if (check.exists()) {
-
                     if (!to.exists()) {
                         Dialog.I().showConfirmDialog(0, "Found Missing Resource", "The Project " + file.getParentFile().getName() + " requires the resource " + relativePath + ".\r\nCopy " + check + " to " + to, null, _AWU.T.lit_yes(), null);
                         copy(check, to);
@@ -271,7 +262,6 @@ public class Theme implements MinTimeWeakReferenceCleanup {
                 }
                 int in = relativePath.indexOf("\\");
                 int in2 = relativePath.indexOf("/");
-
                 if (in < 0 || in2 < in) {
                     in = in2;
                 }
@@ -339,7 +329,6 @@ public class Theme implements MinTimeWeakReferenceCleanup {
     // }
     // return this.getURL("images/", relativePath, ".png");
     // }
-
     public String getNameSpace() {
         return this.nameSpace;
     }
@@ -445,9 +434,21 @@ public class Theme implements MinTimeWeakReferenceCleanup {
         return lookupImageUrl(string, -1) != null;
     }
 
+    public URL getIconURL(final String string) {
+        URL ret = null;
+        if (this.delegate != null) {
+            ret = delegate.getIconURL(string);
+        }
+        if (ret == null) {
+            return lookupImageUrl(string, -1);
+        } else {
+            return ret;
+        }
+    }
+
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.storage.config.MinTimeWeakReferenceCleanup# onMinTimeWeakReferenceCleanup
      * (org.appwork.storage.config.MinTimeWeakReference)
      */
@@ -484,7 +485,6 @@ public class Theme implements MinTimeWeakReferenceCleanup {
     // this.theme = null;
     // this.clearCache();
     // }
-
     /**
      * @param theme
      */
@@ -495,5 +495,4 @@ public class Theme implements MinTimeWeakReferenceCleanup {
             this.clearCache();
         }
     }
-
 }

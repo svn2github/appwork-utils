@@ -822,6 +822,8 @@ public abstract class KeyHandler<RawClass> {
         getterName = getterName.replaceAll("(\\D)(\\d+)", "$1 $2");
         getterName = getterName.replaceAll("(\\d+)(\\D)", "$1 $2");
         getterName = getterName.replaceAll("(\\S)([A-Z][a-z])", "$1 $2");
+        getterName = getterName.replaceAll("(1080|720|480|540|360|240) ?(p|P)", "$1$2");
+        getterName = getterName.replaceAll("(^| )(2|4|8) ?(k|K)($| )", "$1$2$3$4");
         if (getterName.endsWith(" Enabled")) {
             getterName = getterName.substring(0, getterName.length() - 8);
         }

@@ -87,7 +87,6 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
-import org.appwork.resources.AWIcon;
 import org.appwork.scheduler.DelayedRunnable;
 import org.appwork.storage.Storage;
 import org.appwork.swing.MigPanel;
@@ -521,7 +520,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.swing.components.tooltips.ToolTipHandler#createExtTooltip()
      */
     @Override
@@ -854,7 +853,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.swing.components.tooltips.ToolTipHandler#updateTooltip(org .appwork.swing.components.tooltips.ExtTooltip,
      * java.awt.event.MouseEvent)
      */
@@ -975,7 +974,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.swing.components.tooltips.ToolTipHandler# isTooltipDisabledUntilNextRefocus()
      */
     @Override
@@ -986,7 +985,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.swing.components.tooltips.ToolTipHandler# isTooltipWithoutFocusEnabled()
      */
     @Override
@@ -1339,6 +1338,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
         }
         this.getSelectionModel().setSelectionInterval(0, this.getRowCount() - 1);
     }
+
     // /**
     // * @param b
     // */
@@ -1360,7 +1360,6 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
     // }
     //
     // }
-
     // @Override
     // public void setAutoResizeMode(final int mode) {
     //
@@ -1380,6 +1379,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
     @SuppressWarnings("unchecked")
     @Override
     protected void processMouseEvent(final MouseEvent e) {
+        System.out.println(e);
         if (e.getID() == MouseEvent.MOUSE_RELEASED) {
             if (CrossSystem.isContextMenuTrigger(e)) {
                 final int row = this.rowAtPoint(e.getPoint());

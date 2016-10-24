@@ -54,6 +54,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
 import java.awt.image.ConvolveOp;
 import java.awt.image.DataBufferByte;
+import java.awt.image.DataBufferInt;
 import java.awt.image.FilteredImageSource;
 import java.awt.image.ImageFilter;
 import java.awt.image.ImageProducer;
@@ -85,9 +86,7 @@ import com.kitfox.svg.SVGDiagram;
 import com.kitfox.svg.SVGUniverse;
 
 public class IconIO {
-
     public static class ScaledIcon implements Icon, IDIcon {
-
         private final Icon source;
 
         protected Icon getSource() {
@@ -178,14 +177,11 @@ public class IconIO {
         for (int i = 0; i < 400; i++) {
             matrix[i] = 1.0f / 400.0f;
         }
-
         final BufferedImageOp op = new ConvolveOp(new Kernel(20, 20, matrix), ConvolveOp.EDGE_NO_OP, null);
         return op.filter(image, null);
-
     }
 
     public static BufferedImage colorRangeToTransparency(final BufferedImage image, final Color c1, final Color c2) {
-
         final int r1 = c1.getRed();
         final int g1 = c1.getGreen();
         final int b1 = c1.getBlue();
@@ -195,23 +191,19 @@ public class IconIO {
         final ImageFilter filter = new RGBImageFilter() {
             @Override
             public final int filterRGB(final int x, final int y, final int rgb) {
-
                 final int r = (rgb & 0xFF0000) >> 16;
-                final int g = (rgb & 0xFF00) >> 8;
-                final int b = rgb & 0xFF;
-                if (r >= r1 && r <= r2 && g >= g1 && g <= g2 && b >= b1 && b <= b2) {
-                    // Set fully transparent but keep color
-                    // calculate a alpha value based on the distance between the
-                    // range borders and the pixel color
-                    final int dist = (Math.abs(r - (r1 + r2) / 2) + Math.abs(g - (g1 + g2) / 2) + Math.abs(b - (b1 + b2) / 2)) * 2;
-
-                    return new Color(r, g, b, Math.min(255, dist)).getRGB();
-                }
-
-                return rgb;
+        final int g = (rgb & 0xFF00) >> 8;
+        final int b = rgb & 0xFF;
+        if (r >= r1 && r <= r2 && g >= g1 && g <= g2 && b >= b1 && b <= b2) {
+            // Set fully transparent but keep color
+            // calculate a alpha value based on the distance between the
+            // range borders and the pixel color
+            final int dist = (Math.abs(r - (r1 + r2) / 2) + Math.abs(g - (g1 + g2) / 2) + Math.abs(b - (b1 + b2) / 2)) * 2;
+            return new Color(r, g, b, Math.min(255, dist)).getRGB();
+        }
+        return rgb;
             }
         };
-
         final ImageProducer ip = new FilteredImageSource(image.getSource(), filter);
         final Image img = Toolkit.getDefaultToolkit().createImage(ip);
         return IconIO.toBufferedImage(img);
@@ -232,7 +224,6 @@ public class IconIO {
         final BufferedImage image;
         if (org.appwork.utils.Application.isHeadless()) {
             image = new BufferedImage(w, h, Transparency.TRANSLUCENT);
-
         } else {
             final GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
             final GraphicsDevice gd = ge.getDefaultScreenDevice();
@@ -246,7 +237,6 @@ public class IconIO {
         icon.paintIcon(null, g, 0, 0);
         g.dispose();
         return image;
-
     }
 
     public static BufferedImage createEmptyImage(final int w, final int h) {
@@ -315,49 +305,105 @@ public class IconIO {
      * @return
      */
     public static BufferedImage getCroppedImage(BufferedImage source) {
-        if (source != null && source.getType() == BufferedImage.TYPE_4BYTE_ABGR) {
-            try {
-                // Get our top-left pixel color as our "baseline" for cropping
-                final byte[] pixels = ((DataBufferByte) source.getRaster().getDataBuffer()).getData();
-                final int width = source.getWidth();
-                final int height = source.getHeight();
-                int x0, y0, x1, y1; // the new corners of the trimmed image
-                int i, j; // i - horizontal iterator; j - vertical iterator
-                leftLoop: for (i = 0; i < width; i++) {
-                    for (j = 0; j < height; j++) {
-                        if (pixels[(j * width + i) * 4] != 0) { // alpha is the very first byte and then every fourth one
-                            break leftLoop;
+        if (source != null) {
+            if (source.getType() == BufferedImage.TYPE_INT_ARGB) {
+                try {
+                    // Get our top-left pixel color as our "baseline" for cropping
+                    final int[] pixels = ((DataBufferInt) source.getRaster().getDataBuffer()).getData();
+                    final int width = source.getWidth();
+                    final int height = source.getHeight();
+                    int x0, y0, x1, y1; // the new corners of the trimmed image
+                    int i, j; // i - horizontal iterator; j - vertical iterator
+                    leftLoop: for (i = 0; i < width; i++) {
+                        for (j = 0; j < height; j++) {
+                            final int alpha = (pixels[(j * width + i)] >> 24) & 0xFF;
+                            if (alpha != 0) { // alpha is the very first byte and then every fourth one
+                                break leftLoop;
+                            }
                         }
                     }
-                }
-                x0 = i;
-                topLoop: for (j = 0; j < height; j++) {
-                    for (i = 0; i < width; i++) {
-                        if (pixels[(j * width + i) * 4] != 0) {
-                            break topLoop;
+                    x0 = i;
+                    topLoop: for (j = 0; j < height; j++) {
+                        for (i = 0; i < width; i++) {
+                            final int alpha = (pixels[(j * width + i)] >> 24) & 0xFF;
+                            if (alpha != 0) {
+                                break topLoop;
+                            }
                         }
                     }
-                }
-                y0 = j;
-                rightLoop: for (i = width - 1; i >= 0; i--) {
-                    for (j = 0; j < height; j++) {
-                        if (pixels[(j * width + i) * 4] != 0) {
-                            break rightLoop;
+                    y0 = j;
+                    rightLoop: for (i = width - 1; i >= 0; i--) {
+                        for (j = 0; j < height; j++) {
+                            final int alpha = (pixels[(j * width + i)] >> 24) & 0xFF;
+                            if (alpha != 0) {
+                                break rightLoop;
+                            }
                         }
                     }
-                }
-                x1 = i + 1;
-                bottomLoop: for (j = height - 1; j >= 0; j--) {
-                    for (i = 0; i < width; i++) {
-                        if (pixels[(j * width + i) * 4] != 0) {
-                            break bottomLoop;
+                    x1 = i + 1;
+                    bottomLoop: for (j = height - 1; j >= 0; j--) {
+                        for (i = 0; i < width; i++) {
+                            final int alpha = (pixels[(j * width + i)] >> 24) & 0xFF;
+                            if (alpha != 0) {
+                                break bottomLoop;
+                            }
                         }
                     }
+                    y1 = j + 1;
+                    if (x0 == 0 && y0 == 0 && (x1 - x0) == height && (y1 - y0) == width) {
+                        return source;
+                    } else {
+                        return source.getSubimage(x0, y0, x1 - x0, y1 - y0);
+                    }
+                } catch (final Throwable e) {
                 }
-                y1 = j + 1;
-                return source.getSubimage(x0, y0, x1 - x0, y1 - y0);
-            } catch (final Throwable e) {
-                e.printStackTrace();
+            } else if (source.getType() == BufferedImage.TYPE_4BYTE_ABGR) {
+                try {
+                    // Get our top-left pixel color as our "baseline" for cropping
+                    final byte[] pixels = ((DataBufferByte) source.getRaster().getDataBuffer()).getData();
+                    final int width = source.getWidth();
+                    final int height = source.getHeight();
+                    int x0, y0, x1, y1; // the new corners of the trimmed image
+                    int i, j; // i - horizontal iterator; j - vertical iterator
+                    leftLoop: for (i = 0; i < width; i++) {
+                        for (j = 0; j < height; j++) {
+                            if (pixels[(j * width + i) * 4] != 0) { // alpha is the very first byte and then every fourth one
+                                break leftLoop;
+                            }
+                        }
+                    }
+                    x0 = i;
+                    topLoop: for (j = 0; j < height; j++) {
+                        for (i = 0; i < width; i++) {
+                            if (pixels[(j * width + i) * 4] != 0) {
+                                break topLoop;
+                            }
+                        }
+                    }
+                    y0 = j;
+                    rightLoop: for (i = width - 1; i >= 0; i--) {
+                        for (j = 0; j < height; j++) {
+                            if (pixels[(j * width + i) * 4] != 0) {
+                                break rightLoop;
+                            }
+                        }
+                    }
+                    x1 = i + 1;
+                    bottomLoop: for (j = height - 1; j >= 0; j--) {
+                        for (i = 0; i < width; i++) {
+                            if (pixels[(j * width + i) * 4] != 0) {
+                                break bottomLoop;
+                            }
+                        }
+                    }
+                    y1 = j + 1;
+                    if (x0 == 0 && y0 == 0 && (x1 - x0) == height && (y1 - y0) == width) {
+                        return source;
+                    } else {
+                        return source.getSubimage(x0, y0, x1 - x0, y1 - y0);
+                    }
+                } catch (final Throwable e) {
+                }
             }
         }
         return source;
@@ -410,7 +456,6 @@ public class IconIO {
         } else {
             return new ScaledIcon(icon, width, height, bicubic);
         }
-
     }
 
     /**
@@ -535,7 +580,6 @@ public class IconIO {
         g2.dispose();
         IconIO.debug(paintTo);
         return paintTo;
-
     }
 
     /**
@@ -770,7 +814,6 @@ public class IconIO {
         final int r1 = search.getRed();
         final int g1 = search.getGreen();
         final int b1 = search.getBlue();
-
         final ImageFilter filter = new RGBImageFilter() {
             @Override
             public final int filterRGB(final int x, final int y, final int rgb) {
@@ -787,16 +830,12 @@ public class IconIO {
                         return replace.getRGB();
                     }
                     final double brightness = ((r + g + b) / 3) / (double) 255;
-
                     Color nc = new Color((int) (replace.getRed() * brightness), (int) (replace.getGreen() * brightness), (int) (replace.getBlue() * brightness), (int) (replace.getAlpha() * brightness));
-
                     return nc.getRGB();
                 }
-
                 return rgb;
             }
         };
-
         final ImageProducer ip = new FilteredImageSource(image.getSource(), filter);
         final Image img = Toolkit.getDefaultToolkit().createImage(ip);
         return img;
@@ -844,18 +883,15 @@ public class IconIO {
 
     public static Image getImageFromSVG(URL url, int w, int h) throws IOException {
         try {
-
             SVGUniverse universe = new SVGUniverse();
             // String svg = IO.readURLToString(url);
             InputStream is = null;
             try {
                 URI uri = universe.loadSVG(is = url.openStream(), "dummy.svg");
-
                 SVGDiagram diagram = universe.getDiagram(uri);
                 // Rectangle dp = diagram.getDeviceViewport();
                 // Rectangle2D vr = diagram.getViewRect();
                 // Rectangle2D bb = diagram.getRoot().getBoundingBox();
-
                 diagram.updateTime(0d);
                 diagram.setIgnoringClipHeuristic(true);
                 if (w <= 0) {
@@ -867,27 +903,21 @@ public class IconIO {
                 double faktor = 1d / Math.max((double) diagram.getWidth() / w, (double) diagram.getHeight() / h);
                 int width = Math.max((int) (diagram.getWidth() * faktor), 1);
                 int height = Math.max((int) (diagram.getHeight() * faktor), 1);
-
                 BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
                 Graphics2D g = bi.createGraphics();
                 try {
                     g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                     int x = 0;
                     int y = 0;
-
                     g.translate(x, y);
                     final Rectangle2D.Double rect = new Rectangle2D.Double();
                     diagram.getViewRect(rect);
                     AffineTransform scaleXform = new AffineTransform();
                     scaleXform.setToScale(width / rect.width, height / rect.height);
-
                     AffineTransform oldXform = g.getTransform();
                     g.transform(scaleXform);
-
                     diagram.render(g);
-
                     g.setTransform(oldXform);
-
                     g.translate(-x, -y);
                 } finally {
                     g.dispose();
@@ -900,5 +930,4 @@ public class IconIO {
             throw new IOException(e);
         }
     }
-
 }

@@ -35,7 +35,6 @@ package org.appwork.utils.logging2.sendlogs;
 
 import java.awt.event.ActionEvent;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -64,19 +63,15 @@ import org.appwork.utils.zip.ZipIOWriter;
  *
  */
 public abstract class AbstractLogAction extends BasicAction {
-
     protected int total;
     protected int current;
 
     public AbstractLogAction() {
-
     }
 
     @Override
     public void actionPerformed(final ActionEvent e) {
-
         final ProgressDialog p = new ProgressDialog(new ProgressGetter() {
-
             @Override
             public String getLabelString() {
                 return null;
@@ -85,7 +80,6 @@ public abstract class AbstractLogAction extends BasicAction {
             @Override
             public int getProgress() {
                 return -1;
-
             }
 
             @Override
@@ -98,17 +92,13 @@ public abstract class AbstractLogAction extends BasicAction {
                 AbstractLogAction.this.create();
             }
         }, UIOManager.BUTTONS_HIDE_OK, T.T.LogAction_actionPerformed_zip_title_(), T.T.LogAction_actionPerformed_wait_(), null, null, null);
-
         try {
             Dialog.getInstance().showDialog(p);
         } catch (final Throwable e1) {
-
         }
-
     }
 
     protected void create() throws DialogClosedException, DialogCanceledException {
-
         final java.util.List<LogFolder> folders = getLogFolders();
         LogFolder currentLog = null;
         LogFolder latestLog = null;
@@ -124,7 +114,6 @@ public abstract class AbstractLogAction extends BasicAction {
                 latestLog = folder;
             }
         }
-
         if (currentLog != null) {
             currentLog.setSelected(true);
             currentLog.setCurrent(true);
@@ -134,9 +123,7 @@ public abstract class AbstractLogAction extends BasicAction {
             }
         }
         final SendLogDialog d = new SendLogDialog(folders);
-
         Dialog.getInstance().showDialog(d);
-
         final java.util.List<LogFolder> selection = d.getSelectedFolders();
         if (selection.size() == 0) {
             return;
@@ -144,7 +131,6 @@ public abstract class AbstractLogAction extends BasicAction {
         this.total = selection.size();
         this.current = 0;
         final ProgressDialog p = new ProgressDialog(new ProgressGetter() {
-
             @Override
             public String getLabelString() {
                 return null;
@@ -165,18 +151,14 @@ public abstract class AbstractLogAction extends BasicAction {
 
             @Override
             public void run() throws Exception {
-
                 try {
                     AbstractLogAction.this.createPackage(selection);
                 } catch (final WTFException e) {
                     throw new InterruptedException();
                 }
-
             }
         }, UIOManager.BUTTONS_HIDE_OK, T.T.LogAction_actionPerformed_zip_title_(), T.T.LogAction_actionPerformed_wait_(), null, null, null);
-
         Dialog.getInstance().showDialog(p);
-
     }
 
     /**
@@ -191,14 +173,6 @@ public abstract class AbstractLogAction extends BasicAction {
                 if (timestampString != null) {
                     final long timestamp = Long.parseLong(timestampString);
                     final LogFolder logFolder = new LogFolder(f, timestamp);
-                    if (Files.getFiles(new FileFilter() {
-                        @Override
-                        public boolean accept(final File pathname) {
-                            return pathname.isFile() && pathname.length() > 0;
-                        }
-                    }, f).size() == 0) {
-                        continue;
-                    }
                     folders.add(logFolder);
                 }
             }
@@ -216,12 +190,10 @@ public abstract class AbstractLogAction extends BasicAction {
             zip.delete();
             zip.getParentFile().mkdirs();
             ZipIOWriter writer = null;
-
             final String name = lf.getFolder().getName() + "-" + this.format(lf.getCreated()) + " to " + this.format(lf.getLastModified());
             final File folder = Application.getTempResource("logs/" + name);
             try {
                 if (lf.isNeedsFlush()) {
-
                     this.flushLogs();
                 }
                 writer = new ZipIOWriter(zip) {
@@ -236,7 +208,6 @@ public abstract class AbstractLogAction extends BasicAction {
                         super.addFile(addFile, compress, fullPath);
                     }
                 };
-
                 if (folder.exists()) {
                     Files.deleteRecursiv(folder);
                 }
@@ -248,9 +219,7 @@ public abstract class AbstractLogAction extends BasicAction {
                 } catch (final Throwable e) {
                 }
             }
-
             this.onNewPackage(zip, this.format(lf.getCreated()) + "-" + this.format(lf.getLastModified()));
-
             this.current++;
         }
     }
@@ -266,9 +235,7 @@ public abstract class AbstractLogAction extends BasicAction {
      */
     protected String format(final long created) {
         final Date date = new Date(created);
-
         return new SimpleDateFormat("dd.MM.yy HH.mm.ss", Locale.GERMANY).format(date);
-
     }
 
     /**
@@ -283,5 +250,4 @@ public abstract class AbstractLogAction extends BasicAction {
      * @throws IOException
      */
     abstract protected void onNewPackage(File zip, String string) throws IOException;
-
 }

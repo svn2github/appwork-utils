@@ -151,6 +151,10 @@ public class LogSink extends Logger {
                     }
                     break;
                 case CLOSE:
+                    if (source.isFlushOnClose() || source.isFlushOnFinalize()) {
+                        source.flush();
+                    }
+                    break;
                 case FINALIZE:
                     if (source.isFlushOnFinalize()) {
                         source.flush();

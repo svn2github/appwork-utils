@@ -485,8 +485,9 @@ public class YEncInputStream extends InputStream {
     public long getPartSize() {
         if (isMultiPart) {
             return getPartEnd() - getPartBegin() + 1;
+        } else {
+            return -1;
         }
-        return -1;
     }
 
     /**
@@ -516,7 +517,8 @@ public class YEncInputStream extends InputStream {
         }
         if (start != -1) {
             return line.substring(start + search.length(), end);
+        } else {
+            return null;
         }
-        return null;
     }
 }

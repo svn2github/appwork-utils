@@ -40,22 +40,17 @@ import java.io.InputStream;
 import java.io.PushbackInputStream;
 
 public class YEncInputStream extends InputStream {
-
     /**
      * http://www.yenc.org/yenc-draft.1.3.txt
      */
-
     private final InputStream           inputStream;
     private final ByteArrayOutputStream buffer;
     private final long                  size;
     private final String                name;
     private final int                   lineLength;
     private final boolean               isMultiPart;
-
     private final long                  partBegin;
-
     private long                        decodedBytes = 0;
-
     private boolean                     eof          = false;
 
     /**
@@ -210,7 +205,6 @@ public class YEncInputStream extends InputStream {
 
     private final byte[] encodedBuffer;
     private int          encodedLength     = 0;
-
     private boolean      skipYEndDetection = false;
     private int          lineIndex         = 0;
 
@@ -422,10 +416,12 @@ public class YEncInputStream extends InputStream {
             if (size != getPartSize()) {
                 throw new IOException("part-size-error");
             }
-            final String partValue = getValue(trailer, "part");
-            final int partIndex = partValue != null ? Integer.parseInt(partValue) : -1;
-            if (partIndex != getPartIndex()) {
-                throw new IOException("part-index-error");
+            final String partValueString = getValue(trailer, "part");
+            if (partValueString != null) {
+                final int partValueInt = Integer.parseInt(partValueString);
+                if (partValueInt != getPartIndex()) {
+                    throw new IOException("part-index-error:" + getPartIndex() + "!=" + partValueInt);
+                }
             }
             pcrc32Value = getValue(trailer, "pcrc32");
             crc32Value = getValue(trailer, " crc32");// space is important to differ between pcrc32 and crc32

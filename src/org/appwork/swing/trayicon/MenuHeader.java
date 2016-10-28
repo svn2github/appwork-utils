@@ -15,11 +15,11 @@ import org.appwork.utils.swing.SwingUtils;
 public class MenuHeader extends MigPanel implements MouseListener {
     private AbstractTray tray;
     private JLabel       label;
+    private JLabel       icon;
 
     public MenuHeader(final AbstractTray tray, Icon ico, String title, Color color) {
         super("ins 1 3 1 1, wrap 3", "[]20[]", "[24!]");
         this.tray = tray;
-        JLabel icon;
         this.add(icon = new JLabel(ico));
         this.add(label = SwingUtils.toBold(new JLabel(title)));
         this.setBackground(color);
@@ -30,6 +30,10 @@ public class MenuHeader extends MigPanel implements MouseListener {
         icon.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         label.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         this.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+    }
+
+    public JLabel getIcon() {
+        return icon;
     }
 
     public JLabel getLabel() {

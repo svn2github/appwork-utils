@@ -37,11 +37,17 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.appwork.utils.Regex;
+import org.appwork.utils.StringUtils;
+import org.appwork.utils.logging2.extmanager.LoggerFactory;
 import org.appwork.utils.os.CrossSystem;
 
 public class ProcessBuilderFactory {
+    private static String CONSOLE_CODEPAGE = null;
+
     public static ProcessOutput runCommand(final java.util.List<String> commands) throws IOException, InterruptedException {
         return ProcessBuilderFactory.runCommand(ProcessBuilderFactory.create(commands));
     }
@@ -222,5 +228,33 @@ public class ProcessBuilderFactory {
         } else {
             return tiny;
         }
+    }
+
+    /**
+     * @return
+     */
+    public static String getConsoleCodepage() {
+        if (StringUtils.isEmpty(CONSOLE_CODEPAGE)) {
+            switch (CrossSystem.getOSFamily()) {
+            case WINDOWS:
+                try {
+                    String result = runCommand("cmd", "/c", "chcp").getStdOutString("ASCII");
+                    result = new Regex(result, ":\\s*(\\d+)").getMatch(0);
+                    if (StringUtils.isNotEmpty(result)) {
+                        CONSOLE_CODEPAGE = "cp" + result.trim();
+                    }
+                } catch (Throwable e) {
+                    LoggerFactory.getDefaultLogger().log(e);
+                    ;
+                }
+                break;
+            default:
+                break;
+            }
+            if (StringUtils.isEmpty(CONSOLE_CODEPAGE)) {
+                CONSOLE_CODEPAGE = Charset.defaultCharset().displayName();
+            }
+        }
+        return CONSOLE_CODEPAGE;
     }
 }

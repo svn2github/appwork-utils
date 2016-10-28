@@ -48,7 +48,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -1278,13 +1277,12 @@ public class CrossSystem {
             if (!CrossSystem.isWindows()) {
                 throw new UnsupportedOperationException("getAntiVirusSoftwareInfo: Not Supported for your OS");
             }
-            final String charSet = Charset.defaultCharset().displayName();
             switch (CrossSystem.getOS()) {
             case WINDOWS_XP:
-                response = ProcessBuilderFactory.runCommand(WMIC_PATH, "/NAMESPACE:\\\\root\\SecurityCenter", "path", "AntiVirusProduct", "get", "companyName,displayName,pathToEnableOnAccessUI,pathToUpdateUI,productUptoDate", "/format:value").getStdOutString(charSet);
+                response = ProcessBuilderFactory.runCommand(WMIC_PATH, "/NAMESPACE:\\\\root\\SecurityCenter", "path", "AntiVirusProduct", "get", "companyName,displayName,pathToEnableOnAccessUI,pathToUpdateUI,productUptoDate", "/format:value").getStdOutString();
                 break;
             default:
-                response = ProcessBuilderFactory.runCommand(WMIC_PATH, "/NAMESPACE:\\\\root\\SecurityCenter2", "path", "AntiVirusProduct", "get", "displayName,pathToSignedProductExe,pathToSignedReportingExe,productState", "/format:value").getStdOutString(charSet);
+                response = ProcessBuilderFactory.runCommand(WMIC_PATH, "/NAMESPACE:\\\\root\\SecurityCenter2", "path", "AntiVirusProduct", "get", "displayName,pathToSignedProductExe,pathToSignedReportingExe,productState", "/format:value").getStdOutString();
                 break;
             }
             return parseWindowWMIResponse(response, null);
@@ -1343,13 +1341,12 @@ public class CrossSystem {
             if (!CrossSystem.isWindows()) {
                 throw new UnsupportedOperationException("getFirewallSoftwareInfo: Not Supported for your OS");
             }
-            final String charSet = Charset.defaultCharset().displayName();
             switch (CrossSystem.getOS()) {
             case WINDOWS_XP:
-                response = ProcessBuilderFactory.runCommand(WMIC_PATH, "/NAMESPACE:\\\\root\\SecurityCenter", "path", "FirewallProduct", "get", "companyName,displayName,enabled,pathToEnableUI", "/format:value").getStdOutString(charSet);
+                response = ProcessBuilderFactory.runCommand(WMIC_PATH, "/NAMESPACE:\\\\root\\SecurityCenter", "path", "FirewallProduct", "get", "companyName,displayName,enabled,pathToEnableUI", "/format:value").getStdOutString();
                 break;
             default:
-                response = ProcessBuilderFactory.runCommand(WMIC_PATH, "/NAMESPACE:\\\\root\\SecurityCenter2", "path", "FirewallProduct", "get", "displayName,pathToSignedProductExe,pathToSignedProductExe,pathToSignedReportingExe,productState", "/format:value").getStdOutString(charSet);
+                response = ProcessBuilderFactory.runCommand(WMIC_PATH, "/NAMESPACE:\\\\root\\SecurityCenter2", "path", "FirewallProduct", "get", "displayName,pathToSignedProductExe,pathToSignedProductExe,pathToSignedReportingExe,productState", "/format:value").getStdOutString();
                 break;
             }
             return parseWindowWMIResponse(response, null);
@@ -1371,12 +1368,11 @@ public class CrossSystem {
             if (!CrossSystem.isWindows()) {
                 throw new UnsupportedOperationException("getAntiSpySoftwareInfo: Not Supported for your OS");
             }
-            final String charSet = Charset.defaultCharset().displayName();
             switch (CrossSystem.getOS()) {
             case WINDOWS_XP:
                 throw new UnsupportedOperationException("getAntiSpySoftwareInfo: Not Supported for your OS");
             default:
-                response = ProcessBuilderFactory.runCommand(WMIC_PATH, "/NAMESPACE:\\\\root\\SecurityCenter2", "path", "AntiSpywareProduct", "get", "displayName,pathToSignedProductExe,pathToSignedProductExe,pathToSignedReportingExe,productState", "/format:value").getStdOutString(charSet);
+                response = ProcessBuilderFactory.runCommand(WMIC_PATH, "/NAMESPACE:\\\\root\\SecurityCenter2", "path", "AntiSpywareProduct", "get", "displayName,pathToSignedProductExe,pathToSignedProductExe,pathToSignedReportingExe,productState", "/format:value").getStdOutString();
                 break;
             }
             return parseWindowWMIResponse(response, null);
@@ -1393,10 +1389,9 @@ public class CrossSystem {
             if (!CrossSystem.isWindows()) {
                 throw new UnsupportedOperationException("isProcessRunning: Not Supported for your OS");
             }
-            final String charSet = Charset.defaultCharset().displayName();
             switch (CrossSystem.getOS()) {
             default:
-                response = ProcessBuilderFactory.runCommand(WMIC_PATH, "process", "where", "executablepath='" + path.replaceAll("[\\/\\\\]+", "\\\\\\\\") + "'", "get", "processID", "/format:value").getStdOutString(charSet);
+                response = ProcessBuilderFactory.runCommand(WMIC_PATH, "process", "where", "executablepath='" + path.replaceAll("[\\/\\\\]+", "\\\\\\\\") + "'", "get", "processID", "/format:value").getStdOutString();
                 break;
             }
             if (StringUtils.isNotEmpty(response) && response.contains("ProcessId=")) {

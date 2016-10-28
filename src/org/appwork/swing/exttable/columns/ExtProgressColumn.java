@@ -99,7 +99,6 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
             }
             final ExtTableModel<E> mod = column.getModel();
             if (mod != null && mod.getTable() != null && column.indeterminatedRenderer.isIndeterminate() && mod.getTable().isShowing()) {
-
                 // cleanup map in case we removed a indeterminated value
                 if (System.currentTimeMillis() - this.cleanupTimer > 30000) {
                     Entry<E, Long> next;
@@ -110,13 +109,11 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
                             it.remove();
                         }
                     }
-
                     this.cleanupTimer = System.currentTimeMillis();
                     if (column.map.size() == 0 && column.indeterminatedRenderer.isIndeterminate()) {
                         column.indeterminatedRenderer.setIndeterminate(false);
                         return;
                     }
-
                 }
                 if (column.columnIndex >= 0) {
                     if (System.currentTimeMillis() - this.timer > 1000 / column.getFps()) {
@@ -156,10 +153,9 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
 
     protected RendererProgressBar determinatedRenderer;
     protected Border              defaultBorder;
-    private RendererProgressBar   indeterminatedRenderer;
-    private MigPanel              renderer;
+    protected RendererProgressBar indeterminatedRenderer;
+    protected MigPanel            renderer;
     private HashMap<E, Long>      map;
-
     private int                   columnIndex = -1;
     protected MigPanel            determinedRendererPanel;
     protected MigPanel            indeterminedRendererPanel;
@@ -195,12 +191,10 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
         chooseDeterminated();
         this.defaultBorder = BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(1, 1, 2, 1), this.determinatedRenderer.getBorder());
         this.setRowSorter(new ExtDefaultRowSorter<E>() {
-
             @Override
             public int compare(final E o1, final E o2) {
                 final double v1 = (double) ExtProgressColumn.this.getValue(o1) / ExtProgressColumn.this.getMax(o1);
                 final double v2 = (double) ExtProgressColumn.this.getValue(o2) / ExtProgressColumn.this.getMax(o2);
-
                 if (v1 == v2) {
                     return 0;
                 }
@@ -210,7 +204,6 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
                     return v2 > v1 ? -1 : 1;
                 }
             }
-
         });
     }
 
@@ -219,7 +212,6 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
      */
     protected void preInit() {
         // TODO Auto-generated method stub
-
     }
 
     protected IndeterminatedRenderer<E> initIndeterminatedRenderer() {
@@ -233,7 +225,6 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
     /**
      *
      */
-
     @Override
     public void configureEditorComponent(final E value, final boolean isSelected, final int row, final int column) {
     }
@@ -422,7 +413,5 @@ abstract public class ExtProgressColumn<E> extends ExtColumn<E> {
      */
     @Override
     public void setValue(final Object value, final E object) {
-
     }
-
 }

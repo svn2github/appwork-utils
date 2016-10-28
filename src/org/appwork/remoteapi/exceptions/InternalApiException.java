@@ -58,4 +58,15 @@ public class InternalApiException extends RemoteAPIException {
     public InternalApiException(String msg) {
         this(new RuntimeException(msg));
     }
+
+    /**
+     * @param e
+     * @return
+     */
+    public static InternalApiException get(Throwable e) {
+        if (e instanceof InternalApiException) {
+            return (InternalApiException) e;
+        }
+        return new InternalApiException(e);
+    }
 }

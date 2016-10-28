@@ -48,7 +48,6 @@ import org.appwork.utils.processes.ProcessOutput;
  *
  */
 public class DesktopSupportLinux implements DesktopSupport {
-
     public static enum WINDOW_MANAGER {
         XFCE,
         GNOME,
@@ -123,7 +122,6 @@ public class DesktopSupportLinux implements DesktopSupport {
             this.windowManager = WINDOW_MANAGER.UNKNOWN;
             openCommand = null;
         }
-
         if (StringUtils.isNotEmpty(XDG_CURRENT_DESKTOP)) {
             this.customFile = new String[] { "xdg-open", "%s" };
             this.customBrowse = new String[] { "xdg-open", "%s" };
@@ -251,7 +249,7 @@ public class DesktopSupportLinux implements DesktopSupport {
     private void dbusPowerState(String command) {
         try {
             ProcessOutput output = ProcessBuilderFactory.runCommand(new String[] { "dbus-send", "--session", "--dest=org.freedesktop.PowerManagement", "--type=method_call", "--print-reply", "--reply-timeout=2000", "/org/freedesktop/PowerManagement", "org.freedesktop.PowerManagement." + command });
-            if (output.getErrOutString("UTF-8").contains("org.freedesktop.DBus.Error.ServiceUnknown")) {
+            if (output.getErrOutString().contains("org.freedesktop.DBus.Error.ServiceUnknown")) {
                 // compatible to newer dbus versions
                 ProcessBuilderFactory.runCommand("dbus-send", "--system", "--print-reply", "--dest=org.freedesktop.login1", "/org/freedesktop/login1", "org.freedesktop.login1.Manager." + command, "boolean:true");
             }
@@ -282,7 +280,6 @@ public class DesktopSupportLinux implements DesktopSupport {
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("no hibernate support, use shutdown");
             return false;
         }
-
     }
 
     /*
@@ -313,5 +310,4 @@ public class DesktopSupportLinux implements DesktopSupport {
         }
         return null;
     }
-
 }

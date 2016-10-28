@@ -1,5 +1,5 @@
 /**
- * 
+ *
  * ====================================================================================================================================================
  *         "AppWork Utilities" License
  *         The "AppWork Utilities" will be called [The Product] from now on.
@@ -7,16 +7,16 @@
  *         Copyright (c) 2009-2015, AppWork GmbH <e-mail@appwork.org>
  *         Schwabacher Straße 117
  *         90763 Fürth
- *         Germany   
+ *         Germany
  * === Preamble ===
  *     This license establishes the terms under which the [The Product] Source Code & Binary files may be used, copied, modified, distributed, and/or redistributed.
  *     The intent is that the AppWork GmbH is able to provide their utilities library for free to non-commercial projects whereas commercial usage is only permitted after obtaining a commercial license.
  *     These terms apply to all files that have the [The Product] License header (IN the file), a <filename>.license or <filename>.info (like mylib.jar.info) file that contains a reference to this license.
- * 	
+ *
  * === 3rd Party Licences ===
  *     Some parts of the [The Product] use or reference 3rd party libraries and classes. These parts may have different licensing conditions. Please check the *.license and *.info files of included libraries
- *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header. 	
- * 	
+ *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header.
+ *
  * === Definition: Commercial Usage ===
  *     If anybody or any organization is generating income (directly or indirectly) by using [The Product] or if there's any commercial interest or aspect in what you are doing, we consider this as a commercial usage.
  *     If your use-case is neither strictly private nor strictly educational, it is commercial. If you are unsure whether your use-case is commercial or not, consider it as commercial or contact us.
@@ -25,9 +25,9 @@
  *     If you want to use [The Product] in a commercial way (see definition above), you have to obtain a paid license from AppWork GmbH.
  *     Contact AppWork for further details: <e-mail@appwork.org>
  * === Non-Commercial Usage ===
- *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the 
+ *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the
  *     "GNU Affero General Public License" (http://www.gnu.org/licenses/agpl-3.0.en.html).
- * 	
+ *
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
@@ -38,12 +38,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.charset.Charset;
 
 import org.appwork.utils.Application;
 import org.appwork.utils.Files;
 import org.appwork.utils.IO;
-
 import org.appwork.utils.os.CrossSystem.OperatingSystem;
 import org.appwork.utils.processes.ProcessBuilderFactory;
 import org.appwork.utils.processes.ProcessOutput;
@@ -53,7 +51,6 @@ import org.appwork.utils.processes.ProcessOutput;
  *
  */
 public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
-
     @Override
     public void browseURL(final URL url) throws IOException, URISyntaxException {
         try {
@@ -78,7 +75,6 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
 
     @Override
     public void openFile(final File file) throws IOException {
-
         // workaround for windows
         // see http://bugs.sun.com/view_bug.do?bug_id=6599987
         if (!file.exists()) {
@@ -87,7 +83,6 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
         try {
             // it seems that unicode filenames cannot be opened with
             // "rundll32.exe", "url.dll,FileProtocolHandler". let's try
-
             // this call works for unicode paths as well.
             // the " " parameter is a dummy parameter to represent the window
             // name. without it, paths with space will fail
@@ -118,7 +113,6 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
                 /* force shutdown */
                 try {
                     ProcessBuilderFactory.runCommand(new String[] { "shutdown.exe", "-s", "-f", "-t", "01" });
-
                 } catch (Exception e) {
                     org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
                 }
@@ -143,7 +137,6 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
             if (CrossSystem.OS == OperatingSystem.WINDOWS_2000 || CrossSystem.OS == OperatingSystem.WINDOWS_NT) {
                 /* also try extra methods for windows2000 and nt */
                 try {
-
                     File f = Application.getTempResource("shutdown.vbs");
                     f.deleteOnExit();
                     IO.writeStringToFile(f, "set WshShell = CreateObject(\"WScript.Shell\")\r\nWshShell.SendKeys \"^{ESC}^{ESC}^{ESC}{UP}{ENTER}{ENTER}\"\r\n");
@@ -172,7 +165,6 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
             break;
         }
         return true;
-
     }
 
     @Override
@@ -192,7 +184,6 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
                 String path = CrossSystem.is64BitOperatingSystem() ? Application.getResource("tools\\Windows\\elevate\\Elevate64.exe").getAbsolutePath() : Application.getResource("tools\\Windows\\elevate\\Elevate32.exe").getAbsolutePath();
                 try {
                     ProcessBuilderFactory.runCommand(new String[] { path, "powercfg", "-hibernate", "off" });
-
                 } catch (Throwable e) {
                     org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
                 }
@@ -218,12 +209,10 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
             break;
         case WINDOWS_OTHERS:
             /* older windows versions */
-                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("no standby support, use shutdown");
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("no standby support, use shutdown");
             return false;
-
         }
         return true;
-
     }
 
     /*
@@ -248,7 +237,6 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
                 String path = CrossSystem.is64BitOperatingSystem() ? Application.getResource("tools\\Windows\\elevate\\Elevate64.exe").getAbsolutePath() : Application.getResource("tools\\Windows\\elevate\\Elevate32.exe").getAbsolutePath();
                 try {
                     ProcessBuilderFactory.runCommand(new String[] { path, "powercfg", "-hibernate", "on" });
-
                 } catch (Throwable e) {
                     org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
                 }
@@ -275,11 +263,10 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
             break;
         case WINDOWS_OTHERS:
             /* older windows versions */
-                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("no hibernate support, use shutdown");
+            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("no hibernate support, use shutdown");
             return false;
         }
         return true;
-
     }
 
     private static boolean isHibernateActivated() {
@@ -287,22 +274,20 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
         try {
             status = ProcessBuilderFactory.runCommand(new String[] { "powercfg", "-a" });
             // we should add the return for other languages
-            if (status.getStdOutString(Charset.defaultCharset().name()) != null) {
-                if (status.getStdOutString(Charset.defaultCharset().name()).contains("Ruhezustand wurde nicht aktiviert")) {
+            if (status.getStdOutString() != null) {
+                if (status.getStdOutString().contains("Ruhezustand wurde nicht aktiviert")) {
                     return false;
                 }
-                if (status.getStdOutString(Charset.defaultCharset().name()).contains("Hibernation has not been enabled")) {
+                if (status.getStdOutString().contains("Hibernation has not been enabled")) {
                     return false;
                 }
-                if (status.getStdOutString(Charset.defaultCharset().name()).contains("Hibernation")) {
+                if (status.getStdOutString().contains("Hibernation")) {
                     return false;
                 }
             }
         } catch (Exception e) {
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
         }
-
         return true;
     }
-
 }

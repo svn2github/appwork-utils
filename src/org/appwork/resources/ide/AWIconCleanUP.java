@@ -34,11 +34,16 @@
 package org.appwork.resources.ide;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 
 import org.appwork.app.gui.copycutpaste.CutCopyPasteIcon;
+import org.appwork.exceptions.WTFException;
 import org.appwork.resources.AWIcon;
 import org.appwork.resources.IconRef;
 import org.appwork.swing.components.HeadlessCheckboxIconRef;
@@ -46,6 +51,7 @@ import org.appwork.swing.exttable.ExtTableIcon;
 import org.appwork.swing.trayicon.TrayIconRef;
 import org.appwork.utils.FileHandler;
 import org.appwork.utils.Files;
+import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.ide.IDEUtils;
 import org.appwork.utils.os.CrossSystem;
@@ -115,5 +121,57 @@ public class AWIconCleanUP {
                 // TODO Auto-generated method stub
             }
         }, themesFolder);
+    }
+
+    /**
+     *
+     */
+    public static void printIconRefClassesInClassPath() {
+        Enumeration<URL> roots;
+        StringBuilder sb = new StringBuilder();
+        sb.append("\r\n").append("  ArrayList<Class<? extends IconRef>> required = new ArrayList<Class<? extends IconRef>>();");
+        try {
+            roots = AWIconCleanUP.class.getClassLoader().getResources("");
+            while (roots.hasMoreElements()) {
+                URL u = roots.nextElement();
+                if (u.getProtocol().equals("file")) {
+                    final File folder = new File(u.getPath());
+                    if (folder.isDirectory()) {
+                        sb.append("\r\n").append("// in " + folder.getParentFile().getName());
+                        Files.walkThroughStructure(new FileHandler<RuntimeException>() {
+                            @Override
+                            public void intro(File f) throws RuntimeException {
+                            }
+
+                            @Override
+                            public boolean onFile(File f, int depths) throws RuntimeException {
+                                if ("class".equals(Files.getExtension(f.getName()))) {
+                                    String path = new Regex(Files.getRelativePath(folder, f), "(.*)\\.class$").getMatch(0).replace("/", ".");
+                                    if (!path.contains("$") && path.toLowerCase(Locale.ENGLISH).contains("icon")) {
+                                        Class<?> cls;
+                                        try {
+                                            cls = Class.forName(path);
+                                            if (IconRef.class.isAssignableFrom(cls) && cls.isEnum()) {
+                                                sb.append("\r\n").append("\trequired.add(" + path + ".class);");
+                                            }
+                                        } catch (ClassNotFoundException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }
+                                return true;
+                            }
+
+                            @Override
+                            public void outro(File f) throws RuntimeException {
+                            }
+                        }, folder);
+                    }
+                }
+            }
+            System.out.println(sb);
+        } catch (IOException e1) {
+            throw new WTFException(e1);
+        }
     }
 }

@@ -41,7 +41,6 @@ import java.net.ConnectException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.Proxy;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
@@ -53,6 +52,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.appwork.utils.Application;
 import org.appwork.utils.StringUtils;
+import org.appwork.utils.net.SocketFactory;
 import org.appwork.utils.net.httpconnection.HTTPConnectionUtils;
 import org.appwork.utils.net.httpconnection.HTTPProxy;
 import org.appwork.utils.net.httpconnection.ProxyAuthException;
@@ -204,7 +204,7 @@ public abstract class SocketConnection extends Socket {
 
     protected SocketStreamInterface createConnectSocket(int connectTimeout) throws IOException {
         this.closeConnectSocket();
-        final Socket connectSocket = new Socket(Proxy.NO_PROXY);
+        final Socket connectSocket = SocketFactory.get().create(this);
         final SocketStreamInterface ret = new SocketStreamInterface() {
             @Override
             public Socket getSocket() {

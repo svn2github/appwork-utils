@@ -21,7 +21,6 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import javax.swing.Box;
 import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JSeparator;
 import javax.swing.SwingUtilities;
@@ -222,14 +221,17 @@ public abstract class AbstractTray implements MouseListener, MouseMotionListener
         return jpopup;
     }
 
-    protected void createMenuDebug(MouseEvent e, TrayIconPopup jpopup) {
+    protected void createMenuDebug(MouseEvent e, final TrayIconPopup jpopup) {
         if (e.isControlDown() && e.isShiftDown()) {
             Component spacer = Box.createGlue();
             spacer.setPreferredSize(new Dimension(10, 5));
             jpopup.add(spacer);
             jpopup.add(new JSeparator());
             jpopup.add(new JSeparator());
-            jpopup.add(new JLabel("Debug & Developer Menu"));
+            MenuHeader header = createMenuHeader(e);
+            header.getLabel().setText("Debug & Developer Menu");
+            // header.getIcon().setIcon(null);
+            jpopup.add(new MenuHeaderWrapper(header));
             jpopup.add(new JSeparator());
             for (BasicAction a : this.actions) {
                 if (!Boolean.TRUE.equals(a.getValue("debug"))) {

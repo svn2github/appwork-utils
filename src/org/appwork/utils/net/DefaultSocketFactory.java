@@ -31,57 +31,38 @@
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
-package org.appwork.utils.ide;
+package org.appwork.utils.net;
 
-import java.io.File;
-import java.net.URL;
+import java.net.InetAddress;
+import java.net.Proxy;
+import java.net.Socket;
 
-import org.appwork.exceptions.WTFException;
-import org.appwork.utils.Application;
+import org.appwork.utils.net.httpconnection.HTTPConnection;
+import org.appwork.utils.net.socketconnection.SocketConnection;
 
 /**
  * @author thomas
- * @date 23.02.2016
+ * @date 26.10.2016
  *
  */
-public class IDEUtils {
-    /**
-     * @return
+public class DefaultSocketFactory extends SocketFactory {
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.appwork.utils.net.SocketFactory#createSocket(org.appwork.utils.net.httpconnection.HTTPConnection, java.net.InetAddress)
      */
-    public static File getWorkSpace() {
-        return getProjectFolder(Application.class).getParentFile();
+    @Override
+    public Socket createSocket(HTTPConnection connection, InetAddress bindInetAddress) {
+        return new Socket(Proxy.NO_PROXY);
     }
 
-    public static void main(String[] args) {
-        System.out.println(getWorkSpace());
-    }
-
-    /**
-     * @return
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.appwork.utils.net.SocketFactory#create(org.appwork.utils.net.socketconnection.SocketConnection)
      */
-    public static File getProjectFolder(Class<?> cls) {
-        URL url = Application.class.getResource("/" + cls.getName().replace(".", "/") + ".class");
-        try {
-            File file = new File(url.toURI()).getParentFile();
-            for (int i = 0; i < cls.getName().split("\\.").length; i++) {
-                file = file.getParentFile();
-            }
-            return file;
-        } catch (Throwable e) {
-            throw new WTFException(e);
-        }
-    }
-
-    /**
-     * @return
-     * @throws ClassNotFoundException
-     */
-    public static File getProjectFolder() throws ClassNotFoundException {
-        try {
-            return getProjectFolder(Class.forName(new Exception().getStackTrace()[1].getClassName()));
-        } catch (Throwable e) {
-            // TODO Auto-generated catch block
-            return getProjectFolder(Class.forName(new Exception().getStackTrace()[0].getClassName()));
-        }
+    @Override
+    public Socket create(SocketConnection socketConnection) {
+        return new Socket(Proxy.NO_PROXY);
     }
 }

@@ -127,13 +127,13 @@ public class AWIconCleanUP {
      *
      */
     public static void printIconRefClassesInClassPath() {
-        Enumeration<URL> roots;
-        StringBuilder sb = new StringBuilder();
+        final Enumeration<URL> roots;
+        final StringBuilder sb = new StringBuilder();
         sb.append("\r\n").append("  ArrayList<Class<? extends IconRef>> required = new ArrayList<Class<? extends IconRef>>();");
         try {
             roots = AWIconCleanUP.class.getClassLoader().getResources("");
             while (roots.hasMoreElements()) {
-                URL u = roots.nextElement();
+                final URL u = roots.nextElement();
                 if (u.getProtocol().equals("file")) {
                     final File folder = new File(u.getPath());
                     if (folder.isDirectory()) {
@@ -146,11 +146,10 @@ public class AWIconCleanUP {
                             @Override
                             public boolean onFile(File f, int depths) throws RuntimeException {
                                 if ("class".equals(Files.getExtension(f.getName()))) {
-                                    String path = new Regex(Files.getRelativePath(folder, f), "(.*)\\.class$").getMatch(0).replace("/", ".");
+                                    final String path = new Regex(Files.getRelativePath(folder, f), "(.*)\\.class$").getMatch(0).replace("/", ".");
                                     if (!path.contains("$") && path.toLowerCase(Locale.ENGLISH).contains("icon")) {
-                                        Class<?> cls;
                                         try {
-                                            cls = Class.forName(path);
+                                            final Class<?> cls = Class.forName(path);
                                             if (IconRef.class.isAssignableFrom(cls) && cls.isEnum()) {
                                                 sb.append("\r\n").append("\trequired.add(" + path + ".class);");
                                             }

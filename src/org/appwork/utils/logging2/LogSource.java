@@ -371,6 +371,15 @@ public class LogSource extends Logger implements LogInterface, ClearableLogInter
         }
     }
 
+    public LogSink getLogSink() {
+        final Logger parent = this.parent;
+        if (parent instanceof LogSink) {
+            return (LogSink) parent;
+        } else {
+            return null;
+        }
+    }
+
     @Override
     public void setParent(final Logger parent) {
         this.parent = parent;

@@ -42,9 +42,10 @@ import org.appwork.exceptions.WTFException;
  *
  */
 public class ProcessOutput {
-    private int    exitCode;
-    private byte[] stdOutData;
-    private byte[] errOutData;
+    private final static String CONSOLE_CHARSET = ProcessBuilderFactory.getConsoleCodepage();
+    private final int           exitCode;
+    private final byte[]        stdOutData;
+    private final byte[]        errOutData;
 
     /**
      * @param waitFor
@@ -79,9 +80,15 @@ public class ProcessOutput {
 
     public String getStdOutString() {
         try {
-            return getStdOutString(ProcessBuilderFactory.getConsoleCodepage());
+            return getStdOutString(CONSOLE_CHARSET);
         } catch (UnsupportedEncodingException e) {
-            throw new WTFException(e);
+            try {
+                return getStdOutString("UTF-8");
+            } catch (UnsupportedEncodingException e2) {
+                final WTFException t = new WTFException(e2);
+                t.addSuppressed(e);
+                throw t;
+            }
         }
     }
 
@@ -90,9 +97,15 @@ public class ProcessOutput {
      */
     public String getErrOutString() {
         try {
-            return getErrOutString(ProcessBuilderFactory.getConsoleCodepage());
+            return getErrOutString(CONSOLE_CHARSET);
         } catch (UnsupportedEncodingException e) {
-            throw new WTFException(e);
+            try {
+                return getErrOutString("UTF-8");
+            } catch (UnsupportedEncodingException e2) {
+                final WTFException t = new WTFException(e2);
+                t.addSuppressed(e);
+                throw t;
+            }
         }
     }
 }

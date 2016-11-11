@@ -245,7 +245,6 @@ public class ProcessBuilderFactory {
                     }
                 } catch (Throwable e) {
                     LoggerFactory.getDefaultLogger().log(e);
-                    ;
                 }
                 break;
             default:

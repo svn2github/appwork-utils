@@ -241,7 +241,13 @@ public class ProcessBuilderFactory {
                     String result = runCommand("cmd", "/c", "chcp").getStdOutString("ASCII");
                     result = new Regex(result, ":\\s*(\\d+)").getMatch(0);
                     if (StringUtils.isNotEmpty(result)) {
-                        CONSOLE_CODEPAGE = "cp" + result.trim();
+                        final String cp = "cp" + result.trim();
+                        // https://msdn.microsoft.com/en-us/library/dd317756%28VS.85%29.aspx
+                        if ("CP65001".equalsIgnoreCase(cp)) {
+                            CONSOLE_CODEPAGE = "UTF-8";
+                        } else {
+                            CONSOLE_CODEPAGE = cp;
+                        }
                     }
                 } catch (Throwable e) {
                     LoggerFactory.getDefaultLogger().log(e);

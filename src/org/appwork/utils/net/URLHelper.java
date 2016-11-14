@@ -52,7 +52,7 @@ public class URLHelper {
         final StringBuilder sb = new StringBuilder();
         sb.append(protocol);
         sb.append("://");
-        if (userInfo != null) {
+        if (userInfo != null && userInfo.length() > 0) {
             sb.append(userInfo);
             sb.append("@");
         }
@@ -61,7 +61,7 @@ public class URLHelper {
             sb.append(":");
             sb.append(port);
         }
-        if (path != null) {
+        if (path != null && path.length() > 0) {
             final String encodedURLPath;
             try {
                 encodedURLPath = encodeURLPathSegment(path);
@@ -77,14 +77,14 @@ public class URLHelper {
         } else {
             sb.append("/");
         }
-        if (query != null) {
+        if (query != null && query.length() > 0) {
             sb.append("?");
             /**
              * TODO: implement encodeURLQuerySegment
              */
             sb.append(query);
         }
-        if (ref != null) {
+        if (ref != null && ref.length() > 0) {
             sb.append("#");
             sb.append(ref);
         }
@@ -141,7 +141,15 @@ public class URLHelper {
 
     public static URL createURL(final String url) throws MalformedURLException {
         final URL tmp = new URL(url.trim().replaceAll(" ", "%20"));
-        final String newURL = createURL(tmp.getProtocol(), tmp.getUserInfo(), tmp.getHost(), tmp.getPort(), tmp.getPath(), tmp.getQuery(), tmp.getRef());
+        final String newURL;
+        if (tmp.getPath() != null && tmp.getQuery() == null && tmp.getPath().contains("&")) {
+            final int index = tmp.getPath().indexOf('&');
+            final String newPath = tmp.getPath().substring(0, index);
+            final String newQuery = tmp.getPath().substring(index + 1);
+            newURL = createURL(tmp.getProtocol(), tmp.getUserInfo(), tmp.getHost(), tmp.getPort(), newPath, newQuery, tmp.getRef());
+        } else {
+            newURL = createURL(tmp.getProtocol(), tmp.getUserInfo(), tmp.getHost(), tmp.getPort(), tmp.getPath(), tmp.getQuery(), tmp.getRef());
+        }
         return new URL(newURL);
     }
 

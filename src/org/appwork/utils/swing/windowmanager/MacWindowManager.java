@@ -52,6 +52,16 @@ public class MacWindowManager extends WindowsWindowManager {
 
     /*
      * (non-Javadoc)
+     * 
+     * @see org.appwork.utils.swing.windowmanager.WindowsWindowManager#putOffscreen(java.awt.Window,
+     * org.appwork.utils.swing.windowmanager.WindowManager.FrameState)
+     */
+    @Override
+    protected void putOffscreen(Window w, FrameState state) {
+    }
+
+    /*
+     * (non-Javadoc)
      *
      * @see org.appwork.utils.swing.WindowManager#toFront(java.awt.Window)
      */

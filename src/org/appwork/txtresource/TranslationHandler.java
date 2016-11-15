@@ -44,6 +44,7 @@ import java.util.Iterator;
 import org.appwork.storage.config.annotations.IntegerInterface;
 import org.appwork.storage.config.annotations.LabelInterface;
 import org.appwork.storage.config.annotations.TooltipInterface;
+import org.appwork.txtresource.TranslationUtils.TranslationProviderInterface;
 import org.appwork.utils.Application;
 
 /**
@@ -51,15 +52,12 @@ import org.appwork.utils.Application;
  *
  */
 public class TranslationHandler implements InvocationHandler {
-
     private final Class<? extends TranslateInterface> tInterface;
     private java.util.List<TranslateResource>         lookup;
-
     private HashMap<Method, String>                   cache;
     private final Method[]                            methods;
     private HashMap<String, TranslateResource>        resourceCache;
     private boolean                                   tryCustom;
-
     public static final String                        DEFAULT = "en";
 
     /**
@@ -74,7 +72,6 @@ public class TranslationHandler implements InvocationHandler {
         this.cache = new HashMap<Method, String>();
         this.resourceCache = new HashMap<String, TranslateResource>();
         this.lookup = this.fillLookup(lookup);
-
     }
 
     /**
@@ -98,62 +95,52 @@ public class TranslationHandler implements InvocationHandler {
                     } else {
                         return false;
                     }
-
                 } else if (types[i] == Boolean.class && parameters[i] == boolean.class) {
                     return true;
                 }
                 return false;
             }
-
         }
         return true;
     }
 
     /**
      * @param string
+     * @param prov
      * @param addComments
      * @return
      */
-    public String createFile(final String string, final boolean addComments) {
-
+    public String createFile(final String string, TranslationProviderInterface prov, final boolean addComments) {
         final TranslateData map = new TranslateData();
         this.cache.clear();
         this.lookup = this.fillLookup(string);
         for (final Method m : this.tInterface.getDeclaredMethods()) {
             try {
-                map.put(m.getName(), this.invoke(null, m, null).toString());
-
+                map.put(m.getName(), prov == null ? this.invoke(null, m, null).toString() : prov.get(m, this.invoke(null, m, null).toString()));
             } catch (final Throwable e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
-
         String ret = TranslationUtils.serialize(map);
         if (addComments) {
             for (final Method m : this.tInterface.getDeclaredMethods()) {
                 final Default def = m.getAnnotation(Default.class);
                 final DescriptionForTranslationEntry desc = m.getAnnotation(DescriptionForTranslationEntry.class);
-
                 String comment = "";
                 if (desc != null) {
                     final String d = desc.value().replaceAll("[\\\r\\\n]+", "\r\n//    ");
                     comment += "\r\n// Description:\r\n//    " + d;
                 }
                 if (def != null) {
-
                     comment += "\r\n// Defaultvalue:\r\n//    " + def.toString().replaceAll("[\\\r\\\n]+", "\r\n//    ");
-
                 }
-
                 //
-
                 if (comment.length() > 0) {
                     ret = ret.replace("\"" + m.getName() + "\" : \"", comment + "\r\n\r\n     " + "\"" + m.getName() + "\" : \"");
                 }
             }
         }
-
         return ret;
     }
 
@@ -173,7 +160,6 @@ public class TranslationHandler implements InvocationHandler {
         String path = null;
         URL url = null;
         // check custom path
-
         if (tryCustom) {
             path = rPath != null ? "translations/custom/" + rPath.value().newInstance().getPath() + "." + string + ".lng" : "translations/custom/" + this.tInterface.getName().replace(".", "/") + "." + string + ".lng";
             url = Application.getRessourceURL(path, false);
@@ -193,16 +179,13 @@ public class TranslationHandler implements InvocationHandler {
             // interface is located, or in a translations/namespace
             path = rPath != null ? this.tInterface.getPackage().getName().replace(".", "/") + "/" + rPath.value().newInstance().getPath() + "." + string + ".lng" : this.tInterface.getName().replace(".", "/") + "." + string + ".lng";
             url = Application.getRessourceURL(path, false);
-
             if (url != null) {
                 org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Load Neighbour Translation " + url);
             }
         }
-
         if (url == null && rPath != null) {
             path = rPath.value().newInstance().getPath();
             url = Application.getRessourceURL(path, false);
-
             if (url != null) {
                 org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Load DynamicResourcePath Translation " + url);
             }
@@ -210,7 +193,6 @@ public class TranslationHandler implements InvocationHandler {
         miss: if (url == null) {
             final Defaults ann = this.tInterface.getAnnotation(Defaults.class);
             if (ann != null) {
-
                 for (final String d : ann.lngs()) {
                     if (d.equals(string)) {
                         // defaults
@@ -218,14 +200,12 @@ public class TranslationHandler implements InvocationHandler {
                         break miss;
                     }
                 }
-
             }
             // throw new NullPointerException("Missing Translation: " + path);
         }
         ret = new TranslateResource(url, string);
         this.resourceCache.put(string, ret);
         return ret;
-
     }
 
     /**
@@ -233,7 +213,6 @@ public class TranslationHandler implements InvocationHandler {
      * @return
      */
     private java.util.List<TranslateResource> fillLookup(final String... lookup) {
-
         final java.util.List<TranslateResource> ret = new ArrayList<TranslateResource>();
         TranslateResource res;
         boolean containsDefault = false;
@@ -246,7 +225,6 @@ public class TranslationHandler implements InvocationHandler {
                 ret.add(res);
             } catch (final NullPointerException e) {
                 org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning(e.getMessage());
-
             } catch (final Throwable e) {
                 org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
             }
@@ -277,7 +255,6 @@ public class TranslationHandler implements InvocationHandler {
                         ret = ret.replace("%s" + i, ((LabelInterface) o).getLabel());
                     } else if (o instanceof IntegerInterface) {
                         ret = ret.replace("%s" + i, String.valueOf(((IntegerInterface) o).getInt()));
-
                     } else if (o instanceof TooltipInterface) {
                         ret = ret.replace("%s" + i, ((TooltipInterface) o).getTooltip());
                     } else {
@@ -297,9 +274,7 @@ public class TranslationHandler implements InvocationHandler {
      */
     public String getDefault(final Method method) {
         final TranslateResource res = this.resourceCache.get(TranslationHandler.DEFAULT);
-
         return res.readDefaults(method);
-
     }
 
     /*
@@ -307,7 +282,6 @@ public class TranslationHandler implements InvocationHandler {
      *
      * @see java.lang.reflect.InvocationHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
      */
-
     /**
      * @return
      */
@@ -329,10 +303,8 @@ public class TranslationHandler implements InvocationHandler {
      * @return
      */
     public String getTranslation(final String languageKey, final String methodname, final Object... params) {
-
         final Class<?>[] types = new Class<?>[params.length];
         for (int i = 0; i < params.length; i++) {
-
             types[i] = params[i].getClass();
         }
         for (final Method m : this.methods) {
@@ -344,7 +316,6 @@ public class TranslationHandler implements InvocationHandler {
             }
         }
         return null;
-
     }
 
     public String getValue(final Method method, final java.util.List<TranslateResource> lookup) {
@@ -353,7 +324,6 @@ public class TranslationHandler implements InvocationHandler {
         for (final Iterator<TranslateResource> it = lookup.iterator(); it.hasNext();) {
             res = it.next();
             try {
-
                 ret = res.getEntry(method);
                 if (ret != null) {
                     return ret;
@@ -370,7 +340,6 @@ public class TranslationHandler implements InvocationHandler {
     }
 
     public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
-
         final java.util.List<TranslateResource> lookup = this.lookup;
         // for speed reasons let all controller methods (@see
         // TRanslationINterface.java) start with _
@@ -386,12 +355,10 @@ public class TranslationHandler implements InvocationHandler {
         // return TranslationFactory.listAvailableTranslations(this.tInterface);
         // }
         // if (method.getName().equals("_setLanguage")) {
-
         //
         // if (method.getName().equals("_getTranslation")) {
         HashMap<Method, String> lcache = cache;
         String ret = null;
-
         synchronized (lcache) {
             ret = lcache.get(method);
             if (ret == null) {
@@ -400,10 +367,8 @@ public class TranslationHandler implements InvocationHandler {
                     lcache.put(method, ret);
                 }
             }
-
         }
         return this.format(ret, args);
-
     }
 
     /**
@@ -419,7 +384,6 @@ public class TranslationHandler implements InvocationHandler {
         this.cache = new HashMap<Method, String>();
         this.resourceCache = new HashMap<String, TranslateResource>();
         this.lookup = this.fillLookup(loc);
-
     }
 
     /**
@@ -432,7 +396,6 @@ public class TranslationHandler implements InvocationHandler {
         for (final Iterator<TranslateResource> it = lookup.iterator(); it.hasNext();) {
             res = it.next();
             try {
-
                 ret = res.getSource(method);
                 if (ret != null) {
                     return ret;
@@ -442,7 +405,6 @@ public class TranslationHandler implements InvocationHandler {
                 org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
             }
         }
-
         return ret;
     }
 
@@ -458,7 +420,6 @@ public class TranslationHandler implements InvocationHandler {
      * @return
      */
     public TranslateResource getResource(String id) {
-
         for (TranslateResource tr : lookup) {
             if (tr.getName().equals(id)) {
                 return tr;

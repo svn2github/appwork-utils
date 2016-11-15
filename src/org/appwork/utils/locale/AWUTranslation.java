@@ -217,9 +217,8 @@ public interface AWUTranslation extends TranslateInterface {
     @Default(lngs = { "en", "de" }, values = { "Enter a path...", "Bitte Pfad eingeben..." })
     String pathchooser_helptext();
 
-    @Default(lngs = { "en", "de" }, values = { "Please wait until download has finished", "Bitte warten bis der Download beendet ist" })
-    String please_wait();
-
+    // @Default(lngs = { "en", "de" }, values = { "Please wait until download has finished", "Bitte warten bis der Download beendet ist" })
+    // String please_wait();
     @Default(lngs = { "en", "de" }, values = { "%s3% %s1/%s2", "%s3% %s1/%s2" })
     String progress(String loaded, String total, double d);
 

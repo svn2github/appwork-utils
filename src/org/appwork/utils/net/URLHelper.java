@@ -37,6 +37,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.appwork.exceptions.WTFException;
 import org.appwork.utils.Regex;
@@ -142,11 +144,17 @@ public class URLHelper {
     public static URL createURL(final String url) throws MalformedURLException {
         final URL tmp = new URL(url.trim().replaceAll(" ", "%20"));
         final String newURL;
-        if (tmp.getPath() != null && tmp.getQuery() == null && tmp.getPath().contains("&")) {
-            final int index = tmp.getPath().indexOf('&');
-            final String newPath = tmp.getPath().substring(0, index);
-            final String newQuery = tmp.getPath().substring(index + 1);
-            newURL = createURL(tmp.getProtocol(), tmp.getUserInfo(), tmp.getHost(), tmp.getPort(), newPath, newQuery, tmp.getRef());
+        if (tmp.getPath() != null && tmp.getQuery() == null && tmp.getPath().matches(".*(\\&(?!amp;)).*")) {
+            final Pattern search = Pattern.compile(".*\\&(?!amp;)");
+            final Matcher matcher = search.matcher(tmp.getPath());
+            if (matcher.find()) {
+                final int index = matcher.end();
+                final String newPath = tmp.getPath().substring(0, index - 1);
+                final String newQuery = tmp.getPath().substring(index);
+                newURL = createURL(tmp.getProtocol(), tmp.getUserInfo(), tmp.getHost(), tmp.getPort(), newPath, newQuery, tmp.getRef());
+            } else {
+                newURL = createURL(tmp.getProtocol(), tmp.getUserInfo(), tmp.getHost(), tmp.getPort(), tmp.getPath(), tmp.getQuery(), tmp.getRef());
+            }
         } else {
             newURL = createURL(tmp.getProtocol(), tmp.getUserInfo(), tmp.getHost(), tmp.getPort(), tmp.getPath(), tmp.getQuery(), tmp.getRef());
         }

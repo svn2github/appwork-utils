@@ -40,10 +40,7 @@ import javax.swing.JFrame;
 
 import org.appwork.utils.os.CrossSystem;
 
-/**
- * @author Thomas
- *
- */
+
 public abstract class WindowManager {
     public static enum FrameState {
         OS_DEFAULT,
@@ -66,10 +63,7 @@ public abstract class WindowManager {
             this.id = i;
         }
 
-        /**
-         * @param state
-         * @return
-         */
+
         public static WindowExtendedState get(final int state) {
             if ((state & Frame.MAXIMIZED_BOTH) != 0) {
                 return MAXIMIZED_BOTH;
@@ -87,9 +81,7 @@ public abstract class WindowManager {
         INSTANCE = instance;
     }
 
-    /**
-     * @return
-     */
+
     private static WindowManager createOsWindowManager() {
         if (CrossSystem.isWindows()) {
             return new WindowsWindowManager();
@@ -107,17 +99,12 @@ public abstract class WindowManager {
         return WindowManager.INSTANCE;
     }
 
-    /**
-     * @return
-     */
+
     public WindowExtendedState getExtendedState(final Frame w) {
         return WindowExtendedState.get(w.getExtendedState());
     }
 
-    /**
-     * @param mainFrame
-     * @return
-     */
+
     public boolean hasFocus(final Window window) {
         if (window != null && window.isFocusOwner()) {
             return true;
@@ -165,9 +152,7 @@ public abstract class WindowManager {
 
     abstract public void setVisible(Window w, boolean visible, FrameState state);
 
-    /**
-     * @param w
-     */
+
     abstract public void setZState(Window w, FrameState state);
 
     public void show(final Window w) {
@@ -178,9 +163,7 @@ public abstract class WindowManager {
         this.setVisible(w, true, state);
     }
 
-    /**
-     * @return
-     */
+
     public boolean hasFocus() {
         for (final Window w : Window.getWindows()) {
             if (hasFocus(w)) {

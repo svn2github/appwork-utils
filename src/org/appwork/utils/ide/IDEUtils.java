@@ -39,15 +39,9 @@ import java.net.URL;
 import org.appwork.exceptions.WTFException;
 import org.appwork.utils.Application;
 
-/**
- * @author thomas
- * @date 23.02.2016
- *
- */
+
 public class IDEUtils {
-    /**
-     * @return
-     */
+
     public static File getWorkSpace() {
         return getProjectFolder(Application.class).getParentFile();
     }
@@ -56,9 +50,7 @@ public class IDEUtils {
         System.out.println(getWorkSpace());
     }
 
-    /**
-     * @return
-     */
+
     public static File getProjectFolder(Class<?> cls) {
         URL url = Application.class.getResource("/" + cls.getName().replace(".", "/") + ".class");
         try {
@@ -66,16 +58,19 @@ public class IDEUtils {
             for (int i = 0; i < cls.getName().split("\\.").length; i++) {
                 file = file.getParentFile();
             }
+            //Intellij
+            if("production".equals(file.getName())){
+                if("bin".equals(file.getParentFile().getName())){
+                    return file.getParentFile().getParentFile();
+                }
+            }
             return file;
         } catch (Throwable e) {
             throw new WTFException(e);
         }
     }
 
-    /**
-     * @return
-     * @throws ClassNotFoundException
-     */
+
     public static File getProjectFolder() throws ClassNotFoundException {
         try {
             return getProjectFolder(Class.forName(new Exception().getStackTrace()[1].getClassName()));

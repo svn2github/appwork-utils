@@ -1,6 +1,7 @@
 /**
  *
  * ====================================================================================================================================================
+
  *         "AppWork Utilities" License
  *         The "AppWork Utilities" will be called [The Product] from now on.
  * ====================================================================================================================================================
@@ -76,7 +77,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import org.appwork.exceptions.WTFException;
-import org.appwork.resources.AWIcon;
 import org.appwork.storage.JSonStorage;
 import org.appwork.swing.MigPanel;
 import org.appwork.uio.CloseReason;
@@ -100,25 +100,30 @@ import org.appwork.utils.swing.windowmanager.WindowManager.FrameState;
 import net.miginfocom.swing.MigLayout;
 
 public abstract class AbstractDialog<T> implements ActionListener, WindowListener, OKCancelCloseUserIODefinition, WindowFocusListener {
-    protected static int                                  BUTTON_HEIGHT           = -1;
-    public static DialogLocator                           DEFAULT_LOCATOR         = null;
-    public static final DialogLocator                     LOCATE_CENTER_OF_SCREEN = new CenterOfScreenDialogLocator();
-    private static final HashMap<String, Integer>         SESSION_DONTSHOW_AGAIN  = new HashMap<String, Integer>();
-    public static final OwnerFinder                       DEFAULT_OWNER_FINDER    = new OwnerFinder() {
-                                                                                      @Override
-                                                                                      public Window findDialogOwner(final AbstractDialog<?> dialogModel, final WindowStack windowStack) {
-                                                                                          final Window ret = windowStack.size() == 0 ? null : windowStack.get(windowStack.size() - 1);
-                                                                                          return ret;
-                                                                                      }
-                                                                                  };
-    private static OwnerFinder                            OWNER_FINDER            = AbstractDialog.DEFAULT_OWNER_FINDER;
-    public static WindowZHandler                          ZHANDLER                = new BasicZHandler();
-    private static final WeakHashMap<Object, WindowStack> STACK_MAP               = new WeakHashMap<Object, WindowStack>();
+    protected static int                          BUTTON_HEIGHT           = -1;
+    public static DialogLocator                   DEFAULT_LOCATOR         = null;
+    public static final DialogLocator             LOCATE_CENTER_OF_SCREEN = new CenterOfScreenDialogLocator();
+    private static final HashMap<String, Integer> SESSION_DONTSHOW_AGAIN  = new HashMap<String, Integer>();
+    public static final OwnerFinder               DEFAULT_OWNER_FINDER    = new OwnerFinder() {
+                                                                              @Override
+                                                                              public Window findDialogOwner(final AbstractDialog<?> dialogModel, final WindowStack windowStack) {
+                                                                                  final Window ret = windowStack.size() == 0 ? null : windowStack.get(windowStack.size() - 1);
+                                                                                  return ret;
+                                                                              }
+                                                                          };
+    private static OwnerFinder                    OWNER_FINDER            = AbstractDialog.DEFAULT_OWNER_FINDER;
+    public static WindowZHandler                  ZHANDLER                = new BasicZHandler();
+
+    public static void setZHandler(WindowZHandler zHANDLER) {
+        ZHANDLER = zHANDLER;
+    }
+
+    private static final WeakHashMap<Object, WindowStack> STACK_MAP = new WeakHashMap<Object, WindowStack>();
     /**
      * @param desiredRootFrame
      * @return
      */
-    private static final Object                           NULL_KEY                = new Object();
+    private static final Object                           NULL_KEY  = new Object();
 
     public static int getButtonHeight() {
         return AbstractDialog.BUTTON_HEIGHT;

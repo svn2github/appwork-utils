@@ -43,19 +43,20 @@ public class MacWindowManager extends WindowsWindowManager {
     protected void initForegroundLock() {
     }
 
-    @Override
+    // @Override
     protected boolean setFocusableWindowState(Window w, boolean b) {
         // creates strange assertions in mac native NSWIndow _changejustmain code.-->thus overridden
         // tested in mac 10.12.2 and the "do not focus new windows" code works fine anyway
-        return false;
+        return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.appwork.utils.swing.windowmanager.WindowsWindowManager#putOffscreen(java.awt.Window,
-     * org.appwork.utils.swing.windowmanager.WindowManager.FrameState)
-     */
+    //
+    // /*
+    // * (non-Javadoc)
+    // *
+    // * @see org.appwork.utils.swing.windowmanager.WindowsWindowManager#putOffscreen(java.awt.Window,
+    // * org.appwork.utils.swing.windowmanager.WindowManager.FrameState)
+    // */
     @Override
     protected void putOffscreen(Window w, FrameState state) {
     }

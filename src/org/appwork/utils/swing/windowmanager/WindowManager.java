@@ -56,7 +56,6 @@ public abstract class WindowManager {
         NORMAL(JFrame.NORMAL),
         MAXIMIZED_BOTH(JFrame.MAXIMIZED_BOTH),
         ICONIFIED(JFrame.ICONIFIED);
-
         private int id;
 
         public int getId() {
@@ -80,7 +79,6 @@ public abstract class WindowManager {
             }
             return NORMAL;
         }
-
     }
 
     static WindowManager INSTANCE = WindowManager.createOsWindowManager();
@@ -98,6 +96,7 @@ public abstract class WindowManager {
         } else if (CrossSystem.isUnix()) {
             return new LinuxWindowManager();
         } else if (CrossSystem.isMac()) {
+            // return new WindowsWindowManager();
             return new MacWindowManager();
         } else {
             return new DefaultWindowManager();
@@ -190,5 +189,4 @@ public abstract class WindowManager {
         }
         return false;
     }
-
 }

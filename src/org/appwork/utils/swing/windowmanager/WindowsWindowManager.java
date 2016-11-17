@@ -344,7 +344,7 @@ public class WindowsWindowManager extends WindowManager {
             setZState(w, state);
             return;
         }
-        // //System.out.println("Focus: " + state);
+        // LoggerFactory.getDefaultLogger().info(w + ".SetVisible " + visible + " " + state);
         addDebugListener(w);
         if (visible) {
             if (state == FrameState.OS_DEFAULT) {
@@ -618,7 +618,7 @@ public class WindowsWindowManager extends WindowManager {
         }
         blocker = ExtJFrame.PROPERTY_FOCUSABLE;
         try {
-            // System.out.println("Call setFocusable " + b);
+            // LoggerFactory.getDefaultLogger().info("Call setFocusable " + b);
             w.setFocusable(b);
         } finally {
             blocker = null;
@@ -635,7 +635,7 @@ public class WindowsWindowManager extends WindowManager {
         if (ret == b) {
             return ret;
         }
-        // System.out.println("Call setFocusableWindowState " + b);
+        // LoggerFactory.getDefaultLogger().info("Call setFocusableWindowState " + b);
         blocker = ExtJFrame.PROPERTY_FOCUSABLE_WINDOW_STATE;
         try {
             w.setFocusableWindowState(b);

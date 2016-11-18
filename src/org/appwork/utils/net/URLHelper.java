@@ -145,7 +145,7 @@ public class URLHelper {
         final URL tmp = new URL(url.trim().replaceAll(" ", "%20"));
         final String newURL;
         if (tmp.getPath() != null && tmp.getQuery() == null && tmp.getPath().matches(".*(\\&(?!amp;)).*")) {
-            final Pattern search = Pattern.compile(".*\\&(?!amp;)");
+            final Pattern search = Pattern.compile(".*?\\&(?!amp;)");
             final Matcher matcher = search.matcher(tmp.getPath());
             if (matcher.find()) {
                 final int index = matcher.end();

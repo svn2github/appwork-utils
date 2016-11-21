@@ -44,13 +44,12 @@ import org.appwork.utils.net.httpserver.HttpConnection;
  *
  */
 public abstract class HttpRequest implements HttpRequestInterface {
-
     protected String           requestedURL   = null;
-
     protected HeaderCollection requestHeaders = null;
-
     protected String           requestedPath  = null;
     protected String           serverName     = null;
+
+    public abstract HttpConnection.HttpConnectionType getHttpConnectionType();
 
     public String getServerName() {
         return serverName;
@@ -88,9 +87,7 @@ public abstract class HttpRequest implements HttpRequestInterface {
     protected String               serverProtocol         = null;
     protected boolean              https                  = false;
     protected List<KeyValuePair>   requestedURLParameters = null;
-
     private List<String>           remoteAddress          = new ArrayList<String>();
-
     protected final HttpConnection connection;
 
     public HttpConnection getConnection() {
@@ -187,7 +184,6 @@ public abstract class HttpRequest implements HttpRequestInterface {
      * @return
      */
     public String getActuallRemoteAddress() {
-
         List<String> addresses = getRemoteAddress();
         if (addresses == null || addresses.size() == 0) {
             return null;
@@ -197,5 +193,4 @@ public abstract class HttpRequest implements HttpRequestInterface {
         }
         return addresses.get(1);
     }
-
 }

@@ -35,6 +35,7 @@ package org.appwork.utils.net.httpserver.requests;
 
 import org.appwork.utils.net.httpconnection.HTTPConnection.RequestMethod;
 import org.appwork.utils.net.httpserver.HttpConnection;
+import org.appwork.utils.net.httpserver.HttpConnection.HttpConnectionType;
 
 public class DeleteRequest extends PostRequest {
     /**
@@ -44,9 +45,14 @@ public class DeleteRequest extends PostRequest {
         super(connection);
     }
 
+    @Override
+    public HttpConnectionType getHttpConnectionType() {
+        return HttpConnectionType.DELETE;
+    }
+
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.utils.net.httpserver.requests.PostRequest#getRequestMethod()
      */
     @Override

@@ -52,7 +52,9 @@ import org.appwork.utils.StringUtils;
 import org.appwork.utils.net.HTTPHeader;
 import org.appwork.utils.net.HeaderCollection;
 import org.appwork.utils.net.httpconnection.HTTPConnectionUtils;
+import org.appwork.utils.net.httpserver.handler.HttpConnectHandler;
 import org.appwork.utils.net.httpserver.handler.HttpRequestHandler;
+import org.appwork.utils.net.httpserver.requests.ConnectRequest;
 import org.appwork.utils.net.httpserver.requests.GetRequest;
 import org.appwork.utils.net.httpserver.requests.HeadRequest;
 import org.appwork.utils.net.httpserver.requests.HttpRequest;
@@ -66,14 +68,14 @@ import org.appwork.utils.net.httpserver.responses.HttpResponse;
  *
  */
 public class HttpConnection implements Runnable {
-
     public static enum HttpConnectionType {
+        DELETE,
+        CONNECT,
         HEAD,
         GET,
         POST,
         OPTIONS,
         UNKNOWN;
-
         private final byte[] requestTypeBytes;
 
         private HttpConnectionType() {
@@ -110,7 +112,6 @@ public class HttpConnection implements Runnable {
         public final int length() {
             return this.requestTypeBytes.length;
         }
-
     }
 
     public static List<KeyValuePair> parseParameterList(final String requestedParameters) throws IOException {
@@ -142,20 +143,14 @@ public class HttpConnection implements Runnable {
     protected final HttpServer   server;
     protected final Socket       clientSocket;
     protected boolean            responseHeadersSent = false;
-
     protected HttpResponse       response            = null;
-
     protected final InputStream  is;
-
     protected final OutputStream os;
     protected HttpRequest        request;
-
-    private static final Pattern METHOD              = Pattern.compile("(GET|POST|HEAD|OPTIONS)");
-    private static final Pattern REQUESTLINE         = Pattern.compile(" (/.*?) ");
-
-    private static final Pattern REQUESTURL          = Pattern.compile("(/.*?)($|\\?)");
-
-    private static final Pattern REQUESTPARAM        = Pattern.compile("\\?(.+)");
+    private static final Pattern METHOD              = Pattern.compile("(GET|POST|HEAD|OPTIONS|CONNECT)");
+    private static final Pattern REQUESTLINE         = Pattern.compile("\\s+(.+)\\s+HTTP/");
+    private static final Pattern REQUESTURL          = Pattern.compile("^(/.*?)($|\\?)");
+    private static final Pattern REQUESTPARAM        = Pattern.compile("^/.*?\\?(.+)");
 
     protected HttpConnection(final HttpServer server, final Socket clientSocket, final InputStream is, final OutputStream os) throws IOException {
         this.server = server;
@@ -186,19 +181,23 @@ public class HttpConnection implements Runnable {
         this(server, clientSocket, null, null);
     }
 
-    protected GetRequest buildGetRequest() throws IOException {
+    protected HttpRequest buildGetRequest() throws IOException {
         return new GetRequest(this);
     }
 
-    protected HeadRequest buildHeadRequest() throws IOException {
+    protected HttpRequest buildHeadRequest() throws IOException {
         return new HeadRequest(this);
     }
 
-    protected OptionsRequest buildOptionsRequest() throws IOException {
+    protected HttpRequest buildOptionsRequest() throws IOException {
         return new OptionsRequest(this);
     }
 
-    protected PostRequest buildPostRequest() throws IOException {
+    protected HttpRequest buildConnectRequest() throws IOException {
+        return new ConnectRequest(this);
+    }
+
+    protected HttpRequest buildPostRequest() throws IOException {
         return new PostRequest(this);
     }
 
@@ -223,6 +222,9 @@ public class HttpConnection implements Runnable {
         final HeaderCollection requestHeaders = this.parseRequestHeaders();
         final HttpRequest request;
         switch (connectionType) {
+        case CONNECT:
+            request = this.buildConnectRequest();
+            break;
         case POST:
             request = this.buildPostRequest();
             break;
@@ -370,7 +372,6 @@ public class HttpConnection implements Runnable {
     }
 
     protected HttpConnectionType parseConnectionType(final String requestLine) throws IOException {
-
         final String method = new Regex(requestLine, HttpConnection.METHOD).getMatch(0);
         // TOTO: requestLine may be "" in some cases (chrome pre connection...?)
         try {
@@ -467,6 +468,13 @@ public class HttpConnection implements Runnable {
                             break;
                         }
                     }
+                } else if (this.request instanceof ConnectRequest) {
+                    for (final HttpRequestHandler handler : this.getHandler()) {
+                        if (handler instanceof HttpConnectHandler && ((HttpConnectHandler) handler).onConnectRequest((ConnectRequest) this.request, this.response)) {
+                            handled = true;
+                            break;
+                        }
+                    }
                 }
                 if (!handled) {
                     /* generate error handler */
@@ -531,6 +539,5 @@ public class HttpConnection implements Runnable {
         } else {
             return "HttpConnectionThread: IS and OS";
         }
-
     }
 }

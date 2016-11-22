@@ -34,7 +34,7 @@
 package org.appwork.utils.net.httpserver.handler;
 
 import org.appwork.remoteapi.exceptions.BasicRemoteAPIException;
-import org.appwork.utils.net.httpserver.requests.ConnectRequest;
+import org.appwork.utils.net.httpserver.requests.HttpRequest;
 import org.appwork.utils.net.httpserver.responses.HttpResponse;
 
 /**
@@ -42,6 +42,6 @@ import org.appwork.utils.net.httpserver.responses.HttpResponse;
  * @date 21.11.2016
  *
  */
-public interface HttpConnectHandler extends HttpRequestHandler {
-    public abstract boolean onConnectRequest(final ConnectRequest request, final HttpResponse response) throws BasicRemoteAPIException;
+public interface HttpProxyHandler extends HttpRequestHandler {
+    public abstract boolean onProxyConnectRequest(final HttpRequest request, final HttpResponse response) throws BasicRemoteAPIException;
 }

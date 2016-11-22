@@ -52,7 +52,7 @@ import org.appwork.utils.StringUtils;
 import org.appwork.utils.net.HTTPHeader;
 import org.appwork.utils.net.HeaderCollection;
 import org.appwork.utils.net.httpconnection.HTTPConnectionUtils;
-import org.appwork.utils.net.httpserver.handler.HttpConnectHandler;
+import org.appwork.utils.net.httpserver.handler.HttpProxyHandler;
 import org.appwork.utils.net.httpserver.handler.HttpRequestHandler;
 import org.appwork.utils.net.httpserver.requests.ConnectRequest;
 import org.appwork.utils.net.httpserver.requests.GetRequest;
@@ -440,6 +440,22 @@ public class HttpConnection implements Runnable {
         return HTTPConnectionUtils.readheader(this.getInputStream(), true);
     }
 
+    protected boolean isProxyRequest(HttpRequest request) {
+        if (request != null) {
+            return request instanceof ConnectRequest || StringUtils.startsWithCaseInsensitive(request.getRequestedURL(), "http://") || StringUtils.startsWithCaseInsensitive(request.getRequestedURL(), "https://");
+        } else {
+            return false;
+        }
+    }
+
+    protected boolean isPostRequest(HttpRequest request) {
+        return request instanceof PostRequest;
+    }
+
+    protected boolean isGetRequest(HttpRequest request) {
+        return request instanceof GetRequest;
+    }
+
     @Override
     public void run() {
         boolean closeConnection = true;
@@ -454,23 +470,23 @@ public class HttpConnection implements Runnable {
                 closeConnection = false;
             } else {
                 boolean handled = false;
-                if (this.request instanceof PostRequest) {
+                if (isProxyRequest(request)) {
+                    for (final HttpRequestHandler handler : this.getHandler()) {
+                        if (handler instanceof HttpProxyHandler && ((HttpProxyHandler) handler).onProxyConnectRequest(this.request, this.response)) {
+                            handled = true;
+                            break;
+                        }
+                    }
+                } else if (isPostRequest(request)) {
                     for (final HttpRequestHandler handler : this.getHandler()) {
                         if (handler.onPostRequest((PostRequest) this.request, this.response)) {
                             handled = true;
                             break;
                         }
                     }
-                } else if (this.request instanceof GetRequest) {
+                } else if (isGetRequest(request)) {
                     for (final HttpRequestHandler handler : this.getHandler()) {
                         if (handler.onGetRequest((GetRequest) this.request, this.response)) {
-                            handled = true;
-                            break;
-                        }
-                    }
-                } else if (this.request instanceof ConnectRequest) {
-                    for (final HttpRequestHandler handler : this.getHandler()) {
-                        if (handler instanceof HttpConnectHandler && ((HttpConnectHandler) handler).onConnectRequest((ConnectRequest) this.request, this.response)) {
                             handled = true;
                             break;
                         }
@@ -487,7 +503,7 @@ public class HttpConnection implements Runnable {
             try {
                 closeConnection = this.onException(e, this.request, this.response);
             } catch (final Throwable nothing) {
-                e.printStackTrace();
+                nothing.addSuppressed(e);
                 nothing.printStackTrace();
             }
         } finally {

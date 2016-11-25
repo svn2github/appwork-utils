@@ -503,7 +503,7 @@ public class HttpConnection implements Runnable {
             try {
                 closeConnection = this.onException(e, this.request, this.response);
             } catch (final Throwable nothing) {
-                nothing.addSuppressed(e);
+                e.printStackTrace();
                 nothing.printStackTrace();
             }
         } finally {

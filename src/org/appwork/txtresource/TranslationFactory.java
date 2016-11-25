@@ -54,11 +54,16 @@ import org.appwork.utils.StringUtils;
 public class TranslationFactory {
     private static final HashMap<String, TranslateInterface> CACHE    = new HashMap<String, TranslateInterface>();
     private static String                                    LANGUAGE = "en";
+    private static String                                    COUNTRY;
     static {
         try {
             LANGUAGE = System.getProperty("user.language").toLowerCase();
             if (StringUtils.isEmpty(LANGUAGE)) {
                 LANGUAGE = "en";
+            }
+            COUNTRY = System.getProperty("user.country").toLowerCase();
+            if (StringUtils.isEmpty(COUNTRY)) {
+                COUNTRY = "GB";
             }
         } catch (Throwable e) {
             e.printStackTrace();

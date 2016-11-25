@@ -163,7 +163,11 @@ public class DefaultDocsPageFactory extends InterfaceHandler<Object> {
                         c.setAccessible(true);
                         inst = (BasicRemoteAPIException) c.newInstance(new Object[] { "" });
                     }
-                    return "ResponseCode " + inst.getCode().getCode() + " (" + inst.getCode().getDescription() + ")" + "; Type:" + inst.getType() + "";
+                    if (inst.getData() != null) {
+                        return "ResponseCode " + inst.getCode().getCode() + " (" + inst.getCode().getDescription() + ")" + "; Type:" + inst.getType() + "; Description: " + inst.getData();
+                    } else {
+                        return "ResponseCode " + inst.getCode().getCode() + " (" + inst.getCode().getDescription() + ")" + "; Type:" + inst.getType() + "";
+                    }
                 } catch (Throwable e) {
                     System.out.println("Unsupported Exception type: " + returnType);
                 }

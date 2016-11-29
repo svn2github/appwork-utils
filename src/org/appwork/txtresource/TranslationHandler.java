@@ -216,17 +216,19 @@ public class TranslationHandler implements InvocationHandler {
         final java.util.List<TranslateResource> ret = new ArrayList<TranslateResource>();
         TranslateResource res;
         boolean containsDefault = false;
-        for (final String o : lookup) {
-            try {
-                if (TranslationHandler.DEFAULT.equals(o)) {
-                    containsDefault = true;
+        for (final String oo : lookup) {
+            for (String o : TranslationFactory.getVariantsOf(oo)) {
+                try {
+                    if (TranslationHandler.DEFAULT.equals(o)) {
+                        containsDefault = true;
+                    }
+                    res = this.createTranslationResource(o);
+                    ret.add(res);
+                } catch (final NullPointerException e) {
+                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning(e.getMessage());
+                } catch (final Throwable e) {
+                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
                 }
-                res = this.createTranslationResource(o);
-                ret.add(res);
-            } catch (final NullPointerException e) {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning(e.getMessage());
-            } catch (final Throwable e) {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
             }
         }
         if (!containsDefault) {

@@ -54,17 +54,24 @@ import org.appwork.utils.StringUtils;
 public class TranslationFactory {
     private static final HashMap<String, TranslateInterface> CACHE    = new HashMap<String, TranslateInterface>();
     private static String                                    LANGUAGE = "en";
-    private static String                                    COUNTRY;
     static {
         try {
-            LANGUAGE = System.getProperty("user.language").toLowerCase();
-            if (StringUtils.isEmpty(LANGUAGE)) {
-                LANGUAGE = "en";
+            String l = Locale.getDefault().getLanguage();
+            if (StringUtils.isEmpty(l)) {
+                l = Locale.getDefault().getLanguage();
+                if (StringUtils.isEmpty(l)) {
+                    l = "en";
+                }
             }
-            COUNTRY = System.getProperty("user.country").toLowerCase();
-            if (StringUtils.isEmpty(COUNTRY)) {
-                COUNTRY = "GB";
+            String c = System.getProperty("user.country");
+            if (StringUtils.isEmpty(c)) {
+                c = Locale.getDefault().getCountry();
             }
+            String v = System.getProperty("user.variant");
+            if (StringUtils.isEmpty(v)) {
+                v = Locale.getDefault().getVariant();
+            }
+            setDesiredLanguage(localeToString(l, c, v));
         } catch (Throwable e) {
             e.printStackTrace();
         }
@@ -102,7 +109,7 @@ public class TranslationFactory {
     }
 
     public static <T extends TranslateInterface> T create(final Class<T> class1) {
-        return TranslationFactory.create(class1, TranslationFactory.getDesiredLanguage());
+        return TranslationFactory.create(class1, getDesiredLanguage());
     }
 
     /**
@@ -189,9 +196,6 @@ public class TranslationFactory {
         return TranslationFactory.LANGUAGE;
     }
 
-    /**
-     * @return
-     */
     public static Locale getDesiredLocale() {
         final String lng = TranslationFactory.getDesiredLanguage();
         return TranslationFactory.stringToLocale(lng);
@@ -220,17 +224,26 @@ public class TranslationFactory {
      * @return
      */
     public static String localeToString(final Locale l) {
+        return localeToString(l.getLanguage(), l.getCountry(), l.getVariant());
+    }
+
+    public static String localeToString(final String language, String country, String variant) {
         final StringBuilder sb = new StringBuilder();
-        sb.append(l.getLanguage());
-        String c = l.getCountry();
+        sb.append(language);
+        String c = country;
+        boolean hasCountry = false;
         if (c != null && c.trim().length() > 0) {
-            sb.append("-");
-            sb.append(l.getCountry());
-            c = l.getVariant();
-            if (c != null && c.trim().length() > 0) {
-                sb.append("-");
-                sb.append(l.getCountry());
+            sb.append("_");
+            sb.append(c.toUpperCase(Locale.ENGLISH));
+            hasCountry = true;
+        }
+        c = variant;
+        if (c != null && c.trim().length() > 0) {
+            if (!hasCountry) {
+                sb.append("_");
             }
+            sb.append("_");
+            sb.append(c);
         }
         return sb.toString();
     }
@@ -253,6 +266,13 @@ public class TranslationFactory {
             return false;
         }
         TranslationFactory.LANGUAGE = loc;
+        ArrayList<String> lst = new ArrayList<String>();
+        HashSet<String> dupe = new HashSet<String>();
+        if (loc != null) {
+            if (dupe.add(loc)) {
+                lst.add(loc);
+            }
+        }
         synchronized (TranslationFactory.CACHE) {
             for (final TranslateInterface i : TranslationFactory.CACHE.values()) {
                 i._getHandler().setLanguage(loc);
@@ -283,5 +303,32 @@ public class TranslationFactory {
         default:
             return new Locale(split[0], split[1], split[2]);
         }
+    }
+
+    /**
+     * @param o
+     * @return
+     */
+    public static List<String> getVariantsOf(String o) {
+        Locale loc = TranslationFactory.stringToLocale(o);
+        ArrayList<String> ret = new ArrayList<String>();
+        HashSet<String> dupe = new HashSet<String>();
+        String add = localeToString(loc.getLanguage(), loc.getCountry(), loc.getVariant());
+        if (dupe.add(add)) {
+            ret.add(add);
+        }
+        add = localeToString(loc.getLanguage(), loc.getCountry(), null);
+        if (dupe.add(add)) {
+            ret.add(add);
+        }
+        add = localeToString(loc.getLanguage(), null, loc.getVariant());
+        if (dupe.add(add)) {
+            ret.add(add);
+        }
+        add = localeToString(loc.getLanguage(), null, null);
+        if (dupe.add(add)) {
+            ret.add(add);
+        }
+        return ret;
     }
 }

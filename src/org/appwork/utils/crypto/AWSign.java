@@ -1,5 +1,5 @@
 /**
- * 
+ *
  * ====================================================================================================================================================
  *         "AppWork Utilities" License
  *         The "AppWork Utilities" will be called [The Product] from now on.
@@ -7,16 +7,16 @@
  *         Copyright (c) 2009-2015, AppWork GmbH <e-mail@appwork.org>
  *         Schwabacher Straße 117
  *         90763 Fürth
- *         Germany   
+ *         Germany
  * === Preamble ===
  *     This license establishes the terms under which the [The Product] Source Code & Binary files may be used, copied, modified, distributed, and/or redistributed.
  *     The intent is that the AppWork GmbH is able to provide their utilities library for free to non-commercial projects whereas commercial usage is only permitted after obtaining a commercial license.
  *     These terms apply to all files that have the [The Product] License header (IN the file), a <filename>.license or <filename>.info (like mylib.jar.info) file that contains a reference to this license.
- * 	
+ *
  * === 3rd Party Licences ===
  *     Some parts of the [The Product] use or reference 3rd party libraries and classes. These parts may have different licensing conditions. Please check the *.license and *.info files of included libraries
- *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header. 	
- * 	
+ *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header.
+ *
  * === Definition: Commercial Usage ===
  *     If anybody or any organization is generating income (directly or indirectly) by using [The Product] or if there's any commercial interest or aspect in what you are doing, we consider this as a commercial usage.
  *     If your use-case is neither strictly private nor strictly educational, it is commercial. If you are unsure whether your use-case is commercial or not, consider it as commercial or contact us.
@@ -25,9 +25,9 @@
  *     If you want to use [The Product] in a commercial way (see definition above), you have to obtain a paid license from AppWork GmbH.
  *     Contact AppWork for further details: <e-mail@appwork.org>
  * === Non-Commercial Usage ===
- *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the 
+ *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the
  *     "GNU Affero General Public License" (http://www.gnu.org/licenses/agpl-3.0.en.html).
- * 	
+ *
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
@@ -81,7 +81,7 @@ public class AWSign {
 
     public static void createKeyPair() throws NoSuchAlgorithmException {
         final KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-        keyPairGenerator.initialize(4096);
+        keyPairGenerator.initialize(2048);
         final KeyPair keyPair = keyPairGenerator.genKeyPair();
         System.out.println("PUBLIC  " + Base64.encodeToString(keyPair.getPublic().getEncoded(), false));
         System.out.println("PRIVATE " + Base64.encodeToString(keyPair.getPrivate().getEncoded(), false));
@@ -96,28 +96,21 @@ public class AWSign {
      */
     public static byte[] createSign(final byte[] bytes, final PrivateKey pk, final boolean salt) throws SignatureViolationException {
         try {
-
             final Signature sig = Signature.getInstance("Sha256WithRSA");
-
             sig.initSign(pk);
-            final byte[] saltBytes = AWSign.getSalt(salt);
-
+            final byte[] saltBytes = AWSign.get16ByteSalt(salt);
             if (saltBytes != null) {
                 sig.update(saltBytes);
             }
-
             sig.update(bytes, 0, bytes.length);
-
             final byte[] ret = sig.sign();
             if (!salt) {
                 return ret;
             }
-
             final byte[] merged = new byte[ret.length + saltBytes.length];
             System.arraycopy(saltBytes, 0, merged, 0, saltBytes.length);
             System.arraycopy(ret, 0, merged, saltBytes.length, ret.length);
             return merged;
-
         } catch (final Throwable e) {
             throw new SignatureViolationException(e);
         }
@@ -126,14 +119,10 @@ public class AWSign {
     public static byte[] createSign(final File f, final PrivateKey publicKey, final boolean salt, final byte[] addInfo) throws SignatureViolationException {
         try {
             final Signature sig = Signature.getInstance("Sha256WithRSA");
-
             sig.initSign(publicKey);
-
             InputStream input = null;
             try {
-
-                final byte[] saltBytes = AWSign.getSalt(salt);
-
+                final byte[] saltBytes = AWSign.get16ByteSalt(salt);
                 if (saltBytes != null) {
                     sig.update(saltBytes);
                 }
@@ -152,21 +141,16 @@ public class AWSign {
                 if (!salt) {
                     return ret;
                 }
-
                 final byte[] merged = new byte[ret.length + saltBytes.length];
                 System.arraycopy(saltBytes, 0, merged, 0, saltBytes.length);
                 System.arraycopy(ret, 0, merged, saltBytes.length, ret.length);
                 return merged;
-
             } finally {
-
                 try {
                     input.close();
                 } catch (final Exception e) {
                 }
-
             }
-
         } catch (final Throwable e) {
             throw new SignatureViolationException(e);
         }
@@ -259,7 +243,6 @@ public class AWSign {
             cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
             cipher.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(iv));
             final CipherOutputStream cos = new CipherOutputStream(new FilterOutputStream(fos) {
-
                 @Override
                 public void close() throws IOException {
                 }
@@ -283,7 +266,6 @@ public class AWSign {
                 public void write(final int b) throws IOException {
                     this.out.write(b);
                 }
-
             }, cipher);
             final MessageDigest md = MessageDigest.getInstance("SHA-256");
             int read = 0;
@@ -320,12 +302,10 @@ public class AWSign {
      * @throws InvalidKeySpecException
      */
     public static PrivateKey getPrivateKey(final String privateKey) throws InvalidKeySpecException, NoSuchAlgorithmException {
-
         return KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(Base64.decode(privateKey)));
     }
 
     public static PrivateKey getPrivateKey(final byte[] bytes) throws InvalidKeySpecException, NoSuchAlgorithmException {
-
         return KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(bytes));
     }
 
@@ -354,17 +334,17 @@ public class AWSign {
      * @return
      * @throws NoSuchAlgorithmException
      */
-    public static byte[] getSalt(final boolean salt) throws NoSuchAlgorithmException {
+    public static byte[] get16ByteSalt(final boolean salt) throws NoSuchAlgorithmException {
         if (!salt) {
             return null;
         }
-
+        // do not change 16 bytes unless you know what you are doing. you would have to change all implementations because the 16 bytes
+        // might be hardcoded
         final byte[] saltBytes = new byte[16];
         if (AWSign.sr != null) {
             AWSign.sr.nextBytes(saltBytes);
         }
         return saltBytes;
-
     }
 
     public static SecureRandom getSecureRandom() {
@@ -383,32 +363,24 @@ public class AWSign {
             AWSign.createKeyPair();
             return;
         }
-
         // PUBLIC
         try {
             final PublicKey pub = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(Base64.decode("MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAg+EQ1wHD62QGjzJalAkl1WjExeS345ZkCMtuyvqP3NLVpUbfZjc/IeHVi9qKBUPtV8ca8QfOZo8ACNIBvUxEiVy4YFE7vqZfBNV0uEz/kHSXxDlFeiv0+BFMgcXow0NYBjGDT02/1ddmjEMtnAXnjqUwlVPorzOmJoeuNSLCyCcOe0pKuF1yDha9TkEsaUcJ8kho+09kQvhMl5mKnuTUc81nIHHVb4GClRmFp1kfB9BbqPc9sL5jg1BrmjHMCD84HZk4OehxJ8AeA+veVRH2Gn6gcslPcrgNw1zK6VcXzCqsuZCAejAyDHnX+jay1SaxmHDgk5jc+agee+M2+QPiwQIDAQAB")));
-            final PrivateKey pk = KeyFactory
-                    .getInstance("RSA")
-                    .generatePrivate(
-                            new PKCS8EncodedKeySpec(
-                                    Base64.decode("MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCD4RDXAcPrZAaPMlqUCSXVaMTF5LfjlmQIy27K+o/c0tWlRt9mNz8h4dWL2ooFQ+1XxxrxB85mjwAI0gG9TESJXLhgUTu+pl8E1XS4TP+QdJfEOUV6K/T4EUyBxejDQ1gGMYNPTb/V12aMQy2cBeeOpTCVU+ivM6Ymh641IsLIJw57Skq4XXIOFr1OQSxpRwnySGj7T2RC+EyXmYqe5NRzzWcgcdVvgYKVGYWnWR8H0Fuo9z2wvmODUGuaMcwIPzgdmTg56HEnwB4D695VEfYafqByyU9yuA3DXMrpVxfMKqy5kIB6MDIMedf6NrLVJrGYcOCTmNz5qB574zb5A+LBAgMBAAECggEAWLi/lYZQgjoG16tumI0W8N3NE71toST6I5iI7vFme48zwD9P5/pe9LJz8eSSWjx6nkUK8QDpcMHfqg9usCVxLmA8gj/kS7ytzBi2r47NmCd4OsC05x5PbdxldiDpGQRjYbdJub56wqhpCw/ezUqDn8muR6ftsIC01NMO9hxuoiv1tE1GXZwBo36YSPb5NsB0Og5p0w8gwogXo0/TLIOJVy5ysZGACrXMaSN7DX/XP5hp4rXEfbY9vQdegVShejIKOIc9r5+0btRPjGP7YkMRWvTQQt43jWgI8cBIFUcZ4fYmwegzGnl1OONVzXjum10B2E3R2vmDEZqrLVB22I5Y4QKBgQDq0W0/g9H7hyd0NroZP8yP0/bOZO6ZYzUNMRQgZ/BO76yMUId6+wi0RREzqya+r/ur+kDXCs+liTlbJ+KyjRv29ls40eDW5OpCG9ccFguzg1CUpyIRu2obKC5i59x3I4KGiUplumKcSE8QILD09DslvoSf2pHBIQKZNEdVMROObQKBgQCPxoGORYshbsptqZ5batMTWAeb5xeBn6rxBNDWAzeD+qXazOsTWYgU4310nq/Vqyc7UU18VPoRTTflUyhJFoFxJRjTEHxa/hKjIOGPYayCK2EHrMXHoSxZsUvSbSH1Y84zFAbDcRPylXg1pGnn5CyDB5jijS6mQxnT94TRgX1hJQKBgFwzcUcgNmIiFn7OQlJJt8O9wcoW3Y0C5EDSxYlX5obIGyNZN2k1ipxmBjQYfvUe2p4TfEQzrYbdE9VUGvJq79EPuI/d8P/QEJ92mQchLOUGqaxE197IjQguxc/2JJ3vJoA3Bixde/zLc6fsfi8getz+Ksstok+H66JGYb/0ri4dAoGAFnZeAVtOHGAR0kZAzmmHJquHLM1S99Z5P4SQGA+SmdUMGn4PcAt53kGYdSLht9EwpOzT3UvtccyNog926MxSVtoD4d3ef9zYDpJxixQofoHGfAt7LvA4XJ79iJeySYNZUNOdJuXAxxKhIEhan3cfmS0Trrl+A03SeDJgltbTPt0CgYEA1uPP5gpL029gtx3shiQFblpVl3AhUE1dmDITJYrGqD+06Z+nPHu73kOnVdPKgy9wYIIxcyx/DrQfcT5e1+IZy9bZ5OOIUVi9qNsQ1RhvFzEwo8tiE/1LX7XUIC2gIjyY0Q+VXLk03UgjV7qAgOg4X/foetGZn2NHmc4NUUaCoNE=")));
+            final PrivateKey pk = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(Base64.decode(
+                    "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCD4RDXAcPrZAaPMlqUCSXVaMTF5LfjlmQIy27K+o/c0tWlRt9mNz8h4dWL2ooFQ+1XxxrxB85mjwAI0gG9TESJXLhgUTu+pl8E1XS4TP+QdJfEOUV6K/T4EUyBxejDQ1gGMYNPTb/V12aMQy2cBeeOpTCVU+ivM6Ymh641IsLIJw57Skq4XXIOFr1OQSxpRwnySGj7T2RC+EyXmYqe5NRzzWcgcdVvgYKVGYWnWR8H0Fuo9z2wvmODUGuaMcwIPzgdmTg56HEnwB4D695VEfYafqByyU9yuA3DXMrpVxfMKqy5kIB6MDIMedf6NrLVJrGYcOCTmNz5qB574zb5A+LBAgMBAAECggEAWLi/lYZQgjoG16tumI0W8N3NE71toST6I5iI7vFme48zwD9P5/pe9LJz8eSSWjx6nkUK8QDpcMHfqg9usCVxLmA8gj/kS7ytzBi2r47NmCd4OsC05x5PbdxldiDpGQRjYbdJub56wqhpCw/ezUqDn8muR6ftsIC01NMO9hxuoiv1tE1GXZwBo36YSPb5NsB0Og5p0w8gwogXo0/TLIOJVy5ysZGACrXMaSN7DX/XP5hp4rXEfbY9vQdegVShejIKOIc9r5+0btRPjGP7YkMRWvTQQt43jWgI8cBIFUcZ4fYmwegzGnl1OONVzXjum10B2E3R2vmDEZqrLVB22I5Y4QKBgQDq0W0/g9H7hyd0NroZP8yP0/bOZO6ZYzUNMRQgZ/BO76yMUId6+wi0RREzqya+r/ur+kDXCs+liTlbJ+KyjRv29ls40eDW5OpCG9ccFguzg1CUpyIRu2obKC5i59x3I4KGiUplumKcSE8QILD09DslvoSf2pHBIQKZNEdVMROObQKBgQCPxoGORYshbsptqZ5batMTWAeb5xeBn6rxBNDWAzeD+qXazOsTWYgU4310nq/Vqyc7UU18VPoRTTflUyhJFoFxJRjTEHxa/hKjIOGPYayCK2EHrMXHoSxZsUvSbSH1Y84zFAbDcRPylXg1pGnn5CyDB5jijS6mQxnT94TRgX1hJQKBgFwzcUcgNmIiFn7OQlJJt8O9wcoW3Y0C5EDSxYlX5obIGyNZN2k1ipxmBjQYfvUe2p4TfEQzrYbdE9VUGvJq79EPuI/d8P/QEJ92mQchLOUGqaxE197IjQguxc/2JJ3vJoA3Bixde/zLc6fsfi8getz+Ksstok+H66JGYb/0ri4dAoGAFnZeAVtOHGAR0kZAzmmHJquHLM1S99Z5P4SQGA+SmdUMGn4PcAt53kGYdSLht9EwpOzT3UvtccyNog926MxSVtoD4d3ef9zYDpJxixQofoHGfAt7LvA4XJ79iJeySYNZUNOdJuXAxxKhIEhan3cfmS0Trrl+A03SeDJgltbTPt0CgYEA1uPP5gpL029gtx3shiQFblpVl3AhUE1dmDITJYrGqD+06Z+nPHu73kOnVdPKgy9wYIIxcyx/DrQfcT5e1+IZy9bZ5OOIUVi9qNsQ1RhvFzEwo8tiE/1LX7XUIC2gIjyY0Q+VXLk03UgjV7qAgOg4X/foetGZn2NHmc4NUUaCoNE=")));
             byte[] sign = null;
             sign = AWSign.createSign("Apfelbaum".getBytes(), pk, true);
-
             System.out.println(Base64.encodeToString(sign, false));
             AWSign.verify("Apfelbaum".getBytes(), pub, sign, true);
             System.out.println("OK");
-
             final File file = new File(AWSign.class.getResource(AWSign.class.getSimpleName() + ".class").toURI());
             System.out.println("Sign File: " + file);
             final byte[] add = new byte[] { 1, 2, 3 };
             // add=null;
             sign = AWSign.createSign(file, pk, true, add);
-
             System.out.println(Base64.encodeToString(sign, false));
             AWSign.verify(file, pub, sign, true, add);
             System.out.println("OK2");
-
         } catch (final Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -427,16 +399,14 @@ public class AWSign {
             final Signature sig = Signature.getInstance("Sha256WithRSA");
             sig.initVerify(pub);
             if (salted) {
-                final byte[] salt = new byte[signature.length - 256];
+                byte[] enc = pub.getEncoded();
+                final byte[] salt = new byte[16];
                 System.arraycopy(signature, 0, salt, 0, salt.length);
-
-                final byte[] actualSignature = new byte[256];
-                System.arraycopy(signature, signature.length - 256, actualSignature, 0, actualSignature.length);
+                final byte[] actualSignature = new byte[signature.length - salt.length];
+                System.arraycopy(signature, 16, actualSignature, 0, actualSignature.length);
                 signature = actualSignature;
                 sig.update(salt);
-
             }
-
             sig.update(dataToVerify);
             if (!sig.verify(signature)) {
                 throw new SignatureViolationException("Signatur Check Failed");
@@ -444,7 +414,6 @@ public class AWSign {
         } catch (final SignatureViolationException e) {
             throw e;
         } catch (final Throwable e) {
-
             throw new SignatureViolationException(e);
         }
     }
@@ -463,10 +432,8 @@ public class AWSign {
         } catch (final SignatureViolationException e) {
             throw e;
         } catch (final Throwable e) {
-
             throw new SignatureViolationException(e);
         }
-
     }
 
     /**
@@ -478,14 +445,11 @@ public class AWSign {
      */
     public static void verify(final InputStream input, final PublicKey pub, byte[] signature, final boolean salted, final byte[] additionalBytes) throws SignatureViolationException {
         try {
-
             final Signature sig = Signature.getInstance("Sha256WithRSA");
             sig.initVerify(pub);
-
             if (salted) {
                 final byte[] salt = new byte[signature.length - 256];
                 System.arraycopy(signature, 0, salt, 0, salt.length);
-
                 final byte[] actualSignature = new byte[256];
                 System.arraycopy(signature, signature.length - 256, actualSignature, 0, actualSignature.length);
                 signature = actualSignature;
@@ -507,16 +471,12 @@ public class AWSign {
         } catch (final SignatureViolationException e) {
             throw e;
         } catch (final Throwable e) {
-
             throw new SignatureViolationException(e);
         } finally {
             try {
                 input.close();
             } catch (final Exception e) {
             }
-
         }
-
     }
-
 }

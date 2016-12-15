@@ -35,6 +35,7 @@ package org.appwork.utils.net.httpserver.requests;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -43,6 +44,7 @@ import org.appwork.storage.JSonStorage;
 import org.appwork.storage.simplejson.JSonObject;
 import org.appwork.utils.IO;
 import org.appwork.utils.Regex;
+import org.appwork.utils.StringUtils;
 import org.appwork.utils.net.ChunkedInputStream;
 import org.appwork.utils.net.HTTPHeader;
 import org.appwork.utils.net.LimitedInputStream;
@@ -190,6 +192,32 @@ public class PostRequest extends HttpRequest {
             }
         }
         return null;
+    }
+
+    @Override
+    public String[] getParametersbyKey(String key) throws IOException {
+        final List<String> ret = new ArrayList<String>();
+        List<KeyValuePair> params = this.getRequestedURLParameters();
+        if (params != null) {
+            for (final KeyValuePair param : params) {
+                if (StringUtils.equalsIgnoreCase(key, param.key)) {
+                    ret.add(param.value);
+                }
+            }
+        }
+        params = this.getPostParameter();
+        if (params != null) {
+            for (final KeyValuePair param : params) {
+                if (StringUtils.equalsIgnoreCase(key, param.key)) {
+                    ret.add(param.value);
+                }
+            }
+        }
+        if (ret.size() > 0) {
+            return ret.toArray(new String[0]);
+        } else {
+            return null;
+        }
     }
 
     /**

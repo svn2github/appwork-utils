@@ -54,7 +54,6 @@ import org.appwork.utils.net.httpserver.requests.PostRequest;
  *
  */
 public class RemoteAPIRequest implements HttpRequestInterface {
-
     public static enum REQUESTTYPE {
         HEAD,
         POST,
@@ -64,19 +63,15 @@ public class RemoteAPIRequest implements HttpRequestInterface {
     }
 
     private final InterfaceHandler<?> iface;
-
     private final String[]            parameters;
     protected final HttpRequest       request;
-
     private final Method              method;
-
     private final String              jqueryCallback;
-
     private final String              methodName;
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see java.lang.Object#toString()
      */
     @Override
@@ -95,7 +90,6 @@ public class RemoteAPIRequest implements HttpRequestInterface {
         if (method == null) {
             throw new ApiCommandNotAvailable(request.getRequestedURL());
         }
-
     }
 
     public HttpRequest getHttpRequest() {
@@ -124,7 +118,6 @@ public class RemoteAPIRequest implements HttpRequestInterface {
      * @return
      */
     public Method getMethod() {
-
         return this.method;
     }
 
@@ -135,45 +128,23 @@ public class RemoteAPIRequest implements HttpRequestInterface {
         return this.methodName;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.appwork.utils.net.httpserver.requests.HttpRequestInterface# getParameterbyKey(java.lang.String)
-     */
     @Override
     public String getParameterbyKey(final String key) throws IOException {
-        List<KeyValuePair> params = this.request.getRequestedURLParameters();
-        if (params != null) {
-            for (final KeyValuePair param : params) {
-                if (key.equalsIgnoreCase(param.key)) {
-                    return param.value;
-                }
-            }
+        if (request != null) {
+            return request.getParameterbyKey(key);
+        } else {
+            return null;
         }
-        if (this.request instanceof PostRequest) {
-            params = ((PostRequest) this.request).getPostParameter();
-            if (params != null) {
-                for (final KeyValuePair param : params) {
-                    if (key.equalsIgnoreCase(param.key)) {
-                        return param.value;
-                    }
-                }
-            }
-        }
-        return null;
-
     }
 
-    // /*
-    // * (non-Javadoc)
-    // *
-    // * @see org.appwork.utils.net.httpserver.requests.HttpRequestInterface#
-    // * getPostParameter()
-    // */
-    // @Override
-    // public List<KeyValuePair> getPostParameter() throws IOException {
-    // return request.getPostParameter();
-    // }
+    @Override
+    public String[] getParametersbyKey(String key) throws IOException {
+        if (request != null) {
+            return request.getParametersbyKey(key);
+        } else {
+            return null;
+        }
+    }
 
     public String[] getParameters() {
         return this.parameters;
@@ -203,7 +174,6 @@ public class RemoteAPIRequest implements HttpRequestInterface {
      */
     public String getRemoteAddress() {
         return request.getActuallRemoteAddress();
-
     }
 
     public String getRequestedPath() {
@@ -265,5 +235,4 @@ public class RemoteAPIRequest implements HttpRequestInterface {
     public boolean isHttps() {
         return request.isHttps();
     }
-
 }

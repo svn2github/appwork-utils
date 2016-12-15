@@ -34,7 +34,10 @@
 package org.appwork.utils.net.httpserver.requests;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.appwork.utils.StringUtils;
 import org.appwork.utils.net.httpserver.HttpConnection;
 import org.appwork.utils.net.httpserver.HttpConnection.HttpConnectionType;
 
@@ -57,7 +60,32 @@ public class ConnectRequest extends HttpRequest {
     }
 
     @Override
-    public String getParameterbyKey(String key) throws IOException {
+    public String getParameterbyKey(final String key) throws IOException {
+        final List<KeyValuePair> params = this.getRequestedURLParameters();
+        if (params != null) {
+            for (final KeyValuePair param : params) {
+                if (StringUtils.equalsIgnoreCase(key, param.key)) {
+                    return param.value;
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public String[] getParametersbyKey(String key) throws IOException {
+        final List<String> ret = new ArrayList<String>();
+        final List<KeyValuePair> params = this.getRequestedURLParameters();
+        if (params != null) {
+            for (final KeyValuePair param : params) {
+                if (StringUtils.equalsIgnoreCase(key, param.key)) {
+                    ret.add(param.value);
+                }
+            }
+            if (ret.size() > 0) {
+                return ret.toArray(new String[0]);
+            }
+        }
         return null;
     }
 }

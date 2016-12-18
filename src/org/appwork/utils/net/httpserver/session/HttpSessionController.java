@@ -70,7 +70,7 @@ public abstract class HttpSessionController<T extends HttpSession> implements Ht
         return false;
     }
 
-    private String extractSessionID(final HttpRequest request) {
+    protected String extractSessionID(final HttpRequest request) {
         final Iterator<KeyValuePair> it = request.getRequestedURLParameters().iterator();
         while (it.hasNext()) {
             final KeyValuePair next = it.next();

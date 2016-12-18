@@ -38,6 +38,7 @@ import java.util.Iterator;
 
 import org.appwork.remoteapi.RemoteAPIRequest;
 import org.appwork.remoteapi.SessionRemoteAPIRequest;
+import org.appwork.remoteapi.exceptions.ApiCommandNotAvailable;
 import org.appwork.remoteapi.exceptions.AuthException;
 import org.appwork.remoteapi.exceptions.BasicRemoteAPIException;
 import org.appwork.utils.net.httpserver.handler.HttpRequestHandler;
@@ -119,10 +120,18 @@ public abstract class HttpSessionController<T extends HttpSession> implements Ht
     public boolean onGetRequest(final GetRequest request, final HttpResponse response) throws BasicRemoteAPIException {
         final java.util.List<HttpSessionRequestHandler<T>> handlers = this.handler;
         final T session = this.getSession(request, this.extractSessionID(request));
+        ApiCommandNotAvailable notFound = null;
         for (final HttpSessionRequestHandler<T> handler : handlers) {
-            if (handler.onGetSessionRequest(session, request, response)) {
-                return true;
+            try {
+                if (handler.onGetSessionRequest(session, request, response)) {
+                    return true;
+                }
+            } catch (ApiCommandNotAvailable e) {
+                notFound = e;
             }
+        }
+        if (notFound != null) {
+            throw notFound;
         }
         return false;
     }
@@ -137,10 +146,18 @@ public abstract class HttpSessionController<T extends HttpSession> implements Ht
     public boolean onPostRequest(final PostRequest request, final HttpResponse response) throws BasicRemoteAPIException {
         final java.util.List<HttpSessionRequestHandler<T>> handlers = this.handler;
         final T session = this.getSession(request, this.extractSessionID(request));
+        ApiCommandNotAvailable notFound = null;
         for (final HttpSessionRequestHandler<T> handler : handlers) {
-            if (handler.onPostSessionRequest(session, request, response)) {
-                return true;
+            try {
+                if (handler.onPostSessionRequest(session, request, response)) {
+                    return true;
+                }
+            } catch (ApiCommandNotAvailable e) {
+                notFound = e;
             }
+        }
+        if (notFound != null) {
+            throw notFound;
         }
         return false;
     }

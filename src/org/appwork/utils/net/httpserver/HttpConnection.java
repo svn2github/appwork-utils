@@ -55,12 +55,14 @@ import org.appwork.utils.net.httpconnection.HTTPConnectionUtils;
 import org.appwork.utils.net.httpserver.handler.HttpProxyHandler;
 import org.appwork.utils.net.httpserver.handler.HttpRequestHandler;
 import org.appwork.utils.net.httpserver.requests.ConnectRequest;
+import org.appwork.utils.net.httpserver.requests.DeleteRequest;
 import org.appwork.utils.net.httpserver.requests.GetRequest;
 import org.appwork.utils.net.httpserver.requests.HeadRequest;
 import org.appwork.utils.net.httpserver.requests.HttpRequest;
 import org.appwork.utils.net.httpserver.requests.KeyValuePair;
 import org.appwork.utils.net.httpserver.requests.OptionsRequest;
 import org.appwork.utils.net.httpserver.requests.PostRequest;
+import org.appwork.utils.net.httpserver.requests.PutRequest;
 import org.appwork.utils.net.httpserver.responses.HttpResponse;
 
 /**
@@ -71,6 +73,7 @@ public class HttpConnection implements Runnable {
     public static enum HttpConnectionType {
         DELETE,
         CONNECT,
+        PUT,
         HEAD,
         GET,
         POST,
@@ -201,6 +204,14 @@ public class HttpConnection implements Runnable {
         return new PostRequest(this);
     }
 
+    protected HttpRequest buildPutRequest() throws IOException {
+        return new PutRequest(this);
+    }
+
+    protected HttpRequest buildDeleteRequest() throws IOException {
+        return new DeleteRequest(this);
+    }
+
     /**
      * parses the request and creates a GET/POST-Request Object and fills it with all received data
      *
@@ -236,6 +247,12 @@ public class HttpConnection implements Runnable {
             break;
         case HEAD:
             request = this.buildHeadRequest();
+            break;
+        case PUT:
+            request = this.buildPutRequest();
+            break;
+        case DELETE:
+            request = this.buildDeleteRequest();
             break;
         default:
             throw new IOException("Unsupported " + requestLine);

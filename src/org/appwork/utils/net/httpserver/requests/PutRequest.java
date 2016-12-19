@@ -35,6 +35,7 @@ package org.appwork.utils.net.httpserver.requests;
 
 import org.appwork.utils.net.httpconnection.HTTPConnection.RequestMethod;
 import org.appwork.utils.net.httpserver.HttpConnection;
+import org.appwork.utils.net.httpserver.HttpConnection.HttpConnectionType;
 
 public class PutRequest extends PostRequest {
     /**
@@ -44,13 +45,13 @@ public class PutRequest extends PostRequest {
         super(connection);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.appwork.utils.net.httpserver.requests.PostRequest#getRequestMethod()
-     */
     @Override
     protected RequestMethod getRequestMethod() {
-        return RequestMethod.DELETE;
+        return RequestMethod.PUT;
+    }
+
+    @Override
+    public HttpConnectionType getHttpConnectionType() {
+        return HttpConnectionType.PUT;
     }
 }

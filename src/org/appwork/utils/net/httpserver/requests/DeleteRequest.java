@@ -50,11 +50,6 @@ public class DeleteRequest extends PostRequest {
         return HttpConnectionType.DELETE;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.appwork.utils.net.httpserver.requests.PostRequest#getRequestMethod()
-     */
     @Override
     protected RequestMethod getRequestMethod() {
         return RequestMethod.DELETE;

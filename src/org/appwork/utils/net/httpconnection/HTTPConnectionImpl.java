@@ -1268,7 +1268,7 @@ public class HTTPConnectionImpl implements HTTPConnection {
                     sb.append("Connection-Time: keep-Alive\r\n");
                 }
                 final long lrequestTime = getRequestTime();
-                sb.append("Request-Time: ").append(Math.min(0, lrequestTime) + "ms").append("\r\n");
+                sb.append("Request-Time: ").append(Math.max(0, lrequestTime) + "ms").append("\r\n");
                 sb.append("----------------Response------------------------\r\n");
                 this.connectInputStream();
                 sb.append(this.httpHeader).append("\r\n");

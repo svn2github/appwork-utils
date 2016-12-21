@@ -43,6 +43,7 @@ import java.util.regex.Pattern;
 import org.appwork.exceptions.WTFException;
 import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
+import org.appwork.utils.logging2.extmanager.LoggerFactory;
 
 /**
  * @author daniel
@@ -143,7 +144,6 @@ public class URLHelper {
 
     public static URL createURL(final String url) throws MalformedURLException {
         final URL tmp = new URL(url.trim().replaceAll(" ", "%20"));
-        final String newURL;
         if (tmp.getPath() != null && tmp.getQuery() == null && tmp.getPath().matches(".*(\\&(?!amp;)).*")) {
             final Pattern search = Pattern.compile(".*?\\&(?!amp;)");
             final Matcher matcher = search.matcher(tmp.getPath());
@@ -151,13 +151,14 @@ public class URLHelper {
                 final int index = matcher.end();
                 final String newPath = tmp.getPath().substring(0, index - 1);
                 final String newQuery = tmp.getPath().substring(index);
-                newURL = createURL(tmp.getProtocol(), tmp.getUserInfo(), tmp.getHost(), tmp.getPort(), newPath, newQuery, tmp.getRef());
-            } else {
-                newURL = createURL(tmp.getProtocol(), tmp.getUserInfo(), tmp.getHost(), tmp.getPort(), tmp.getPath(), tmp.getQuery(), tmp.getRef());
+                if (newQuery.matches("^[a-zA-Z0-9%]+=.*?")) {
+                    final String newURL = createURL(tmp.getProtocol(), tmp.getUserInfo(), tmp.getHost(), tmp.getPort(), newPath, newQuery, tmp.getRef());
+                    LoggerFactory.getDefaultLogger().info("Apply auto fix '&->?'|" + url + "|" + newURL);
+                    return new URL(newURL);
+                }
             }
-        } else {
-            newURL = createURL(tmp.getProtocol(), tmp.getUserInfo(), tmp.getHost(), tmp.getPort(), tmp.getPath(), tmp.getQuery(), tmp.getRef());
         }
+        final String newURL = createURL(tmp.getProtocol(), tmp.getUserInfo(), tmp.getHost(), tmp.getPort(), tmp.getPath(), tmp.getQuery(), tmp.getRef());
         return new URL(newURL);
     }
 

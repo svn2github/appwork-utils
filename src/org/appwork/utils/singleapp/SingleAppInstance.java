@@ -78,7 +78,7 @@ public class SingleAppInstance {
 
     private final String            appID;
     private InstanceMessageListener listener      = null;
-    private File                    lockFile      = null;
+    private final File              lockFile;
     private FileLock                fileLock      = null;
     private FileChannel             lockChannel   = null;
     private volatile boolean        daemonRunning = false;
@@ -87,7 +87,7 @@ public class SingleAppInstance {
     private final String            singleApp     = "SingleAppInstance";
     private Thread                  daemon        = null;
     private static final int        DEFAULTPORT   = 9665;
-    private File                    portFile      = null;
+    private final File              portFile;
 
     public SingleAppInstance(final String appID) {
         this(appID, new File(Application.getHome()));
@@ -103,8 +103,7 @@ public class SingleAppInstance {
 
     private synchronized void cannotStart(final String cause) throws UncheckableInstanceException {
         this.alreadyUsed = true;
-        this.lockChannel = null;
-        this.fileLock = null;
+        closeLock();
         throw new UncheckableInstanceException(cause);
     }
 
@@ -117,37 +116,46 @@ public class SingleAppInstance {
                 this.daemon.interrupt();
             }
             try {
-                try {
-                    if (fileLock != null) {
-                        this.fileLock.release();
-                    }
-                } catch (final IOException e) {
-                }
-                try {
-                    if (lockChannel != null) {
-                        this.lockChannel.close();
-                    }
-                } catch (final IOException e) {
-                }
-                try {
-                    if (serverSocket != null) {
-                        serverSocket.close();
-                    }
-                } catch (IOException e) {
-                }
+                closeServer();
+                closeLock();
             } finally {
-                this.lockChannel = null;
-                this.fileLock = null;
                 this.lockFile.delete();
                 this.portFile.delete();
             }
         }
     }
 
+    private synchronized void closeServer() {
+        if (serverSocket != null) {
+            try {
+                serverSocket.close();
+            } catch (Throwable ignore) {
+            }
+        }
+    }
+
+    private synchronized void closeLock() {
+        if (fileLock != null) {
+            try {
+                fileLock.close();
+            } catch (Throwable ignore) {
+            } finally {
+                this.fileLock = null;
+            }
+        }
+        if (lockChannel != null) {
+            try {
+                lockChannel.close();
+            } catch (Throwable ignore) {
+            } finally {
+                this.lockChannel = null;
+            }
+        }
+    }
+
     private synchronized void foundRunningInstance() throws AnotherInstanceRunningException {
         this.alreadyUsed = true;
-        this.lockChannel = null;
-        this.fileLock = null;
+        closeLock();
         throw new AnotherInstanceRunningException(this.appID);
     }
 
@@ -327,9 +335,11 @@ public class SingleAppInstance {
             } catch (final Throwable t) {
                 /* network communication not possible */
             } finally {
-                try {
-                    portWriter.close();
-                } catch (final Throwable t) {
+                if (portWriter != null) {
+                    try {
+                        portWriter.close();
+                    } catch (final Throwable t) {
+                    }
                 }
             }
             this.cannotStart("could not create instance!");

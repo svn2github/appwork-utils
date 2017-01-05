@@ -50,9 +50,7 @@ import org.appwork.utils.os.CrossSystem;
 
 public class Files {
     public static abstract class AbstractHandler<T extends Exception> implements Handler<T> {
-
         public void intro(final File f) {
-
         }
 
         /**
@@ -62,12 +60,10 @@ public class Files {
         abstract public void onFile(File f) throws T;
 
         public void outro(final File f) {
-
         }
     }
 
     public static interface Handler<T extends Exception> {
-
         public void intro(File f) throws T;
 
         /**
@@ -77,7 +73,6 @@ public class Files {
         public void onFile(File f) throws T;
 
         public void outro(File f) throws T;
-
     }
 
     /**
@@ -112,7 +107,6 @@ public class Files {
         if (file.exists() && !fd && breakOnError) {
             throw new IOException("Could not delete " + file);
         }
-
     }
 
     public static LinkedList<String> getDirectories_NonRecursive(final File startDirectory, final boolean includeStart) throws IOException {
@@ -173,7 +167,7 @@ public class Files {
     }
 
     /**
-     * Returns the fileextension for a file with the given name
+     * Returns the fileextension(without dot) for a file with the given name
      *
      * @see #getFileNameWithoutExtension(String)
      * @param name
@@ -196,7 +190,6 @@ public class Files {
      * @return
      */
     public static String getFileNameWithoutExtension(final String filename) {
-
         final int index = filename.lastIndexOf(".");
         if (index < 0) {
             return filename;
@@ -213,7 +206,6 @@ public class Files {
      */
     public static java.util.List<File> getFiles(final boolean includeDirectories, final boolean includeFiles, final File... files) {
         return Files.getFiles(new FileFilter() {
-
             @Override
             public boolean accept(final File pathname) {
                 if (includeDirectories && pathname.isDirectory()) {
@@ -244,9 +236,7 @@ public class Files {
                 if (filter == null || filter.accept(f)) {
                     ret.add(f);
                 }
-
                 if (f.isDirectory()) {
-
                     ret.addAll(Files.getFiles(filter, f.listFiles()));
                 }
             }
@@ -284,7 +274,6 @@ public class Files {
     }
 
     public static String getRelativePath(String root, final String file) {
-
         final String rootPath, filePath;
         if (CrossSystem.isWindows() || CrossSystem.isOS2()) {
             root = root.replace("/", "\\");
@@ -312,7 +301,6 @@ public class Files {
         if (rootPath.equals(filePath)) {
             return "/";
         }
-
         if (CrossSystem.isWindows() || CrossSystem.isOS2()) {
             return file.substring(rootPath.length()).replace("\\", "/");
         } else {
@@ -324,7 +312,6 @@ public class Files {
         if (!f.exists()) {
             return;
         }
-
         if (!handler.onFile(f, depths)) {
             return;
         }
@@ -354,7 +341,6 @@ public class Files {
             }
         }
         handler.onFile(f);
-
     }
 
     public static <T extends Exception> void walkThroughStructure(final FileHandler<T> handler, final File f) throws T {
@@ -364,18 +350,15 @@ public class Files {
         } finally {
             handler.outro(f);
         }
-
     }
 
     public static <T extends Exception> void walkThroughStructure(final Handler<T> handler, final File f) throws T {
         handler.intro(f);
         try {
             Files.internalWalkThroughStructure(new FileHandler<T>() {
-
                 @Override
                 public void intro(File f) throws T {
                     // handler.intro(f);
-
                 }
 
                 @Override
@@ -387,13 +370,11 @@ public class Files {
                 @Override
                 public void outro(File f) throws T {
                     // handler.outro(f);
-
                 }
             }, f, 0);
         } finally {
             handler.outro(f);
         }
-
     }
 
     public static <T extends Exception> void walkThroughStructureReverse(final Handler<T> handler, final File f) throws T {
@@ -403,7 +384,6 @@ public class Files {
         } finally {
             handler.outro(f);
         }
-
     }
 
     /**
@@ -427,7 +407,6 @@ public class Files {
                     nameA = filesA.get(i).getName().toLowerCase(Locale.ENGLISH);
                     nameB = filesB.get(i).getName().toLowerCase(Locale.ENGLISH);
                 }
-
             } else {
                 if (i == 0) {
                     nameA = filesA.get(i).getPath();
@@ -436,7 +415,6 @@ public class Files {
                     nameA = filesA.get(i).getName();
                     nameB = filesB.get(i).getName();
                 }
-
             }
             if (!nameA.equals(nameB)) {
                 break;
@@ -464,5 +442,4 @@ public class Files {
             a = aTmp;
         }
     }
-
 }

@@ -87,7 +87,7 @@ public class HTTPConnectionImpl implements HTTPConnection {
         /**
          * KEEP-ALIVE is enabled for GET/HEAD/OPTIONS/DELETE
          */
-        ENABLED_INTERNAL,
+        /* ENABLED_INTERNAL, */
         /**
          * KEEP-ALIVE is enabled, caller must handle HTTPKeepAliveSocketException
          */
@@ -183,11 +183,11 @@ public class HTTPConnectionImpl implements HTTPConnection {
     protected static final WeakHashMap<SocketStreamInterface, HTTPKeepAliveSocket> KEEPALIVESOCKETS      = new WeakHashMap<SocketStreamInterface, HTTPKeepAliveSocket>();
     protected static final Object                                                  LOCK                  = new Object();
     protected static final DelayedRunnable                                         KEEPALIVECLEANUPTIMER = new DelayedRunnable(10000, 30000) {
-        @Override
-        public void delayedrun() {
-            cleanupKeepAlivePools();
-        }
-    };
+                                                                                                             @Override
+                                                                                                             public void delayedrun() {
+                                                                                                                 cleanupKeepAlivePools();
+                                                                                                             }
+                                                                                                         };
 
     private static final void cleanupKeepAlivePools() {
         synchronized (HTTPConnectionImpl.LOCK) {

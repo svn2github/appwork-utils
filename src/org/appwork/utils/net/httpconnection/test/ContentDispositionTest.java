@@ -45,14 +45,14 @@ import org.appwork.utils.net.httpconnection.HTTPConnectionUtils;
  *
  */
 public class ContentDispositionTest {
-
     /**
      * http://greenbytes.de/tech/tc2231/
      */
     public static void main(String[] args) {
         Application.setApplication(".test");
         final ArrayList<String[]> tests = new ArrayList<String[]>();
-
+        tests.add(new String[] { "attachment;", null });
+        tests.add(new String[] { "attachment", null });
         tests.add(new String[] { "filename=test.zip", "test.zip" });
         tests.add(new String[] { "filename ='test.zip'", "test.zip" });
         tests.add(new String[] { "filename= test.zip", "test.zip" });
@@ -60,7 +60,6 @@ public class ContentDispositionTest {
         tests.add(new String[] { ";filename =test.zip", "test.zip" });
         tests.add(new String[] { "filename= test.zip", "test.zip" });
         tests.add(new String[] { "attachment; filename=\"=?UTF-8?B?UHLDvGZzdW1tZW4uc2hhMQ==?=\"", "Prüfsummen.sha1" });
-
         tests.add(new String[] { "attachment;filename*=UTF-8''Test%20Test%20%282008%29.rar;filename=\"Test Test (2008).rar\"; ", "Test Test (2008).rar" });
         tests.add(new String[] { "attachment;filename*=UTF-8''TEST (2015).rar;filename=\"TEST (2015).rar\";", "TEST (2015).rar" });
         tests.add(new String[] { "attachment; filename==?UTF-8?B?dGVzdC56aXA=?=", "test.zip" });
@@ -87,23 +86,17 @@ public class ContentDispositionTest {
         tests.add(new String[] { "attachment; xfilename=foo.html", null });
         tests.add(new String[] { "attachment; filename=\"/foo.html\"", "/foo.html" });
         tests.add(new String[] { "attachment; filename=\"\\\\foo.html\"", "_foo.html" });
-
         tests.add(new String[] { "attachment; filename*=UTF-8''foo-a%cc%88.html; creation-date=\"Thu, 27 Nov 2014 10:17:31 +0000\"; modification-date=\"Thu, 27 Nov 2014 10:17:31 +0000\"", "foo-ä.html" });
-
         tests.add(new String[] { "attachment; filename*=iso-8859-1''foo-%E4.html", "foo-ä.html" });
         tests.add(new String[] { "attachment; filename*=UTF-8''foo-%c3%a4-%e2%82%ac.html", "foo-ä-€.html" });
         tests.add(new String[] { "attachment; filename*=''foo-%c3%a4-%e2%82%ac.html", null });
         tests.add(new String[] { "attachment; filename*=UTF-8''foo-a%cc%88.html", "foo-ä.html" });
-
         tests.add(new String[] { "attachment; filename*= UTF-8''foo-%c3%a4.html", "foo-ä.html" });
         tests.add(new String[] { "attachment; filename* =UTF-8''foo-%c3%a4.html", "foo-ä.html" });
-
         tests.add(new String[] { "attachment; filename*=UTF-8''A-%2541.html", "A-%41.html" });
         tests.add(new String[] { "attachment; filename*=UTF-8''%5cfoo.html", "_foo.html" });
-
         tests.add(new String[] { "attachment; filename=\"foo-ae.html\"; filename*=UTF-8''foo-%c3%a4.html", "foo-ä.html" });
         tests.add(new String[] { "attachment; filename*=UTF-8''foo-%c3%a4.html; filename=\"foo-ae.html\"", "foo-ä.html" });
-
         for (String test[] : tests) {
             final String result = HTTPConnectionUtils.getFileNameFromDispositionHeader(test[0]);
             if (!StringUtils.equals(result, test[1])) {

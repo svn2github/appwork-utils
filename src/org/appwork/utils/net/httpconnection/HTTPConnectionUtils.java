@@ -47,13 +47,15 @@ import org.appwork.utils.StringUtils;
 import org.appwork.utils.encoding.Base64;
 
 public class HTTPConnectionUtils {
-
     public final static byte R = (byte) 13;
     public final static byte N = (byte) 10;
 
     public static String getFileNameFromDispositionHeader(final String contentdisposition) {
         // http://greenbytes.de/tech/tc2231/
         if (!StringUtils.isEmpty(contentdisposition)) {
+            if (contentdisposition.matches("^\\s*attachment;?\\s*$")) {
+                return null;
+            }
             if (contentdisposition.matches("(?i).*(;| |^)filename\\*.+")) {
                 /* RFC2231 */
                 final String encoding = new Regex(contentdisposition, "(?:;| |^)filename\\*\\s*=\\s*(.+?)''").getMatch(0);
@@ -122,7 +124,6 @@ public class HTTPConnectionUtils {
         ByteBuffer bigbuffer = ByteBuffer.wrap(new byte[4096]);
         final byte[] minibuffer = new byte[1];
         int position;
-
         while (in.read(minibuffer) >= 0) {
             if (bigbuffer.remaining() < 1) {
                 final ByteBuffer newbuffer = ByteBuffer.wrap(new byte[bigbuffer.capacity() * 2]);
@@ -165,7 +166,6 @@ public class HTTPConnectionUtils {
                 }
             }
         }
-
         bigbuffer.flip();
         return bigbuffer;
     }

@@ -35,7 +35,6 @@ package org.appwork.swing.exttable.columns;
 
 import java.awt.Graphics;
 import java.text.DecimalFormat;
-import java.text.FieldPosition;
 
 import javax.swing.JComponent;
 import javax.swing.SwingConstants;
@@ -46,13 +45,11 @@ import org.appwork.swing.exttable.ExtTableModel;
 import org.appwork.utils.swing.renderer.RenderLabel;
 
 public abstract class ExtFileSizeColumn<E> extends ExtColumn<E> {
-
     /**
      *
      */
     private static final long     serialVersionUID = -5812486934156037376L;
     protected final RenderLabel   renderer;
-    private final StringBuffer    sb;
     protected final DecimalFormat formatter;
     protected final String        zeroString       = "~";
 
@@ -77,7 +74,6 @@ public abstract class ExtFileSizeColumn<E> extends ExtColumn<E> {
 
             @Override
             public boolean isVisible() {
-
                 return false;
             }
         };
@@ -99,30 +95,18 @@ public abstract class ExtFileSizeColumn<E> extends ExtColumn<E> {
                     return s1 < s2 ? -1 : 1;
                 }
             }
-
         });
-
-        this.sb = new StringBuffer();
-
         this.formatter = new DecimalFormat("0.00") {
-
             /**
              *
              */
             private static final long serialVersionUID = 1L;
-
-            @Override
-            public StringBuffer format(final double number, final StringBuffer result, final FieldPosition pos) {
-                ExtFileSizeColumn.this.sb.setLength(0);
-                return super.format(number, ExtFileSizeColumn.this.sb, pos);
-            }
         };
     }
 
     @Override
     public void configureEditorComponent(final E value, final boolean isSelected, final int row, final int column) {
         // TODO Auto-generated method stub
-
     }
 
     @Override
@@ -133,7 +117,6 @@ public abstract class ExtFileSizeColumn<E> extends ExtColumn<E> {
         } else {
             this.renderer.setText(this.getSizeString(sizeValue));
         }
-
     }
 
     abstract protected long getBytes(E o2);
@@ -196,7 +179,6 @@ public abstract class ExtFileSizeColumn<E> extends ExtColumn<E> {
         } else {
             return this.getSizeString(sizeValue);
         }
-
     }
 
     @Override
@@ -217,18 +199,14 @@ public abstract class ExtFileSizeColumn<E> extends ExtColumn<E> {
     @Override
     public void resetEditor() {
         // TODO Auto-generated method stub
-
     }
 
     @Override
     public void resetRenderer() {
-
         this.renderer.setBorder(ExtColumn.DEFAULT_BORDER);
-
     }
 
     @Override
     public void setValue(final Object value, final E object) {
-
     }
 }

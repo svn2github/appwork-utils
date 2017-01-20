@@ -61,12 +61,19 @@ public class DesktopSupportLinux implements DesktopSupport {
     private final String[]                  customFile;
     private final String[]                  customBrowse;
     private final WINDOW_MANAGER            windowManager;
+    private final boolean                   waylandDetected;
+
+    public boolean isWayland() {
+        return waylandDetected;
+    }
 
     public DesktopSupportLinux() {
         /* java vm property */
         final String sunDesktop = System.getProperty("sun.desktop");
         /* see http://standards.freedesktop.org/menu-spec/latest/apb.html */
         final String XDG_CURRENT_DESKTOP = System.getenv("XDG_CURRENT_DESKTOP");
+        final String XDG_SESSION_TYPE = System.getenv("XDG_SESSION_TYPE");
+        final String WAYLAND_DISPLAY = System.getenv("WAYLAND_DISPLAY");
         final String GNOME_DESKTOP_SESSION_ID = System.getenv("GNOME_DESKTOP_SESSION_ID");
         /* returns true in case we have running KDE */
         final String KDE_FULL_SESSION = System.getenv("KDE_FULL_SESSION");
@@ -75,6 +82,12 @@ public class DesktopSupportLinux implements DesktopSupport {
         final String GDMSESSION = System.getenv("GDMSESSION");
         final String DESKTOP_SESSION = System.getenv("DESKTOP_SESSION");
         final String[] openCommand;
+        if ("wayland".equals(XDG_SESSION_TYPE) || (WAYLAND_DISPLAY != null && WAYLAND_DISPLAY.contains("wayland"))) {
+            System.out.println("Wayland detected");
+            waylandDetected = true;
+        } else {
+            this.waylandDetected = false;
+        }
         if ("Unity".equals(XDG_CURRENT_DESKTOP) || "ubuntu".equals(GDMSESSION) || "ubuntu-2d".equals(GDMSESSION)) {
             if ("ubuntu-2d".equals(GDMSESSION)) {
                 System.out.println("Unity-2D Desktop detected");
@@ -83,7 +96,7 @@ public class DesktopSupportLinux implements DesktopSupport {
             }
             this.windowManager = WINDOW_MANAGER.UNITY;
             openCommand = new String[] { "gnome-open", "%s" };
-        } else if ("GNOME".equalsIgnoreCase(XDG_CURRENT_DESKTOP) || StringUtils.isNotEmpty(GNOME_DESKTOP_SESSION_ID) || "GNOME".equalsIgnoreCase(GDMSESSION) || "gnome-shell".equals(GDMSESSION) || "gnome-classic".equals(GDMSESSION) || "gnome-fallback".equals(GDMSESSION) || "cinnamon".equals(GDMSESSION)) {
+        } else if ("GNOME".equalsIgnoreCase(XDG_CURRENT_DESKTOP) || (StringUtils.isNotEmpty(GNOME_DESKTOP_SESSION_ID) && !"this-is-deprecated".equals(GNOME_DESKTOP_SESSION_ID)) || "GNOME".equalsIgnoreCase(GDMSESSION) || "gnome-shell".equals(GDMSESSION) || "gnome-classic".equals(GDMSESSION) || "gnome-fallback".equals(GDMSESSION) || "cinnamon".equals(GDMSESSION)) {
             System.out.println("Gnome Desktop detected");
             this.windowManager = WINDOW_MANAGER.GNOME;
             openCommand = new String[] { "gnome-open", "%s" };
@@ -284,7 +297,7 @@ public class DesktopSupportLinux implements DesktopSupport {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.utils.os.DesktopSupport#getDefaultDownloadDirectory()
      */
     @Override

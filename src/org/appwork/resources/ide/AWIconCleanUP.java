@@ -96,7 +96,9 @@ public class AWIconCleanUP {
             if (!CrossSystem.caseSensitiveFileExists(png) && !CrossSystem.caseSensitiveFileExists(svg)) {
                 System.err.println("Missing: " + png + " " + clsMap.get(icon));
             }
+            System.out.println("Expected icons: " + icon);
         }
+        ;
         org.appwork.utils.Files.walkThroughStructure(new FileHandler<RuntimeException>() {
             @Override
             public void intro(File f) throws RuntimeException {

@@ -44,6 +44,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.zip.Deflater;
+import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPOutputStream;
 
 import org.appwork.exceptions.WTFException;
@@ -61,6 +63,7 @@ import org.appwork.remoteapi.exceptions.InternalApiException;
 import org.appwork.remoteapi.responsewrapper.DataObject;
 import org.appwork.storage.JSonStorage;
 import org.appwork.storage.TypeRef;
+import org.appwork.utils.Application;
 import org.appwork.utils.Regex;
 import org.appwork.utils.logging2.extmanager.LoggerFactory;
 import org.appwork.utils.net.ChunkedOutputStream;
@@ -249,7 +252,7 @@ public class RemoteAPI implements HttpRequestHandler {
         };
     }
 
-    public static boolean gzip(final RemoteAPIRequest request) {
+    public static boolean gzip(final HttpRequest request) {
         final HTTPHeader acceptEncoding = request.getRequestHeaders().get(HTTPConstants.HEADER_REQUEST_ACCEPT_ENCODING);
         if (acceptEncoding != null) {
             final String value = acceptEncoding.getValue();
@@ -258,6 +261,10 @@ public class RemoteAPI implements HttpRequestHandler {
             }
         }
         return false;
+    }
+
+    public static boolean gzip(final RemoteAPIRequest request) {
+        return gzip(request.getHttpRequest());
     }
 
     /* hashmap that holds all registered interfaces and their paths */
@@ -365,6 +372,7 @@ public class RemoteAPI implements HttpRequestHandler {
     }
 
     public RemoteAPIRequest createRemoteAPIRequestObject(final HttpRequest request) throws BasicRemoteAPIException {
+        Object preData = prepareRawRequest(request);
         this.validateRequest(request);
         final RemoteAPIMethod remoteAPIMethod = this.getRemoteAPIMethod(request);
         if (remoteAPIMethod == null) {
@@ -422,7 +430,7 @@ public class RemoteAPI implements HttpRequestHandler {
         // }
         RemoteAPIRequest ret;
         try {
-            ret = this.createRemoteAPIRequestObject(request, remoteAPIMethod.getMethodName(), remoteAPIMethod.getInterfaceHandler(), parameters, jqueryCallback);
+            ret = this.createRemoteAPIRequestObject(request, preData, remoteAPIMethod.getMethodName(), remoteAPIMethod.getInterfaceHandler(), parameters, jqueryCallback);
         } catch (final IOException e) {
             throw new BasicRemoteAPIException(e);
         }
@@ -430,7 +438,16 @@ public class RemoteAPI implements HttpRequestHandler {
         return ret;
     }
 
-    protected RemoteAPIRequest createRemoteAPIRequestObject(final HttpRequest request, final String method, final InterfaceHandler<?> interfaceHandler, final java.util.List<String> parameters, final String jqueryCallback) throws IOException, ApiCommandNotAvailable {
+    /**
+     * @param request
+     * @return
+     */
+    protected Object prepareRawRequest(HttpRequest request) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    protected RemoteAPIRequest createRemoteAPIRequestObject(final HttpRequest request, Object extractedData, final String method, final InterfaceHandler<?> interfaceHandler, final java.util.List<String> parameters, final String jqueryCallback) throws IOException, ApiCommandNotAvailable {
         return new RemoteAPIRequest(interfaceHandler, method, parameters.toArray(new String[] {}), request, jqueryCallback);
     }
 
@@ -440,16 +457,22 @@ public class RemoteAPI implements HttpRequestHandler {
 
     public RemoteAPIMethod getRemoteAPIMethod(final HttpRequest request) throws BasicRemoteAPIException {
         final String path = request.getRequestedPath();
-        final String[] intf = new Regex(path, RemoteAPI.INTF).getRow(0);
+        String[] intf = new Regex(path, RemoteAPI.INTF).getRow(0);
         if (intf == null || intf.length != 3) {
-            return null;
+            if ("/".equals(path)) {
+                // special handling. method "" in root
+                intf = new String[] { "", "", "" };
+            } else {
+                return null;
+            }
         }
         /* intf=unimportant,namespace,method */
         if (intf[2] != null && intf[2].endsWith("/")) {
             /* special handling for commands without name */
             /**
-             * Explanation: this is for special handling of this http://localhost/test -->this is method test in root http://localhost/test/
-             * --> this is method without name in namespace test
+             * Explanation: this is for special handling of <br>
+             * http://localhost/test --> this is method test in root <br>
+             * http://localhost/test/ --> this is method without name in namespace test
              */
             intf[1] = intf[2].substring(0, intf[2].length() - 1);
             intf[2] = "";
@@ -736,6 +759,38 @@ public class RemoteAPI implements HttpRequestHandler {
             internal.setRequest(request);
             internal.setResponse(response);
             throw internal;
+        }
+    }
+
+    /**
+     * @param request
+     * @param response
+     * @param bytes
+     * @throws InternalApiException
+     * @throws IOException
+     */
+    public static void sendBytesCompressed(HttpRequest request, HttpResponse response, byte[] bytes) throws IOException {
+        final boolean gzip = RemoteAPI.gzip(request);
+        final boolean deflate = RemoteAPI.gzip(request) && Application.getJavaVersion() >= Application.JAVA16;
+        if (gzip == false && deflate == false) {
+            response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_LENGTH, bytes.length + ""));
+            response.getOutputStream(true).write(bytes);
+        } else {
+            if (deflate) {
+                response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_ENCODING, "deflate"));
+                DeflaterOutputStream out = null;
+                out = new DeflaterOutputStream(response.getOutputStream(true), new Deflater(9, true), true);
+                out.write(bytes);
+                out.finish();
+                out.flush();
+            } else {
+                response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_ENCODING, "gzip"));
+                GZIPOutputStream out = null;
+                out = new GZIPOutputStream(response.getOutputStream(true));
+                out.write(bytes);
+                out.finish();
+                out.flush();
+            }
         }
     }
 }

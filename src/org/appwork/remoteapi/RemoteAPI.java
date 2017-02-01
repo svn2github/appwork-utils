@@ -92,6 +92,7 @@ public class RemoteAPI implements HttpRequestHandler {
             this.interfaceHandler = interfaceHandler;
             this.methodName = methodName;
         }
+
         //
         // protected void registerRootInterface() {
         // try {
@@ -105,7 +106,6 @@ public class RemoteAPI implements HttpRequestHandler {
         // public void help(RemoteAPIRequest request, RemoteAPIResponse response) {
         // // TODO Auto-generated method stub
         // }
-
         public final InterfaceHandler<?> getInterfaceHandler() {
             return this.interfaceHandler;
         }
@@ -175,17 +175,6 @@ public class RemoteAPI implements HttpRequestHandler {
         }
     }
 
-    public static boolean deflate(final RemoteAPIRequest request) {
-        final HTTPHeader acceptEncoding = request.getRequestHeaders().get(HTTPConstants.HEADER_REQUEST_ACCEPT_ENCODING);
-        if (acceptEncoding != null) {
-            final String value = acceptEncoding.getValue();
-            if (value != null && value.contains("deflate")) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     @Deprecated
     public static OutputStream getOutputStream(final RemoteAPIResponse response, final RemoteAPIRequest request, final boolean gzip, final boolean wrapJQuery) throws IOException {
         response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_REQUEST_CACHE_CONTROL, "no-store, no-cache"));
@@ -251,6 +240,21 @@ public class RemoteAPI implements HttpRequestHandler {
                 uos.write(b);
             }
         };
+    }
+
+    public static boolean deflate(final HttpRequest request) {
+        final HTTPHeader acceptEncoding = request.getRequestHeaders().get(HTTPConstants.HEADER_REQUEST_ACCEPT_ENCODING);
+        if (acceptEncoding != null) {
+            final String value = acceptEncoding.getValue();
+            if (value != null && value.contains("deflate")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean deflate(final RemoteAPIRequest request) {
+        return deflate(request.getHttpRequest());
     }
 
     public static boolean gzip(final HttpRequest request) {
@@ -665,8 +669,8 @@ public class RemoteAPI implements HttpRequestHandler {
                         }
                     }
                 }
-                clazz = clazz.getSuperclass();
-                this.interfaces = linterfaces;
+            clazz = clazz.getSuperclass();
+            this.interfaces = linterfaces;
             }
         }
     }
@@ -723,7 +727,7 @@ public class RemoteAPI implements HttpRequestHandler {
                         linterfaces.remove(namespace);
                     }
                 }
-                clazz = clazz.getSuperclass();
+            clazz = clazz.getSuperclass();
             }
             this.interfaces = linterfaces;
         }
@@ -772,7 +776,7 @@ public class RemoteAPI implements HttpRequestHandler {
      */
     public static void sendBytesCompressed(HttpRequest request, HttpResponse response, byte[] bytes) throws IOException {
         final boolean gzip = RemoteAPI.gzip(request);
-        final boolean deflate = RemoteAPI.gzip(request) && Application.getJavaVersion() >= Application.JAVA16;
+        final boolean deflate = RemoteAPI.deflate(request) && Application.getJavaVersion() >= Application.JAVA16;
         if (gzip == false && deflate == false) {
             response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_LENGTH, bytes.length + ""));
             response.getOutputStream(true).write(bytes);

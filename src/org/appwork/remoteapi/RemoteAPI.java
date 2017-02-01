@@ -805,12 +805,14 @@ public class RemoteAPI implements HttpRequestHandler {
                     response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_ENCODING, "deflate"));
                     DeflaterOutputStream out = null;
                     out = new DeflaterOutputStream(response.getOutputStream(true), new Deflater(9, true), true);
+                    out.write(bytes);
                     out.close();
                 } else {
                     response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING, HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING_CHUNKED));
                     response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_ENCODING, "gzip"));
                     GZIPOutputStream out = null;
                     out = new GZIPOutputStream(response.getOutputStream(true));
+                    out.write(bytes);
                     out.close();
                 }
             }

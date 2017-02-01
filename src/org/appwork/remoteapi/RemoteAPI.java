@@ -33,6 +33,7 @@
  * ==================================================================================================================================================== */
 package org.appwork.remoteapi;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
@@ -776,20 +777,42 @@ public class RemoteAPI implements HttpRequestHandler {
             response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_LENGTH, bytes.length + ""));
             response.getOutputStream(true).write(bytes);
         } else {
-            if (deflate) {
-                response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_ENCODING, "deflate"));
-                DeflaterOutputStream out = null;
-                out = new DeflaterOutputStream(response.getOutputStream(true), new Deflater(9, true), true);
-                out.write(bytes);
-                out.finish();
-                out.flush();
+            if (bytes.length < 1 * 1024 * 1024) {
+                // compress small in memory
+                if (deflate) {
+                    response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_ENCODING, "deflate"));
+                    DeflaterOutputStream out = null;
+                    ByteArrayOutputStream bao;
+                    out = new DeflaterOutputStream(bao = new ByteArrayOutputStream(), new Deflater(9, true), true);
+                    out.write(bytes);
+                    out.close();
+                    response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_LENGTH, bao.size() + ""));
+                    bao.writeTo(response.getOutputStream(true));
+                } else {
+                    response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_ENCODING, "gzip"));
+                    GZIPOutputStream out = null;
+                    ByteArrayOutputStream bao;
+                    out = new GZIPOutputStream(bao = new ByteArrayOutputStream());
+                    out.write(bytes);
+                    out.close();
+                    response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_LENGTH, bao.size() + ""));
+                    bao.writeTo(response.getOutputStream(true));
+                }
             } else {
-                response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_ENCODING, "gzip"));
-                GZIPOutputStream out = null;
-                out = new GZIPOutputStream(response.getOutputStream(true));
-                out.write(bytes);
-                out.finish();
-                out.flush();
+                // stream bigger files and setencoding to chunked (no length header)
+                if (deflate) {
+                    response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING, HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING_CHUNKED));
+                    response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_ENCODING, "deflate"));
+                    DeflaterOutputStream out = null;
+                    out = new DeflaterOutputStream(response.getOutputStream(true), new Deflater(9, true), true);
+                    out.close();
+                } else {
+                    response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING, HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING_CHUNKED));
+                    response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_ENCODING, "gzip"));
+                    GZIPOutputStream out = null;
+                    out = new GZIPOutputStream(response.getOutputStream(true));
+                    out.close();
+                }
             }
         }
     }

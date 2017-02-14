@@ -1,7 +1,5 @@
 package org.appwork.utils;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class UniqueAlltimeID {
@@ -82,15 +80,5 @@ public class UniqueAlltimeID {
 
     public static String create() {
         return Long.toString(createUniqueAlltimeID());
-    }
-
-    public static Set<? extends UniqueAlltimeID> createSet(long... ids) {
-        final Set<UniqueAlltimeID> ret = new HashSet<UniqueAlltimeID>();
-        if (ids != null) {
-            for (final long id : ids) {
-                ret.add(new UniqueAlltimeID(id));
-            }
-        }
-        return ret;
     }
 }

@@ -489,10 +489,7 @@ public class RemoteAPI implements HttpRequestHandler {
         String methodName = intf[2];
         if (isHelpRequest(methodName)) {
             try {
-                if (helpBuilder == null) {
-                    helpBuilder = createHelpBuilder(request, namespace);
-                }
-                return new HelpMethod(helpBuilder);
+                return new HelpMethod(getHelpBuilder());
             } catch (Throwable e) {
                 throw new WTFException(e);
             }
@@ -504,8 +501,23 @@ public class RemoteAPI implements HttpRequestHandler {
         return null;
     }
 
-    protected DefaultDocsPageFactory createHelpBuilder(final HttpRequest request, String namespace) throws NoSuchMethodException {
-        DefaultDocsPageFactory helpBuilder = new DefaultDocsPageFactory(this, namespace, request);
+    /**
+     * @return
+     * @throws NoSuchMethodException
+     */
+    public synchronized DefaultDocsPageFactory getHelpBuilder() {
+        try {
+            if (helpBuilder == null) {
+                helpBuilder = createHelpBuilder();
+            }
+            return helpBuilder;
+        } catch (NoSuchMethodException e) {
+            throw new WTFException(e);
+        }
+    }
+
+    protected DefaultDocsPageFactory createHelpBuilder() throws NoSuchMethodException {
+        DefaultDocsPageFactory helpBuilder = new DefaultDocsPageFactory(this);
         return helpBuilder;
     }
 

@@ -33,22 +33,20 @@
  * ==================================================================================================================================================== */
 package org.appwork.remoteapi.exceptions;
 
-/**
- * @author Thomas
- *
- */
-public class AuthException extends RemoteAPIException {
-    /**
-     * @param errorForbidden
-     */
-    public AuthException() {
-        super(RemoteAPIError.AUTH_FAILED);
-    }
+import org.appwork.net.protocol.http.HTTPConstants.ResponseCode;
 
-    /**
-     * @param authErrorSessionMissing
-     */
-    public AuthException(String authErrorSessionMissing) {
-        super(RemoteAPIError.AUTH_FAILED, authErrorSessionMissing);
+public class CaptchaException extends RemoteAPIException {
+    public CaptchaException(String translation) {
+        super(new APIError() {
+            @Override
+            public String name() {
+                return CaptchaException.class.getSimpleName();
+            }
+
+            @Override
+            public ResponseCode getCode() {
+                return ResponseCode.ERROR_UNAUTHORIZED;
+            }
+        }, translation);
     }
 }

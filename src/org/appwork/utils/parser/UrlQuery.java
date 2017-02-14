@@ -74,13 +74,18 @@ public class UrlQuery {
             if (ret.length() > 0) {
                 ret.append("&");
             }
-            ret.append(s.getKey()).append("=").append(s.getValue());
+            if (s.getKey() == null) {
+                ret.append(s.getValue());
+            } else {
+                ret.append(s.getKey()).append("=").append(s.getValue());
+            }
         }
         return ret.toString();
     }
 
-    public void add(String key, String value) {
+    public UrlQuery add(String key, String value) {
         this.list.add(new KeyValueStringEntry(key, value));
+        return this;
     }
 
     /**

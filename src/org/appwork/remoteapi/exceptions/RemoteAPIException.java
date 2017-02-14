@@ -62,9 +62,9 @@ public class RemoteAPIException extends BasicRemoteAPIException {
      * @param e
      * @return
      */
-    public static RemoteAPIException wrap(Throwable e) {
-        if (e instanceof RemoteAPIException) {
-            return (RemoteAPIException) e;
+    public static BasicRemoteAPIException wrap(Throwable e) {
+        if (e instanceof BasicRemoteAPIException) {
+            return (BasicRemoteAPIException) e;
         }
         return new RemoteAPIException(e, RemoteAPIError.INTERNAL_SERVER_ERROR);
     }

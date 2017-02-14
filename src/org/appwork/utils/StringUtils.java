@@ -33,10 +33,10 @@
  * ==================================================================================================================================================== */
 package org.appwork.utils;
 
+import java.util.List;
 import java.util.Locale;
 
 public class StringUtils {
-
     public static boolean contains(final String input, final String contains) {
         if (StringUtils.isEmpty(input) || StringUtils.isEmpty(contains)) {
             return false;
@@ -74,8 +74,8 @@ public class StringUtils {
      * taken from http://stackoverflow.com/questions/4731055/whitespace-matching-regex-java
      */
     final private static String whitespace_chars = "[" /*
-     * dummy empty string for homogeneity
-     */
+                                                        * dummy empty string for homogeneity
+                                                        */
             + "\\u0009" // CHARACTER
             // TABULATION
             + "\\u000A" // LINE
@@ -193,14 +193,11 @@ public class StringUtils {
         if (string.length() >= minCount) {
             return string;
         }
-
         final StringBuilder sb = new StringBuilder();
-
         sb.append(string);
         while (sb.length() < minCount) {
             sb.insert(0, filler);
         }
-
         return sb.toString();
     }
 
@@ -208,14 +205,11 @@ public class StringUtils {
         if (string.length() >= minCount) {
             return string;
         }
-
         final StringBuilder sb = new StringBuilder();
-
         sb.append(string);
         while (sb.length() < minCount) {
             sb.append(filler);
         }
-
         return sb.toString();
     }
 
@@ -285,4 +279,28 @@ public class StringUtils {
         }
     }
 
+    /**
+     * @param parameters
+     * @param string
+     * @return
+     */
+    public static String join(Object[] parameters, String separator) {
+        StringBuilder sb = new StringBuilder();
+        for (Object s : parameters) {
+            if (sb.length() > 0) {
+                sb.append(separator);
+            }
+            sb.append(String.valueOf(s));
+        }
+        return sb.toString();
+    }
+
+    /**
+     * @param signParams
+     * @param separator
+     * @return
+     */
+    public static String join(List<String> params, String separator) {
+        return join(params.toArray(new String[] {}), separator);
+    }
 }

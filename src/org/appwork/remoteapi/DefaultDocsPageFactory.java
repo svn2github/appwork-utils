@@ -71,20 +71,17 @@ import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.logging2.extmanager.LoggerFactory;
 import org.appwork.utils.net.HTTPHeader;
-import org.appwork.utils.net.httpserver.requests.HttpRequest;
 
 public class DefaultDocsPageFactory extends InterfaceHandler<Object> {
     final protected RemoteAPI        api;
-    final protected String           namespace;
     private Method                   help;
     private SoftReference<byte[]>    cachedBytes;
     private HashMap<Object, Integer> reservedAnchorIds;
     private HashSet<Object>          dupeCheck;
 
-    public DefaultDocsPageFactory(RemoteAPI api, String namespace, HttpRequest request) throws SecurityException, NoSuchMethodException {
+    public DefaultDocsPageFactory(RemoteAPI api) throws SecurityException, NoSuchMethodException {
         super();
         this.api = api;
-        this.namespace = namespace;
     }
 
     /**

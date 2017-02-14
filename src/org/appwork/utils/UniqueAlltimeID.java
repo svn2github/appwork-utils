@@ -84,7 +84,7 @@ public class UniqueAlltimeID {
         return Long.toString(createUniqueAlltimeID());
     }
 
-    public static Set<UniqueAlltimeID> createSet(long... ids) {
+    public static Set<? extends UniqueAlltimeID> createSet(long... ids) {
         final Set<UniqueAlltimeID> ret = new HashSet<UniqueAlltimeID>();
         if (ids != null) {
             for (final long id : ids) {

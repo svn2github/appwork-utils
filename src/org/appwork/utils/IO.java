@@ -117,11 +117,9 @@ public class IO {
                     //
                     // For a discussion about this see :
                     // http://forum.java.sun.com/thread.jspa?threadID=439695&messageID=2917510
-
                     final int maxCount = 64 * 1024 * 1024 - 32 * 1024;
                     final long size = inChannel.size();
                     long position = 0;
-
                     while (position < size) {
                         position += inChannel.transferTo(position, maxCount, outChannel);
                         if (progress != null) {
@@ -170,7 +168,6 @@ public class IO {
             if (IO.ERROR_HANDLER != null) {
                 IO.ERROR_HANDLER.onCopyException(e, in, out);
             }
-
             throw e;
         } catch (final RuntimeException e) {
             if (IO.ERROR_HANDLER != null) {
@@ -191,7 +188,6 @@ public class IO {
 
     public static void copyFolderRecursive(final File src, final File dest, final boolean overwriteFiles, final FileFilter filter, final SYNC sync) throws IOException {
         Files.walkThroughStructure(new AbstractHandler<IOException>() {
-
             @Override
             public void onFile(final File f) throws IOException {
                 if (filter != null && !filter.accept(f)) {
@@ -215,10 +211,8 @@ public class IO {
                     IO.copyFile(f, dst, sync);
                 }
                 return;
-
             }
         }, src);
-
     }
 
     /**
@@ -246,7 +240,6 @@ public class IO {
         UTF16LE(new byte[] { (byte) 255, (byte) 254 }, "UTF-16LE"),
         UTF32BE(new byte[] { (byte) 0, (byte) 0, (byte) 254, (byte) 255 }, "UTF-32BE"),
         UTF32LE(new byte[] { (byte) 0, (byte) 0, (byte) 255, (byte) 254 }, "UTF-32LE");
-
         private final byte[] bomMarker;
         private final String charSet;
 
@@ -320,7 +313,7 @@ public class IO {
             int retry = 0;
             while (true) {
                 try {
-                    return new RandomAccessFile(file, "rw");
+                    return new RandomAccessFile(file, mode);
                 } catch (final FileNotFoundException e) {
                     /**
                      * too fast file opening/extraction (eg image gallery) can result in "access denied" exception
@@ -342,7 +335,7 @@ public class IO {
                 }
             }
         } else {
-            return new RandomAccessFile(file, "rw");
+            return new RandomAccessFile(file, mode);
         }
     }
 
@@ -357,10 +350,9 @@ public class IO {
     /*
      * this function reads a line from a bufferedinputstream up to a maxLength. in case the line is longer than maxLength the rest of the
      * line is read but not returned
-     * 
+     *
      * this function skips emtpy lines
      */
-
     public static byte[] readFile(final File ressource, final int maxSize) throws IOException {
         FileInputStream fis = null;
         try {
@@ -403,18 +395,15 @@ public class IO {
                      * Workaround for this bug: http://bugs.sun.com/view_bug.do?bug_id=4508058
                      * http://bugs.sun.com/view_bug.do?bug_id=6378911
                      */
-
                     line = line.substring(1);
                 }
                 ret.append(line);
             }
-
             return ret.toString();
         } catch (final IOException e) {
             if (IO.ERROR_HANDLER != null) {
                 IO.ERROR_HANDLER.onReadStreamException(e, fis);
             }
-
             throw e;
         } catch (final RuntimeException e) {
             if (IO.ERROR_HANDLER != null) {
@@ -617,7 +606,6 @@ public class IO {
      */
     public static void secureWrite(final File file, final String utf8String, final SYNC sync) throws UnsupportedEncodingException, IOException {
         IO.secureWrite(file, utf8String.getBytes("UTF-8"), sync);
-
     }
 
     /**
@@ -652,7 +640,6 @@ public class IO {
             if (!file.canWrite()) {
                 throw new IllegalArgumentException("Cannot write to file: " + file);
             }
-
             FileOutputStream fos = null;
             Writer output = null;
             boolean deleteFile = true;
@@ -731,7 +718,6 @@ public class IO {
             if (!file.canWrite()) {
                 throw new IllegalArgumentException("Cannot write to file: " + file);
             }
-
             FileOutputStream out = null;
             boolean deleteFile = true;
             try {
@@ -767,7 +753,6 @@ public class IO {
             if (IO.ERROR_HANDLER != null) {
                 IO.ERROR_HANDLER.onWriteException(e, file, data);
             }
-
             throw e;
         } catch (final RuntimeException e) {
             if (IO.ERROR_HANDLER != null) {
@@ -781,5 +766,4 @@ public class IO {
             throw e;
         }
     }
-
 }

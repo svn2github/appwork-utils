@@ -7,7 +7,7 @@ public class UniqueAlltimeID {
     private long                    id;
 
     public UniqueAlltimeID() {
-        this.id = createUniqueAlltimeID();
+        this.id = next();
     }
 
     private static long createUniqueAlltimeID() {
@@ -75,10 +75,14 @@ public class UniqueAlltimeID {
      * WARNING: by manually refreshing the ID you can break unique state of this Instance!
      */
     public void refresh() {
-        this.setID(createUniqueAlltimeID());
+        this.setID(next());
     }
 
     public static String create() {
-        return Long.toString(createUniqueAlltimeID());
+        return Long.toString(next());
+    }
+
+    public static long next() {
+        return createUniqueAlltimeID();
     }
 }

@@ -455,4 +455,7 @@ public interface AWUTranslation extends TranslateInterface {
 
     @Default(lngs = { "en", "de" }, values = { "and", "und" })
     String lit_and();
+
+    @Default(lngs = { "en", "de" }, values = { "Debug- & Developer Menu", "Debug- & Entwicklermenü" })
+    String debug_menu();
 }

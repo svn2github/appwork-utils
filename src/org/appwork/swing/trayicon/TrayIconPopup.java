@@ -13,33 +13,30 @@
 //
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 package org.appwork.swing.trayicon;
 
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.PointerInfo;
+import java.awt.Window;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
 import javax.swing.JPopupMenu;
+import javax.swing.Popup;
 
+import org.appwork.utils.logging2.extmanager.LoggerFactory;
 import org.appwork.utils.swing.EDTHelper;
 import org.appwork.utils.swing.EDTRunner;
 
 public final class TrayIconPopup extends JPopupMenu implements MouseListener {
-
     private static final long serialVersionUID  = 2623190748929934409L;
-
     private boolean           enteredPopup;
-
     private boolean           hideThreadrunning = false;
-
     private transient Thread  hideThread;
 
     public void setVisible(boolean b) {
         super.setVisible(b);
-
         if (b) {
             startAutoHide();
         } else {
@@ -50,9 +47,7 @@ public final class TrayIconPopup extends JPopupMenu implements MouseListener {
     public TrayIconPopup() {
         super();
         setInvoker(this);
-
         addMouseListener(this);
-
     }
 
     /**
@@ -77,7 +72,6 @@ public final class TrayIconPopup extends JPopupMenu implements MouseListener {
                 }
             }
         }.start();
-
         hideThread = new Thread() {
             /*
              * this thread handles closing of popup because enter/exit/move events are too slow and can miss the exitevent
@@ -89,26 +83,44 @@ public final class TrayIconPopup extends JPopupMenu implements MouseListener {
                     } catch (InterruptedException e) {
                     }
                     new EDTRunner() {
-
                         @Override
                         protected void runInEDT() {
                             if (enteredPopup && hideThreadrunning) {
                                 PointerInfo mouse = MouseInfo.getPointerInfo();
                                 try {
                                     Point location = getLocationOnScreen();
-
+                                    Point mouseLocation = mouse.getLocation();
+                                    boolean activeFrame = false;
+                                    // find sub menus in the try icon
+                                    for (Window w : Window.getWindows()) {
+                                        try {
+                                            if (!w.isShowing()) {
+                                                continue;
+                                            }
+                                            String cls = w.getClass().getName();
+                                            if (cls.startsWith(Popup.class.getName())) {
+                                                boolean active = w.getBounds().contains(mouseLocation);
+                                                if (active) {
+                                                    activeFrame = true;
+                                                    break;
+                                                }
+                                            }
+                                        } catch (Throwable e) {
+                                            LoggerFactory.getDefaultLogger().log(e);
+                                        }
+                                    }
+                                    if (activeFrame) {
+                                        return;
+                                    }
                                     if (mouse.getLocation().x < location.x || mouse.getLocation().x > location.x + TrayIconPopup.this.getSize().width) {
                                         setVisible(false);
-
                                     } else if (mouse.getLocation().y < location.y || mouse.getLocation().y > location.y + TrayIconPopup.this.getSize().height) {
                                         setVisible(false);
-
                                     }
                                 } catch (Exception e) {
                                     setVisible(false);
                                 }
                             }
-
                         }
                     }.waitForEDT();
                 }
@@ -122,7 +134,6 @@ public final class TrayIconPopup extends JPopupMenu implements MouseListener {
     }
 
     public void mouseEntered(MouseEvent e) {
-
         enteredPopup = true;
     }
 
@@ -140,9 +151,7 @@ public final class TrayIconPopup extends JPopupMenu implements MouseListener {
     }
 
     public void show(int x, int y) {
-
         setLocation(x, y);
         setVisible(true);
     }
-
 }

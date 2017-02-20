@@ -29,6 +29,7 @@ import org.appwork.resources.IconRef;
 import org.appwork.scheduler.DelayedRunnable;
 import org.appwork.swing.action.BasicAction;
 import org.appwork.utils.images.IconIO;
+import org.appwork.utils.locale._AWU;
 import org.appwork.utils.os.CrossSystem;
 import org.appwork.utils.swing.EDTRunner;
 
@@ -37,7 +38,7 @@ public abstract class AbstractTray implements MouseListener, MouseMotionListener
     protected TrayIcon                                  trayIcon;
     private org.appwork.swing.trayicon.TrayMouseAdapter ma;
     private TrayIconPopup                               jpopup;
-    private BasicAction[]                               actions;
+    protected BasicAction[]                             actions;
     private DelayedRunnable                             doubleclickDelayer;
     private Runnable                                    runable;
 
@@ -216,7 +217,7 @@ public abstract class AbstractTray implements MouseListener, MouseMotionListener
         jpopup.add(header = new MenuHeaderWrapper(createMenuHeader(e)));
         header.setOpaque(false);
         header.setBackground(null);
-        createMenuNormal(jpopup);
+        createMenuNormal(e, jpopup);
         createMenuDebug(e, jpopup);
         return jpopup;
     }
@@ -229,7 +230,7 @@ public abstract class AbstractTray implements MouseListener, MouseMotionListener
             jpopup.add(new JSeparator());
             jpopup.add(new JSeparator());
             MenuHeader header = createMenuHeader(e);
-            header.getLabel().setText("Debug & Developer Menu");
+            header.getLabel().setText(_AWU.T.debug_menu());
             // header.getIcon().setIcon(null);
             jpopup.add(new MenuHeaderWrapper(header));
             jpopup.add(new JSeparator());
@@ -237,13 +238,17 @@ public abstract class AbstractTray implements MouseListener, MouseMotionListener
                 if (!Boolean.TRUE.equals(a.getValue("debug"))) {
                     continue;
                 }
-                JMenuItem m = createMenuItem(a);
-                jpopup.add(m);
+                addMenuEntry(jpopup, e, a);
             }
         }
     }
 
-    protected void createMenuNormal(TrayIconPopup jpopup) {
+    protected void addMenuEntry(final TrayIconPopup jpopup, MouseEvent e, BasicAction a) {
+        JMenuItem m = createMenuItem(a);
+        jpopup.add(m);
+    }
+
+    protected void createMenuNormal(MouseEvent e, TrayIconPopup jpopup) {
         for (BasicAction a : this.actions) {
             if (a == null) {
                 jpopup.add(new JSeparator());
@@ -252,8 +257,7 @@ public abstract class AbstractTray implements MouseListener, MouseMotionListener
             if (Boolean.TRUE.equals(a.getValue("debug"))) {
                 continue;
             }
-            JMenuItem m = createMenuItem(a);
-            jpopup.add(m);
+            addMenuEntry(jpopup, e, a);
         }
     }
 

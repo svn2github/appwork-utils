@@ -300,7 +300,7 @@ public class StringUtils {
      * @param separator
      * @return
      */
-    public static String join(List<String> params, String separator) {
-        return join(params.toArray(new String[] {}), separator);
+    public static String join(List<? extends Object> params, String separator) {
+        return join(params.toArray(new Object[] {}), separator);
     }
 }

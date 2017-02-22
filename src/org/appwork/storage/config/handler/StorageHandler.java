@@ -88,13 +88,12 @@ import org.appwork.utils.swing.dialog.Dialog;
 public class StorageHandler<T extends ConfigInterface> implements InvocationHandler {
     private final static LinkedHashMap<String, Runnable>    DELAYEDWRITES = new LinkedHashMap<String, Runnable>();
     protected static final DelayedRunnable                  SAVEDELAYER   = new DelayedRunnable(5000, 30000) {
-        @Override
-        public void delayedrun() {
-            StorageHandler.saveAll();
-        }
-    };
+                                                                              @Override
+                                                                              public void delayedrun() {
+                                                                                  StorageHandler.saveAll();
+                                                                              }
+                                                                          };
     private static final HashMap<StorageHandler<?>, String> STORAGEMAP;
-
     static {
         // important, because getDefaultLogger might initialize StorageHandler and access to STORAGEMAP must be ensured in constructor of
         // StorageHandler
@@ -707,7 +706,6 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
         final byte[] cryptKey = keyHandler.getCryptKey();
         final File path = keyHandler.getPath();
         final Runnable run = new Runnable() {
-
             @Override
             public void run() {
                 JSonStorage.saveTo(path, cryptKey == null, cryptKey, jsonBytes);
@@ -1082,7 +1080,16 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
     public void write() {
         this.getPrimitiveStorage().save();
     }
+
     /**
      * @param key2
      */
+    /**
+     * @param b
+     */
+    public void setAllowWriteDefaultObjects(boolean b) {
+        for (KeyHandler<?> kh : getKeyHandler()) {
+            kh.setAllowWriteDefaultObjects(b);
+        }
+    }
 }

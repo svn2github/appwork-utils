@@ -79,10 +79,11 @@ public class Files {
      * delete all files/folders that are given
      *
      * @param files
+     * @return
      * @throws IOException
      */
-    public static void deleteRecursiv(final File file) throws IOException {
-        Files.deleteRecursiv(file, true);
+    public static int deleteRecursiv(final File file) throws IOException {
+        return Files.deleteRecursiv(file, true);
     }
 
     /**
@@ -90,7 +91,8 @@ public class Files {
      * @param b
      * @throws IOException
      */
-    public static void deleteRecursiv(final File file, final boolean breakOnError) throws IOException {
+    public static int deleteRecursiv(final File file, final boolean breakOnError) throws IOException {
+        int ret = 0;
         if (!file.exists()) {
             throw new FileNotFoundException(file.getAbsolutePath());
         }
@@ -98,15 +100,19 @@ public class Files {
             final File[] files = file.listFiles();
             if (files != null) {
                 for (final File f : files) {
-                    Files.deleteRecursiv(f, breakOnError);
+                    ret += Files.deleteRecursiv(f, breakOnError);
                 }
             }
         }
         LoggerFactory.getDefaultLogger().finer(" Delete file " + file);
         final boolean fd = file.delete();
+        if (fd) {
+            ret++;
+        }
         if (file.exists() && !fd && breakOnError) {
             throw new IOException("Could not delete " + file);
         }
+        return ret;
     }
 
     public static LinkedList<String> getDirectories_NonRecursive(final File startDirectory, final boolean includeStart) throws IOException {

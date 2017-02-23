@@ -37,7 +37,7 @@
 		</manifest>
 
 		<mkdir dir="${dist}" />
-		<jar jarfile="${dist}/appworkutils.jar" manifest="Manifest.MF">
+		<jar duplicate="fail" jarfile="${dist}/appworkutils.jar" manifest="Manifest.MF">
 			<fileset dir="${cls}">
 				<include name="**/**" />
 			</fileset>

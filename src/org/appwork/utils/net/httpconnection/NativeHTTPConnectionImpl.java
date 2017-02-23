@@ -93,7 +93,6 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
     private boolean                                     wasConnected         = false;
     private boolean                                     sslTrustALL          = false;
     private final static WeakHashMap<Thread, HTTPProxy> availableProxies     = new WeakHashMap<Thread, HTTPProxy>();
-
     static {
         try {
             Authenticator.setDefault(new Authenticator() {
@@ -382,7 +381,7 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
         this.connect();
         this.connectInputStream();
         final int code = this.getResponseCode();
-        if (this.isOK() || code == 404 || code == 403 || code == 416) {
+        if (this.isOK() || code == 404 || code == 403 || code == 416 || code == 401) {
             if (this.convertedInputStream != null) {
                 return this.convertedInputStream;
             }

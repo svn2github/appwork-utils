@@ -183,11 +183,11 @@ public class HTTPConnectionImpl implements HTTPConnection {
     protected static final WeakHashMap<SocketStreamInterface, HTTPKeepAliveSocket> KEEPALIVESOCKETS      = new WeakHashMap<SocketStreamInterface, HTTPKeepAliveSocket>();
     protected static final Object                                                  LOCK                  = new Object();
     protected static final DelayedRunnable                                         KEEPALIVECLEANUPTIMER = new DelayedRunnable(10000, 30000) {
-                                                                                                             @Override
-                                                                                                             public void delayedrun() {
-                                                                                                                 cleanupKeepAlivePools();
-                                                                                                             }
-                                                                                                         };
+        @Override
+        public void delayedrun() {
+            cleanupKeepAlivePools();
+        }
+    };
 
     private static final void cleanupKeepAlivePools() {
         synchronized (HTTPConnectionImpl.LOCK) {
@@ -1080,7 +1080,7 @@ public class HTTPConnectionImpl implements HTTPConnection {
         this.connect();
         this.connectInputStream();
         final int code = this.getResponseCode();
-        if (this.isOK() || code == 404 || code == 403 || code == 416) {
+        if (this.isOK() || code == 404 || code == 403 || code == 416 || code == 401) {
             if (this.convertedInputStream != null) {
                 return this.convertedInputStream;
             }

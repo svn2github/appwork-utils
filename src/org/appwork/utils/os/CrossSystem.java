@@ -96,10 +96,12 @@ public class CrossSystem {
         WINDOWS_XP(OSFamily.WINDOWS),
         WINDOWS_2003(OSFamily.WINDOWS),
         WINDOWS_VISTA(OSFamily.WINDOWS),
+        WINDOWS_SERVER_2003(OSFamily.WINDOWS),
         WINDOWS_SERVER_2008(OSFamily.WINDOWS),
         WINDOWS_7(OSFamily.WINDOWS),
         WINDOWS_8(OSFamily.WINDOWS),
         WINDOWS_SERVER_2012(OSFamily.WINDOWS),
+        WINDOWS_SERVER_2016(OSFamily.WINDOWS),
         WINDOWS_10(OSFamily.WINDOWS);
         private final OSFamily family;
 
@@ -249,7 +251,6 @@ public class CrossSystem {
     private final static String         ARCH_STRING;
     private static Boolean              OS64BIT                   = null;
     public final static String          WMIC_PATH;
-
     static {
         /* Init OS_ID */
         OS_STRING = System.getProperty("os.name");
@@ -551,10 +552,14 @@ public class CrossSystem {
                 return OperatingSystem.WINDOWS_2000;
             } else if (os.contains("windows 2003")) {
                 return OperatingSystem.WINDOWS_2003;
+            } else if (os.contains("windows server 2003")) {
+                return OperatingSystem.WINDOWS_SERVER_2003;
             } else if (os.contains("windows server 2008")) {
                 return OperatingSystem.WINDOWS_SERVER_2008;
             } else if (os.contains("windows server 2012")) {
                 return OperatingSystem.WINDOWS_SERVER_2012;
+            } else if (os.contains("windows server 2016")) {
+                return OperatingSystem.WINDOWS_SERVER_2016;
             } else if (os.contains("nt")) {
                 return OperatingSystem.WINDOWS_NT;
             } else if (os.contains("windows")) {

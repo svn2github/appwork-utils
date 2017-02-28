@@ -51,6 +51,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 
 import javax.swing.KeyStroke;
@@ -1045,23 +1046,29 @@ public class CrossSystem {
     }
 
     private static boolean openCustom(final String[] custom, final String what) throws IOException {
-        if (custom == null || custom.length < 1) {
+        if (custom == null || custom.length < 1 || what == null) {
             return false;
         }
         boolean added = false;
-        final java.util.List<String> commands = new ArrayList<String>();
+        final List<String> commands = new ArrayList<String>();
         for (final String s : custom) {
-            final String add = s.replace("%s", what);
-            if (!add.equals(s)) {
-                added = true;
+            if (s != null) {
+                final String add = s.replace("%s", what);
+                if (!add.equals(s)) {
+                    added = true;
+                }
+                commands.add(add);
             }
-            commands.add(add);
         }
-        if (added == false) {
-            commands.add(what);
+        if (commands.size() > 0) {
+            if (added == false) {
+                commands.add(what);
+            }
+            Runtime.getRuntime().exec(commands.toArray(new String[] {}));
+            return true;
+        } else {
+            return false;
         }
-        Runtime.getRuntime().exec(commands.toArray(new String[] {}));
-        return true;
     }
 
     /**

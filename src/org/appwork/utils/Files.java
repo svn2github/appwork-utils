@@ -76,24 +76,24 @@ public class Files {
     }
 
     /**
-     * @deprecated Use {@link #deleteRekursive(File)} instead delete all files/folders that are given We need the void method handler for
+     * @deprecated Use {@link #deleteRecursive(File)} instead delete all files/folders that are given We need the void method handler for
      *             some uninstaller routines
      * @param files
      * @return
      * @throws IOException
      */
     public static void deleteRecursiv(final File file) throws IOException {
-        Files.deleteRekursive(file, true);
+        Files.deleteRecursive(file, true);
     }
 
     /**
-     * @deprecated Use {@link #deleteRekursive(File, boolean)} instead We need the void method handler for some uninstaller routines
+     * @deprecated Use {@link #deleteRecursive(File, boolean)} instead We need the void method handler for some uninstaller routines
      * @param file
      * @param b
      * @throws IOException
      */
     public static void deleteRecursiv(final File file, final boolean breakOnError) throws IOException {
-        deleteRekursive(file, breakOnError);
+        deleteRecursive(file, breakOnError);
     }
 
     /**
@@ -103,8 +103,8 @@ public class Files {
      * @return
      * @throws IOException
      */
-    public static int deleteRekursive(final File file) throws IOException {
-        return Files.deleteRekursive(file, true);
+    public static int deleteRecursive(final File file) throws IOException {
+        return Files.deleteRecursive(file, true);
     }
 
     /**
@@ -112,7 +112,7 @@ public class Files {
      * @param b
      * @throws IOException
      */
-    public static int deleteRekursive(final File file, final boolean breakOnError) throws IOException {
+    public static int deleteRecursive(final File file, final boolean breakOnError) throws IOException {
         int ret = 0;
         if (!file.exists()) {
             throw new FileNotFoundException(file.getAbsolutePath());
@@ -121,7 +121,7 @@ public class Files {
             final File[] files = file.listFiles();
             if (files != null) {
                 for (final File f : files) {
-                    ret += Files.deleteRekursive(f, breakOnError);
+                    ret += Files.deleteRecursive(f, breakOnError);
                 }
             }
         }

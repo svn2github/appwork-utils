@@ -76,14 +76,35 @@ public class Files {
     }
 
     /**
+     * @deprecated Use {@link #deleteRekursive(File)} instead delete all files/folders that are given We need the void method handler for
+     *             some uninstaller routines
+     * @param files
+     * @return
+     * @throws IOException
+     */
+    public static void deleteRecursiv(final File file) throws IOException {
+        Files.deleteRekursive(file, true);
+    }
+
+    /**
+     * @deprecated Use {@link #deleteRekursive(File, boolean)} instead We need the void method handler for some uninstaller routines
+     * @param file
+     * @param b
+     * @throws IOException
+     */
+    public static void deleteRecursiv(final File file, final boolean breakOnError) throws IOException {
+        deleteRekursive(file, breakOnError);
+    }
+
+    /**
      * delete all files/folders that are given
      *
      * @param files
      * @return
      * @throws IOException
      */
-    public static int deleteRecursiv(final File file) throws IOException {
-        return Files.deleteRecursiv(file, true);
+    public static int deleteRekursive(final File file) throws IOException {
+        return Files.deleteRekursive(file, true);
     }
 
     /**
@@ -91,7 +112,7 @@ public class Files {
      * @param b
      * @throws IOException
      */
-    public static int deleteRecursiv(final File file, final boolean breakOnError) throws IOException {
+    public static int deleteRekursive(final File file, final boolean breakOnError) throws IOException {
         int ret = 0;
         if (!file.exists()) {
             throw new FileNotFoundException(file.getAbsolutePath());
@@ -100,7 +121,7 @@ public class Files {
             final File[] files = file.listFiles();
             if (files != null) {
                 for (final File f : files) {
-                    ret += Files.deleteRecursiv(f, breakOnError);
+                    ret += Files.deleteRekursive(f, breakOnError);
                 }
             }
         }

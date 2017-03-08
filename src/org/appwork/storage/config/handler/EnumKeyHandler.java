@@ -34,6 +34,8 @@
 package org.appwork.storage.config.handler;
 
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.appwork.storage.JSonStorage;
 import org.appwork.storage.TypeRef;
@@ -46,19 +48,16 @@ import org.appwork.storage.config.annotations.DefaultJsonObject;
  *
  */
 public class EnumKeyHandler extends KeyHandler<Enum> {
-
     /**
      * @param storageHandler
      * @param key
      */
     public EnumKeyHandler(final StorageHandler<?> storageHandler, final String key) {
         super(storageHandler, key);
-        // TODO Auto-generated constructor stub
     }
 
     @Override
     protected Class<? extends Annotation> getDefaultAnnotation() {
-
         return DefaultEnumValue.class;
     }
 
@@ -66,13 +65,19 @@ public class EnumKeyHandler extends KeyHandler<Enum> {
     @SuppressWarnings("rawtypes")
     public Enum getDefaultValue() {
         return this.defaultValue;
+    }
 
+    public Enum[] values() {
+        final List<Enum> ret = new ArrayList<Enum>();
+        for (final Object e : getRawClass().getEnumConstants()) {
+            ret.add((Enum) e);
+        }
+        return ret.toArray(new Enum[0]);
     }
 
     @Override
     protected void initDefaults() throws Throwable {
         Enum defaults = null;
-
         final DefaultFactory df = this.getAnnotation(DefaultFactory.class);
         if (df != null) {
             defaults = (Enum) df.value().newInstance().getDefaultValue();
@@ -92,35 +97,16 @@ public class EnumKeyHandler extends KeyHandler<Enum> {
         this.setDefaultValue((Enum) storageHandler.runDefaultValueFactory(this, defaults));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.appwork.storage.config.KeyHandler#initHandler()
-     */
     @Override
     protected void initHandler() throws Throwable {
-
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.appwork.storage.config.KeyHandler#putValue(java.lang.Object)
-     */
     @Override
     protected void putValue(final Enum object) {
         this.storageHandler.getPrimitiveStorage().put(this.getKey(), object);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.appwork.storage.config.KeyHandler#validateValue(java.lang.Object)
-     */
     @Override
     protected void validateValue(final Enum object) throws Throwable {
-        // TODO Auto-generated method stub
-
     }
-
 }

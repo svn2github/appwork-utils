@@ -15,7 +15,21 @@ public class Moment {
         this.c.setTimeInMillis(time);
     }
 
-    public Moment map(int amount, Interval interval) {
+    /**
+     * @param cur
+     */
+    public Moment(Date cur) {
+        this(cur.getTime());
+    }
+
+    /**
+     *
+     */
+    public Moment() {
+        this(System.currentTimeMillis());
+    }
+
+    public Moment map(int amount, UnitsTime interval) {
         this.timestamp = this.getMappedTimestamp(amount, interval);
         return this;
     }
@@ -25,7 +39,7 @@ public class Moment {
         return new Date(this.timestamp).toString();
     }
 
-    public long getMappedTimestamp(int amount, Interval interval) {
+    public long getMappedTimestamp(int amount, UnitsTime interval) {
         this.c.setTimeInMillis(this.timestamp);
         switch (interval) {
         case SECOND:
@@ -74,7 +88,7 @@ public class Moment {
         }
     }
 
-    public Moment add(int i, Interval month) {
+    public Moment add(int i, UnitsTime month) {
         this.c.setTimeInMillis(this.timestamp);
         this.c.add(month.calendarID, i);
         this.timestamp = this.c.getTimeInMillis();
@@ -91,5 +105,21 @@ public class Moment {
 
     public void setTimeInMS(long time) {
         this.timestamp = time;
+    }
+
+    /**
+     * @return
+     */
+    public int getHourOfDay() {
+        c.setTimeInMillis(timestamp);
+        return c.get(Calendar.HOUR_OF_DAY);
+    }
+
+    /**
+     * @return
+     */
+    public int getDayOfWeek() {
+        c.setTimeInMillis(timestamp);
+        return c.get(Calendar.DAY_OF_WEEK);
     }
 }

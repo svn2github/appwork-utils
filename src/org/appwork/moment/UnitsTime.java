@@ -2,7 +2,7 @@ package org.appwork.moment;
 
 import java.util.Calendar;
 
-public enum Interval {
+public enum UnitsTime {
     /**
      * Always sort from short to long!!
      */
@@ -16,7 +16,7 @@ public enum Interval {
     public final long   min;
     public final long   max;
 
-    private Interval(int calendarRepresentation, long min, long max) {
+    private UnitsTime(int calendarRepresentation, long min, long max) {
         this.calendarID = calendarRepresentation;
         this.min = min;
         this.max = max;

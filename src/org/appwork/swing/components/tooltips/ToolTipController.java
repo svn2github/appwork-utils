@@ -72,7 +72,6 @@ import org.appwork.utils.swing.EDTRunner;
  *
  */
 public class ToolTipController implements MouseListener, MouseMotionListener, WindowFocusListener, PropertyChangeListener, AWTEventListener {
-
     public static final ScheduledExecutorService EXECUTER            = Executors.newSingleThreadScheduledExecutor();
     // order is important. EXECUTER has to be available
     private static final ToolTipController       INSTANCE            = new ToolTipController();
@@ -88,15 +87,12 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
     }
 
     private ToolTipDelayer   delayer;
-
     private JComponent       activeComponent;
-
     private Point            mousePosition;
     private long             lastHidden  = 0;
-
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent)
      */
     private int              changeDelay = 500;
@@ -106,7 +102,6 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
     protected ToolTipDelayer defaultDelayer;
 
     // private Window parentWindow;
-
     /**
      * Create a new instance of ToolTipManager. This is a singleton class. Access the only existing instance by using {@link #getInstance()}
      * .
@@ -114,7 +109,6 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
     private ToolTipController() {
         setDelay(2500);
         Toolkit.getDefaultToolkit().addAWTEventListener(this, AWTEvent.MOUSE_EVENT_MASK);
-
     }
 
     protected ExtTooltip getActiveToolTipPanel() {
@@ -140,14 +134,12 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
         if (activePopup != null) {
             activeToolTipPanel.onHide();
             if (activeToolTipPanel.isLastHiddenEnabled()) {
-
                 lastHidden = System.currentTimeMillis();
             }
             activeToolTipPanel = null;
             activePopup.hide();
             // this.activePopup.removeMouseListener(this);
             activePopup = null;
-
             if (activeComponent != null) {
                 final Window ownerWindow = SwingUtilities.getWindowAncestor(activeComponent);
                 if (ownerWindow != null) {
@@ -157,7 +149,6 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
                     activeComponent = null;
                 }
             }
-
         }
     }
 
@@ -169,13 +160,12 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
      * @return
      */
     private boolean isTooltipVisible() {
-
         return activePopup != null;
     }
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.swing.event.AWTEventListener#onAWTEventAfterDispatch(java .awt.AWTEvent)
      */
     @Override
@@ -198,34 +188,30 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
                 lastHidden = 0;
                 break;
             }
-
         }
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
      */
     @Override
     public void mouseClicked(final MouseEvent e) {
-
     }
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see java.awt.event.MouseMotionListener#mouseDragged(java.awt.event.MouseEvent )
      */
     @Override
     public void mouseDragged(final MouseEvent e) {
         mouseMoved(e);
-
     }
 
     @Override
     public void mouseEntered(final MouseEvent e) {
-
         if (e.getSource() instanceof ToolTipHandler) {
             if (e.getSource() == activeComponent) {
                 return;
@@ -234,7 +220,6 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
             if (activeComponent instanceof JComponent) {
                 ToolTipManager.sharedInstance().unregisterComponent(activeComponent);
             }
-
             activeComponent = (JComponent) e.getSource();
             if (System.currentTimeMillis() - lastHidden < getChangeDelay()) {
                 mousePosition = e.getLocationOnScreen();
@@ -244,47 +229,40 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
             hideTooltip();
         } else {
             if (!mouseOverComponent(e.getLocationOnScreen()) && !mouseOverTooltip(e.getLocationOnScreen())) {
-
                 hideTooltip();
             }
-        }
-
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.awt.event.MouseListener#mouseExited(java.awt.event.MouseEvent)
-     */
-    @Override
-    public void mouseExited(final MouseEvent e) {
-        if (!mouseOverComponent(e.getLocationOnScreen()) && !mouseOverTooltip(e.getLocationOnScreen())) {
-            // do not hide if we exit component and enter tooltip
-
-            hideTooltip();
         }
     }
 
     /*
      * (non-Javadoc)
      *
+     * @see java.awt.event.MouseListener#mouseExited(java.awt.event.MouseEvent)
+     */
+    @Override
+    public void mouseExited(final MouseEvent e) {
+        if (!mouseOverComponent(e.getLocationOnScreen()) && !mouseOverTooltip(e.getLocationOnScreen())) {
+            // do not hide if we exit component and enter tooltip
+            hideTooltip();
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.awt.event.MouseMotionListener#mouseMoved(java.awt.event.MouseEvent)
      */
     @Override
     public void mouseMoved(final MouseEvent e) {
-
         final JComponent ac = activeComponent;
         if (!isTooltipVisible() && ac != null) {
             mousePosition = e.getLocationOnScreen();
             if (System.currentTimeMillis() - lastHidden < getChangeDelay()) {
-
                 showTooltip();
             } else {
                 restartDelayer(ac, mousePosition);
-
             }
         } else if (ac != null) {
-
             if (((ToolTipHandler) ac).updateTooltip(activeToolTipPanel, e)) {
                 if (activeToolTipPanel == null || activeToolTipPanel.isLastHiddenEnabled()) {
                     mousePosition = e.getLocationOnScreen();
@@ -292,7 +270,6 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
                 } else {
                     hideTooltip();
                 }
-
             }
         }
     }
@@ -302,7 +279,6 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
      * @param mousePosition2
      */
     private void restartDelayer(final JComponent ac, final Point mousePosition2) {
-
         final int newDelayer = ((ToolTipHandler) ac).getTooltipDelay(new Point(mousePosition2.x, mousePosition2.y));
         if (newDelayer > 0 && newDelayer != delayer.getDelay()) {
             delayer.stop();
@@ -312,7 +288,6 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
             delayer = defaultDelayer;
         }
         delayer.resetAndStart();
-
     }
 
     /**
@@ -322,12 +297,9 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
     private boolean mouseOverComponent(final Point point) {
         try {
             if (point != null && activeComponent != null && activeComponent instanceof JComponent && activeComponent.isShowing() && activeComponent.getParent() != null) {
-
                 final Rectangle bounds = activeComponent.getBounds();
-
                 SwingUtilities.convertPointFromScreen(point, activeComponent.getParent());
                 return bounds.contains(point);
-
             }
         } catch (final Exception e) {
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
@@ -342,7 +314,6 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
     private boolean mouseOverTooltip(final Point locationOnScreen) {
         try {
             if (locationOnScreen != null && activeToolTipPanel != null && activeToolTipPanel.isShowing()) {
-
                 final Dimension d = activeToolTipPanel.getSize();
                 final Point loc = activeToolTipPanel.getLocationOnScreen();
                 final Rectangle bounds = new Rectangle(loc.x, loc.y, d.width, d.height);
@@ -356,13 +327,12 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see java.beans.PropertyChangeListener#propertyChange(java.beans. PropertyChangeEvent)
      */
     @Override
     public void propertyChange(final PropertyChangeEvent evt) {
         hideTooltip();
-
     }
 
     /**
@@ -388,7 +358,6 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
      */
     public synchronized void setDelay(final int delay) {
         new EDTRunner() {
-
             @Override
             protected void runInEDT() {
                 if (delayer != null) {
@@ -398,7 +367,6 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
                 defaultDelayer = delayer;
             }
         }.waitForEDT();
-
     }
 
     public void setHandler(final ToolTipPainter handler) {
@@ -419,7 +387,6 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
      * @param createExtTooltip
      */
     public void show(final ExtTooltip tt) {
-
         hideTooltip();
         // delayer.stop();
         if (tt != null) {
@@ -427,16 +394,13 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
                 if (handler.showToolTip(tt)) {
                     return;
                 }
-
             }
             if (isClassicToolstipsEnabled()) {
                 final PopupFactory popupFactory = PopupFactory.getSharedInstance();
                 GraphicsConfiguration gc = null;
-
                 if (activeComponent != null) {
                     gc = activeComponent.getGraphicsConfiguration();
                 } else {
-
                     for (final GraphicsDevice screen : GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()) {
                         if (screen.getDefaultConfiguration().getBounds().contains(mousePosition)) {
                             gc = screen.getDefaultConfiguration();
@@ -450,29 +414,24 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
                 final Rectangle screenBounds = gc.getBounds();
                 final Insets screenInsets = Toolkit.getDefaultToolkit().getScreenInsets(gc);
                 Point ttPosition = new Point(mousePosition.x, mousePosition.y);
-
                 // if screen has insets, we have to deacrease the available
                 // space
                 screenBounds.x += screenInsets.left;
                 screenBounds.y += screenInsets.top;
                 screenBounds.width -= screenInsets.left + screenInsets.right;
                 screenBounds.height -= screenInsets.top + screenInsets.bottom;
-
                 if (ttPosition.x > screenBounds.x + screenBounds.width / 2) {
                     // move to left on right screen size
                     ttPosition.x = mousePosition.x - tt.getPreferredSize().width;
-
                 } else {
                     ttPosition.x = mousePosition.x + 15;
                 }
-
                 if (ttPosition.y > screenBounds.y + screenBounds.height / 2) {
                     // move tt to top if we are in bottom part of screen
                     ttPosition.y = mousePosition.y - tt.getPreferredSize().height;
                 } else {
                     ttPosition.y = mousePosition.y + 15;
                 }
-
                 // wtf...fu%&inaccessable methods!
                 try {
                     final Method method = javax.swing.PopupFactory.class.getDeclaredMethod("setPopupType", new Class[] { Integer.TYPE });
@@ -481,12 +440,10 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
                 } catch (final Exception exception) {
                     throw new RuntimeException(exception);
                 }
-
                 screenBounds.x += screenInsets.left;
                 screenBounds.y += screenInsets.top;
                 screenBounds.width -= screenInsets.left + screenInsets.right;
                 screenBounds.height -= screenInsets.top + screenInsets.bottom;
-
                 final int maxWidth = screenBounds.x + screenBounds.width - ttPosition.x;
                 final int maxHeight = ttPosition.y + tt.getPreferredSize().height - screenBounds.y;
                 // final Point loc = getLocationOnScreen();
@@ -494,27 +451,27 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
                 ToolTipController.this.activeToolTipPanel = tt;
                 tt.addMouseListener(ToolTipController.this);
                 ttPosition = activeToolTipPanel.getDesiredLocation(activeComponent, ttPosition);
-
                 activePopup = popupFactory.getPopup(activeComponent, activeToolTipPanel, ttPosition.x, ttPosition.y);
-
-                final Window ownerWindow = SwingUtilities.getWindowAncestor(activeComponent);
+                final Window ownerWindow;
+                if (activeComponent != null) {
+                    ownerWindow = SwingUtilities.getWindowAncestor(activeComponent);
+                } else {
+                    ownerWindow = null;
+                }
                 // if the components window is not the active any more, for
                 // exmaple
                 // because we opened a dialog, don't show tooltip
-
                 if (ownerWindow != null) {
                     ownerWindow.removeWindowFocusListener(this);
                     ownerWindow.addWindowFocusListener(this);
                 }
                 tt.onShow();
                 activePopup.show();
-
             }
             // parentWindow =
             // SwingUtilities.windowForComponent(this.activeToolTipPanel);
             //
             // parentWindow.addMouseListener(ToolTipController.this);
-
         }
     }
 
@@ -523,10 +480,8 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
      */
     public void show(final ToolTipHandler handler) {
         activeComponent = (JComponent) handler;
-
         mousePosition = MouseInfo.getPointerInfo().getLocation();
         showTooltip();
-
     }
 
     /**
@@ -540,9 +495,7 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
         boolean tooltipWithoutFocusEnabled = aC != null && ((ToolTipHandler) aC).isTooltipWithoutFocusEnabled();
         boolean tooltipVisible = ToolTipController.this.isTooltipVisible();
         boolean mouseOverComponent = ToolTipController.this.mouseOverComponent(MouseInfo.getPointerInfo().getLocation());
-
         if (aC != null && (!focusable || hasFocus || tooltipWithoutFocusEnabled) && !tooltipVisible && mouseOverComponent) {
-
             if (aC instanceof JTable && ((JTable) aC).getDropLocation() != null) {
                 System.out.println("drop is going on");
                 return;
@@ -550,15 +503,12 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
             final Window ownerWindow = SwingUtilities.getWindowAncestor(aC);
             // if the components window is not the active any more, for exmaple
             // because we opened a dialog, don't show tooltip
-
             if (ownerWindow.isActive()) {
                 final Point p = new Point(ToolTipController.this.mousePosition);
                 SwingUtilities.convertPointFromScreen(p, aC);
                 this.show(((ToolTipHandler) aC).createExtTooltip(p));
             }
-
         }
-
     }
 
     /**
@@ -579,46 +529,41 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see java.awt.event.WindowFocusListener#windowGainedFocus(java.awt.event. WindowEvent)
      */
     @Override
     public void windowGainedFocus(final WindowEvent e) {
         // TODO Auto-generated method stub
-
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.awt.event.WindowFocusListener#windowLostFocus(java.awt.event.WindowEvent )
-     */
-    @Override
-    public void windowLostFocus(final WindowEvent e) {
-        hideTooltip();
-
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see java.awt.event.MouseListener#mousePressed(java.awt.event.MouseEvent)
+     * @see java.awt.event.WindowFocusListener#windowLostFocus(java.awt.event.WindowEvent )
      */
     @Override
-    public void mousePressed(final MouseEvent e) {
-        // TODO Auto-generated method stub
-
+    public void windowLostFocus(final WindowEvent e) {
+        hideTooltip();
     }
 
     /*
      * (non-Javadoc)
      *
+     * @see java.awt.event.MouseListener#mousePressed(java.awt.event.MouseEvent)
+     */
+    @Override
+    public void mousePressed(final MouseEvent e) {
+        // TODO Auto-generated method stub
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.awt.event.MouseListener#mouseReleased(java.awt.event.MouseEvent)
      */
     @Override
     public void mouseReleased(final MouseEvent e) {
         // TODO Auto-generated method stub
-
     }
-
 }

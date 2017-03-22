@@ -364,7 +364,7 @@ public class Files {
                 return;
             }
             for (final File sf : files) {
-                Files.walkThroughStructureReverse(handler, sf);
+                Files.internalWalkThroughStructureReverse(handler, sf);
             }
         }
         handler.onFile(f);

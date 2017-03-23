@@ -469,4 +469,84 @@ public class Files {
             a = aTmp;
         }
     }
+
+    /**
+     * @param folder
+     * @return
+     * @throws IOException
+     */
+    public static File guessRoot(File file) throws IOException {
+        if (Application.getJavaVersion() >= Application.JAVA17) {
+            File ret = Files17.guessRoot(file);
+            if (ret != null) {
+                return ret;
+            }
+        }
+        String bestRootMatch = null;
+        if (CrossSystem.isUnix()) {
+            try {
+                final List<ProcMounts> procMounts = ProcMounts.list();
+                if (procMounts != null) {
+                    final String destination = file.getAbsolutePath();
+                    for (final ProcMounts procMount : procMounts) {
+                        if (!procMount.isReadOnly() && destination.startsWith(procMount.getMountPoint())) {
+                            if (bestRootMatch == null || (procMount.getMountPoint().length() > bestRootMatch.length())) {
+                                bestRootMatch = procMount.getMountPoint();
+                            }
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                LoggerFactory.getDefaultLogger().log(e);
+            }
+        }
+        if (bestRootMatch == null) {
+            // fallback to File.listRoots
+            final String destination = file.getAbsolutePath();
+            if (!destination.startsWith("\\")) {
+                final File[] roots = File.listRoots();
+                if (roots != null) {
+                    for (final File root : roots) {
+                        final String rootString = root.getAbsolutePath();
+                        final boolean startsWith;
+                        if (CrossSystem.isWindows()) {
+                            startsWith = StringUtils.startsWithCaseInsensitive(destination, rootString);
+                        } else {
+                            startsWith = destination.startsWith(rootString);
+                        }
+                        if (startsWith) {
+                            bestRootMatch = rootString;
+                            break;
+                        }
+                    }
+                }
+            } else {
+                // simple unc support (netshares without assigned drive letter)
+                File existingFile = file;
+                while (existingFile != null) {
+                    if (existingFile.exists()) {
+                        bestRootMatch = existingFile.getAbsolutePath();
+                    }
+                    existingFile = existingFile.getParentFile();
+                }
+            }
+        }
+        return bestRootMatch == null ? null : new File(bestRootMatch);
+    }
+
+    /**
+     * @param path
+     * @return
+     * @throws IOException
+     */
+    public static long getUsableDiskspace(File path) throws IOException {
+        if (Application.getJavaVersion() >= Application.JAVA17) {
+            return Files17.getUsableDiskspace(path);
+        }
+        File root = guessRoot(path);
+        if (root == null) {
+            root = path;
+        }
+        return root.getFreeSpace();
+    }
 }

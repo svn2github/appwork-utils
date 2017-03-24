@@ -68,13 +68,26 @@ public class TranslationUtils {
         }
     }
 
+    public static class Translated {
+        /**
+         *
+         */
+        public Translated(String value, String comment) {
+            this.value = value;
+            this.comment = comment;
+        }
+
+        final public String value;
+        final public String comment;
+    }
+
     public static interface TranslationProviderInterface {
         /**
          * @param m
          * @param string
          * @return
          */
-        String get(Method m, String def);
+        Translated get(Method m, String tl, String def);
     }
 
     public static void createFiles(final boolean addComments, File dist, String[] lngs, TranslationProviderInterface prov, final Class<? extends TranslateInterface>... classes) throws URISyntaxException, IOException {

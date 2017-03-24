@@ -44,8 +44,10 @@ import java.util.Iterator;
 import org.appwork.storage.config.annotations.IntegerInterface;
 import org.appwork.storage.config.annotations.LabelInterface;
 import org.appwork.storage.config.annotations.TooltipInterface;
+import org.appwork.txtresource.TranslationUtils.Translated;
 import org.appwork.txtresource.TranslationUtils.TranslationProviderInterface;
 import org.appwork.utils.Application;
+import org.appwork.utils.StringUtils;
 
 /**
  * @author thomas
@@ -114,9 +116,16 @@ public class TranslationHandler implements InvocationHandler {
         final TranslateData map = new TranslateData();
         this.cache.clear();
         this.lookup = this.fillLookup(string);
+        HashMap<Method, Translated> comments = new HashMap<Method, Translated>();
         for (final Method m : this.tInterface.getDeclaredMethods()) {
             try {
-                map.put(m.getName(), prov == null ? this.invoke(null, m, null).toString() : prov.get(m, this.invoke(null, m, null).toString()));
+                if (prov == null) {
+                    map.put(m.getName(), this.invoke(null, m, null).toString());
+                } else {
+                    Translated trans = prov.get(m, string, this.invoke(null, m, null).toString());
+                    comments.put(m, trans);
+                    map.put(m.getName(), trans.value);
+                }
             } catch (final Throwable e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -128,16 +137,20 @@ public class TranslationHandler implements InvocationHandler {
                 final Default def = m.getAnnotation(Default.class);
                 final DescriptionForTranslationEntry desc = m.getAnnotation(DescriptionForTranslationEntry.class);
                 String comment = "";
+                Translated translated = comments.get(m);
+                if (translated != null) {
+                    String c = translated.comment;
+                    if (StringUtils.isNotEmpty(c)) {
+                        comment += "\r\n//   " + c;
+                    }
+                }
                 if (desc != null) {
                     final String d = desc.value().replaceAll("[\\\r\\\n]+", "\r\n//    ");
                     comment += "\r\n// Description:\r\n//    " + d;
                 }
-                if (def != null) {
-                    comment += "\r\n// Defaultvalue:\r\n//    " + def.toString().replaceAll("[\\\r\\\n]+", "\r\n//    ");
-                }
                 //
                 if (comment.length() > 0) {
-                    ret = ret.replace("\"" + m.getName() + "\" : \"", comment + "\r\n\r\n     " + "\"" + m.getName() + "\" : \"");
+                    ret = ret.replace(m.getName() + "=", comment + "\r\n" + m.getName() + "=");
                 }
             }
         }
@@ -281,7 +294,7 @@ public class TranslationHandler implements InvocationHandler {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.reflect.InvocationHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
      */
     /**

@@ -56,7 +56,6 @@ import org.appwork.utils.logging2.LogInterface;
 import org.appwork.utils.logging2.extmanager.LoggerFactory;
 
 public class JsonKeyValueStorage extends Storage {
-
     private final Map<String, Object> internalMap;
     private final String              name;
     private final File                file;
@@ -123,6 +122,8 @@ public class JsonKeyValueStorage extends Storage {
             getDefaultLogger().info("Prefer (merged) JSon Storage from File: " + file);
             final HashMap<String, Object> load = JSonStorage.restoreFrom(file, plain, key, TypeRef.HASHMAP, new HashMap<String, Object>());
             this.putAll(load);
+        } else {
+            getDefaultLogger().info("CFG File does not exist: " + file);
         }
     }
 
@@ -185,7 +186,6 @@ public class JsonKeyValueStorage extends Storage {
         } finally {
             getLock().readUnlock(readL);
         }
-
         if (ret != null && def != null && ret.getClass() != def.getClass()) {
             /* ret class different from def class, so we have to convert */
             if (def instanceof Long) {
@@ -235,7 +235,6 @@ public class JsonKeyValueStorage extends Storage {
                 }
             }
         }
-
         if (def instanceof Enum<?> && ret instanceof String) {
             try {
                 ret = Enum.valueOf(((Enum<?>) def).getDeclaringClass(), (String) ret);
@@ -372,7 +371,6 @@ public class JsonKeyValueStorage extends Storage {
                         return false;
                     }
                 }
-
                 final boolean xCArray = xC.isArray();
                 final boolean yCArray = yC.isArray();
                 if (xCArray && yCArray) {
@@ -534,12 +532,10 @@ public class JsonKeyValueStorage extends Storage {
                 getLock().readUnlock(readL);
             }
             final Runnable run = new Runnable() {
-
                 @Override
                 public void run() {
                     JSonStorage.saveTo(file, plain, key, jsonBytes);
                 }
-
             };
             StorageHandler.enqueueWrite(run, file.getAbsolutePath(), true);
         }
@@ -584,5 +580,4 @@ public class JsonKeyValueStorage extends Storage {
             getLock().readUnlock(readL);
         }
     }
-
 }

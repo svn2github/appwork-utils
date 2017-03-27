@@ -1036,32 +1036,36 @@ public class HTTPConnectionImpl implements HTTPConnection {
         final long[] ranges = this.getRange();
         if (ranges != null && ranges[2] >= 0) {
             return ranges[2];
+        } else {
+            return this.getContentLength();
         }
-        return this.getContentLength();
     }
 
     public long getContentLength() {
         final String length = this.getHeaderField("Content-Length");
         if (length != null) {
             return Long.parseLong(length.trim());
+        } else {
+            return -1;
         }
-        return -1;
     }
 
     public String getContentType() {
         final String type = this.getHeaderField("Content-Type");
         if (type == null) {
             return "unknown";
+        } else {
+            return type;
         }
-        return type;
     }
 
     public String getHeaderField(final String string) {
         final List<String> ret = this.headers.get(string);
         if (ret == null || ret.size() == 0) {
             return null;
+        } else {
+            return ret.get(0);
         }
-        return ret.get(0);
     }
 
     public Map<String, List<String>> getHeaderFields() {

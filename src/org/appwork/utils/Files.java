@@ -477,7 +477,7 @@ public class Files {
      */
     public static File guessRoot(File file) throws IOException {
         if (Application.getJavaVersion() >= Application.JAVA17) {
-            File ret = Files17.guessRoot(file);
+            final File ret = Files17.guessRoot(file);
             if (ret != null) {
                 return ret;
             }
@@ -534,19 +534,16 @@ public class Files {
         return bestRootMatch == null ? null : new File(bestRootMatch);
     }
 
-    /**
-     * @param path
-     * @return
-     * @throws IOException
-     */
     public static long getUsableDiskspace(File path) throws IOException {
         if (Application.getJavaVersion() >= Application.JAVA17) {
             return Files17.getUsableDiskspace(path);
+        } else {
+            final File root = guessRoot(path);
+            if (root != null) {
+                return root.getFreeSpace();
+            } else {
+                return path.getFreeSpace();
+            }
         }
-        File root = guessRoot(path);
-        if (root == null) {
-            root = path;
-        }
-        return root.getFreeSpace();
     }
 }

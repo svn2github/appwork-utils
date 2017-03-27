@@ -328,11 +328,12 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
 
     @Override
     public long getCompleteContentLength() {
-        this.getRange();
-        if (this.ranges != null && this.ranges[2] > 0) {
-            return this.ranges[2];
+        final long[] ret = this.getRange();
+        if (ret != null && ret[2] > 0) {
+            return ret[2];
+        } else {
+            return this.getContentLength();
         }
-        return this.getContentLength();
     }
 
     @Override
@@ -340,8 +341,9 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
         final String length = this.getHeaderField("Content-Length");
         if (length != null) {
             return Long.parseLong(length.trim());
+        } else {
+            return -1;
         }
-        return -1;
     }
 
     @Override
@@ -349,8 +351,9 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
         final String type = this.getHeaderField("Content-Type");
         if (type == null) {
             return "unknown";
+        } else {
+            return type;
         }
-        return type;
     }
 
     @Override
@@ -358,8 +361,9 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
         final List<String> ret = this.headers.get(string);
         if (ret == null || ret.size() == 0) {
             return null;
+        } else {
+            return ret.get(0);
         }
-        return ret.get(0);
     }
 
     @Override

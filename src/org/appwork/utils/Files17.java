@@ -45,11 +45,6 @@ import java.util.Map;
 
 import org.appwork.utils.os.CrossSystem;
 
-/**
- * @author Thomas
- * @date 23.03.2017
- *
- */
 public class Files17 {
     public static File guessRoot(File file) throws IOException {
         FileStore fileFileStore = null;
@@ -78,6 +73,7 @@ public class Files17 {
     /**
      * Stores the known hacks.
      */
+    // from http://stackoverflow.com/questions/10678363/find-the-directory-for-a-filestore, 25.05.2016
     private static final Map<Class<? extends FileStore>, Hacks> hacksMap = new HashMap<Class<? extends FileStore>, Hacks>();
     static {
         if (CrossSystem.isWindows()) {
@@ -196,7 +192,7 @@ public class Files17 {
         File existingFile = path;
         while (existingFile != null) {
             if (existingFile.exists()) {
-                FileStore fileFileStore = Files.getFileStore(existingFile.toPath());
+                final FileStore fileFileStore = Files.getFileStore(existingFile.toPath());
                 if (fileFileStore != null) {
                     return fileFileStore.getUsableSpace();
                 }
@@ -205,10 +201,11 @@ public class Files17 {
                 existingFile = existingFile.getParentFile();
             }
         }
-        File root = org.appwork.utils.Files.guessRoot(path);
-        if (root == null) {
-            root = path;
+        final File root = org.appwork.utils.Files.guessRoot(path);
+        if (root != null) {
+            return root.getFreeSpace();
+        } else {
+            return path.getFreeSpace();
         }
-        return root.getFreeSpace();
     }
 }

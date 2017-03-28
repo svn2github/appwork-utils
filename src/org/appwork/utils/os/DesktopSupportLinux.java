@@ -37,8 +37,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
 
+import org.appwork.utils.Application;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.processes.ProcessBuilderFactory;
 import org.appwork.utils.processes.ProcessOutput;
@@ -58,8 +58,8 @@ public class DesktopSupportLinux implements DesktopSupport {
     }
 
     private final DesktopSupportJavaDesktop fallBack = new DesktopSupportJavaDesktop();
-    private final String[]                  customFile;
-    private final String[]                  customBrowse;
+    private final String[]                  linuxFileOpen;
+    private final String[]                  linuxBrowseUrl;
     private final WINDOW_MANAGER            windowManager;
     private final boolean                   waylandDetected;
 
@@ -135,21 +135,25 @@ public class DesktopSupportLinux implements DesktopSupport {
             this.windowManager = WINDOW_MANAGER.UNKNOWN;
             openCommand = null;
         }
-        if (StringUtils.isNotEmpty(XDG_CURRENT_DESKTOP)) {
-            this.customFile = new String[] { "xdg-open", "%s" };
-            this.customBrowse = new String[] { "xdg-open", "%s" };
+        if (Application.isHeadless()) {
+            this.linuxBrowseUrl = null;
+            this.linuxFileOpen = null;
         } else {
-            this.customFile = openCommand;
-            this.customBrowse = openCommand;
+            if (StringUtils.isNotEmpty(XDG_CURRENT_DESKTOP)) {
+                this.linuxFileOpen = new String[] { "xdg-open", "%s" };
+                this.linuxBrowseUrl = new String[] { "xdg-open", "%s" };
+            } else {
+                this.linuxFileOpen = openCommand;
+                this.linuxBrowseUrl = openCommand;
+            }
         }
     }
 
     @Override
     public void browseURL(final URL url) throws IOException, URISyntaxException {
-        if (this.openCustom(this.customBrowse, url.toExternalForm())) {
-            return;
+        if (!this.openCustom(this.linuxBrowseUrl, url.toExternalForm())) {
+            this.fallBack.browseURL(url);
         }
-        this.fallBack.browseURL(url);
     }
 
     public WINDOW_MANAGER getWindowManager() {
@@ -158,10 +162,11 @@ public class DesktopSupportLinux implements DesktopSupport {
 
     @Override
     public boolean isBrowseURLSupported() {
-        if (this.customBrowse != null && this.customFile.length >= 2 || this.fallBack.isBrowseURLSupported()) {
+        if (this.linuxBrowseUrl != null && this.linuxBrowseUrl.length >= 2 || this.fallBack.isBrowseURLSupported()) {
             return true;
+        } else {
+            return false;
         }
-        return false;
     }
 
     public boolean isGnomeDesktop() {
@@ -186,10 +191,11 @@ public class DesktopSupportLinux implements DesktopSupport {
 
     @Override
     public boolean isOpenFileSupported() {
-        if (this.customFile != null && this.customFile.length >= 2 || this.fallBack.isOpenFileSupported()) {
+        if (this.linuxFileOpen != null && this.linuxFileOpen.length >= 2 || this.fallBack.isOpenFileSupported()) {
             return true;
+        } else {
+            return false;
         }
-        return false;
     }
 
     public boolean isXFCEDesktop() {
@@ -202,31 +208,18 @@ public class DesktopSupportLinux implements DesktopSupport {
     }
 
     private boolean openCustom(final String[] custom, final String what) throws IOException {
-        if (custom == null || custom.length < 1) {
+        try {
+            return CrossSystem.openCustom(custom, what);
+        } catch (IOException e) {
             return false;
         }
-        boolean added = false;
-        final java.util.List<String> commands = new ArrayList<String>();
-        for (final String s : custom) {
-            final String add = s.replace("%s", what);
-            if (!add.equals(s)) {
-                added = true;
-            }
-            commands.add(add);
-        }
-        if (added == false) {
-            commands.add(what);
-        }
-        Runtime.getRuntime().exec(commands.toArray(new String[] {}));
-        return true;
     }
 
     @Override
     public void openFile(final File file) throws IOException {
-        if (this.openCustom(this.customFile, file.getAbsolutePath())) {
-            return;
+        if (!this.openCustom(this.linuxFileOpen, file.getAbsolutePath())) {
+            this.fallBack.openFile(file);
         }
-        this.fallBack.openFile(file);
     }
 
     @Override

@@ -71,6 +71,7 @@ import org.appwork.utils.net.ChunkedOutputStream;
 import org.appwork.utils.net.HTTPHeader;
 import org.appwork.utils.net.httpserver.handler.HttpRequestHandler;
 import org.appwork.utils.net.httpserver.requests.GetRequest;
+import org.appwork.utils.net.httpserver.requests.HTTPBridge;
 import org.appwork.utils.net.httpserver.requests.HttpRequest;
 import org.appwork.utils.net.httpserver.requests.KeyValuePair;
 import org.appwork.utils.net.httpserver.requests.PostRequest;
@@ -179,20 +180,31 @@ public class RemoteAPI implements HttpRequestHandler {
     public static OutputStream getOutputStream(final RemoteAPIResponse response, final RemoteAPIRequest request, final boolean gzip, final boolean wrapJQuery) throws IOException {
         response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_REQUEST_CACHE_CONTROL, "no-store, no-cache"));
         response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_TYPE, "application/json"));
-        response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING, HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING_CHUNKED));
+        final HTTPBridge bridge = request.getHttpRequest().getBridge();
+        final boolean chunked;
+        if (bridge == null || bridge.canHandleChunkedEncoding(request.getHttpRequest(), response.getHttpResponse())) {
+            chunked = true;
+            response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING, HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING_CHUNKED));
+        } else {
+            chunked = false;
+        }
         if (gzip) {
             response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_ENCODING, "gzip"));
         }
         response.setResponseCode(ResponseCode.SUCCESS_OK);
-        final OutputStream os = response.getOutputStream(true);
-        final ChunkedOutputStream cos = new ChunkedOutputStream(os);
+        final OutputStream os;
+        if (chunked) {
+            os = new ChunkedOutputStream(response.getOutputStream(true));
+        } else {
+            os = response.getOutputStream(true);
+        }
         final OutputStream uos;
         final GZIPOutputStream out;
         if (gzip) {
-            uos = out = new GZIPOutputStream(cos);
+            uos = out = new GZIPOutputStream(os);
         } else {
             out = null;
-            uos = cos;
+            uos = os;
         }
         return new OutputStream() {
             boolean wrapperHeader = wrapJQuery && request != null && request.getJqueryCallback() != null;
@@ -815,20 +827,24 @@ public class RemoteAPI implements HttpRequestHandler {
                     bao.writeTo(response.getOutputStream(true));
                 }
             } else {
+                if (deflate) {
+                    response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_ENCODING, "deflate"));
+                } else {
+                    response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_ENCODING, "gzip"));
+                }
                 final OutputStream os;
-                if (request.getBridge() == null || request.getBridge().canHandleChunkedEncoding(request, response)) {
+                final HTTPBridge bridge = request.getBridge();
+                if (bridge == null || bridge.canHandleChunkedEncoding(request, response)) {
                     response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING, HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING_CHUNKED));
                     os = new ChunkedOutputStream(response.getOutputStream(true));
                 } else {
                     os = response.getOutputStream(true);
                 }
                 if (deflate) {
-                    response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_ENCODING, "deflate"));
                     final DeflaterOutputStream out = new DeflaterOutputStream(os, new Deflater(9, true), false);
                     out.write(bytes);
                     out.close();
                 } else {
-                    response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_ENCODING, "gzip"));
                     final GZIPOutputStream out = new GZIPOutputStream(os);
                     out.write(bytes);
                     out.close();

@@ -52,13 +52,15 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.appwork.utils.net.httpserver.handler.HttpRequestHandler;
+import org.appwork.utils.net.httpserver.requests.HTTPBridge;
+import org.appwork.utils.net.httpserver.requests.HttpRequest;
+import org.appwork.utils.net.httpserver.responses.HttpResponse;
 
 /**
  * @author daniel
  *
  */
-public class HttpServer implements Runnable {
-
+public class HttpServer implements Runnable, HTTPBridge {
     private final int                                      wishPort;
     private final AtomicReference<ServerSocket>            controlSocket   = new AtomicReference<ServerSocket>(null);
     private volatile Thread                                serverThread    = null;
@@ -151,13 +153,10 @@ public class HttpServer implements Runnable {
         ThreadPoolExecutor threadPool = null;
         try {
             threadPool = new ThreadPoolExecutor(0, 20, 10000l, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(100), new ThreadFactory() {
-
                 public Thread newThread(final Runnable r) {
                     return new HttpConnectionThread(HttpServer.this, r);
                 }
-
             }, new ThreadPoolExecutor.AbortPolicy()) {
-
                 final ThreadPoolExecutor threadPool;
                 {
                     threadPool = this;
@@ -184,7 +183,6 @@ public class HttpServer implements Runnable {
                     }
                     super.beforeExecute(t, r);
                 }
-
             };
             threadPool.allowCoreThreadTimeOut(true);
             while (controlSocket.get() == socket) {
@@ -246,10 +244,9 @@ public class HttpServer implements Runnable {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Runnable#run()
      */
-
     /**
      * @param localhostOnly
      *            the localhostOnly to set
@@ -323,4 +320,15 @@ public class HttpServer implements Runnable {
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.appwork.utils.net.httpserver.requests.HTTPBridge#canHandleChunkedEncoding(org.appwork.utils.net.httpserver.requests.HttpRequest,
+     * org.appwork.utils.net.httpserver.responses.HttpResponse)
+     */
+    @Override
+    public boolean canHandleChunkedEncoding(HttpRequest request, HttpResponse response) {
+        return true;
+    }
 }

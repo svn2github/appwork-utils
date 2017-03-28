@@ -89,6 +89,7 @@ public abstract class HttpRequest implements HttpRequestInterface {
     protected List<KeyValuePair>   requestedURLParameters = null;
     private List<String>           remoteAddress          = new ArrayList<String>();
     protected final HttpConnection connection;
+    private HTTPBridge             bridge;
 
     public HttpConnection getConnection() {
         return connection;
@@ -192,5 +193,21 @@ public abstract class HttpRequest implements HttpRequestInterface {
             return addresses.get(0);
         }
         return addresses.get(1);
+    }
+
+    /**
+     * @param string
+     */
+    public void setBridge(HTTPBridge bridge) {
+        this.bridge = bridge;
+    }
+
+    /**
+     * returns the server bridge. Exmaple: FCGI for the FCGI bridge
+     *
+     * @return
+     */
+    public HTTPBridge getBridge() {
+        return bridge;
     }
 }

@@ -257,6 +257,7 @@ public class HttpConnection implements Runnable {
         default:
             throw new IOException("Unsupported " + requestLine);
         }
+        request.setBridge(server);
         /* parse remoteClientAddresses */
         request.setRemoteAddress(this.getRemoteAddress(requestHeaders));
         request.setRequestedURLParameters(requestedURLParameters);

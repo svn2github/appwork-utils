@@ -793,7 +793,7 @@ public class RemoteAPI implements HttpRequestHandler {
             response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_LENGTH, bytes.length + ""));
             response.getOutputStream(true).write(bytes);
         } else {
-            if (bytes.length < 1 * 1024 * 1024) {
+            if (false && bytes.length < 1 * 1024 * 1024) {
                 // compress small in memory
                 if (deflate) {
                     response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_ENCODING, "deflate"));
@@ -815,21 +815,37 @@ public class RemoteAPI implements HttpRequestHandler {
                     bao.writeTo(response.getOutputStream(true));
                 }
             } else {
-                // stream bigger files and setencoding to chunked (no length header)
-                if (deflate) {
-                    response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING, HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING_CHUNKED));
-                    response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_ENCODING, "deflate"));
-                    DeflaterOutputStream out = null;
-                    out = new DeflaterOutputStream(new ChunkedOutputStream(response.getOutputStream(true)), new Deflater(9, true), true);
-                    out.write(bytes);
-                    out.close();
+                if (request.getBridge() == null || request.getBridge().canHandleChunkedEncoding(request, response)) {
+                    // stream bigger files and setencoding to chunked (no length header)
+                    if (deflate) {
+                        response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING, HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING_CHUNKED));
+                        response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_ENCODING, "deflate"));
+                        DeflaterOutputStream out = null;
+                        out = new DeflaterOutputStream(new ChunkedOutputStream(response.getOutputStream(true)), new Deflater(9, true), false);
+                        out.write(bytes);
+                        out.close();
+                    } else {
+                        response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING, HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING_CHUNKED));
+                        response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_ENCODING, "gzip"));
+                        GZIPOutputStream out = null;
+                        out = new GZIPOutputStream(new ChunkedOutputStream(response.getOutputStream(true)));
+                        out.write(bytes);
+                        out.close();
+                    }
                 } else {
-                    response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING, HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING_CHUNKED));
-                    response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_ENCODING, "gzip"));
-                    GZIPOutputStream out = null;
-                    out = new GZIPOutputStream(response.getOutputStream(true));
-                    out.write(bytes);
-                    out.close();
+                    if (deflate) {
+                        response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_ENCODING, "deflate"));
+                        DeflaterOutputStream out = null;
+                        out = new DeflaterOutputStream(response.getOutputStream(true), new Deflater(9, true), false);
+                        out.write(bytes);
+                        out.close();
+                    } else {
+                        response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_ENCODING, "gzip"));
+                        GZIPOutputStream out = null;
+                        out = new GZIPOutputStream(response.getOutputStream(true));
+                        out.write(bytes);
+                        out.close();
+                    }
                 }
             }
         }

@@ -43,9 +43,8 @@ import org.appwork.utils.StringUtils;
 import org.appwork.utils.logging2.LogSource;
 
 public class ExtLogManager extends LogManager {
-    public static String[] WHITELIST     = new String[] { "org.fourthline", "com.mongo", "javax.mail", "com.sun.xml.internal.messaging.saaj" };
-    public static String[] BLACKLIST     = new String[] { "com.mongodb.driver.cluster", "org.fourthline", "org.fourthline.cling.registry.Registry", "org.fourthline.cling.model.message.header", "org.fourthline.cling.model.message.UpnpHeaders", "org.fourthline.cling.transport" };
-
+    public static String[] WHITELIST     = new String[] { "org.fourthline", "org.mongo", "com.mongo", "javax.mail", "com.sun.xml.internal.messaging.saaj" };
+    public static String[] BLACKLIST     = new String[] { "org.mongodb.driver", "org.bson.ObjectId", "org.mongodb.diagnostics", "com.mongodb.diagnostics", "com.mongodb.driver", "org.fourthline", "org.fourthline.cling.registry.Registry", "org.fourthline.cling.model.message.header", "org.fourthline.cling.model.message.UpnpHeaders", "org.fourthline.cling.transport" };
     private LoggerFactory  loggerFactory = null;
 
     public LoggerFactory getLoggerFactory() {
@@ -58,23 +57,17 @@ public class ExtLogManager extends LogManager {
 
     public boolean addLogger(final Logger logger) {
         String name = logger.getName();
-
         if ("sun.util.logging.resources.logging".equals(logger.getResourceBundleName())) {
             if (loggerFactory != null) {
-
                 for (final String w : WHITELIST) {
                     if (name.startsWith(w)) {
                         System.out.println("Redirect Logger (WL): " + name);
                         return false;
-
                     }
                 }
-
             }
-
         }
         if (!(logger instanceof LogSource)) {
-
             // adds a handler to system loggers.
             // this handler delegates the output to our logging system
             logger.setLevel(Level.INFO);
@@ -82,7 +75,6 @@ public class ExtLogManager extends LogManager {
                 {
                     setLevel(Level.INFO);
                 }
-
                 private LogSource del;
 
                 @Override
@@ -111,12 +103,10 @@ public class ExtLogManager extends LogManager {
                 @Override
                 public void flush() {
                     // TODO Auto-generated method stub
-
                 }
 
                 @Override
                 public void close() throws SecurityException {
-
                 }
             });
         }
@@ -129,26 +119,29 @@ public class ExtLogManager extends LogManager {
 
     @Override
     public synchronized Logger getLogger(final String name) {
-
         if (loggerFactory != null) {
             for (final String b : BLACKLIST) {
                 if (name.startsWith(b)) {
                     LoggerFactory.getDefaultLogger().finer("Ignored (BL): " + name);
-                    return super.getLogger(name);
+                    Logger ret = super.getLogger(name);
+                    if (ret != null) {
+                        ret.setLevel(Level.OFF);
+                    }
+                    return ret;
                 }
             }
-
             for (final String w : WHITELIST) {
                 if (name.startsWith(w)) {
                     LoggerFactory.getDefaultLogger().finer("Redirect Logger (WL): " + name);
                     return loggerFactory.getLogger(name);
-
                 }
             }
-
         }
         LoggerFactory.getDefaultLogger().finer("Ignored: " + name);
-        return super.getLogger(name);
+        Logger ret = super.getLogger(name);
+        if (ret != null) {
+            ret.setLevel(Level.OFF);
+        }
+        return ret;
     }
-
 }

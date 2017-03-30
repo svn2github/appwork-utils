@@ -176,11 +176,21 @@ public class RemoteAPI implements HttpRequestHandler {
         }
     }
 
+    protected HTTPBridge getHTTPBridge(final RemoteAPIRequest request, final RemoteAPIResponse response) {
+        if (request != null) {
+            final HttpRequest httpRequest = request.getHttpRequest();
+            if (httpRequest != null) {
+                return httpRequest.getBridge();
+            }
+        }
+        return null;
+    }
+
     @Deprecated
     public static OutputStream getOutputStream(final RemoteAPIResponse response, final RemoteAPIRequest request, final boolean gzip, final boolean wrapJQuery) throws IOException {
         response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_REQUEST_CACHE_CONTROL, "no-store, no-cache"));
         response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_TYPE, "application/json"));
-        final HTTPBridge bridge = request.getHttpRequest().getBridge();
+        final HTTPBridge bridge = response.getRemoteAPI().getHTTPBridge(request, response);
         final boolean chunked;
         if (bridge == null || bridge.canHandleChunkedEncoding(request.getHttpRequest(), response.getHttpResponse())) {
             chunked = true;
@@ -833,7 +843,7 @@ public class RemoteAPI implements HttpRequestHandler {
                     response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_ENCODING, "gzip"));
                 }
                 final OutputStream os;
-                final HTTPBridge bridge = request.getBridge();
+                final HTTPBridge bridge = request != null ? request.getBridge() : null;
                 if (bridge == null || bridge.canHandleChunkedEncoding(request, response)) {
                     response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING, HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING_CHUNKED));
                     os = new ChunkedOutputStream(response.getOutputStream(true));

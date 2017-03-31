@@ -33,6 +33,7 @@
  * ==================================================================================================================================================== */
 package org.appwork.remoteapi;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -65,6 +66,7 @@ import org.appwork.remoteapi.responsewrapper.DataObject;
 import org.appwork.storage.JSonStorage;
 import org.appwork.storage.TypeRef;
 import org.appwork.utils.Application;
+import org.appwork.utils.IO;
 import org.appwork.utils.Regex;
 import org.appwork.utils.logging2.extmanager.LoggerFactory;
 import org.appwork.utils.net.ChunkedOutputStream;
@@ -703,8 +705,8 @@ public class RemoteAPI implements HttpRequestHandler {
                         }
                     }
                 }
-            clazz = clazz.getSuperclass();
-            this.interfaces = linterfaces;
+                clazz = clazz.getSuperclass();
+                this.interfaces = linterfaces;
             }
         }
     }
@@ -761,7 +763,7 @@ public class RemoteAPI implements HttpRequestHandler {
                         linterfaces.remove(namespace);
                     }
                 }
-            clazz = clazz.getSuperclass();
+                clazz = clazz.getSuperclass();
             }
             this.interfaces = linterfaces;
         }
@@ -798,6 +800,43 @@ public class RemoteAPI implements HttpRequestHandler {
             internal.setRequest(request);
             internal.setResponse(response);
             throw internal;
+        }
+    }
+
+    /**
+     * @param request
+     * @param response
+     * @param bytes
+     * @throws InternalApiException
+     * @throws IOException
+     */
+    public static void sendBytesCompressed(HttpRequest request, HttpResponse response, ByteArrayInputStream is) throws IOException {
+        final boolean gzip = RemoteAPI.gzip(request);
+        final boolean deflate = RemoteAPI.deflate(request) && Application.getJavaVersion() >= Application.JAVA16;
+        if (deflate) {
+            response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_ENCODING, "deflate"));
+        } else {
+            response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_ENCODING, "gzip"));
+        }
+        final OutputStream os;
+        final HTTPBridge bridge = request != null ? request.getBridge() : null;
+        if (bridge == null || bridge.canHandleChunkedEncoding(request, response)) {
+            response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING, HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING_CHUNKED));
+            os = new ChunkedOutputStream(response.getOutputStream(true));
+        } else {
+            os = response.getOutputStream(true);
+        }
+        if (deflate) {
+            final DeflaterOutputStream out = new DeflaterOutputStream(os, new Deflater(9, true), false);
+            IO.readStreamToOutputStream(-1, is, out, false);
+            out.close();
+        } else if (gzip) {
+            final GZIPOutputStream out = new GZIPOutputStream(os);
+            IO.readStreamToOutputStream(-1, is, out, false);
+            out.close();
+        } else {
+            IO.readStreamToOutputStream(-1, is, os, false);
+            os.close();
         }
     }
 

@@ -162,7 +162,9 @@ public class DesktopSupportLinux implements DesktopSupport {
 
     @Override
     public boolean isBrowseURLSupported() {
-        if (this.linuxBrowseUrl != null && this.linuxBrowseUrl.length >= 2 || this.fallBack.isBrowseURLSupported()) {
+        if (this.linuxBrowseUrl != null && this.linuxBrowseUrl.length >= 2) {
+            return true;
+        } else if (this.fallBack.isBrowseURLSupported()) {
             return true;
         } else {
             return false;
@@ -290,7 +292,7 @@ public class DesktopSupportLinux implements DesktopSupport {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.utils.os.DesktopSupport#getDefaultDownloadDirectory()
      */
     @Override

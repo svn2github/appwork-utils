@@ -55,7 +55,6 @@ import java.util.Map.Entry;
 import org.appwork.net.protocol.http.HTTPConstants;
 import org.appwork.txtresource.TranslationFactory;
 import org.appwork.utils.Application;
-import org.appwork.utils.StringUtils;
 import org.appwork.utils.logging2.LogInterface;
 import org.appwork.utils.net.ChunkedOutputStream;
 import org.appwork.utils.net.DownloadProgress;
@@ -471,10 +470,10 @@ public class BasicHTTP {
         }
     }
 
-    public HTTPConnection openPostConnection(final URL url, final UploadProgress progress, final InputStream is, final HashMap<String, String> header, long contentLength) throws BasicHTTPException, InterruptedException {
+    @SuppressWarnings("resource")
+    public HTTPConnection openPostConnection(final URL url, final UploadProgress progress, final InputStream is, final HashMap<String, String> header, final long contentLength) throws BasicHTTPException, InterruptedException {
         boolean close = true;
         synchronized (this.lock) {
-            OutputStream outputStream = null;
             final byte[] buffer = new byte[64000];
             try {
                 this.connection = HTTPConnectionFactory.createHTTPConnection(url, this.proxy);
@@ -482,35 +481,30 @@ public class BasicHTTP {
                 this.connection.setConnectTimeout(this.getConnectTimeout());
                 this.connection.setReadTimeout(this.getReadTimeout());
                 this.connection.setRequestMethod(RequestMethod.POST);
-                // maybe the header is already set
-                String clHeader = connection.getRequestProperties().get(HTTPConstants.HEADER_RESPONSE_CONTENT_LENGTH);
-                if (contentLength >= 0) {
-                    if (clHeader != null) {
-                        connection.getRequestProperties().remove(HTTPConstants.HEADER_RESPONSE_CONTENT_LENGTH);
-                    }
-                    this.connection.setRequestProperty(HTTPConstants.HEADER_RESPONSE_CONTENT_LENGTH, clHeader = String.valueOf(contentLength));
-                    connection.getRequestProperties().remove(HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING);
-                } else if (StringUtils.isEmpty(clHeader)) {
-                    if (clHeader != null) {
-                        connection.getRequestProperties().remove(HTTPConstants.HEADER_RESPONSE_CONTENT_LENGTH);
-                    }
-                    this.connection.setRequestProperty(HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING, HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING_CHUNKED);
-                }
-                if (StringUtils.isNotEmpty(clHeader) && contentLength < 0) {
-                    // correct the contentLength if not given, but available as header
-                    contentLength = Long.parseLong(clHeader);
-                }
                 this.connection.setRequestProperty("Accept-Language", TranslationFactory.getDesiredLanguage());
                 this.connection.setRequestProperty("User-Agent", "AppWork " + Application.getApplication());
                 this.connection.setRequestProperty("Connection", "Close");
                 /* connection specific headers */
                 if (header != null) {
                     for (final Entry<String, String> next : header.entrySet()) {
-                        this.connection.setRequestProperty(next.getKey(), next.getValue());
+                        if (HTTPConstants.HEADER_RESPONSE_CONTENT_LENGTH.equalsIgnoreCase(next.getKey())) {
+                            continue;
+                        } else {
+                            this.connection.setRequestProperty(next.getKey(), next.getValue());
+                        }
                     }
                 }
                 for (final Entry<String, String> next : this.requestHeader.entrySet()) {
-                    this.connection.setRequestProperty(next.getKey(), next.getValue());
+                    if (HTTPConstants.HEADER_RESPONSE_CONTENT_LENGTH.equalsIgnoreCase(next.getKey())) {
+                        continue;
+                    } else {
+                        this.connection.setRequestProperty(next.getKey(), next.getValue());
+                    }
+                }
+                if (contentLength >= 0) {
+                    this.connection.setRequestProperty(HTTPConstants.HEADER_RESPONSE_CONTENT_LENGTH, Long.toString(contentLength));
+                } else {
+                    this.connection.setRequestProperty(HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING, HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING_CHUNKED);
                 }
                 int lookupTry = 0;
                 try {
@@ -529,9 +523,11 @@ public class BasicHTTP {
                 } catch (final IOException e) {
                     throw new BasicHTTPException(this.connection, new ReadIOException(e));
                 }
-                outputStream = this.connection.getOutputStream();
+                final OutputStream outputStream;
                 if (contentLength < 0) {
-                    outputStream = new ChunkedOutputStream(outputStream);
+                    outputStream = new ChunkedOutputStream(this.connection.getOutputStream());
+                } else {
+                    outputStream = this.connection.getOutputStream();
                 }
                 int read = 0;
                 while ((read = is.read(buffer)) != -1) {
@@ -548,15 +544,14 @@ public class BasicHTTP {
                         throw new InterruptedException();
                     }
                 }
-                if (outputStream instanceof ChunkedOutputStream) {
-                    ((ChunkedOutputStream) outputStream).sendEOF();
-                    // outputStream.close();
-                } else {
-                    try {
+                try {
+                    if (outputStream instanceof ChunkedOutputStream) {
+                        ((ChunkedOutputStream) outputStream).sendEOF();
+                    } else {
                         outputStream.flush();
-                    } catch (final IOException e) {
-                        throw new BasicHTTPException(this.connection, new WriteIOException(e));
                     }
+                } catch (final IOException e) {
+                    throw new BasicHTTPException(this.connection, new WriteIOException(e));
                 }
                 this.connection.finalizeConnect();
                 this.checkResponseCode();

@@ -130,14 +130,13 @@ public abstract class Upload {
                 header.put(HTTPConstants.HEADER_REQUEST_IF_MATCH, eTag);
             }
             header.put(HTTPConstants.HEADER_REQUEST_CONTENT_TYPE, "application/octet-stream");
-            header.put(HTTPConstants.HEADER_RESPONSE_CONTENT_LENGTH, "0");
             if (this.file.exists() == false) {
                 throw new FileNotFoundException("Local file does not exist: " + this.file);
             }
             header.put(HTTPConstants.HEADER_RESPONSE_CONTENT_RANGE, "bytes */" + this.file.length());
             this.checkInterrupted();
             long tt = System.currentTimeMillis();
-            con = shttp.openPostConnection(this.getUploadURL(), null, new ByteArrayInputStream(new byte[0]), header);
+            con = shttp.openPostConnection(this.getUploadURL(), null, new ByteArrayInputStream(new byte[0]), header, 0);
             LoggerFactory.getDefaultLogger().info("GRZ Open Connection " + (System.currentTimeMillis() - tt));
             this.parseResponse(con);
             return this.remoteSize;
@@ -318,11 +317,10 @@ public abstract class Upload {
             final DigestInputStream is = new DigestInputStream(new LimitedInputStream(fis, uploadSize), md);
             header.put(HTTPConstants.HEADER_REQUEST_IF_MATCH, this.getQuotedEtag());
             header.put(HTTPConstants.HEADER_REQUEST_CONTENT_TYPE, "application/octet-stream");
-            header.put(HTTPConstants.HEADER_RESPONSE_CONTENT_LENGTH, "" + uploadSize);
             header.put(HTTPConstants.HEADER_RESPONSE_CONTENT_RANGE, "bytes " + remoteSize + "-" + rangeEnd + "/" + this.file.length());
             this.checkInterrupted();
             long tt = System.currentTimeMillis();
-            con = shttp.openPostConnection(this.getUploadURL(), uploadProgress, is, header);
+            con = shttp.openPostConnection(this.getUploadURL(), uploadProgress, is, header, uploadSize);
             LoggerFactory.getDefaultLogger().info("UC Open Connection " + (System.currentTimeMillis() - tt));
             this.parseResponse(con);
             final String remoteHash = new String(IO.readStream(1024, con.getInputStream()), "UTF-8");

@@ -33,9 +33,9 @@
  * ==================================================================================================================================================== */
 package org.appwork.remoteapi;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
@@ -810,12 +810,12 @@ public class RemoteAPI implements HttpRequestHandler {
      * @throws InternalApiException
      * @throws IOException
      */
-    public static void sendBytesCompressed(HttpRequest request, HttpResponse response, ByteArrayInputStream is) throws IOException {
+    public static void sendBytesCompressed(HttpRequest request, HttpResponse response, InputStream is) throws IOException {
         final boolean gzip = RemoteAPI.gzip(request);
         final boolean deflate = RemoteAPI.deflate(request) && Application.getJavaVersion() >= Application.JAVA16;
         if (deflate) {
             response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_ENCODING, "deflate"));
-        } else {
+        } else if (gzip) {
             response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_ENCODING, "gzip"));
         }
         final OutputStream os;
@@ -865,7 +865,7 @@ public class RemoteAPI implements HttpRequestHandler {
                     out.close();
                     response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_LENGTH, bao.size() + ""));
                     bao.writeTo(response.getOutputStream(true));
-                } else {
+                } else if (gzip) {
                     response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_ENCODING, "gzip"));
                     GZIPOutputStream out = null;
                     ByteArrayOutputStream bao;
@@ -874,11 +874,14 @@ public class RemoteAPI implements HttpRequestHandler {
                     out.close();
                     response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_LENGTH, bao.size() + ""));
                     bao.writeTo(response.getOutputStream(true));
+                } else {
+                    response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_LENGTH, bytes.length + ""));
+                    response.getOutputStream(true).write(bytes);
                 }
             } else {
                 if (deflate) {
                     response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_ENCODING, "deflate"));
-                } else {
+                } else if (gzip) {
                     response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_ENCODING, "gzip"));
                 }
                 final OutputStream os;
@@ -893,10 +896,13 @@ public class RemoteAPI implements HttpRequestHandler {
                     final DeflaterOutputStream out = new DeflaterOutputStream(os, new Deflater(9, true), false);
                     out.write(bytes);
                     out.close();
-                } else {
+                } else if (gzip) {
                     final GZIPOutputStream out = new GZIPOutputStream(os);
                     out.write(bytes);
                     out.close();
+                } else {
+                    os.write(bytes);
+                    os.close();
                 }
             }
         }

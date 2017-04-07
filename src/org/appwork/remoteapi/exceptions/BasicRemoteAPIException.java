@@ -119,7 +119,7 @@ public class BasicRemoteAPIException extends Exception implements HttpConnection
 
     public boolean handle(final HttpResponse response, boolean gzip) throws IOException {
         byte[] bytes;
-        final String str = JSonStorage.serializeToJson(new DeviceErrorResponse(this.getType(), this.data));
+        final String str = JSonStorage.serializeToJson(new DeviceErrorResponse(this.getType(), getData()));
         bytes = str.getBytes("UTF-8");
         if (gzip) {
             response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_ENCODING, "gzip"));

@@ -35,6 +35,7 @@ package org.appwork.utils;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 public class StringUtils {
     public static boolean contains(final String input, final String contains) {
@@ -283,8 +284,20 @@ public class StringUtils {
      * @param parameters
      * @param string
      * @return
+     * @deprecated use {@link #join(String, Objects...)} instead
      */
     public static String join(Object[] parameters, String separator) {
+        StringBuilder sb = new StringBuilder();
+        for (Object s : parameters) {
+            if (sb.length() > 0) {
+                sb.append(separator);
+            }
+            sb.append(String.valueOf(s));
+        }
+        return sb.toString();
+    }
+
+    public static String join(String separator, Object... parameters) {
         StringBuilder sb = new StringBuilder();
         for (Object s : parameters) {
             if (sb.length() > 0) {
@@ -302,5 +315,21 @@ public class StringUtils {
      */
     public static String join(List<? extends Object> params, String separator) {
         return join(params.toArray(new Object[] {}), separator);
+    }
+
+    /**
+     * @param fcgiPorts
+     * @param separator
+     * @return
+     */
+    public static String join(String separator, int... ints) {
+        StringBuilder sb = new StringBuilder();
+        for (Object s : ints) {
+            if (sb.length() > 0) {
+                sb.append(separator);
+            }
+            sb.append(String.valueOf(s));
+        }
+        return sb.toString();
     }
 }

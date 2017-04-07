@@ -86,7 +86,23 @@ public class CrossSystem {
         DRAGONFLYBSD(OSFamily.BSD),
         BSD(OSFamily.BSD),
         LINUX(OSFamily.LINUX),
+        /*
+         * List must be sorted by release Date!!
+         */
         MAC(OSFamily.MAC),
+        MAC_CHEETAH(OSFamily.MAC),
+        MAC_PUMA(OSFamily.MAC),
+        MAC_JAGUAR(OSFamily.MAC),
+        MAC_PANTHER(OSFamily.MAC),
+        MAC_TIGER(OSFamily.MAC),
+        MAC_LEOPOARD(OSFamily.MAC),
+        MAC_SNOW_LEOPOARD(OSFamily.MAC),
+        MAC_LION(OSFamily.MAC),
+        MAC_MOUNTAIN_LION(OSFamily.MAC),
+        MAC_MAVERICKS(OSFamily.MAC),
+        MAC_YOSEMITE(OSFamily.MAC),
+        MAC_EL_CAPITAN(OSFamily.MAC),
+        MAC_SIERRA(OSFamily.MAC),
         OS2(OSFamily.OS2),
         /*
          * List must be sorted by release Date!!
@@ -366,7 +382,7 @@ public class CrossSystem {
         pathPart = pathPart.replaceFirst("^\\.+", ".");
         /*
          * remove ending dots, not allowed under windows and others os maybe too
-         * 
+         *
          * Do not end a file or directory name with a space or a period.
          */
         pathPart = pathPart.replaceFirst("\\.+$", "");
@@ -494,25 +510,20 @@ public class CrossSystem {
         return false;
     }
 
-    /**
-     * @return e.g. MacOsXVersion.MAC_OSX_10p6_SNOW_LEOPARD.getVersionID() for 10.6.4
-     */
-    public static long getMacOSVersion() {
-        if (CrossSystem.isMac()) {
-            final String str = System.getProperty("os.version");
-            return CrossSystem.getMacOSVersion(str);
+    private static long parseMacOSVersion(final String osVersionProperty) {
+        if (osVersionProperty != null) {
+            try {
+                long ret = 0;
+                long faktor = 1000000;
+                for (final String s : osVersionProperty.split("\\.")) {
+                    ret += Integer.parseInt(s) * faktor;
+                    faktor /= 1000;
+                }
+                return ret;
+            } catch (final Throwable ignore) {
+            }
         }
-        return -1l;
-    }
-
-    public static long getMacOSVersion(final String osVersionProperty) {
-        long l = 0;
-        long faktor = 1000000;
-        for (final String s : osVersionProperty.split("\\.")) {
-            l += Integer.parseInt(s) * faktor;
-            faktor /= 1000;
-        }
-        return l;
+        return -1;
     }
 
     /**
@@ -532,13 +543,9 @@ public class CrossSystem {
         return CrossSystem.OS;
     }
 
-    /**
-     * @param osString
-     * @return
-     */
-    public static OperatingSystem getOSByString(final String osString) {
-        if (osString != null) {
-            final String os = osString.toLowerCase(Locale.ENGLISH);
+    private static OperatingSystem getWindowsRelease(final String osName) {
+        if (osName != null) {
+            final String os = osName.toLowerCase(Locale.ENGLISH);
             if (os.contains("windows 10")) {
                 return OperatingSystem.WINDOWS_10;
             } else if (os.contains("windows 8")) {
@@ -565,22 +572,93 @@ public class CrossSystem {
                 return OperatingSystem.WINDOWS_NT;
             } else if (os.contains("windows")) {
                 return OperatingSystem.WINDOWS_OTHERS;
-            } else if (os.contains("mac") || os.contains("darwin")) {
-                return OperatingSystem.MAC;
+            }
+        }
+        return null;
+    }
+
+    private static OperatingSystem getMacOSRelease(final String osName, final String osVersion) {
+        if (osName != null) {
+            final String os = osName.toLowerCase(Locale.ENGLISH);
+            if (os.contains("mac") || os.contains("darwin")) {
+                final long version = parseMacOSVersion(osVersion);
+                if (version >= 10012000) {
+                    return OperatingSystem.MAC_SIERRA;
+                } else if (version >= 10011000) {
+                    return OperatingSystem.MAC_EL_CAPITAN;
+                } else if (version >= 10010000) {
+                    return OperatingSystem.MAC_YOSEMITE;
+                } else if (version >= 10009000) {
+                    return OperatingSystem.MAC_MAVERICKS;
+                } else if (version >= 10008000) {
+                    return OperatingSystem.MAC_MOUNTAIN_LION;
+                } else if (version >= 10007000) {
+                    return OperatingSystem.MAC_LION;
+                } else if (version >= 10006000) {
+                    return OperatingSystem.MAC_SNOW_LEOPOARD;
+                } else if (version >= 10005000) {
+                    return OperatingSystem.MAC_LEOPOARD;
+                } else if (version >= 10004000) {
+                    return OperatingSystem.MAC_TIGER;
+                } else if (version >= 10003000) {
+                    return OperatingSystem.MAC_PANTHER;
+                } else if (version >= 10002000) {
+                    return OperatingSystem.MAC_JAGUAR;
+                } else if (version >= 10001000) {
+                    return OperatingSystem.MAC_PUMA;
+                } else if (version >= 10000000) {
+                    return OperatingSystem.MAC_CHEETAH;
+                } else {
+                    return OperatingSystem.MAC;
+                }
+            }
+        }
+        return null;
+    }
+
+    private static OperatingSystem getBSDRelease(final String osName) {
+        if (osName != null) {
+            final String os = osName.toLowerCase(Locale.ENGLISH);
+            if (os.contains("bsd")) {
+                if (os.contains("kfreebsd")) {
+                    return OperatingSystem.KFREEBSD;
+                } else if (os.contains("freebsd")) {
+                    return OperatingSystem.FREEBSD;
+                } else if (os.contains("netbsd")) {
+                    return OperatingSystem.NETBSD;
+                } else if (os.contains("openbsd")) {
+                    return OperatingSystem.OPENBSD;
+                } else if (os.contains("dragonflybsd")) {
+                    return OperatingSystem.DRAGONFLYBSD;
+                } else {
+                    return OperatingSystem.BSD;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @param osString
+     * @return
+     */
+    public static OperatingSystem getOSByString(final String osString) {
+        if (osString != null) {
+            final String os = osString.toLowerCase(Locale.ENGLISH);
+            OperatingSystem ret = null;
+            if (ret == null && (os.contains("windows") || os.contains("nt"))) {
+                ret = getWindowsRelease(os);
+            }
+            if (ret == null && (os.contains("mac") || os.contains("darwin"))) {
+                ret = getMacOSRelease(os, System.getProperty("os.version"));
+            }
+            if (ret == null && os.contains("bsd")) {
+                ret = getBSDRelease(os);
+            }
+            if (ret != null) {
+                return ret;
             } else if (os.contains("os/2")) {
                 return OperatingSystem.OS2;
-            } else if (os.contains("kfreebsd")) {
-                return OperatingSystem.KFREEBSD;
-            } else if (os.contains("freebsd")) {
-                return OperatingSystem.FREEBSD;
-            } else if (os.contains("netbsd")) {
-                return OperatingSystem.NETBSD;
-            } else if (os.contains("openbsd")) {
-                return OperatingSystem.OPENBSD;
-            } else if (os.contains("dragonflybsd")) {
-                return OperatingSystem.DRAGONFLYBSD;
-            } else if (os.contains("bsd")) {
-                return OperatingSystem.BSD;
             } else {
                 return OperatingSystem.LINUX;
             }

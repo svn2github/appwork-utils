@@ -40,6 +40,8 @@ import java.util.zip.GZIPOutputStream;
 import org.appwork.net.protocol.http.HTTPConstants;
 import org.appwork.net.protocol.http.HTTPConstants.ResponseCode;
 import org.appwork.storage.JSonStorage;
+import org.appwork.utils.Exceptions;
+import org.appwork.utils.logging2.LogInterface;
 import org.appwork.utils.net.HTTPHeader;
 import org.appwork.utils.net.httpserver.HttpConnectionExceptionHandler;
 import org.appwork.utils.net.httpserver.requests.HttpRequestInterface;
@@ -162,5 +164,16 @@ public class BasicRemoteAPIException extends Exception implements HttpConnection
             return (BasicRemoteAPIException) e;
         }
         return new BasicRemoteAPIException(e, e.getClass().getSimpleName(), ResponseCode.SERVERERROR_INTERNAL, null);
+    }
+
+    /**
+     * @param defaultLogger
+     */
+    public void writeToLogger(LogInterface logger) {
+        if (request == null) {
+            logger.info("Exception in Request **\r\n" + Exceptions.getStackTrace(this));
+        } else {
+            logger.info("Exception in Request " + request.getId() + "\r\n" + Exceptions.getStackTrace(this));
+        }
     }
 }

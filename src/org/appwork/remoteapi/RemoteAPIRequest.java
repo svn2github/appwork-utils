@@ -71,7 +71,7 @@ public class RemoteAPIRequest implements HttpRequestInterface {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#toString()
      */
     @Override
@@ -234,5 +234,16 @@ public class RemoteAPIRequest implements HttpRequestInterface {
      */
     public boolean isHttps() {
         return request.isHttps();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.appwork.utils.net.httpserver.requests.HttpRequestInterface#getID()
+     */
+    @Override
+    public long getId() {
+        // TODO Auto-generated method stub
+        return request.getId();
     }
 }

@@ -97,7 +97,7 @@ public class GetRequest extends HttpRequest {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
-        sb.append("\r\n----------------Request-------------------------\r\n");
+        sb.append("\r\n----------------Request " + getId() + "-------------------------\r\n");
         sb.append("GET ").append(this.getRequestedURL()).append(" HTTP/1.1\r\n");
         for (final HTTPHeader key : this.getRequestHeaders()) {
             sb.append(key.getKey());

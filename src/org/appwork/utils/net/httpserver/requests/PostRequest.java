@@ -250,14 +250,14 @@ public class PostRequest extends HttpRequest {
                 json = modifyByContentType(content_type, json);
                 jsonRequest = JSonStorage.restoreFromString(json, JSonRequest.TYPE_REF);
             }
-            break;
+                break;
             case X_WWW_FORM_URLENCODED: {
                 final byte[] jsonBytes = IO.readStream(-1, this.getInputStream());
                 String params = new String(jsonBytes, charSet);
                 params = modifyByContentType(content_type, params);
                 this.postParameters = HttpConnection.parseParameterList(params);
             }
-            break;
+                break;
             }
         }
         if (jsonRequest != null && jsonRequest.getParams() != null) {
@@ -301,7 +301,7 @@ public class PostRequest extends HttpRequest {
     public String toString() {
         try {
             final StringBuilder sb = new StringBuilder();
-            sb.append("\r\n----------------Request-------------------------\r\n");
+            sb.append("\r\n----------------Request " + getId() + "-------------------------\r\n");
             sb.append(getRequestMethod() + " ").append(this.getRequestedURL()).append(" HTTP/1.1\r\n");
             for (final HTTPHeader key : this.getRequestHeaders()) {
                 sb.append(key.getKey());

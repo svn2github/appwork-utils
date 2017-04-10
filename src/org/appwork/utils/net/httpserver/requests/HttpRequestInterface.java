@@ -40,7 +40,7 @@ import org.appwork.utils.net.HeaderCollection;
 
 /**
  * @author daniel
- * 
+ *
  */
 public interface HttpRequestInterface {
     public String getRequestedPath();
@@ -48,6 +48,12 @@ public interface HttpRequestInterface {
     public String getParameterbyKey(String key) throws IOException;
 
     public String[] getParametersbyKey(String key) throws IOException;
+
+    /**
+     *
+     * @return session-unique long for this request. Used to map log entries
+     */
+    public long getId();
 
     public String getRequestedURL();
 

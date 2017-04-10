@@ -35,6 +35,7 @@ package org.appwork.utils.net.httpserver.requests;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.appwork.utils.net.HeaderCollection;
 import org.appwork.utils.net.httpserver.HttpConnection;
@@ -90,13 +91,21 @@ public abstract class HttpRequest implements HttpRequestInterface {
     private List<String>           remoteAddress          = new ArrayList<String>();
     protected final HttpConnection connection;
     private HTTPBridge             bridge;
+    private final long             id;
 
     public HttpConnection getConnection() {
         return connection;
     }
 
+    private static AtomicLong REQUEST_ID_COUNTER = new AtomicLong(0);
+
     public HttpRequest(final HttpConnection connection) {
         this.connection = connection;
+        id = REQUEST_ID_COUNTER.incrementAndGet();
+    }
+
+    public long getId() {
+        return id;
     }
 
     /**

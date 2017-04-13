@@ -33,6 +33,7 @@
  * ==================================================================================================================================================== */
 package org.appwork.utils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -331,5 +332,18 @@ public class StringUtils {
             sb.append(String.valueOf(s));
         }
         return sb.toString();
+    }
+
+    /**
+     * @param string
+     * @param length
+     * @return returns a list of the given length and each entry contains string
+     */
+    public static List<String> createList(String string, int length) {
+        ArrayList<String> ret = new ArrayList<String>();
+        while (length-- > 0) {
+            ret.add(string);
+        }
+        return ret;
     }
 }

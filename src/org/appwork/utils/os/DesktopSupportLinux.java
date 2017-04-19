@@ -37,6 +37,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Locale;
 
 import org.appwork.utils.Application;
 import org.appwork.utils.StringUtils;
@@ -67,6 +68,10 @@ public class DesktopSupportLinux implements DesktopSupport {
         return waylandDetected;
     }
 
+    private final boolean contains(String string, String value) {
+        return string != null && value != null && string.toLowerCase(Locale.ENGLISH).contains(value.toLowerCase(Locale.ENGLISH));
+    }
+
     public DesktopSupportLinux() {
         /* java vm property */
         final String sunDesktop = System.getProperty("sun.desktop");
@@ -82,29 +87,38 @@ public class DesktopSupportLinux implements DesktopSupport {
         final String GDMSESSION = System.getenv("GDMSESSION");
         final String DESKTOP_SESSION = System.getenv("DESKTOP_SESSION");
         final String[] openCommand;
-        if ("wayland".equals(XDG_SESSION_TYPE) || (WAYLAND_DISPLAY != null && WAYLAND_DISPLAY.contains("wayland"))) {
-            System.out.println("Wayland detected");
-            waylandDetected = true;
+        if (contains(XDG_CURRENT_DESKTOP, "wayland")) {
+            System.out.println("Wayland detected:XDG_CURRENT_DESKTOP=" + XDG_CURRENT_DESKTOP);
+            this.waylandDetected = true;
+        } else if (contains(GDMSESSION, "wayland")) {
+            System.out.println("Wayland detected:GDMSESSION=" + GDMSESSION);
+            this.waylandDetected = true;
+        } else if (contains(XDG_SESSION_TYPE, "wayland")) {
+            System.out.println("Wayland detected:XDG_SESSION_TYPE=" + XDG_SESSION_TYPE);
+            this.waylandDetected = true;
+        } else if (contains(WAYLAND_DISPLAY, "wayland")) {
+            System.out.println("Wayland detected:WAYLAND_DISPLAY=" + WAYLAND_DISPLAY);
+            this.waylandDetected = true;
         } else {
             this.waylandDetected = false;
         }
-        if ("Unity".equals(XDG_CURRENT_DESKTOP) || "ubuntu".equals(GDMSESSION) || "ubuntu-2d".equals(GDMSESSION)) {
-            if ("ubuntu-2d".equals(GDMSESSION)) {
+        if (contains(XDG_CURRENT_DESKTOP, "Unity") || contains(GDMSESSION, "ubuntu")) {
+            if (contains(GDMSESSION, "ubuntu-2d")) {
                 System.out.println("Unity-2D Desktop detected");
             } else {
                 System.out.println("Unity-3D Desktop detected");
             }
             this.windowManager = WINDOW_MANAGER.UNITY;
             openCommand = new String[] { "gnome-open", "%s" };
-        } else if ("GNOME".equalsIgnoreCase(XDG_CURRENT_DESKTOP) || (StringUtils.isNotEmpty(GNOME_DESKTOP_SESSION_ID) && !"this-is-deprecated".equals(GNOME_DESKTOP_SESSION_ID)) || "GNOME".equalsIgnoreCase(GDMSESSION) || "gnome-shell".equals(GDMSESSION) || "gnome-classic".equals(GDMSESSION) || "gnome-fallback".equals(GDMSESSION) || "cinnamon".equals(GDMSESSION)) {
+        } else if (contains(XDG_CURRENT_DESKTOP, "GNOME") || (StringUtils.isNotEmpty(GNOME_DESKTOP_SESSION_ID) && !"this-is-deprecated".equals(GNOME_DESKTOP_SESSION_ID)) || contains(GDMSESSION, "GNOME") || contains(GDMSESSION, "gnome-shell") || contains(GDMSESSION, "gnome-classic") || contains(GDMSESSION, "gnome-fallback") || contains(GDMSESSION, "cinnamon")) {
             System.out.println("Gnome Desktop detected");
             this.windowManager = WINDOW_MANAGER.GNOME;
             openCommand = new String[] { "gnome-open", "%s" };
-        } else if ("mate".equalsIgnoreCase(XDG_CURRENT_DESKTOP) || "mate".equalsIgnoreCase(DESKTOP_SESSION)) {
+        } else if (contains(XDG_CURRENT_DESKTOP, "mate") || contains(DESKTOP_SESSION, "mate")) {
             System.out.println("Mate Desktop detected");
             this.windowManager = WINDOW_MANAGER.MATE;
             openCommand = new String[] { "gnome-open", "%s" };
-        } else if ("true".equals(KDE_FULL_SESSION) || "kde-plasma".equals(DESKTOP_SESSION)) {
+        } else if (contains(KDE_FULL_SESSION, "true") || contains(DESKTOP_SESSION, "kde-plasma")) {
             if (KDE_SESSION_VERSION != null) {
                 System.out.println("KDE Version " + KDE_SESSION_VERSION + " detected");
             } else {
@@ -121,7 +135,7 @@ public class DesktopSupportLinux implements DesktopSupport {
                 }
             }
             openCommand = new String[] { kdeOpenCommand, "%s" };
-        } else if ("XFCE".equals(XDG_CURRENT_DESKTOP)) {
+        } else if (contains(XDG_CURRENT_DESKTOP, "XFCE")) {
             System.out.println("XFCE detected");
             this.windowManager = WINDOW_MANAGER.XFCE;
             openCommand = new String[] { "xdg-open", "%s" };

@@ -37,6 +37,7 @@ import java.awt.Point;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 
 import javax.swing.ButtonModel;
 import javax.swing.JCheckBox;
@@ -51,13 +52,11 @@ import org.appwork.utils.swing.EDTRunner;
 import org.appwork.utils.swing.SwingUtils;
 
 public class ExtCheckBox extends JCheckBox implements ToolTipHandler {
-
     /**
      *
      */
     private static final long          serialVersionUID = 3223817461429862778L;
     private JComponent[]               dependencies;
-
     private TooltipTextDelegateFactory tooltipFactory;
 
     /**
@@ -70,7 +69,6 @@ public class ExtCheckBox extends JCheckBox implements ToolTipHandler {
         SwingUtils.setOpaque(this, false);
         // addActionListener(this);
         setDependencies(components);
-
     }
 
     /**
@@ -84,27 +82,21 @@ public class ExtCheckBox extends JCheckBox implements ToolTipHandler {
         this(components);
         setModel(new ConfigToggleButtonModel(keyHandler));
         updateDependencies();
-
     }
 
     public void setModel(final ButtonModel newModel) {
         super.setModel(newModel);
         newModel.addItemListener(new ItemListener() {
-
             @Override
             public void itemStateChanged(final ItemEvent e) {
-
                 new EDTRunner() {
-
                     @Override
                     protected void runInEDT() {
                         updateDependencies();
                     }
-
                 };
             }
         });
-
     }
 
     public JComponent[] getDependencies() {
@@ -113,7 +105,6 @@ public class ExtCheckBox extends JCheckBox implements ToolTipHandler {
 
     public void setDependencies(final JComponent... dependencies) {
         this.dependencies = dependencies;
-
         updateDependencies();
     }
 
@@ -124,7 +115,6 @@ public class ExtCheckBox extends JCheckBox implements ToolTipHandler {
     public void setTooltipFactory(final TooltipTextDelegateFactory tooltipFactory) {
         this.tooltipFactory = tooltipFactory;
     }
-
     // public void setSelected(boolean b) {
     //
     // super.setSelected(b);
@@ -142,17 +132,22 @@ public class ExtCheckBox extends JCheckBox implements ToolTipHandler {
     // public void actionPerformed(ActionEvent e) {
     // updateDependencies();
     // }
-
     /**
      *
      */
     public void updateDependencies() {
         if (dependencies != null) {
+            ArrayList<ExtCheckBox> boxes = new ArrayList<ExtCheckBox>();
             for (final JComponent c : dependencies) {
                 c.setEnabled(getDependenciesLogic(c, isSelected()));
+                if (c instanceof ExtCheckBox) {
+                    boxes.add((ExtCheckBox) c);
+                }
+            }
+            for (ExtCheckBox box : boxes) {
+                box.updateDependencies();
             }
         }
-
     }
 
     /**
@@ -173,18 +168,17 @@ public class ExtCheckBox extends JCheckBox implements ToolTipHandler {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.swing.components.tooltips.ToolTipHandler#createExtTooltip (java.awt.Point)
      */
     @Override
     public ExtTooltip createExtTooltip(final Point mousePosition) {
-
         return getTooltipFactory().createTooltip();
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.swing.components.tooltips.ToolTipHandler# isTooltipDisabledUntilNextRefocus()
      */
     @Override
@@ -195,7 +189,7 @@ public class ExtCheckBox extends JCheckBox implements ToolTipHandler {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.swing.components.tooltips.ToolTipHandler#updateTooltip(org .appwork.swing.components.tooltips.ExtTooltip,
      * java.awt.event.MouseEvent)
      */
@@ -210,4 +204,16 @@ public class ExtCheckBox extends JCheckBox implements ToolTipHandler {
         return false;
     }
 
+    /**
+     * @param jLabel
+     * @return
+     */
+    public JComponent addDependency(JComponent c) {
+        JComponent[] newDeps = new JComponent[dependencies.length + 1];
+        System.arraycopy(dependencies, 0, newDeps, 0, dependencies.length);
+        newDeps[newDeps.length - 1] = c;
+        dependencies = newDeps;
+        updateDependencies();
+        return c;
+    }
 }

@@ -183,6 +183,10 @@ public class SyntheticaHelper {
             boolean decorated = config.isWindowDecorationEnabled();
             de.javasoft.plaf.synthetica.SyntheticaLookAndFeel.setWindowsDecorated(decorated);
             UIManager.put("Synthetica.window.decoration", decorated);
+            if (CrossSystem.isUnix()) {
+                // Robot.createScreenCapture crashes on wayland
+                UIManager.put("Synthetica.popupRobot.enabled", Boolean.FALSE);
+            }
             UIManager.put("Synthetica.text.antialias", config.isTextAntiAliasEnabled());
             UIManager.put("Synthetica.extendedFileChooser.rememberPreferences", Boolean.FALSE);
             UIManager.put("Synthetica.extendedFileChooser.rememberLastDirectory", Boolean.FALSE);

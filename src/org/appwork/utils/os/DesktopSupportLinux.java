@@ -87,6 +87,7 @@ public class DesktopSupportLinux implements DesktopSupport {
         final String GDMSESSION = System.getenv("GDMSESSION");
         final String DESKTOP_SESSION = System.getenv("DESKTOP_SESSION");
         final String[] openCommand;
+        /* WAYLAND? */
         if (contains(XDG_CURRENT_DESKTOP, "wayland")) {
             System.out.println("Wayland detected:XDG_CURRENT_DESKTOP=" + XDG_CURRENT_DESKTOP);
             this.waylandDetected = true;
@@ -306,7 +307,7 @@ public class DesktopSupportLinux implements DesktopSupport {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.utils.os.DesktopSupport#getDefaultDownloadDirectory()
      */
     @Override

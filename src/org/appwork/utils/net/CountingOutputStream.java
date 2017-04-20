@@ -41,7 +41,6 @@ import java.io.OutputStream;
  *
  */
 public class CountingOutputStream extends OutputStream implements CountingConnection {
-
     private final OutputStream os;
     private volatile long      written = 0;
 
@@ -61,7 +60,7 @@ public class CountingOutputStream extends OutputStream implements CountingConnec
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.utils.net.CountingConnection#transferedBytes()
      */
     @Override
@@ -75,6 +74,12 @@ public class CountingOutputStream extends OutputStream implements CountingConnec
         this.written += b.length;
     }
 
+    public void setTransferedBytes(long written) {
+        if (written >= 0) {
+            this.written = written;
+        }
+    }
+
     @Override
     public void write(final byte b[], final int off, final int len) throws IOException {
         this.os.write(b, off, len);
@@ -86,5 +91,4 @@ public class CountingOutputStream extends OutputStream implements CountingConnec
         this.os.write(b);
         this.written++;
     }
-
 }

@@ -153,7 +153,7 @@ public class HTTPConnectionImpl implements HTTPConnection {
     protected volatile boolean                   inputStreamConnected = false;
     protected String                             httpHeader           = null;
     protected String                             invalidHttpHeader    = null;
-    private boolean                              contentDecoded       = true;
+    protected boolean                            contentDecoded       = true;
     protected long                               postTodoLength       = -1;
     private int[]                                allowedResponseCodes = new int[0];
     protected final CopyOnWriteArrayList<String> connectExceptions    = new CopyOnWriteArrayList<String>();
@@ -1085,36 +1085,35 @@ public class HTTPConnectionImpl implements HTTPConnection {
         this.connectInputStream();
         final int code = this.getResponseCode();
         if (this.isOK() || code == 404 || code == 403 || code == 416 || code == 401) {
-            if (this.convertedInputStream != null) {
-                return this.convertedInputStream;
-            }
-            if (this.contentDecoded && !RequestMethod.HEAD.equals(this.getRequestMethod())) {
-                final String encodingTransfer = this.getHeaderField("Content-Transfer-Encoding");
-                if ("base64".equalsIgnoreCase(encodingTransfer)) {
-                    /* base64 encoded content */
-                    this.inputStream = new Base64InputStream(this.inputStream);
-                }
-                /* we convert different content-encodings to normal inputstream */
-                final String encoding = this.getHeaderField("Content-Encoding");
-                if (encoding == null || encoding.length() == 0 || "none".equalsIgnoreCase(encoding)) {
-                    /* no encoding */
-                    this.convertedInputStream = this.inputStream;
-                } else if ("gzip".equalsIgnoreCase(encoding)) {
-                    /* gzip encoding */
-                    this.convertedInputStream = new GZIPInputStream(this.inputStream);
-                } else if ("deflate".equalsIgnoreCase(encoding)) {
-                    /* deflate encoding */
-                    this.convertedInputStream = new java.util.zip.InflaterInputStream(this.inputStream, new java.util.zip.Inflater(true));
+            if (this.convertedInputStream == null) {
+                if (this.contentDecoded && !RequestMethod.HEAD.equals(this.getRequestMethod())) {
+                    final String encodingTransfer = this.getHeaderField("Content-Transfer-Encoding");
+                    if ("base64".equalsIgnoreCase(encodingTransfer)) {
+                        /* base64 encoded content */
+                        this.inputStream = new Base64InputStream(this.inputStream);
+                    }
+                    /* we convert different content-encodings to normal inputstream */
+                    final String encoding = this.getHeaderField("Content-Encoding");
+                    if (encoding == null || encoding.length() == 0 || "none".equalsIgnoreCase(encoding)) {
+                        /* no encoding */
+                        this.convertedInputStream = this.inputStream;
+                    } else if ("gzip".equalsIgnoreCase(encoding)) {
+                        /* gzip encoding */
+                        this.convertedInputStream = new GZIPInputStream(this.inputStream);
+                    } else if ("deflate".equalsIgnoreCase(encoding)) {
+                        /* deflate encoding */
+                        this.convertedInputStream = new java.util.zip.InflaterInputStream(this.inputStream, new java.util.zip.Inflater(true));
+                    } else {
+                        /* unsupported */
+                        this.contentDecoded = false;
+                        this.convertedInputStream = this.inputStream;
+                    }
                 } else {
-                    /* unsupported */
-                    this.contentDecoded = false;
+                    /*
+                     * use original inputstream OR LimitedInputStream from HeadRequest
+                     */
                     this.convertedInputStream = this.inputStream;
                 }
-            } else {
-                /*
-                 * use original inputstream OR LimitedInputStream from HeadRequest
-                 */
-                this.convertedInputStream = this.inputStream;
             }
             return this.convertedInputStream;
         } else {

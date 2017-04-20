@@ -87,7 +87,7 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
     protected String                                    customcharset        = null;
     protected long                                      requestTime          = -1;
     protected long[]                                    ranges;
-    private boolean                                     contentDecoded       = false;
+    protected boolean                                   contentDecoded       = false;
     private Proxy                                       nativeProxy;
     private boolean                                     connected            = false;
     private boolean                                     wasConnected         = false;
@@ -386,40 +386,39 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
         this.connectInputStream();
         final int code = this.getResponseCode();
         if (this.isOK() || code == 404 || code == 403 || code == 416 || code == 401) {
-            if (this.convertedInputStream != null) {
-                return this.convertedInputStream;
-            }
-            if (this.contentDecoded) {
-                /**
-                 * disabled because it is unknown if httpurlconnection transparently handles transfer-encoding as it already handles chunked
-                 * transfer-encoding
-                 *
-                 */
-                // final String encodingTransfer =
-                // this.getHeaderField("Content-Transfer-Encoding");
-                // if ("base64".equalsIgnoreCase(encodingTransfer)) {
-                // /* base64 encoded content */
-                // this.inputStream = new Base64InputStream(this.inputStream);
-                // }
-                /* we convert different content-encodings to normal inputstream */
-                final String encoding = this.getHeaderField("Content-Encoding");
-                if (encoding == null || encoding.length() == 0 || "none".equalsIgnoreCase(encoding)) {
-                    /* no encoding */
-                    this.convertedInputStream = this.inputStream;
-                } else if ("gzip".equalsIgnoreCase(encoding)) {
-                    /* gzip encoding */
-                    this.convertedInputStream = new GZIPInputStream(this.inputStream);
-                } else if ("deflate".equalsIgnoreCase(encoding)) {
-                    /* deflate encoding */
-                    this.convertedInputStream = new java.util.zip.InflaterInputStream(this.inputStream, new java.util.zip.Inflater(true));
+            if (this.convertedInputStream == null) {
+                if (this.contentDecoded && !RequestMethod.HEAD.equals(this.getRequestMethod())) {
+                    /**
+                     * disabled because it is unknown if httpurlconnection transparently handles transfer-encoding as it already handles
+                     * chunked transfer-encoding
+                     *
+                     */
+                    // final String encodingTransfer =
+                    // this.getHeaderField("Content-Transfer-Encoding");
+                    // if ("base64".equalsIgnoreCase(encodingTransfer)) {
+                    // /* base64 encoded content */
+                    // this.inputStream = new Base64InputStream(this.inputStream);
+                    // }
+                    /* we convert different content-encodings to normal inputstream */
+                    final String encoding = this.getHeaderField("Content-Encoding");
+                    if (encoding == null || encoding.length() == 0 || "none".equalsIgnoreCase(encoding)) {
+                        /* no encoding */
+                        this.convertedInputStream = this.inputStream;
+                    } else if ("gzip".equalsIgnoreCase(encoding)) {
+                        /* gzip encoding */
+                        this.convertedInputStream = new GZIPInputStream(this.inputStream);
+                    } else if ("deflate".equalsIgnoreCase(encoding)) {
+                        /* deflate encoding */
+                        this.convertedInputStream = new java.util.zip.InflaterInputStream(this.inputStream, new java.util.zip.Inflater(true));
+                    } else {
+                        /* unsupported */
+                        this.contentDecoded = false;
+                        this.convertedInputStream = this.inputStream;
+                    }
                 } else {
-                    /* unsupported */
-                    this.contentDecoded = false;
+                    /* use original inputstream */
                     this.convertedInputStream = this.inputStream;
                 }
-            } else {
-                /* use original inputstream */
-                this.convertedInputStream = this.inputStream;
             }
             return this.convertedInputStream;
         } else {

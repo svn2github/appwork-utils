@@ -51,33 +51,36 @@ import org.appwork.utils.logging2.LogSourceProvider;
  *
  */
 public class LoggerFactory extends LogSourceProvider {
-    private static LoggerFactory INSTANCE;
+    private static final LoggerFactory INSTANCE;
     static {
         org.appwork.utils.Application.warnInit();
+        INSTANCE = initialize();
+    }
+
+    private static LoggerFactory initialize() {
         try {
             // the logmanager should not be initialized here. so setting the
             // property should tell the logmanager to init a ExtLogManager
             // instance.
-            // TODO: Java 1.9, this will initialize ExtLogManager via AppClassLoader!
-            if (!"true".equals(System.getProperty("jdk9test"))) {
-                System.setProperty("java.util.logging.manager", ExtLogManager.class.getName());
-            }
-            LogManager man = java.util.logging.LogManager.getLogManager();
+            // TODO: JDK9, this will initialize ExtLogManager via AppClassLoader!
+            System.setProperty("java.util.logging.manager", ExtLogManager.class.getName());
+            final LogManager logManager = java.util.logging.LogManager.getLogManager();
             // throws an exception if man is not instanceof ExtLogManager
-            ((ExtLogManager) man).getClass();
+            ((ExtLogManager) logManager).getClass();
             // The init order is important
-            INSTANCE = new LoggerFactory();
-            ((ExtLogManager) man).setLoggerFactory(INSTANCE);
+            final LoggerFactory instance = new LoggerFactory();
+            ((ExtLogManager) logManager).setLoggerFactory(instance);
+            return instance;
         } catch (final Throwable e) {
             e.printStackTrace();
-            final java.util.logging.LogManager lm = java.util.logging.LogManager.getLogManager();
-            if (lm != null) {
-                System.err.println("Logmanager: " + lm + "|" + lm.getClass().getClassLoader());
+            final LogManager logManager = java.util.logging.LogManager.getLogManager();
+            if (logManager != null) {
+                System.err.println("Logmanager:" + logManager + "|ClassLoader:" + logManager.getClass().getClassLoader());
             } else {
                 System.err.println("Logmanager: null");
             }
             try {
-                if (lm != null) {
+                if (logManager != null) {
                     // seems like the logmanager has already been set, and is
                     // not of type ExtLogManager. try to fix this here
                     // we experiences this bug once on a mac system. may be
@@ -90,8 +93,8 @@ public class LoggerFactory extends LogSourceProvider {
                     final Field field = java.util.logging.LogManager.class.getDeclaredField("manager");
                     field.setAccessible(true);
                     final ExtLogManager manager = new ExtLogManager();
-                    INSTANCE = new LoggerFactory();
-                    manager.setLoggerFactory(INSTANCE);
+                    final LoggerFactory instance = new LoggerFactory();
+                    manager.setLoggerFactory(instance);
                     Field modifiersField = Field.class.getDeclaredField("modifiers");
                     modifiersField.setAccessible(true);
                     modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
@@ -100,7 +103,7 @@ public class LoggerFactory extends LogSourceProvider {
                     rootLogger.setAccessible(true);
                     modifiersField.setAccessible(true);
                     modifiersField.setInt(rootLogger, rootLogger.getModifiers() & ~Modifier.FINAL);
-                    final Logger rootLoggerInstance = (Logger) rootLogger.get(lm);
+                    final Logger rootLoggerInstance = (Logger) rootLogger.get(logManager);
                     rootLogger.set(manager, rootLoggerInstance);
                     manager.addLogger(rootLoggerInstance);
                     // Adding the global Logger. Doing so in the Logger.<clinit>
@@ -108,18 +111,17 @@ public class LoggerFactory extends LogSourceProvider {
                     final Method setLogManager = Logger.class.getDeclaredMethod("setLogManager", new Class[] { java.util.logging.LogManager.class });
                     setLogManager.setAccessible(true);
                     setLogManager.invoke(Logger.global, manager);
-                    final Enumeration<String> names = lm.getLoggerNames();
+                    final Enumeration<String> names = logManager.getLoggerNames();
                     while (names.hasMoreElements()) {
-                        manager.addLogger(lm.getLogger(names.nextElement()));
+                        manager.addLogger(logManager.getLogger(names.nextElement()));
                     }
+                    return instance;
                 }
             } catch (final Throwable e1) {
                 e1.printStackTrace();
             }
-            // catch (final IllegalAccessException e1) {
-            // e1.printStackTrace();
-            // }
         }
+        return new LoggerFactory();
     }
 
     public static LoggerFactory I() {

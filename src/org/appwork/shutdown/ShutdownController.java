@@ -50,7 +50,6 @@ import org.appwork.utils.logging2.extmanager.LoggerFactory;
 
 public class ShutdownController extends Thread {
     class ShutdownEventWrapper extends ShutdownEvent {
-
         private final Thread orgThread;
 
         /**
@@ -72,7 +71,6 @@ public class ShutdownController extends Thread {
 
         @Override
         public int hashCode() {
-
             return this.orgThread.hashCode();
         }
 
@@ -90,11 +88,9 @@ public class ShutdownController extends Thread {
         public String toString() {
             return "ShutdownEventWrapper " + this.orgThread + " - " + this.orgThread.getClass().getName() + " Priority: " + this.getHookPriority();
         }
-
     }
 
     private static final ShutdownController INSTANCE = new ShutdownController();
-
     static {
         org.appwork.utils.Application.warnInit();
     }
@@ -111,12 +107,9 @@ public class ShutdownController extends Thread {
     private final ArrayList<ShutdownEvent>             hooks;
     private final ArrayList<ShutdownEvent>             originalShutdownHooks;
     private final java.util.List<ShutdownVetoListener> vetoListeners;
-
     private int                                        exitCode           = 0;
     private final AtomicInteger                        requestedShutDowns = new AtomicInteger(0);
-
     private volatile Thread                            exitThread         = null;
-
     private final AtomicBoolean                        shutDown           = new AtomicBoolean(false);
     protected ShutdownRequest                          shutdownRequest;
 
@@ -126,7 +119,6 @@ public class ShutdownController extends Thread {
      */
     private ShutdownController() {
         super(ShutdownController.class.getSimpleName());
-
         this.hooks = new ArrayList<ShutdownEvent>();
         this.originalShutdownHooks = new ArrayList<ShutdownEvent>();
         this.vetoListeners = new ArrayList<ShutdownVetoListener>();
@@ -137,13 +129,11 @@ public class ShutdownController extends Thread {
             // ShutdownController.
             // this may fail (reflektion). As a fallback we just add
             // Shutdowncontroller as a normal hook.
-
             final IdentityHashMap<Thread, Thread> hookDelegater = new IdentityHashMap<Thread, Thread>() {
                 /**
                  *
                  */
                 private static final long serialVersionUID = 8334628124340671103L;
-
                 {
                     // SHutdowncontroller should be the only hook!!
                     super.put(ShutdownController.this, ShutdownController.this);
@@ -152,7 +142,6 @@ public class ShutdownController extends Thread {
                 @Override
                 public Thread put(final Thread key, final Thread value) {
                     final ShutdownEventWrapper hook = new ShutdownEventWrapper(value);
-
                     ShutdownController.this.addShutdownEvent(hook);
                     return null;
                 }
@@ -163,26 +152,21 @@ public class ShutdownController extends Thread {
                     return (Thread) key;
                 }
             };
-
+            // TODO: jdk9
             final Field field = Class.forName("java.lang.ApplicationShutdownHooks").getDeclaredField("hooks");
             field.setAccessible(true);
             final Map<Thread, Thread> hooks = (Map<Thread, Thread>) field.get(null);
             synchronized (hooks) {
-
                 final Set<Thread> threads = hooks.keySet();
-
                 for (final Thread hook : threads) {
                     this.addShutdownEvent(new ShutdownEventWrapper(hook));
-
                 }
                 field.set(null, hookDelegater);
             }
-
         } catch (final Throwable e) {
             LoggerFactory.getDefaultLogger().log(e);
             Runtime.getRuntime().addShutdownHook(this);
         }
-
     }
 
     public void addShutdownEvent(final ShutdownEvent event) {
@@ -210,7 +194,6 @@ public class ShutdownController extends Thread {
                 this.hooks.add(event);
             }
         }
-
     }
 
     public void addShutdownVetoListener(final ShutdownVetoListener listener) {
@@ -222,10 +205,8 @@ public class ShutdownController extends Thread {
             this.vetoListeners.add(listener);
             try {
                 java.util.Collections.sort(this.vetoListeners, new Comparator<ShutdownVetoListener>() {
-
                     @Override
                     public int compare(final ShutdownVetoListener o1, final ShutdownVetoListener o2) {
-
                         return new Long(o1.getShutdownVetoPriority()).compareTo(new Long(o2.getShutdownVetoPriority()));
                     }
                 });
@@ -251,11 +232,8 @@ public class ShutdownController extends Thread {
                 if (request != null && request.askForVeto(v) == false) {
                     continue;
                 }
-
                 v.onShutdownVetoRequest(request);
-
             } catch (final ShutdownVetoException e) {
-
                 if (request != null) {
                     try {
                         request.addVeto(e);
@@ -268,7 +246,6 @@ public class ShutdownController extends Thread {
             }
         }
         return request;
-
     }
 
     public int getExitCode() {
@@ -327,14 +304,12 @@ public class ShutdownController extends Thread {
         }
         synchronized (this.hooks) {
             ShutdownEvent next;
-
             // add event sorted
             for (final Iterator<ShutdownEvent> it = this.hooks.iterator(); it.hasNext();) {
                 next = it.next();
                 if (next == event) {
                     it.remove();
                 }
-
             }
         }
     }
@@ -368,18 +343,14 @@ public class ShutdownController extends Thread {
         this.log("Request Shutdown: " + request);
         this.requestedShutDowns.incrementAndGet();
         try {
-
             this.collectVetos(request);
             final java.util.List<ShutdownVetoException> vetos = request.getVetos();
-
             if (vetos.size() == 0) {
-
                 LoggerFactory.getDefaultLogger().info("No Vetos");
                 ShutdownVetoListener[] localList = null;
                 synchronized (this.vetoListeners) {
                     localList = this.vetoListeners.toArray(new ShutdownVetoListener[] {});
                 }
-
                 LoggerFactory.getDefaultLogger().info("Fire onShutDownEvents");
                 for (final ShutdownVetoListener v : localList) {
                     try {
@@ -387,7 +358,6 @@ public class ShutdownController extends Thread {
                         v.onShutdown(request);
                     } catch (final Throwable e) {
                         LoggerFactory.getDefaultLogger().log(e);
-
                     } finally {
                         LoggerFactory.getDefaultLogger().info("Call onShutdown done: " + v);
                     }
@@ -400,11 +370,9 @@ public class ShutdownController extends Thread {
                         LoggerFactory.getDefaultLogger().severe(Exceptions.getStackTrace(e));
                     }
                     this.exitThread = new Thread("ShutdownThread") {
-
                         @Override
                         public void run() {
                             ShutdownController.this.shutdownRequest = request;
-
                             LoggerFactory.getDefaultLogger().info("Exit Now: Code: " + ShutdownController.this.getExitCode());
                             System.exit(ShutdownController.this.getExitCode());
                         }
@@ -460,14 +428,12 @@ public class ShutdownController extends Thread {
         try {
             // code may run in the shutdown hook. Classloading problems are
             // possible
-
             if (this.logger != null) {
                 this.logger.info(string);
             } else {
                 System.out.println(string);
             }
         } catch (final Throwable e) {
-
         }
     }
 
@@ -477,11 +443,9 @@ public class ShutdownController extends Thread {
          * Attention. This runs in shutdownhook. make sure, that we do not have to load previous unloaded classes here.
          */
         try {
-
             java.util.List<ShutdownEvent> list;
             synchronized (this.hooks) {
                 list = new ArrayList<ShutdownEvent>(this.hooks);
-
             }
             synchronized (this.originalShutdownHooks) {
                 list.addAll(this.originalShutdownHooks);
@@ -490,27 +454,21 @@ public class ShutdownController extends Thread {
             for (final ShutdownEvent e : list) {
                 try {
                     i++;
-
                     final long started = System.currentTimeMillis();
-
                     log("[" + i + "/" + list.size() + "|Priority: " + e.getHookPriority() + "]" + "ShutdownController: start item->" + e);
-
                     final Thread thread = new Thread(new Runnable() {
-
                         @Override
                         public void run() {
                             e.onShutdown(ShutdownController.this.shutdownRequest);
                         }
                     });
                     thread.setName("ShutdownHook [" + i + "/" + list.size() + "|Priority: " + e.getHookPriority() + "]");
-
                     thread.start();
                     try {
                         e.waitFor();
                         thread.join(Math.max(0, e.getMaxDuration()));
                     } catch (final Throwable e1) {
                         e1.printStackTrace();
-
                     }
                     if (thread.isAlive()) {
                         log("[" + i + "/" + list.size() + "|Priority: " + e.getHookPriority() + "]" + "ShutdownController: " + e + "->is still running after " + e.getMaxDuration() + " ms");
@@ -524,12 +482,10 @@ public class ShutdownController extends Thread {
                 }
             }
             log("Shutdown Hooks Finished");
-
         } catch (final Throwable e1) {
             // do not use Log here. If LoggerFactory.getDefaultLogger().log(e1); throws an
             // exception,
             // we have to catch it here without the risk of another exception.
-
         }
     }
 
@@ -538,6 +494,5 @@ public class ShutdownController extends Thread {
      */
     public void setExitCode(final int i) {
         this.exitCode = i;
-
     }
 }

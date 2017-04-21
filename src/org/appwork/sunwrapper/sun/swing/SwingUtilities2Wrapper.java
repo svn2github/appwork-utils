@@ -38,6 +38,7 @@ import java.awt.FontMetrics;
 
 import javax.swing.JComponent;
 
+import org.appwork.utils.JVMVersion;
 import org.appwork.utils.logging2.extmanager.LoggerFactory;
 
 /**
@@ -47,7 +48,7 @@ import org.appwork.utils.logging2.extmanager.LoggerFactory;
 public class SwingUtilities2Wrapper {
     private static boolean       CLIP_STRING_IF_NECESSARY_OK = true;
     // TODO:jdk9
-    private final static boolean JDK9TEST                    = "true".equals(System.getProperty("jdk9test"));
+    private final static boolean JDK9TEST                    = JVMVersion.isJAVA19Test();
 
     /**
      * @param rendererField

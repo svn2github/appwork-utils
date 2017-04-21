@@ -41,6 +41,7 @@ import java.util.Enumeration;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
+import org.appwork.utils.JVMVersion;
 import org.appwork.utils.logging2.ConsoleLogImpl;
 import org.appwork.utils.logging2.LogInterface;
 import org.appwork.utils.logging2.LogSource;
@@ -60,7 +61,7 @@ public class LoggerFactory extends LogSourceProvider {
     private static LoggerFactory initialize() {
         try {
             // TODO: JDK9
-            if ("true".equals(System.getProperty("jdk9test"))) {
+            if (JVMVersion.isJAVA19Test()) {
                 return new LoggerFactory();
             }
             // the logmanager should not be initialized here. so setting the

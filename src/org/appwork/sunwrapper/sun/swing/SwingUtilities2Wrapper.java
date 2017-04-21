@@ -45,7 +45,9 @@ import org.appwork.utils.logging2.extmanager.LoggerFactory;
  *
  */
 public class SwingUtilities2Wrapper {
-    private static boolean CLIP_STRING_IF_NECESSARY_OK = true;
+    private static boolean       CLIP_STRING_IF_NECESSARY_OK = true;
+    // TODO:jdk9
+    private final static boolean JDK9TEST                    = "true".equals(System.getProperty("jdk9test"));
 
     /**
      * @param rendererField
@@ -57,16 +59,37 @@ public class SwingUtilities2Wrapper {
     public static String clipStringIfNecessary(JComponent component, FontMetrics fontMetrics, String str, int availableWidth) {
         try {
             if (CLIP_STRING_IF_NECESSARY_OK) {
+                if (JDK9TEST) {
+                    if (str == null || str.length() == 0 || str.trim().length() == 0) {
+                        return str;
+                    }
+                    final char[] charArray = str.toCharArray();
+                    int length = charArray.length;
+                    while (length > 0) {
+                        final int stringWidth = fontMetrics.charsWidth(charArray, 0, length);
+                        if (stringWidth > availableWidth) {
+                            length--;
+                        } else {
+                            if (length == charArray.length) {
+                                return str;
+                            } else {
+                                return new String(charArray, 0, length);
+                            }
+                        }
+                    }
+                    return "";
+                }
                 return sun.swing.SwingUtilities2.clipStringIfNecessary(component, fontMetrics, str, availableWidth);
             }
         } catch (final NoClassDefFoundError e) {
             CLIP_STRING_IF_NECESSARY_OK = false;
+            System.err.println("sun.swing.SwingUtilities2.clipStringIfNecessary failed");
             LoggerFactory.I().getLogger(SwingUtilities2Wrapper.class.getName()).log(e);
         } catch (final IllegalAccessError e) {
             CLIP_STRING_IF_NECESSARY_OK = false;
+            System.err.println("sun.swing.SwingUtilities2.clipStringIfNecessary failed");
             LoggerFactory.I().getLogger(SwingUtilities2Wrapper.class.getName()).log(e);
         }
-        System.err.println("sun.swing.SwingUtilities2.clipStringIfNecessary failed");
         return str;
     }
 

@@ -39,7 +39,6 @@ import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
-import org.appwork.utils.StringUtils;
 import org.appwork.utils.logging2.LogSource;
 
 public class ExtLogManager extends LogManager {
@@ -93,7 +92,7 @@ public class ExtLogManager extends LogManager {
                 protected void ensureLogger(final Logger logger) {
                     if (del == null && loggerFactory != null) {
                         String name = logger.getName();
-                        if (StringUtils.isEmpty(name)) {
+                        if (name == null || name.trim().length() == 0) {
                             name = logger.toString();
                         }
                         del = loggerFactory.getLogger(name);

@@ -59,6 +59,10 @@ public class LoggerFactory extends LogSourceProvider {
 
     private static LoggerFactory initialize() {
         try {
+            // TODO: JDK9
+            if ("true".equals(System.getProperty("jdk9test"))) {
+                return new LoggerFactory();
+            }
             // the logmanager should not be initialized here. so setting the
             // property should tell the logmanager to init a ExtLogManager
             // instance.

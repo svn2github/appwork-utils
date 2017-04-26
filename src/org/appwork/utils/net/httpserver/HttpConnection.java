@@ -532,6 +532,28 @@ public class HttpConnection implements Runnable {
         }
     }
 
+    public static interface ConnectionHook {
+        /**
+         * @param httpConnection
+         */
+        void onBeforeSendHeaders(HttpResponse httpConnection);
+
+        /**
+         * @param httpConnection
+         */
+        void onAfterSendHeaders(HttpResponse httpConnection);
+    }
+
+    private ConnectionHook hook;
+
+    public ConnectionHook getHook() {
+        return hook;
+    }
+
+    public void setHook(ConnectionHook hook) {
+        this.hook = hook;
+    }
+
     /**
      * this function sends the response headers
      *
@@ -545,17 +567,27 @@ public class HttpConnection implements Runnable {
             }
             if (this.response != null) {
                 final OutputStream out = this.getRawOutputStream();
-                out.write(HttpResponse.HTTP11);
-                out.write(this.response.getResponseCode().getBytes());
-                out.write(HttpResponse.NEWLINE);
-                for (final HTTPHeader h : this.response.getResponseHeaders()) {
-                    out.write(h.getKey().getBytes("ISO-8859-1"));
-                    out.write(HTTPHeader.DELIMINATOR);
-                    out.write(h.getValue().getBytes("ISO-8859-1"));
+                ConnectionHook lHook = hook;
+                try {
+                    if (lHook != null) {
+                        lHook.onBeforeSendHeaders(response);
+                    }
+                    out.write(HttpResponse.HTTP11);
+                    out.write(this.response.getResponseCode().getBytes());
                     out.write(HttpResponse.NEWLINE);
+                    for (final HTTPHeader h : this.response.getResponseHeaders()) {
+                        out.write(h.getKey().getBytes("ISO-8859-1"));
+                        out.write(HTTPHeader.DELIMINATOR);
+                        out.write(h.getValue().getBytes("ISO-8859-1"));
+                        out.write(HttpResponse.NEWLINE);
+                    }
+                    out.write(HttpResponse.NEWLINE);
+                    out.flush();
+                } finally {
+                    if (lHook != null) {
+                        lHook.onAfterSendHeaders(response);
+                    }
                 }
-                out.write(HttpResponse.NEWLINE);
-                out.flush();
             }
         } finally {
             this.setResponseHeadersSent(true);

@@ -31,69 +31,18 @@
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
-package org.appwork.utils.encoding;
+package org.appwork.utils;
 
-import java.io.UnsupportedEncodingException;
-
-/**
- * @author daniel
- *
- */
-public class URLEncode {
-    private static final String RFC2396CHARS = "0123456789" + "abcdefghijklmnopqrstuvwxyz" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ" + "-_.!~*'()";
-
-    public static void main(String[] args) throws UnsupportedEncodingException {
-        System.out.println(URLEncode.encodeRFC2396("\r\n"));
-    }
-
-    /* http://www.ietf.org/rfc/rfc2396.txt */
-    public static String encodeRFC2396(final String input) throws UnsupportedEncodingException {
-        final StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < input.length(); i++) {
-            final char ch = input.charAt(i);
-            if (ch == ' ') {
-                sb.append("+");
-            } else if (URLEncode.RFC2396CHARS.indexOf(ch) != -1) {
-                sb.append(ch);
-            } else {
-                if (ch > 255) {
-                    /* not allowed, replaced by + */
-                    sb.append("+");
-                } else {
-                    /* hex formatted */
-                    sb.append("%");
-                    final String append = Integer.toHexString(ch);
-                    if (append.length() < 2) {
-                        sb.append("0");
-                    }
-                    sb.append(append);
-                }
-            }
-        }
-        return sb.toString();
-    }
-
-    public static String encodeURIComponent(final String input) {
-        if (input == null) {
-            return null;
-        }
-        final StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < input.length(); i++) {
-            final char ch = input.charAt(i);
-            if (ch == ' ') {
-                sb.append("%20");
-            } else if (URLEncode.RFC2396CHARS.indexOf(ch) != -1) {
-                sb.append(ch);
-            } else {
-                /* hex formatted */
-                sb.append("%");
-                final String append = Integer.toHexString(ch);
-                if (append.length() < 2) {
-                    sb.append("0");
-                }
-                sb.append(append);
-            }
-        }
-        return sb.toString();
+public class ArrayUtils {
+    /**
+     * @param src
+     * @param offset
+     * @param length
+     * @return new array that contains a slice of the src array
+     */
+    public static byte[] subArray(byte[] src, int offset, int length) {
+        byte[] ret = new byte[length];
+        System.arraycopy(src, offset, ret, 0, length);
+        return ret;
     }
 }

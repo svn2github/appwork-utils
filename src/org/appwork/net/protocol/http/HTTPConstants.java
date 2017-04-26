@@ -78,31 +78,23 @@ public class HTTPConstants {
          * The request cannot be fulfilled due to bad syntax.[2
          */
         ERROR_BAD_REQUEST(400, "Bad Request"),
-
         ERROR_UNAUTHORIZED(401, "Unauthorized"),
         /**
          * The request was a legal request, but the server is refusing to respond to it.[2] Unlike a 401 Unauthorized response,
          * authenticating will make no difference.[2
          */
         ERROR_FORBIDDEN(403, "Forbidden"),
-
         PROXY_AUTH_REQUIRED(407, "Forbidden"),
         /**
          * The requested resource could not be found but may be available again in the future.[2] Subsequent requests by the client are
          * permissible.
          */
         ERROR_NOT_FOUND(404, "Not Found"),
-
         LENGTH_REQUIRED(411, "Length Required"),
-
         REQUEST_ENTITY_TOO_LARGE(413, "Request Entity Too Large"),
-
         REQUEST_URL_TOO_LONG(414, "Request-URL Too Long"),
-
         REQUEST_HEADER_FIELDS_TOO_LARGE(431, "Request Header Fields Too Large"),
-
         ERROR_RANGE_NOT_SUPPORTED(416, "Range requests not supported"),
-
         TOO_MANY_REQUESTS(429, "Too Many Requests"),
         /**
          * A generic error message, given when no more specific message is suitable.[2
@@ -120,9 +112,7 @@ public class HTTPConstants {
          * The server is currently unavailable (because it is overloaded or down for maintenance).[2] Generally, this is a temporary state.
          */
         SERVERERROR_SERVICE_UNAVAILABLE(503, "Service Unavailable"),
-
         GATEWAY_TIMEOUT(504, "Gateway Time-out"),
-
         SUCCESS_PARTIAL_CONTENT(206, "Partial Content");
         /**
          * @param responseCode
@@ -135,12 +125,10 @@ public class HTTPConstants {
                 }
             }
             return null;
-
         }
 
         private final int    code;
         private final String description;
-
         private final byte[] bytes;
 
         private ResponseCode(final int code, final String desc) {
@@ -205,11 +193,9 @@ public class HTTPConstants {
      * The mime type of the body of the request (used with POST and PUT requests) Content-Type: application/x-www-form-urlencoded
      */
     public static final String HEADER_REQUEST_CONTENT_TYPE                  = "Content-Type";
-
     public static final String HEADER_RESPONSE_CONTENT_RANGE                = "Content-Range";
     public static final String HEADER_RESPONSE_SET_COOKIE                   = "Set-Cookie";
     public static final String HEADER_RESPONSE_CONTENT_DISPOSITION          = "Content-Disposition";
-
     /**
      * The date and time that the message was sent Date: Tue, 15 Nov 1994 08:12:31 GMT
      */
@@ -262,7 +248,6 @@ public class HTTPConstants {
      * Implementation-specific headers that may have various effects anywhere along the request-response chain. Pragma: no-cache
      */
     public static final String HEADER_REQUEST_RANGE                         = "Range";
-
     public static final String HEADER_ETAG                                  = "ETag";
     /**
      * Implementation-specific headers that may have various effects anywhere along the request-response chain. Pragma: no-cache
@@ -287,7 +272,6 @@ public class HTTPConstants {
     public static final String HEADER_REQUEST_LOCATION                      = "Location";
     public static final String HEADER_REQUEST_X_FORWARDED_FOR               = "X-Forwarded-For";
     public static final String HEADER_REQUEST_X_CLIENT_IP                   = "X-Client-IP";
-
     /**
      * Implementation-specific headers that may have various effects anywhere along the request-response chain. Pragma: no-cache
      */
@@ -310,5 +294,9 @@ public class HTTPConstants {
     public static final String HEADER_RESPONSE_ACCESS_CONTROL_ALLOW_METHODS = "Access-Control-Allow-Methods";
     public static final String HEADER_RESPONSE_ACCESS_CONTROL_ALLOW_HEADERS = "Access-Control-Allow-Headers";
     public static final String HEADER_RESPONSE_ACCESS_CONTROL_MAX_AGE       = "Access-Control-Max-Age";
-
+    public static final String HEADER_RESPONSE_CONTENT_SECURITY_POLICY      = "Content-Security-Policy";
+    public static final String HEADER_RESPONSE_X_FRAME_OPTIONS              = "X-Frame-Options";
+    public static final String HEADER_RESPONSE_X_XSS_PROTECTION             = "X-Xss-Protection";
+    public static final String HEADER_RESPONSE_REFERRER_POLICY              = "Referrer-Policy";
+    public static final String HEADER_RESPONSE_X_CONTENT_TYPE_OPTIONS       = "X-Content-Type-Options";
 }

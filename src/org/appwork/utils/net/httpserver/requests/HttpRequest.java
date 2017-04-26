@@ -124,10 +124,16 @@ public abstract class HttpRequest implements HttpRequestInterface {
         return remoteAddress;
     }
 
+    /**
+     * The path without additional namespaces (like jcgi/
+     */
     public String getRequestedPath() {
         return requestedPath;
     }
 
+    /**
+     * this full path (incl. jcgi)
+     */
     public String getRequestedURL() {
         return requestedURL;
     }

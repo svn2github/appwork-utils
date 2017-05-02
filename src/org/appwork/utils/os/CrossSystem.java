@@ -322,8 +322,20 @@ public class CrossSystem {
      * @throws IOException
      */
     private static void _openFILE(final File file) throws IOException {
-        if (!CrossSystem.openCustom(CrossSystem.FILE_COMMANDLINE, file.getAbsolutePath())) {
-            CrossSystem.DESKTOP_SUPPORT.openFile(file);
+        try {
+            if (CrossSystem.openCustom(CrossSystem.FILE_COMMANDLINE, file.getAbsolutePath())) {
+                return;
+            } else if (CrossSystem.isOpenFileSupported()) {
+                CrossSystem.DESKTOP_SUPPORT.openFile(file);
+            } else {
+                throw new IOException("Unsupported OpenFile:" + file);
+            }
+        } catch (IOException e) {
+            if (CrossSystem.isOpenFileSupported()) {
+                CrossSystem.DESKTOP_SUPPORT.openFile(file);
+            } else {
+                throw e;
+            }
         }
     }
 
@@ -335,8 +347,20 @@ public class CrossSystem {
      * @throws URISyntaxException
      */
     public static void openUrlOrThrowException(final String _url) throws IOException, URISyntaxException {
-        if (!CrossSystem.openCustom(CrossSystem.BROWSER_COMMANDLINE, _url)) {
-            CrossSystem.DESKTOP_SUPPORT.browseURL(new URL(_url));
+        try {
+            if (CrossSystem.openCustom(CrossSystem.BROWSER_COMMANDLINE, _url)) {
+                return;
+            } else if (CrossSystem.isOpenBrowserSupported()) {
+                CrossSystem.DESKTOP_SUPPORT.browseURL(new URL(_url));
+            } else {
+                throw new IOException("Unsupported OpenBrowser:" + _url);
+            }
+        } catch (final IOException e) {
+            if (CrossSystem.isOpenBrowserSupported()) {
+                CrossSystem.DESKTOP_SUPPORT.browseURL(new URL(_url));
+            } else {
+                throw e;
+            }
         }
     }
 

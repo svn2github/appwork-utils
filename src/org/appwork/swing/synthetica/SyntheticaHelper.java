@@ -187,7 +187,7 @@ public class SyntheticaHelper {
                 // Robot.createScreenCapture crashes on wayland
                 UIManager.put("Synthetica.popupRobot.enabled", Boolean.FALSE);
             }
-            UIManager.put("Synthetica.text.antialias", config.isTextAntiAliasEnabled());
+            // UIManager.put("Synthetica.text.antialias", config.isTextAntiAliasEnabled());
             UIManager.put("Synthetica.extendedFileChooser.rememberPreferences", Boolean.FALSE);
             UIManager.put("Synthetica.extendedFileChooser.rememberLastDirectory", Boolean.FALSE);
             // /* http://www.jyloo.com/news/?pubId=1297681728000 */

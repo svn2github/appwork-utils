@@ -327,7 +327,7 @@ public class CrossSystem {
                 return;
             } else if (CrossSystem.isOpenFileSupported()) {
                 CrossSystem.DESKTOP_SUPPORT.openFile(file);
-            }
+            } 
         } catch (IOException e) {
             if (CrossSystem.isOpenFileSupported()) {
                 CrossSystem.DESKTOP_SUPPORT.openFile(file);
@@ -404,7 +404,7 @@ public class CrossSystem {
         pathPart = pathPart.replaceFirst("^\\.+", ".");
         /*
          * remove ending dots, not allowed under windows and others os maybe too
-         * 
+         *
          * Do not end a file or directory name with a space or a period.
          */
         pathPart = pathPart.replaceFirst("\\.+$", "");

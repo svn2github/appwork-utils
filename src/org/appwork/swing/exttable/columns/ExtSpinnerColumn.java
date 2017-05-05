@@ -75,15 +75,25 @@ public abstract class ExtSpinnerColumn<E> extends ExtTextColumn<E> {
 
     public ExtSpinnerColumn(final String name, final ExtTableModel<E> table) {
         super(name, table);
+        this.intModel = new SpinnerNumberModel(0, Integer.MIN_VALUE, Integer.MAX_VALUE, 1);
+        this.longModel = new SpinnerNumberModel(Long.valueOf(0l), Long.valueOf(Long.MIN_VALUE), Long.valueOf(Long.MAX_VALUE), Long.valueOf(1l));
+        this.byteModel = new SpinnerNumberModel(Byte.valueOf((byte) 0), Byte.valueOf(Byte.MIN_VALUE), Byte.valueOf(Byte.MAX_VALUE), Byte.valueOf((byte) 1));
+        this.shortModel = new SpinnerNumberModel(Short.valueOf((short) 0), Short.valueOf(Short.MIN_VALUE), Short.valueOf(Short.MAX_VALUE), Short.valueOf((short) 1));
+        this.doubleModel = new SpinnerNumberModel(Double.valueOf(0.0d), Double.valueOf(-Double.MAX_VALUE), Double.valueOf(Double.MAX_VALUE), Double.valueOf(1.0d));
+        this.floatModel = new SpinnerNumberModel(Float.valueOf(0.0f), Float.valueOf(-Float.MAX_VALUE), Float.valueOf(Float.MAX_VALUE), Float.valueOf(1.0f));
         this.editor = new JSpinner();
-        this.intEditor = new JSpinner.NumberEditor(this.editor, "#");
-        this.longEditor = this.intEditor;
-        this.byteEditor = this.intEditor;
-        this.shortEditor = this.intEditor;
-        this.doubleEditor = new JSpinner.NumberEditor(this.editor, "###.##");
-        this.floatEditor = this.doubleEditor;
+        this.intEditor = new JSpinner.NumberEditor(new JSpinner(intModel), "#");
+        this.longEditor = new JSpinner.NumberEditor(new JSpinner(longModel), "#");
+        this.byteEditor = new JSpinner.NumberEditor(new JSpinner(byteModel), "#");
+        this.shortEditor = new JSpinner.NumberEditor(new JSpinner(shortModel), "#");
+        this.doubleEditor = new JSpinner.NumberEditor(new JSpinner(doubleModel), "###.##");
+        this.floatEditor = new JSpinner.NumberEditor(new JSpinner(floatModel), "###.##");
         this.intEditor.getTextField().addActionListener(this);
+        this.longEditor.getTextField().addActionListener(this);
+        this.byteEditor.getTextField().addActionListener(this);
+        this.shortEditor.getTextField().addActionListener(this);
         this.doubleEditor.getTextField().addActionListener(this);
+        this.floatEditor.getTextField().addActionListener(this);
         tableFocusLost = new FocusListener() {
             @Override
             public void focusLost(FocusEvent e) {
@@ -95,12 +105,6 @@ public abstract class ExtSpinnerColumn<E> extends ExtTextColumn<E> {
                 // TODO Auto-generated method stub
             }
         };
-        this.intModel = new SpinnerNumberModel(0, Integer.MIN_VALUE, Integer.MAX_VALUE, 1);
-        this.longModel = new SpinnerNumberModel(Long.valueOf(0l), Long.valueOf(Long.MIN_VALUE), Long.valueOf(Long.MAX_VALUE), Long.valueOf(1l));
-        this.byteModel = new SpinnerNumberModel(Byte.valueOf((byte) 0), Byte.valueOf(Byte.MIN_VALUE), Byte.valueOf(Byte.MAX_VALUE), Byte.valueOf((byte) 1));
-        this.shortModel = new SpinnerNumberModel(Short.valueOf((short) 0), Short.valueOf(Short.MIN_VALUE), Short.valueOf(Short.MAX_VALUE), Short.valueOf((short) 1));
-        this.doubleModel = new SpinnerNumberModel(Double.valueOf(0.0d), Double.valueOf(-Double.MAX_VALUE), Double.valueOf(Double.MAX_VALUE), Double.valueOf(1.0d));
-        this.floatModel = new SpinnerNumberModel(Float.valueOf(0.0f), Float.valueOf(-Float.MAX_VALUE), Float.valueOf(Float.MAX_VALUE), Float.valueOf(1.0f));
         this.setRowSorter(new ExtDefaultRowSorter<E>() {
             @Override
             public int compare(final E o1, final E o2) {

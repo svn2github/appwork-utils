@@ -45,6 +45,7 @@ import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 import javax.swing.BorderFactory;
@@ -65,20 +66,29 @@ import org.appwork.utils.swing.renderer.RenderLabel;
 import org.appwork.utils.swing.renderer.RendererMigPanel;
 
 public abstract class ExtTextColumn<E> extends ExtColumn<E> implements ActionListener, FocusListener {
-    private static final long serialVersionUID = 2114805529462086691L;
-    protected JLabel          rendererField;
-    protected JTextField      editorField;
-    private final Border      defaultBorder    = BorderFactory.createEmptyBorder(0, 5, 0, 5);
-    private Color             rendererForeground;
-    private Color             editorForeground;
-    private Font              rendererFont;
-    private Font              editorFont;
-    protected JPanel          editor;
-    protected JLabel          rendererIcon;
-    protected JPanel          renderer;
-    protected JLabel          editorIconLabel;
-    protected boolean         noset            = false;
-    private boolean           clipingEnabled   = true;
+    private static final long     serialVersionUID = 2114805529462086691L;
+    protected JLabel              rendererField;
+    protected JTextField          editorField;
+    private final Border          defaultBorder    = BorderFactory.createEmptyBorder(0, 5, 0, 5);
+    private Color                 rendererForeground;
+    private Color                 editorForeground;
+    private Font                  rendererFont;
+    private Font                  editorFont;
+    protected JPanel              editor;
+    protected JLabel              rendererIcon;
+    protected JPanel              renderer;
+    protected JLabel              editorIconLabel;
+    protected final AtomicInteger noSet            = new AtomicInteger(0);
+
+    public void setNoSet(boolean b) {
+        if (b) {
+            noSet.incrementAndGet();
+        } else if (noSet.get() > 0) {
+            noSet.decrementAndGet();
+        }
+    }
+
+    private boolean clipingEnabled = true;
 
     public boolean isClipingEnabled() {
         return clipingEnabled;
@@ -97,7 +107,7 @@ public abstract class ExtTextColumn<E> extends ExtColumn<E> implements ActionLis
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.swing.exttable.ExtColumn#getCellSizeEstimation(java.lang.Object, int)
      */
     @Override
@@ -136,11 +146,11 @@ public abstract class ExtTextColumn<E> extends ExtColumn<E> implements ActionLis
 
             public void keyReleased(final KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                    ExtTextColumn.this.noset = true;
+                    setNoSet(true);
                     try {
                         ExtTextColumn.this.stopCellEditing();
                     } finally {
-                        ExtTextColumn.this.noset = false;
+                        setNoSet(false);
                     }
                 }
             }
@@ -296,14 +306,14 @@ public abstract class ExtTextColumn<E> extends ExtColumn<E> implements ActionLis
         if (!e.isTemporary() || e.getOppositeComponent() == null) {
             /*
              * we check for temporary , because a rightclick menu will cause focus lost but editing should not stop
-             *
+             * 
              * we also check for oppositeComponent to stopEditing when we click outside the window
              */
-            ExtTextColumn.this.noset = true;
+            setNoSet(true);
             try {
                 ExtTextColumn.this.stopCellEditing();
             } finally {
-                ExtTextColumn.this.noset = false;
+                setNoSet(false);
             }
         }
     }
@@ -315,7 +325,7 @@ public abstract class ExtTextColumn<E> extends ExtColumn<E> implements ActionLis
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.swing.exttable.ExtColumn#getDefaultForeground()
      */
     @Override
@@ -341,7 +351,7 @@ public abstract class ExtTextColumn<E> extends ExtColumn<E> implements ActionLis
 
     /*
      * @param value
-     *
+     * 
      * @return
      */
     protected Icon getIcon(final E value) {
@@ -443,6 +453,7 @@ public abstract class ExtTextColumn<E> extends ExtColumn<E> implements ActionLis
         SwingUtils.setOpaque(this.rendererIcon, false);
         SwingUtils.setOpaque(this.rendererField, false);
     }
+
     // /**
     // * @param value
     // */
@@ -462,7 +473,6 @@ public abstract class ExtTextColumn<E> extends ExtColumn<E> implements ActionLis
     // */
     // protected void prepareTableCellEditorComponent(final JTextField text) {
     // }
-
     // protected void prepareTextfieldForHelpText(final JTextField tf) {
     //
     // tf.setForeground(Color.lightGray);
@@ -477,9 +487,13 @@ public abstract class ExtTextColumn<E> extends ExtColumn<E> implements ActionLis
     protected void setStringValue(final String value, final E object) {
     }
 
+    protected boolean noSet() {
+        return noSet.get() > 0;
+    }
+
     @Override
     public void setValue(final Object value, final E object) {
-        if (!this.noset) {
+        if (!noSet()) {
             this.setStringValue((String) value, object);
         }
     }

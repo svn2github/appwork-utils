@@ -6,41 +6,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicBoolean;
 
-public abstract class WebSocketClient {
+import org.appwork.utils.net.websocket.WebSocketFrameHeader.OP_CODE;
+
+public abstract class WebSocketEndPoint {
     // https://tools.ietf.org/html/rfc6455
     // http://www.websocket.org/echo.html
     // https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_servers
-    public static enum OP_CODE {
-        CONTINUATION(0x0),
-        UTF8_TEXT(0x1),
-        BINARY(0x2),
-        CLOSE(0x8),
-        PING(0x9),
-        PONG(0xA);
-        private final int opCode;
-
-        final int getOpCode() {
-            return this.opCode;
-        }
-
-        private OP_CODE(int opCode) {
-            this.opCode = opCode;
-        }
-
-        static OP_CODE get(int opCode) {
-            for (final OP_CODE value : OP_CODE.values()) {
-                if (value.getOpCode() == opCode) {
-                    return value;
-                }
-            }
-            return null;
-        }
-    }
-
-    protected final AtomicBoolean closed = new AtomicBoolean(false);
-
     protected static byte[] fill(final InputStream is, final byte[] buffer) throws IOException {
         final int length = buffer.length;
         int done = 0;
@@ -129,14 +101,14 @@ public abstract class WebSocketClient {
      * @return
      */
     public WriteWebSocketFrame buildPongFrame(ReadWebSocketFrame ping) {
-        if (OP_CODE.PING.equals(ping.getOpcode())) {
+        if (OP_CODE.PING.equals(ping.getOpCode())) {
             if (ping.hasPayLoad()) {
                 return new WriteWebSocketFrame(new WebSocketFrameHeader(true, OP_CODE.PONG, ping.getPayloadLength(), ping.getMask()), ping.getPayload());
             } else {
                 return new WriteWebSocketFrame(new WebSocketFrameHeader(true, OP_CODE.PONG, 0), null);
             }
         } else {
-            throw new IllegalArgumentException("Parameter must be valid PING!");
+            throw new IllegalArgumentException("Wrong OpCode:" + ping.getOpCode());
         }
     }
 
@@ -155,7 +127,7 @@ public abstract class WebSocketClient {
         final ReadWebSocketFrame webSocketFrame = ReadWebSocketFrame.read(this.getInputStream());
         if (webSocketFrame != null) {
             this.log(webSocketFrame);
-            switch (webSocketFrame.getOpcode()) {
+            switch (webSocketFrame.getOpCode()) {
             case PING:
                 this.onOpCode_Ping(webSocketFrame);
                 break;

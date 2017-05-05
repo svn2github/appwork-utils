@@ -4,9 +4,35 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.appwork.utils.formatter.HexFormatter;
-import org.appwork.utils.net.websocket.WebSocketClient.OP_CODE;
 
 public class WebSocketFrameHeader {
+    public static enum OP_CODE {
+        CONTINUATION(0x0),
+        UTF8_TEXT(0x1),
+        BINARY(0x2),
+        CLOSE(0x8),
+        PING(0x9),
+        PONG(0xA);
+        private final int opCode;
+
+        final int getOpCode() {
+            return this.opCode;
+        }
+
+        private OP_CODE(int opCode) {
+            this.opCode = opCode;
+        }
+
+        static OP_CODE get(int opCode) {
+            for (final OP_CODE value : OP_CODE.values()) {
+                if (value.getOpCode() == opCode) {
+                    return value;
+                }
+            }
+            return null;
+        }
+    }
+
     private final boolean fin;
 
     public boolean isFin() {
@@ -14,7 +40,7 @@ public class WebSocketFrameHeader {
     }
 
     public OP_CODE getOpcode() {
-        return this.opcode;
+        return this.opCode;
     }
 
     public boolean hasPayLoad() {
@@ -29,21 +55,21 @@ public class WebSocketFrameHeader {
         return this.mask;
     }
 
-    private final OP_CODE opcode;
+    private final OP_CODE opCode;
     private final long    payloadLength;
     private final byte[]  mask;
 
     public static WebSocketFrameHeader read(final InputStream is) throws IOException {
-        byte[] buf = WebSocketClient.fill(is, new byte[2]);
+        byte[] buf = WebSocketEndPoint.fill(is, new byte[2]);
         final boolean fin = 1 == (buf[0] & 0xff) >>> 7;// fin, frrrxxxx 7 rightshift
         final int opCode = buf[0] & 15;// opCode, xxxx1111
         final boolean mask = 1 == (buf[1] & 0xff) >>> 7;// mask, fxxxxxxx 7 rightshift
         long payloadLength = buf[1] & 127; // length, x1111111
         if (payloadLength == 126) {
-            buf = WebSocketClient.fill(is, new byte[2]);// 16 bit unsigned
+            buf = WebSocketEndPoint.fill(is, new byte[2]);// 16 bit unsigned
             payloadLength = ((buf[0] & 255) << 8) + ((buf[1] & 255) << 0);
         } else if (payloadLength == 127) {
-            buf = WebSocketClient.fill(is, new byte[8]);// 64 bit unsigned
+            buf = WebSocketEndPoint.fill(is, new byte[8]);// 64 bit unsigned
             payloadLength = ((long) buf[0] << 56) + ((long) (buf[1] & 255) << 48) + ((long) (buf[2] & 255) << 40) + ((long) (buf[3] & 255) << 32) + ((long) (buf[4] & 255) << 24) + ((buf[5] & 255) << 16) + ((buf[6] & 255) << 8) + ((buf[7] & 255) << 0);
         }
         final OP_CODE op_Code = OP_CODE.get(opCode);
@@ -52,7 +78,7 @@ public class WebSocketFrameHeader {
             throw new IOException("Unsupported opCode:" + opCode);
         }
         if (mask) {
-            return new WebSocketFrameHeader(fin, op_Code, payloadLength, WebSocketClient.fill(is, new byte[4]));
+            return new WebSocketFrameHeader(fin, op_Code, payloadLength, WebSocketEndPoint.fill(is, new byte[4]));
         } else {
             return new WebSocketFrameHeader(fin, op_Code, payloadLength);
         }
@@ -93,9 +119,9 @@ public class WebSocketFrameHeader {
         return ret;
     }
 
-    public WebSocketFrameHeader(boolean fin, OP_CODE opcode, long payloadLength, byte[] mask) {
+    public WebSocketFrameHeader(boolean fin, OP_CODE opCode, long payloadLength, byte[] mask) {
         this.fin = fin;
-        this.opcode = opcode;
+        this.opCode = opCode;
         this.payloadLength = payloadLength;
         this.mask = mask;
         if (mask != null && mask.length != 4) {
@@ -104,8 +130,8 @@ public class WebSocketFrameHeader {
         }
     }
 
-    public WebSocketFrameHeader(boolean fin, OP_CODE opcode, long payloadLength) {
-        this(fin, opcode, payloadLength, null);
+    public WebSocketFrameHeader(boolean fin, OP_CODE opCode, long payloadLength) {
+        this(fin, opCode, payloadLength, null);
     }
 
     @Override

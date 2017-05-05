@@ -1,32 +1,43 @@
 package org.appwork.utils.net.websocket;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+
 import org.appwork.utils.formatter.HexFormatter;
-import org.appwork.utils.net.websocket.WebSocketClient.OP_CODE;
+import org.appwork.utils.net.websocket.WebSocketFrameHeader.OP_CODE;
 
 public abstract class WebSocketFrame {
-    private final WebSocketFrameHeader frameHeader;
+    protected final WebSocketFrameHeader frameHeader;
 
     public boolean isFin() {
         return this.frameHeader.isFin();
     }
 
-    public final OP_CODE getOpcode() {
+    public OP_CODE getOpCode() {
         return this.frameHeader.getOpcode();
     }
 
-    public final long getPayloadLength() {
+    public long getPayloadLength() {
         return this.frameHeader.getPayloadLength();
     }
 
-    public final byte[] getMask() {
+    public byte[] getMask() {
         return this.frameHeader.getMask();
     }
 
-    public final byte[] getPayload() {
+    public byte[] getPayload() {
         return this.payload;
     }
 
-    public final byte[] getHeader() {
+    public InputStream getPayLoadInputStream() {
+        if (hasPayLoad()) {
+            return new ByteArrayInputStream(getPayload());
+        } else {
+            return new ByteArrayInputStream(new byte[0]);
+        }
+    }
+
+    public byte[] getHeader() {
         return this.getFrameHeader().getBytes();
     }
 
@@ -38,7 +49,7 @@ public abstract class WebSocketFrame {
         return this.frameHeader.hasPayLoad();
     }
 
-    private final byte[] payload;
+    protected final byte[] payload;
 
     public WebSocketFrame(WebSocketFrameHeader frameHeader, byte[] payload) {
         this.frameHeader = frameHeader;
@@ -58,7 +69,7 @@ public abstract class WebSocketFrame {
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("Fin:").append(this.isFin());
-        sb.append("|OpCode:").append(this.getOpcode());
+        sb.append("|OpCode:").append(this.getOpCode());
         if (this.getMask() != null) {
             sb.append("|Mask:").append(HexFormatter.byteArrayToHex(this.getMask()));
         }

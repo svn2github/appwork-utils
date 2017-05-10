@@ -26,7 +26,7 @@ public abstract class WebSocketEndPoint {
         return buffer;
     }
 
-    protected byte[] nextMask() {
+    public byte[] nextMask() {
         final byte[] ret = new byte[4];
         new Random().nextBytes(ret);
         return ret;

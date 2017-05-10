@@ -57,6 +57,10 @@ public class HttpResponse implements HttpResponseInterface {
     protected OutputStream         outputStream  = null;
     protected boolean              asyncResponse = false;
 
+    public HttpConnection getConnection() {
+        return connection;
+    }
+
     public HttpResponse(final HttpConnection connection) {
         this.connection = connection;
         this.responseHeaders = new HeaderCollection();
@@ -66,7 +70,7 @@ public class HttpResponse implements HttpResponseInterface {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.utils.net.httpserver.responses.HttpResponseInterface# closeConnection()
      */
     @Override

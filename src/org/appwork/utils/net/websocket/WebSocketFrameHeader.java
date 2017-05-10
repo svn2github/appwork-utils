@@ -61,7 +61,7 @@ public class WebSocketFrameHeader {
 
     public static WebSocketFrameHeader read(final InputStream is) throws IOException {
         byte[] buf = WebSocketEndPoint.fill(is, new byte[2]);
-        final boolean fin = 1 == (buf[0] & 0xff) >>> 7;// fin, frrrxxxx 7 rightshift
+        final boolean fin = 1 == (buf[0] & 0xff) >>> 7;// fin, finrsv1rsv2rsv3xxxx 7 rightshift
         final int opCode = buf[0] & 15;// opCode, xxxx1111
         final boolean mask = 1 == (buf[1] & 0xff) >>> 7;// mask, fxxxxxxx 7 rightshift
         long payloadLength = buf[1] & 127; // length, x1111111
@@ -86,21 +86,22 @@ public class WebSocketFrameHeader {
 
     public byte[] getBytes() {
         int length = 1;// fin and opCode
-        if (this.mask != null) {
-            length += 4;
+        if (this.payloadLength <= 125) {
+            length += 1;// mask|length;
+        } else if (this.payloadLength > 125 && this.payloadLength <= ((1 << 16) - 1)) {
+            length += 3;// mask|length + 2 bytes, 16 bit unsigned
+        } else {
+            length += 9;// mask|length + 8 bytes,64 bit unsigned
         }
-        length += 1;// mask and length;
-        if (this.payloadLength > 125 && this.payloadLength <= (2 ^ 16)) {
-            length += 2;// 2 bytes, 16 bit unsigned
-        } else if (this.payloadLength > (2 ^ 16)) {
-            length += 8;// 8 bytes,64 bit unsigned
+        if (this.mask != null) {
+            length += 4;// mask, 4 bytes
         }
         int writeIndex = 0;
         final byte[] ret = new byte[length];
-        ret[writeIndex++] = (byte) ((this.isFin() ? 1 << 7 : 0) + this.getOpcode().getOpCode());
+        ret[writeIndex++] = (byte) ((this.isFin() ? 1 << 7 : 0) + (this.getOpcode().getOpCode() & 0xFF));
         if (this.payloadLength <= 125) {
-            ret[writeIndex++] = (byte) ((this.mask != null ? 1 << 7 : 0) + Math.max(0, this.payloadLength));
-        } else if (this.payloadLength > 125 && this.payloadLength <= (2 ^ 16)) {
+            ret[writeIndex++] = (byte) ((this.mask != null ? 1 << 7 : 0) + (Math.max(0, this.payloadLength) & 0xFF));
+        } else if (this.payloadLength > 125 && this.payloadLength <= ((1 << 16) - 1)) {
             ret[writeIndex++] = (byte) ((this.mask != null ? 1 << 7 : 0) + 126);
             ret[writeIndex++] = (byte) (this.payloadLength >>> 8 & 0xFF);
             ret[writeIndex++] = (byte) (this.payloadLength >>> 0 & 0xFF);

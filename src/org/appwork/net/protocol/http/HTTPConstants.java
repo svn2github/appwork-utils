@@ -51,6 +51,7 @@ public class HTTPConstants {
          * Failed and not continue).[2]
          */
         INFORMATION_CONTINUE(100, "Continue"),
+        SWITCHING_PROTOCOLS(101, "Switching Protocols"),
         /**
          * Standard response for successful HTTP requests. The actual response will depend on the request method used. In a GET request, the
          * response will contain an entity corresponding to the requested resource. In a POST request the response will contain an entity

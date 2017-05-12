@@ -262,7 +262,11 @@ public abstract class LogSourceProvider {
     }
 
     public LogSource getClassLogger(final Class<?> clazz) {
-        return this.getLogger(clazz.getSimpleName());
+        String name = clazz.getSimpleName();
+        if (StringUtils.isEmpty(name)) {
+            name = clazz.getName();
+        }
+        return this.getLogger(name);
     }
 
     public LogConsoleHandler getConsoleHandler() {

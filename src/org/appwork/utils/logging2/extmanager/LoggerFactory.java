@@ -54,7 +54,6 @@ import org.appwork.utils.logging2.LogSourceProvider;
 public class LoggerFactory extends LogSourceProvider {
     private static final LoggerFactory INSTANCE;
     static {
-        org.appwork.utils.Application.warnInit();
         INSTANCE = initialize();
     }
 
@@ -178,7 +177,7 @@ public class LoggerFactory extends LogSourceProvider {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.utils.logging2.LogSourceProvider#getLogger(java.lang.String)
      */
     @Override

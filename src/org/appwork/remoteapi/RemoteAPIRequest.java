@@ -41,6 +41,7 @@ import java.util.List;
 import org.appwork.remoteapi.exceptions.ApiCommandNotAvailable;
 import org.appwork.storage.JSonStorage;
 import org.appwork.utils.net.HeaderCollection;
+import org.appwork.utils.net.httpserver.requests.ConnectRequest;
 import org.appwork.utils.net.httpserver.requests.GetRequest;
 import org.appwork.utils.net.httpserver.requests.HeadRequest;
 import org.appwork.utils.net.httpserver.requests.HttpRequest;
@@ -55,6 +56,7 @@ import org.appwork.utils.net.httpserver.requests.PostRequest;
  */
 public class RemoteAPIRequest implements HttpRequestInterface {
     public static enum REQUESTTYPE {
+        CONNECT,
         HEAD,
         POST,
         OPTIONS,
@@ -205,17 +207,17 @@ public class RemoteAPIRequest implements HttpRequestInterface {
     public REQUESTTYPE getRequestType() {
         if (this.request instanceof OptionsRequest) {
             return REQUESTTYPE.OPTIONS;
-        }
-        if (this.request instanceof HeadRequest) {
+        } else if (this.request instanceof HeadRequest) {
             return REQUESTTYPE.HEAD;
-        }
-        if (this.request instanceof PostRequest) {
+        } else if (this.request instanceof PostRequest) {
             return REQUESTTYPE.POST;
-        }
-        if (this.request instanceof GetRequest) {
+        } else if (this.request instanceof GetRequest) {
             return REQUESTTYPE.GET;
+        } else if (this.request instanceof ConnectRequest) {
+            return REQUESTTYPE.CONNECT;
+        } else {
+            return REQUESTTYPE.UNKNOWN;
         }
-        return REQUESTTYPE.UNKNOWN;
     }
 
     /**
@@ -238,7 +240,7 @@ public class RemoteAPIRequest implements HttpRequestInterface {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.utils.net.httpserver.requests.HttpRequestInterface#getID()
      */
     @Override

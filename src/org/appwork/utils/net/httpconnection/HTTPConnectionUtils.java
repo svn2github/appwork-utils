@@ -41,6 +41,7 @@ import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.regex.Matcher;
 
+import org.appwork.net.protocol.http.HTTPConstants;
 import org.appwork.utils.Application;
 import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
@@ -168,6 +169,63 @@ public class HTTPConnectionUtils {
         }
         bigbuffer.flip();
         return bigbuffer;
+    }
+
+    public static long[] parseContentRange(final HTTPConnection httpConnection) {
+        final String contentRange = httpConnection.getHeaderField(HTTPConstants.HEADER_RESPONSE_CONTENT_RANGE);
+        if (contentRange != null) {
+            String[] range = null;
+            // the total size can be given by a * Like: bytes 26395608-29695059/*
+            if ((range = new Regex(contentRange, "\\s*(\\d+)\\s*-\\s*(\\d+)\\s*/\\s*(\\d+|\\*)").getRow(0)) != null) {
+                /* RFC-2616 */
+                /* START-STOP/SIZE */
+                /* Content-Range=[133333332-199999999/200000000] */
+                final long gotSB = Long.parseLong(range[0]);
+                final long gotEB = Long.parseLong(range[1]);
+                final long gotS = "*".equals(range[2]) ? -1 : Long.parseLong(range[2]);
+                return new long[] { gotSB, gotEB, gotS };
+            } else if ((range = new Regex(contentRange, "\\s*(\\d+)\\s*-\\s*/\\s*(\\d+|\\*)").getRow(0)) != null && (httpConnection == null || httpConnection.getResponseCode() != 416)) {
+                /* only parse this when we have NO 416 (invalid range request) */
+                /* NON RFC-2616! STOP is missing */
+                /*
+                 * this happend for some stupid servers, seems to happen when request is bytes=9500- (x till end)
+                 */
+                /* START-/SIZE */
+                /* content-range: bytes 1020054729-/1073741824 */
+                final long gotSB = Long.parseLong(range[0]);
+                if ("*".equals(range[1])) {
+                    return new long[] { gotSB, -1, -1 };
+                } else {
+                    final long gotS = Long.parseLong(range[1]);
+                    return new long[] { gotSB, gotS - 1, gotS };
+                }
+            } else if ((httpConnection == null || httpConnection.getResponseCode() == 416) && (range = new Regex(contentRange, ".\\s*\\*\\s*/\\s*(\\d+|\\*)").getRow(0)) != null) {
+                /* a 416 may respond with content-range * | content.size answer */
+                return new long[] { -1, -1, "*".equals(range[0]) ? -1 : Long.parseLong(range[0]) };
+            } else if ((httpConnection == null || httpConnection.getResponseCode() == 206) && (range = new Regex(contentRange, "[ \\*]+/(\\d+)").getRow(0)) != null) {
+                /* RFC-2616 */
+                /* a nginx 206 may respond with */
+                /* content-range: bytes * / 554407633 */
+                /*
+                 * A response with status code 206 (Partial Content) MUST NOT include a Content-Range field with a byte-range- resp-spec of
+                 * "*".
+                 */
+                return new long[] { -1, Long.parseLong(range[0]), Long.parseLong(range[0]) };
+            } else if ((range = new Regex(contentRange, "\\s*bytes\\s*-\\s*(\\d+)/(\\d+)").getRow(0)) != null) {
+                /**
+                 * HTTP/1.1 200 OK Server: nginx/1.4.6 (Ubuntu)
+                 *
+                 * Content-Range: bytes -7601730/7601731
+                 */
+                return new long[] { 0, Long.parseLong(range[0]), Long.parseLong(range[1]) };
+            } else {
+                /* unknown range header format! */
+                System.out.println(contentRange + " format is unknown!");
+                return null;
+            }
+        } else {
+            return null;
+        }
     }
 
     public static InetAddress[] resolvHostIP(String host) throws IOException {

@@ -57,7 +57,6 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSession;
 
-import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.net.CountingOutputStream;
 import org.appwork.utils.net.NullOutputStream;
@@ -436,46 +435,10 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
 
     @Override
     public long[] getRange() {
-        if (this.ranges != null) {
-            return this.ranges;
+        if (this.ranges == null) {
+            this.ranges = HTTPConnectionUtils.parseContentRange(this);
         }
-        String contentRange = this.getHeaderField("Content-Range");
-        if ((contentRange = this.getHeaderField("Content-Range")) == null) {
-            return null;
-        }
-        String[] range = null;
-        if (contentRange != null) {
-            if ((range = new Regex(contentRange, ".*?(\\d+).*?-.*?(\\d+).*?/.*?(\\d+)").getRow(0)) != null) {
-                /* RFC-2616 */
-                /* START-STOP/SIZE */
-                /* Content-Range=[133333332-199999999/200000000] */
-                final long gotSB = Long.parseLong(range[0]);
-                final long gotEB = Long.parseLong(range[1]);
-                final long gotS = Long.parseLong(range[2]);
-                this.ranges = new long[] { gotSB, gotEB, gotS };
-                return this.ranges;
-            } else if ((range = new Regex(contentRange, ".*?(\\d+).*?-/.*?(\\d+)").getRow(0)) != null && this.getResponseCode() != 416) {
-                /* only parse this when we have NO 416 (invalid range request) */
-                /* NON RFC-2616! STOP is missing */
-                /*
-                 * this happend for some stupid servers, seems to happen when request is bytes=9500- (x till end)
-                 */
-                /* START-/SIZE */
-                /* content-range: bytes 1020054729-/1073741824 */
-                final long gotSB = Long.parseLong(range[0]);
-                final long gotS = Long.parseLong(range[1]);
-                this.ranges = new long[] { gotSB, gotS - 1, gotS };
-                return this.ranges;
-            } else if (this.getResponseCode() == 416 && (range = new Regex(contentRange, ".*?\\*/.*?(\\d+)").getRow(0)) != null) {
-                /* a 416 may respond with content-range * | content.size answer */
-                this.ranges = new long[] { -1, -1, Long.parseLong(range[0]) };
-                return this.ranges;
-            } else {
-                /* unknown range header format! */
-                System.out.println(contentRange + " format is unknown!");
-            }
-        }
-        return null;
+        return this.ranges;
     }
 
     protected String getRequestInfo() {

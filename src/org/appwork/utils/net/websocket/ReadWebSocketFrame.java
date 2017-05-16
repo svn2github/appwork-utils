@@ -1,12 +1,8 @@
 package org.appwork.utils.net.websocket;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.Charset;
 
-import org.appwork.utils.IO;
 import org.appwork.utils.formatter.HexFormatter;
-import org.appwork.utils.net.LimitedInputStream;
 import org.appwork.utils.net.websocket.WebSocketFrameHeader.OP_CODE;
 
 public class ReadWebSocketFrame extends WebSocketFrame {
@@ -23,24 +19,6 @@ public class ReadWebSocketFrame extends WebSocketFrame {
 
     public ReadWebSocketFrame(WebSocketFrameHeader frameHeader) {
         this(frameHeader, null);
-    }
-
-    public static ReadWebSocketFrame read(InputStream is) throws IOException {
-        final WebSocketFrameHeader frameHeader = WebSocketFrameHeader.read(is);
-        if (frameHeader != null) {
-            if (frameHeader.getPayloadLength() > 0) {
-                final byte[] payLoad = IO.readStream(-1, new LimitedInputStream(is, frameHeader.getPayloadLength()) {
-                    @Override
-                    public void close() throws IOException {
-                    }
-                });
-                return new ReadWebSocketFrame(frameHeader, payLoad);
-            } else {
-                return new ReadWebSocketFrame(frameHeader);
-            }
-        } else {
-            return null;
-        }
     }
 
     @Override

@@ -1,8 +1,5 @@
 package org.appwork.utils.net.websocket;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 import org.appwork.utils.formatter.HexFormatter;
 
 public class WebSocketFrameHeader {
@@ -58,31 +55,6 @@ public class WebSocketFrameHeader {
     private final OP_CODE opCode;
     private final long    payloadLength;
     private final byte[]  mask;
-
-    public static WebSocketFrameHeader read(final InputStream is) throws IOException {
-        byte[] buf = WebSocketEndPoint.fill(is, new byte[2]);
-        final boolean fin = 1 == (buf[0] & 0xff) >>> 7;// fin, finrsv1rsv2rsv3xxxx 7 rightshift
-        final int opCode = buf[0] & 15;// opCode, xxxx1111
-        final boolean mask = 1 == (buf[1] & 0xff) >>> 7;// mask, fxxxxxxx 7 rightshift
-        long payloadLength = buf[1] & 127; // length, x1111111
-        if (payloadLength == 126) {
-            buf = WebSocketEndPoint.fill(is, new byte[2]);// 16 bit unsigned
-            payloadLength = ((buf[0] & 255) << 8) + ((buf[1] & 255) << 0);
-        } else if (payloadLength == 127) {
-            buf = WebSocketEndPoint.fill(is, new byte[8]);// 64 bit unsigned
-            payloadLength = ((long) buf[0] << 56) + ((long) (buf[1] & 255) << 48) + ((long) (buf[2] & 255) << 40) + ((long) (buf[3] & 255) << 32) + ((long) (buf[4] & 255) << 24) + ((buf[5] & 255) << 16) + ((buf[6] & 255) << 8) + ((buf[7] & 255) << 0);
-        }
-        final OP_CODE op_Code = OP_CODE.get(opCode);
-        if (op_Code == null) {
-            //
-            throw new IOException("Unsupported opCode:" + opCode);
-        }
-        if (mask) {
-            return new WebSocketFrameHeader(fin, op_Code, payloadLength, WebSocketEndPoint.fill(is, new byte[4]));
-        } else {
-            return new WebSocketFrameHeader(fin, op_Code, payloadLength);
-        }
-    }
 
     public byte[] getBytes() {
         int length = 1;// fin and opCode

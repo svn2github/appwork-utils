@@ -135,6 +135,10 @@ public class EventsAPI implements EventsAPIInterface, RemoteAPIEventsSender {
         return null;
     }
 
+    protected EventObject pollEvent(Subscriber subscriber, long waitfor) throws InterruptedException {
+        return subscriber.poll(waitfor);
+    }
+
     @Override
     public SubscriptionResponse changesubscriptiontimeouts(final long subscriptionid, final long polltimeout, final long maxkeepalive) {
         final Subscriber subscriber = getSubscriber(subscriptionid);
@@ -190,7 +194,7 @@ public class EventsAPI implements EventsAPIInterface, RemoteAPIEventsSender {
         final ArrayList<EventObjectStorable> eventStorables = new ArrayList<EventObjectStorable>();
         try {
             EventObject event;
-            while ((event = subscriber.poll(events.size() == 0 ? subscriber.getPollTimeout() : 0)) != null && getSubscriber(subscriptionid) == subscriber) {
+            while (getSubscriber(subscriptionid) == subscriber && (event = pollEvent(subscriber, events.size() == 0 ? subscriber.getPollTimeout() : 0)) != null) {
                 events.add(event);
                 eventStorables.add(new EventObjectStorable(event));
             }

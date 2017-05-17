@@ -379,8 +379,8 @@ public class DefaultDocsPageFactory extends InterfaceHandler<Object> {
                 int count = 0;
                 Type returnType = m.getGenericReturnType();
                 requiredTypes.addAll(getTypes(returnType));
-                APIParameterNames anno = m.getAnnotation(APIParameterNames.class);
-                String[] parameterNames = anno == null ? null : anno.value();
+                final APIParameterNames anno = m.getAnnotation(APIParameterNames.class);
+                final String[] parameterNames = anno == null ? null : anno.value();
                 for (int i = 0; i < m.getGenericParameterTypes().length; i++) {
                     if (m.getParameterTypes()[i] == RemoteAPIRequest.class || m.getParameterTypes()[i] == RemoteAPIResponse.class) {
                         continue;
@@ -397,8 +397,14 @@ public class DefaultDocsPageFactory extends InterfaceHandler<Object> {
                     requiredTypes.addAll(getTypes(paramClass));
                     String paramName = typeToString(requiredTypes, paramClass, false, false);
                     if (parameterNames != null) {
-                        call += new Regex(parameterNames[i], "^(\\S+)").getMatch(0);
-                        header += parameterNames[i];
+                        if (i < parameterNames.length) {
+                            call += new Regex(parameterNames[i], "^(\\S+)").getMatch(0);
+                            header += parameterNames[i];
+                        } else {
+                            System.out.println("FIXME: Invalid APIParameterNames Annotation for Method:" + m.getName() + "|Class:" + m.getDeclaringClass().getName());
+                            call += paramName;
+                            header += paramName;
+                        }
                     } else {
                         call += paramName;
                         header += paramName;
@@ -807,7 +813,11 @@ public class DefaultDocsPageFactory extends InterfaceHandler<Object> {
             key = "&nbsp;";
         }
         if (parameterNames != null) {
-            value = htmlEncode(count + " - " + parameterNames[i] + " (") + paramNameHTML + htmlEncode(")");
+            if (i < parameterNames.length) {
+                value = htmlEncode(count + " - " + parameterNames[i] + " (") + paramNameHTML + htmlEncode(")");
+            } else {
+                value = htmlEncode(count + " - ") + paramNameHTML;
+            }
         } else {
             value = htmlEncode(count + " - ") + paramNameHTML;
         }

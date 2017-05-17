@@ -60,6 +60,10 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 public class JacksonMapper implements JSONMapper {
     private final ObjectMapper mapper;
 
+    public ObjectMapper getMapper() {
+        return mapper;
+    }
+
     public JacksonMapper() {
         mapper = new ObjectMapper(new ExtJsonFactory());
         mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);

@@ -37,6 +37,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 
 /**
  * @author daniel
@@ -143,12 +144,12 @@ public class AWFCUtils {
     }
 
     public String readString(final int size) throws IOException {
-        return new String(this.ensureRead(size, null), 0, size, "UTF-8");
+        return new String(this.ensureRead(size, null), 0, size, UTF8);
     }
 
     public String readString(byte[] tempBuffer) throws IOException {
         final int size = this.readShort();
-        return new String(this.ensureRead(size, tempBuffer), 0, size, "UTF-8");
+        return new String(this.ensureRead(size, tempBuffer), 0, size, UTF8);
     }
 
     public void writeBoolean(final boolean b) throws IOException {
@@ -193,11 +194,13 @@ public class AWFCUtils {
         this.getCurrentOutputStream().write(this.buffer, 0, 2);
     }
 
+    private final static Charset UTF8 = Charset.forName("UTF-8");
+
     public void writeString(final String string) throws IOException {
         if (string == null) {
             throw new IOException("string == null");
         }
-        final byte[] stringBytes = string.getBytes("UTF-8");
+        final byte[] stringBytes = string.getBytes(UTF8);
         if (stringBytes.length > 32767) {
             throw new IllegalArgumentException("StringSize must not be greater than 32767 bytes");
         }

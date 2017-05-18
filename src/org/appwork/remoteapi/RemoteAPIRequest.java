@@ -39,6 +39,8 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 import org.appwork.remoteapi.exceptions.ApiCommandNotAvailable;
+import org.appwork.remoteapi.exceptions.BadParameterException;
+import org.appwork.remoteapi.exceptions.BasicRemoteAPIException;
 import org.appwork.storage.JSonStorage;
 import org.appwork.utils.net.HeaderCollection;
 import org.appwork.utils.net.httpserver.requests.ConnectRequest;
@@ -82,7 +84,7 @@ public class RemoteAPIRequest implements HttpRequestInterface {
         return request + "\r\n" + "Method: " + method + "\r\nParameters:" + JSonStorage.serializeToJson(parameters);
     }
 
-    public RemoteAPIRequest(final InterfaceHandler<?> iface, final String methodName, final String[] parameters, final HttpRequest request, final String jqueryCallback) throws ApiCommandNotAvailable {
+    public RemoteAPIRequest(final InterfaceHandler<?> iface, final String methodName, final String[] parameters, final HttpRequest request, final String jqueryCallback) throws BasicRemoteAPIException {
         this.iface = iface;
         this.parameters = parameters;
         this.request = request;
@@ -90,7 +92,11 @@ public class RemoteAPIRequest implements HttpRequestInterface {
         this.jqueryCallback = jqueryCallback;
         this.method = this.iface.getMethod(methodName, this.parameters.length);
         if (method == null) {
-            throw new ApiCommandNotAvailable(request.getRequestedURL());
+            if (this.iface.hasMethodName(methodName)) {
+                throw new BadParameterException(request.getRequestedURL());
+            } else {
+                throw new ApiCommandNotAvailable(request.getRequestedURL());
+            }
         }
     }
 

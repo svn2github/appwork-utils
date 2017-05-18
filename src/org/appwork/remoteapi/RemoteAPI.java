@@ -476,7 +476,7 @@ public class RemoteAPI implements HttpRequestHandler {
         return null;
     }
 
-    protected RemoteAPIRequest createRemoteAPIRequestObject(final HttpRequest request, Object extractedData, final String method, final InterfaceHandler<?> interfaceHandler, final java.util.List<String> parameters, final String jqueryCallback) throws IOException, ApiCommandNotAvailable {
+    protected RemoteAPIRequest createRemoteAPIRequestObject(final HttpRequest request, Object extractedData, final String method, final InterfaceHandler<?> interfaceHandler, final java.util.List<String> parameters, final String jqueryCallback) throws IOException, BasicRemoteAPIException {
         return new RemoteAPIRequest(interfaceHandler, method, parameters.toArray(new String[] {}), request, jqueryCallback);
     }
 
@@ -705,8 +705,8 @@ public class RemoteAPI implements HttpRequestHandler {
                         }
                     }
                 }
-                clazz = clazz.getSuperclass();
-                this.interfaces = linterfaces;
+            clazz = clazz.getSuperclass();
+            this.interfaces = linterfaces;
             }
         }
     }
@@ -763,7 +763,7 @@ public class RemoteAPI implements HttpRequestHandler {
                         linterfaces.remove(namespace);
                     }
                 }
-                clazz = clazz.getSuperclass();
+            clazz = clazz.getSuperclass();
             }
             this.interfaces = linterfaces;
         }

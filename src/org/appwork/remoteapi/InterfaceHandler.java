@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.appwork.remoteapi.annotations.AllowNonStorableObjects;
 import org.appwork.remoteapi.annotations.AllowResponseAccess;
@@ -60,6 +61,7 @@ import org.appwork.storage.JSonStorage;
 import org.appwork.storage.config.annotations.AllowStorage;
 import org.appwork.uio.UIOManager;
 import org.appwork.utils.Application;
+import org.appwork.utils.StringUtils;
 
 /**
  * @author thomas
@@ -184,6 +186,17 @@ public class InterfaceHandler<T> {
             return ret;
         }
         return this.methods.get(methodName);
+    }
+
+    public boolean hasMethodName(final String methodName) {
+        if (StringUtils.isNotEmpty(methodName)) {
+            for (final String method : methods.keySet()) {
+                if (method.equals(methodName) || method.matches("^" + Pattern.quote(methodName) + "\\d+$")) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**

@@ -71,6 +71,7 @@ import org.appwork.utils.Regex;
 import org.appwork.utils.logging2.extmanager.LoggerFactory;
 import org.appwork.utils.net.ChunkedOutputStream;
 import org.appwork.utils.net.HTTPHeader;
+import org.appwork.utils.net.httpserver.HttpConnection.HttpConnectionType;
 import org.appwork.utils.net.httpserver.handler.HttpRequestHandler;
 import org.appwork.utils.net.httpserver.requests.GetRequest;
 import org.appwork.utils.net.httpserver.requests.HTTPBridge;
@@ -813,6 +814,7 @@ public class RemoteAPI implements HttpRequestHandler {
     public static void sendBytesCompressed(HttpRequest request, HttpResponse response, InputStream is) throws IOException {
         final boolean gzip = RemoteAPI.gzip(request);
         final boolean deflate = RemoteAPI.deflate(request) && Application.getJavaVersion() >= Application.JAVA16;
+        final boolean isHeadRequest = HttpConnectionType.HEAD.equals(request.getHttpConnectionType());
         if (deflate) {
             response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_ENCODING, "deflate"));
         } else if (gzip) {
@@ -826,17 +828,19 @@ public class RemoteAPI implements HttpRequestHandler {
         } else {
             os = response.getOutputStream(true);
         }
-        if (deflate) {
-            final DeflaterOutputStream out = new DeflaterOutputStream(os, new Deflater(9, true), false);
-            IO.readStreamToOutputStream(-1, is, out, false);
-            out.close();
-        } else if (gzip) {
-            final GZIPOutputStream out = new GZIPOutputStream(os);
-            IO.readStreamToOutputStream(-1, is, out, false);
-            out.close();
-        } else {
-            IO.readStreamToOutputStream(-1, is, os, false);
-            os.close();
+        if (!isHeadRequest) {
+            if (deflate) {
+                final DeflaterOutputStream out = new DeflaterOutputStream(os, new Deflater(9, true), false);
+                IO.readStreamToOutputStream(-1, is, out, false);
+                out.close();
+            } else if (gzip) {
+                final GZIPOutputStream out = new GZIPOutputStream(os);
+                IO.readStreamToOutputStream(-1, is, out, false);
+                out.close();
+            } else {
+                IO.readStreamToOutputStream(-1, is, os, false);
+                os.close();
+            }
         }
     }
 
@@ -850,33 +854,44 @@ public class RemoteAPI implements HttpRequestHandler {
     public static void sendBytesCompressed(HttpRequest request, HttpResponse response, byte[] bytes) throws IOException {
         final boolean gzip = RemoteAPI.gzip(request);
         final boolean deflate = RemoteAPI.deflate(request) && Application.getJavaVersion() >= Application.JAVA16;
+        final boolean isHeadRequest = HttpConnectionType.HEAD.equals(request.getHttpConnectionType());
         if (gzip == false && deflate == false) {
             response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_LENGTH, bytes.length + ""));
-            response.getOutputStream(true).write(bytes);
+            final OutputStream os = response.getOutputStream(true);
+            if (!isHeadRequest) {
+                os.write(bytes);
+            }
         } else {
             if (bytes.length < 1 * 1024 * 1024) {
                 // compress small in memory
                 if (deflate) {
                     response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_ENCODING, "deflate"));
-                    DeflaterOutputStream out = null;
-                    ByteArrayOutputStream bao;
-                    out = new DeflaterOutputStream(bao = new ByteArrayOutputStream(), new Deflater(9, true), true);
+                    final ByteArrayOutputStream bao = new ByteArrayOutputStream();
+                    final DeflaterOutputStream out = new DeflaterOutputStream(bao, new Deflater(9, true), true);
                     out.write(bytes);
                     out.close();
                     response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_LENGTH, bao.size() + ""));
-                    bao.writeTo(response.getOutputStream(true));
+                    final OutputStream os = response.getOutputStream(true);
+                    if (!isHeadRequest) {
+                        bao.writeTo(os);
+                    }
                 } else if (gzip) {
                     response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_ENCODING, "gzip"));
-                    GZIPOutputStream out = null;
-                    ByteArrayOutputStream bao;
-                    out = new GZIPOutputStream(bao = new ByteArrayOutputStream());
+                    final ByteArrayOutputStream bao = new ByteArrayOutputStream();
+                    final GZIPOutputStream out = new GZIPOutputStream(bao);
                     out.write(bytes);
                     out.close();
                     response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_LENGTH, bao.size() + ""));
-                    bao.writeTo(response.getOutputStream(true));
+                    final OutputStream os = response.getOutputStream(true);
+                    if (!isHeadRequest) {
+                        bao.writeTo(os);
+                    }
                 } else {
                     response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_LENGTH, bytes.length + ""));
-                    response.getOutputStream(true).write(bytes);
+                    final OutputStream os = response.getOutputStream(true);
+                    if (!isHeadRequest) {
+                        os.write(bytes);
+                    }
                 }
             } else {
                 if (deflate) {
@@ -892,17 +907,19 @@ public class RemoteAPI implements HttpRequestHandler {
                 } else {
                     os = response.getOutputStream(true);
                 }
-                if (deflate) {
-                    final DeflaterOutputStream out = new DeflaterOutputStream(os, new Deflater(9, true), false);
-                    out.write(bytes);
-                    out.close();
-                } else if (gzip) {
-                    final GZIPOutputStream out = new GZIPOutputStream(os);
-                    out.write(bytes);
-                    out.close();
-                } else {
-                    os.write(bytes);
-                    os.close();
+                if (!isHeadRequest) {
+                    if (deflate) {
+                        final DeflaterOutputStream out = new DeflaterOutputStream(os, new Deflater(9, true), false);
+                        out.write(bytes);
+                        out.close();
+                    } else if (gzip) {
+                        final GZIPOutputStream out = new GZIPOutputStream(os);
+                        out.write(bytes);
+                        out.close();
+                    } else {
+                        os.write(bytes);
+                        os.close();
+                    }
                 }
             }
         }

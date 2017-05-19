@@ -139,6 +139,10 @@ public class EventsAPI implements EventsAPIInterface, RemoteAPIEventsSender {
         return subscriber.poll(waitfor);
     }
 
+    protected void pushBackEvent(Subscriber subscriber, List<EventObject> events) {
+        subscriber.pushBack(events);
+    }
+
     @Override
     public SubscriptionResponse changesubscriptiontimeouts(final long subscriptionid, final long polltimeout, final long maxkeepalive) {
         final Subscriber subscriber = getSubscriber(subscriptionid);
@@ -376,7 +380,7 @@ public class EventsAPI implements EventsAPIInterface, RemoteAPIEventsSender {
 
     /*
      * starts a cleanupThread (if needed) to remove subscribers that are no longer alive
-     *
+     * 
      * current implementation has a minimum delay of 1 minute
      */
     protected void subscribersCleanupThread() {

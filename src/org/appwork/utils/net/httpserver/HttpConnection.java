@@ -261,6 +261,9 @@ public class HttpConnection implements Runnable {
         default:
             throw new IOException("Unsupported " + requestLine);
         }
+        if (request == null) {
+            throw new IOException("Unsupported " + requestLine);
+        }
         request.setBridge(server);
         /* parse remoteClientAddresses */
         request.setRemoteAddress(this.getRemoteAddress(requestHeaders));
@@ -306,9 +309,7 @@ public class HttpConnection implements Runnable {
     }
 
     public List<HttpRequestHandler> getHandler() {
-        synchronized (this.server.getHandler()) {
-            return this.server.getHandler();
-        }
+        return this.server.getHandler();
     }
 
     /**

@@ -91,6 +91,7 @@ public class HTTPConstants {
          * permissible.
          */
         ERROR_NOT_FOUND(404, "Not Found"),
+        METHOD_NOT_ALLOWED(405, "Method Not Allowed"),
         LENGTH_REQUIRED(411, "Length Required"),
         REQUEST_ENTITY_TOO_LARGE(413, "Request Entity Too Large"),
         REQUEST_URL_TOO_LONG(414, "Request-URL Too Long"),

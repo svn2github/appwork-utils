@@ -536,12 +536,15 @@ public class HttpConnection implements Runnable {
                 nothing.printStackTrace();
             }
         } finally {
-            if (lHook != null) {
-                lHook.onFinalizeConnection(closeConnection, request, response);
-            }
-            if (closeConnection) {
-                this.closeConnection();
-                this.close();
+            try {
+                if (lHook != null) {
+                    lHook.onFinalizeConnection(closeConnection, request, response);
+                }
+            } finally {
+                if (closeConnection) {
+                    this.closeConnection();
+                    this.close();
+                }
             }
         }
     }

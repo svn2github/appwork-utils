@@ -41,6 +41,7 @@ import java.util.zip.GZIPOutputStream;
 
 import org.appwork.net.protocol.http.HTTPConstants;
 import org.appwork.net.protocol.http.HTTPConstants.ResponseCode;
+import org.appwork.remoteapi.RemoteAPIRequest.REQUESTTYPE;
 import org.appwork.utils.Application;
 import org.appwork.utils.net.ChunkedOutputStream;
 import org.appwork.utils.net.HTTPHeader;
@@ -50,7 +51,7 @@ import org.appwork.utils.net.httpserver.responses.HttpResponseInterface;
 
 /**
  * @author daniel
- * 
+ *
  */
 public class RemoteAPIResponse implements HttpResponseInterface {
     protected final int        MAXUNCOMPRESSED = 32767;
@@ -69,7 +70,7 @@ public class RemoteAPIResponse implements HttpResponseInterface {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.utils.net.httpserver.responses.HttpResponseInterface# closeConnection()
      */
     @Override
@@ -118,32 +119,38 @@ public class RemoteAPIResponse implements HttpResponseInterface {
         }
         final boolean gzip = RemoteAPI.gzip(request);
         final boolean deflate = RemoteAPI.gzip(request) && Application.getJavaVersion() >= Application.JAVA16;
+        final boolean isHeadRequest = REQUESTTYPE.HEAD.equals(request.getRequestType());
         if (gzip == false && deflate == false || bytes.length <= this.MAXUNCOMPRESSED) {
             this.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_LENGTH, bytes.length + ""));
-            this.getOutputStream(true).write(bytes);
+            final OutputStream os = this.getOutputStream(true);
+            if (!isHeadRequest) {
+                os.write(bytes);
+            }
         } else {
             if (deflate) {
                 this.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_ENCODING, "deflate"));
                 this.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING, HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING_CHUNKED));
-                ChunkedOutputStream cos = null;
-                DeflaterOutputStream out = null;
-                cos = new ChunkedOutputStream(this.getOutputStream(true));
-                out = new DeflaterOutputStream(cos, new Deflater(9, true));
-                out.write(bytes);
-                out.finish();
-                out.flush();
-                cos.sendEOF();
+                final OutputStream os = this.getOutputStream(true);
+                if (!isHeadRequest) {
+                    final ChunkedOutputStream cos = new ChunkedOutputStream(os);
+                    final DeflaterOutputStream out = new DeflaterOutputStream(cos, new Deflater(9, true));
+                    out.write(bytes);
+                    out.finish();
+                    out.flush();
+                    cos.sendEOF();
+                }
             } else {
                 this.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_ENCODING, "gzip"));
                 this.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING, HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING_CHUNKED));
-                ChunkedOutputStream cos = null;
-                GZIPOutputStream out = null;
-                cos = new ChunkedOutputStream(this.getOutputStream(true));
-                out = new GZIPOutputStream(cos);
-                out.write(bytes);
-                out.finish();
-                out.flush();
-                cos.sendEOF();
+                final OutputStream os = this.getOutputStream(true);
+                if (!isHeadRequest) {
+                    final ChunkedOutputStream cos = new ChunkedOutputStream(os);
+                    final GZIPOutputStream out = new GZIPOutputStream(cos);
+                    out.write(bytes);
+                    out.finish();
+                    out.flush();
+                    cos.sendEOF();
+                }
             }
         }
     }

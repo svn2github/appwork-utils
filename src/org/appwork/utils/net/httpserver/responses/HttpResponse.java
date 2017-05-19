@@ -70,7 +70,7 @@ public class HttpResponse implements HttpResponseInterface {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.utils.net.httpserver.responses.HttpResponseInterface# closeConnection()
      */
     @Override

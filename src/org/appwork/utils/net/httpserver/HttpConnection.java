@@ -44,8 +44,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.appwork.exceptions.WTFException;
 import org.appwork.net.protocol.http.HTTPConstants;
 import org.appwork.net.protocol.http.HTTPConstants.ResponseCode;
+import org.appwork.remoteapi.exceptions.RemoteAPIException;
 import org.appwork.utils.Exceptions;
 import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
@@ -482,12 +484,16 @@ public class HttpConnection implements Runnable {
     @Override
     public void run() {
         boolean closeConnection = true;
+        ConnectionHook lHook = hook;
         try {
             if (this.request == null) {
                 this.request = this.buildRequest();
             }
             if (this.response == null) {
                 this.response = this.buildResponse();
+            }
+            if (lHook != null) {
+                lHook.onStartHandleConnection(request, response);
             }
             if (this.deferRequest(this.request)) {
                 closeConnection = false;
@@ -530,6 +536,9 @@ public class HttpConnection implements Runnable {
                 nothing.printStackTrace();
             }
         } finally {
+            if (lHook != null) {
+                lHook.onFinalizeConnection(closeConnection, request, response);
+            }
             if (closeConnection) {
                 this.closeConnection();
                 this.close();
@@ -541,12 +550,25 @@ public class HttpConnection implements Runnable {
         /**
          * @param httpConnection
          */
-        void onBeforeSendHeaders(HttpResponse httpConnection);
+        void onBeforeSendHeaders(HttpResponse response);
+
+        /**
+         * @param closeConnection
+         * @param request
+         * @param response
+         */
+        void onFinalizeConnection(boolean closeConnection, HttpRequest request, HttpResponse response);
+
+        /**
+         * @param request
+         * @param response
+         */
+        void onStartHandleConnection(HttpRequest request, HttpResponse response) throws RemoteAPIException;
 
         /**
          * @param httpConnection
          */
-        void onAfterSendHeaders(HttpResponse httpConnection);
+        void onAfterSendHeaders(HttpResponse response);
     }
 
     private ConnectionHook hook;
@@ -556,6 +578,9 @@ public class HttpConnection implements Runnable {
     }
 
     public void setHook(ConnectionHook hook) {
+        if (this.hook != null) {
+            throw new WTFException("Hook already set!");
+        }
         this.hook = hook;
     }
 

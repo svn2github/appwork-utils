@@ -36,12 +36,17 @@ package org.appwork.utils.os;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.regex.Pattern;
 
+import org.appwork.exceptions.WTFException;
 import org.appwork.utils.Application;
 import org.appwork.utils.Files;
 import org.appwork.utils.IO;
+import org.appwork.utils.Regex;
 import org.appwork.utils.os.CrossSystem.OperatingSystem;
 import org.appwork.utils.processes.ProcessBuilderFactory;
 import org.appwork.utils.processes.ProcessOutput;
@@ -289,5 +294,75 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
         }
         return true;
+    }
+
+    /**
+     * @param pid
+     * @return
+     */
+    public String getProcessCommandlineByPID(int pid) {
+        ProcessOutput result;
+        try {
+            result = ProcessBuilderFactory.runCommand("wmic", "process", "where", "ProcessID=" + pid, "get", "CommandLine");
+            String str = result.getStdOutString().trim();
+            return Regex.getLines(str)[2];
+        } catch (Throwable e) {
+            throw new WTFException(e);
+        }
+    }
+
+    public String getProcessExecutablePathByPID(int pid) {
+        ProcessOutput result;
+        try {
+            result = ProcessBuilderFactory.runCommand("wmic", "process", "where", "ProcessID=" + pid, "get", "ExecutablePath");
+            String str = result.getStdOutString().trim();
+            return Regex.getLines(str)[2];
+        } catch (Throwable e) {
+            throw new WTFException(e);
+        }
+    }
+
+    /**
+     * @param pid
+     * @return
+     */
+    public String getProcessNameByPID(int pid) {
+        ProcessOutput result;
+        try {
+            result = ProcessBuilderFactory.runCommand("cmd", "/c", "tasklist", "|", "findstr", String.valueOf(pid));
+            String str = result.getStdOutString();
+            for (String line : Regex.getLines(str)) {
+                line = line.trim();
+                String name = new Regex(line, "^(\\S+)\\s+" + pid + "\\s+").getMatch(0);
+                if (name != null) {
+                    return name;
+                }
+            }
+        } catch (Throwable e) {
+            throw new WTFException(e);
+        }
+        return null;
+    }
+
+    /**
+     * @param i
+     * @return
+     */
+    public int getPIDForRemoteAddress(SocketAddress adr) {
+        ProcessOutput result;
+        try {
+            result = ProcessBuilderFactory.runCommand("cmd", "/c", "netstat", "-o", "-n", "-a", "|", "findstr", ((InetSocketAddress) adr).getAddress().getHostAddress() + ":" + ((InetSocketAddress) adr).getPort());
+            String str = result.getStdOutString();
+            for (String line : Regex.getLines(str)) {
+                line = line.trim();
+                String pid = new Regex(line, "^(?:TCP|UDP)\\s+" + Pattern.quote(((InetSocketAddress) adr).getAddress().getHostAddress()) + "\\:" + ((InetSocketAddress) adr).getPort() + "\\s+.*?(\\d+)$").getMatch(0);
+                if (pid != null) {
+                    return Integer.parseInt(pid);
+                }
+            }
+        } catch (Throwable e) {
+            throw new WTFException(e);
+        }
+        return -1;
     }
 }

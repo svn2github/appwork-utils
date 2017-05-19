@@ -39,6 +39,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
+import javax.swing.text.JTextComponent;
 
 import org.appwork.swing.MigPanel;
 import org.appwork.uio.ConfirmDialogInterface;
@@ -47,10 +48,10 @@ import org.appwork.utils.BinaryLogic;
 import org.appwork.utils.os.CrossSystem;
 
 public class ConfirmDialog extends AbstractDialog<Integer> implements ConfirmDialogInterface {
-
-    public static final int STYLE_HTML       = Dialog.STYLE_HTML;
-    public static final int STYLE_SCROLLPANE = Dialog.STYLE_LARGE;
-    private String          message;
+    public static final int  STYLE_HTML       = Dialog.STYLE_HTML;
+    public static final int  STYLE_SCROLLPANE = Dialog.STYLE_LARGE;
+    private String           message;
+    protected JTextComponent textComponent;
 
     public void setMessage(final String message) {
         this.message = message;
@@ -99,9 +100,9 @@ public class ConfirmDialog extends AbstractDialog<Integer> implements ConfirmDia
     // }
     //
     // } else {
-    // console.println("|Dialog>  Enter y for " + ((getOKButtonText() == null) ?
+    // console.println("|Dialog> Enter y for " + ((getOKButtonText() == null) ?
     // "OK" : getOKButtonText()));
-    // console.println("|Dialog>  Enter n for " + ((getCancelButtonText() ==
+    // console.println("|Dialog> Enter n for " + ((getCancelButtonText() ==
     // null) ? "CANCEL" : getCancelButtonText()));
     // console.print("|Input > ");
     // if (console.readLine().trim().equalsIgnoreCase("y")) {
@@ -128,11 +129,9 @@ public class ConfirmDialog extends AbstractDialog<Integer> implements ConfirmDia
     // }
     // }
     // }
-
     public ConfirmDialog(final int flag, final String title, final String message, final Icon icon, final String okOption, final String cancelOption) {
         super(flag, title, icon, okOption, cancelOption);
         org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Dialog    [" + okOption + "][" + cancelOption + "]\r\nflag:  " + Integer.toBinaryString(flag) + "\r\ntitle: " + title + "\r\nmsg:   \r\n" + message);
-
         this.message = message;
     }
 
@@ -165,18 +164,16 @@ public class ConfirmDialog extends AbstractDialog<Integer> implements ConfirmDia
     @Override
     public JComponent layoutDialogContent() {
         final MigPanel p = new MigPanel("ins 0", "[]", "[]");
-        addMessageComponent(p);
+        textComponent = addMessageComponent(p);
         return p;
     }
 
-    protected void addMessageComponent(final MigPanel p) {
-
+    protected JTextComponent addMessageComponent(final MigPanel p) {
         JTextPane textField = new JTextPane() {
             private static final long serialVersionUID = 1L;
 
             @Override
             public boolean getScrollableTracksViewportWidth() {
-
                 return !BinaryLogic.containsAll(ConfirmDialog.this.flagMask, Dialog.STYLE_LARGE);
             }
         };
@@ -184,19 +181,16 @@ public class ConfirmDialog extends AbstractDialog<Integer> implements ConfirmDia
         if (BinaryLogic.containsAll(flagMask, Dialog.STYLE_HTML)) {
             textField.setContentType("text/html");
             textField.addHyperlinkListener(new HyperlinkListener() {
-
                 public void hyperlinkUpdate(final HyperlinkEvent e) {
                     if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
                         CrossSystem.openURL(e.getURL());
                     }
                 }
-
             });
         } else {
             textField.setContentType("text/plain");
             // this.textField.setMaximumSize(new Dimension(450, 600));
         }
-
         textField.setText(getMessage());
         textField.setEditable(false);
         textField.setBackground(null);
@@ -204,17 +198,12 @@ public class ConfirmDialog extends AbstractDialog<Integer> implements ConfirmDia
         textField.setFocusable(false);
         textField.putClientProperty("Synthetica.opaque", Boolean.FALSE);
         textField.setCaretPosition(0);
-
         if (BinaryLogic.containsAll(flagMask, Dialog.STYLE_LARGE)) {
-
             p.add(new JScrollPane(textField), "pushx,growx");
-
         } else {
-
             p.add(textField);
-
         }
-
+        return textField;
     }
 
     /**
@@ -222,7 +211,6 @@ public class ConfirmDialog extends AbstractDialog<Integer> implements ConfirmDia
      */
     protected void modifyTextPane(JTextPane textField) {
         // TODO Auto-generated method stub
-
     }
 
     @Override
@@ -232,7 +220,5 @@ public class ConfirmDialog extends AbstractDialog<Integer> implements ConfirmDia
         } else {
             return ("dialog-" + getTitle() + "_" + getMessage()).replaceAll("\\W", "_");
         }
-
     }
-
 }

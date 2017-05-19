@@ -128,6 +128,12 @@ public class DefaultDocsPageFactory extends InterfaceHandler<Object> {
                 this.cachedBytes = new SoftReference<byte[]>(bytes);
             }
             response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_TYPE, "text/html"));
+            ContentSecurityHeader ret = new ContentSecurityHeader();
+            ret.addDefaultSrc("'self'");
+            ret.addScriptSrc("http://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/highlight.min.js");
+            ret.addScriptSrc("'unsafe-inline'");
+            ret.addStyleSrc("'unsafe-inline'");
+            response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_SECURITY_POLICY, ret.toHeaderString()));
             response.setResponseCode(ResponseCode.SUCCESS_OK);
             response.sendBytes(request, bytes);
         } catch (IOException e) {

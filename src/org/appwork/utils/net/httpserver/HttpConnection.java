@@ -173,6 +173,10 @@ public class HttpConnection implements Runnable {
         }
     }
 
+    public Socket getClientSocket() {
+        return clientSocket;
+    }
+
     protected HttpConnection() {
         this.server = null;
         this.clientSocket = null;

@@ -46,9 +46,13 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -63,9 +67,13 @@ import org.appwork.shutdown.ShutdownRequest;
 import org.appwork.uio.InputDialogInterface;
 import org.appwork.uio.UIOManager;
 import org.appwork.utils.Application;
+import org.appwork.utils.Hash;
 import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
+import org.appwork.utils.encoding.Base64;
+import org.appwork.utils.formatter.HexFormatter;
 import org.appwork.utils.locale._AWU;
+import org.appwork.utils.logging2.extmanager.LoggerFactory;
 import org.appwork.utils.os.mime.Mime;
 import org.appwork.utils.os.mime.MimeFactory;
 import org.appwork.utils.processes.ProcessBuilderFactory;
@@ -327,7 +335,7 @@ public class CrossSystem {
                 return;
             } else if (CrossSystem.isOpenFileSupported()) {
                 CrossSystem.DESKTOP_SUPPORT.openFile(file);
-            } 
+            }
         } catch (IOException e) {
             if (CrossSystem.isOpenFileSupported()) {
                 CrossSystem.DESKTOP_SUPPORT.openFile(file);
@@ -1078,6 +1086,10 @@ public class CrossSystem {
         return CrossSystem.DESKTOP_SUPPORT.isBrowseURLSupported() || (CrossSystem.getBrowserCommandLine() != null && CrossSystem.getBrowserCommandLine().length > 0);
     }
 
+    public static DesktopSupport getDesktopSupport() {
+        return DESKTOP_SUPPORT;
+    }
+
     /**
      * returns true in case of "open a File" is supported
      *
@@ -1517,5 +1529,80 @@ public class CrossSystem {
             throw new WTFException(e);
         }
         throw new UnexpectedResponseException("Unexpected Response: " + response);
+    }
+
+    /**
+     *
+     */
+    public static void playErrorSound() {
+        if (getOSFamily() == OSFamily.WINDOWS) {
+            final Runnable runnable = (Runnable) Toolkit.getDefaultToolkit().getDesktopProperty("win.sound.exclamation");
+            if (runnable != null) {
+                runnable.run();
+            } else {
+                Toolkit.getDefaultToolkit().beep();
+            }
+        } else {
+            Toolkit.getDefaultToolkit().beep();
+        }
+    }
+
+    /**
+     * tries to generate an hardware ID from the available network Interfaces. may return NULL
+     *
+     * @return
+     * @throws SocketException
+     */
+    public static String generateNetworkIdentifier() {
+        try {
+            Enumeration<NetworkInterface> netifs;
+            String netID = null;
+            // LoggerFactory.getDefaultLogger().info("Scan MACs");
+            netifs = NetworkInterface.getNetworkInterfaces();
+            // final StringBuilder macs = new StringBuilder();
+            HashSet<String> dupes = new HashSet<String>();
+            ArrayList<String> list = new ArrayList<String>();
+            while (netifs.hasMoreElements()) {
+                final NetworkInterface netif = netifs.nextElement();
+                // LoggerFactory.getDefaultLogger().info("* " + netif);
+                if (netif.isLoopback()) {
+                    // LoggerFactory.getDefaultLogger().info("- Loopback");
+                    continue;
+                }
+                if (netif.isPointToPoint()) {
+                    // LoggerFactory.getDefaultLogger().info("- P2P");
+                    continue;
+                }
+                if (netif.isVirtual()) {
+                    // LoggerFactory.getDefaultLogger().info("- VIRT");
+                    continue;
+                }
+                String macString;
+                final byte[] macBytes = netif.getHardwareAddress();
+                if (macBytes != null) {
+                    macString = HexFormatter.byteArrayToHex(macBytes).toLowerCase(Locale.ENGLISH);
+                    if (dupes.add(macString)) {
+                        // LoggerFactory.getDefaultLogger().info("+ " + macString);
+                        list.add(macString.toUpperCase(Locale.ENGLISH));
+                        continue;
+                    } else {
+                        // LoggerFactory.getDefaultLogger().info("- MACDUPE");
+                    }
+                } else {
+                    // LoggerFactory.getDefaultLogger().info("- NOMAC");
+                }
+            }
+            Collections.sort(list);
+            StringBuilder sb = new StringBuilder();
+            for (String s : list) {
+                sb.append(s);
+                sb.append("\r\n");
+            }
+            netID = Base64.encodeToString(HexFormatter.hexToByteArray(Hash.getMD5(sb.toString())), false);
+            return netID;
+        } catch (Throwable e) {
+            LoggerFactory.getDefaultLogger().log(e);
+        }
+        return null;
     }
 }

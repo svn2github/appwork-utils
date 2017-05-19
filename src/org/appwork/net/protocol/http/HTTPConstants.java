@@ -300,4 +300,5 @@ public class HTTPConstants {
     public static final String HEADER_RESPONSE_X_XSS_PROTECTION             = "X-Xss-Protection";
     public static final String HEADER_RESPONSE_REFERRER_POLICY              = "Referrer-Policy";
     public static final String HEADER_RESPONSE_X_CONTENT_TYPE_OPTIONS       = "X-Content-Type-Options";
+    public static final String HEADER_REQUEST_ORIGIN                        = "Origin";
 }

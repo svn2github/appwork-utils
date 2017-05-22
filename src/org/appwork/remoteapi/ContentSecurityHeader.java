@@ -17,6 +17,12 @@ public class ContentSecurityHeader {
         this.scriptSrc.add(string);
     }
 
+    private HashSet<String> fontSrc = new HashSet<String>();
+
+    public void addFontSrc(String string) {
+        this.fontSrc.add(string);
+    }
+
     private HashSet<String> imgSrc = new HashSet<String>();
 
     public void addImgSrc(String string) {
@@ -29,6 +35,7 @@ public class ContentSecurityHeader {
         this.append(sb, "style-src", this.styleSrc);
         this.append(sb, "img-src", this.imgSrc);
         this.append(sb, "script-src", this.scriptSrc);
+        this.append(sb, "font-src", this.fontSrc);
         if (StringUtils.isNotEmpty(this.reportURI)) {
             if (sb.length() > 0) {
                 sb.append("; ");

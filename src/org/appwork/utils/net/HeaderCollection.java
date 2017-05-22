@@ -159,4 +159,15 @@ public class HeaderCollection implements Iterable<HTTPHeader> {
         return this.collection.toString();
     }
 
+    /**
+     * @param httpHeader
+     * @return
+     */
+    public boolean addIfAbsent(HTTPHeader httpHeader) {
+        if (get(httpHeader.getKey()) == null) {
+            add(httpHeader);
+            return true;
+        }
+        return false;
+    }
 }

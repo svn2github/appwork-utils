@@ -47,13 +47,14 @@ import java.util.regex.Pattern;
 import org.appwork.exceptions.WTFException;
 import org.appwork.net.protocol.http.HTTPConstants;
 import org.appwork.net.protocol.http.HTTPConstants.ResponseCode;
-import org.appwork.remoteapi.exceptions.RemoteAPIException;
+import org.appwork.remoteapi.exceptions.BasicRemoteAPIException;
 import org.appwork.utils.Exceptions;
 import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.net.HTTPHeader;
 import org.appwork.utils.net.HeaderCollection;
 import org.appwork.utils.net.httpconnection.HTTPConnectionUtils;
+import org.appwork.utils.net.httpserver.handler.ExtendedHttpRequestHandler;
 import org.appwork.utils.net.httpserver.handler.HttpProxyHandler;
 import org.appwork.utils.net.httpserver.handler.HttpRequestHandler;
 import org.appwork.utils.net.httpserver.requests.ConnectRequest;
@@ -484,7 +485,6 @@ public class HttpConnection implements Runnable {
     @Override
     public void run() {
         boolean closeConnection = true;
-        ConnectionHook lHook = hook;
         try {
             if (this.request == null) {
                 this.request = this.buildRequest();
@@ -492,33 +492,52 @@ public class HttpConnection implements Runnable {
             if (this.response == null) {
                 this.response = this.buildResponse();
             }
-            if (lHook != null) {
-                lHook.onStartHandleConnection(request, response);
-            }
             if (this.deferRequest(this.request)) {
                 closeConnection = false;
             } else {
                 boolean handled = false;
-                if (isProxyRequest(request)) {
-                    for (final HttpRequestHandler handler : this.getHandler()) {
-                        if (handler instanceof HttpProxyHandler && ((HttpProxyHandler) handler).onProxyConnectRequest(this.request, this.response)) {
-                            handled = true;
-                            break;
+                for (final HttpRequestHandler handler : this.getHandler()) {
+                    try {
+                        if (handler instanceof ExtendedHttpRequestHandler) {
+                            ((ExtendedHttpRequestHandler) handler).onBeforeRequest(this.request, this.response);
                         }
-                    }
-                } else if (isPostRequest(request)) {
-                    for (final HttpRequestHandler handler : this.getHandler()) {
-                        if (handler.onPostRequest((PostRequest) this.request, this.response)) {
-                            handled = true;
-                            break;
+                        if (isProxyRequest(request)) {
+                            handled = ((HttpProxyHandler) handler).onProxyConnectRequest(this.request, this.response);
+                        } else if (isGetRequest(request)) {
+                            handled = handler.onGetRequest((GetRequest) this.request, this.response);
+                        } else if (isPostRequest(request)) {
+                            handled = handler.onPostRequest((PostRequest) this.request, this.response);
                         }
-                    }
-                } else if (isGetRequest(request)) {
-                    for (final HttpRequestHandler handler : this.getHandler()) {
-                        if (handler.onGetRequest((GetRequest) this.request, this.response)) {
-                            handled = true;
+                        if (handled) {
+                            if (handler instanceof ExtendedHttpRequestHandler) {
+                                ((ExtendedHttpRequestHandler) handler).onAfterRequest(this.request, this.response, true);
+                            }
                             break;
+                        } else {
+                            if (handler instanceof ExtendedHttpRequestHandler) {
+                                ((ExtendedHttpRequestHandler) handler).onAfterRequest(this.request, this.response, false);
+                            }
                         }
+                    } catch (BasicRemoteAPIException e) {
+                        if (handler instanceof ExtendedHttpRequestHandler) {
+                            ((ExtendedHttpRequestHandler) handler).onAfterRequestException(this.request, this.response, e);
+                        }
+                        throw e;
+                    } catch (RuntimeException e) {
+                        if (handler instanceof ExtendedHttpRequestHandler) {
+                            ((ExtendedHttpRequestHandler) handler).onAfterRequestException(this.request, this.response, e);
+                        }
+                        throw e;
+                    } catch (Error e) {
+                        if (handler instanceof ExtendedHttpRequestHandler) {
+                            ((ExtendedHttpRequestHandler) handler).onAfterRequestException(this.request, this.response, e);
+                        }
+                        throw e;
+                    } catch (Throwable e) {
+                        if (handler instanceof ExtendedHttpRequestHandler) {
+                            ((ExtendedHttpRequestHandler) handler).onAfterRequestException(this.request, this.response, e);
+                        }
+                        throw new WTFException(e);
                     }
                 }
                 if (!handled) {
@@ -536,16 +555,13 @@ public class HttpConnection implements Runnable {
                 nothing.printStackTrace();
             }
         } finally {
-            try {
-                if (lHook != null) {
-                    lHook.onFinalizeConnection(closeConnection, request, response);
-                }
-            } finally {
-                if (closeConnection) {
-                    this.closeConnection();
-                    this.close();
-                }
+            if (closeConnection) {
+                this.closeConnection();
+                this.close();
             }
+            // if (getHook() == null) {
+            // LoggerFactory.getDefaultLogger().finer("No Connection Hook!");
+            // }
         }
     }
 
@@ -554,24 +570,6 @@ public class HttpConnection implements Runnable {
          * @param httpConnection
          */
         void onBeforeSendHeaders(HttpResponse response);
-
-        /**
-         * @param closeConnection
-         * @param request
-         * @param response
-         */
-        void onFinalizeConnection(boolean closeConnection, HttpRequest request, HttpResponse response);
-
-        /**
-         * @param request
-         * @param response
-         */
-        void onStartHandleConnection(HttpRequest request, HttpResponse response) throws RemoteAPIException;
-
-        /**
-         * @param httpConnection
-         */
-        void onAfterSendHeaders(HttpResponse response);
     }
 
     private ConnectionHook hook;
@@ -581,9 +579,6 @@ public class HttpConnection implements Runnable {
     }
 
     public void setHook(ConnectionHook hook) {
-        if (this.hook != null) {
-            throw new WTFException("Hook already set!");
-        }
         this.hook = hook;
     }
 
@@ -617,9 +612,6 @@ public class HttpConnection implements Runnable {
                     out.write(HttpResponse.NEWLINE);
                     out.flush();
                 } finally {
-                    if (lHook != null) {
-                        lHook.onAfterSendHeaders(response);
-                    }
                 }
             }
         } finally {

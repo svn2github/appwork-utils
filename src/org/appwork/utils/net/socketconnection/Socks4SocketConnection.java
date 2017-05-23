@@ -96,16 +96,20 @@ public class Socks4SocketConnection extends SocketConnection {
         /* send ipv4/domain */
         switch (destType) {
         case IPV4:
-            final InetAddress address = endPointAddress.getAddress();
-            if (address != null) {
+            final InetAddress ipv4 = endPointAddress.getAddress();
+            if (ipv4 != null && ipv4.getAddress().length == 4) {
                 if (logger != null) {
-                    logger.append("->SEND tcp connect request by ipv4:" + address.getHostAddress() + "\r\n");
+                    logger.append("->SEND tcp connect request by ipv4:" + ipv4.getHostAddress() + "\r\n");
                 }
-                bos.write(address.getAddress());
+                bos.write(ipv4.getAddress());
                 break;
             } else {
                 if (logger != null) {
-                    logger.append("->Cannot connect request by ipv4 (unresolved)\r\n");
+                    if (ipv4 == null) {
+                        logger.append("->Cannot connect request by ipv4 (unresolved)\r\n");
+                    } else {
+                        logger.append("->Cannot connect request by ipv4 (no ipv4)\r\n");
+                    }
                 }
             }
         case DOMAIN:
@@ -120,11 +124,11 @@ public class Socks4SocketConnection extends SocketConnection {
             }
             break;
         default:
-            throw new IllegalArgumentException("Unsupported destType");
+            throw new IllegalArgumentException("Unsupported destType:" + destType);
         }
         /* send user ID string */
         if (userID != null && userID.length() > 0) {
-            bos.write(userID.getBytes("ISO-8859-1"));
+            bos.write(userID.getBytes(ISO_8859_1));
         }
         /* NULL/end */
         bos.write((byte) 0);

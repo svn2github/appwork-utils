@@ -46,6 +46,7 @@ import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.nio.channels.SocketChannel;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -153,6 +154,7 @@ public abstract class SocketConnection extends Socket {
     private Boolean                                      tcpNoDelay           = null;
     private Integer                                      trafficClass         = null;
     private final AtomicReference<SocketStreamInterface> pendingConnectSocket = new AtomicReference<SocketStreamInterface>(null);
+    protected static final Charset                       ISO_8859_1           = Charset.forName("ISO-8859-1");
 
     public SocketConnection(HTTPProxy proxy) {
         this.proxy = proxy;

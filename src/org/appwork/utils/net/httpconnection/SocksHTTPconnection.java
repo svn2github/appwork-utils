@@ -42,7 +42,6 @@ import java.net.URL;
  *
  */
 public abstract class SocksHTTPconnection extends HTTPConnectionImpl {
-
     public static enum AUTH {
         PLAIN,
         NONE
@@ -50,11 +49,11 @@ public abstract class SocksHTTPconnection extends HTTPConnectionImpl {
 
     public static enum DESTTYPE {
         IPV4,
+        IPV6,
         DOMAIN
     }
 
     protected SocketStreamInterface sockssocket            = null;
-
     protected int                   httpPort;
     protected StringBuffer          proxyRequest           = null;
     protected InetSocketAddress     proxyInetSocketAddress = null;
@@ -191,5 +190,4 @@ public abstract class SocksHTTPconnection extends HTTPConnectionImpl {
         }
         return super.getRequestInfo();
     }
-
 }

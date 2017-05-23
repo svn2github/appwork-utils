@@ -84,6 +84,8 @@ public class Socks5SocketConnection extends SocketConnection {
         try {
             final AUTH authRequest = Socks5SocketConnection.sayHello(proxySocket, authOffer, logger);
             switch (authRequest) {
+            case NONE:
+                break;
             case PLAIN:
                 switch (authOffer) {
                 case NONE:
@@ -94,7 +96,7 @@ public class Socks5SocketConnection extends SocketConnection {
                 }
                 break;
             default:
-                break;
+                throw new IOException("Unsupported AUTH:" + authRequest);
             }
             return Socks5SocketConnection.establishConnection(proxySocket, endpoint, this.getDestType(), logger);
         } catch (final InvalidAuthException e) {
@@ -116,21 +118,46 @@ public class Socks5SocketConnection extends SocketConnection {
         bos.write((byte) 1);
         /* reserved */
         bos.write((byte) 0);
-        /* send ipv4/domain */
+        /* send ipv4/ipv6/domain */
         switch (destType) {
         case IPV4:
-            final InetAddress address = endPointAddress.getAddress();
-            if (address != null) {
+            final InetAddress ipv4 = endPointAddress.getAddress();
+            if (ipv4 != null && ipv4.getAddress().length == 4) {
                 /* we use ipv4 */
                 bos.write((byte) 1);
                 if (logger != null) {
-                    logger.append("->SEND tcp connect request by ipv4:" + address.getHostAddress() + "\r\n");
+                    logger.append("->SEND tcp connect request by ipv6:" + ipv4.getHostAddress() + "\r\n");
                 }
-                bos.write(address.getAddress());
+                bos.write(ipv4.getAddress());
                 break;
             } else {
                 if (logger != null) {
-                    logger.append("->Cannot connect request by ipv4 (unresolved)\r\n");
+                    if (ipv4 == null) {
+                        logger.append("->Cannot connect request by ipv4 (unresolved)\r\n");
+                    } else {
+                        logger.append("->Cannot connect request by ipv4 (no ipv4)\r\n");
+                    }
+                }
+            }
+        case IPV6:
+            if (DESTTYPE.IPV6.equals(destType)) {
+                final InetAddress ipv6 = endPointAddress.getAddress();
+                if (ipv6 != null && ipv6.getAddress().length == 16) {
+                    /* we use ipv6 */
+                    bos.write((byte) 4);
+                    if (logger != null) {
+                        logger.append("->SEND tcp connect request by ipv6:" + ipv6.getHostAddress() + "\r\n");
+                    }
+                    bos.write(ipv6.getAddress());
+                    break;
+                } else {
+                    if (logger != null) {
+                        if (ipv6 == null) {
+                            logger.append("->Cannot connect request by ipv6 (unresolved)\r\n");
+                        } else {
+                            logger.append("->Cannot connect request by ipv6 (no ipv6)\r\n");
+                        }
+                    }
                 }
             }
         case DOMAIN:
@@ -140,12 +167,12 @@ public class Socks5SocketConnection extends SocketConnection {
             if (logger != null) {
                 logger.append("->SEND tcp connect request by domain:" + domainString + "\r\n");
             }
-            final byte[] domainBytes = domainString.getBytes("ISO-8859-1");
-            bos.write((byte) domainBytes.length);
+            final byte[] domainBytes = domainString.getBytes(ISO_8859_1);
+            bos.write((byte) domainBytes.length & 0xff);
             bos.write(domainBytes);
             break;
         default:
-            throw new IllegalArgumentException("Unsupported destType");
+            throw new IllegalArgumentException("Unsupported destType:" + destType);
         }
         /* send port */
         /* network byte order */
@@ -194,7 +221,7 @@ public class Socks5SocketConnection extends SocketConnection {
             /* port */
             final byte[] connectedPort = SocketConnection.ensureRead(is, 2, null);
             if (logger != null) {
-                logger.append("<-BOUND Domain:" + new String(connectedDomain) + ":" + (ByteBuffer.wrap(connectedPort).getShort() & 0xffff) + "\r\n");
+                logger.append("<-BOUND Domain:" + new String(connectedDomain, ISO_8859_1) + ":" + (ByteBuffer.wrap(connectedPort).getShort() & 0xffff) + "\r\n");
             }
         } else if (resp[3] == 4) {
             /* ipv6 response */
@@ -216,19 +243,19 @@ public class Socks5SocketConnection extends SocketConnection {
         if (logger != null) {
             logger.append("->AUTH user:pass\r\n");
         }
-        final byte[] userNameBytes = user.getBytes("ISO-8859-1");
-        final byte[] passWordBytes = pass.getBytes("ISO-8859-1");
+        final byte[] userNameBytes = user.getBytes(ISO_8859_1);
+        final byte[] passWordBytes = pass.getBytes(ISO_8859_1);
         final OutputStream os = proxySocket.getOutputStream();
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         /* must be 1 */
         bos.write((byte) 1);
         /* send username */
-        bos.write((byte) userNameBytes.length);
+        bos.write((byte) userNameBytes.length & 0xff);
         if (userNameBytes.length > 0) {
             bos.write(userNameBytes);
         }
         /* send password */
-        bos.write((byte) passWordBytes.length);
+        bos.write((byte) passWordBytes.length & 0xff);
         if (passWordBytes.length > 0) {
             bos.write(passWordBytes);
         }
@@ -245,7 +272,7 @@ public class Socks5SocketConnection extends SocketConnection {
             if (logger != null) {
                 logger.append("<-AUTH Invalid!\r\n");
             }
-            throw new InvalidAuthException("Socks5 auth invalid");
+            throw new InvalidAuthException("Socks5 auth invalid:" + resp[1]);
         } else {
             if (logger != null) {
                 logger.append("<-AUTH Valid!\r\n");
@@ -263,7 +290,7 @@ public class Socks5SocketConnection extends SocketConnection {
         }
         /* socks5 */
         bos.write((byte) 5);
-        /* only none ans password/username auth method */
+        /* only none and password/username auth method */
         final boolean plainAuthPossible = AUTH.PLAIN.equals(auth);
         if (plainAuthPossible) {
             if (SENDONLYSINGLEAUTHMETHOD) {

@@ -128,4 +128,20 @@ public class ShellFolderWrapper {
         }
         return null;
     }
+
+    /**
+     * @param file
+     * @return
+     * @throws FileNotFoundException
+     */
+    public static File getShellFolder(File file) throws FileNotFoundException {
+        try {
+            return sun.awt.shell.ShellFolder.getShellFolder(file);
+        } catch (final NoClassDefFoundError e) {
+            LoggerFactory.I().getLogger(ShellFolderWrapper.class.getName()).log(e);
+        } catch (final IllegalAccessError e) {
+            LoggerFactory.I().getLogger(ShellFolderWrapper.class.getName()).log(e);
+        }
+        return null;
+    }
 }

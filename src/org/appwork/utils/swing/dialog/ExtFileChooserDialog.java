@@ -71,6 +71,7 @@ import javax.swing.plaf.basic.BasicFileChooserUI;
 
 import org.appwork.resources.AWUTheme;
 import org.appwork.storage.config.JsonConfig;
+import org.appwork.sunwrapper.sun.awt.shell.ShellFolderWrapper;
 import org.appwork.swing.components.searchcombo.SearchComboBox;
 import org.appwork.utils.Application;
 import org.appwork.utils.Files;
@@ -119,7 +120,6 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
         UIManager.put("FileChooser.helpButtonToolTipText", _AWU.T.DIALOG_FILECHOOSER_helpButtonToolTipText());
         UIManager.put("FileChooser.directoryOpenButtonToolTipText", _AWU.T.DIALOG_FILECHOOSER_directoryOpenButtonToolTipText());
     }
-
     /**
      *
      */
@@ -547,20 +547,41 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
         fc = new ModdedJFileChooser(fileSystemView = new ExtFileSystemView()) {
             private Insets  nullInsets;
             private boolean initComplete = false;
-
             {
                 initComplete = true;
                 nullInsets = new Insets(0, 0, 0, 0);
             }
 
+            /*
+             * (non-Javadoc)
+             *
+             * @see javax.swing.JFileChooser#getCurrentDirectory()
+             */
             @Override
-            public void addPropertyChangeListener(final PropertyChangeListener listener) {
+            public File getCurrentDirectory() {
+                // TODO Auto-generated method stub
+                File file = super.getCurrentDirectory();
+                if (file == null) {
+                    return null;
+                }
+                try {
+                    return ShellFolderWrapper.getShellFolder(file);
+                } catch (Throwable e) {
+                    System.out.println(file);
+                    e.printStackTrace();
+                    return file;
+                }
+            }
+
+            @Override
+            public void addPropertyChangeListener(PropertyChangeListener listener) {
                 if (listener instanceof BasicDirectoryModel && directoryModel == null) {
                     // this is a workaround to avoid multiple init scans of the
                     // filedirectory during the filechooser setup.
                     directoryModel = listener;
                     return;
                 }
+    
                 super.addPropertyChangeListener(listener);
             }
 

@@ -5,6 +5,13 @@ import java.util.HashSet;
 import org.appwork.utils.StringUtils;
 
 public class ContentSecurityHeader {
+    /**
+     *
+     */
+    public ContentSecurityHeader() {
+        // TODO Auto-generated constructor stub
+    }
+
     private HashSet<String> defaultSrc = new HashSet<String>();
 
     public void addDefaultSrc(String string) {

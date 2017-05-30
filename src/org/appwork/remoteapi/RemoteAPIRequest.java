@@ -42,6 +42,7 @@ import org.appwork.remoteapi.exceptions.ApiCommandNotAvailable;
 import org.appwork.remoteapi.exceptions.BadParameterException;
 import org.appwork.remoteapi.exceptions.BasicRemoteAPIException;
 import org.appwork.storage.JSonStorage;
+import org.appwork.utils.logging2.extmanager.LoggerFactory;
 import org.appwork.utils.net.HeaderCollection;
 import org.appwork.utils.net.httpserver.requests.ConnectRequest;
 import org.appwork.utils.net.httpserver.requests.GetRequest;
@@ -92,6 +93,7 @@ public class RemoteAPIRequest implements HttpRequestInterface {
         this.jqueryCallback = jqueryCallback;
         this.method = this.iface.getMethod(methodName, this.parameters.length);
         if (method == null) {
+            LoggerFactory.getDefaultLogger().info("IP " + request.getRemoteAddress());
             if (this.iface.hasMethodName(methodName)) {
                 throw new BadParameterException(request.getRequestedURL());
             } else {

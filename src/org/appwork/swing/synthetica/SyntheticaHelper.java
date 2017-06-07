@@ -193,8 +193,7 @@ public class SyntheticaHelper {
             // /* http://www.jyloo.com/news/?pubId=1297681728000 */
             // /* we want our own FontScaling, not SystemDPI */
             UIManager.put("Synthetica.font.respectSystemDPI", config.isFontRespectsSystemDPI());
-            final int fontScale = getFontScaleFaktor(config, locale);
-            UIManager.put("Synthetica.font.scaleFactor", fontScale);
+            int fontScale = getFontScaleFaktor(config, locale);
             if (config.isFontRespectsSystemDPI() && fontScale != 100) {
                 org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("SystemDPI might interfere with JD's FontScaling");
             }

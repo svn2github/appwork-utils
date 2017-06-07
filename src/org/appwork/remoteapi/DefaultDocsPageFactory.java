@@ -34,6 +34,7 @@
 package org.appwork.remoteapi;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.ref.SoftReference;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -73,6 +74,10 @@ import org.appwork.utils.logging2.extmanager.LoggerFactory;
 import org.appwork.utils.net.HTTPHeader;
 
 public class DefaultDocsPageFactory extends InterfaceHandler<Object> {
+    /**
+     *
+     */
+    public static final String       AUTHENTICATION = "Authentication";
     final protected RemoteAPI        api;
     private Method                   help;
     private SoftReference<byte[]>    cachedBytes;
@@ -132,6 +137,7 @@ public class DefaultDocsPageFactory extends InterfaceHandler<Object> {
             ret.addDefaultSrc("'self'");
             ret.addScriptSrc("'unsafe-inline'");
             ret.addStyleSrc("'unsafe-inline'");
+            ret.addImgSrc("data:");
             response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_SECURITY_POLICY, ret.toHeaderString()));
             response.setResponseCode(ResponseCode.SUCCESS_OK);
             response.sendBytes(request, bytes);
@@ -424,7 +430,7 @@ public class DefaultDocsPageFactory extends InterfaceHandler<Object> {
                 }
                 int id = this.count.incrementAndGet();
                 int i = 3;
-                content.append("<a class='anchor' id='tag_" + id + "'></a>" + "<h3 class='main-type-method'>" + "<span  style=''>" + htmlEncode(name) + "</span><span style='position: absolute;right: 20px;'>Parameter: " + count + "</span>" + "</h" + i + ">");
+                content.append("<a class='anchor' id='tag_" + id + "'></a>" + "<h3 class='main-type-method'>" + "<span  style=''>" + htmlEncode(name) + "</span><span  style='position: absolute;right: 20px;'>Parameter: " + count + "</span>" + "</h" + i + ">");
                 nav.append("<div class='menu-h" + i + "'><a href=\"#tag_" + id + "\"><span class='menu-content-h" + i + " tooltip' >" + "<span  style=''>" + htmlEncode(name) + "</span><span class='tooltiptext'>" + htmlEncode("Parameter: " + count + " " + htmlEncode(header)) + "</span>" + "</span></a></div>");
                 nav.append("</li>");
                 content.append("<ul class='keyvalue'>");
@@ -432,7 +438,48 @@ public class DefaultDocsPageFactory extends InterfaceHandler<Object> {
                     content.append("<li><p class='deprecated'>DEPRECATED Method. This method will be removed soon. DO NOT USE IT!</p></li>");
                 }
                 if (m.getAnnotation(ApiSessionRequired.class) != null || m.getDeclaringClass().getAnnotation(ApiSessionRequired.class) != null) {
-                    addKeyValueEntry(content, "Authentication", "required");
+                    addKeyValueEntry(content, AUTHENTICATION, "required");
+                }
+                HashMap<String, HashSet<String>> map = new HashMap<String, HashSet<String>>();
+                for (Annotation a : m.getAnnotations()) {
+                    try {
+                        Method docKey = a.getClass().getDeclaredMethod("docKey", new Class[] {});
+                        if (docKey != null) {
+                            String docKeyValue = String.valueOf(docKey.invoke(a, new Object[] {}));
+                            if (StringUtils.isNotEmpty(docKeyValue)) {
+                                String docValueValue = "";
+                                Method docValue = a.getClass().getDeclaredMethod("docValue", new Class[] {});
+                                if (docKey != null) {
+                                    docValueValue = String.valueOf(docValue.invoke(a, new Object[] {}));
+                                }
+                                if (StringUtils.isEmpty(docValueValue)) {
+                                    docValueValue = "";
+                                }
+                                HashSet<String> lst = map.get(docKeyValue);
+                                if (lst == null) {
+                                    map.put(docKeyValue, lst = new HashSet<String>());
+                                }
+                                lst.add(docValueValue);
+                            }
+                        }
+                    } catch (Throwable e) {
+                        // e.printStackTrace();
+                    }
+                }
+                ArrayList<String> keys = new ArrayList<String>(map.keySet());
+                Collections.sort(keys);
+                for (String key : keys) {
+                    ArrayList<String> lst = new ArrayList<String>(map.get(key));
+                    for (int ii = 0; ii < lst.size(); ii++) {
+                        if (lst.size() > 0 && StringUtils.isEmpty(lst.get(ii))) {
+                            continue;
+                        }
+                        if (ii == 0) {
+                            addKeyValueEntry(content, key, lst.get(ii));
+                        } else {
+                            addKeyValueEntry(content, "", lst.get(ii));
+                        }
+                    }
                 }
                 count = 0;
                 for (i = 0; i < m.getGenericParameterTypes().length; i++) {

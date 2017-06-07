@@ -10,7 +10,12 @@ body {
 p, li {
 	font: 1.2em/1.8em Tahoma, sans-serif;
 }
-
+span.no_selection {
+    -webkit-user-select: none; /* webkit (safari, chrome) browsers */
+    -moz-user-select: none; /* mozilla browsers */
+    -khtml-user-select: none; /* webkit (konqueror) browsers */
+    -ms-user-select: none; /* IE10+ */
+}
 .menu-h2 {
 	font-weight: bold;
 	font-size: 0.7em;
@@ -127,6 +132,8 @@ ol{
 	float: left;
 	font-size: 10px;
 	font-weight: 700;
+	display: inline-block;
+	height:10px;
 }
 
 h2 {

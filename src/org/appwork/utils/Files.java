@@ -208,7 +208,12 @@ public class Files {
         if (index < 0 || index + 1 >= name.length()) {
             return null;
         }
-        return name.substring(index + 1).toLowerCase(Locale.ENGLISH);
+        final String ret = name.substring(index + 1).toLowerCase(Locale.ENGLISH);
+        if (ret.matches("^[a-zA-Z0-9\\.\\-\\_]+$")) {
+            return ret;
+        } else {
+            return null;
+        }
     }
 
     /**

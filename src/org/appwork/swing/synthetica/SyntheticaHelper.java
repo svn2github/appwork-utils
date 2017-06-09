@@ -197,6 +197,7 @@ public class SyntheticaHelper {
             if (config.isFontRespectsSystemDPI() && fontScale != 100) {
                 org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("SystemDPI might interfere with JD's FontScaling");
             }
+            UIManager.put("Synthetica.font.scaleFactor", fontScale);
             UIManager.put("Synthetica.animation.enabled", config.isAnimationEnabled());
             if (CrossSystem.isWindows()) {
                 /* only windows opaque works fine */

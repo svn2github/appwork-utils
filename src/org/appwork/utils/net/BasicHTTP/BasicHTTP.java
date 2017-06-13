@@ -195,6 +195,9 @@ public class BasicHTTP {
                     this.connection.setRequestProperty("Range", "bytes=" + resumePosition + "-");
                 }
                 this.connection.setRequestProperty("Connection", "Close");
+                if (progress != null) {
+                    progress.onConnect();
+                }
                 this.connection.connect();
                 final boolean ranged = this.connection.getRequestProperty("Range") != null;
                 if (ranged && this.connection.getResponseCode() == 200) {
@@ -613,6 +616,9 @@ public class BasicHTTP {
                 }
                 this.connection.setRequestProperty("Connection", "Close");
                 int lookupTry = 0;
+                if (uploadProgress != null) {
+                    uploadProgress.onConnect();
+                }
                 while (true) {
                     try {
                         this.connection.connect();

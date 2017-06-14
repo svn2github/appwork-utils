@@ -50,6 +50,7 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -1604,5 +1605,20 @@ public class CrossSystem {
             LoggerFactory.getDefaultLogger().log(e);
         }
         return null;
+    }
+
+    /**
+     * @return
+     */
+    public static String generateHardwareID() {
+        MessageDigest md;
+        try {
+            md = MessageDigest.getInstance("SHA256");
+            md.update(Base64.decodeFast(generateNetworkIdentifier()));
+            md.update((byte) Runtime.getRuntime().availableProcessors());
+            return Base64.encodeToString(md.digest(), false);
+        } catch (Throwable e) {
+            throw new WTFException(e);
+        }
     }
 }

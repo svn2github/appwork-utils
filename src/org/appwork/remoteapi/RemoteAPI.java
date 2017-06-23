@@ -706,8 +706,8 @@ public class RemoteAPI implements HttpRequestHandler {
                         }
                     }
                 }
-            clazz = clazz.getSuperclass();
-            this.interfaces = linterfaces;
+                clazz = clazz.getSuperclass();
+                this.interfaces = linterfaces;
             }
         }
     }
@@ -764,7 +764,7 @@ public class RemoteAPI implements HttpRequestHandler {
                         linterfaces.remove(namespace);
                     }
                 }
-            clazz = clazz.getSuperclass();
+                clazz = clazz.getSuperclass();
             }
             this.interfaces = linterfaces;
         }

@@ -198,6 +198,7 @@ public class CrossSystem {
                         break;
                     }
                 }
+                System.out.println("Arm:" + armVx + "|Revision:" + revision);
                 if (armVx && revision != null) {
                     if (revision.startsWith("1000") && revision.length() > 4) {
                         revision = revision.substring(4);
@@ -469,7 +470,7 @@ public class CrossSystem {
         pathPart = pathPart.replaceFirst("^\\.+", ".");
         /*
          * remove ending dots, not allowed under windows and others os maybe too
-         *
+         * 
          * Do not end a file or directory name with a space or a period.
          */
         pathPart = pathPart.replaceFirst("\\.+$", "");

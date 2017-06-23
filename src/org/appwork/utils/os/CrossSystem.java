@@ -173,6 +173,7 @@ public class CrossSystem {
     }
 
     // http://www.raspberrypi-spy.co.uk/2012/09/checking-your-raspberry-pi-board-version/
+    // http://elinux.org/RPi_HardwareHistory#Board_Revision_History
     public static boolean isRaspberryPi() {
         if (CrossSystem.ISRASPBERRYPI != null) {
             return CrossSystem.ISRASPBERRYPI;
@@ -187,7 +188,7 @@ public class CrossSystem {
                 final BufferedReader is = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
                 String line = null;
                 while ((line = is.readLine()) != null) {
-                    if (line.contains("ARMv")) {
+                    if (StringUtils.containsIgnoreCase(line, "ARMv")) {
                         armVx = true;
                     } else if (StringUtils.containsIgnoreCase(line, "Revision")) {
                         revision = new Regex(line, "(?i)Revision\\s*:\\*s(.+)").getMatch(0);
@@ -198,6 +199,9 @@ public class CrossSystem {
                     }
                 }
                 if (armVx && revision != null) {
+                    if (revision.startsWith("1000") && revision.length() > 4) {
+                        revision = revision.substring(4);
+                    }
                     if (StringUtils.equalsIgnoreCase(revision, "0002")) {
                         // Model B Rev 1
                         isRaspberryPi = true;
@@ -222,25 +226,31 @@ public class CrossSystem {
                     } else if (StringUtils.equalsIgnoreCase(revision, "0012") || StringUtils.equalsIgnoreCase(revision, "0015")) {
                         // Model A+
                         isRaspberryPi = true;
-                    } else if (StringUtils.equalsIgnoreCase(revision, "a01041") || StringUtils.equalsIgnoreCase(revision, "a21041")) {
-                        // Pi 2 Model B v1.1
+                    } else if (StringUtils.equalsIgnoreCase(revision, "a01040") || StringUtils.equalsIgnoreCase(revision, "a01041") || StringUtils.equalsIgnoreCase(revision, "a21041")) {
+                        // Pi 2 Model B v1.0,v1.1,v1.2
                         isRaspberryPi = true;
                     } else if (StringUtils.equalsIgnoreCase(revision, "a22042")) {
                         // Pi 2 Model B v1.2
                         isRaspberryPi = true;
+                    } else if (StringUtils.equalsIgnoreCase(revision, "900021")) {
+                        // Pi 2 Model A+ V1.1
+                        isRaspberryPi = true;
+                    } else if (StringUtils.equalsIgnoreCase(revision, "900032")) {
+                        // Pi 2 Model B+ V1.2
+                        isRaspberryPi = true;
                     } else if (StringUtils.equalsIgnoreCase(revision, "900092")) {
                         // Pi Zero v1.2
                         isRaspberryPi = true;
-                    } else if (StringUtils.equalsIgnoreCase(revision, "900093")) {
+                    } else if (StringUtils.equalsIgnoreCase(revision, "900093") || StringUtils.equalsIgnoreCase(revision, "920093")) {
                         // Pi Zero v1.3
                         isRaspberryPi = true;
                     } else if (StringUtils.equalsIgnoreCase(revision, "9000C1") || StringUtils.equalsIgnoreCase(revision, "0x9000C1")) {
                         // Pi Zero W
                         isRaspberryPi = true;
-                    } else if (StringUtils.equalsIgnoreCase(revision, "a02082")) {
-                        // Pi 3 Model B
+                    } else if (StringUtils.equalsIgnoreCase(revision, "a020a0 ")) {
+                        // Compute Module 3 (and CM3 Lite)
                         isRaspberryPi = true;
-                    } else if (StringUtils.equalsIgnoreCase(revision, "a22082")) {
+                    } else if (StringUtils.equalsIgnoreCase(revision, "a02082") || StringUtils.equalsIgnoreCase(revision, "a22082") || StringUtils.equalsIgnoreCase(revision, "a32082")) {
                         // Pi 3 Model B
                         isRaspberryPi = true;
                     }

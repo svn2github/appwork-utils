@@ -172,6 +172,10 @@ public class CrossSystem {
         return CrossSystem.isBSD() || CrossSystem.isLinux();
     }
 
+    public static void main(String[] args) {
+        System.out.println(isRaspberryPi());
+    }
+
     // http://www.raspberrypi-spy.co.uk/2012/09/checking-your-raspberry-pi-board-version/
     // http://elinux.org/RPi_HardwareHistory#Board_Revision_History
     public static boolean isRaspberryPi() {
@@ -190,15 +194,14 @@ public class CrossSystem {
                 while ((line = is.readLine()) != null) {
                     if (StringUtils.containsIgnoreCase(line, "ARMv")) {
                         armVx = true;
-                    } else if (StringUtils.containsIgnoreCase(line, "Revision")) {
-                        revision = new Regex(line, "(?i)Revision\\s*:\\s*(.+)").getMatch(0);
+                    } else if (StringUtils.startsWithCaseInsensitive(line, "Revision")) {
+                        revision = new Regex(line, "(?i)^Revision\\s*:\\s*(.+)").getMatch(0);
                     }
                     if (armVx && revision != null) {
                         is.close();
                         break;
                     }
                 }
-                System.out.println("Arm:" + armVx + "|Revision:" + revision);
                 if (armVx && revision != null) {
                     if (revision.startsWith("1000") && revision.length() > 4) {
                         revision = revision.substring(4);

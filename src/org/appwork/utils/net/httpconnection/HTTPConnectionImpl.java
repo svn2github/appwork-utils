@@ -185,11 +185,11 @@ public class HTTPConnectionImpl implements HTTPConnection {
     protected static final WeakHashMap<SocketStreamInterface, HTTPKeepAliveSocket> KEEPALIVESOCKETS      = new WeakHashMap<SocketStreamInterface, HTTPKeepAliveSocket>();
     protected static final Object                                                  LOCK                  = new Object();
     protected static final DelayedRunnable                                         KEEPALIVECLEANUPTIMER = new DelayedRunnable(10000, 30000) {
-        @Override
-        public void delayedrun() {
-            cleanupKeepAlivePools();
-        }
-    };
+                                                                                                             @Override
+                                                                                                             public void delayedrun() {
+                                                                                                                 cleanupKeepAlivePools();
+                                                                                                             }
+                                                                                                         };
 
     private static final void cleanupKeepAlivePools() {
         synchronized (HTTPConnectionImpl.LOCK) {
@@ -205,6 +205,27 @@ public class HTTPConnectionImpl implements HTTPConnection {
                             final HTTPKeepAliveSocket keepAliveSocket = keepAliveIterator.next();
                             final SocketStreamInterface socketStream = keepAliveSocket.getSocketStream();
                             final Socket socket = socketStream.getSocket();
+                            try {
+                                if (socket.getChannel() != null) {
+                                    final SocketChannel channel = socket.getChannel();
+                                    channel.configureBlocking(false);
+                                    final ByteBuffer check = ByteBuffer.wrap(new byte[1]);
+                                    final int read = channel.read(check);
+                                    if (read == -1) {
+                                        throw new AsynchronousCloseException();
+                                    } else if (read != 0) {
+                                        throw new IOException("Unexpected data received");
+                                    }
+                                    channel.configureBlocking(true);
+                                }
+                            } catch (IOException e) {
+                                try {
+                                    socket.close();
+                                } catch (final Throwable ignore) {
+                                }
+                                keepAliveIterator.remove();
+                                continue;
+                            }
                             if (socket.isClosed() || keepAliveSocket.getKeepAliveTimestamp() <= System.currentTimeMillis()) {
                                 try {
                                     socket.close();

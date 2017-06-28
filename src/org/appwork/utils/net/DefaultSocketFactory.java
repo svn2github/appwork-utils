@@ -33,9 +33,11 @@
  * ==================================================================================================================================================== */
 package org.appwork.utils.net;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Proxy;
 import java.net.Socket;
+import java.nio.channels.SocketChannel;
 
 import org.appwork.utils.net.httpconnection.HTTPConnection;
 import org.appwork.utils.net.socketconnection.SocketConnection;
@@ -48,21 +50,31 @@ import org.appwork.utils.net.socketconnection.SocketConnection;
 public class DefaultSocketFactory extends SocketFactory {
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.utils.net.SocketFactory#createSocket(org.appwork.utils.net.httpconnection.HTTPConnection, java.net.InetAddress)
      */
     @Override
     public Socket createSocket(HTTPConnection connection, InetAddress bindInetAddress) {
-        return new Socket(Proxy.NO_PROXY);
+        try {
+            final SocketChannel channel = SocketChannel.open();
+            return channel.socket();
+        } catch (final IOException e) {
+            return new Socket(Proxy.NO_PROXY);
+        }
     }
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.utils.net.SocketFactory#create(org.appwork.utils.net.socketconnection.SocketConnection)
      */
     @Override
     public Socket create(SocketConnection socketConnection) {
-        return new Socket(Proxy.NO_PROXY);
+        try {
+            final SocketChannel channel = SocketChannel.open();
+            return channel.socket();
+        } catch (final IOException e) {
+            return new Socket(Proxy.NO_PROXY);
+        }
     }
 }

@@ -50,6 +50,8 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.nio.ByteBuffer;
+import java.nio.channels.AsynchronousCloseException;
+import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -326,8 +328,14 @@ public class HTTPConnectionImpl implements HTTPConnection {
                                 } else {
                                     localIP = null;
                                 }
+                                final InetAddress[] remoteIPs;
+                                if (this.remoteIPs != null) {
+                                    remoteIPs = this.remoteIPs;
+                                } else {
+                                    remoteIPs = new InetAddress[] { ((InetSocketAddress) socket.getRemoteSocketAddress()).getAddress() };
+                                }
                                 final boolean ssl = StringUtils.equalsIgnoreCase("https", this.httpURL.getProtocol());
-                                keepAliveSocket = new HTTPKeepAliveSocket(getHostname(), ssl, socketStream, maxKeepAliveTimeout, maxKeepAliveRequests, localIP, this.remoteIPs);
+                                keepAliveSocket = new HTTPKeepAliveSocket(getHostname(), ssl, socketStream, maxKeepAliveTimeout, maxKeepAliveRequests, localIP, remoteIPs);
                             }
                             keepAliveSocket.increaseRequests();
                             if (keepAliveSocket.getRequestsLeft() > 0) {
@@ -393,6 +401,27 @@ public class HTTPConnectionImpl implements HTTPConnection {
                     final HTTPKeepAliveSocket next = socketPoolIterator.next();
                     final SocketStreamInterface socketStream = next.getSocketStream();
                     final Socket socket = socketStream.getSocket();
+                    try {
+                        if (socket.getChannel() != null) {
+                            final SocketChannel channel = socket.getChannel();
+                            channel.configureBlocking(false);
+                            final ByteBuffer check = ByteBuffer.wrap(new byte[1]);
+                            final int read = channel.read(check);
+                            if (read == -1) {
+                                throw new AsynchronousCloseException();
+                            } else if (read != 0) {
+                                throw new IOException("Unexpected data received");
+                            }
+                            channel.configureBlocking(true);
+                        }
+                    } catch (IOException e) {
+                        try {
+                            socket.close();
+                        } catch (final Throwable ignore) {
+                        }
+                        socketPoolIterator.remove();
+                        continue;
+                    }
                     if (socket.isClosed() || next.getKeepAliveTimestamp() <= System.currentTimeMillis()) {
                         try {
                             socket.close();
@@ -401,7 +430,7 @@ public class HTTPConnectionImpl implements HTTPConnection {
                         socketPoolIterator.remove();
                     } else if (socket.getPort() != port || !next.sameLocalIP(localIP)) {
                         continue;
-                    } else if (next.isSsl() && ssl) {
+                    } else if (next.isSsl() && ssl && next.sameHost(host)) {
                         /**
                          * ssl needs to have same hostname to avoid (SNI)
                          *
@@ -410,12 +439,11 @@ public class HTTPConnectionImpl implements HTTPConnection {
                          * Host name provided via SNI and via HTTP are different
                          * </p>
                          */
-                        if (next.sameHost(host)) {
-                            socketPoolIterator.remove();
-                            HTTPConnectionImpl.KEEPALIVESOCKETS.put(socketStream, next);
-                            return socketStream;
-                        }
-                    } else if (next.isSsl() == false && ssl == false && next.sameRemoteIPs(this.remoteIPs)) {
+                        socketPoolIterator.remove();
+                        HTTPConnectionImpl.KEEPALIVESOCKETS.put(socketStream, next);
+                        return socketStream;
+                    } else if (next.isSsl() == false && ssl == false && (next.sameHost(host) || next.sameRemoteIPs(getRemoteIPs()))) {
+                        // same hostname or same ip
                         socketPoolIterator.remove();
                         HTTPConnectionImpl.KEEPALIVESOCKETS.put(socketStream, next);
                         return socketStream;
@@ -537,7 +565,7 @@ public class HTTPConnectionImpl implements HTTPConnection {
     }
 
     protected Socket createRawConnectionSocket(final InetAddress bindInetAddress) throws IOException {
-        Socket socket = SocketFactory.get().create(this, bindInetAddress);
+        final Socket socket = SocketFactory.get().create(this, bindInetAddress);
         if (bindInetAddress != null) {
             try {
                 socket.bind(new InetSocketAddress(bindInetAddress, 0));
@@ -607,6 +635,13 @@ public class HTTPConnectionImpl implements HTTPConnection {
         return this.hostName != null;
     }
 
+    protected InetAddress[] getRemoteIPs() throws IOException {
+        if (this.remoteIPs == null) {
+            this.remoteIPs = this.resolvHostIP(getHostname());
+        }
+        return remoteIPs;
+    }
+
     public void connect() throws IOException {
         boolean sslSNIWorkAround = false;
         connect: while (true) {
@@ -619,15 +654,9 @@ public class HTTPConnectionImpl implements HTTPConnection {
             }
             this.connectionSocket = this.getKeepAliveSocket();
             if (this.connectionSocket == null) {
-                if (this.remoteIPs == null) {
-                    this.remoteIPs = this.resolvHostIP(getHostname());
-                }
-                this.connectionSocket = this.getKeepAliveSocket();
-            }
-            if (this.connectionSocket == null) {
                 /* try all different ip's until one is valid and connectable */
                 IOException ee = null;
-                for (final InetAddress host : this.remoteIPs) {
+                for (final InetAddress host : getRemoteIPs()) {
                     this.resetConnection();
                     int port = this.httpURL.getPort();
                     if (port == -1) {

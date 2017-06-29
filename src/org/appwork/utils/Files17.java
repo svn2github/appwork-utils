@@ -76,37 +76,43 @@ public class Files17 {
     // from http://stackoverflow.com/questions/10678363/find-the-directory-for-a-filestore, 25.05.2016
     private static final Map<Class<? extends FileStore>, Hacks> hacksMap = new HashMap<Class<? extends FileStore>, Hacks>();
     static {
-        if (CrossSystem.isWindows()) {
+        // TODO: JDK9
+        if (JVMVersion.get() < JVMVersion.JAVA19) {
             try {
-                final Class<? extends FileStore> fileStoreClass = Class.forName("sun.nio.fs.WindowsFileStore").asSubclass(FileStore.class);
-                hacksMap.put(fileStoreClass, new WindowsFileStoreHacks(fileStoreClass));
-            } catch (ClassNotFoundException e) {
-                // Probably not running on Windows.
-            }
-        } else {
-            try {
-                final Class<? extends FileStore> fileStoreClass = Class.forName("sun.nio.fs.UnixFileStore").asSubclass(FileStore.class);
-                hacksMap.put(fileStoreClass, new UnixFileStoreHacks(fileStoreClass));
-            } catch (ClassNotFoundException e) {
-                // Probably not running on UNIX.
-            }
-            try {
-                final Class<? extends FileStore> fileStoreClass = Class.forName("sun.nio.fs.LinuxFileStore").asSubclass(FileStore.class);
-                hacksMap.put(fileStoreClass, new UnixFileStoreHacks(fileStoreClass));
-            } catch (ClassNotFoundException e) {
-                // Probably not running on LINUX.
-            }
-            try {
-                final Class<? extends FileStore> fileStoreClass = Class.forName("sun.nio.fs.SolarisFileStore").asSubclass(FileStore.class);
-                hacksMap.put(fileStoreClass, new UnixFileStoreHacks(fileStoreClass));
-            } catch (ClassNotFoundException e) {
-                // Probably not running on SOLARIS.
-            }
-            try {
-                final Class<? extends FileStore> fileStoreClass = Class.forName("sun.nio.fs.BsdFileStore").asSubclass(FileStore.class);
-                hacksMap.put(fileStoreClass, new UnixFileStoreHacks(fileStoreClass));
-            } catch (ClassNotFoundException e) {
-                // Probably not running on BSD.
+                if (CrossSystem.isWindows()) {
+                    try {
+                        final Class<? extends FileStore> fileStoreClass = Class.forName("sun.nio.fs.WindowsFileStore").asSubclass(FileStore.class);
+                        hacksMap.put(fileStoreClass, new WindowsFileStoreHacks(fileStoreClass));
+                    } catch (ClassNotFoundException e) {
+                        // Probably not running on Windows.
+                    }
+                } else {
+                    try {
+                        final Class<? extends FileStore> fileStoreClass = Class.forName("sun.nio.fs.UnixFileStore").asSubclass(FileStore.class);
+                        hacksMap.put(fileStoreClass, new UnixFileStoreHacks(fileStoreClass));
+                    } catch (ClassNotFoundException e) {
+                        // Probably not running on UNIX.
+                    }
+                    try {
+                        final Class<? extends FileStore> fileStoreClass = Class.forName("sun.nio.fs.LinuxFileStore").asSubclass(FileStore.class);
+                        hacksMap.put(fileStoreClass, new UnixFileStoreHacks(fileStoreClass));
+                    } catch (ClassNotFoundException e) {
+                        // Probably not running on LINUX.
+                    }
+                    try {
+                        final Class<? extends FileStore> fileStoreClass = Class.forName("sun.nio.fs.SolarisFileStore").asSubclass(FileStore.class);
+                        hacksMap.put(fileStoreClass, new UnixFileStoreHacks(fileStoreClass));
+                    } catch (ClassNotFoundException e) {
+                        // Probably not running on SOLARIS.
+                    }
+                    try {
+                        final Class<? extends FileStore> fileStoreClass = Class.forName("sun.nio.fs.BsdFileStore").asSubclass(FileStore.class);
+                        hacksMap.put(fileStoreClass, new UnixFileStoreHacks(fileStoreClass));
+                    } catch (ClassNotFoundException e) {
+                        // Probably not running on BSD.
+                    }
+                }
+            } catch (final Throwable e) {
             }
         }
     }

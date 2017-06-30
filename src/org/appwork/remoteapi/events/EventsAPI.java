@@ -380,7 +380,7 @@ public class EventsAPI implements EventsAPIInterface, RemoteAPIEventsSender {
 
     /*
      * starts a cleanupThread (if needed) to remove subscribers that are no longer alive
-     * 
+     *
      * current implementation has a minimum delay of 1 minute
      */
     protected void subscribersCleanupThread() {

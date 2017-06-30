@@ -37,8 +37,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.URLDecoder;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -227,7 +229,7 @@ public class HttpConnection implements Runnable {
         /* read request Method and Path */
         final String requestLine = this.parseRequestLine();
         if (StringUtils.isEmpty(requestLine)) {
-            throw new IOException("Empty RequestLine");
+            throw new EmptyRequestException();
         }
         // TOTO: requestLine may be "" in some cases (chrome pre connection...?)
         final HttpConnectionType connectionType = this.parseConnectionType(requestLine);
@@ -376,6 +378,10 @@ public class HttpConnection implements Runnable {
     }
 
     public boolean onException(final Throwable e, final HttpRequest request, final HttpResponse response) throws IOException {
+        if (Exceptions.containsInstanceOf(e, SocketException.class, ClosedChannelException.class)) {
+            // socket already closed
+            return true;
+        }
         if (e instanceof HttpConnectionExceptionHandler) {
             return ((HttpConnectionExceptionHandler) e).handle(response);
         }

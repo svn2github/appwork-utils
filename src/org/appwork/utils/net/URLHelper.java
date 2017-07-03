@@ -143,7 +143,7 @@ public class URLHelper {
     }
 
     public static URL createURL(final String url) throws MalformedURLException {
-        final URL tmp = new URL(url.trim().replaceAll(" ", "%20"));
+        final URL tmp = new URL(url.trim().replaceAll(":/+", "://").replaceAll(" ", "%20"));
         if (tmp.getPath() != null && tmp.getQuery() == null && tmp.getPath().matches(".*(\\&(?!amp;)).*")) {
             final Pattern search = Pattern.compile(".*?\\&(?!amp;)");
             final Matcher matcher = search.matcher(tmp.getPath());
@@ -165,7 +165,7 @@ public class URLHelper {
     public static String parseLocation(final URL url, final String loc) {
         final String location = loc.trim().replaceAll(" ", "%20");
         try {
-            if (location.matches("^https?://.+")) {
+            if (location.matches("^https?:/.+")) {
                 final URL dummyURL = createURL(location);
                 return fixPathTraversal(dummyURL).toString();
             } else if (location.matches("^:\\d+/.*")) {

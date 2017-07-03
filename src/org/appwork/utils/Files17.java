@@ -47,22 +47,24 @@ import org.appwork.utils.os.CrossSystem;
 
 public class Files17 {
     public static File guessRoot(File file) throws IOException {
-        FileStore fileFileStore = null;
-        File existingFile = file;
-        while (existingFile != null) {
-            if (existingFile.exists()) {
-                fileFileStore = Files.getFileStore(existingFile.toPath());
-                break;
-            } else {
-                existingFile = existingFile.getParentFile();
+        if (JVMVersion.get() >= JVMVersion.JAVA17 && JVMVersion.get() < JVMVersion.JAVA19) {
+            FileStore fileFileStore = null;
+            File existingFile = file;
+            while (existingFile != null) {
+                if (existingFile.exists()) {
+                    fileFileStore = Files.getFileStore(existingFile.toPath());
+                    break;
+                } else {
+                    existingFile = existingFile.getParentFile();
+                }
             }
-        }
-        if (fileFileStore != null) {
-            for (FileStore fileStore : FileSystems.getDefault().getFileStores()) {
-                if (fileStore.equals(fileFileStore)) {
-                    final Path fileStorePath = getPath(fileStore);
-                    if (fileStorePath != null) {
-                        return fileStorePath.toFile();
+            if (fileFileStore != null) {
+                for (FileStore fileStore : FileSystems.getDefault().getFileStores()) {
+                    if (fileStore.equals(fileFileStore)) {
+                        final Path fileStorePath = getPath(fileStore);
+                        if (fileStorePath != null) {
+                            return fileStorePath.toFile();
+                        }
                     }
                 }
             }
@@ -77,7 +79,7 @@ public class Files17 {
     private static final Map<Class<? extends FileStore>, Hacks> hacksMap = new HashMap<Class<? extends FileStore>, Hacks>();
     static {
         // TODO: JDK9
-        if (JVMVersion.get() < JVMVersion.JAVA19) {
+        if (JVMVersion.get() >= JVMVersion.JAVA17 && JVMVersion.get() < JVMVersion.JAVA19) {
             try {
                 if (CrossSystem.isWindows()) {
                     try {

@@ -481,7 +481,7 @@ public class Files {
      * @throws IOException
      */
     public static File guessRoot(File file) throws IOException {
-        if (Application.getJavaVersion() >= Application.JAVA17) {
+        if (JVMVersion.get() >= JVMVersion.JAVA17 && JVMVersion.get() < JVMVersion.JAVA19) {
             final File ret = Files17.guessRoot(file);
             if (ret != null) {
                 return ret;

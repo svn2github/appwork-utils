@@ -50,7 +50,6 @@ import org.appwork.utils.IO;
 import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.formatter.HexFormatter;
-import org.appwork.utils.logging2.extmanager.LoggerFactory;
 import org.appwork.utils.net.LimitedInputStream;
 import org.appwork.utils.net.UploadProgress;
 import org.appwork.utils.net.BasicHTTP.BasicHTTP;
@@ -137,7 +136,7 @@ public abstract class Upload {
             this.checkInterrupted();
             long tt = System.currentTimeMillis();
             con = shttp.openPostConnection(this.getUploadURL(), null, new ByteArrayInputStream(new byte[0]), header, 0);
-            LoggerFactory.getDefaultLogger().info("GRZ Open Connection " + (System.currentTimeMillis() - tt));
+            // LoggerFactory.getDefaultLogger().info("GRZ Open Connection " + (System.currentTimeMillis() - tt));
             this.parseResponse(con);
             return this.remoteSize;
         } finally {
@@ -321,7 +320,7 @@ public abstract class Upload {
             this.checkInterrupted();
             long tt = System.currentTimeMillis();
             con = shttp.openPostConnection(this.getUploadURL(), uploadProgress, is, header, uploadSize);
-            LoggerFactory.getDefaultLogger().info("UC Open Connection " + (System.currentTimeMillis() - tt));
+            // LoggerFactory.getDefaultLogger().info("UC Open Connection " + (System.currentTimeMillis() - tt));
             this.parseResponse(con);
             final String remoteHash = new String(IO.readStream(1024, con.getInputStream()), "UTF-8");
             final String localHash = HexFormatter.byteArrayToHex(is.getMessageDigest().digest());

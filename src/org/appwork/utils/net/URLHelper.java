@@ -54,15 +54,25 @@ public class URLHelper {
     public static String createURL(final String protocol, final String userInfo, final String host, final int port, final String path, final String query, final String ref) throws MalformedURLException {
         final StringBuilder sb = new StringBuilder();
         sb.append(protocol);
-        sb.append("://");
-        if (userInfo != null && userInfo.length() > 0) {
-            sb.append(userInfo);
-            sb.append("@");
+        final boolean isFileProtocol;
+        if (protocol != null && "file".equalsIgnoreCase(protocol)) {
+            isFileProtocol = true;
+            // file with authority is not supported
+            sb.append(":/");
+        } else {
+            isFileProtocol = false;
+            sb.append("://");
         }
-        sb.append(host);
-        if (port != -1) {
-            sb.append(":");
-            sb.append(port);
+        if (!isFileProtocol) {
+            if (userInfo != null && userInfo.length() > 0) {
+                sb.append(userInfo);
+                sb.append("@");
+            }
+            sb.append(host);
+            if (port != -1) {
+                sb.append(":");
+                sb.append(port);
+            }
         }
         if (path != null && path.length() > 0) {
             final String encodedURLPath;
@@ -71,7 +81,14 @@ public class URLHelper {
             } catch (UnsupportedEncodingException shouldNeverHappen) {
                 throw new MalformedURLException(shouldNeverHappen.getMessage());
             }
-            if (encodedURLPath.startsWith("/")) {
+            if (isFileProtocol) {
+                if (encodedURLPath.startsWith("/")) {
+                    // remove double slash -> authority -> exception
+                    sb.append(encodedURLPath.substring(1));
+                } else {
+                    sb.append(encodedURLPath);
+                }
+            } else if (encodedURLPath.startsWith("/")) {
                 sb.append(encodedURLPath);
             } else {
                 sb.append("/");
@@ -80,16 +97,18 @@ public class URLHelper {
         } else {
             sb.append("/");
         }
-        if (query != null && query.length() > 0) {
-            sb.append("?");
-            /**
-             * TODO: implement encodeURLQuerySegment
-             */
-            sb.append(query);
-        }
-        if (ref != null && ref.length() > 0) {
-            sb.append("#");
-            sb.append(ref);
+        if (!isFileProtocol) {
+            if (query != null && query.length() > 0) {
+                sb.append("?");
+                /**
+                 * TODO: implement encodeURLQuerySegment
+                 */
+                sb.append(query);
+            }
+            if (ref != null && ref.length() > 0) {
+                sb.append("#");
+                sb.append(ref);
+            }
         }
         return sb.toString();
     }
@@ -143,7 +162,11 @@ public class URLHelper {
     }
 
     public static URL createURL(final String url) throws MalformedURLException {
-        final URL tmp = new URL(url.trim().replaceAll(":/+", "://").replaceAll(" ", "%20"));
+        URL tmp = new URL(url.trim().replaceAll(" ", "%20"));
+        if (StringUtils.isEmpty(tmp.getHost()) && tmp.getProtocol() != null && tmp.getProtocol().matches("(https?|ftp)")) {
+            // fix required authority part for http(s) and ftp
+            tmp = new URL(url.trim().replaceFirst("^(?i)(https?|ftp):/+", "$1://").replaceAll(" ", "%20"));
+        }
         if (tmp.getPath() != null && tmp.getQuery() == null && tmp.getPath().matches(".*(\\&(?!amp;)).*")) {
             final Pattern search = Pattern.compile(".*?\\&(?!amp;)");
             final Matcher matcher = search.matcher(tmp.getPath());
@@ -165,7 +188,9 @@ public class URLHelper {
     public static String parseLocation(final URL url, final String loc) {
         final String location = loc.trim().replaceAll(" ", "%20");
         try {
-            if (location.matches("^https?:/.+")) {
+            if (location.matches("^(?i)ftp:/.+") || location.matches("^(?i)file:/.+")) {
+                throw new WTFException("Unsupported:location=" + location);
+            } else if (location.matches("^(?i)https?:/.+")) {
                 final URL dummyURL = createURL(location);
                 return fixPathTraversal(dummyURL).toString();
             } else if (location.matches("^:\\d+/.*")) {
@@ -259,18 +284,29 @@ public class URLHelper {
                 }
             }
             final StringBuilder sb = new StringBuilder();
-            sb.append(url.getProtocol());
-            sb.append("://");
-            if (url.getUserInfo() != null) {
-                sb.append(url.getUserInfo());
-                sb.append("@");
+            final String protocol = url.getProtocol();
+            sb.append(protocol);
+            final boolean isFileProtocol;
+            if (protocol != null && "file".equalsIgnoreCase(protocol)) {
+                isFileProtocol = true;
+                // file with authority is not supported
+                sb.append(":/");
+            } else {
+                isFileProtocol = false;
+                sb.append("://");
             }
-            sb.append(url.getHost());
-            if (url.getPort() != -1) {
-                sb.append(":");
-                sb.append(url.getPort());
+            if (!isFileProtocol) {
+                if (url.getUserInfo() != null) {
+                    sb.append(url.getUserInfo());
+                    sb.append("@");
+                }
+                sb.append(url.getHost());
+                if (url.getPort() != -1) {
+                    sb.append(":");
+                    sb.append(url.getPort());
+                }
+                sb.append("/");
             }
-            sb.append("/");
             for (int i = 0; i < pathParts.length; i++) {
                 final String pathPart = pathParts[i];
                 if (pathPart != null) {
@@ -282,13 +318,15 @@ public class URLHelper {
                     }
                 }
             }
-            if (url.getQuery() != null) {
-                sb.append("?");
-                sb.append(url.getQuery());
-            }
-            if (url.getRef() != null) {
-                sb.append("#");
-                sb.append(url.getRef());
+            if (!isFileProtocol) {
+                if (url.getQuery() != null) {
+                    sb.append("?");
+                    sb.append(url.getQuery());
+                }
+                if (url.getRef() != null) {
+                    sb.append("#");
+                    sb.append(url.getRef());
+                }
             }
             return createURL(sb.toString());
         }
@@ -317,32 +355,7 @@ public class URLHelper {
         if (!modifyQuery && !modifyUserInfo && !modifyRef) {
             return url;
         } else {
-            final StringBuilder sb = new StringBuilder();
-            sb.append(url.getProtocol());
-            sb.append("://");
-            if (includeUserInfo && url.getUserInfo() != null) {
-                sb.append(url.getUserInfo());
-                sb.append("@");
-            }
-            sb.append(url.getHost());
-            if (url.getPort() != -1) {
-                sb.append(":");
-                sb.append(url.getPort());
-            }
-            if (!StringUtils.isEmpty(url.getPath())) {
-                sb.append(url.getPath());
-            } else {
-                sb.append("/");
-            }
-            if (includeQuery && url.getQuery() != null) {
-                sb.append("?");
-                sb.append(url.getQuery());
-            }
-            if (includeRef && url.getRef() != null) {
-                sb.append("#");
-                sb.append(url.getRef());
-            }
-            return createURL(sb.toString());
+            return createURL(createURL(url.getProtocol(), includeUserInfo ? url.getUserInfo() : null, url.getHost(), url.getPort(), url.getPath(), includeQuery ? url.getQuery() : null, includeRef ? url.getRef() : null));
         }
     }
 }

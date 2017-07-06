@@ -139,6 +139,14 @@ public class CrossSystem {
             return this.family;
         }
 
+        public final boolean isMaximum(final OperatingSystem os) {
+            if (os.getFamily().equals(getFamily())) {
+                final int maximum = os.ordinal();
+                return ordinal() <= maximum;
+            }
+            return false;
+        }
+
         public final boolean isMinimum(final OperatingSystem os) {
             if (os.getFamily().equals(getFamily())) {
                 final int minimum = os.ordinal();
@@ -170,10 +178,6 @@ public class CrossSystem {
 
     public static boolean isUnix() {
         return CrossSystem.isBSD() || CrossSystem.isLinux();
-    }
-
-    public static void main(String[] args) {
-        System.out.println(isRaspberryPi());
     }
 
     // http://www.raspberrypi-spy.co.uk/2012/09/checking-your-raspberry-pi-board-version/
@@ -473,7 +477,7 @@ public class CrossSystem {
         pathPart = pathPart.replaceFirst("^\\.+", ".");
         /*
          * remove ending dots, not allowed under windows and others os maybe too
-         * 
+         *
          * Do not end a file or directory name with a space or a period.
          */
         pathPart = pathPart.replaceFirst("\\.+$", "");

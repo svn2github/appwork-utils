@@ -60,7 +60,6 @@ public abstract class SocketFactory {
      * @return
      */
     public Socket create(HTTPConnection connection, InetAddress bindInetAddress) {
-        // TODO Auto-generated method stub
         return FACTORY.createSocket(connection, bindInetAddress);
     }
 

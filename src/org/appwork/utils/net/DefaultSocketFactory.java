@@ -48,33 +48,33 @@ import org.appwork.utils.net.socketconnection.SocketConnection;
  *
  */
 public class DefaultSocketFactory extends SocketFactory {
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.appwork.utils.net.SocketFactory#createSocket(org.appwork.utils.net.httpconnection.HTTPConnection, java.net.InetAddress)
-     */
+    private final static boolean PREFER_SOCKET = "true".equalsIgnoreCase(System.getProperty("org.appwork.utils.net.DefaultSocketFactory.PREFER_SOCKET", "false"));
+
     @Override
     public Socket createSocket(HTTPConnection connection, InetAddress bindInetAddress) {
-        try {
-            final SocketChannel channel = SocketChannel.open();
-            return channel.socket();
-        } catch (final IOException e) {
+        if (PREFER_SOCKET) {
             return new Socket(Proxy.NO_PROXY);
+        } else {
+            try {
+                final SocketChannel channel = SocketChannel.open();
+                return channel.socket();
+            } catch (final IOException e) {
+                return new Socket(Proxy.NO_PROXY);
+            }
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.appwork.utils.net.SocketFactory#create(org.appwork.utils.net.socketconnection.SocketConnection)
-     */
     @Override
     public Socket create(SocketConnection socketConnection) {
-        try {
-            final SocketChannel channel = SocketChannel.open();
-            return channel.socket();
-        } catch (final IOException e) {
+        if (PREFER_SOCKET) {
             return new Socket(Proxy.NO_PROXY);
+        } else {
+            try {
+                final SocketChannel channel = SocketChannel.open();
+                return channel.socket();
+            } catch (final IOException e) {
+                return new Socket(Proxy.NO_PROXY);
+            }
         }
     }
 }

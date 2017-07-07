@@ -381,6 +381,9 @@ public abstract class SocketConnection extends Socket {
 
     @Override
     public SocketChannel getChannel() {
+        if (this.proxySocket != null && proxySocket.getSocket() != null) {
+            return proxySocket.getSocket().getChannel();
+        }
         return null;
     }
 

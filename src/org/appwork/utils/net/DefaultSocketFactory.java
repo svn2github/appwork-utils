@@ -41,6 +41,8 @@ import java.nio.channels.SocketChannel;
 
 import org.appwork.utils.net.httpconnection.HTTPConnection;
 import org.appwork.utils.net.socketconnection.SocketConnection;
+import org.appwork.utils.os.CrossSystem;
+import org.appwork.utils.os.CrossSystem.OperatingSystem;
 
 /**
  * @author thomas
@@ -50,9 +52,13 @@ import org.appwork.utils.net.socketconnection.SocketConnection;
 public class DefaultSocketFactory extends SocketFactory {
     private final static boolean PREFER_SOCKET = "true".equalsIgnoreCase(System.getProperty("org.appwork.utils.net.DefaultSocketFactory.PREFER_SOCKET", "false"));
 
+    protected boolean preferSocket() {
+        return PREFER_SOCKET || (CrossSystem.isWindows() && CrossSystem.getOS().isMaximum(OperatingSystem.WINDOWS_XP));
+    }
+
     @Override
     public Socket createSocket(HTTPConnection connection, InetAddress bindInetAddress) {
-        if (PREFER_SOCKET) {
+        if (preferSocket()) {
             return new Socket(Proxy.NO_PROXY);
         } else {
             try {
@@ -66,7 +72,7 @@ public class DefaultSocketFactory extends SocketFactory {
 
     @Override
     public Socket create(SocketConnection socketConnection) {
-        if (PREFER_SOCKET) {
+        if (preferSocket()) {
             return new Socket(Proxy.NO_PROXY);
         } else {
             try {

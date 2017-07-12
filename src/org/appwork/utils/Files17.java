@@ -52,14 +52,21 @@ public class Files17 {
             File existingFile = file;
             while (existingFile != null) {
                 if (existingFile.exists()) {
-                    fileFileStore = Files.getFileStore(existingFile.toPath());
-                    break;
-                } else {
-                    existingFile = existingFile.getParentFile();
+                    try {
+                        fileFileStore = Files.getFileStore(existingFile.toPath());
+                        break;
+                    } catch (IOException e) {
+                        // https://bugs.openjdk.java.net/browse/JDK-8165852
+                        // https://bugs.openjdk.java.net/browse/JDK-8166162
+                        if (!StringUtils.containsIgnoreCase(e.getMessage(), "mount point not found")) {
+                            throw e;
+                        }
+                    }
                 }
+                existingFile = existingFile.getParentFile();
             }
             if (fileFileStore != null) {
-                for (FileStore fileStore : FileSystems.getDefault().getFileStores()) {
+                for (final FileStore fileStore : FileSystems.getDefault().getFileStores()) {
                     if (fileStore.equals(fileFileStore)) {
                         final Path fileStorePath = getPath(fileStore);
                         if (fileStorePath != null) {
@@ -196,18 +203,25 @@ public class Files17 {
      * @return
      * @throws IOException
      */
-    public static long getUsableDiskspace(File path) throws IOException {
+    public static long getUsableDiskspace(final File path) throws IOException {
         File existingFile = path;
         while (existingFile != null) {
             if (existingFile.exists()) {
-                final FileStore fileFileStore = Files.getFileStore(existingFile.toPath());
-                if (fileFileStore != null) {
-                    return fileFileStore.getUsableSpace();
+                try {
+                    final FileStore fileFileStore = Files.getFileStore(existingFile.toPath());
+                    if (fileFileStore != null) {
+                        return fileFileStore.getUsableSpace();
+                    }
+                    break;
+                } catch (IOException e) {
+                    // https://bugs.openjdk.java.net/browse/JDK-8165852
+                    // https://bugs.openjdk.java.net/browse/JDK-8166162
+                    if (!StringUtils.containsIgnoreCase(e.getMessage(), "mount point not found")) {
+                        throw e;
+                    }
                 }
-                break;
-            } else {
-                existingFile = existingFile.getParentFile();
             }
+            existingFile = existingFile.getParentFile();
         }
         final File root = org.appwork.utils.Files.guessRoot(path);
         if (root != null) {

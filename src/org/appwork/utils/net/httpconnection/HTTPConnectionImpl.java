@@ -397,7 +397,7 @@ public class HTTPConnectionImpl implements HTTPConnection {
         return false;
     }
 
-    protected SocketStreamInterface getKeepAliveSocket() throws IOException {
+    protected SocketStreamInterface getKeepAliveSocket(final boolean dnsLookup) throws IOException {
         final InetAddress localIP = getDirectInetAddress(getProxy());
         final int port;
         if (this.httpURL.getPort() == -1) {
@@ -463,7 +463,7 @@ public class HTTPConnectionImpl implements HTTPConnection {
                         socketPoolIterator.remove();
                         HTTPConnectionImpl.KEEPALIVESOCKETS.put(socketStream, next);
                         return socketStream;
-                    } else if (next.isSsl() == false && ssl == false && (next.sameHost(host) || next.sameRemoteIPs(getRemoteIPs()))) {
+                    } else if (next.isSsl() == false && ssl == false && (next.sameHost(host) || (dnsLookup && next.sameRemoteIPs(getRemoteIPs())))) {
                         // same hostname or same ip
                         socketPoolIterator.remove();
                         HTTPConnectionImpl.KEEPALIVESOCKETS.put(socketStream, next);
@@ -673,7 +673,10 @@ public class HTTPConnectionImpl implements HTTPConnection {
             if (!isHostnameResolved()) {
                 setHostname(resolveHostname(this.httpURL.getHost()));
             }
-            this.connectionSocket = this.getKeepAliveSocket();
+            this.connectionSocket = this.getKeepAliveSocket(false);
+            if (this.connectionSocket == null) {
+                this.connectionSocket = this.getKeepAliveSocket(true);
+            }
             if (this.connectionSocket == null) {
                 /* try all different ip's until one is valid and connectable */
                 IOException ee = null;

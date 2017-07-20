@@ -98,7 +98,7 @@ public class Socks5SocketConnection extends SocketConnection {
             default:
                 throw new IOException("Unsupported AUTH:" + authRequest);
             }
-            return Socks5SocketConnection.establishConnection(proxySocket, endpoint, this.getDestType(), logger);
+            return Socks5SocketConnection.establishConnection(this, proxySocket, endpoint, this.getDestType(), logger);
         } catch (final InvalidAuthException e) {
             throw new ProxyAuthException(e, proxy);
         } catch (final EndpointConnectException e) {
@@ -108,7 +108,7 @@ public class Socks5SocketConnection extends SocketConnection {
         }
     }
 
-    protected static SocketStreamInterface establishConnection(final SocketStreamInterface proxySocket, final SocketAddress endpoint, DESTTYPE destType, final StringBuffer logger) throws IOException {
+    protected static SocketStreamInterface establishConnection(Socks5SocketConnection socks5SocketConnection, final SocketStreamInterface proxySocket, final SocketAddress endpoint, DESTTYPE destType, final StringBuffer logger) throws IOException {
         final InetSocketAddress endPointAddress = (InetSocketAddress) endpoint;
         final OutputStream os = proxySocket.getOutputStream();
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -211,6 +211,7 @@ public class Socks5SocketConnection extends SocketConnection {
             final byte[] connectedIP = SocketConnection.ensureRead(is, 4, null);
             /* port */
             final byte[] connectedPort = SocketConnection.ensureRead(is, 2, null);
+            socks5SocketConnection.setEndPointSocketAddress(new InetSocketAddress(InetAddress.getByAddress(connectedIP), ByteBuffer.wrap(connectedPort).getShort() & 0xffff));
             if (logger != null) {
                 logger.append("<-BOUND IPv4:" + InetAddress.getByAddress(connectedIP) + ":" + (ByteBuffer.wrap(connectedPort).getShort() & 0xffff) + "\r\n");
             }
@@ -228,6 +229,7 @@ public class Socks5SocketConnection extends SocketConnection {
             final byte[] connectedIP = SocketConnection.ensureRead(is, 16, null);
             /* port */
             final byte[] connectedPort = SocketConnection.ensureRead(is, 2, null);
+            socks5SocketConnection.setEndPointSocketAddress(new InetSocketAddress(InetAddress.getByAddress(connectedIP), ByteBuffer.wrap(connectedPort).getShort() & 0xffff));
             if (logger != null) {
                 logger.append("<-BOUND IPv6:" + InetAddress.getByAddress(connectedIP) + ":" + (ByteBuffer.wrap(connectedPort).getShort() & 0xffff) + "\r\n");
             }

@@ -97,6 +97,16 @@ public abstract class SocketConnection extends Socket {
         }
     }
 
+    protected SocketAddress endPointSocketAddress;
+
+    public SocketAddress getEndPointSocketAddress() {
+        return endPointSocketAddress;
+    }
+
+    protected void setEndPointSocketAddress(SocketAddress endPointSocketAddress) {
+        this.endPointSocketAddress = endPointSocketAddress;
+    }
+
     protected static int ensureRead(final InputStream is) throws IOException {
         final int read = is.read();
         if (read == -1) {
@@ -276,6 +286,7 @@ public abstract class SocketConnection extends Socket {
 
     protected void connect(SocketStreamInterface socketStreamInterface, SocketAddress connectSocketAddress, int connectTimeout) throws IOException {
         if (socketStreamInterface.getSocket() != null) {
+            setEndPointSocketAddress(connectSocketAddress);
             socketStreamInterface.getSocket().connect(connectSocketAddress, connectTimeout);
         } else {
             throw new IOException("SocketStreamInterface does not provide a connectable socket");

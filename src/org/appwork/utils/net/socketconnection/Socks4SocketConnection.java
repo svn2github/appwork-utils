@@ -73,7 +73,7 @@ public class Socks4SocketConnection extends SocketConnection {
         final HTTPProxy proxy = getProxy();
         try {
             Socks4SocketConnection.sayHello(proxySocket, logger);
-            return Socks4SocketConnection.establishConnection(proxySocket, proxy.getUser(), endPoint, this.getDestType(), logger);
+            return Socks4SocketConnection.establishConnection(this, proxySocket, proxy.getUser(), endPoint, this.getDestType(), logger);
         } catch (final InvalidAuthException e) {
             throw new ProxyAuthException(e, proxy);
         } catch (final EndpointConnectException e) {
@@ -83,7 +83,7 @@ public class Socks4SocketConnection extends SocketConnection {
         }
     }
 
-    public static SocketStreamInterface establishConnection(final SocketStreamInterface proxySocket, final String userID, final SocketAddress endPoint, DESTTYPE destType, final StringBuffer logger) throws IOException {
+    public static SocketStreamInterface establishConnection(Socks4SocketConnection sock4SocketConnection, final SocketStreamInterface proxySocket, final String userID, final SocketAddress endPoint, DESTTYPE destType, final StringBuffer logger) throws IOException {
         final InetSocketAddress endPointAddress = (InetSocketAddress) endPoint;
         final OutputStream os = proxySocket.getOutputStream();
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -164,6 +164,7 @@ public class Socks4SocketConnection extends SocketConnection {
         final byte[] connectedPort = SocketConnection.ensureRead(is, 2, null);
         /* ip4v response */
         final byte[] connectedIP = SocketConnection.ensureRead(is, 4, null);
+        sock4SocketConnection.setEndPointSocketAddress(new InetSocketAddress(InetAddress.getByAddress(connectedIP), ByteBuffer.wrap(connectedPort).getShort() & 0xffff));
         if (logger != null) {
             logger.append("<-BOUND IP:" + InetAddress.getByAddress(connectedIP) + ":" + (ByteBuffer.wrap(connectedPort).getShort() & 0xffff) + "\r\n");
         }

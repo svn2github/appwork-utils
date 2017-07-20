@@ -191,6 +191,7 @@ public class HTTPConstants {
      * The length of the request body in octets (8-bit bytes) Content-Length: 348
      */
     public static final String HEADER_RESPONSE_CONTENT_LENGTH               = "Content-Length";
+    public static final String HEADER_RESPONSE_WWW_AUTHENTICATE            = "WWW-Authenticate";
     /**
      * The mime type of the body of the request (used with POST and PUT requests) Content-Type: application/x-www-form-urlencoded
      */

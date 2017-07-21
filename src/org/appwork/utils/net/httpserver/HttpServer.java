@@ -188,19 +188,28 @@ public class HttpServer implements Runnable, HTTPBridge {
             while (controlSocket.get() == socket) {
                 try {
                     final Socket clientSocket = socket.accept();
+                    boolean closeSocket = true;
                     try {
-                        threadPool.execute(this.createConnectionHandler(clientSocket));
+                        final Runnable runnable;
+                        try {
+                            runnable = this.createConnectionHandler(clientSocket);
+                        } catch (Throwable e) {
+                            throw new IOException(e);
+                        }
+                        if (runnable != null) {
+                            threadPool.execute(runnable);
+                            closeSocket = false;
+                        }
                     } catch (final IOException e) {
                         e.printStackTrace();
-                        try {
-                            clientSocket.close();
-                        } catch (final Throwable e2) {
-                        }
                     } catch (final RejectedExecutionException e) {
                         e.printStackTrace();
-                        try {
-                            clientSocket.close();
-                        } catch (final Throwable e2) {
+                    } finally {
+                        if (closeSocket && clientSocket != null) {
+                            try {
+                                clientSocket.close();
+                            } catch (final Throwable e2) {
+                            }
                         }
                     }
                 } catch (final SocketTimeoutException e) {
@@ -322,7 +331,7 @@ public class HttpServer implements Runnable, HTTPBridge {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.appwork.utils.net.httpserver.requests.HTTPBridge#canHandleChunkedEncoding(org.appwork.utils.net.httpserver.requests.HttpRequest,
      * org.appwork.utils.net.httpserver.responses.HttpResponse)

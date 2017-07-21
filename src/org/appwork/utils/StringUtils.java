@@ -76,8 +76,8 @@ public class StringUtils {
      * taken from http://stackoverflow.com/questions/4731055/whitespace-matching-regex-java
      */
     final private static String whitespace_chars = "[" /*
-                                                        * dummy empty string for homogeneity
-                                                        */
+     * dummy empty string for homogeneity
+     */
             + "\\u0009" // CHARACTER
             // TABULATION
             + "\\u000A" // LINE
@@ -147,6 +147,14 @@ public class StringUtils {
             return x;
         } else {
             return null;
+        }
+    }
+
+    public static String valueOrEmpty(String x) {
+        if (x == null) {
+            return "";
+        } else {
+            return x;
         }
     }
 

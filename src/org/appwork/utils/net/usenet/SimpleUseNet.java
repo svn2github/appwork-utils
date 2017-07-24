@@ -53,10 +53,8 @@ import org.appwork.utils.net.httpconnection.JavaSSLSocketStreamFactory;
 import org.appwork.utils.net.socketconnection.SocketConnection;
 
 public abstract class SimpleUseNet {
-
     public static enum COMMAND {
         HEAD {
-
             @Override
             public boolean isMultiLineResponse(int code) {
                 switch (code) {
@@ -65,17 +63,14 @@ public abstract class SimpleUseNet {
                 }
                 return false;
             }
-
         },
         AUTHINFO_USER {
-
             @Override
             public String getCommand() {
                 return "AUTHINFO USER";
             }
         },
         AUTHINFO_PASS {
-
             @Override
             public String getCommand() {
                 return "AUTHINFO PASS";
@@ -84,7 +79,6 @@ public abstract class SimpleUseNet {
         BODY,
         STAT,
         QUIT;
-
         public boolean isMultiLineResponse(int code) {
             return false;
         };
@@ -97,7 +91,6 @@ public abstract class SimpleUseNet {
     /**
      * rfc3977 nntp
      */
-
     private volatile Socket socket = null;
 
     public static class CommandResponse {
@@ -122,7 +115,6 @@ public abstract class SimpleUseNet {
         public String toString() {
             return getResponseCode() + ":" + getMessage();
         }
-
     }
 
     public Socket getSocket() {
@@ -132,7 +124,6 @@ public abstract class SimpleUseNet {
     private volatile OutputStream outputStream = null;
     private volatile InputStream  inputStream  = null;
     private final byte[]          CRLF         = "\r\n".getBytes();
-
     private final LogInterface    logger;
     private final HTTPProxy       proxy;
 
@@ -242,6 +233,11 @@ public abstract class SimpleUseNet {
                 return;
             case 481:
                 throw new InvalidAuthException();
+            case 482:
+                if (StringUtils.containsIgnoreCase(response.getMessage(), "incorrect")) {
+                    throw new InvalidAuthException();
+                }
+                break;
             case 502:
                 if (StringUtils.containsIgnoreCase(response.getMessage(), "Authentication Failed")) {
                     // user/pass incorrect
@@ -470,5 +466,4 @@ public abstract class SimpleUseNet {
             }
         }
     }
-
 }

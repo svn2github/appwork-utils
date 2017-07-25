@@ -205,6 +205,14 @@ public class HTTPConnectionImpl implements HTTPConnection {
                             final HTTPKeepAliveSocket keepAliveSocket = keepAliveIterator.next();
                             final SocketStreamInterface socketStream = keepAliveSocket.getSocketStream();
                             final Socket socket = socketStream.getSocket();
+                            if (socket.isClosed() || keepAliveSocket.getKeepAliveTimestamp() <= System.currentTimeMillis()) {
+                                try {
+                                    socket.close();
+                                } catch (final Throwable ignore) {
+                                }
+                                keepAliveIterator.remove();
+                                continue;
+                            }
                             try {
                                 if (socket.getChannel() != null) {
                                     final SocketChannel channel = socket.getChannel();
@@ -225,13 +233,6 @@ public class HTTPConnectionImpl implements HTTPConnection {
                                 }
                                 keepAliveIterator.remove();
                                 continue;
-                            }
-                            if (socket.isClosed() || keepAliveSocket.getKeepAliveTimestamp() <= System.currentTimeMillis()) {
-                                try {
-                                    socket.close();
-                                } catch (final Throwable ignore) {
-                                }
-                                keepAliveIterator.remove();
                             }
                         }
                     }
@@ -397,6 +398,34 @@ public class HTTPConnectionImpl implements HTTPConnection {
         return false;
     }
 
+    protected boolean checkSocketChannel(Socket socket) {
+        if (socket != null) {
+            try {
+                if (socket.getChannel() != null) {
+                    final SocketChannel channel = socket.getChannel();
+                    channel.configureBlocking(false);
+                    final ByteBuffer check = ByteBuffer.wrap(new byte[1]);
+                    final int read = channel.read(check);
+                    if (read == -1) {
+                        throw new AsynchronousCloseException();
+                    } else if (read != 0) {
+                        throw new IOException("Unexpected data received");
+                    }
+                    channel.configureBlocking(true);
+                }
+                return true;
+            } catch (IOException e) {
+                try {
+                    if (socket != null) {
+                        socket.close();
+                    }
+                } catch (final Throwable ignore) {
+                }
+            }
+        }
+        return false;
+    }
+
     protected SocketStreamInterface getKeepAliveSocket(final boolean dnsLookup) throws IOException {
         final InetAddress localIP = getDirectInetAddress(getProxy());
         final int port;
@@ -422,33 +451,13 @@ public class HTTPConnectionImpl implements HTTPConnection {
                     final HTTPKeepAliveSocket next = socketPoolIterator.next();
                     final SocketStreamInterface socketStream = next.getSocketStream();
                     final Socket socket = socketStream.getSocket();
-                    try {
-                        if (socket.getChannel() != null) {
-                            final SocketChannel channel = socket.getChannel();
-                            channel.configureBlocking(false);
-                            final ByteBuffer check = ByteBuffer.wrap(new byte[1]);
-                            final int read = channel.read(check);
-                            if (read == -1) {
-                                throw new AsynchronousCloseException();
-                            } else if (read != 0) {
-                                throw new IOException("Unexpected data received");
-                            }
-                            channel.configureBlocking(true);
-                        }
-                    } catch (IOException e) {
-                        try {
-                            socket.close();
-                        } catch (final Throwable ignore) {
-                        }
-                        socketPoolIterator.remove();
-                        continue;
-                    }
                     if (socket.isClosed() || next.getKeepAliveTimestamp() <= System.currentTimeMillis()) {
                         try {
                             socket.close();
                         } catch (final Throwable ignore) {
                         }
                         socketPoolIterator.remove();
+                        continue;
                     } else if (socket.getPort() != port || !next.sameLocalIP(localIP)) {
                         continue;
                     } else if (next.isSsl() && ssl && next.sameHost(host)) {
@@ -461,13 +470,21 @@ public class HTTPConnectionImpl implements HTTPConnection {
                          * </p>
                          */
                         socketPoolIterator.remove();
-                        HTTPConnectionImpl.KEEPALIVESOCKETS.put(socketStream, next);
-                        return socketStream;
+                        if (checkSocketChannel(socket)) {
+                            HTTPConnectionImpl.KEEPALIVESOCKETS.put(socketStream, next);
+                            return socketStream;
+                        } else {
+                            continue;
+                        }
                     } else if (next.isSsl() == false && ssl == false && (next.sameHost(host) || (dnsLookup && next.sameRemoteIPs(getRemoteIPs())))) {
                         // same hostname or same ip
                         socketPoolIterator.remove();
-                        HTTPConnectionImpl.KEEPALIVESOCKETS.put(socketStream, next);
-                        return socketStream;
+                        if (checkSocketChannel(socket)) {
+                            HTTPConnectionImpl.KEEPALIVESOCKETS.put(socketStream, next);
+                            return socketStream;
+                        } else {
+                            continue;
+                        }
                     }
                 }
                 if (socketPool.isEmpty()) {

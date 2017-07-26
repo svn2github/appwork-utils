@@ -206,6 +206,7 @@ public class SyntheticaHelper {
                 /* must be true to disable it..strange world ;) */
                 UIManager.put("Synthetica.window.opaque", true);
             }
+            UIManager.put("Synthetica.text.antialias", config.isTextAntiAliasEnabled());
             UIManager.put("Synthetica.menu.toolTipEnabled", true);
             UIManager.put("Synthetica.menuItem.toolTipEnabled", true);
             if (!Application.isHeadless()) {

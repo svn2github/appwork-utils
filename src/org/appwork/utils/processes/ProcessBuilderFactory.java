@@ -208,25 +208,56 @@ public class ProcessBuilderFactory {
         return new ProcessBuilder(ProcessBuilderFactory.escape(tiny));
     }
 
-    private static String[] escape(final String[] tiny) {
-        if (CrossSystem.isWindows() || CrossSystem.isOS2()) {
-            // The windows processbuilder throws exceptions if a arguments
-            // starts
-            // with ", but does not end with " or vice versa
-            final String[] ret = new String[tiny.length];
-            //
-            for (int i = 0; i < ret.length; i++) {
-                if (tiny[i].startsWith("\"") && !tiny[i].endsWith("\"")) {
-                    ret[i] = "\"" + tiny[i].replace("\"", "\\\"") + "\"";
-                } else if (!tiny[i].startsWith("\"") && tiny[i].endsWith("\"")) {
-                    ret[i] = "\"" + tiny[i].replace("\"", "\\\"") + "\"";
+    public static String[] escape(final String[] input) {
+        return escape(input, false);
+    }
+
+    public static String[] escape(final String[] input, final boolean forceEscape) {
+        if (input != null && (CrossSystem.isWindows() || CrossSystem.isOS2() || forceEscape)) {
+            /* The windows processbuilder throws exceptions if a arguments starts with ", but does not end with " or vice versa */
+            final String[] ret = new String[input.length];
+            final String rawC = "\"";
+            final String escapedC = "\\\"";
+            for (int index = 0; index < ret.length; index++) {
+                // only count non escaped quotations
+                final String value = input[index];
+                if (value == null) {
+                    ret[index] = value;
                 } else {
-                    ret[i] = tiny[i];
+                    final int count = new Regex(value, "((?<!\\\\)" + rawC + ")").count();
+                    final boolean rawC_Start = value.startsWith(rawC);
+                    final boolean rawC_End = value.endsWith(rawC) && !value.endsWith(escapedC);
+                    if (count == 0) {
+                        // we have none!
+                        ret[index] = value;
+                    } else if (rawC_Start && rawC_End) {
+                        // prefix and postfix are provided
+                        if (count % 2 == 0) {
+                            ret[index] = value;
+                        } else {
+                            // we have to accept our fate and trust the input to be valid :)
+                            ret[index] = value;
+                        }
+                    } else if (count % 2 == 0) {
+                        // even count
+                        ret[index] = value;
+                    } else {
+                        // WTF: rest must be odd! corrections required?
+                        // note: you can't use replace as you will nuke other valid quoted components.
+                        if (rawC_Start && !rawC_End) {
+                            ret[index] = value + rawC;
+                        } else if (!rawC_Start && rawC_End) {
+                            ret[index] = rawC + value;
+                        } else {
+                            // we have to accept our fate and trust the input to be valid :)
+                            ret[index] = value;
+                        }
+                    }
                 }
             }
             return ret;
         } else {
-            return tiny;
+            return input;
         }
     }
 

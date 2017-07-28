@@ -62,7 +62,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.WeakHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.zip.GZIPInputStream;
 
@@ -173,39 +172,37 @@ public class HTTPConnectionImpl implements HTTPConnection {
 
     public void setKeepAlive(KEEPALIVE keepAlive) {
         if (keepAlive == null) {
-            keepAlive = KEEPALIVE.DISABLED;
+            this.keepAlive = KEEPALIVE.DISABLED;
+        } else {
+            this.keepAlive = keepAlive;
         }
-        this.keepAlive = keepAlive;
     }
 
     /**
      * Keep-Alive stuff
      */
-    protected static final HashMap<String, LinkedList<HTTPKeepAliveSocket>>        KEEPALIVEPOOL         = new HashMap<String, LinkedList<HTTPKeepAliveSocket>>();
-    protected static final WeakHashMap<SocketStreamInterface, HTTPKeepAliveSocket> KEEPALIVESOCKETS      = new WeakHashMap<SocketStreamInterface, HTTPKeepAliveSocket>();
-    protected static final Object                                                  LOCK                  = new Object();
-    protected static final DelayedRunnable                                         KEEPALIVECLEANUPTIMER = new DelayedRunnable(10000, 30000) {
-        @Override
-        public void delayedrun() {
-            cleanupKeepAlivePools();
-        }
-    };
+    protected static final HashMap<String, LinkedList<KeepAliveSocketStream>> KEEPALIVEPOOL         = new HashMap<String, LinkedList<KeepAliveSocketStream>>();
+    protected static final Object                                             LOCK                  = new Object();
+    protected static final DelayedRunnable                                    KEEPALIVECLEANUPTIMER = new DelayedRunnable(10000, 30000) {
+                                                                                                        @Override
+                                                                                                        public void delayedrun() {
+                                                                                                            cleanupKeepAlivePools();
+                                                                                                        }
+                                                                                                    };
 
     private static final void cleanupKeepAlivePools() {
         synchronized (HTTPConnectionImpl.LOCK) {
             try {
-                HTTPConnectionImpl.KEEPALIVESOCKETS.isEmpty();
-                final Iterator<Entry<String, LinkedList<HTTPKeepAliveSocket>>> hostIterator = HTTPConnectionImpl.KEEPALIVEPOOL.entrySet().iterator();
+                final Iterator<Entry<String, LinkedList<KeepAliveSocketStream>>> hostIterator = HTTPConnectionImpl.KEEPALIVEPOOL.entrySet().iterator();
                 while (hostIterator.hasNext()) {
-                    final Entry<String, LinkedList<HTTPKeepAliveSocket>> next = hostIterator.next();
-                    final LinkedList<HTTPKeepAliveSocket> keepAliveSockets = next.getValue();
+                    final Entry<String, LinkedList<KeepAliveSocketStream>> next = hostIterator.next();
+                    final LinkedList<KeepAliveSocketStream> keepAliveSockets = next.getValue();
                     if (keepAliveSockets != null) {
-                        final Iterator<HTTPKeepAliveSocket> keepAliveIterator = keepAliveSockets.iterator();
+                        final Iterator<KeepAliveSocketStream> keepAliveIterator = keepAliveSockets.iterator();
                         while (keepAliveIterator.hasNext()) {
-                            final HTTPKeepAliveSocket keepAliveSocket = keepAliveIterator.next();
-                            final SocketStreamInterface socketStream = keepAliveSocket.getSocketStream();
+                            final KeepAliveSocketStream socketStream = keepAliveIterator.next();
                             final Socket socket = socketStream.getSocket();
-                            if (socket.isClosed() || keepAliveSocket.getKeepAliveTimestamp() <= System.currentTimeMillis()) {
+                            if (socket.isClosed() || socketStream.getKeepAliveTimestamp() <= System.currentTimeMillis()) {
                                 try {
                                     socket.close();
                                 } catch (final Throwable ignore) {
@@ -327,11 +324,13 @@ public class HTTPConnectionImpl implements HTTPConnection {
                     if (!this.isRequiresOutputStream() || ((CountingOutputStream) this.outputStream).transferedBytes() == this.postTodoLength) {
                         socket.setKeepAlive(true);
                         synchronized (HTTPConnectionImpl.LOCK) {
-                            HTTPKeepAliveSocket keepAliveSocket = HTTPConnectionImpl.KEEPALIVESOCKETS.remove(socket);
-                            if (keepAliveSocket == null) {
-                                final String connectionResponse = this.getHeaderField("Keep-Alive");
-                                final String maxKeepAliveTimeoutString = new Regex(connectionResponse, "timeout\\s*?=\\s*?(\\d+)").getMatch(0);
-                                final String maxKeepAliveRequestsString = new Regex(connectionResponse, "max\\s*?=\\s*?(\\d+)").getMatch(0);
+                            final KeepAliveSocketStream keepAliveSocketStream;
+                            if (socketStream instanceof KeepAliveSocketStream) {
+                                keepAliveSocketStream = (KeepAliveSocketStream) socketStream;
+                            } else {
+                                final String connectionResponse = this.getHeaderField(HTTPConstants.HTTP_KEEP_ALIVE);
+                                final String maxKeepAliveTimeoutString = new Regex(connectionResponse, "timeout\\s*=\\s*(\\d+)").getMatch(0);
+                                final String maxKeepAliveRequestsString = new Regex(connectionResponse, "max\\s*=\\s*(\\d+)").getMatch(0);
                                 final long maxKeepAliveTimeout;
                                 if (maxKeepAliveTimeoutString != null) {
                                     maxKeepAliveTimeout = Long.parseLong(maxKeepAliveTimeoutString) * 1000l;
@@ -356,32 +355,35 @@ public class HTTPConnectionImpl implements HTTPConnection {
                                 } else {
                                     remoteIPs = new InetAddress[] { ((InetSocketAddress) socket.getRemoteSocketAddress()).getAddress() };
                                 }
-                                final boolean ssl = StringUtils.equalsIgnoreCase("https", this.httpURL.getProtocol());
-                                keepAliveSocket = new HTTPKeepAliveSocket(getHostname(), ssl, socketStream, maxKeepAliveTimeout, maxKeepAliveRequests, localIP, remoteIPs);
+                                if (StringUtils.equalsIgnoreCase("https", this.httpURL.getProtocol())) {
+                                    keepAliveSocketStream = new KeepAliveSSLSocketStream(getHostname(), socketStream, maxKeepAliveTimeout, maxKeepAliveRequests, localIP, remoteIPs);
+                                } else {
+                                    keepAliveSocketStream = new KeepAliveSocketStream(getHostname(), socketStream, maxKeepAliveTimeout, maxKeepAliveRequests, localIP, remoteIPs);
+                                }
                             }
-                            keepAliveSocket.increaseRequests();
-                            if (keepAliveSocket.getRequestsLeft() > 0) {
+                            keepAliveSocketStream.increaseRequests();
+                            if (keepAliveSocketStream.getRequestsLeft() > 0) {
                                 String domain = null;
                                 if (HTTPConnectionImpl.PSL != null) {
-                                    domain = HTTPConnectionImpl.PSL.getDomain(keepAliveSocket.getHost());
+                                    domain = HTTPConnectionImpl.PSL.getDomain(keepAliveSocketStream.getHost());
                                 }
                                 if (StringUtils.isEmpty(domain)) {
                                     domain = "FALLBACK";
                                 }
-                                LinkedList<HTTPKeepAliveSocket> keepAlivePool = HTTPConnectionImpl.KEEPALIVEPOOL.get(domain);
+                                LinkedList<KeepAliveSocketStream> keepAlivePool = HTTPConnectionImpl.KEEPALIVEPOOL.get(domain);
                                 if (keepAlivePool == null) {
-                                    keepAlivePool = new LinkedList<HTTPKeepAliveSocket>();
+                                    keepAlivePool = new LinkedList<KeepAliveSocketStream>();
                                     HTTPConnectionImpl.KEEPALIVEPOOL.put(domain, keepAlivePool);
                                 }
-                                keepAlivePool.add(keepAliveSocket);
-                                keepAliveSocket.keepAlive();
+                                keepAlivePool.add(keepAliveSocketStream);
+                                keepAliveSocketStream.keepAlive();
                                 final long maxKeepAlive = this.getMaxKeepAliveSockets();
                                 if (keepAlivePool.size() > maxKeepAlive) {
-                                    final Iterator<HTTPKeepAliveSocket> it = keepAlivePool.iterator();
+                                    final Iterator<KeepAliveSocketStream> it = keepAlivePool.iterator();
                                     while (it.hasNext() && keepAlivePool.size() > maxKeepAlive) {
-                                        final HTTPKeepAliveSocket next = it.next();
+                                        final KeepAliveSocketStream next = it.next();
                                         try {
-                                            next.getSocketStream().close();
+                                            next.close();
                                         } catch (final Throwable ignore) {
                                         }
                                         it.remove();
@@ -426,7 +428,7 @@ public class HTTPConnectionImpl implements HTTPConnection {
         return false;
     }
 
-    protected SocketStreamInterface getKeepAliveSocket(final boolean dnsLookup) throws IOException {
+    protected KeepAliveSocketStream getKeepAliveSocket(final boolean dnsLookup) throws IOException {
         final InetAddress localIP = getDirectInetAddress(getProxy());
         final int port;
         if (this.httpURL.getPort() == -1) {
@@ -444,23 +446,22 @@ public class HTTPConnectionImpl implements HTTPConnection {
             domain = "FALLBACK";
         }
         synchronized (HTTPConnectionImpl.LOCK) {
-            final LinkedList<HTTPKeepAliveSocket> socketPool = HTTPConnectionImpl.KEEPALIVEPOOL.get(domain);
+            final LinkedList<KeepAliveSocketStream> socketPool = HTTPConnectionImpl.KEEPALIVEPOOL.get(domain);
             if (socketPool != null) {
-                final Iterator<HTTPKeepAliveSocket> socketPoolIterator = socketPool.descendingIterator();
+                final Iterator<KeepAliveSocketStream> socketPoolIterator = socketPool.descendingIterator();
                 while (socketPoolIterator.hasNext()) {
-                    final HTTPKeepAliveSocket next = socketPoolIterator.next();
-                    final SocketStreamInterface socketStream = next.getSocketStream();
+                    final KeepAliveSocketStream socketStream = socketPoolIterator.next();
                     final Socket socket = socketStream.getSocket();
-                    if (socket.isClosed() || next.getKeepAliveTimestamp() <= System.currentTimeMillis()) {
+                    if (socket.isClosed() || socketStream.getKeepAliveTimestamp() <= System.currentTimeMillis()) {
                         try {
                             socket.close();
                         } catch (final Throwable ignore) {
                         }
                         socketPoolIterator.remove();
                         continue;
-                    } else if (socket.getPort() != port || !next.sameLocalIP(localIP)) {
+                    } else if (socket.getPort() != port || !socketStream.sameLocalIP(localIP)) {
                         continue;
-                    } else if (next.isSsl() && ssl && next.sameHost(host)) {
+                    } else if (socketStream.isSsl() && ssl && socketStream.sameHost(host)) {
                         /**
                          * ssl needs to have same hostname to avoid (SNI)
                          *
@@ -471,16 +472,14 @@ public class HTTPConnectionImpl implements HTTPConnection {
                          */
                         socketPoolIterator.remove();
                         if (checkSocketChannel(socket)) {
-                            HTTPConnectionImpl.KEEPALIVESOCKETS.put(socketStream, next);
                             return socketStream;
                         } else {
                             continue;
                         }
-                    } else if (next.isSsl() == false && ssl == false && (next.sameHost(host) || (dnsLookup && next.sameRemoteIPs(getRemoteIPs())))) {
+                    } else if (socketStream.isSsl() == false && ssl == false && (socketStream.sameHost(host) || (dnsLookup && socketStream.sameRemoteIPs(getRemoteIPs())))) {
                         // same hostname or same ip
                         socketPoolIterator.remove();
                         if (checkSocketChannel(socket)) {
-                            HTTPConnectionImpl.KEEPALIVESOCKETS.put(socketStream, next);
                             return socketStream;
                         } else {
                             continue;
@@ -830,11 +829,6 @@ public class HTTPConnectionImpl implements HTTPConnection {
                     continue connect;
                 }
                 throw e;
-            } catch (final HTTPKeepAliveSocketException e) {
-                if (KEEPALIVE.EXTERNAL_EXCEPTION.equals(this.getKeepAlive())) {
-                    //
-                    throw e;
-                }
             }
         }
     }
@@ -882,10 +876,6 @@ public class HTTPConnectionImpl implements HTTPConnection {
 
     protected synchronized void connectInputStream() throws IOException {
         final SocketStreamInterface connectionSocket = this.getConnectionSocket();
-        final boolean isKeepAliveSocket;
-        synchronized (HTTPConnectionImpl.LOCK) {
-            isKeepAliveSocket = connectionSocket != null && HTTPConnectionImpl.KEEPALIVESOCKETS.containsKey(connectionSocket);
-        }
         try {
             if (this.isRequiresOutputStream() && this.postTodoLength >= 0) {
                 final long done = ((CountingOutputStream) this.outputStream).transferedBytes();
@@ -929,8 +919,8 @@ public class HTTPConnectionImpl implements HTTPConnection {
                     this.httpResponseMessage = "";
                 }
             } else {
-                if (isKeepAliveSocket) {
-                    throw new IOException("unknown HTTP response");
+                if (connectionSocket instanceof KeepAliveSocketStream) {
+                    throw new KeepAliveSocketStreamException(new IOException("unknown HTTP response"), connectionSocket);
                 }
                 this.invalidHttpHeader = this.httpHeader;
                 this.httpHeader = HTTPConnectionImpl.UNKNOWN_HTTP_RESPONSE;
@@ -1030,18 +1020,8 @@ public class HTTPConnectionImpl implements HTTPConnection {
                 }
             }
             this.inputStream = wrappedInputStream;
-        } catch (final HTTPKeepAliveSocketException e) {
-            this.disconnect();
-            throw e;
         } catch (final IOException e) {
             this.disconnect();
-            if (connectionSocket != null) {
-                synchronized (HTTPConnectionImpl.LOCK) {
-                    if (HTTPConnectionImpl.KEEPALIVESOCKETS.remove(connectionSocket) != null) {
-                        throw new HTTPKeepAliveSocketException(e, connectionSocket.getSocket());
-                    }
-                }
-            }
             throw e;
         }
     }
@@ -1431,10 +1411,6 @@ public class HTTPConnectionImpl implements HTTPConnection {
     protected void sendRequest() throws UnsupportedEncodingException, IOException {
         /* now send Request */
         final SocketStreamInterface connectionSocket = getConnectionSocket();
-        final boolean isKeepAliveSocket;
-        synchronized (HTTPConnectionImpl.LOCK) {
-            isKeepAliveSocket = connectionSocket != null && HTTPConnectionImpl.KEEPALIVESOCKETS.containsKey(connectionSocket);
-        }
         final StringBuilder sb = new StringBuilder();
         sb.append(this.httpMethod.name()).append(' ').append(this.httpPath).append(" HTTP/1.1\r\n");
         boolean hostSet = false;
@@ -1463,82 +1439,17 @@ public class HTTPConnectionImpl implements HTTPConnection {
             sb.append(next.getKey()).append(": ").append(next.getValue()).append("\r\n");
         }
         sb.append("\r\n");
-        final Socket socket = connectionSocket.getSocket();
         try {
             final OutputStream outputStream = connectionSocket.getOutputStream();
             outputStream.write(sb.toString().getBytes("ISO-8859-1"));
             outputStream.flush();
             if (this.isRequiresOutputStream()) {
-                this.outputStream = new CountingOutputStream(outputStream) {
-                    @Override
-                    public void close() throws IOException {
-                        if (!isKeepAliveSocket) {
-                            super.close();
-                        }
-                    }
-
-                    private final void throwIOException(final IOException e) throws IOException {
-                        if (isKeepAliveSocket) {
-                            synchronized (HTTPConnectionImpl.LOCK) {
-                                HTTPConnectionImpl.KEEPALIVESOCKETS.remove(connectionSocket);
-                            }
-                            throw new HTTPKeepAliveSocketException(e, socket);
-                        } else {
-                            throw e;
-                        }
-                    }
-
-                    @Override
-                    public void flush() throws IOException {
-                        try {
-                            super.flush();
-                        } catch (final IOException e) {
-                            throwIOException(e);
-                        }
-                    }
-
-                    @Override
-                    public void write(byte[] b) throws IOException {
-                        try {
-                            super.write(b);
-                        } catch (final IOException e) {
-                            throwIOException(e);
-                        }
-                    }
-
-                    @Override
-                    public void write(byte[] b, int off, int len) throws IOException {
-                        try {
-                            super.write(b, off, len);
-                        } catch (final IOException e) {
-                            throwIOException(e);
-                        }
-                    }
-
-                    @Override
-                    public void write(int b) throws IOException {
-                        try {
-                            super.write(b);
-                        } catch (final IOException e) {
-                            throwIOException(e);
-                        }
-                    }
-                };
+                this.outputStream = new CountingOutputStream(outputStream);
             } else {
                 this.connectInputStream();
             }
-        } catch (final HTTPKeepAliveSocketException e) {
-            this.disconnect();
-            throw e;
         } catch (final IOException e) {
             this.disconnect();
-            if (connectionSocket != null) {
-                synchronized (HTTPConnectionImpl.LOCK) {
-                    if (HTTPConnectionImpl.KEEPALIVESOCKETS.remove(connectionSocket) != null) {
-                        throw new HTTPKeepAliveSocketException(e, connectionSocket.getSocket());
-                    }
-                }
-            }
             throw e;
         }
     }

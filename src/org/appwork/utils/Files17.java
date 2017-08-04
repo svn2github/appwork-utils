@@ -39,6 +39,7 @@ import java.lang.reflect.Field;
 import java.nio.file.FileStore;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,6 +48,10 @@ import org.appwork.utils.os.CrossSystem;
 
 public class Files17 {
     public static File guessRoot(File file) throws IOException {
+        return guessRoot(file, false);
+    }
+
+    public static File guessRoot(File file, boolean throwException) throws IOException {
         if (JVMVersion.get() >= JVMVersion.JAVA17 && JVMVersion.get() < JVMVersion.JAVA19) {
             FileStore fileFileStore = null;
             File existingFile = file;
@@ -55,11 +60,24 @@ public class Files17 {
                     try {
                         fileFileStore = Files.getFileStore(existingFile.toPath());
                         break;
+                    } catch (InvalidPathException e) {
+                        // wrong locale, java.nio.file.InvalidPathException: Malformed input or input contains unmappable characters
+                        if (throwException) {
+                            throw e;
+                        } else {
+                            break;
+                        }
                     } catch (IOException e) {
                         // https://bugs.openjdk.java.net/browse/JDK-8165852
                         // https://bugs.openjdk.java.net/browse/JDK-8166162
-                        if (!StringUtils.containsIgnoreCase(e.getMessage(), "mount point not found")) {
+                        if (throwException) {
                             throw e;
+                        } else {
+                            if (!StringUtils.containsIgnoreCase(e.getMessage(), "mount point not found")) {
+                                throw e;
+                            } else {
+                                break;
+                            }
                         }
                     }
                 }
@@ -198,12 +216,16 @@ public class Files17 {
         }
     }
 
+    public static long getUsableDiskspace(final File path) throws IOException {
+        return getUsableDiskspace(path, false);
+    }
+
     /**
      * @param path
      * @return
      * @throws IOException
      */
-    public static long getUsableDiskspace(final File path) throws IOException {
+    public static long getUsableDiskspace(final File path, boolean throwException) throws IOException {
         File existingFile = path;
         while (existingFile != null) {
             if (existingFile.exists()) {
@@ -213,11 +235,24 @@ public class Files17 {
                         return fileFileStore.getUsableSpace();
                     }
                     break;
+                } catch (InvalidPathException e) {
+                    // wrong locale, java.nio.file.InvalidPathException: Malformed input or input contains unmappable characters
+                    if (throwException) {
+                        throw e;
+                    } else {
+                        break;
+                    }
                 } catch (IOException e) {
                     // https://bugs.openjdk.java.net/browse/JDK-8165852
                     // https://bugs.openjdk.java.net/browse/JDK-8166162
-                    if (!StringUtils.containsIgnoreCase(e.getMessage(), "mount point not found")) {
+                    if (throwException) {
                         throw e;
+                    } else {
+                        if (!StringUtils.containsIgnoreCase(e.getMessage(), "mount point not found")) {
+                            throw e;
+                        } else {
+                            break;
+                        }
                     }
                 }
             }

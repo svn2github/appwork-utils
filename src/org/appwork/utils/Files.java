@@ -475,14 +475,18 @@ public class Files {
         }
     }
 
+    public static File guessRoot(File file) throws IOException {
+        return guessRoot(file, false);
+    }
+
     /**
      * @param folder
      * @return
      * @throws IOException
      */
-    public static File guessRoot(File file) throws IOException {
+    public static File guessRoot(File file, boolean throwException) throws IOException {
         if (JVMVersion.get() >= JVMVersion.JAVA17 && JVMVersion.get() < JVMVersion.JAVA19) {
-            final File ret = Files17.guessRoot(file);
+            final File ret = Files17.guessRoot(file, throwException);
             if (ret != null) {
                 return ret;
             }

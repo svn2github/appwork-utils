@@ -51,6 +51,7 @@ import org.appwork.remoteapi.annotations.AllowResponseAccess;
 import org.appwork.remoteapi.annotations.ApiAuthLevel;
 import org.appwork.remoteapi.annotations.ApiDoc;
 import org.appwork.remoteapi.annotations.ApiHiddenMethod;
+import org.appwork.remoteapi.annotations.ApiDoNotExpose;
 import org.appwork.remoteapi.annotations.ApiMethodName;
 import org.appwork.remoteapi.annotations.ApiNamespace;
 import org.appwork.remoteapi.annotations.ApiRawMethod;
@@ -277,8 +278,10 @@ public class InterfaceHandler<T> {
         for (final Class<T> interfaceClass : this.interfaceClasses) {
             boolean srcUpdate = false;
             for (final Method m : interfaceClass.getMethods()) {
-                final ApiHiddenMethod hidden = m.getAnnotation(ApiHiddenMethod.class);
-                if (hidden != null) {
+                if (m.getAnnotation(ApiHiddenMethod.class) != null) {
+                    continue;
+                }
+                if (m.getAnnotation(ApiDoNotExpose.class) != null) {
                     continue;
                 }
                 srcUpdate |= this.validateMethod(m);

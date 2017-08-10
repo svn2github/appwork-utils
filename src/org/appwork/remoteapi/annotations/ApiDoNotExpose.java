@@ -10,7 +10,7 @@
  *         Germany
  * === Preamble ===
  *     This license establishes the terms under which the [The Product] Source Code & Binary files may be used, copied, modified, distributed, and/or redistributed.
- *     The intent is that the AppWork GmbH is able to provide  their utilities library for free to non-commercial projects whereas commercial usage is only permitted after obtaining a commercial license.
+ *     The intent is that the AppWork GmbH is able to provide their utilities library for free to non-commercial projects whereas commercial usage is only permitted after obtaining a commercial license.
  *     These terms apply to all files that have the [The Product] License header (IN the file), a <filename>.license or <filename>.info (like mylib.jar.info) file that contains a reference to this license.
  *
  * === 3rd Party Licences ===
@@ -19,11 +19,11 @@
  *
  * === Definition: Commercial Usage ===
  *     If anybody or any organization is generating income (directly or indirectly) by using [The Product] or if there's any commercial interest or aspect in what you are doing, we consider this as a commercial usage.
- *     If your use-case is neither strictly private nor strictly educational, it is commercial. If you are unsure whether your use-case is commercial or not, consider it as commercial or contact as.
+ *     If your use-case is neither strictly private nor strictly educational, it is commercial. If you are unsure whether your use-case is commercial or not, consider it as commercial or contact us.
  * === Dual Licensing ===
  * === Commercial Usage ===
  *     If you want to use [The Product] in a commercial way (see definition above), you have to obtain a paid license from AppWork GmbH.
- *     Contact AppWork for further details: e-mail@appwork.org
+ *     Contact AppWork for further details: <e-mail@appwork.org>
  * === Non-Commercial Usage ===
  *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the
  *     "GNU Affero General Public License" (http://www.gnu.org/licenses/agpl-3.0.en.html).
@@ -31,56 +31,18 @@
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
-package org.appwork.utils.net;
+package org.appwork.remoteapi.annotations;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.Proxy;
-import java.net.Socket;
-import java.nio.channels.SocketChannel;
-
-import org.appwork.utils.net.httpconnection.HTTPConnection;
-import org.appwork.utils.net.socketconnection.SocketConnection;
-import org.appwork.utils.os.CrossSystem;
-import org.appwork.utils.os.CrossSystem.OperatingSystem;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * @author thomas
- * @date 26.10.2016
+ * Use this annotation for methods you need in the interface, but do not want to expose to the api
  *
  */
-public class DefaultSocketFactory extends SocketFactory {
-    private final static boolean PREFER_SOCKET = true || "true".equalsIgnoreCase(System.getProperty("org.appwork.utils.net.DefaultSocketFactory.PREFER_SOCKET", "false"));
-
-    protected boolean preferSocket() {
-        return PREFER_SOCKET || (CrossSystem.isWindows() && CrossSystem.getOS().isMaximum(OperatingSystem.WINDOWS_XP));
-    }
-
-    @Override
-    public Socket createSocket(HTTPConnection connection, InetAddress bindInetAddress) {
-        if (preferSocket()) {
-            return new Socket(Proxy.NO_PROXY);
-        } else {
-            try {
-                final SocketChannel channel = SocketChannel.open();
-                return channel.socket();
-            } catch (final IOException e) {
-                return new Socket(Proxy.NO_PROXY);
-            }
-        }
-    }
-
-    @Override
-    public Socket create(SocketConnection socketConnection) {
-        if (preferSocket()) {
-            return new Socket(Proxy.NO_PROXY);
-        } else {
-            try {
-                final SocketChannel channel = SocketChannel.open();
-                return channel.socket();
-            } catch (final IOException e) {
-                return new Socket(Proxy.NO_PROXY);
-            }
-        }
-    }
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ ElementType.METHOD })
+public @interface ApiDoNotExpose {
 }

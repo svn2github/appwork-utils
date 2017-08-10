@@ -860,6 +860,8 @@ public class RemoteAPI implements HttpRequestHandler {
             final OutputStream os = response.getOutputStream(true);
             if (!isHeadRequest) {
                 os.write(bytes);
+                // os.close();
+                // System.out.println(1);
             }
         } else {
             if (bytes.length < 1 * 1024 * 1024) {

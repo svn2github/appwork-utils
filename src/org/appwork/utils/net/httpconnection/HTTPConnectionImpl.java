@@ -184,11 +184,11 @@ public class HTTPConnectionImpl implements HTTPConnection {
     protected static final HashMap<String, LinkedList<KeepAliveSocketStream>> KEEPALIVEPOOL         = new HashMap<String, LinkedList<KeepAliveSocketStream>>();
     protected static final Object                                             LOCK                  = new Object();
     protected static final DelayedRunnable                                    KEEPALIVECLEANUPTIMER = new DelayedRunnable(10000, 30000) {
-                                                                                                        @Override
-                                                                                                        public void delayedrun() {
-                                                                                                            cleanupKeepAlivePools();
-                                                                                                        }
-                                                                                                    };
+        @Override
+        public void delayedrun() {
+            cleanupKeepAlivePools();
+        }
+    };
 
     private static final void cleanupKeepAlivePools() {
         synchronized (HTTPConnectionImpl.LOCK) {
@@ -894,9 +894,18 @@ public class HTTPConnectionImpl implements HTTPConnection {
             final InputStream inputStream = connectionSocket.getInputStream();
             this.inputStreamConnected = true;
             /* first read http header */
-            ByteBuffer header = HTTPConnectionUtils.readheader(inputStream, true);
-            if (header.limit() == 0) {
-                throw new EOFException("empty HTTP-Response");
+            ByteBuffer header = null;
+            try {
+                header = HTTPConnectionUtils.readheader(inputStream, true);
+                if (header.limit() == 0) {
+                    throw new EOFException("empty HTTP-Response");
+                }
+            } catch (final IOException e) {
+                if (connectionSocket instanceof KeepAliveSocketStream) {
+                    throw new KeepAliveSocketStreamException(e, connectionSocket);
+                } else {
+                    throw e;
+                }
             }
             if (header.hasArray()) {
                 this.httpHeader = new String(header.array(), 0, header.limit(), "ISO-8859-1").trim();
@@ -949,7 +958,15 @@ public class HTTPConnectionImpl implements HTTPConnection {
                 return;
             }
             /* read rest of http headers */
-            header = HTTPConnectionUtils.readheader(inputStream, false);
+            try {
+                header = HTTPConnectionUtils.readheader(inputStream, false);
+            } catch (final IOException e) {
+                if (connectionSocket instanceof KeepAliveSocketStream) {
+                    throw new KeepAliveSocketStreamException(e, connectionSocket);
+                } else {
+                    throw e;
+                }
+            }
             final String temp;
             if (header.hasArray()) {
                 temp = fromBytes(header.array(), 0, header.limit());

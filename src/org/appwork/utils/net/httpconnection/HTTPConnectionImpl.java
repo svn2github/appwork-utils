@@ -280,8 +280,14 @@ public class HTTPConnectionImpl implements HTTPConnection {
         }
     }
 
-    protected long getDefaultKeepAliveMaxRequests() {
-        return 128;
+    protected long getDefaultKeepAliveMaxRequests(final String server) {
+        if (StringUtils.containsIgnoreCase(server, "nginx")) {
+            return 100;
+        } else if (StringUtils.containsIgnoreCase(server, "apache")) {
+            return 100;
+        } else {
+            return 100;
+        }
     }
 
     protected long getMaxKeepAliveSockets() {
@@ -292,8 +298,14 @@ public class HTTPConnectionImpl implements HTTPConnection {
         }
     }
 
-    protected long getDefaultKeepAliveTimeout() {
-        return 60 * 1000l;
+    protected long getDefaultKeepAliveTimeout(final String server) {
+        if (StringUtils.containsIgnoreCase(server, "nginx")) {
+            return 75 * 1000l;
+        } else if (StringUtils.containsIgnoreCase(server, "apache")) {
+            return 5 * 1000l;
+        } else {
+            return 60 * 1000l;
+        }
     }
 
     protected boolean isKeepAliveOK() {
@@ -329,19 +341,20 @@ public class HTTPConnectionImpl implements HTTPConnection {
                                 keepAliveSocketStream = (KeepAliveSocketStream) socketStream;
                             } else {
                                 final String connectionResponse = this.getHeaderField(HTTPConstants.HTTP_KEEP_ALIVE);
+                                final String server = this.getHeaderField(HTTPConstants.HEADER_RESPONSE_SERVER);
                                 final String maxKeepAliveTimeoutString = new Regex(connectionResponse, "timeout\\s*=\\s*(\\d+)").getMatch(0);
                                 final String maxKeepAliveRequestsString = new Regex(connectionResponse, "max\\s*=\\s*(\\d+)").getMatch(0);
                                 final long maxKeepAliveTimeout;
                                 if (maxKeepAliveTimeoutString != null) {
                                     maxKeepAliveTimeout = Long.parseLong(maxKeepAliveTimeoutString) * 1000l;
                                 } else {
-                                    maxKeepAliveTimeout = this.getDefaultKeepAliveTimeout();
+                                    maxKeepAliveTimeout = this.getDefaultKeepAliveTimeout(server);
                                 }
                                 final long maxKeepAliveRequests;
                                 if (maxKeepAliveRequestsString != null) {
                                     maxKeepAliveRequests = Long.parseLong(maxKeepAliveRequestsString);
                                 } else {
-                                    maxKeepAliveRequests = this.getDefaultKeepAliveMaxRequests();
+                                    maxKeepAliveRequests = this.getDefaultKeepAliveMaxRequests(server);
                                 }
                                 final InetAddress localIP;
                                 if (this.proxy != null && this.proxy.isDirect()) {

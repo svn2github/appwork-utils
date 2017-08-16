@@ -41,4 +41,12 @@ public class BadRequestException extends RemoteAPIException {
     public BadRequestException(String details) {
         super(RemoteAPIError.BAD_PARAMETERS, details);
     }
+
+    public BadRequestException(Throwable e, String details) {
+        super(e, RemoteAPIError.BAD_PARAMETERS, details);
+    }
+
+    public BadRequestException(Throwable e) {
+        super(e, RemoteAPIError.BAD_PARAMETERS);
+    }
 }

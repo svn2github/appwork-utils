@@ -460,7 +460,11 @@ public class RemoteAPI implements HttpRequestHandler {
         // }
         RemoteAPIRequest ret;
         try {
-            ret = this.createRemoteAPIRequestObject(request, preData, remoteAPIMethod.getMethodName(), remoteAPIMethod.getInterfaceHandler(), parameters, jqueryCallback);
+            // first ask the implementation itself
+            ret = remoteAPIMethod.getInterfaceHandler().createRemoteAPIRequestObject(request, preData, remoteAPIMethod, parameters, jqueryCallback);
+            if (ret == null) {
+                ret = this.createRemoteAPIRequestObject(request, preData, remoteAPIMethod.getMethodName(), remoteAPIMethod.getInterfaceHandler(), parameters, jqueryCallback);
+            }
         } catch (final IOException e) {
             throw new BasicRemoteAPIException(e);
         }
@@ -477,7 +481,7 @@ public class RemoteAPI implements HttpRequestHandler {
         return null;
     }
 
-    protected RemoteAPIRequest createRemoteAPIRequestObject(final HttpRequest request, Object extractedData, final String method, final InterfaceHandler<?> interfaceHandler, final java.util.List<String> parameters, final String jqueryCallback) throws IOException, BasicRemoteAPIException {
+    public RemoteAPIRequest createRemoteAPIRequestObject(final HttpRequest request, Object extractedData, final String method, final InterfaceHandler<?> interfaceHandler, final java.util.List<String> parameters, final String jqueryCallback) throws IOException, BasicRemoteAPIException {
         return new RemoteAPIRequest(interfaceHandler, method, parameters.toArray(new String[] {}), request, jqueryCallback);
     }
 

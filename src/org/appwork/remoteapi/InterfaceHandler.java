@@ -46,23 +46,26 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.appwork.remoteapi.RemoteAPI.RemoteAPIMethod;
 import org.appwork.remoteapi.annotations.AllowNonStorableObjects;
 import org.appwork.remoteapi.annotations.AllowResponseAccess;
 import org.appwork.remoteapi.annotations.ApiAuthLevel;
+import org.appwork.remoteapi.annotations.ApiDoNotExpose;
 import org.appwork.remoteapi.annotations.ApiDoc;
 import org.appwork.remoteapi.annotations.ApiHiddenMethod;
-import org.appwork.remoteapi.annotations.ApiDoNotExpose;
 import org.appwork.remoteapi.annotations.ApiMethodName;
 import org.appwork.remoteapi.annotations.ApiNamespace;
 import org.appwork.remoteapi.annotations.ApiRawMethod;
 import org.appwork.remoteapi.annotations.ApiSessionRequired;
 import org.appwork.remoteapi.annotations.ApiSignatureRequired;
+import org.appwork.remoteapi.exceptions.BasicRemoteAPIException;
 import org.appwork.storage.InvalidTypeException;
 import org.appwork.storage.JSonStorage;
 import org.appwork.storage.config.annotations.AllowStorage;
 import org.appwork.uio.UIOManager;
 import org.appwork.utils.Application;
 import org.appwork.utils.StringUtils;
+import org.appwork.utils.net.httpserver.requests.HttpRequest;
 
 /**
  * @author thomas
@@ -544,5 +547,22 @@ public class InterfaceHandler<T> {
         synchronized (this) {
             return new HashMap<String, Method>(methods);
         }
+    }
+
+    /**
+     * @param request
+     * @param preData
+     * @param remoteAPIMethod
+     * @param parameters
+     * @param jqueryCallback
+     * @return
+     * @throws BasicRemoteAPIException
+     * @throws IOException
+     */
+    public RemoteAPIRequest createRemoteAPIRequestObject(HttpRequest request, Object preData, RemoteAPIMethod remoteAPIMethod, List<String> parameters, String jqueryCallback) throws IOException, BasicRemoteAPIException {
+        if (impl instanceof RequestObjectFactory) {
+            return ((RequestObjectFactory) impl).createRemoteAPIRequestObject(request, preData, remoteAPIMethod, parameters, jqueryCallback);
+        }
+        return null;
     }
 }

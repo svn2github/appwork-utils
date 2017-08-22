@@ -234,7 +234,7 @@ public class IO {
         return IO.importFileToString(file, -1);
     }
 
-    private static enum BOM {
+    public static enum BOM {
         UTF8(new byte[] { (byte) 239, (byte) 187, (byte) 191 }, "UTF-8"),
         UTF16BE(new byte[] { (byte) 254, (byte) 255 }, "UTF-16BE"),
         UTF16LE(new byte[] { (byte) 255, (byte) 254 }, "UTF-16LE"),
@@ -243,7 +243,7 @@ public class IO {
         private final byte[] bomMarker;
         private final String charSet;
 
-        private final String getCharSet() {
+        public final String getCharSet() {
             return charSet;
         }
 
@@ -252,11 +252,20 @@ public class IO {
             this.charSet = charSet;
         }
 
-        protected final int length() {
+        public final int length() {
             return bomMarker.length;
         }
 
-        protected boolean startsWith(byte[] bytes) {
+        public static BOM get(byte[] bytes) {
+            for (final BOM bom : BOM.values()) {
+                if (bom.startsWith(bytes)) {
+                    return bom;
+                }
+            }
+            return null;
+        }
+
+        public boolean startsWith(byte[] bytes) {
             if (bytes != null && bytes.length >= length()) {
                 for (int index = 0; index < length(); index++) {
                     if (bytes[index] != bomMarker[index]) {
@@ -268,7 +277,7 @@ public class IO {
             return false;
         }
 
-        protected static String read(byte[] bytes) throws IOException {
+        public static String read(byte[] bytes) throws IOException {
             for (final BOM bom : BOM.values()) {
                 if (bom.startsWith(bytes)) {
                     return new String(bytes, bom.length(), bytes.length - bom.length(), bom.getCharSet());

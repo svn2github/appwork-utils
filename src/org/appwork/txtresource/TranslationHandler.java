@@ -333,6 +333,11 @@ public class TranslationHandler implements InvocationHandler {
         return null;
     }
 
+    /**
+     * @param method
+     * @param args
+     * @return
+     */
     public String getValue(final Method method, final java.util.List<TranslateResource> lookup) {
         String ret = null;
         TranslateResource res;
@@ -364,6 +369,33 @@ public class TranslationHandler implements InvocationHandler {
         // else if (method.getName().startsWith("_")) {
         if (method.getName().equals("_getHandler")) {
             return this;
+        }
+        if (Translateable.class.isAssignableFrom(method.getReturnType())) {
+            return new Translateable() {
+                @Override
+                public String translate(String[] localePriority) {
+                    // TODO Auto-generated method stub
+                    // ArrayList<TranslateResource> sorted = new ArrayList<TranslateResource>(lookup);
+                    for (TranslateResource l : fillLookup(localePriority)) {
+                        String ret;
+                        try {
+                            ret = l.getEntry(method);
+                            if (ret != null) {
+                                return format(ret, args);
+                            }
+                        } catch (Throwable e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        }
+                    }
+                    return null;
+                }
+
+                @Override
+                public String getKey() {
+                    return method.getName();
+                }
+            };
         }
         // if (method.getName().equals("_getSupportedLanguages")) {
         //

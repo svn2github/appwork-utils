@@ -35,7 +35,6 @@ package org.appwork.utils.net.httpconnection;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.URL;
 
@@ -46,7 +45,6 @@ import org.appwork.utils.net.socketconnection.Socks4SocketConnection;
  *
  */
 public class Socks4HTTPConnectionImpl extends SocksHTTPconnection {
-
     public Socks4HTTPConnectionImpl(final URL url, final HTTPProxy proxy) {
         super(url, proxy);
         if (this.proxy == null || !HTTPProxy.TYPE.SOCKS4.equals(this.proxy.getType())) {
@@ -57,14 +55,14 @@ public class Socks4HTTPConnectionImpl extends SocksHTTPconnection {
     @Override
     protected Socket createRawConnectionSocket(final InetAddress bindInetAddress) throws IOException {
         final Socks4SocketConnection socket = new Socks4SocketConnection(this.getProxy(), DESTTYPE.DOMAIN);
-        socket.setSoTimeout(readTimeout);
+        socket.setSoTimeout(getReadTimeout());
         return socket;
     }
 
     @Override
     protected SocketStreamInterface connect(SocketStreamInterface socketStream) throws IOException {
         final Socket socket = socketStream.getSocket();
-        ((Socks4SocketConnection) socket).connect(this.proxyInetSocketAddress = new InetSocketAddress(getHostname(), this.httpPort), this.getConnectTimeout(), this.proxyRequest);
+        ((Socks4SocketConnection) socket).connect(this.proxyInetSocketAddress = buildConnectEndPointSocketAddress(), this.getConnectTimeout(), this.proxyRequest);
         return socketStream;
     }
 }

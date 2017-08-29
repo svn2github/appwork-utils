@@ -35,7 +35,10 @@ package org.appwork.utils.net.httpconnection;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.net.URL;
+
+import org.appwork.utils.net.socketconnection.SocketConnection;
 
 /**
  * @author daniel
@@ -54,7 +57,6 @@ public abstract class SocksHTTPconnection extends HTTPConnectionImpl {
     }
 
     protected SocketStreamInterface sockssocket            = null;
-    protected int                   httpPort;
     protected StringBuffer          proxyRequest           = null;
     protected InetSocketAddress     proxyInetSocketAddress = null;
 
@@ -65,14 +67,11 @@ public abstract class SocksHTTPconnection extends HTTPConnectionImpl {
     @Override
     public void connect() throws IOException {
         /* establish to destination through socks */
-        this.httpPort = this.httpURL.getPort();
-        if (this.httpPort == -1) {
-            this.httpPort = this.httpURL.getDefaultPort();
-        }
         if (!isHostnameResolved()) {
             setHostname(resolveHostname(httpURL.getHost()));
         }
         boolean sslSNIWorkAround = false;
+        final int port = getConnectEndpointPort();
         connect: while (true) {
             if (this.isConnectionSocketValid()) {
                 return;/* oder fehler */
@@ -89,9 +88,9 @@ public abstract class SocksHTTPconnection extends HTTPConnectionImpl {
                         final SSLSocketStreamFactory factory = getSSLSocketStreamFactory();
                         if (sslSNIWorkAround) {
                             /* wrong configured SNI at serverSide */
-                            this.connectionSocket = factory.create(sockssocket, "", httpPort, true, isSSLTrustALL());
+                            this.connectionSocket = factory.create(sockssocket, "", port, true, isSSLTrustALL());
                         } else {
-                            this.connectionSocket = factory.create(sockssocket, getHostname(), httpPort, true, isSSLTrustALL());
+                            this.connectionSocket = factory.create(sockssocket, getHostname(), port, true, isSSLTrustALL());
                         }
                     } catch (final IOException e) {
                         this.connectExceptions.add(this.sockssocket + "|" + e.getMessage());
@@ -114,7 +113,7 @@ public abstract class SocksHTTPconnection extends HTTPConnectionImpl {
                 return;
             } catch (final javax.net.ssl.SSLException e) {
                 try {
-                    this.connectExceptions.add(this.proxyInetSocketAddress + "|" + e.getMessage());
+                    this.connectExceptions.add("Socks:" + SocketConnection.getRootEndPointSocketAddress(sockssocket) + "|EndPoint:" + this.proxyInetSocketAddress + "|Exception:" + e.getMessage());
                 } finally {
                     this.disconnect();
                 }
@@ -125,7 +124,7 @@ public abstract class SocksHTTPconnection extends HTTPConnectionImpl {
                 throw new ProxyConnectException(e, this.proxy);
             } catch (final IOException e) {
                 try {
-                    this.connectExceptions.add(this.proxyInetSocketAddress + "|" + e.getMessage());
+                    this.connectExceptions.add("Socks:" + SocketConnection.getRootEndPointSocketAddress(sockssocket) + "|EndPoint:" + this.proxyInetSocketAddress + "|Exception:" + e.getMessage());
                 } finally {
                     this.disconnect();
                 }
@@ -171,6 +170,27 @@ public abstract class SocksHTTPconnection extends HTTPConnectionImpl {
         }
     }
 
+    protected int getConnectEndpointPort() {
+        final int ret = this.httpURL.getPort();
+        if (ret == -1) {
+            return this.httpURL.getDefaultPort();
+        } else {
+            return ret;
+        }
+    }
+
+    protected boolean resolveConnectEndPoint() {
+        return true;
+    }
+
+    protected InetSocketAddress buildConnectEndPointSocketAddress() {
+        if (resolveConnectEndPoint()) {
+            return new InetSocketAddress(getHostname(), getConnectEndpointPort());
+        } else {
+            return InetSocketAddress.createUnresolved(getHostname(), getConnectEndpointPort());
+        }
+    }
+
     abstract protected SocketStreamInterface connect(SocketStreamInterface socketStream) throws IOException;
 
     @Override
@@ -178,9 +198,11 @@ public abstract class SocksHTTPconnection extends HTTPConnectionImpl {
         if (this.proxyRequest != null) {
             final StringBuilder sb = new StringBuilder();
             final String type = this.proxy.getType().name();
-            sb.append("-->" + type + ":").append(this.proxy.getHost() + ":" + this.proxy.getPort()).append("\r\n");
-            if (this.proxyInetSocketAddress != null && this.proxyInetSocketAddress.getAddress() != null) {
-                sb.append("-->" + type + "IP:").append(this.proxyInetSocketAddress.getAddress().getHostAddress()).append("\r\n");
+            final SocketAddress socketAddress = SocketConnection.getRootEndPointSocketAddress(sockssocket);
+            if (socketAddress != null) {
+                sb.append("-->" + type + ":");
+                sb.append(socketAddress);
+                sb.append("\r\n");
             }
             sb.append("----------------CONNECTRequest(" + type + ")----------\r\n");
             sb.append(this.proxyRequest.toString());

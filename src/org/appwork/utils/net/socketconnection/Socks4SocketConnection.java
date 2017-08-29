@@ -56,7 +56,18 @@ import org.appwork.utils.net.httpconnection.SocksHTTPconnection.DESTTYPE;
 public class Socks4SocketConnection extends SocketConnection {
     private final DESTTYPE destType;
 
-    public DESTTYPE getDestType() {
+    public DESTTYPE getDestType(final SocketAddress endpoint) {
+        if (endpoint != null && endpoint instanceof InetSocketAddress) {
+            final InetSocketAddress inetSocketAddress = (InetSocketAddress) endpoint;
+            if (inetSocketAddress.getAddress() != null) {
+                switch (inetSocketAddress.getAddress().getAddress().length) {
+                case 4:
+                    return DESTTYPE.IPV4;
+                case 16:
+                    return DESTTYPE.DOMAIN;
+                }
+            }
+        }
         return this.destType;
     }
 
@@ -72,8 +83,8 @@ public class Socks4SocketConnection extends SocketConnection {
     protected SocketStreamInterface connectProxySocket(final SocketStreamInterface proxySocket, final SocketAddress endPoint, final StringBuffer logger) throws IOException {
         final HTTPProxy proxy = getProxy();
         try {
-            Socks4SocketConnection.sayHello(proxySocket, logger);
-            return Socks4SocketConnection.establishConnection(this, proxySocket, proxy.getUser(), endPoint, this.getDestType(), logger);
+            sayHello(proxySocket, logger);
+            return establishConnection(this, proxySocket, proxy.getUser(), setEndPointSocketAddress(endPoint), this.getDestType(endPoint), logger);
         } catch (final InvalidAuthException e) {
             throw new ProxyAuthException(e, proxy);
         } catch (final EndpointConnectException e) {
@@ -83,7 +94,7 @@ public class Socks4SocketConnection extends SocketConnection {
         }
     }
 
-    public static SocketStreamInterface establishConnection(Socks4SocketConnection sock4SocketConnection, final SocketStreamInterface proxySocket, final String userID, final SocketAddress endPoint, DESTTYPE destType, final StringBuffer logger) throws IOException {
+    protected SocketStreamInterface establishConnection(Socks4SocketConnection sock4SocketConnection, final SocketStreamInterface proxySocket, final String userID, final SocketAddress endPoint, final DESTTYPE destType, final StringBuffer logger) throws IOException {
         final InetSocketAddress endPointAddress = (InetSocketAddress) endPoint;
         final OutputStream os = proxySocket.getOutputStream();
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -99,7 +110,7 @@ public class Socks4SocketConnection extends SocketConnection {
             final InetAddress ipv4 = endPointAddress.getAddress();
             if (ipv4 != null && ipv4.getAddress().length == 4) {
                 if (logger != null) {
-                    logger.append("->SEND tcp connect request by ipv4:" + ipv4.getHostAddress() + "\r\n");
+                    logger.append("->SEND tcp connect request by ipv4:" + ipv4.getHostAddress() + "|port:" + port + "\r\n");
                 }
                 bos.write(ipv4.getAddress());
                 break;
@@ -113,14 +124,13 @@ public class Socks4SocketConnection extends SocketConnection {
                 }
             }
         case DOMAIN:
-            destType = DESTTYPE.DOMAIN;
             /* we use domain */
             bos.write((byte) 0);
             bos.write((byte) 0);
             bos.write((byte) 0);
             bos.write((byte) 100);
             if (logger != null) {
-                logger.append("->SEND tcp connect request by domain:" + SocketConnection.getHostName(endPointAddress) + "\r\n");
+                logger.append("->SEND tcp connect request by domain:" + SocketConnection.getHostName(endPointAddress) + "|port:" + port + "\r\n");
             }
             break;
         default:
@@ -164,14 +174,13 @@ public class Socks4SocketConnection extends SocketConnection {
         final byte[] connectedPort = SocketConnection.ensureRead(is, 2, null);
         /* ip4v response */
         final byte[] connectedIP = SocketConnection.ensureRead(is, 4, null);
-        sock4SocketConnection.setEndPointSocketAddress(new InetSocketAddress(InetAddress.getByAddress(connectedIP), ByteBuffer.wrap(connectedPort).getShort() & 0xffff));
         if (logger != null) {
             logger.append("<-BOUND IP:" + InetAddress.getByAddress(connectedIP) + ":" + (ByteBuffer.wrap(connectedPort).getShort() & 0xffff) + "\r\n");
         }
         return proxySocket;
     }
 
-    public static void sayHello(final SocketStreamInterface proxySocket, final StringBuffer logger) throws IOException {
+    protected void sayHello(final SocketStreamInterface proxySocket, final StringBuffer logger) throws IOException {
         final OutputStream os = proxySocket.getOutputStream();
         if (logger != null) {
             logger.append("->SOCKS4 Hello\r\n");

@@ -99,12 +99,38 @@ public abstract class SocketConnection extends Socket {
 
     protected SocketAddress endPointSocketAddress;
 
+    public static SocketAddress getRootEndPointSocketAddress(final SocketStreamInterface socketStream) {
+        if (socketStream != null) {
+            return getRootEndPointSocketAddress(socketStream.getSocket());
+        } else {
+            return null;
+        }
+    }
+
+    public static SocketAddress getRootEndPointSocketAddress(final Socket socket) {
+        SocketAddress ret = null;
+        Socket nextSocket = socket;
+        while (nextSocket != null) {
+            if (nextSocket instanceof SocketConnection) {
+                ret = ((SocketConnection) nextSocket).getEndPointSocketAddress();
+                nextSocket = ((SocketConnection) nextSocket).getProxySocket();
+            } else {
+                if (nextSocket.getInetAddress() != null) {
+                    ret = new InetSocketAddress(nextSocket.getInetAddress(), nextSocket.getPort());
+                }
+                break;
+            }
+        }
+        return ret;
+    }
+
     public SocketAddress getEndPointSocketAddress() {
         return endPointSocketAddress;
     }
 
-    protected void setEndPointSocketAddress(SocketAddress endPointSocketAddress) {
+    protected SocketAddress setEndPointSocketAddress(SocketAddress endPointSocketAddress) {
         this.endPointSocketAddress = endPointSocketAddress;
+        return endPointSocketAddress;
     }
 
     protected static int ensureRead(final InputStream is) throws IOException {
@@ -202,8 +228,9 @@ public abstract class SocketConnection extends Socket {
 
     @Override
     public synchronized void close() throws IOException {
-        if (this.proxySocket != null) {
-            this.proxySocket.close();
+        final SocketStreamInterface socketStream = getProxySocketStream();
+        if (socketStream != null) {
+            socketStream.close();
         } else {
             this.closeConnectSocket();
         }
@@ -296,8 +323,9 @@ public abstract class SocketConnection extends Socket {
     public void connect(SocketAddress endpoint, final int connectTimeout, final StringBuffer logger) throws IOException {
         try {
             IOException ioE = null;
+            final int port = getProxy().getPort();
             for (final InetAddress connectAddress : resolvHostIP(this.getProxy().getHost())) {
-                final InetSocketAddress connectSocketAddress = new InetSocketAddress(connectAddress, this.getProxy().getPort());
+                final InetSocketAddress connectSocketAddress = new InetSocketAddress(connectAddress, port);
                 try {
                     if (connectTimeout == 0) {
                         /** no workaround for infinite connect timeouts **/
@@ -390,34 +418,54 @@ public abstract class SocketConnection extends Socket {
 
     protected abstract SocketStreamInterface connectProxySocket(SocketStreamInterface proxySocket, SocketAddress endpoint, final StringBuffer logger) throws IOException;
 
+    public SocketStreamInterface getProxySocketStream() {
+        return proxySocket;
+    }
+
+    protected Socket getProxySocket() {
+        final SocketStreamInterface lProxySocket = getProxySocketStream();
+        if (lProxySocket != null) {
+            return lProxySocket.getSocket();
+        } else {
+            return null;
+        }
+    }
+
     @Override
     public SocketChannel getChannel() {
-        if (this.proxySocket != null && proxySocket.getSocket() != null) {
-            return proxySocket.getSocket().getChannel();
+        final Socket socket = getProxySocket();
+        if (socket != null) {
+            return socket.getChannel();
+        } else {
+            return null;
         }
-        return null;
     }
 
     @Override
     public InetAddress getInetAddress() {
-        if (this.proxySocket != null && proxySocket.getSocket() != null) {
-            return proxySocket.getSocket().getInetAddress();
+        final Socket socket = getProxySocket();
+        if (socket != null) {
+            return socket.getInetAddress();
+        } else {
+            return null;
         }
-        return null;
     }
 
     @Override
     public InputStream getInputStream() throws IOException {
-        if (this.proxySocket != null) {
-            return this.proxySocket.getInputStream();
+        final SocketStreamInterface socketStream = getProxySocketStream();
+        if (socketStream != null) {
+            return socketStream.getInputStream();
+        } else {
+            throw new SocketException("Socket is not connected");
         }
-        throw new SocketException("Socket is not connected");
     }
 
     @Override
     public boolean getKeepAlive() throws SocketException {
-        if (this.proxySocket != null && proxySocket.getSocket() != null) {
-            return proxySocket.getSocket().getKeepAlive();
+        final Socket socket = getProxySocket();
+        if (socket != null) {
+            return socket.getKeepAlive();
         }
         if (this.keepAlive != null) {
             return this.keepAlive;
@@ -427,32 +475,39 @@ public abstract class SocketConnection extends Socket {
 
     @Override
     public InetAddress getLocalAddress() {
-        if (this.proxySocket != null && proxySocket.getSocket() != null) {
-            return proxySocket.getSocket().getLocalAddress();
+        final Socket socket = getProxySocket();
+        if (socket != null) {
+            return socket.getLocalAddress();
+        } else {
+            return new InetSocketAddress(0).getAddress();
         }
-        return new InetSocketAddress(0).getAddress();
     }
 
     @Override
     public int getLocalPort() {
-        if (this.proxySocket != null && proxySocket.getSocket() != null) {
-            return proxySocket.getSocket().getLocalPort();
+        final Socket socket = getProxySocket();
+        if (socket != null) {
+            return socket.getLocalPort();
+        } else {
+            return -1;
         }
-        return -1;
     }
 
     @Override
     public SocketAddress getLocalSocketAddress() {
-        if (this.proxySocket != null && proxySocket.getSocket() != null) {
-            return proxySocket.getSocket().getLocalSocketAddress();
+        final Socket socket = getProxySocket();
+        if (socket != null) {
+            return socket.getLocalSocketAddress();
+        } else {
+            return null;
         }
-        return null;
     }
 
     @Override
     public boolean getOOBInline() throws SocketException {
-        if (this.proxySocket != null && proxySocket.getSocket() != null) {
-            return proxySocket.getSocket().getOOBInline();
+        final Socket socket = getProxySocket();
+        if (socket != null) {
+            return socket.getOOBInline();
         }
         if (this.oobInline != null) {
             return this.oobInline;
@@ -462,18 +517,21 @@ public abstract class SocketConnection extends Socket {
 
     @Override
     public OutputStream getOutputStream() throws IOException {
-        if (this.proxySocket != null) {
-            return this.proxySocket.getOutputStream();
+        final SocketStreamInterface socketStream = getProxySocketStream();
+        if (socketStream != null) {
+            return socketStream.getOutputStream();
         }
         throw new SocketException("Socket is not connected");
     }
 
     @Override
     public int getPort() {
-        if (this.proxySocket != null && proxySocket.getSocket() != null) {
-            return proxySocket.getSocket().getPort();
+        final Socket socket = getProxySocket();
+        if (socket != null) {
+            return socket.getPort();
+        } else {
+            return -1;
         }
-        return -1;
     }
 
     public HTTPProxy getProxy() {
@@ -482,8 +540,9 @@ public abstract class SocketConnection extends Socket {
 
     @Override
     public synchronized int getReceiveBufferSize() throws SocketException {
-        if (this.proxySocket != null && proxySocket.getSocket() != null) {
-            return proxySocket.getSocket().getReceiveBufferSize();
+        final Socket socket = getProxySocket();
+        if (socket != null) {
+            return socket.getReceiveBufferSize();
         }
         if (this.receiveBufferSize != null) {
             return this.receiveBufferSize;
@@ -493,16 +552,19 @@ public abstract class SocketConnection extends Socket {
 
     @Override
     public SocketAddress getRemoteSocketAddress() {
-        if (this.proxySocket != null && proxySocket.getSocket() != null) {
-            return proxySocket.getSocket().getRemoteSocketAddress();
+        final Socket socket = getProxySocket();
+        if (socket != null) {
+            return socket.getRemoteSocketAddress();
+        } else {
+            return null;
         }
-        return null;
     }
 
     @Override
     public boolean getReuseAddress() throws SocketException {
-        if (this.proxySocket != null && proxySocket.getSocket() != null) {
-            return proxySocket.getSocket().getReuseAddress();
+        final Socket socket = getProxySocket();
+        if (socket != null) {
+            return socket.getReuseAddress();
         }
         if (this.reuseAddress != null) {
             return this.reuseAddress;
@@ -512,8 +574,9 @@ public abstract class SocketConnection extends Socket {
 
     @Override
     public synchronized int getSendBufferSize() throws SocketException {
-        if (this.proxySocket != null && proxySocket.getSocket() != null) {
-            return proxySocket.getSocket().getSendBufferSize();
+        final Socket socket = getProxySocket();
+        if (socket != null) {
+            return socket.getSendBufferSize();
         }
         if (this.sendBufferSize != null) {
             return this.sendBufferSize;
@@ -523,16 +586,18 @@ public abstract class SocketConnection extends Socket {
 
     @Override
     public int getSoLinger() throws SocketException {
-        if (this.proxySocket != null && proxySocket.getSocket() != null) {
-            return proxySocket.getSocket().getSoLinger();
+        final Socket socket = getProxySocket();
+        if (socket != null) {
+            return socket.getSoLinger();
         }
         return this.soLinger == null ? -1 : this.soLinger;
     }
 
     @Override
     public synchronized int getSoTimeout() throws SocketException {
-        if (this.proxySocket != null && proxySocket.getSocket() != null) {
-            return proxySocket.getSocket().getSoTimeout();
+        final Socket socket = getProxySocket();
+        if (socket != null) {
+            return socket.getSoTimeout();
         }
         if (this.soTimeout != null) {
             return this.soTimeout;
@@ -542,8 +607,9 @@ public abstract class SocketConnection extends Socket {
 
     @Override
     public boolean getTcpNoDelay() throws SocketException {
-        if (this.proxySocket != null && proxySocket.getSocket() != null) {
-            return proxySocket.getSocket().getTcpNoDelay();
+        final Socket socket = getProxySocket();
+        if (socket != null) {
+            return socket.getTcpNoDelay();
         }
         if (this.tcpNoDelay != null) {
             return this.tcpNoDelay;
@@ -553,8 +619,9 @@ public abstract class SocketConnection extends Socket {
 
     @Override
     public int getTrafficClass() throws SocketException {
-        if (this.proxySocket != null && proxySocket.getSocket() != null) {
-            return proxySocket.getSocket().getTrafficClass();
+        final Socket socket = getProxySocket();
+        if (socket != null) {
+            return socket.getTrafficClass();
         }
         if (this.trafficClass != null) {
             return this.trafficClass;
@@ -564,55 +631,51 @@ public abstract class SocketConnection extends Socket {
 
     @Override
     public boolean isBound() {
-        if (this.proxySocket != null && proxySocket.getSocket() != null) {
-            return proxySocket.getSocket().isBound();
+        final Socket socket = getProxySocket();
+        if (socket != null) {
+            return socket.isBound();
+        } else {
+            return this.bindPoint != null;
         }
-        return this.bindPoint != null;
     }
 
     @Override
     public boolean isClosed() {
-        if (this.proxySocket != null && proxySocket.getSocket() != null) {
-            return proxySocket.getSocket().isClosed();
-        }
-        return false;
+        final Socket socket = getProxySocket();
+        return socket != null && socket.isClosed();
     }
 
     @Override
     public boolean isConnected() {
-        if (this.proxySocket != null && proxySocket.getSocket() != null) {
-            return proxySocket.getSocket().isConnected();
-        }
-        return false;
+        final Socket socket = getProxySocket();
+        return socket != null && socket.isConnected();
     }
 
     @Override
     public boolean isInputShutdown() {
-        if (this.proxySocket != null && proxySocket.getSocket() != null) {
-            return proxySocket.getSocket().isInputShutdown();
-        }
-        return false;
+        final Socket socket = getProxySocket();
+        return socket != null && socket.isInputShutdown();
     }
 
     @Override
     public boolean isOutputShutdown() {
-        if (this.proxySocket != null && proxySocket.getSocket() != null) {
-            return proxySocket.getSocket().isOutputShutdown();
-        }
-        return false;
+        final Socket socket = getProxySocket();
+        return socket != null && socket.isOutputShutdown();
     }
 
     @Override
     public void sendUrgentData(int data) throws IOException {
-        if (this.proxySocket != null && proxySocket.getSocket() != null) {
-            proxySocket.getSocket().sendUrgentData(data);
+        final Socket socket = getProxySocket();
+        if (socket != null) {
+            socket.sendUrgentData(data);
         }
     }
 
     @Override
     public void setKeepAlive(boolean on) throws SocketException {
-        if (this.proxySocket != null && proxySocket.getSocket() != null) {
-            proxySocket.getSocket().setKeepAlive(on);
+        final Socket socket = getProxySocket();
+        if (socket != null) {
+            socket.setKeepAlive(on);
         } else {
             this.keepAlive = on;
         }
@@ -620,8 +683,9 @@ public abstract class SocketConnection extends Socket {
 
     @Override
     public void setOOBInline(boolean on) throws SocketException {
-        if (this.proxySocket != null && proxySocket.getSocket() != null) {
-            proxySocket.getSocket().setOOBInline(on);
+        final Socket socket = getProxySocket();
+        if (socket != null) {
+            socket.setOOBInline(on);
         } else {
             this.oobInline = on;
         }
@@ -629,15 +693,17 @@ public abstract class SocketConnection extends Socket {
 
     @Override
     public void setPerformancePreferences(int connectionTime, int latency, int bandwidth) {
-        if (this.proxySocket != null && proxySocket.getSocket() != null) {
-            proxySocket.getSocket().setPerformancePreferences(connectionTime, latency, bandwidth);
+        final Socket socket = getProxySocket();
+        if (socket != null) {
+            socket.setPerformancePreferences(connectionTime, latency, bandwidth);
         }
     }
 
     @Override
     public synchronized void setReceiveBufferSize(int size) throws SocketException {
-        if (this.proxySocket != null && proxySocket.getSocket() != null) {
-            proxySocket.getSocket().setReceiveBufferSize(size);
+        final Socket socket = getProxySocket();
+        if (socket != null) {
+            socket.setReceiveBufferSize(size);
         } else {
             this.receiveBufferSize = size;
         }
@@ -645,8 +711,9 @@ public abstract class SocketConnection extends Socket {
 
     @Override
     public void setReuseAddress(boolean on) throws SocketException {
-        if (this.proxySocket != null && proxySocket.getSocket() != null) {
-            proxySocket.getSocket().setReuseAddress(on);
+        final Socket socket = getProxySocket();
+        if (socket != null) {
+            socket.setReuseAddress(on);
         } else {
             this.reuseAddress = on;
         }
@@ -654,8 +721,9 @@ public abstract class SocketConnection extends Socket {
 
     @Override
     public synchronized void setSendBufferSize(int size) throws SocketException {
-        if (this.proxySocket != null && proxySocket.getSocket() != null) {
-            proxySocket.getSocket().setSendBufferSize(size);
+        final Socket socket = getProxySocket();
+        if (socket != null) {
+            socket.setSendBufferSize(size);
         } else {
             this.sendBufferSize = size;
         }
@@ -663,10 +731,12 @@ public abstract class SocketConnection extends Socket {
 
     @Override
     public String toString() {
-        if (this.proxySocket != null) {
-            return this.proxySocket.toString();
+        final Socket socket = getProxySocket();
+        if (socket != null) {
+            return socket.toString();
+        } else {
+            return super.toString();
         }
-        return super.toString();
     }
 
     private void setSocketOptions(final Socket connectSocket) throws IOException {
@@ -706,8 +776,9 @@ public abstract class SocketConnection extends Socket {
 
     @Override
     public void setSoLinger(boolean on, int linger) throws SocketException {
-        if (this.proxySocket != null) {
-            proxySocket.getSocket().setSoLinger(on, linger);
+        final Socket socket = getProxySocket();
+        if (socket != null) {
+            socket.setSoLinger(on, linger);
         } else {
             if (on) {
                 this.soLinger = linger;
@@ -719,8 +790,9 @@ public abstract class SocketConnection extends Socket {
 
     @Override
     public synchronized void setSoTimeout(int timeout) throws SocketException {
-        if (this.proxySocket != null && proxySocket.getSocket() != null) {
-            proxySocket.getSocket().setSoTimeout(timeout);
+        final Socket socket = getProxySocket();
+        if (socket != null) {
+            socket.setSoTimeout(timeout);
         } else {
             this.soTimeout = timeout;
         }
@@ -728,8 +800,9 @@ public abstract class SocketConnection extends Socket {
 
     @Override
     public void setTcpNoDelay(boolean on) throws SocketException {
-        if (this.proxySocket != null && proxySocket.getSocket() != null) {
-            proxySocket.getSocket().setTcpNoDelay(on);
+        final Socket socket = getProxySocket();
+        if (socket != null) {
+            socket.setTcpNoDelay(on);
         } else {
             this.tcpNoDelay = on;
         }
@@ -737,8 +810,9 @@ public abstract class SocketConnection extends Socket {
 
     @Override
     public void setTrafficClass(int tc) throws SocketException {
-        if (this.proxySocket != null && proxySocket.getSocket() != null) {
-            proxySocket.getSocket().setTrafficClass(tc);
+        final Socket socket = getProxySocket();
+        if (socket != null) {
+            socket.setTrafficClass(tc);
         } else {
             this.trafficClass = tc;
         }
@@ -746,17 +820,21 @@ public abstract class SocketConnection extends Socket {
 
     @Override
     public void shutdownInput() throws IOException {
-        if (this.proxySocket != null && proxySocket.getSocket() != null) {
-            proxySocket.getSocket().shutdownInput();
+        final Socket socket = getProxySocket();
+        if (socket != null) {
+            socket.shutdownInput();
+        } else {
+            throw new SocketException("Socket is not connected");
         }
-        throw new SocketException("Socket is not connected");
     }
 
     @Override
     public void shutdownOutput() throws IOException {
-        if (this.proxySocket != null && proxySocket.getSocket() != null) {
-            proxySocket.getSocket().shutdownOutput();
+        final Socket socket = getProxySocket();
+        if (socket != null) {
+            socket.shutdownOutput();
+        } else {
+            throw new SocketException("Socket is not connected");
         }
-        throw new SocketException("Socket is not connected");
     }
 }

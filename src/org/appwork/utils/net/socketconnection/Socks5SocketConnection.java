@@ -58,7 +58,18 @@ import org.appwork.utils.net.httpconnection.SocksHTTPconnection.DESTTYPE;
 public class Socks5SocketConnection extends SocketConnection {
     private final DESTTYPE destType;
 
-    public DESTTYPE getDestType() {
+    public DESTTYPE getDestType(final SocketAddress endpoint) {
+        if (endpoint != null && endpoint instanceof InetSocketAddress) {
+            final InetSocketAddress inetSocketAddress = (InetSocketAddress) endpoint;
+            if (inetSocketAddress.getAddress() != null) {
+                switch (inetSocketAddress.getAddress().getAddress().length) {
+                case 4:
+                    return DESTTYPE.IPV4;
+                case 16:
+                    return DESTTYPE.IPV6;
+                }
+            }
+        }
         return this.destType;
     }
 
@@ -71,7 +82,7 @@ public class Socks5SocketConnection extends SocketConnection {
     }
 
     @Override
-    protected SocketStreamInterface connectProxySocket(final SocketStreamInterface proxySocket, final SocketAddress endpoint, final StringBuffer logger) throws IOException {
+    protected SocketStreamInterface connectProxySocket(final SocketStreamInterface proxySocket, final SocketAddress endPoint, final StringBuffer logger) throws IOException {
         final AUTH authOffer;
         final HTTPProxy proxy = getProxy();
         final String userName = proxy.getUser();
@@ -82,7 +93,7 @@ public class Socks5SocketConnection extends SocketConnection {
             authOffer = AUTH.NONE;
         }
         try {
-            final AUTH authRequest = Socks5SocketConnection.sayHello(proxySocket, authOffer, logger);
+            final AUTH authRequest = sayHello(proxySocket, authOffer, logger);
             switch (authRequest) {
             case NONE:
                 break;
@@ -91,24 +102,24 @@ public class Socks5SocketConnection extends SocketConnection {
                 case NONE:
                     throw new InvalidAuthException();
                 case PLAIN:
-                    Socks5SocketConnection.authPlain(proxySocket, userName, passWord, logger);
+                    authPlain(proxySocket, userName, passWord, logger);
                     break;
                 }
                 break;
             default:
                 throw new IOException("Unsupported AUTH:" + authRequest);
             }
-            return Socks5SocketConnection.establishConnection(this, proxySocket, endpoint, this.getDestType(), logger);
+            return establishConnection(this, proxySocket, setEndPointSocketAddress(endPoint), this.getDestType(endPoint), logger);
         } catch (final InvalidAuthException e) {
             throw new ProxyAuthException(e, proxy);
         } catch (final EndpointConnectException e) {
-            throw new ProxyEndpointConnectException(e, getProxy(), endpoint);
+            throw new ProxyEndpointConnectException(e, getProxy(), endPoint);
         } catch (final IOException e) {
             throw new ProxyConnectException(e, this.getProxy());
         }
     }
 
-    protected static SocketStreamInterface establishConnection(Socks5SocketConnection socks5SocketConnection, final SocketStreamInterface proxySocket, final SocketAddress endpoint, DESTTYPE destType, final StringBuffer logger) throws IOException {
+    protected SocketStreamInterface establishConnection(Socks5SocketConnection socks5SocketConnection, final SocketStreamInterface proxySocket, final SocketAddress endpoint, final DESTTYPE destType, final StringBuffer logger) throws IOException {
         final InetSocketAddress endPointAddress = (InetSocketAddress) endpoint;
         final OutputStream os = proxySocket.getOutputStream();
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -118,6 +129,7 @@ public class Socks5SocketConnection extends SocketConnection {
         bos.write((byte) 1);
         /* reserved */
         bos.write((byte) 0);
+        final int port = endPointAddress.getPort();
         /* send ipv4/ipv6/domain */
         switch (destType) {
         case IPV4:
@@ -126,7 +138,7 @@ public class Socks5SocketConnection extends SocketConnection {
                 /* we use ipv4 */
                 bos.write((byte) 1);
                 if (logger != null) {
-                    logger.append("->SEND tcp connect request by ipv6:" + ipv4.getHostAddress() + "\r\n");
+                    logger.append("->SEND tcp connect request by ipv4:" + ipv4.getHostAddress() + "|port:" + port + "\r\n");
                 }
                 bos.write(ipv4.getAddress());
                 break;
@@ -146,7 +158,7 @@ public class Socks5SocketConnection extends SocketConnection {
                     /* we use ipv6 */
                     bos.write((byte) 4);
                     if (logger != null) {
-                        logger.append("->SEND tcp connect request by ipv6:" + ipv6.getHostAddress() + "\r\n");
+                        logger.append("->SEND tcp connect request by ipv6:" + ipv6.getHostAddress() + "|port:" + port + "\r\n");
                     }
                     bos.write(ipv6.getAddress());
                     break;
@@ -165,7 +177,7 @@ public class Socks5SocketConnection extends SocketConnection {
             bos.write((byte) 3);
             final String domainString = SocketConnection.getHostName(endPointAddress);
             if (logger != null) {
-                logger.append("->SEND tcp connect request by domain:" + domainString + "\r\n");
+                logger.append("->SEND tcp connect request by domain:" + domainString + "|port:" + port + "\r\n");
             }
             final byte[] domainBytes = domainString.getBytes(ISO_8859_1);
             bos.write((byte) domainBytes.length & 0xff);
@@ -176,7 +188,6 @@ public class Socks5SocketConnection extends SocketConnection {
         }
         /* send port */
         /* network byte order */
-        final int port = endPointAddress.getPort();
         bos.write(port >> 8 & 0xff);
         bos.write(port & 0xff);
         bos.writeTo(os);
@@ -211,7 +222,6 @@ public class Socks5SocketConnection extends SocketConnection {
             final byte[] connectedIP = SocketConnection.ensureRead(is, 4, null);
             /* port */
             final byte[] connectedPort = SocketConnection.ensureRead(is, 2, null);
-            socks5SocketConnection.setEndPointSocketAddress(new InetSocketAddress(InetAddress.getByAddress(connectedIP), ByteBuffer.wrap(connectedPort).getShort() & 0xffff));
             if (logger != null) {
                 logger.append("<-BOUND IPv4:" + InetAddress.getByAddress(connectedIP) + ":" + (ByteBuffer.wrap(connectedPort).getShort() & 0xffff) + "\r\n");
             }
@@ -229,7 +239,6 @@ public class Socks5SocketConnection extends SocketConnection {
             final byte[] connectedIP = SocketConnection.ensureRead(is, 16, null);
             /* port */
             final byte[] connectedPort = SocketConnection.ensureRead(is, 2, null);
-            socks5SocketConnection.setEndPointSocketAddress(new InetSocketAddress(InetAddress.getByAddress(connectedIP), ByteBuffer.wrap(connectedPort).getShort() & 0xffff));
             if (logger != null) {
                 logger.append("<-BOUND IPv6:" + InetAddress.getByAddress(connectedIP) + ":" + (ByteBuffer.wrap(connectedPort).getShort() & 0xffff) + "\r\n");
             }
@@ -239,7 +248,7 @@ public class Socks5SocketConnection extends SocketConnection {
         return proxySocket;
     }
 
-    protected static void authPlain(final SocketStreamInterface proxySocket, String userName, String passWord, final StringBuffer logger) throws IOException {
+    protected void authPlain(final SocketStreamInterface proxySocket, String userName, String passWord, final StringBuffer logger) throws IOException {
         final String user = userName == null ? "" : userName;
         final String pass = passWord == null ? "" : passWord;
         if (logger != null) {
@@ -284,7 +293,7 @@ public class Socks5SocketConnection extends SocketConnection {
 
     private final static boolean SENDONLYSINGLEAUTHMETHOD = true;
 
-    public static AUTH sayHello(final SocketStreamInterface proxySocket, AUTH auth, final StringBuffer logger) throws IOException {
+    protected AUTH sayHello(final SocketStreamInterface proxySocket, AUTH auth, final StringBuffer logger) throws IOException {
         final OutputStream os = proxySocket.getOutputStream();
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         if (logger != null) {

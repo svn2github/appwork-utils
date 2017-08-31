@@ -42,6 +42,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -401,6 +402,18 @@ public class RemoteAPI implements HttpRequestHandler {
         }
     }
 
+    public static class ParsedParameters {
+        public final java.util.List<String> parameters;
+
+        public ParsedParameters(List<String> parameters, String jqueryCallback) {
+            super();
+            this.parameters = Collections.unmodifiableList(parameters);
+            this.jqueryCallback = jqueryCallback;
+        }
+
+        public final String jqueryCallback;
+    }
+
     public RemoteAPIRequest createRemoteAPIRequestObject(final HttpRequest request) throws BasicRemoteAPIException {
         Object preData = prepareRawRequest(request);
         this.validateRequest(request);
@@ -408,6 +421,30 @@ public class RemoteAPI implements HttpRequestHandler {
         if (remoteAPIMethod == null) {
             return null;
         }
+        ParsedParameters parsedParameters = parseParameters(request);
+        // if (jqueryCallback != null) {
+        // System.out.println("found jquery callback: " + jqueryCallback);
+        // }
+        RemoteAPIRequest ret;
+        try {
+            // first ask the implementation itself
+            ret = remoteAPIMethod.getInterfaceHandler().createRemoteAPIRequestObject(request, preData, remoteAPIMethod, parsedParameters);
+            if (ret == null) {
+                ret = this.createRemoteAPIRequestObject(request, preData, remoteAPIMethod.getMethodName(), remoteAPIMethod.getInterfaceHandler(), parsedParameters);
+            }
+        } catch (final IOException e) {
+            throw new BasicRemoteAPIException(e);
+        }
+        this.validateRequest(ret);
+        return ret;
+    }
+
+    /**
+     * @param request
+     * @return
+     * @throws BasicRemoteAPIException
+     */
+    public ParsedParameters parseParameters(HttpRequest request) throws BasicRemoteAPIException {
         final java.util.List<String> parameters = new ArrayList<String>();
         String jqueryCallback = null;
         /* convert GET parameters to methodParameters */
@@ -455,21 +492,7 @@ public class RemoteAPI implements HttpRequestHandler {
                 throw new RuntimeException(e);
             }
         }
-        // if (jqueryCallback != null) {
-        // System.out.println("found jquery callback: " + jqueryCallback);
-        // }
-        RemoteAPIRequest ret;
-        try {
-            // first ask the implementation itself
-            ret = remoteAPIMethod.getInterfaceHandler().createRemoteAPIRequestObject(request, preData, remoteAPIMethod, parameters, jqueryCallback);
-            if (ret == null) {
-                ret = this.createRemoteAPIRequestObject(request, preData, remoteAPIMethod.getMethodName(), remoteAPIMethod.getInterfaceHandler(), parameters, jqueryCallback);
-            }
-        } catch (final IOException e) {
-            throw new BasicRemoteAPIException(e);
-        }
-        this.validateRequest(ret);
-        return ret;
+        return new ParsedParameters(parameters, jqueryCallback);
     }
 
     /**
@@ -481,8 +504,8 @@ public class RemoteAPI implements HttpRequestHandler {
         return null;
     }
 
-    public RemoteAPIRequest createRemoteAPIRequestObject(final HttpRequest request, Object extractedData, final String method, final InterfaceHandler<?> interfaceHandler, final java.util.List<String> parameters, final String jqueryCallback) throws IOException, BasicRemoteAPIException {
-        return new RemoteAPIRequest(interfaceHandler, method, parameters.toArray(new String[] {}), request, jqueryCallback);
+    public RemoteAPIRequest createRemoteAPIRequestObject(final HttpRequest request, Object extractedData, final String method, final InterfaceHandler<?> interfaceHandler, ParsedParameters parsedParameters) throws IOException, BasicRemoteAPIException {
+        return new RemoteAPIRequest(interfaceHandler, method, parsedParameters.parameters.toArray(new String[] {}), request, parsedParameters.jqueryCallback);
     }
 
     protected RemoteAPIResponse createRemoteAPIResponseObject(final RemoteAPIRequest request, final HttpResponse response) throws IOException {

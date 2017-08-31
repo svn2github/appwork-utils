@@ -34,8 +34,8 @@
 package org.appwork.remoteapi;
 
 import java.io.IOException;
-import java.util.List;
 
+import org.appwork.remoteapi.RemoteAPI.ParsedParameters;
 import org.appwork.remoteapi.RemoteAPI.RemoteAPIMethod;
 import org.appwork.remoteapi.exceptions.BasicRemoteAPIException;
 import org.appwork.utils.net.httpserver.requests.HttpRequest;
@@ -50,11 +50,10 @@ public interface RequestObjectFactory {
      * @param request
      * @param preData
      * @param remoteAPIMethod
-     * @param parameters
-     * @param jqueryCallback
+     * @param parsedParameters TODO
      * @return
      * @throws BasicRemoteAPIException
      * @throws IOException
      */
-    RemoteAPIRequest createRemoteAPIRequestObject(HttpRequest request, Object preData, RemoteAPIMethod remoteAPIMethod, List<String> parameters, String jqueryCallback) throws IOException, BasicRemoteAPIException;
+    RemoteAPIRequest createRemoteAPIRequestObject(HttpRequest request, Object preData, RemoteAPIMethod remoteAPIMethod, ParsedParameters parsedParameters) throws IOException, BasicRemoteAPIException;
 }

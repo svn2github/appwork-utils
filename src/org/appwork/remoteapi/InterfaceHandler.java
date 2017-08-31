@@ -46,6 +46,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.appwork.remoteapi.RemoteAPI.ParsedParameters;
 import org.appwork.remoteapi.RemoteAPI.RemoteAPIMethod;
 import org.appwork.remoteapi.annotations.AllowNonStorableObjects;
 import org.appwork.remoteapi.annotations.AllowResponseAccess;
@@ -554,14 +555,14 @@ public class InterfaceHandler<T> {
      * @param preData
      * @param remoteAPIMethod
      * @param parameters
-     * @param jqueryCallback
+     *            TODO
      * @return
      * @throws BasicRemoteAPIException
      * @throws IOException
      */
-    public RemoteAPIRequest createRemoteAPIRequestObject(HttpRequest request, Object preData, RemoteAPIMethod remoteAPIMethod, List<String> parameters, String jqueryCallback) throws IOException, BasicRemoteAPIException {
+    public RemoteAPIRequest createRemoteAPIRequestObject(HttpRequest request, Object preData, RemoteAPIMethod remoteAPIMethod, ParsedParameters parameters) throws IOException, BasicRemoteAPIException {
         if (impl instanceof RequestObjectFactory) {
-            return ((RequestObjectFactory) impl).createRemoteAPIRequestObject(request, preData, remoteAPIMethod, parameters, jqueryCallback);
+            return ((RequestObjectFactory) impl).createRemoteAPIRequestObject(request, preData, remoteAPIMethod, parameters);
         }
         return null;
     }

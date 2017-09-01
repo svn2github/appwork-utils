@@ -168,6 +168,10 @@ public class PostRequest extends HttpRequest {
         return this.inputStream;
     }
 
+    public void setInputStream(InputStream inputStream) {
+        this.inputStream = inputStream;
+    }
+
     /*
      * (non-Javadoc)
      *

@@ -70,7 +70,7 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
     protected final HTTPProxy                           proxy;
     protected final HTTPHeaderMap<String>               requestProperties;
     protected final HTTPHeaderMap<List<String>>         headers;
-    private HttpURLConnection                           con;
+    protected HttpURLConnection                         con;
     protected int                                       readTimeout          = 30000;
     protected int                                       connectTimeout       = 30000;
     private int[]                                       allowedResponseCodes = new int[0];

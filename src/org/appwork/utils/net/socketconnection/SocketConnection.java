@@ -111,13 +111,10 @@ public abstract class SocketConnection extends Socket {
         SocketAddress ret = null;
         Socket nextSocket = socket;
         while (nextSocket != null) {
+            ret = nextSocket.getRemoteSocketAddress();
             if (nextSocket instanceof SocketConnection) {
-                ret = ((SocketConnection) nextSocket).getEndPointSocketAddress();
                 nextSocket = ((SocketConnection) nextSocket).getProxySocket();
             } else {
-                if (nextSocket.getInetAddress() != null) {
-                    ret = new InetSocketAddress(nextSocket.getInetAddress(), nextSocket.getPort());
-                }
                 break;
             }
         }

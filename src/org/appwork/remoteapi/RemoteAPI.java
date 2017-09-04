@@ -546,11 +546,16 @@ public class RemoteAPI implements HttpRequestHandler {
                 throw new WTFException(e);
             }
         }
-        final InterfaceHandler<RemoteAPIInterface> ret = this.interfaces.get(namespace);
+        final InterfaceHandler<RemoteAPIInterface> ret = getInterfaceByNamespace(namespace);
         if (ret != null) {
             return new RemoteAPIMethod(namespace, ret, methodName);
         }
         return null;
+    }
+
+    protected InterfaceHandler<RemoteAPIInterface> getInterfaceByNamespace(String namespace) {
+        final InterfaceHandler<RemoteAPIInterface> ret = this.interfaces.get(namespace);
+        return ret;
     }
 
     /**

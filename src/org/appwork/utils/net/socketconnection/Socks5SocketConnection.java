@@ -58,7 +58,7 @@ import org.appwork.utils.net.httpconnection.SocksHTTPconnection.DESTTYPE;
 public class Socks5SocketConnection extends SocketConnection {
     private final DESTTYPE destType;
 
-    public DESTTYPE getDestType(final SocketAddress endpoint) {
+    protected DESTTYPE getDestType(final SocketAddress endpoint) {
         if (endpoint != null && endpoint instanceof InetSocketAddress) {
             final InetSocketAddress inetSocketAddress = (InetSocketAddress) endpoint;
             if (inetSocketAddress.getAddress() != null) {
@@ -131,6 +131,7 @@ public class Socks5SocketConnection extends SocketConnection {
         bos.write((byte) 0);
         final int port = endPointAddress.getPort();
         /* send ipv4/ipv6/domain */
+        final DESTTYPE usedDestType;
         switch (destType) {
         case IPV4:
             final InetAddress ipv4 = endPointAddress.getAddress();
@@ -141,6 +142,7 @@ public class Socks5SocketConnection extends SocketConnection {
                     logger.append("->SEND tcp connect request by ipv4:" + ipv4.getHostAddress() + "|port:" + port + "\r\n");
                 }
                 bos.write(ipv4.getAddress());
+                usedDestType = DESTTYPE.IPV4;
                 break;
             } else {
                 if (logger != null) {
@@ -161,6 +163,7 @@ public class Socks5SocketConnection extends SocketConnection {
                         logger.append("->SEND tcp connect request by ipv6:" + ipv6.getHostAddress() + "|port:" + port + "\r\n");
                     }
                     bos.write(ipv6.getAddress());
+                    usedDestType = DESTTYPE.IPV6;
                     break;
                 } else {
                     if (logger != null) {
@@ -182,6 +185,7 @@ public class Socks5SocketConnection extends SocketConnection {
             final byte[] domainBytes = domainString.getBytes(ISO_8859_1);
             bos.write((byte) domainBytes.length & 0xff);
             bos.write(domainBytes);
+            usedDestType = DESTTYPE.DOMAIN;
             break;
         default:
             throw new IllegalArgumentException("Unsupported destType:" + destType);
@@ -202,19 +206,23 @@ public class Socks5SocketConnection extends SocketConnection {
         switch (resp[1]) {
         case 0:
             break;
+        case 1:
+            throw new IOException("Socks5 general server failure");
+        case 2:
+            throw new EndpointConnectException("Socks5 connection not allowed by ruleset");
         case 3:
             throw new EndpointConnectException("Network is unreachable");
         case 4:
             throw new EndpointConnectException("Host is unreachable");
         case 5:
             throw new EndpointConnectException("Connection refused");
-        case 1:
-            throw new IOException("Socks5 general server failure");
-        case 2:
-            throw new EndpointConnectException("Socks5 connection not allowed by ruleset");
         case 6:
+            throw new EndpointConnectException("TTL expired");
         case 7:
+            throw new EndpointConnectException("Command not supported");
         case 8:
+            throw new EndpointConnectException("Address type not supported:" + usedDestType);
+        default:
             throw new EndpointConnectException("Socks5 could not establish connection, status=" + resp[1]);
         }
         if (resp[3] == 1) {

@@ -180,7 +180,7 @@ public abstract class SocksHTTPconnection extends HTTPConnectionImpl {
     }
 
     protected boolean resolveConnectEndPoint() {
-        return true;
+        return proxy != null && proxy.isResolveHostname();
     }
 
     protected InetSocketAddress buildConnectEndPointSocketAddress() {

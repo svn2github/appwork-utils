@@ -57,6 +57,15 @@ public class HTTPProxyStorable implements Storable {
     private TYPE    type                       = null;
     private boolean useConnectMethod           = false;
     private boolean preferNativeImplementation = false;
+    private boolean resolveHostName            = false;
+
+    public boolean isResolveHostName() {
+        return resolveHostName;
+    }
+
+    public void setResolveHostName(boolean resolveHostName) {
+        this.resolveHostName = resolveHostName;
+    }
 
     public static void main(String[] args) {
         System.out.println(JSonStorage.serializeToJson(new HTTPProxyStorable()));

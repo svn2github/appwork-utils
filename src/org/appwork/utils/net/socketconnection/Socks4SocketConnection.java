@@ -56,7 +56,7 @@ import org.appwork.utils.net.httpconnection.SocksHTTPconnection.DESTTYPE;
 public class Socks4SocketConnection extends SocketConnection {
     private final DESTTYPE destType;
 
-    public DESTTYPE getDestType(final SocketAddress endpoint) {
+    protected DESTTYPE getDestType(final SocketAddress endpoint) {
         if (endpoint != null && endpoint instanceof InetSocketAddress) {
             final InetSocketAddress inetSocketAddress = (InetSocketAddress) endpoint;
             if (inetSocketAddress.getAddress() != null) {

@@ -57,31 +57,31 @@ public class HTTPProxy {
     }
 
     public static final HTTPProxy NONE = new HTTPProxy(TYPE.NONE) {
-        @Override
-        public void setConnectMethodPrefered(final boolean value) {
-        }
+                                           @Override
+                                           public void setConnectMethodPrefered(final boolean value) {
+                                           }
 
-        @Override
-        public void setLocal(final String local) {
-        }
+                                           @Override
+                                           public void setLocal(final String local) {
+                                           }
 
-        @Override
-        public void setPass(final String pass) {
-        }
+                                           @Override
+                                           public void setPass(final String pass) {
+                                           }
 
-        @Override
-        public void setPort(final int port) {
-        }
+                                           @Override
+                                           public void setPort(final int port) {
+                                           }
 
-        @Override
-        public void setType(final TYPE type) {
-            super.setType(TYPE.NONE);
-        }
+                                           @Override
+                                           public void setType(final TYPE type) {
+                                               super.setType(TYPE.NONE);
+                                           }
 
-        @Override
-        public void setUser(final String user) {
-        }
-    };
+                                           @Override
+                                           public void setUser(final String user) {
+                                           }
+                                       };
 
     public static List<HTTPProxy> getFromSystemProperties() {
         final java.util.List<HTTPProxy> ret = new ArrayList<HTTPProxy>();
@@ -89,23 +89,23 @@ public class HTTPProxy {
             {
                 /* try to parse http proxy from system properties */
                 final String host = System.getProperties().getProperty("http.proxyHost");
-                        if (!StringUtils.isEmpty(host)) {
-                            int port = 80;
-                            final String ports = System.getProperty("http.proxyPort");
-                            if (!StringUtils.isEmpty(ports)) {
-                                port = Integer.parseInt(ports);
-                            }
-                            final HTTPProxy pr = new HTTPProxy(HTTPProxy.TYPE.HTTP, host, port);
-                            final String user = System.getProperty("http.proxyUser");
-                            final String pass = System.getProperty("http.proxyPassword");
-                            if (!StringUtils.isEmpty(user)) {
-                                pr.setUser(user);
-                            }
-                            if (!StringUtils.isEmpty(pass)) {
-                                pr.setPass(pass);
-                            }
-                            ret.add(pr);
-                        }
+                if (!StringUtils.isEmpty(host)) {
+                    int port = 80;
+                    final String ports = System.getProperty("http.proxyPort");
+                    if (!StringUtils.isEmpty(ports)) {
+                        port = Integer.parseInt(ports);
+                    }
+                    final HTTPProxy pr = new HTTPProxy(HTTPProxy.TYPE.HTTP, host, port);
+                    final String user = System.getProperty("http.proxyUser");
+                    final String pass = System.getProperty("http.proxyPassword");
+                    if (!StringUtils.isEmpty(user)) {
+                        pr.setUser(user);
+                    }
+                    if (!StringUtils.isEmpty(pass)) {
+                        pr.setPass(pass);
+                    }
+                    ret.add(pr);
+                }
             }
             {
                 /* try to parse http proxy from system properties */
@@ -178,6 +178,7 @@ public class HTTPProxy {
         }
         ret.setPreferNativeImplementation(storable.isPreferNativeImplementation());
         ret.setConnectMethodPrefered(storable.isConnectMethodPrefered());
+        ret.setResolveHostname(storable.isResolveHostName());
         ret.setPass(storable.getPassword());
         ret.setUser(storable.getUsername());
         ret.setPort(storable.getPort());
@@ -241,6 +242,7 @@ public class HTTPProxy {
         }
         ret.setConnectMethodPrefered(proxy.isConnectMethodPrefered());
         ret.setPreferNativeImplementation(proxy.isPreferNativeImplementation());
+        ret.setResolveHostName(proxy.isResolveHostname());
         ret.setPort(proxy.getPort());
         ret.setPassword(proxy.getPass());
         ret.setUsername(proxy.getUser());
@@ -372,6 +374,15 @@ public class HTTPProxy {
     protected TYPE    type                       = TYPE.DIRECT;
     protected boolean useConnectMethod           = false;
     protected boolean preferNativeImplementation = false;
+    protected boolean resolveHostname            = false;
+
+    public boolean isResolveHostname() {
+        return resolveHostname;
+    }
+
+    public void setResolveHostname(boolean resolveHostname) {
+        this.resolveHostname = resolveHostname;
+    }
 
     protected HTTPProxy() {
     }
@@ -423,7 +434,7 @@ public class HTTPProxy {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see java.lang.Object#clone()
      */
     @Override
@@ -471,7 +482,7 @@ public class HTTPProxy {
                     return false;
                 }
             default:
-                return this.isPreferNativeImplementation() == proxy.isPreferNativeImplementation();
+                return this.isPreferNativeImplementation() == proxy.isPreferNativeImplementation() && isResolveHostname() == proxy.isResolveHostname();
             }
         }
         return false;
@@ -549,17 +560,17 @@ public class HTTPProxy {
     }
 
     protected void set(final HTTPProxy proxy) {
-        if (proxy == null) {
-            return;
+        if (proxy != null) {
+            this.setUser(proxy.getUser());
+            this.setHost(proxy.getHost());
+            this.setLocal(proxy.getLocal());
+            this.setPass(proxy.getPass());
+            this.setPort(proxy.getPort());
+            this.setType(proxy.getType());
+            this.setResolveHostname(proxy.isResolveHostname());
+            this.setConnectMethodPrefered(proxy.isConnectMethodPrefered());
+            this.setPreferNativeImplementation(proxy.isPreferNativeImplementation());
         }
-        this.setUser(proxy.getUser());
-        this.setHost(proxy.getHost());
-        this.setLocal(proxy.getLocal());
-        this.setPass(proxy.getPass());
-        this.setPort(proxy.getPort());
-        this.setType(proxy.getType());
-        this.setConnectMethodPrefered(proxy.isConnectMethodPrefered());
-        this.setPreferNativeImplementation(proxy.isPreferNativeImplementation());
     }
 
     public void setConnectMethodPrefered(final boolean value) {

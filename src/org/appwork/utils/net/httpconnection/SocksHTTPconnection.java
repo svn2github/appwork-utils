@@ -38,6 +38,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.URL;
 
+import org.appwork.utils.StringUtils;
 import org.appwork.utils.net.socketconnection.SocketConnection;
 
 /**
@@ -71,6 +72,7 @@ public abstract class SocksHTTPconnection extends HTTPConnectionImpl {
             setHostname(resolveHostname(httpURL.getHost()));
         }
         boolean sslSNIWorkAround = false;
+        String[] cipherBlackList = null;
         final int port = getConnectEndpointPort();
         connect: while (true) {
             if (this.isConnectionSocketValid()) {
@@ -88,15 +90,19 @@ public abstract class SocksHTTPconnection extends HTTPConnectionImpl {
                         final SSLSocketStreamFactory factory = getSSLSocketStreamFactory();
                         if (sslSNIWorkAround) {
                             /* wrong configured SNI at serverSide */
-                            this.connectionSocket = factory.create(sockssocket, "", port, true, isSSLTrustALL());
+                            this.connectionSocket = factory.create(sockssocket, "", port, true, isSSLTrustALL(), cipherBlackList);
                         } else {
-                            this.connectionSocket = factory.create(sockssocket, getHostname(), port, true, isSSLTrustALL());
+                            this.connectionSocket = factory.create(sockssocket, getHostname(), port, true, isSSLTrustALL(), cipherBlackList);
                         }
                     } catch (final IOException e) {
                         this.connectExceptions.add(this.sockssocket + "|" + e.getMessage());
                         this.disconnect();
                         if (sslSNIWorkAround == false && e.getMessage().contains("unrecognized_name")) {
                             sslSNIWorkAround = true;
+                            continue connect;
+                        }
+                        if (cipherBlackList == null && (StringUtils.contains(e.getMessage(), "Could not generate DH keypair"))) {
+                            cipherBlackList = new String[] { "_DHE", "_ECDHE" };
                             continue connect;
                         }
                         throw new ProxyConnectException(e, this.proxy);
@@ -119,6 +125,10 @@ public abstract class SocksHTTPconnection extends HTTPConnectionImpl {
                 }
                 if (sslSNIWorkAround == false && e.getMessage().contains("unrecognized_name")) {
                     sslSNIWorkAround = true;
+                    continue connect;
+                }
+                if (cipherBlackList == null && (StringUtils.contains(e.getMessage(), "Could not generate DH keypair"))) {
+                    cipherBlackList = new String[] { "_DHE", "_ECDHE" };
                     continue connect;
                 }
                 throw new ProxyConnectException(e, this.proxy);

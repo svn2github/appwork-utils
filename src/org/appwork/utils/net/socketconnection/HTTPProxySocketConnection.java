@@ -98,7 +98,7 @@ public class HTTPProxySocketConnection extends SocketConnection {
         if (HTTPProxy.TYPE.HTTPS.equals(proxy.getType())) {
             try {
                 final SSLSocketStreamFactory factory = getSSLSocketStreamFactory();
-                proxySocket = factory.create(proxySocket, "", proxy.getPort(), true, isSSLTrustALL());
+                proxySocket = factory.create(proxySocket, "", proxy.getPort(), true, isSSLTrustALL(), null);
             } catch (final IOException e) {
                 throw new ProxyConnectException(e, proxy);
             }

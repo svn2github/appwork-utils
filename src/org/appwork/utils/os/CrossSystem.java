@@ -209,6 +209,8 @@ public class CrossSystem {
                 }
                 if (armVx && revision != null) {
                     if (revision.startsWith("1000") && revision.length() > 4) {
+                        // if you see a "1000" at the front of the Revision, e.g. 10000002 then it indicates[1] that your Raspberry Pi has
+                        // been over-volted, and your board revision is simply the last 4 digits (i.e. 0002 in this example).
                         revision = revision.substring(4);
                     }
                     if (StringUtils.equalsIgnoreCase(revision, "0002")) {
@@ -223,7 +225,7 @@ public class CrossSystem {
                     } else if (StringUtils.equalsIgnoreCase(revision, "0007") || StringUtils.equalsIgnoreCase(revision, "0008") || StringUtils.equalsIgnoreCase(revision, "0009")) {
                         // Model A
                         isRaspberryPi = true;
-                    } else if (StringUtils.equalsIgnoreCase(revision, "000d") || StringUtils.equalsIgnoreCase(revision, "000e") || StringUtils.equalsIgnoreCase(revision, "000f")) {
+                    } else if (StringUtils.equalsIgnoreCase(revision, "000d") || StringUtils.equalsIgnoreCase(revision, "000e") || StringUtils.equalsIgnoreCase(revision, "00e") || StringUtils.equalsIgnoreCase(revision, "000f")) {
                         // Model B Rev 2
                         isRaspberryPi = true;
                     } else if (StringUtils.equalsIgnoreCase(revision, "0010") || StringUtils.equalsIgnoreCase(revision, "0013") || StringUtils.equalsIgnoreCase(revision, "900032")) {

@@ -70,6 +70,10 @@ public class JavaSSLSocketStreamFactory implements SSLSocketStreamFactory {
     }
 
     public static SSLSocketFactory getSSLSocketFactory(final boolean useSSLTrustAll) throws IOException {
+        return getSSLSocketFactory(useSSLTrustAll, null);
+    }
+
+    public static SSLSocketFactory getSSLSocketFactory(final boolean useSSLTrustAll, String[] cipherBlacklist) throws IOException {
         final SSLSocketFactory factory;
         if (useSSLTrustAll) {
             factory = TrustALLSSLFactory.getSSLFactoryTrustALL();
@@ -87,15 +91,6 @@ public class JavaSSLSocketStreamFactory implements SSLSocketStreamFactory {
             private Socket removeSSLProtocol(final Socket socket) {
                 if (socket != null && socket instanceof SSLSocket) {
                     final SSLSocket sslSocket = (SSLSocket) socket;
-                    // final ArrayList<String> protocols = new
-                    // ArrayList<String>(Arrays.asList(sslSocket.getEnabledProtocols()));
-                    // final Iterator<String> it = protocols.iterator();
-                    // while (it.hasNext()) {
-                    // final String next = it.next();
-                    // if (StringUtils.containsIgnoreCase(next, "ssl")) {
-                    // it.remove();
-                    // }
-                    // }
                     final long javaVersion = Application.getJavaVersion();
                     if (javaVersion >= Application.JAVA18) {
                         sslSocket.setEnabledProtocols(new String[] { "TLSv1", "TLSv1.1", "TLSv1.2" });
@@ -111,17 +106,26 @@ public class JavaSSLSocketStreamFactory implements SSLSocketStreamFactory {
             private Socket removeGMCCipherSuit(final Socket socket) {
                 if (socket != null && socket instanceof SSLSocket) {
                     final long javaVersion = Application.getJavaVersion();
-                    final boolean gcmWorkaround = javaVersion < 18600000;
-                    if (gcmWorkaround) {
+                    final boolean gcmWorkaround = javaVersion < 18060000;
+                    if (gcmWorkaround || cipherBlacklist != null) {
                         final SSLSocket sslSocket = (SSLSocket) socket;
                         final ArrayList<String> cipherSuits = new ArrayList<String>(Arrays.asList(sslSocket.getEnabledCipherSuites()));
                         final Iterator<String> it = cipherSuits.iterator();
                         boolean updateCipherSuites = false;
-                        while (it.hasNext()) {
+                        cipher: while (it.hasNext()) {
                             final String next = it.next();
                             if (gcmWorkaround && StringUtils.containsIgnoreCase(next, "GCM")) {
                                 it.remove();
                                 updateCipherSuites = true;
+                                continue cipher;
+                            } else {
+                                for (final String cipherBlacklistEntry : cipherBlacklist) {
+                                    if (StringUtils.containsIgnoreCase(next, cipherBlacklistEntry)) {
+                                        it.remove();
+                                        updateCipherSuites = true;
+                                        continue cipher;
+                                    }
+                                }
                             }
                         }
                         if (updateCipherSuites) {
@@ -215,8 +219,8 @@ public class JavaSSLSocketStreamFactory implements SSLSocketStreamFactory {
     }
 
     @Override
-    public SSLSocketStreamInterface create(final SocketStreamInterface socketStream, final String host, final int port, final boolean autoClose, final boolean trustAll) throws IOException {
-        final SSLSocket sslSocket = (SSLSocket) getSSLSocketFactory(trustAll).createSocket(socketStream.getSocket(), host, port, autoClose);
+    public SSLSocketStreamInterface create(final SocketStreamInterface socketStream, final String host, final int port, final boolean autoClose, final boolean trustAll, final String[] cipherBlacklist) throws IOException {
+        final SSLSocket sslSocket = (SSLSocket) getSSLSocketFactory(trustAll, cipherBlacklist).createSocket(socketStream.getSocket(), host, port, autoClose);
         // sslSocket.startHandshake();
         // verifySSLHostname(sslSocket, host, trustAll);
         return new SSLSocketStreamInterface() {

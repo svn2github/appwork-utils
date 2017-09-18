@@ -184,11 +184,11 @@ public class HTTPConnectionImpl implements HTTPConnection {
     protected static final HashMap<String, LinkedList<KeepAliveSocketStream>> KEEPALIVEPOOL         = new HashMap<String, LinkedList<KeepAliveSocketStream>>();
     protected static final Object                                             LOCK                  = new Object();
     protected static final DelayedRunnable                                    KEEPALIVECLEANUPTIMER = new DelayedRunnable(10000, 30000) {
-        @Override
-        public void delayedrun() {
-            cleanupKeepAlivePools();
-        }
-    };
+                                                                                                        @Override
+                                                                                                        public void delayedrun() {
+                                                                                                            cleanupKeepAlivePools();
+                                                                                                        }
+                                                                                                    };
 
     private static final void cleanupKeepAlivePools() {
         synchronized (HTTPConnectionImpl.LOCK) {
@@ -694,6 +694,7 @@ public class HTTPConnectionImpl implements HTTPConnection {
 
     public void connect() throws IOException {
         boolean sslSNIWorkAround = false;
+        String[] cipherBlackList = null;
         connect: while (true) {
             if (this.isConnectionSocketValid()) {
                 return;/* oder fehler */
@@ -797,9 +798,9 @@ public class HTTPConnectionImpl implements HTTPConnection {
                             final SSLSocketStreamFactory factory = getSSLSocketStreamFactory();
                             if (sslSNIWorkAround) {
                                 /* wrong configured SNI at serverSide */
-                                this.connectionSocket = factory.create(connectionSocket, "", port, true, isSSLTrustALL());
+                                this.connectionSocket = factory.create(connectionSocket, "", port, true, isSSLTrustALL(), cipherBlackList);
                             } else {
-                                this.connectionSocket = factory.create(connectionSocket, getHostname(), port, true, isSSLTrustALL());
+                                this.connectionSocket = factory.create(connectionSocket, getHostname(), port, true, isSSLTrustALL(), cipherBlackList);
                             }
                         }
                         this.connectTime = System.currentTimeMillis() - startTime;
@@ -810,6 +811,10 @@ public class HTTPConnectionImpl implements HTTPConnection {
                         this.connectExceptions.add(connectedInetSocketAddress + "|" + e.getMessage());
                         if (sslSNIWorkAround == false && (StringUtils.contains(e.getMessage(), "unrecognized_name"))) {
                             sslSNIWorkAround = true;
+                            continue connect;
+                        }
+                        if (cipherBlackList == null && (StringUtils.contains(e.getMessage(), "Could not generate DH keypair"))) {
+                            cipherBlackList = new String[] { "_DHE", "_ECDHE" };
                             continue connect;
                         }
                         if (bindInetAddress != null) {
@@ -839,6 +844,10 @@ public class HTTPConnectionImpl implements HTTPConnection {
                 }
                 if (sslSNIWorkAround == false && e.getMessage().contains("unrecognized_name")) {
                     sslSNIWorkAround = true;
+                    continue connect;
+                }
+                if (cipherBlackList == null && (StringUtils.contains(e.getMessage(), "Could not generate DH keypair"))) {
+                    cipherBlackList = new String[] { "_DHE", "_ECDHE" };
                     continue connect;
                 }
                 throw e;

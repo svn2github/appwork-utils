@@ -70,6 +70,7 @@ public class HTTPProxyHTTPConnectionImpl extends HTTPConnectionImpl {
     @Override
     public void connect() throws IOException {
         boolean sslSNIWorkAround = false;
+        String[] cipherBlackList = null;
         InetAddress hosts[] = null;
         connect: while (true) {
             if (this.isConnectionSocketValid()) {
@@ -120,8 +121,9 @@ public class HTTPProxyHTTPConnectionImpl extends HTTPConnectionImpl {
                 if (HTTPProxy.TYPE.HTTPS.equals(proxy.getType())) {
                     final SSLSocketStreamFactory factory = getSSLSocketStreamFactory();
                     try {
-                        this.connectionSocket = factory.create(connectionSocket, "", proxy.getPort(), true, isSSLTrustALL());
+                        this.connectionSocket = factory.create(connectionSocket, "", proxy.getPort(), true, isSSLTrustALL(), null);
                     } catch (final IOException e) {
+                        // TODO: add sni/dh workaround
                         this.connectExceptions.add(this.connectionSocket + "|" + e.getMessage());
                         this.disconnect();
                         throw new ProxyConnectException(e, this.proxy);
@@ -204,15 +206,19 @@ public class HTTPProxyHTTPConnectionImpl extends HTTPConnectionImpl {
                             final SSLSocketStreamFactory factory = getSSLSocketStreamFactory();
                             if (sslSNIWorkAround) {
                                 /* wrong configured SNI at serverSide */
-                                this.connectionSocket = factory.create(connectionSocket, "", httpPort, true, isSSLTrustALL());
+                                this.connectionSocket = factory.create(connectionSocket, "", httpPort, true, isSSLTrustALL(), cipherBlackList);
                             } else {
-                                this.connectionSocket = factory.create(connectionSocket, getHostname(), httpPort, true, isSSLTrustALL());
+                                this.connectionSocket = factory.create(connectionSocket, getHostname(), httpPort, true, isSSLTrustALL(), cipherBlackList);
                             }
                         } catch (final IOException e) {
                             this.connectExceptions.add(this.connectionSocket + "|" + e.getMessage());
                             this.disconnect();
                             if (sslSNIWorkAround == false && e.getMessage().contains("unrecognized_name")) {
                                 sslSNIWorkAround = true;
+                                continue connect;
+                            }
+                            if (cipherBlackList == null && (StringUtils.contains(e.getMessage(), "Could not generate DH keypair"))) {
+                                cipherBlackList = new String[] { "_DHE", "_ECDHE" };
                                 continue connect;
                             }
                             throw new ProxyConnectException(e, this.proxy);
@@ -239,6 +245,10 @@ public class HTTPProxyHTTPConnectionImpl extends HTTPConnectionImpl {
                 }
                 if (sslSNIWorkAround == false && e.getMessage().contains("unrecognized_name")) {
                     sslSNIWorkAround = true;
+                    continue connect;
+                }
+                if (cipherBlackList == null && (StringUtils.contains(e.getMessage(), "Could not generate DH keypair"))) {
+                    cipherBlackList = new String[] { "_DHE", "_ECDHE" };
                     continue connect;
                 }
                 throw new ProxyConnectException(e, this.proxy);

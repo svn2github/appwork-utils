@@ -118,7 +118,7 @@ public class JavaSSLSocketStreamFactory implements SSLSocketStreamFactory {
                                 it.remove();
                                 updateCipherSuites = true;
                                 continue cipher;
-                            } else {
+                            } else if (cipherBlacklist != null) {
                                 for (final String cipherBlacklistEntry : cipherBlacklist) {
                                     if (StringUtils.containsIgnoreCase(next, cipherBlacklistEntry)) {
                                         it.remove();

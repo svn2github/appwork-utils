@@ -73,7 +73,7 @@ public class JavaSSLSocketStreamFactory implements SSLSocketStreamFactory {
         return getSSLSocketFactory(useSSLTrustAll, null);
     }
 
-    public static SSLSocketFactory getSSLSocketFactory(final boolean useSSLTrustAll, String[] cipherBlacklist) throws IOException {
+    public static SSLSocketFactory getSSLSocketFactory(final boolean useSSLTrustAll, final String[] cipherBlacklist) throws IOException {
         final SSLSocketFactory factory;
         if (useSSLTrustAll) {
             factory = TrustALLSSLFactory.getSSLFactoryTrustALL();

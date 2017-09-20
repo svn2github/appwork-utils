@@ -39,6 +39,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -171,11 +173,20 @@ public abstract class AbstractLogAction extends BasicAction {
             for (final File f : logs) {
                 final String timestampString = new Regex(f.getName(), "(\\d{7,})_").getMatch(0);
                 if (timestampString != null) {
-                    final long timestamp = Long.parseLong(timestampString);
-                    final LogFolder logFolder = new LogFolder(f, timestamp);
+                    final LogFolder logFolder = new LogFolder(f, Long.parseLong(timestampString));
                     folders.add(logFolder);
                 }
             }
+            Collections.sort(folders, new Comparator<LogFolder>() {
+                private final int compare(long x, long y) {
+                    return (x < y) ? -1 : ((x == y) ? 0 : 1);
+                }
+
+                @Override
+                public int compare(LogFolder o1, LogFolder o2) {
+                    return compare(o2.getCreated(), o1.getCreated());
+                }
+            });
         }
         return folders;
     }

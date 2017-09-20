@@ -57,7 +57,6 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellEditor;
 
 import org.appwork.exceptions.WTFException;
-import org.appwork.resources.AWIcon;
 import org.appwork.storage.JSonStorage;
 import org.appwork.storage.Storage;
 import org.appwork.utils.swing.EDTHelper;
@@ -167,7 +166,7 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see javax.swing.table.AbstractTableModel#fireTableChanged(javax.swing.event.TableModelEvent)
      */
     @Override
@@ -532,7 +531,7 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
     public TableCellEditor getCelleditorByColumn(final int modelColumnIndex) {
         /*
          * Math.max(0, columnIndex)
-         *
+         * 
          * WORKAROUND for -1 column access,Index out of Bound,Unknown why it happens but this workaround seems to do its job
          */
         return this.getExtColumnByModelIndex(modelColumnIndex);
@@ -547,7 +546,7 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
     public ExtColumn<E> getCellrendererByColumn(final int columnIndex) {
         /*
          * Math.max(0, columnIndex)
-         *
+         * 
          * WORKAROUND for -1 column access,Index out of Bound,Unknown why it happens but this workaround seems to do its job
          */
         return this.columns.get(Math.max(0, columnIndex));
@@ -587,7 +586,7 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
     public String getColumnName(final int column) {
         /*
          * Math.max(0, columnIndex)
-         *
+         * 
          * WORKAROUND for -1 column access,Index out of Bound,Unknown why it happens but this workaround seems to do its job
          */
         return this.columns.get(Math.max(0, column)).getName();
@@ -1016,9 +1015,9 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
 
     /*
      * this will be called after fireTableStructureChanged. you can customize everything after this
-     *
+     * 
      * true = restore selection
-     *
+     * 
      * false = do not restore selection
      */
     protected boolean postSetTableData(final List<E> newtableData) {
@@ -1138,29 +1137,13 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
      * @param latest
      */
     public void setSelectedObject(final E latest) {
-        new EDTHelper<Object>() {
-            @Override
-            public Object edtRun() {
-                final ExtTable<E> ltable = ExtTableModel.this.getTable();
-                final ListSelectionModel s = ltable.getSelectionModel();
-                final boolean isValueAdjusting = s.getValueIsAdjusting();
-                s.setValueIsAdjusting(true);
-                try {
-                    if (ExtTableModel.this.hasSelectedObjects()) {
-                        ExtTableModel.this.clearSelection();
-                    }
-                    if (latest != null) {
-                        final int row = ExtTableModel.this.getRowforObject(latest);
-                        if (row >= 0) {
-                            ltable.addRowSelectionInterval(row, row);
-                        }
-                    }
-                } finally {
-                    s.setValueIsAdjusting(isValueAdjusting);
-                }
-                return null;
-            }
-        }.start();
+        if (latest == null) {
+            setSelectedObjects(null);
+        } else {
+            final List<E> objects = new ArrayList<E>();
+            objects.add(latest);
+            setSelectedObjects(objects);
+        }
     }
 
     /**

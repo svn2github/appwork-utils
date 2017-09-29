@@ -56,7 +56,6 @@ import org.appwork.utils.URLStream;
  *         https://publicsuffix.org/list/
  */
 public class PublicSuffixList {
-
     private static PublicSuffixList INSTANCE;
     static {
         try {
@@ -73,7 +72,6 @@ public class PublicSuffixList {
     /**
      * Implementation for https://publicsuffix.org/list/
      */
-
     private final Map<String, List<String>> map;
 
     public PublicSuffixList(URL publicSuffixList) throws IOException {
@@ -87,7 +85,7 @@ public class PublicSuffixList {
     public String getDomain(String fullDomain) {
         final String topLeveLDomain = this.getTopLevelDomain(fullDomain);
         if (topLeveLDomain != null) {
-            final String pattern = "([^\\.]+\\." + Pattern.quote(topLeveLDomain) + ")";
+            final String pattern = "(([^\\. ]+\\.?){0,}\\." + Pattern.quote(topLeveLDomain) + ")";
             final String domain = new Regex(fullDomain, pattern).getMatch(0);
             return domain;
         }
@@ -120,7 +118,6 @@ public class PublicSuffixList {
                         }
                     }
                     Collections.sort(hits, new Comparator<String>() {
-
                         public int compare(int x, int y) {
                             return x < y ? 1 : x == y ? 0 : -1;
                         }
@@ -129,10 +126,8 @@ public class PublicSuffixList {
                         public int compare(String o1, String o2) {
                             return this.compare(o1.length(), o2.length());
                         }
-
                     });
                     return hits.get(0);
-
                 }
             }
         }
@@ -172,7 +167,7 @@ public class PublicSuffixList {
                         }
                     }
                     for (List<String> list : map.values()) {
-                        if (list != emptyList) {
+                        if (list != emptyList && list instanceof ArrayList) {
                             ((ArrayList) list).trimToSize();
                         }
                     }

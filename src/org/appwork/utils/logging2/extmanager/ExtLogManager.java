@@ -42,7 +42,7 @@ import java.util.logging.Logger;
 import org.appwork.utils.logging2.LogSource;
 
 public class ExtLogManager extends LogManager {
-    public static String[] WHITELIST     = new String[] { "org.fourthline", "org.mongo", "com.mongo", "javax.mail", "com.sun.xml.internal.messaging.saaj" };
+    public static String[] WHITELIST     = new String[] { "de.btobastian", "org.fourthline", "org.mongo", "com.mongo", "javax.mail", "com.sun.xml.internal.messaging.saaj" };
     public static String[] BLACKLIST     = new String[] { "org.mongodb.driver", "org.bson.ObjectId", "org.mongodb.diagnostics", "com.mongodb.diagnostics", "com.mongodb.driver", "org.fourthline", "org.fourthline.cling.registry.Registry", "org.fourthline.cling.model.message.header", "org.fourthline.cling.model.message.UpnpHeaders", "org.fourthline.cling.transport" };
     private LoggerFactory  loggerFactory = null;
 
@@ -74,6 +74,7 @@ public class ExtLogManager extends LogManager {
                 {
                     setLevel(Level.INFO);
                 }
+
                 private LogSource del;
 
                 @Override

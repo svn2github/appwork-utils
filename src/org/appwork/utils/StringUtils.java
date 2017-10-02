@@ -137,7 +137,7 @@ public class StringUtils {
 
     public static String trim(String input) {
         if (input != null) {
-            return input.replaceAll("^" + StringUtils.whitespace_chars + "+", "").replaceAll(StringUtils.whitespace_chars + "+$", "");
+            return removeBOM(input.replaceAll("^" + StringUtils.whitespace_chars + "+", "").replaceAll(StringUtils.whitespace_chars + "+$", ""));
         }
         return null;
     }

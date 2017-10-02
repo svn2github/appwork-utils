@@ -103,7 +103,7 @@ public class JavaSSLSocketStreamFactory implements SSLSocketStreamFactory {
                 return socket;
             }
 
-            private Socket removeGMCCipherSuit(final Socket socket) {
+            private Socket disableCipherSuit(final Socket socket) {
                 if (socket != null && socket instanceof SSLSocket) {
                     // final long javaVersion = Application.getJavaVersion();
                     // https://stackoverflow.com/questions/25992131/slow-aes-gcm-encryption-and-decryption-with-java-8u20/27028067#27028067
@@ -139,7 +139,7 @@ public class JavaSSLSocketStreamFactory implements SSLSocketStreamFactory {
 
             @Override
             public Socket createSocket(Socket arg0, String arg1, int arg2, boolean arg3) throws IOException {
-                return removeGMCCipherSuit(this.removeSSLProtocol(factory.createSocket(arg0, arg1, arg2, arg3)));
+                return disableCipherSuit(this.removeSSLProtocol(factory.createSocket(arg0, arg1, arg2, arg3)));
             }
 
             @Override
@@ -154,22 +154,22 @@ public class JavaSSLSocketStreamFactory implements SSLSocketStreamFactory {
 
             @Override
             public Socket createSocket(String arg0, int arg1) throws IOException, UnknownHostException {
-                return removeGMCCipherSuit(this.removeSSLProtocol(factory.createSocket(arg0, arg1)));
+                return disableCipherSuit(this.removeSSLProtocol(factory.createSocket(arg0, arg1)));
             }
 
             @Override
             public Socket createSocket(InetAddress arg0, int arg1) throws IOException {
-                return removeGMCCipherSuit(this.removeSSLProtocol(factory.createSocket(arg0, arg1)));
+                return disableCipherSuit(this.removeSSLProtocol(factory.createSocket(arg0, arg1)));
             }
 
             @Override
             public Socket createSocket(String arg0, int arg1, InetAddress arg2, int arg3) throws IOException, UnknownHostException {
-                return removeGMCCipherSuit(this.removeSSLProtocol(factory.createSocket(arg0, arg1, arg2, arg3)));
+                return disableCipherSuit(this.removeSSLProtocol(factory.createSocket(arg0, arg1, arg2, arg3)));
             }
 
             @Override
             public Socket createSocket(InetAddress arg0, int arg1, InetAddress arg2, int arg3) throws IOException {
-                return removeGMCCipherSuit(this.removeSSLProtocol(factory.createSocket(arg0, arg1, arg2, arg3)));
+                return disableCipherSuit(this.removeSSLProtocol(factory.createSocket(arg0, arg1, arg2, arg3)));
             }
         };
     }

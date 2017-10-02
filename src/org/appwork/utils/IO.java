@@ -256,6 +256,10 @@ public class IO {
             return bomMarker.length;
         }
 
+        public byte[] getBOM() {
+            return bomMarker.clone();
+        }
+
         public static BOM get(byte[] bytes) {
             for (final BOM bom : BOM.values()) {
                 if (bom.startsWith(bytes)) {

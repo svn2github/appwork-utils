@@ -142,6 +142,15 @@ public class StringUtils {
         return null;
     }
 
+    public static String removeBOM(final String input) {
+        // Strings in Java are UTF-16 BE, BOM
+        if (input != null && input.startsWith("\uFEFF")) {
+            return input.substring(1);
+        } else {
+            return input;
+        }
+    }
+
     public static String nullOrNonEmpty(String x) {
         if (StringUtils.isNotEmpty(x)) {
             return x;

@@ -42,7 +42,6 @@ import java.io.PushbackInputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.ConnectException;
 import java.net.Inet4Address;
-import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
@@ -77,6 +76,7 @@ import org.appwork.utils.net.LimitedInputStream;
 import org.appwork.utils.net.PublicSuffixList;
 import org.appwork.utils.net.SocketFactory;
 import org.appwork.utils.net.StreamValidEOF;
+import org.appwork.utils.net.httpconnection.SocketStreamInterface.TCP_VERSION;
 import org.appwork.utils.os.CrossSystem;
 
 public class HTTPConnectionImpl implements HTTPConnection {
@@ -137,6 +137,19 @@ public class HTTPConnectionImpl implements HTTPConnection {
     protected String                      httpResponseMessage = "";
     protected volatile int                readTimeout         = 30000;
     protected volatile int                connectTimeout      = 30000;
+    protected TCP_VERSION                 tcpVersion          = TCP_VERSION.TCP4_ONLY;
+
+    public TCP_VERSION getTcpVersion() {
+        return tcpVersion;
+    }
+
+    public void setTcpVersion(TCP_VERSION tcpVersion) {
+        if (tcpVersion == null) {
+            this.tcpVersion = TCP_VERSION.TCP4_ONLY;
+        } else {
+            this.tcpVersion = tcpVersion;
+        }
+    }
 
     public int getReadTimeout() {
         return this.readTimeout;
@@ -184,11 +197,11 @@ public class HTTPConnectionImpl implements HTTPConnection {
     protected static final HashMap<String, LinkedList<KeepAliveSocketStream>> KEEPALIVEPOOL         = new HashMap<String, LinkedList<KeepAliveSocketStream>>();
     protected static final Object                                             LOCK                  = new Object();
     protected static final DelayedRunnable                                    KEEPALIVECLEANUPTIMER = new DelayedRunnable(10000, 30000) {
-                                                                                                        @Override
-                                                                                                        public void delayedrun() {
-                                                                                                            cleanupKeepAlivePools();
-                                                                                                        }
-                                                                                                    };
+        @Override
+        public void delayedrun() {
+            cleanupKeepAlivePools();
+        }
+    };
 
     private static final void cleanupKeepAlivePools() {
         synchronized (HTTPConnectionImpl.LOCK) {
@@ -683,6 +696,10 @@ public class HTTPConnectionImpl implements HTTPConnection {
 
     protected boolean isHostnameResolved() {
         return this.hostName != null;
+    }
+
+    protected InetAddress[] resolvHostIP(final String host) throws IOException {
+        return SocketStreamInterface.resolvHostIP(host, getTcpVersion());
     }
 
     protected InetAddress[] getRemoteIPs() throws IOException {
@@ -1426,25 +1443,6 @@ public class HTTPConnectionImpl implements HTTPConnection {
 
     protected boolean isRequiresOutputStream() {
         return httpMethod.requiresOutputStream;
-    }
-
-    public InetAddress[] resolvHostIP(final String host) throws IOException {
-        final InetAddress[] ips = HTTPConnectionUtils.resolvHostIP(host);
-        if (ips != null) {
-            final List<InetAddress> ipv4FirstList = new ArrayList<InetAddress>();
-            for (final InetAddress ip : ips) {
-                if (ip instanceof Inet4Address) {
-                    ipv4FirstList.add(ip);
-                }
-            }
-            for (final InetAddress ip : ips) {
-                if (ip instanceof Inet6Address) {
-                    ipv4FirstList.add(ip);
-                }
-            }
-            return ipv4FirstList.toArray(new InetAddress[0]);
-        }
-        return null;
     }
 
     protected void sendRequest() throws UnsupportedEncodingException, IOException {

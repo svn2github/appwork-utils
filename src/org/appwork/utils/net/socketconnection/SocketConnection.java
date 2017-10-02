@@ -38,7 +38,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ConnectException;
-import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -47,18 +46,16 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.appwork.utils.Application;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.net.SocketFactory;
-import org.appwork.utils.net.httpconnection.HTTPConnectionUtils;
 import org.appwork.utils.net.httpconnection.HTTPProxy;
 import org.appwork.utils.net.httpconnection.ProxyAuthException;
 import org.appwork.utils.net.httpconnection.ProxyConnectException;
 import org.appwork.utils.net.httpconnection.SocketStreamInterface;
+import org.appwork.utils.net.httpconnection.SocketStreamInterface.TCP_VERSION;
 
 /**
  * @author daniel
@@ -188,6 +185,19 @@ public abstract class SocketConnection extends Socket {
     private Integer                                      trafficClass         = null;
     private final AtomicReference<SocketStreamInterface> pendingConnectSocket = new AtomicReference<SocketStreamInterface>(null);
     protected static final Charset                       ISO_8859_1           = Charset.forName("ISO-8859-1");
+    protected TCP_VERSION                                tcpVersion           = TCP_VERSION.TCP4_ONLY;
+
+    public TCP_VERSION getTcpVersion() {
+        return tcpVersion;
+    }
+
+    public void setTcpVersion(TCP_VERSION tcpVersion) {
+        if (tcpVersion == null) {
+            this.tcpVersion = TCP_VERSION.TCP4_ONLY;
+        } else {
+            this.tcpVersion = tcpVersion;
+        }
+    }
 
     public SocketConnection(HTTPProxy proxy) {
         this.proxy = proxy;
@@ -295,17 +305,7 @@ public abstract class SocketConnection extends Socket {
     }
 
     public InetAddress[] resolvHostIP(final String host) throws IOException {
-        final InetAddress[] ips = HTTPConnectionUtils.resolvHostIP(host);
-        if (ips != null) {
-            final List<InetAddress> ips_v4 = new ArrayList<InetAddress>();
-            for (final InetAddress ip : ips) {
-                if (ip instanceof Inet4Address) {
-                    ips_v4.add(ip);
-                }
-            }
-            return ips_v4.toArray(new InetAddress[0]);
-        }
-        return null;
+        return SocketStreamInterface.resolvHostIP(host, getTcpVersion());
     }
 
     protected void connect(SocketStreamInterface socketStreamInterface, SocketAddress connectSocketAddress, int connectTimeout) throws IOException {

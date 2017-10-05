@@ -325,21 +325,23 @@ public class HTTPProxy {
         final String auth = new Regex(s, "://(.+)@").getMatch(0);
         final String host = new Regex(s, "://(.+@)?(.*?)(/|$)").getMatch(1);
         HTTPProxy ret = null;
-        if ("https".equalsIgnoreCase(type)) {
+        if (StringUtils.equalsIgnoreCase("https", type)) {
             ret = new HTTPProxy(TYPE.HTTPS);
             ret.setPort(443);
-        } else if ("http".equalsIgnoreCase(type)) {
+        } else if (StringUtils.equalsIgnoreCase("http", type)) {
             ret = new HTTPProxy(TYPE.HTTP);
             ret.setPort(8080);
-        } else if ("socks5".equalsIgnoreCase(type)) {
+        } else if (StringUtils.equalsIgnoreCase("socks5", type)) {
             ret = new HTTPProxy(TYPE.SOCKS5);
             ret.setPort(1080);
-        } else if ("socks4".equalsIgnoreCase(type)) {
+        } else if (StringUtils.equalsIgnoreCase("socks4", type)) {
             ret = new HTTPProxy(TYPE.SOCKS4);
             ret.setPort(1080);
-        } else if ("direct".equalsIgnoreCase(type)) {
+        } else if (StringUtils.equalsIgnoreCase("direct", type)) {
             ret = new HTTPProxy(TYPE.DIRECT);
             ret.setLocal(host);
+        } else {
+            return null;
         }
         if (ret != null) {
             final String hostname = new Regex(host, "(.*?)(:\\d+$|$)").getMatch(0);

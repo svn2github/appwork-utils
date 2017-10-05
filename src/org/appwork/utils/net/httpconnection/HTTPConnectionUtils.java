@@ -35,10 +35,16 @@ package org.appwork.utils.net.httpconnection;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.URLDecoder;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 import java.util.regex.Matcher;
 
 import org.appwork.net.protocol.http.HTTPConstants;
@@ -48,6 +54,70 @@ import org.appwork.utils.StringUtils;
 import org.appwork.utils.encoding.Base64;
 
 public class HTTPConnectionUtils {
+    public static enum TCP_VERSION {
+        TCP4_ONLY,
+        TCP4_TCP6,
+        TCP6_TCP4,
+        SYSTEM
+    }
+
+    public static InetAddress[] resolvHostIP(final String host, TCP_VERSION tcpVersion) throws IOException {
+        InetAddress[] ret = HTTPConnectionUtils.resolvHostIP(host);
+        if (ret != null) {
+            if (tcpVersion == null) {
+                tcpVersion = TCP_VERSION.TCP4_ONLY;
+            }
+            switch (tcpVersion) {
+            case TCP4_ONLY:
+                final List<InetAddress> ipv4Only = new ArrayList<InetAddress>();
+                for (final InetAddress ip : ret) {
+                    if (ip instanceof Inet4Address) {
+                        ipv4Only.add(ip);
+                    }
+                }
+                ret = ipv4Only.toArray(new InetAddress[0]);
+                break;
+            case TCP4_TCP6:
+                Arrays.sort(ret, new Comparator<InetAddress>() {
+                    private final int compare(boolean x, boolean y) {
+                        return (x == y) ? 0 : (x ? 1 : -1);
+                    }
+
+                    @Override
+                    public int compare(InetAddress o1, InetAddress o2) {
+                        final boolean x = o1 instanceof Inet6Address;
+                        final boolean y = o2 instanceof Inet6Address;
+                        return compare(x, y);
+                    }
+                });
+                break;
+            case TCP6_TCP4:
+                Arrays.sort(ret, new Comparator<InetAddress>() {
+                    private final int compare(boolean x, boolean y) {
+                        return (x == y) ? 0 : (x ? 1 : -1);
+                    }
+
+                    @Override
+                    public int compare(InetAddress o1, InetAddress o2) {
+                        final boolean x = o1 instanceof Inet4Address;
+                        final boolean y = o2 instanceof Inet4Address;
+                        return compare(x, y);
+                    }
+                });
+                break;
+            case SYSTEM:
+            default:
+                break;
+            }
+            if (ret.length > 0) {
+                return ret;
+            } else {
+                throw new UnknownHostException("Could not resolve(" + tcpVersion + "):" + host);
+            }
+        }
+        return null;
+    }
+
     public final static byte R = (byte) 13;
     public final static byte N = (byte) 10;
 

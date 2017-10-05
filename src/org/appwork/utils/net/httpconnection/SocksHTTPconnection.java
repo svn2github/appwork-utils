@@ -34,6 +34,7 @@
 package org.appwork.utils.net.httpconnection;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.URL;
@@ -195,10 +196,15 @@ public abstract class SocksHTTPconnection extends HTTPConnectionImpl {
 
     protected InetSocketAddress buildConnectEndPointSocketAddress() {
         if (resolveConnectEndPoint()) {
-            return new InetSocketAddress(getHostname(), getConnectEndpointPort());
-        } else {
-            return InetSocketAddress.createUnresolved(getHostname(), getConnectEndpointPort());
+            try {
+                final InetAddress[] inetAddress = HTTPConnectionUtils.resolvHostIP(getHostname(), getTcpVersion());
+                if (inetAddress != null && inetAddress.length > 0) {
+                    return new InetSocketAddress(inetAddress[0], getConnectEndpointPort());
+                }
+            } catch (IOException e) {
+            }
         }
+        return InetSocketAddress.createUnresolved(getHostname(), getConnectEndpointPort());
     }
 
     abstract protected SocketStreamInterface connect(SocketStreamInterface socketStream) throws IOException;

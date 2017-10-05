@@ -35,6 +35,9 @@ package org.appwork.utils.net.socketconnection;
 
 import java.io.IOException;
 import java.net.ConnectException;
+import java.net.Inet4Address;
+import java.net.Inet6Address;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketTimeoutException;
@@ -69,7 +72,7 @@ public class DirectSocketConnection extends SocketConnection {
             try {
                 if (connectTimeout == 0) {
                     /** no workaround for infinite connect timeouts **/
-                    final SocketStreamInterface connectSocket = this.createConnectSocket(connectTimeout);
+                    final SocketStreamInterface connectSocket = this.createConnectSocket(endPoint, connectTimeout);
                     connect(connectSocket, endPoint, connectTimeout);
                 } else {
                     /**
@@ -79,7 +82,7 @@ public class DirectSocketConnection extends SocketConnection {
                     while (true) {
                         final long beforeConnect = System.currentTimeMillis();
                         try {
-                            final SocketStreamInterface connectSocket = this.createConnectSocket(connectTimeout);
+                            final SocketStreamInterface connectSocket = this.createConnectSocket(endPoint, connectTimeout);
                             connect(connectSocket, endPoint, connectTimeout);
                             break;
                         } catch (final ConnectException cE) {
@@ -151,13 +154,36 @@ public class DirectSocketConnection extends SocketConnection {
         }
     }
 
+    protected InetAddress getBindInetAddress(InetAddress dest, HTTPProxy proxy) throws IOException {
+        if (proxy != null && proxy.isDirect()) {
+            final InetAddress[] ret = HTTPConnectionImpl.getNetworkInterfaceInetAdress(proxy);
+            if (ret != null && ret.length > 0) {
+                for (final InetAddress ia : ret) {
+                    if (dest instanceof Inet4Address) {
+                        if (ia instanceof Inet4Address) {
+                            return ia;
+                        }
+                    } else if (dest instanceof Inet6Address) {
+                        if (ia instanceof Inet6Address) {
+                            return ia;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
     @Override
-    protected SocketStreamInterface createConnectSocket(int connectTimeout) throws IOException {
-        final SocketStreamInterface socket = super.createConnectSocket(connectTimeout);
+    protected SocketStreamInterface createConnectSocket(final SocketAddress endPoint, int connectTimeout) throws IOException {
+        final SocketStreamInterface socket = super.createConnectSocket(endPoint, connectTimeout);
         if (this.getProxy().isDirect()) {
             try {
-                if (socket.getSocket() != null) {
-                    socket.getSocket().bind(new InetSocketAddress(HTTPConnectionImpl.getDirectInetAddress(getProxy()), 0));
+                if (socket.getSocket() != null && endPoint instanceof InetSocketAddress) {
+                    final InetAddress bind = getBindInetAddress(((InetSocketAddress) endPoint).getAddress(), getProxy());
+                    if (bind != null) {
+                        socket.getSocket().bind(new InetSocketAddress(bind, 0));
+                    }
                 }
             } catch (IOException e) {
                 socket.close();

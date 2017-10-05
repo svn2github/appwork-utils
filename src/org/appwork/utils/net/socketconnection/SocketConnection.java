@@ -51,11 +51,12 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.appwork.utils.Application;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.net.SocketFactory;
+import org.appwork.utils.net.httpconnection.HTTPConnectionUtils;
+import org.appwork.utils.net.httpconnection.HTTPConnectionUtils.TCP_VERSION;
 import org.appwork.utils.net.httpconnection.HTTPProxy;
 import org.appwork.utils.net.httpconnection.ProxyAuthException;
 import org.appwork.utils.net.httpconnection.ProxyConnectException;
 import org.appwork.utils.net.httpconnection.SocketStreamInterface;
-import org.appwork.utils.net.httpconnection.SocketStreamInterface.TCP_VERSION;
 
 /**
  * @author daniel
@@ -248,7 +249,7 @@ public abstract class SocketConnection extends Socket {
         this.connect(endpoint, 0);
     }
 
-    protected SocketStreamInterface createConnectSocket(int connectTimeout) throws IOException {
+    protected SocketStreamInterface createConnectSocket(final SocketAddress endPoint, int connectTimeout) throws IOException {
         this.closeConnectSocket();
         final Socket connectSocket = SocketFactory.get().create(this);
         final SocketStreamInterface ret = new SocketStreamInterface() {
@@ -305,7 +306,7 @@ public abstract class SocketConnection extends Socket {
     }
 
     public InetAddress[] resolvHostIP(final String host) throws IOException {
-        return SocketStreamInterface.resolvHostIP(host, getTcpVersion());
+        return HTTPConnectionUtils.resolvHostIP(host, getTcpVersion());
     }
 
     protected void connect(SocketStreamInterface socketStreamInterface, SocketAddress connectSocketAddress, int connectTimeout) throws IOException {
@@ -326,7 +327,7 @@ public abstract class SocketConnection extends Socket {
                 try {
                     if (connectTimeout == 0) {
                         /** no workaround for infinite connect timeouts **/
-                        final SocketStreamInterface connectSocket = this.createConnectSocket(connectTimeout);
+                        final SocketStreamInterface connectSocket = this.createConnectSocket(endpoint, connectTimeout);
                         connect(connectSocket, connectSocketAddress, connectTimeout);
                     } else {
                         /**
@@ -336,7 +337,7 @@ public abstract class SocketConnection extends Socket {
                         while (true) {
                             final long beforeConnect = System.currentTimeMillis();
                             try {
-                                final SocketStreamInterface connectSocket = this.createConnectSocket(connectTimeout);
+                                final SocketStreamInterface connectSocket = this.createConnectSocket(endpoint, connectTimeout);
                                 connect(connectSocket, connectSocketAddress, connectTimeout);
                                 break;
                             } catch (final ConnectException cE) {

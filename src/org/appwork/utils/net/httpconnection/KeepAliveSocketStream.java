@@ -48,11 +48,11 @@ import org.appwork.utils.StringUtils;
  */
 public class KeepAliveSocketStream implements SocketStreamInterface {
     protected final SocketStreamInterface socket;
-    protected final InetAddress           localIP;
+    protected final InetAddress           boundIP;
     protected final String                host;
 
-    public InetAddress getLocalIP() {
-        return this.localIP;
+    public InetAddress getBoundIP() {
+        return this.boundIP;
     }
 
     public InetAddress[] getRemoteIPs() {
@@ -61,8 +61,20 @@ public class KeepAliveSocketStream implements SocketStreamInterface {
 
     protected final InetAddress[] remoteIPs;
 
-    public boolean sameLocalIP(final InetAddress otherIP) {
-        return otherIP == null && this.getLocalIP() == null || otherIP != null && this.getLocalIP() != null && this.getLocalIP().equals(otherIP);
+    public boolean sameBoundIP(final InetAddress bindIP[]) {
+        final InetAddress boundIP = getBoundIP();
+        if (bindIP == null && boundIP == null) {
+            return true;
+        } else if (bindIP != null && boundIP != null) {
+            for (InetAddress bind : bindIP) {
+                if (bind.equals(boundIP)) {
+                    return true;
+                }
+            }
+            return false;
+        } else {
+            return false;
+        }
     }
 
     public boolean sameHost(final String otherHost) {
@@ -127,10 +139,10 @@ public class KeepAliveSocketStream implements SocketStreamInterface {
         this.keepAliveTimestamp = System.currentTimeMillis() + this.getKeepAliveTimeout();
     }
 
-    public KeepAliveSocketStream(final String host, final SocketStreamInterface socket, final long keepAliveTimeout, final long maxRequests, final InetAddress localIP, final InetAddress[] remoteIPs) {
+    public KeepAliveSocketStream(final String host, final SocketStreamInterface socket, final long keepAliveTimeout, final long maxRequests, final InetAddress boundIP, final InetAddress[] remoteIPs) {
         this.host = host;
         this.socket = socket;
-        this.localIP = localIP;
+        this.boundIP = boundIP;
         this.remoteIPs = remoteIPs;
         this.keepAliveTimeout = Math.max(0, keepAliveTimeout);
         this.maxRequests = Math.max(0, maxRequests);

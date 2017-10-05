@@ -40,6 +40,7 @@ import java.net.SocketAddress;
 import java.net.URL;
 
 import org.appwork.utils.StringUtils;
+import org.appwork.utils.net.httpconnection.HTTPConnectionUtils.IPVERSION;
 import org.appwork.utils.net.socketconnection.SocketConnection;
 
 /**
@@ -194,10 +195,21 @@ public abstract class SocksHTTPconnection extends HTTPConnectionImpl {
         return proxy != null && proxy.isResolveHostname();
     }
 
+    protected IPVERSION getEndPointIPVersion() {
+        return IPVERSION.SYSTEM;
+    }
+
     protected InetSocketAddress buildConnectEndPointSocketAddress() {
+        try {
+            final InetAddress[] ret = resolveLiteralIP(getHostname());
+            if (ret != null && ret.length > 0) {
+                return new InetSocketAddress(ret[0], getConnectEndpointPort());
+            }
+        } catch (IOException e) {
+        }
         if (resolveConnectEndPoint()) {
             try {
-                final InetAddress[] inetAddress = HTTPConnectionUtils.resolvHostIP(getHostname(), getTcpVersion());
+                final InetAddress[] inetAddress = HTTPConnectionUtils.resolvHostIP(getHostname(), getEndPointIPVersion());
                 if (inetAddress != null && inetAddress.length > 0) {
                     return new InetSocketAddress(inetAddress[0], getConnectEndpointPort());
                 }

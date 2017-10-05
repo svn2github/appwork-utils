@@ -190,22 +190,21 @@ public class HTTPProxy {
         if (host == null) {
             return info;
         }
-        final String tmphost = host.replaceFirst("http://", "").replaceFirst("https://", "");
-        String tmpport = new org.appwork.utils.Regex(host, ".*?:(\\d+)").getMatch(0);
+        final String tmphost = host.replaceFirst("^https?://", "");
+        String tmpport = new org.appwork.utils.Regex(host, ":(\\d+)(/|$)").getMatch(0);
         if (tmpport != null) {
-            info[1] = "" + tmpport;
+            info[1] = tmpport;
         } else {
             if (port != null) {
                 tmpport = new Regex(port, "(\\d+)").getMatch(0);
             }
             if (tmpport != null) {
-                info[1] = "" + tmpport;
+                info[1] = tmpport;
             } else {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("No proxyport defined, using default 8080");
                 info[1] = "8080";
             }
         }
-        info[0] = new Regex(tmphost, "(.*?)(:|/|$)").getMatch(0);
+        info[0] = new Regex(tmphost, "(.*?)(:\\d+$|:\\d+/|/|$)").getMatch(0);
         return info;
     }
 
@@ -282,13 +281,13 @@ public class HTTPProxy {
                     String proxyurl = new Regex(vals, "(\\d+\\.\\d+\\.\\d+\\.\\d+)").getMatch(0);
                     if (proxyurl == null) {
                         /* parse domain name */
-                        proxyurl = new Regex(vals, ".+=(.*?)($|:)").getMatch(0);
+                        proxyurl = new Regex(vals, ".+=(.*?)(:\\d+$|:\\d+/|/|$)").getMatch(0);
                         if (proxyurl == null) {
                             /* parse domain name */
-                            proxyurl = new Regex(vals, "=?(.*?)($|:)").getMatch(0);
+                            proxyurl = new Regex(vals, "=?(.*?)(:\\d+$|:\\d+/|/|$)").getMatch(0);
                         }
                     }
-                    final String port = new Regex(vals, ":(\\d+)").getMatch(0);
+                    final String port = new Regex(vals, ":(\\d+)(/|$)").getMatch(0);
                     if (proxyurl != null) {
                         if (lowerCaseVals.startsWith("socks")) {
                             final int rPOrt = port != null ? Integer.parseInt(port) : 1080;
@@ -343,8 +342,8 @@ public class HTTPProxy {
             ret.setLocal(host);
         }
         if (ret != null) {
-            final String hostname = new Regex(host, "(.*?)(:|$)").getMatch(0);
-            final String port = new Regex(host, ".*?:(\\d+)").getMatch(0);
+            final String hostname = new Regex(host, "(.*?)(:\\d+$|$)").getMatch(0);
+            final String port = new Regex(host, ".*?:(\\d+)$").getMatch(0);
             if (!StringUtils.isEmpty(hostname)) {
                 ret.setHost(hostname);
             }
@@ -403,7 +402,7 @@ public class HTTPProxy {
     public HTTPProxy(final TYPE type, final String host, final int port) {
         this.setPort(port);
         this.setType(type);
-        this.setHost(HTTPProxy.getInfo(host, "" + port)[0]);
+        this.setHost(HTTPProxy.getInfo(host, Integer.toString(port))[0]);
     }
 
     public String _toString() {

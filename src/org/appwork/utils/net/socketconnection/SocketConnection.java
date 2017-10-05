@@ -52,7 +52,7 @@ import org.appwork.utils.Application;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.net.SocketFactory;
 import org.appwork.utils.net.httpconnection.HTTPConnectionUtils;
-import org.appwork.utils.net.httpconnection.HTTPConnectionUtils.TCP_VERSION;
+import org.appwork.utils.net.httpconnection.HTTPConnectionUtils.IPVERSION;
 import org.appwork.utils.net.httpconnection.HTTPProxy;
 import org.appwork.utils.net.httpconnection.ProxyAuthException;
 import org.appwork.utils.net.httpconnection.ProxyConnectException;
@@ -186,18 +186,14 @@ public abstract class SocketConnection extends Socket {
     private Integer                                      trafficClass         = null;
     private final AtomicReference<SocketStreamInterface> pendingConnectSocket = new AtomicReference<SocketStreamInterface>(null);
     protected static final Charset                       ISO_8859_1           = Charset.forName("ISO-8859-1");
-    protected TCP_VERSION                                tcpVersion           = TCP_VERSION.TCP4_ONLY;
+    protected IPVERSION                                  ipVersion            = null;
 
-    public TCP_VERSION getTcpVersion() {
-        return tcpVersion;
+    public IPVERSION getIPVersion() {
+        return ipVersion;
     }
 
-    public void setTcpVersion(TCP_VERSION tcpVersion) {
-        if (tcpVersion == null) {
-            this.tcpVersion = TCP_VERSION.TCP4_ONLY;
-        } else {
-            this.tcpVersion = tcpVersion;
-        }
+    public void setIPVersion(IPVERSION ipVersion) {
+        this.ipVersion = ipVersion;
     }
 
     public SocketConnection(HTTPProxy proxy) {
@@ -306,7 +302,7 @@ public abstract class SocketConnection extends Socket {
     }
 
     public InetAddress[] resolvHostIP(final String host) throws IOException {
-        return HTTPConnectionUtils.resolvHostIP(host, getTcpVersion());
+        return HTTPConnectionUtils.resolvHostIP(host, getIPVersion());
     }
 
     protected void connect(SocketStreamInterface socketStreamInterface, SocketAddress connectSocketAddress, int connectTimeout) throws IOException {

@@ -54,21 +54,18 @@ import org.appwork.utils.StringUtils;
 import org.appwork.utils.encoding.Base64;
 
 public class HTTPConnectionUtils {
-    public static enum TCP_VERSION {
-        TCP4_ONLY,
-        TCP4_TCP6,
-        TCP6_TCP4,
-        SYSTEM
+    public static enum IPVERSION {
+        IPV4_ONLY,
+        IPV4_IPV6,
+        IPV6_IPV4,
+        SYSTEM;
     }
 
-    public static InetAddress[] resolvHostIP(final String host, TCP_VERSION tcpVersion) throws IOException {
+    public static InetAddress[] resolvHostIP(final String host, IPVERSION ipVersion) throws IOException {
         InetAddress[] ret = HTTPConnectionUtils.resolvHostIP(host);
-        if (ret != null) {
-            if (tcpVersion == null) {
-                tcpVersion = TCP_VERSION.TCP4_ONLY;
-            }
-            switch (tcpVersion) {
-            case TCP4_ONLY:
+        if (ret != null && ipVersion != null) {
+            switch (ipVersion) {
+            case IPV4_ONLY:
                 final List<InetAddress> ipv4Only = new ArrayList<InetAddress>();
                 for (final InetAddress ip : ret) {
                     if (ip instanceof Inet4Address) {
@@ -77,7 +74,7 @@ public class HTTPConnectionUtils {
                 }
                 ret = ipv4Only.toArray(new InetAddress[0]);
                 break;
-            case TCP4_TCP6:
+            case IPV4_IPV6:
                 Arrays.sort(ret, new Comparator<InetAddress>() {
                     private final int compare(boolean x, boolean y) {
                         return (x == y) ? 0 : (x ? 1 : -1);
@@ -91,7 +88,7 @@ public class HTTPConnectionUtils {
                     }
                 });
                 break;
-            case TCP6_TCP4:
+            case IPV6_IPV4:
                 Arrays.sort(ret, new Comparator<InetAddress>() {
                     private final int compare(boolean x, boolean y) {
                         return (x == y) ? 0 : (x ? 1 : -1);
@@ -109,13 +106,12 @@ public class HTTPConnectionUtils {
             default:
                 break;
             }
-            if (ret.length > 0) {
-                return ret;
-            } else {
-                throw new UnknownHostException("Could not resolve(" + tcpVersion + "):" + host);
-            }
         }
-        return null;
+        if (ret != null && ret.length > 0) {
+            return ret;
+        } else {
+            throw new UnknownHostException("Could not resolve(" + ipVersion + "):" + host);
+        }
     }
 
     public final static byte R = (byte) 13;

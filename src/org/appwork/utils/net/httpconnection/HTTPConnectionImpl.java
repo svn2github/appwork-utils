@@ -77,7 +77,7 @@ import org.appwork.utils.net.LimitedInputStream;
 import org.appwork.utils.net.PublicSuffixList;
 import org.appwork.utils.net.SocketFactory;
 import org.appwork.utils.net.StreamValidEOF;
-import org.appwork.utils.net.httpconnection.HTTPConnectionUtils.TCP_VERSION;
+import org.appwork.utils.net.httpconnection.HTTPConnectionUtils.IPVERSION;
 import org.appwork.utils.os.CrossSystem;
 
 public class HTTPConnectionImpl implements HTTPConnection {
@@ -138,18 +138,14 @@ public class HTTPConnectionImpl implements HTTPConnection {
     protected String                      httpResponseMessage = "";
     protected volatile int                readTimeout         = 30000;
     protected volatile int                connectTimeout      = 30000;
-    protected TCP_VERSION                 tcpVersion          = TCP_VERSION.TCP4_ONLY;
+    protected IPVERSION                   ipVersion           = null;
 
-    public TCP_VERSION getTcpVersion() {
-        return tcpVersion;
+    public IPVERSION getIPVersion() {
+        return ipVersion;
     }
 
-    public void setTcpVersion(TCP_VERSION tcpVersion) {
-        if (tcpVersion == null) {
-            this.tcpVersion = TCP_VERSION.TCP4_ONLY;
-        } else {
-            this.tcpVersion = tcpVersion;
-        }
+    public void setIPVersion(IPVERSION ipVersion) {
+        this.ipVersion = null;
     }
 
     public int getReadTimeout() {
@@ -568,17 +564,26 @@ public class HTTPConnectionImpl implements HTTPConnection {
         return null;
     }
 
+    public static InetAddress[] resolveLiteralIP(final String ip) throws IOException {
+        if (ip != null) {
+            final InetAddress[] ret = new InetAddress[1];
+            if (ip.matches("^\\d+\\.\\d+\\.\\d+\\.\\d+$")) {
+                ret[0] = InetAddress.getByName(ip);
+                return ret;
+            } else if (ip.matches("^\\[[a-f0-9:]+\\]$")) {
+                ret[0] = InetAddress.getByName(ip);
+                return ret;
+            }
+        }
+        return null;
+    }
+
     public static InetAddress[] getNetworkInterfaceInetAdress(HTTPProxy proxy) throws IOException {
         if (proxy != null && proxy.isDirect()) {
             final String local = proxy.getLocal();
             if (local != null) {
-                final InetAddress[] ret = new InetAddress[1];
-                if (local.matches("^\\d+\\.\\d+\\.\\d+\\.\\d+$")) {
-                    ret[0] = InetAddress.getByName(local);
-                } else if (local.matches("^\\[[a-f0-9:]+\\]$")) {
-                    ret[0] = InetAddress.getByName(local);
-                }
-                if (ret[0] != null) {
+                final InetAddress[] ret = resolveLiteralIP(local);
+                if (ret != null && ret.length > 0) {
                     return ret;
                 }
             }
@@ -725,7 +730,7 @@ public class HTTPConnectionImpl implements HTTPConnection {
     }
 
     protected InetAddress[] resolvHostIP(final String host) throws IOException {
-        return HTTPConnectionUtils.resolvHostIP(host, getTcpVersion());
+        return HTTPConnectionUtils.resolvHostIP(host, getIPVersion());
     }
 
     protected InetAddress[] getRemoteIPs() throws IOException {

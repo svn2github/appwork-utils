@@ -45,6 +45,7 @@ import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
@@ -194,11 +195,11 @@ public class HTTPConnectionImpl implements HTTPConnection {
     protected static final HashMap<String, LinkedList<KeepAliveSocketStream>> KEEPALIVEPOOL         = new HashMap<String, LinkedList<KeepAliveSocketStream>>();
     protected static final Object                                             LOCK                  = new Object();
     protected static final DelayedRunnable                                    KEEPALIVECLEANUPTIMER = new DelayedRunnable(10000, 30000) {
-                                                                                                        @Override
-                                                                                                        public void delayedrun() {
-                                                                                                            cleanupKeepAlivePools();
-                                                                                                        }
-                                                                                                    };
+        @Override
+        public void delayedrun() {
+            cleanupKeepAlivePools();
+        }
+    };
 
     private static final void cleanupKeepAlivePools() {
         synchronized (HTTPConnectionImpl.LOCK) {
@@ -602,56 +603,62 @@ public class HTTPConnectionImpl implements HTTPConnection {
                 final NetworkInterface netif = NetworkInterface.getByName(ifName);
                 if (netif == null) {
                     throw new ProxyConnectException("No such networkinterface: " + interfaceName, proxy);
-                }
-                if (!netif.isUp()) {
+                } else if (!netif.isUp()) {
                     throw new ProxyConnectException("Unconnected networkinterface: " + interfaceName, proxy);
-                }
-                if (subInterface) {
-                    final HashSet<InetAddress> inetAddresses = new HashSet<InetAddress>();
-                    final Enumeration<NetworkInterface> subif = netif.getSubInterfaces();
-                    while (subif.hasMoreElements()) {
-                        final NetworkInterface next = subif.nextElement();
-                        if (interfaceName.equals(next.getName())) {
-                            if (!next.isUp()) {
-                                throw new ProxyConnectException("Unconnected networkinterface: " + interfaceName, proxy);
-                            }
-                            final Enumeration<InetAddress> iaSub = next.getInetAddresses();
-                            while (iaSub.hasMoreElements()) {
-                                final InetAddress ia = iaSub.nextElement();
-                                inetAddresses.add(ia);
-                            }
-                            if (inetAddresses.size() > 0) {
-                                return inetAddresses.toArray(new InetAddress[0]);
-                            }
-                            throw new ProxyConnectException("Unsupported networkinterface: " + interfaceName, proxy);
-                        }
-                    }
-                    throw new ProxyConnectException("No such networkinterface: " + interfaceName, proxy);
                 } else {
-                    /**
-                     * root.getInetAddresses contains all InetAddress (rootInterface+subInterfaces), so we have to filter out subInterfaces
-                     * first
-                     */
-                    final HashSet<InetAddress> inetAddresses = new HashSet<InetAddress>();
-                    final Enumeration<InetAddress> iaRoot = netif.getInetAddresses();
-                    while (iaRoot.hasMoreElements()) {
-                        final InetAddress ia = iaRoot.nextElement();
-                        inetAddresses.add(ia);
-                    }
-                    final Enumeration<NetworkInterface> subif = netif.getSubInterfaces();
-                    while (subif.hasMoreElements()) {
-                        final NetworkInterface next = subif.nextElement();
-                        final Enumeration<InetAddress> iaSub = next.getInetAddresses();
-                        while (iaSub.hasMoreElements()) {
-                            final InetAddress ia = iaSub.nextElement();
-                            inetAddresses.remove(ia);
+                    if (subInterface) {
+                        final HashSet<InetAddress> ret = new HashSet<InetAddress>();
+                        final Enumeration<NetworkInterface> subNetworkInterfaces = netif.getSubInterfaces();
+                        while (subNetworkInterfaces.hasMoreElements()) {
+                            final NetworkInterface subNetworkInterface = subNetworkInterfaces.nextElement();
+                            if (subNetworkInterface != null && interfaceName.equals(subNetworkInterface.getName())) {
+                                if (!subNetworkInterface.isUp()) {
+                                    throw new ProxyConnectException("Unconnected networkinterface: " + interfaceName, proxy);
+                                }
+                                final List<InterfaceAddress> interfaceAddresses = subNetworkInterface.getInterfaceAddresses();
+                                if (interfaceAddresses != null) {
+                                    for (final InterfaceAddress interfaceAddress : interfaceAddresses) {
+                                        ret.add(interfaceAddress.getAddress());
+                                    }
+                                }
+                                if (ret.size() > 0) {
+                                    return ret.toArray(new InetAddress[0]);
+                                }
+                                throw new ProxyConnectException("Unsupported networkinterface: " + interfaceName, proxy);
+                            }
+                        }
+                    } else {
+                        /**
+                         * root.getInetAddresses contains all InetAddress (rootInterface+subInterfaces), so we have to filter out
+                         * subInterfaces
+                         */
+                        final HashSet<InetAddress> ret = new HashSet<InetAddress>();
+                        List<InterfaceAddress> interfaceAddresses = netif.getInterfaceAddresses();
+                        if (interfaceAddresses != null) {
+                            for (final InterfaceAddress interfaceAddress : interfaceAddresses) {
+                                ret.add(interfaceAddress.getAddress());
+                            }
+                        }
+                        if (ret.size() > 0) {
+                            final Enumeration<NetworkInterface> subNetworkInterfaces = netif.getSubInterfaces();
+                            while (subNetworkInterfaces.hasMoreElements()) {
+                                final NetworkInterface subNetworkInterface = subNetworkInterfaces.nextElement();
+                                if (subNetworkInterface != null) {
+                                    interfaceAddresses = subNetworkInterface.getInterfaceAddresses();
+                                    if (interfaceAddresses != null) {
+                                        for (final InterfaceAddress interfaceAddress : interfaceAddresses) {
+                                            ret.remove(interfaceAddress.getAddress());
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        if (ret.size() > 0) {
+                            return ret.toArray(new InetAddress[0]);
                         }
                     }
-                    if (inetAddresses.size() > 0) {
-                        return inetAddresses.toArray(new InetAddress[0]);
-                    }
+                    throw new ProxyConnectException("Unsupported networkinterface: " + interfaceName, proxy);
                 }
-                throw new ProxyConnectException("Unsupported networkinterface: " + interfaceName, proxy);
             }
             throw new ProxyConnectException("Invalid Direct Proxy", proxy);
         }

@@ -309,12 +309,10 @@ public class HTTPConnectionUtils {
             /* remove spaces....so literal IP's work without resolving */
             resolvHost = host.trim();
         }
-        InetAddress hosts[] = null;
         for (int resolvTry = 0; resolvTry < 2; resolvTry++) {
             try {
                 /* resolv all possible ip's */
-                hosts = InetAddress.getAllByName(resolvHost);
-                return hosts;
+                return InetAddress.getAllByName(resolvHost);
             } catch (final UnknownHostException e) {
                 try {
                     Thread.sleep(500);

@@ -146,7 +146,7 @@ public class HTTPConnectionImpl implements HTTPConnection {
     }
 
     public void setIPVersion(IPVERSION ipVersion) {
-        this.ipVersion = null;
+        this.ipVersion = ipVersion;
     }
 
     public int getReadTimeout() {

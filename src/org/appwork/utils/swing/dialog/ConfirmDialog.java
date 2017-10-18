@@ -33,6 +33,8 @@
  * ==================================================================================================================================================== */
 package org.appwork.utils.swing.dialog;
 
+import java.awt.Font;
+
 import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
@@ -178,6 +180,7 @@ public class ConfirmDialog extends AbstractDialog<Integer> implements ConfirmDia
             }
         };
         modifyTextPane(textField);
+        final Font font = textField.getFont();
         if (BinaryLogic.containsAll(flagMask, Dialog.STYLE_HTML)) {
             textField.setContentType("text/html");
             textField.addHyperlinkListener(new HyperlinkListener() {
@@ -191,6 +194,7 @@ public class ConfirmDialog extends AbstractDialog<Integer> implements ConfirmDia
             textField.setContentType("text/plain");
             // this.textField.setMaximumSize(new Dimension(450, 600));
         }
+        textField.setFont(font);
         textField.setText(getMessage());
         textField.setEditable(false);
         textField.setBackground(null);

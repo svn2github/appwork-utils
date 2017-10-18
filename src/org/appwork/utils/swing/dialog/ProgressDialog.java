@@ -33,6 +33,7 @@
  * ==================================================================================================================================================== */
 package org.appwork.utils.swing.dialog;
 
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -61,7 +62,6 @@ import org.appwork.utils.swing.EDTHelper;
  */
 public class ProgressDialog extends AbstractDialog<Integer> implements ProgressInterface {
     public interface ProgressGetter {
-
         public int getProgress();
 
         public String getString();
@@ -77,13 +77,10 @@ public class ProgressDialog extends AbstractDialog<Integer> implements ProgressI
     private Thread               executer;
     private final ProgressGetter getter;
     private final String         message;
-
     private Timer                updater;
     private long                 waitForTermination = 20000;
     protected Throwable          throwable          = null;
-
     private JLabel               lbl;
-
     protected JTextPane          textField;
 
     /**
@@ -108,7 +105,6 @@ public class ProgressDialog extends AbstractDialog<Integer> implements ProgressI
             this.getter = progressGetter;
         }
         this.setReturnmask(true);
-
     }
 
     /*
@@ -139,37 +135,33 @@ public class ProgressDialog extends AbstractDialog<Integer> implements ProgressI
             }
         }
         super.dispose();
-
     }
 
     protected void addMessageComponent(final MigPanel p) {
-
         textField = new JTextPane() {
             private static final long serialVersionUID = 1L;
 
             @Override
             public boolean getScrollableTracksViewportWidth() {
-
                 return !BinaryLogic.containsAll(flagMask, Dialog.STYLE_LARGE);
             }
         };
         modifyTextPane(textField);
+        final Font font = textField.getFont();
         if (BinaryLogic.containsAll(flagMask, Dialog.STYLE_HTML)) {
             textField.setContentType("text/html");
             textField.addHyperlinkListener(new HyperlinkListener() {
-
                 public void hyperlinkUpdate(final HyperlinkEvent e) {
                     if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
                         CrossSystem.openURL(e.getURL());
                     }
                 }
-
             });
         } else {
             textField.setContentType("text/plain");
             // this.textField.setMaximumSize(new Dimension(450, 600));
         }
-
+        textField.setFont(font);
         textField.setText(message);
         textField.setEditable(false);
         textField.setBackground(null);
@@ -177,17 +169,11 @@ public class ProgressDialog extends AbstractDialog<Integer> implements ProgressI
         textField.setFocusable(false);
         textField.putClientProperty("Synthetica.opaque", Boolean.FALSE);
         textField.setCaretPosition(0);
-
         if (BinaryLogic.containsAll(flagMask, Dialog.STYLE_LARGE)) {
-
             p.add(new JScrollPane(textField), "pushx,growx,spanx");
-
         } else {
-
             p.add(textField, "pushx,growx,spanx");
-
         }
-
     }
 
     /**
@@ -195,7 +181,6 @@ public class ProgressDialog extends AbstractDialog<Integer> implements ProgressI
      */
     private void modifyTextPane(JTextPane textField2) {
         // TODO Auto-generated method stub
-
     }
 
     /**
@@ -214,10 +199,8 @@ public class ProgressDialog extends AbstractDialog<Integer> implements ProgressI
         this.getDialog().setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         final MigPanel p = new MigPanel("ins 0,wrap 2", "[][]", "[][]");
         this.extendLayout(p);
-
         addMessageComponent(p);
         this.textField.setText(this.message);
-
         this.extendLayout(p);
         final JProgressBar bar;
         p.add(bar = new JProgressBar(0, 100), "growx,pushx" + (this.isLabelEnabled() ? "" : ",spanx"));
@@ -227,9 +210,7 @@ public class ProgressDialog extends AbstractDialog<Integer> implements ProgressI
             this.lbl.setHorizontalAlignment(SwingConstants.RIGHT);
             p.add(this.lbl, "wmin 30");
         }
-
         this.updater = new Timer(50, new ActionListener() {
-
             public void actionPerformed(final ActionEvent e) {
                 if (ProgressDialog.this.getter != null) {
                     final int prg = ProgressDialog.this.updateProgress(bar, ProgressDialog.this.getter);
@@ -247,7 +228,6 @@ public class ProgressDialog extends AbstractDialog<Integer> implements ProgressI
         this.updater.setInitialDelay(50);
         this.updater.start();
         this.executer = new Thread("ProgressDialogExecuter") {
-
             @Override
             public void run() {
                 try {
@@ -258,21 +238,17 @@ public class ProgressDialog extends AbstractDialog<Integer> implements ProgressI
                     ProgressDialog.this.setReturnmask(false);
                 } finally {
                     new EDTHelper<Object>() {
-
                         @Override
                         public Object edtRun() {
                             ProgressDialog.this.dispose();
                             return null;
                         }
-
                     }.start();
                     ProgressDialog.this.updater.stop();
                 }
-
             }
         };
         this.executer.start();
-
         return p;
     }
 
@@ -281,7 +257,6 @@ public class ProgressDialog extends AbstractDialog<Integer> implements ProgressI
      */
     protected void extendLayout(JPanel p) {
         // TODO Auto-generated method stub
-
     }
 
     /**
@@ -308,14 +283,11 @@ public class ProgressDialog extends AbstractDialog<Integer> implements ProgressI
 
     protected int updateProgress(final JProgressBar bar, final ProgressGetter getter) {
         final int prg = getter.getProgress();
-
         if (prg < 0) {
             bar.setIndeterminate(true);
-
         } else {
             bar.setIndeterminate(false);
             bar.setValue(prg);
-
         }
         return prg;
     }
@@ -347,5 +319,4 @@ public class ProgressDialog extends AbstractDialog<Integer> implements ProgressI
         // TODO Auto-generated method stub
         return this.getter.getProgress();
     }
-
 }

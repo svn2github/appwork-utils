@@ -33,6 +33,7 @@
  * ==================================================================================================================================================== */
 package org.appwork.utils.swing.dialog;
 
+import java.awt.Font;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -159,6 +160,7 @@ public class InputDialog extends AbstractDialog<String> implements KeyListener, 
                     return true;
                 }
             };
+            final Font font = textField.getFont();
             if (BinaryLogic.containsAll(this.flagMask, Dialog.STYLE_HTML)) {
                 this.textField.setContentType("text/html");
                 this.textField.addHyperlinkListener(new HyperlinkListener() {
@@ -169,9 +171,10 @@ public class InputDialog extends AbstractDialog<String> implements KeyListener, 
                     }
                 });
             } else {
-                this.textField.setContentType("text");
+                this.textField.setContentType("text/plain");
                 // this.textField.setMaximumSize(new Dimension(450, 600));
             }
+            textField.setFont(font);
             this.textField.setText(this.message);
             this.textField.setEditable(false);
             this.textField.setBackground(null);

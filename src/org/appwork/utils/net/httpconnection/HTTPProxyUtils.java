@@ -67,7 +67,10 @@ public class HTTPProxyUtils {
                 List<InterfaceAddress> interfaceAddresses = networkInterface.getInterfaceAddresses();
                 if (interfaceAddresses != null) {
                     for (final InterfaceAddress interfaceAddress : interfaceAddresses) {
-                        ret.add(interfaceAddress.getAddress());
+                        if (interfaceAddress != null) {
+                            // can be null, for example PPP/SLIP interface
+                            ret.add(interfaceAddress.getAddress());
+                        }
                     }
                 }
                 final Enumeration<NetworkInterface> subNetworkInterfaces = networkInterface.getSubInterfaces();
@@ -77,7 +80,10 @@ public class HTTPProxyUtils {
                         interfaceAddresses = subNetworkInterface.getInterfaceAddresses();
                         if (interfaceAddresses != null) {
                             for (final InterfaceAddress interfaceAddress : interfaceAddresses) {
-                                ret.add(interfaceAddress.getAddress());
+                                if (interfaceAddress != null) {
+                                    // can be null, for example PPP/SLIP interface
+                                    ret.add(interfaceAddress.getAddress());
+                                }
                             }
                         }
                     }

@@ -618,7 +618,10 @@ public class HTTPConnectionImpl implements HTTPConnection {
                                 final List<InterfaceAddress> interfaceAddresses = subNetworkInterface.getInterfaceAddresses();
                                 if (interfaceAddresses != null) {
                                     for (final InterfaceAddress interfaceAddress : interfaceAddresses) {
-                                        ret.add(interfaceAddress.getAddress());
+                                        if (interfaceAddress != null) {
+                                            // can be null, for example PPP/SLIP interface
+                                            ret.add(interfaceAddress.getAddress());
+                                        }
                                     }
                                 }
                                 if (ret.size() > 0) {
@@ -636,7 +639,10 @@ public class HTTPConnectionImpl implements HTTPConnection {
                         List<InterfaceAddress> interfaceAddresses = netif.getInterfaceAddresses();
                         if (interfaceAddresses != null) {
                             for (final InterfaceAddress interfaceAddress : interfaceAddresses) {
-                                ret.add(interfaceAddress.getAddress());
+                                if (interfaceAddress != null) {
+                                    // can be null, for example PPP/SLIP interface
+                                    ret.add(interfaceAddress.getAddress());
+                                }
                             }
                         }
                         if (ret.size() > 0) {
@@ -647,7 +653,10 @@ public class HTTPConnectionImpl implements HTTPConnection {
                                     interfaceAddresses = subNetworkInterface.getInterfaceAddresses();
                                     if (interfaceAddresses != null) {
                                         for (final InterfaceAddress interfaceAddress : interfaceAddresses) {
-                                            ret.remove(interfaceAddress.getAddress());
+                                            if (interfaceAddress != null) {
+                                                // can be null, for example PPP/SLIP interface
+                                                ret.remove(interfaceAddress.getAddress());
+                                            }
                                         }
                                     }
                                 }

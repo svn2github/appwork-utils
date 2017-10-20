@@ -34,7 +34,6 @@
 package org.appwork.utils.net.httpconnection;
 
 import java.net.InetAddress;
-import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -64,26 +63,22 @@ public class HTTPProxyUtils {
                 if (networkInterface.isLoopback() && allowLoopback == false) {
                     continue;
                 }
-                List<InterfaceAddress> interfaceAddresses = networkInterface.getInterfaceAddresses();
-                if (interfaceAddresses != null) {
-                    for (final InterfaceAddress interfaceAddress : interfaceAddresses) {
-                        if (interfaceAddress != null) {
-                            // can be null, for example PPP/SLIP interface
-                            ret.add(interfaceAddress.getAddress());
-                        }
+                Enumeration<InetAddress> inetAddresses = networkInterface.getInetAddresses();
+                while (inetAddresses.hasMoreElements()) {
+                    final InetAddress inetAddress = inetAddresses.nextElement();
+                    if (inetAddress != null) {
+                        ret.add(inetAddress);
                     }
                 }
                 final Enumeration<NetworkInterface> subNetworkInterfaces = networkInterface.getSubInterfaces();
                 while (subNetworkInterfaces.hasMoreElements()) {
                     final NetworkInterface subNetworkInterface = subNetworkInterfaces.nextElement();
                     if (subNetworkInterface != null) {
-                        interfaceAddresses = subNetworkInterface.getInterfaceAddresses();
-                        if (interfaceAddresses != null) {
-                            for (final InterfaceAddress interfaceAddress : interfaceAddresses) {
-                                if (interfaceAddress != null) {
-                                    // can be null, for example PPP/SLIP interface
-                                    ret.add(interfaceAddress.getAddress());
-                                }
+                        inetAddresses = subNetworkInterface.getInetAddresses();
+                        while (inetAddresses.hasMoreElements()) {
+                            final InetAddress inetAddress = inetAddresses.nextElement();
+                            if (inetAddress != null) {
+                                ret.add(inetAddress);
                             }
                         }
                     }

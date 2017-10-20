@@ -45,7 +45,6 @@ import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
@@ -195,11 +194,11 @@ public class HTTPConnectionImpl implements HTTPConnection {
     protected static final HashMap<String, LinkedList<KeepAliveSocketStream>> KEEPALIVEPOOL         = new HashMap<String, LinkedList<KeepAliveSocketStream>>();
     protected static final Object                                             LOCK                  = new Object();
     protected static final DelayedRunnable                                    KEEPALIVECLEANUPTIMER = new DelayedRunnable(10000, 30000) {
-        @Override
-        public void delayedrun() {
-            cleanupKeepAlivePools();
-        }
-    };
+                                                                                                        @Override
+                                                                                                        public void delayedrun() {
+                                                                                                            cleanupKeepAlivePools();
+                                                                                                        }
+                                                                                                    };
 
     private static final void cleanupKeepAlivePools() {
         synchronized (HTTPConnectionImpl.LOCK) {
@@ -615,34 +614,32 @@ public class HTTPConnectionImpl implements HTTPConnection {
                                 if (!subNetworkInterface.isUp()) {
                                     throw new ProxyConnectException("Unconnected networkinterface: " + interfaceName, proxy);
                                 }
-                                final List<InterfaceAddress> interfaceAddresses = subNetworkInterface.getInterfaceAddresses();
-                                if (interfaceAddresses != null) {
-                                    for (final InterfaceAddress interfaceAddress : interfaceAddresses) {
-                                        if (interfaceAddress != null) {
-                                            // can be null, for example PPP/SLIP interface
-                                            ret.add(interfaceAddress.getAddress());
-                                        }
+                                final Enumeration<InetAddress> inetAddresses = subNetworkInterface.getInetAddresses();
+                                while (inetAddresses.hasMoreElements()) {
+                                    final InetAddress inetAddress = inetAddresses.nextElement();
+                                    if (inetAddress != null) {
+                                        ret.add(inetAddress);
                                     }
                                 }
                                 if (ret.size() > 0) {
                                     return ret.toArray(new InetAddress[0]);
+                                } else {
+                                    throw new ProxyConnectException("Unsupported networkinterface: " + interfaceName, proxy);
                                 }
-                                throw new ProxyConnectException("Unsupported networkinterface: " + interfaceName, proxy);
                             }
                         }
+                        throw new ProxyConnectException("Unsupported networkinterface: " + interfaceName, proxy);
                     } else {
                         /**
                          * root.getInetAddresses contains all InetAddress (rootInterface+subInterfaces), so we have to filter out
                          * subInterfaces
                          */
                         final HashSet<InetAddress> ret = new HashSet<InetAddress>();
-                        List<InterfaceAddress> interfaceAddresses = netif.getInterfaceAddresses();
-                        if (interfaceAddresses != null) {
-                            for (final InterfaceAddress interfaceAddress : interfaceAddresses) {
-                                if (interfaceAddress != null) {
-                                    // can be null, for example PPP/SLIP interface
-                                    ret.add(interfaceAddress.getAddress());
-                                }
+                        Enumeration<InetAddress> inetAddresses = netif.getInetAddresses();
+                        while (inetAddresses.hasMoreElements()) {
+                            final InetAddress inetAddress = inetAddresses.nextElement();
+                            if (inetAddress != null) {
+                                ret.add(inetAddress);
                             }
                         }
                         if (ret.size() > 0) {
@@ -650,13 +647,11 @@ public class HTTPConnectionImpl implements HTTPConnection {
                             while (subNetworkInterfaces.hasMoreElements()) {
                                 final NetworkInterface subNetworkInterface = subNetworkInterfaces.nextElement();
                                 if (subNetworkInterface != null) {
-                                    interfaceAddresses = subNetworkInterface.getInterfaceAddresses();
-                                    if (interfaceAddresses != null) {
-                                        for (final InterfaceAddress interfaceAddress : interfaceAddresses) {
-                                            if (interfaceAddress != null) {
-                                                // can be null, for example PPP/SLIP interface
-                                                ret.remove(interfaceAddress.getAddress());
-                                            }
+                                    inetAddresses = subNetworkInterface.getInetAddresses();
+                                    while (inetAddresses.hasMoreElements()) {
+                                        final InetAddress inetAddress = inetAddresses.nextElement();
+                                        if (inetAddress != null) {
+                                            ret.remove(inetAddress);
                                         }
                                     }
                                 }
@@ -664,9 +659,10 @@ public class HTTPConnectionImpl implements HTTPConnection {
                         }
                         if (ret.size() > 0) {
                             return ret.toArray(new InetAddress[0]);
+                        } else {
+                            throw new ProxyConnectException("Unsupported networkinterface: " + interfaceName, proxy);
                         }
                     }
-                    throw new ProxyConnectException("Unsupported networkinterface: " + interfaceName, proxy);
                 }
             }
             throw new ProxyConnectException("Invalid Direct Proxy", proxy);

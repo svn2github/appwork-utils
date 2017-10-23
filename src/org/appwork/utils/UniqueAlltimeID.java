@@ -10,6 +10,12 @@ public class UniqueAlltimeID {
         this.id = next();
     }
 
+    public static void main(String[] args) {
+        for (int i = 0; i < 20000000; i++) {
+            System.out.println(UniqueAlltimeID.next());
+        }
+    }
+
     private static long createUniqueAlltimeID() {
         long id = -1;
         while (true) {

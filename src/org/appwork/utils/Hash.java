@@ -33,15 +33,16 @@
  * ==================================================================================================================================================== */
 package org.appwork.utils;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.util.zip.CRC32;
 import java.util.zip.CheckedInputStream;
+import java.util.zip.CheckedOutputStream;
 
 import org.appwork.utils.formatter.HexFormatter;
+import org.appwork.utils.net.NullOutputStream;
 
 public class Hash {
     public static final String HASH_TYPE_SHA256 = "SHA-256";
@@ -66,24 +67,12 @@ public class Hash {
     }
 
     public static long getCRC32(final byte[] data) throws IOException {
-        CheckedInputStream cis = null;
-        ByteArrayInputStream bis = null;
+        final CheckedOutputStream cos = new CheckedOutputStream(new NullOutputStream(), new CRC32());
         try {
-            bis = new ByteArrayInputStream(data);
-            cis = new CheckedInputStream(bis, new CRC32());
-            final byte readBuffer[] = new byte[32767];
-            while (cis.read(readBuffer) >= 0) {
-            }
-            return cis.getChecksum().getValue();
+            cos.write(data);
+            return cos.getChecksum().getValue();
         } finally {
-            try {
-                cis.close();
-            } catch (final Throwable e) {
-            }
-            try {
-                bis.close();
-            } catch (final Throwable e) {
-            }
+            cos.close();
         }
     }
 

@@ -38,6 +38,8 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class YEncInputStream extends InputStream {
     /**
@@ -52,6 +54,8 @@ public class YEncInputStream extends InputStream {
     private final long                  partBegin;
     private long                        decodedBytes = 0;
     private boolean                     eof          = false;
+    protected final static Pattern      NUMBER       = Pattern.compile("\\d+");
+    protected final static Pattern      CRC32        = Pattern.compile("[a-fA-F0-9]+");
 
     /**
      * returns the starting points, in bytes, of the block in the original file
@@ -122,16 +126,16 @@ public class YEncInputStream extends InputStream {
         if (!line.startsWith("=ybegin")) {
             throw new IOException("missing =ybegin");
         }
-        final String lineValue = getValue(line, "line");
+        final String lineValue = getValue(line, "line", NUMBER);
         this.lineLength = lineValue != null ? Integer.parseInt(lineValue) : -1;
-        name = getValue(line, "name");
-        final String sizeValue = getValue(line, "size");
+        name = getValue(line, "name", null);
+        final String sizeValue = getValue(line, "size", NUMBER);
         this.size = sizeValue != null ? Long.parseLong(sizeValue) : -1l;
-        final String partValue = getValue(line, "part");
+        final String partValue = getValue(line, "part", NUMBER);
         partIndex = partValue != null ? Integer.parseInt(partValue) : -1;
         isMultiPart = partIndex != -1;
         if (isMultiPart) {
-            final String totalValue = getValue(line, "total");
+            final String totalValue = getValue(line, "total", NUMBER);
             partTotal = totalValue != null ? Integer.parseInt(totalValue) : -1;
         } else {
             partTotal = -1;
@@ -142,9 +146,9 @@ public class YEncInputStream extends InputStream {
             if (!line.startsWith("=ypart")) {
                 throw new IOException("missing =ypart");
             }
-            final String beginValue = getValue(line, "begin");
+            final String beginValue = getValue(line, "begin", NUMBER);
             partBegin = beginValue != null ? Long.parseLong(beginValue) : -1;
-            final String endValue = getValue(line, "end");
+            final String endValue = getValue(line, "end", NUMBER);
             partEnd = endValue != null ? Long.parseLong(endValue) : -1;
         } else {
             partBegin = -1;
@@ -407,7 +411,7 @@ public class YEncInputStream extends InputStream {
         final int lineSize = client.readLine(inputStream, buffer);
         final byte[] lineBuffer = buffer.toByteArray();
         final String trailer = new String(lineBuffer, 0, lineSize, "ISO-8859-1");
-        final String sizeValue = getValue(trailer, "size");
+        final String sizeValue = getValue(trailer, "size", NUMBER);
         final long size = sizeValue != null ? Long.parseLong(sizeValue) : -1;
         if (decodedBytes < size) {
             throw new IOException("decoded-size-error");
@@ -416,15 +420,15 @@ public class YEncInputStream extends InputStream {
             if (size != getPartSize()) {
                 throw new IOException("part-size-error");
             }
-            final String partValueString = getValue(trailer, "part");
+            final String partValueString = getValue(trailer, "part", NUMBER);
             if (partValueString != null) {
                 final int partValueInt = Integer.parseInt(partValueString);
                 if (partValueInt != getPartIndex()) {
                     throw new IOException("part-index-error:" + getPartIndex() + "!=" + partValueInt);
                 }
             }
-            pcrc32Value = getValue(trailer, "pcrc32");
-            crc32Value = getValue(trailer, " crc32");// space is important to differ between pcrc32 and crc32
+            pcrc32Value = getValue(trailer, "pcrc32", CRC32);
+            crc32Value = getValue(trailer, " crc32", CRC32);// space is important to differ between pcrc32 and crc32
         } else {
             if (size != getSize()) {
                 throw new IOException("size-error");
@@ -500,7 +504,7 @@ public class YEncInputStream extends InputStream {
     }
 
     // TODO: better use regex here!
-    protected String getValue(final String line, final String key) {
+    protected String getValue(final String line, final String key, final Pattern pattern) {
         final String search = key + "=";
         final int start = line.indexOf(search);
         final int end;
@@ -516,7 +520,14 @@ public class YEncInputStream extends InputStream {
             }
         }
         if (start != -1) {
-            return line.substring(start + search.length(), end);
+            final String ret = line.substring(start + search.length(), end);
+            if (pattern != null) {
+                final Matcher matcher = pattern.matcher(ret);
+                if (matcher.find()) {
+                    return matcher.group();
+                }
+            }
+            return ret;
         } else {
             return null;
         }

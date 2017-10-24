@@ -503,33 +503,32 @@ public class YEncInputStream extends InputStream {
         return lineLength;
     }
 
-    // TODO: better use regex here!
-    protected String getValue(final String line, final String key, final Pattern pattern) {
+    protected String getValue(final String line, final String key, final Pattern valuePattern) {
         final String search = key + "=";
         final int start = line.indexOf(search);
-        final int end;
-        if ("name".equals(key)) {
-            /* special handling for name(last key/value to allow spaces) */
-            end = line.length();
+        if (start == -1) {
+            return null;
         } else {
-            final int index = line.indexOf(" ", start);
-            if (index == -1) {
+            final int end;
+            if ("name".equals(key)) {
+                /* special handling for name(last key/value to allow spaces) */
                 end = line.length();
             } else {
-                end = index;
+                final int index = line.indexOf(" ", start + search.length());
+                if (index == -1) {
+                    end = line.length();
+                } else {
+                    end = index;
+                }
             }
-        }
-        if (start != -1) {
             final String ret = line.substring(start + search.length(), end);
-            if (pattern != null) {
-                final Matcher matcher = pattern.matcher(ret);
+            if (valuePattern != null) {
+                final Matcher matcher = valuePattern.matcher(ret);
                 if (matcher.find()) {
                     return matcher.group();
                 }
             }
             return ret;
-        } else {
-            return null;
         }
     }
 }

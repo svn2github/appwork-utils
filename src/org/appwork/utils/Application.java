@@ -362,11 +362,13 @@ public class Application {
             return ROOT;
         }
         final String exe4j = System.getProperty("exe4j.moduleName");
-        File file = new File(exe4j);
-        if (exe4j != null && file.exists()) {
-            // exe4j moves the working directory to temp
-            ROOT = file.getParent();
-            return ROOT;
+        if (exe4j != null) {
+            File file = new File(exe4j);
+            if (exe4j != null && file.exists()) {
+                // exe4j moves the working directory to temp
+                ROOT = file.getParent();
+                return ROOT;
+            }
         }
         final String key = "awuhome" + Application.APP_FOLDER;
         final String sysProp = System.getProperty(key);

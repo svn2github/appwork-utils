@@ -40,28 +40,28 @@ import org.appwork.net.protocol.http.HTTPConstants;
 import org.appwork.net.protocol.http.HTTPConstants.ResponseCode;
 import org.appwork.utils.net.HTTPHeader;
 import org.appwork.utils.net.HeaderCollection;
-import org.appwork.utils.net.httpserver.HttpConnection;
 import org.appwork.utils.net.httpserver.HttpConnection.ConnectionHook;
+import org.appwork.utils.net.httpserver.RawHttpConnectionInterface;
 
 /**
  * @author daniel
  *
  */
 public class HttpResponse implements HttpResponseInterface {
-    private final HeaderCollection responseHeaders;
-    public static final byte[]     NEWLINE       = "\r\n".getBytes();
-    public static final byte[]     HTTP11        = "HTTP/1.1 ".getBytes();
-    public static final byte[]     _0            = "0".getBytes();
-    private ResponseCode           responseCode  = ResponseCode.SUCCESS_NO_CONTENT;
-    protected final HttpConnection connection;
-    protected OutputStream         outputStream  = null;
-    protected boolean              asyncResponse = false;
+    private final HeaderCollection             responseHeaders;
+    public static final byte[]                 NEWLINE       = "\r\n".getBytes();
+    public static final byte[]                 HTTP11        = "HTTP/1.1 ".getBytes();
+    public static final byte[]                 _0            = "0".getBytes();
+    private ResponseCode                       responseCode  = ResponseCode.SUCCESS_NO_CONTENT;
+    protected final RawHttpConnectionInterface connection;
+    protected OutputStream                     outputStream  = null;
+    protected boolean                          asyncResponse = false;
 
-    public HttpConnection getConnection() {
+    public RawHttpConnectionInterface getConnection() {
         return connection;
     }
 
-    public HttpResponse(final HttpConnection connection) {
+    public HttpResponse(final RawHttpConnectionInterface connection) {
         this.connection = connection;
         this.responseHeaders = new HeaderCollection();
         this.responseHeaders.add(new HTTPHeader(HTTPConstants.HEADER_REQUEST_CONNECTION, "close"));

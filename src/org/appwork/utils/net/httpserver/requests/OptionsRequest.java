@@ -34,18 +34,18 @@
 package org.appwork.utils.net.httpserver.requests;
 
 import org.appwork.utils.net.HTTPHeader;
-import org.appwork.utils.net.httpserver.HttpConnection;
 import org.appwork.utils.net.httpserver.HttpConnection.HttpConnectionType;
+import org.appwork.utils.net.httpserver.RawHttpConnectionInterface;
 
 /**
  * @author daniel
- * 
+ *
  */
 public class OptionsRequest extends GetRequest {
     /**
      * @param connection
      */
-    public OptionsRequest(HttpConnection connection) {
+    public OptionsRequest(RawHttpConnectionInterface connection) {
         super(connection);
     }
 

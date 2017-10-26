@@ -39,8 +39,8 @@ import java.util.List;
 
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.net.HTTPHeader;
-import org.appwork.utils.net.httpserver.HttpConnection;
 import org.appwork.utils.net.httpserver.HttpConnection.HttpConnectionType;
+import org.appwork.utils.net.httpserver.RawHttpConnectionInterface;
 
 /**
  * @author daniel
@@ -50,13 +50,13 @@ public class GetRequest extends HttpRequest {
     /**
      * @param connection
      */
-    public GetRequest(final HttpConnection connection) {
+    public GetRequest(final RawHttpConnectionInterface connection) {
         super(connection);
     }
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.utils.net.httpserver.requests.HttpRequestInterface# getParameterbyKey(java.lang.String)
      */
     @Override

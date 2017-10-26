@@ -34,14 +34,14 @@
 package org.appwork.utils.net.httpserver.requests;
 
 import org.appwork.utils.net.httpconnection.HTTPConnection.RequestMethod;
-import org.appwork.utils.net.httpserver.HttpConnection;
 import org.appwork.utils.net.httpserver.HttpConnection.HttpConnectionType;
+import org.appwork.utils.net.httpserver.RawHttpConnectionInterface;
 
 public class PutRequest extends PostRequest {
     /**
      * @param connection
      */
-    public PutRequest(HttpConnection connection) {
+    public PutRequest(RawHttpConnectionInterface connection) {
         super(connection);
     }
 

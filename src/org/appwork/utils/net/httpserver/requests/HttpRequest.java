@@ -39,6 +39,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.appwork.utils.net.HeaderCollection;
 import org.appwork.utils.net.httpserver.HttpConnection;
+import org.appwork.utils.net.httpserver.RawHttpConnectionInterface;
 
 /**
  * @author daniel
@@ -84,22 +85,22 @@ public abstract class HttpRequest implements HttpRequestInterface {
         this.https = https;
     }
 
-    protected int                  serverPort             = -1;
-    protected String               serverProtocol         = null;
-    protected boolean              https                  = false;
-    protected List<KeyValuePair>   requestedURLParameters = null;
-    private List<String>           remoteAddress          = new ArrayList<String>();
-    protected final HttpConnection connection;
-    private HTTPBridge             bridge;
-    private final long             id;
+    protected int                              serverPort             = -1;
+    protected String                           serverProtocol         = null;
+    protected boolean                          https                  = false;
+    protected List<KeyValuePair>               requestedURLParameters = null;
+    private List<String>                       remoteAddress          = new ArrayList<String>();
+    protected final RawHttpConnectionInterface connection;
+    private HTTPBridge                         bridge;
+    private final long                         id;
 
-    public HttpConnection getConnection() {
+    public RawHttpConnectionInterface getConnection() {
         return connection;
     }
 
     private static AtomicLong REQUEST_ID_COUNTER = new AtomicLong(0);
 
-    public HttpRequest(final HttpConnection connection) {
+    public HttpRequest(final RawHttpConnectionInterface connection) {
         this.connection = connection;
         id = REQUEST_ID_COUNTER.incrementAndGet();
     }

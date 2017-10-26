@@ -72,7 +72,7 @@ import org.appwork.utils.net.httpserver.responses.HttpResponse;
  * @author daniel
  *
  */
-public class HttpConnection implements Runnable {
+public class HttpConnection implements Runnable, RawHttpConnectionInterface {
     public static enum HttpConnectionType {
         DELETE,
         CONNECT,

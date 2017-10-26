@@ -31,61 +31,34 @@
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
-package org.appwork.utils.net.httpserver.requests;
+package org.appwork.utils.net.httpserver;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.InputStream;
+import java.io.OutputStream;
 
-import org.appwork.utils.StringUtils;
-import org.appwork.utils.net.httpserver.HttpConnection.HttpConnectionType;
-import org.appwork.utils.net.httpserver.RawHttpConnectionInterface;
+import org.appwork.utils.net.httpserver.HttpConnection.ConnectionHook;
+import org.appwork.utils.net.httpserver.requests.HttpRequest;
 
 /**
  * @author daniel
- * @date 21.11.2016
+ * @date 26.10.2017
  *
  */
-public class ConnectRequest extends HttpRequest {
-    /**
-     * @param connection
-     */
-    public ConnectRequest(RawHttpConnectionInterface connection) {
-        super(connection);
-    }
+public interface RawHttpConnectionInterface {
+    public OutputStream getOutputStream(boolean b) throws IOException;
 
-    @Override
-    public HttpConnectionType getHttpConnectionType() {
-        return HttpConnectionType.CONNECT;
-    }
+    public InputStream getInputStream() throws IOException;
 
-    @Override
-    public String getParameterbyKey(final String key) throws IOException {
-        final List<KeyValuePair> params = this.getRequestedURLParameters();
-        if (params != null) {
-            for (final KeyValuePair param : params) {
-                if (StringUtils.equalsIgnoreCase(key, param.key)) {
-                    return param.value;
-                }
-            }
-        }
-        return null;
-    }
+    public boolean closableStreams();
 
-    @Override
-    public String[] getParametersbyKey(String key) throws IOException {
-        final List<String> ret = new ArrayList<String>();
-        final List<KeyValuePair> params = this.getRequestedURLParameters();
-        if (params != null) {
-            for (final KeyValuePair param : params) {
-                if (StringUtils.equalsIgnoreCase(key, param.key)) {
-                    ret.add(param.value);
-                }
-            }
-            if (ret.size() > 0) {
-                return ret.toArray(new String[0]);
-            }
-        }
-        return null;
-    }
+    public HttpRequest getRequest();
+
+    public void closeConnection();
+
+    public void close();
+
+    public void setHook(ConnectionHook hook);
+
+    public ConnectionHook getHook();
 }

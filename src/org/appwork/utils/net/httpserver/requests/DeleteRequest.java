@@ -34,14 +34,14 @@
 package org.appwork.utils.net.httpserver.requests;
 
 import org.appwork.utils.net.httpconnection.HTTPConnection.RequestMethod;
-import org.appwork.utils.net.httpserver.HttpConnection;
 import org.appwork.utils.net.httpserver.HttpConnection.HttpConnectionType;
+import org.appwork.utils.net.httpserver.RawHttpConnectionInterface;
 
 public class DeleteRequest extends PostRequest {
     /**
      * @param connection
      */
-    public DeleteRequest(HttpConnection connection) {
+    public DeleteRequest(RawHttpConnectionInterface connection) {
         super(connection);
     }
 

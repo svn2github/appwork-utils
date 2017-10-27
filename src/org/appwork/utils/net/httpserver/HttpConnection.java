@@ -148,15 +148,15 @@ public class HttpConnection implements Runnable, RawHttpConnectionInterface {
 
     protected final HttpServer   server;
     protected final Socket       clientSocket;
-    protected boolean            responseHeadersSent = false;
-    protected HttpResponse       response            = null;
+    protected boolean            outputStreamInUse = false;
+    protected HttpResponse       response          = null;
     protected final InputStream  is;
     protected final OutputStream os;
     protected HttpRequest        request;
-    private static final Pattern METHOD              = Pattern.compile("(GET|POST|HEAD|OPTIONS|CONNECT)");
-    private static final Pattern REQUESTLINE         = Pattern.compile("\\s+(.+)\\s+HTTP/");
-    private static final Pattern REQUESTURL          = Pattern.compile("^(/.*?)($|\\?)");
-    private static final Pattern REQUESTPARAM        = Pattern.compile("^/.*?\\?(.+)");
+    private static final Pattern METHOD            = Pattern.compile("(GET|POST|HEAD|OPTIONS|CONNECT)");
+    private static final Pattern REQUESTLINE       = Pattern.compile("\\s+(.+)\\s+HTTP/");
+    private static final Pattern REQUESTURL        = Pattern.compile("^(/.*?)($|\\?)");
+    private static final Pattern REQUESTPARAM      = Pattern.compile("^/.*?\\?(.+)");
 
     protected HttpConnection(final HttpServer server, final Socket clientSocket, final InputStream is, final OutputStream os) throws IOException {
         this.server = server;
@@ -331,7 +331,7 @@ public class HttpConnection implements Runnable, RawHttpConnectionInterface {
      */
     public OutputStream getOutputStream(final boolean sendResponseHeaders) throws IOException {
         if (sendResponseHeaders) {
-            this.sendResponseHeaders();
+            this.openOutputStream();
         }
         return this.getRawOutputStream();
     }
@@ -373,8 +373,8 @@ public class HttpConnection implements Runnable, RawHttpConnectionInterface {
         return this.response;
     }
 
-    public boolean isResponseHeadersSent() {
-        return this.responseHeadersSent;
+    public boolean isOutputStreamInUse() {
+        return this.outputStreamInUse;
     }
 
     public boolean onException(final Throwable e, final HttpRequest request, final HttpResponse response) throws IOException {
@@ -583,40 +583,39 @@ public class HttpConnection implements Runnable, RawHttpConnectionInterface {
      *
      * @throws IOException
      */
-    protected void sendResponseHeaders() throws IOException {
-        try {
-            if (this.isResponseHeadersSent()) {
-                //
-                throw new IOException("Headers already send!");
-            }
-            if (this.response != null) {
+    protected void openOutputStream() throws IOException {
+        if (this.isOutputStreamInUse()) {
+            throw new IOException("OutputStream is already in use!");
+        } else if (this.response != null) {
+            try {
                 final OutputStream out = this.getRawOutputStream();
-                ConnectionHook lHook = hook;
-                try {
-                    if (lHook != null) {
-                        lHook.onBeforeSendHeaders(response);
-                    }
-                    out.write(HttpResponse.HTTP11);
-                    out.write(this.response.getResponseCode().getBytes());
-                    out.write(HttpResponse.NEWLINE);
-                    for (final HTTPHeader h : this.response.getResponseHeaders()) {
-                        out.write(h.getKey().getBytes("ISO-8859-1"));
-                        out.write(HTTPHeader.DELIMINATOR);
-                        out.write(h.getValue().getBytes("ISO-8859-1"));
-                        out.write(HttpResponse.NEWLINE);
-                    }
-                    out.write(HttpResponse.NEWLINE);
-                    out.flush();
-                } finally {
+                final ConnectionHook lHook = hook;
+                if (lHook != null) {
+                    lHook.onBeforeSendHeaders(response);
                 }
+                openOutputStream(out, response);
+            } finally {
+                this.setOutputStreamInUse(true);
             }
-        } finally {
-            this.setResponseHeadersSent(true);
         }
     }
 
-    protected void setResponseHeadersSent(final boolean responseHeadersSent) {
-        this.responseHeadersSent = responseHeadersSent;
+    protected void openOutputStream(OutputStream out, HttpResponse response) throws IOException {
+        out.write(HttpResponse.HTTP11);
+        out.write(response.getResponseCode().getBytes());
+        out.write(HttpResponse.NEWLINE);
+        for (final HTTPHeader h : this.response.getResponseHeaders()) {
+            out.write(h.getKey().getBytes("ISO-8859-1"));
+            out.write(HTTPHeader.DELIMINATOR);
+            out.write(h.getValue().getBytes("ISO-8859-1"));
+            out.write(HttpResponse.NEWLINE);
+        }
+        out.write(HttpResponse.NEWLINE);
+        out.flush();
+    }
+
+    protected void setOutputStreamInUse(final boolean outputStreamInUse) {
+        this.outputStreamInUse = outputStreamInUse;
     }
 
     @Override

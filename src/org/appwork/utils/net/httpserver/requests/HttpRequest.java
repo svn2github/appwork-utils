@@ -49,33 +49,8 @@ public abstract class HttpRequest implements HttpRequestInterface {
     protected String           requestedURL   = null;
     protected HeaderCollection requestHeaders = null;
     protected String           requestedPath  = null;
-    protected String           serverName     = null;
 
     public abstract HttpConnection.HttpConnectionType getHttpConnectionType();
-
-    public String getServerName() {
-        return serverName;
-    }
-
-    public void setServerName(String serverName) {
-        this.serverName = serverName;
-    }
-
-    public int getServerPort() {
-        return serverPort;
-    }
-
-    public void setServerPort(int serverPort) {
-        this.serverPort = serverPort;
-    }
-
-    public String getServerProtocol() {
-        return serverProtocol;
-    }
-
-    public void setServerProtocol(String serverProtocol) {
-        this.serverProtocol = serverProtocol;
-    }
 
     public boolean isHttps() {
         return https;
@@ -85,8 +60,6 @@ public abstract class HttpRequest implements HttpRequestInterface {
         this.https = https;
     }
 
-    protected int                              serverPort             = -1;
-    protected String                           serverProtocol         = null;
     protected boolean                          https                  = false;
     protected List<KeyValuePair>               requestedURLParameters = null;
     private List<String>                       remoteAddress          = new ArrayList<String>();

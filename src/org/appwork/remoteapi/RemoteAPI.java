@@ -222,7 +222,7 @@ public class RemoteAPI implements HttpRequestHandler {
         }
         return new OutputStream() {
             boolean wrapperHeader = wrapJQuery && request != null && request.getJqueryCallback() != null;
-            boolean wrapperEnd    = wrapJQuery && request != null && request.getJqueryCallback() != null;
+            boolean wrapperEnd = wrapJQuery && request != null && request.getJqueryCallback() != null;
 
             @Override
             public void close() throws IOException {
@@ -855,8 +855,10 @@ public class RemoteAPI implements HttpRequestHandler {
         final OutputStream os;
         final HTTPBridge bridge = request != null ? request.getBridge() : null;
         if (bridge == null || bridge.canHandleChunkedEncoding(request, response)) {
-            response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING, HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING_CHUNKED));
-            os = new ChunkedOutputStream(response.getOutputStream(true));
+            // response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING,
+            // HTTPConstants.HEADER_RESPONSE_TRANSFER_ENCODING_CHUNKED));
+            // os = new ChunkedOutputStream(response.getOutputStream(true));
+            os = response.getOutputStream(true);
         } else {
             os = response.getOutputStream(true);
         }

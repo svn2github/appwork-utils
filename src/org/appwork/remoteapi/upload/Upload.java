@@ -116,7 +116,14 @@ public abstract class Upload {
         return "\"" + ret + "\"";
     }
 
-    public long getRemoteSize(final boolean fetchOnline) throws FileNotFoundException, IOException, InterruptedException {
+    protected void checkLocal() throws IOException {
+        final File file = getFile();
+        if (file.exists() == false) {
+            throw new FileNotFoundException("Local file does not exist: " + file);
+        }
+    }
+
+    public long getRemoteSize(final boolean fetchOnline) throws IOException, InterruptedException {
         if (fetchOnline == false && this.remoteSize > 0) {
             return this.remoteSize;
         }
@@ -129,12 +136,9 @@ public abstract class Upload {
                 header.put(HTTPConstants.HEADER_REQUEST_IF_MATCH, eTag);
             }
             header.put(HTTPConstants.HEADER_REQUEST_CONTENT_TYPE, "application/octet-stream");
-            if (this.file.exists() == false) {
-                throw new FileNotFoundException("Local file does not exist: " + this.file);
-            }
-            header.put(HTTPConstants.HEADER_RESPONSE_CONTENT_RANGE, "bytes */" + this.file.length());
+            checkLocal();
+            header.put(HTTPConstants.HEADER_RESPONSE_CONTENT_RANGE, "bytes */" + getLocalSize());
             this.checkInterrupted();
-            long tt = System.currentTimeMillis();
             con = shttp.openPostConnection(this.getUploadURL(), null, new ByteArrayInputStream(new byte[0]), header, 0);
             // LoggerFactory.getDefaultLogger().info("GRZ Open Connection " + (System.currentTimeMillis() - tt));
             this.parseResponse(con);
@@ -164,10 +168,11 @@ public abstract class Upload {
         if (this.remoteSize <= 0) {
             return false;
         }
-        if (this.remoteSize > this.file.length()) {
-            throw new FileNotFoundException("RemoteSize > LocalSize");
+        final long localSize = getLocalSize();
+        if (this.remoteSize > localSize) {
+            throw new FileNotFoundException("RemoteSize=" + remoteSize + " > LocalSize=" + localSize);
         }
-        return this.file.length() == this.remoteSize;
+        return localSize == this.remoteSize;
     }
 
     protected void parseResponse(final HTTPConnection con) throws IOException {
@@ -187,7 +192,7 @@ public abstract class Upload {
                     this.remoteSize = Long.parseLong(remoteSize) + 1;
                 }
             } else {
-                this.remoteSize = this.file.length();
+                this.remoteSize = getLocalSize();
             }
             return;
         }
@@ -223,16 +228,68 @@ public abstract class Upload {
         return MessageDigest.getInstance("SHA-1");
     }
 
+    protected InputStream openInputStream() throws IOException {
+        final RandomAccessFile raf = new RandomAccessFile(getFile(), "r");
+        return new InputStream() {
+            @Override
+            public int read() throws IOException {
+                return raf.read();
+            }
+
+            @Override
+            public int available() throws IOException {
+                final long available = raf.length() - raf.getFilePointer();
+                if (available > Integer.MAX_VALUE) {
+                    return Integer.MAX_VALUE;
+                } else {
+                    return (int) available;
+                }
+            }
+
+            @Override
+            public long skip(final long skip) throws IOException {
+                long left = skip;
+                while (left > 0) {
+                    final int skipped;
+                    if (left > Integer.MAX_VALUE) {
+                        skipped = raf.skipBytes(Integer.MAX_VALUE);
+                    } else {
+                        skipped = raf.skipBytes((int) left);
+                    }
+                    left -= skipped;
+                    if (skipped == 0) {
+                        break;
+                    }
+                }
+                return skip - left;
+            }
+
+            @Override
+            public void close() throws IOException {
+                raf.close();
+            }
+
+            @Override
+            public int read(byte[] b) throws IOException {
+                return raf.read(b);
+            }
+
+            @Override
+            public int read(byte[] b, int off, int len) throws IOException {
+                return raf.read(b, off, len);
+            }
+        };
+    }
+
     public boolean uploadChunk() throws FileNotFoundException, IOException, InterruptedException, NoSuchAlgorithmException {
         final BasicHTTP shttp = this.getBasicHTTP();
-        RandomAccessFile raf = null;
+        InputStream is = null;
         HTTPConnection con = null;
         final UploadProgress uploadProgress = this.getUploadProgress();
         try {
             final HashMap<String, String> header = new HashMap<String, String>();
-            raf = new RandomAccessFile(this.file, "r");
-            final RandomAccessFile fraf = raf;
-            long uploadSize = this.file.length();
+            is = openInputStream();
+            long uploadSize = getLocalSize();
             if (uploadProgress != null) {
                 uploadProgress.setTotal(uploadSize);
             }
@@ -253,8 +310,8 @@ public abstract class Upload {
             }
             if (remoteSize > 0) {
                 /* we resume the upload */
-                raf.seek(remoteSize);
-                uploadSize = this.file.length() - remoteSize;
+                final long skipped = is.skip(remoteSize);
+                uploadSize = getLocalSize() - skipped;
             }
             final long maxChunkSize = this.getUploadChunkSize();
             if (maxChunkSize > 1024) {
@@ -264,66 +321,16 @@ public abstract class Upload {
             this.checkInterrupted();
             final long rangeEnd = remoteSize + uploadSize - 1;
             final MessageDigest md = getMessageDigest();
-            final InputStream fis = new InputStream() {
-                @Override
-                public int available() throws IOException {
-                    if (fraf.length() - fraf.getFilePointer() >= Integer.MAX_VALUE) {
-                        return Integer.MAX_VALUE;
-                    } else {
-                        return (int) (fraf.length() - fraf.getFilePointer());
-                    }
-                }
-
-                @Override
-                public void close() throws IOException {
-                    fraf.close();
-                }
-
-                @Override
-                public synchronized void mark(final int readlimit) {
-                }
-
-                @Override
-                public boolean markSupported() {
-                    return false;
-                }
-
-                @Override
-                public int read() throws IOException {
-                    return fraf.read();
-                }
-
-                @Override
-                public int read(final byte[] b) throws IOException {
-                    return fraf.read(b);
-                }
-
-                @Override
-                public int read(final byte[] b, final int off, final int len) throws IOException {
-                    return fraf.read(b, off, len);
-                }
-
-                @Override
-                public synchronized void reset() throws IOException {
-                    super.reset();
-                }
-
-                @Override
-                public long skip(final long n) throws IOException {
-                    return 0;
-                }
-            };
-            final DigestInputStream is = new DigestInputStream(new LimitedInputStream(fis, uploadSize), md);
+            final DigestInputStream dis = new DigestInputStream(new LimitedInputStream(is, uploadSize), md);
             header.put(HTTPConstants.HEADER_REQUEST_IF_MATCH, this.getQuotedEtag());
             header.put(HTTPConstants.HEADER_REQUEST_CONTENT_TYPE, "application/octet-stream");
-            header.put(HTTPConstants.HEADER_RESPONSE_CONTENT_RANGE, "bytes " + remoteSize + "-" + rangeEnd + "/" + this.file.length());
+            header.put(HTTPConstants.HEADER_RESPONSE_CONTENT_RANGE, "bytes " + remoteSize + "-" + rangeEnd + "/" + getLocalSize());
             this.checkInterrupted();
-            long tt = System.currentTimeMillis();
-            con = shttp.openPostConnection(this.getUploadURL(), uploadProgress, is, header, uploadSize);
+            con = shttp.openPostConnection(this.getUploadURL(), uploadProgress, dis, header, uploadSize);
             // LoggerFactory.getDefaultLogger().info("UC Open Connection " + (System.currentTimeMillis() - tt));
             this.parseResponse(con);
             final String remoteHash = new String(IO.readStream(1024, con.getInputStream()), "UTF-8");
-            final String localHash = HexFormatter.byteArrayToHex(is.getMessageDigest().digest());
+            final String localHash = HexFormatter.byteArrayToHex(dis.getMessageDigest().digest());
             if (!localHash.equalsIgnoreCase(remoteHash)) {
                 throw new UploadHashException("Upload error: hash missmatch");
             }
@@ -334,7 +341,7 @@ public abstract class Upload {
             return this.isUploadComplete();
         } finally {
             try {
-                raf.close();
+                is.close();
             } catch (final Throwable e) {
             }
             try {

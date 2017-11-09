@@ -340,52 +340,44 @@ public class Files {
         }
     }
 
-    public static <T extends Throwable> void internalWalkThroughStructure(final FileHandler<T> handler, final File f, int depths) throws T {
-        if (!f.exists()) {
-            return;
-        }
-        if (!handler.onFile(f, depths)) {
-            return;
-        }
-        if (f.isDirectory()) {
-            depths++;
-            final File[] files = f.listFiles();
-            if (files == null) {
-                return;
-            }
-            for (final File sf : files) {
-                Files.internalWalkThroughStructure(handler, sf, depths);
+    public static <T extends Throwable> void internalWalkThroughStructure(final FileHandler<T> handler, final File file, final int depths) throws T {
+        if (file.exists() && handler.onFile(file, depths)) {
+            if (file.isDirectory()) {
+                final File[] directoryFiles = file.listFiles();
+                if (directoryFiles != null) {
+                    for (final File directoryFile : directoryFiles) {
+                        Files.internalWalkThroughStructure(handler, directoryFile, depths + 1);
+                    }
+                }
             }
         }
     }
 
-    public static <T extends Exception> void internalWalkThroughStructureReverse(final Handler<T> handler, final File f) throws T {
-        if (!f.exists()) {
-            return;
-        }
-        if (f.isDirectory()) {
-            final File[] files = f.listFiles();
-            if (files == null) {
-                return;
+    public static <T extends Exception> void internalWalkThroughStructureReverse(final Handler<T> handler, final File file) throws T {
+        if (file.exists()) {
+            if (file.isDirectory()) {
+                final File[] directoryFiles = file.listFiles();
+                if (directoryFiles != null) {
+                    for (final File directoryFile : directoryFiles) {
+                        Files.internalWalkThroughStructureReverse(handler, directoryFile);
+                    }
+                }
             }
-            for (final File sf : files) {
-                Files.internalWalkThroughStructureReverse(handler, sf);
-            }
+            handler.onFile(file);
         }
-        handler.onFile(f);
     }
 
-    public static <T extends Exception> void walkThroughStructure(final FileHandler<T> handler, final File f) throws T {
-        handler.intro(f);
+    public static <T extends Exception> void walkThroughStructure(final FileHandler<T> handler, final File file) throws T {
+        handler.intro(file);
         try {
-            Files.internalWalkThroughStructure(handler, f, 0);
+            Files.internalWalkThroughStructure(handler, file, 0);
         } finally {
-            handler.outro(f);
+            handler.outro(file);
         }
     }
 
-    public static <T extends Exception> void walkThroughStructure(final Handler<T> handler, final File f) throws T {
-        handler.intro(f);
+    public static <T extends Exception> void walkThroughStructure(final Handler<T> handler, final File file) throws T {
+        handler.intro(file);
         try {
             Files.internalWalkThroughStructure(new FileHandler<T>() {
                 @Override
@@ -403,18 +395,18 @@ public class Files {
                 public void outro(File f) throws T {
                     // handler.outro(f);
                 }
-            }, f, 0);
+            }, file, 0);
         } finally {
-            handler.outro(f);
+            handler.outro(file);
         }
     }
 
-    public static <T extends Exception> void walkThroughStructureReverse(final Handler<T> handler, final File f) throws T {
-        handler.intro(f);
+    public static <T extends Exception> void walkThroughStructureReverse(final Handler<T> handler, final File file) throws T {
+        handler.intro(file);
         try {
-            Files.internalWalkThroughStructureReverse(handler, f);
+            Files.internalWalkThroughStructureReverse(handler, file);
         } finally {
-            handler.outro(f);
+            handler.outro(file);
         }
     }
 

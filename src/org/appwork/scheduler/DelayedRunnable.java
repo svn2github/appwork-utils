@@ -46,7 +46,6 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  */
 public abstract class DelayedRunnable implements Runnable {
-
     public static String getCaller() {
         final Throwable stackTrace = new Throwable().fillInStackTrace();
         try {
@@ -77,7 +76,6 @@ public abstract class DelayedRunnable implements Runnable {
          * changed core to 1 because of http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7091003
          */
         final ScheduledThreadPoolExecutor ret = new ScheduledThreadPoolExecutor(1, new ThreadFactory() {
-
             @Override
             public Thread newThread(final Runnable r) {
                 final Thread thread = new Thread(r);
@@ -96,7 +94,6 @@ public abstract class DelayedRunnable implements Runnable {
 
     private final ScheduledExecutorService service;
     private final long                     delayInMS;
-
     private final AtomicLong               lastRunRequest  = new AtomicLong(0);
     private final AtomicLong               firstRunRequest = new AtomicLong(0);
     private final AtomicBoolean            delayerSet      = new AtomicBoolean(false);
@@ -153,6 +150,10 @@ public abstract class DelayedRunnable implements Runnable {
         return delayInMS;
     }
 
+    public long getMaximumDelay() {
+        return maxInMS;
+    }
+
     public long getEstimatedNextRun() {
         final long firstRunRequest = this.firstRunRequest.get();
         if (firstRunRequest > 0) {
@@ -175,7 +176,6 @@ public abstract class DelayedRunnable implements Runnable {
         }
         this.firstRunRequest.compareAndSet(0, System.currentTimeMillis());
         this.service.schedule(new Runnable() {
-
             private void delayAgain(final long currentTime, Long nextDelay, final long minDif, final long thisRequestRun) {
                 if (DelayedRunnable.this.delayerSet.get() == false) {
                     return;
@@ -234,7 +234,6 @@ public abstract class DelayedRunnable implements Runnable {
                 DelayedRunnable.this.firstRunRequest.set(0);
                 DelayedRunnable.this.delayerSet.set(false);
             }
-
         }, DelayedRunnable.this.delayInMS, TimeUnit.MILLISECONDS);
     }
 
@@ -250,5 +249,4 @@ public abstract class DelayedRunnable implements Runnable {
     public boolean stop() {
         return this.delayerSet.compareAndSet(true, false);
     }
-
 }

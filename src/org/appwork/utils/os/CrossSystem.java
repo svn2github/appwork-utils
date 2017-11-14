@@ -447,6 +447,21 @@ public class CrossSystem {
      * @return
      */
     public static String alleviatePathParts(String pathPart) {
+        return alleviatePathParts(pathPart, true);
+    }
+
+    /**
+     * use this method to make pathPart safe to use in a full absoluePath.
+     *
+     * it will remove driveletters/path separators and all known chars that are forbidden in a path
+     *
+     * @param pathPart
+     *            {@link String}
+     * @param removeLeadingHidingDot
+     *            {@link Boolean} remove leading/hiding(unix) dot
+     * @return
+     */
+    public static String alleviatePathParts(String pathPart, boolean removeLeadingHidingDot) {
         if (StringUtils.isEmpty(pathPart)) {
             if (pathPart != null) {
                 return pathPart;
@@ -477,10 +492,14 @@ public class CrossSystem {
         /*
          * replace starting dots by single dot (prevents directory traversal)
          */
-        pathPart = pathPart.replaceFirst("^\\.+", ".");
+        if (removeLeadingHidingDot) {
+            pathPart = pathPart.replaceFirst("^\\.+", "");
+        } else {
+            pathPart = pathPart.replaceFirst("^\\.+", ".");
+        }
         /*
          * remove ending dots, not allowed under windows and others os maybe too
-         *
+         * 
          * Do not end a file or directory name with a space or a period.
          */
         pathPart = pathPart.replaceFirst("\\.+$", "");

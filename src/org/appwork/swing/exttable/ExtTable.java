@@ -1466,15 +1466,22 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
                                     @Override
                                     protected void runInEDT() {
                                         final PointerInfo pointerInfo = MouseInfo.getPointerInfo();
-                                        Point mousePosition = null;
+                                        final Point mousePosition;
                                         if (pointerInfo != null) {
                                             mousePosition = pointerInfo.getLocation();
                                             SwingUtilities.convertPointFromScreen(mousePosition, ExtTable.this);
+                                        } else {
+                                            mousePosition = null;
                                         }
                                         if (mousePosition != null) {
                                             final int rowNow = ExtTable.this.rowAtPoint(mousePosition);
+                                            if (rowNow != row) {
+                                                return;
+                                            }
                                             final ExtColumn<E> colNow = ExtTable.this.getExtColumnAtPoint(mousePosition);
-                                            if (rowNow != row || col != colNow) {
+                                            if (col != colNow) {
+                                                return;
+                                            } else if (getModel().getObjectbyRow(rowNow) != obj) {
                                                 return;
                                             }
                                         }

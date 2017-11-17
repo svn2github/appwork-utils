@@ -176,10 +176,10 @@ public class JsonKeyValueStorage extends Storage {
     @SuppressWarnings("unchecked")
     @Override
     public <E> E get(final String key, final E def, final Boolean autoPutValue) throws StorageException {
-        final boolean readL = getLock().readLock();
         final boolean contains;
         final boolean autoPutDefaultValue = autoPutValue == null ? isAutoPutValues() : Boolean.TRUE.equals(autoPutValue);
         Object ret = null;
+        final boolean readL = getLock().readLock();
         try {
             contains = getMap().containsKey(key);
             ret = contains ? getMap().get(key) : null;
@@ -271,7 +271,7 @@ public class JsonKeyValueStorage extends Storage {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.storage.Storage#getID()
      */
     @Override
@@ -297,14 +297,14 @@ public class JsonKeyValueStorage extends Storage {
         if (key == null) {
             throw new WTFException("key == null is forbidden!");
         }
-        final boolean readL = getLock().readLock();
         boolean requestSave = true;
+        getLock().writeLock();
         try {
             final Object ret = getMap().put(key, value);
             requestSave = !equals(ret, value);
             return ret;
         } finally {
-            getLock().readUnlock(readL);
+            getLock().writeUnlock();
             if (requestSave) {
                 this.requestSave();
             }
@@ -318,7 +318,7 @@ public class JsonKeyValueStorage extends Storage {
     }
 
     private static Set<Class<?>> getWrapperTypes() {
-        Set<Class<?>> ret = new HashSet<Class<?>>();
+        final Set<Class<?>> ret = new HashSet<Class<?>>();
         ret.add(Boolean.class);
         ret.add(Character.class);
         ret.add(Byte.class);
@@ -556,7 +556,7 @@ public class JsonKeyValueStorage extends Storage {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.storage.Storage#size()
      */
     @Override

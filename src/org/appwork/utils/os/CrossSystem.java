@@ -208,60 +208,57 @@ public class CrossSystem {
                     }
                 }
                 if (armVx && revision != null) {
-                    if (revision.startsWith("1000") && revision.length() > 4) {
-                        // if you see a "1000" at the front of the Revision, e.g. 10000002 then it indicates[1] that your Raspberry Pi has
-                        // been over-volted, and your board revision is simply the last 4 digits (i.e. 0002 in this example).
-                        revision = revision.substring(4);
-                    }
-                    if (StringUtils.equalsIgnoreCase(revision, "0002")) {
+                    // if you see a "1000" at the front of the Revision, e.g. 10000002 then it indicates[1] that your Raspberry Pi has
+                    // been over-volted, and your board revision is simply the last 4 digits (i.e. 0002 in this example).
+                    if (StringUtils.endsWithCaseInsensitive(revision, "0002")) {
                         // Model B Rev 1
                         isRaspberryPi = true;
-                    } else if (StringUtils.equalsIgnoreCase(revision, "0003")) {
+                    } else if (StringUtils.endsWithCaseInsensitive(revision, "0003")) {
                         // Model B Rev 1, ECHN0001
                         isRaspberryPi = true;
-                    } else if (StringUtils.equalsIgnoreCase(revision, "0004") || StringUtils.equalsIgnoreCase(revision, "0005") || StringUtils.equalsIgnoreCase(revision, "0006")) {
+                    } else if (StringUtils.endsWithCaseInsensitive(revision, "0004") || StringUtils.endsWithCaseInsensitive(revision, "0005") || StringUtils.endsWithCaseInsensitive(revision, "0006")) {
                         // Model B Rev 2
                         isRaspberryPi = true;
-                    } else if (StringUtils.equalsIgnoreCase(revision, "0007") || StringUtils.equalsIgnoreCase(revision, "0008") || StringUtils.equalsIgnoreCase(revision, "0009")) {
+                    } else if (StringUtils.endsWithCaseInsensitive(revision, "0007") || StringUtils.endsWithCaseInsensitive(revision, "0008") || StringUtils.endsWithCaseInsensitive(revision, "0009")) {
                         // Model A
                         isRaspberryPi = true;
-                    } else if (StringUtils.equalsIgnoreCase(revision, "000d") || StringUtils.equalsIgnoreCase(revision, "000e") || StringUtils.equalsIgnoreCase(revision, "00e") || StringUtils.equalsIgnoreCase(revision, "000f")) {
+                    } else if (StringUtils.endsWithCaseInsensitive(revision, "000d") || StringUtils.endsWithCaseInsensitive(revision, "000e") || StringUtils.endsWithCaseInsensitive(revision, "00e") || StringUtils.endsWithCaseInsensitive(revision, "000f")) {
                         // Model B Rev 2
                         isRaspberryPi = true;
-                    } else if (StringUtils.equalsIgnoreCase(revision, "0010") || StringUtils.equalsIgnoreCase(revision, "0013") || StringUtils.equalsIgnoreCase(revision, "900032")) {
+                    } else if (StringUtils.endsWithCaseInsensitive(revision, "0010") || StringUtils.endsWithCaseInsensitive(revision, "0013") || StringUtils.endsWithCaseInsensitive(revision, "900032")) {
                         // Model B+
                         isRaspberryPi = true;
-                    } else if (StringUtils.equalsIgnoreCase(revision, "0011") || StringUtils.equalsIgnoreCase(revision, "0014")) {
+                    } else if (StringUtils.endsWithCaseInsensitive(revision, "0011") || StringUtils.endsWithCaseInsensitive(revision, "0014")) {
                         // Compute Module
                         isRaspberryPi = true;
-                    } else if (StringUtils.equalsIgnoreCase(revision, "0012") || StringUtils.equalsIgnoreCase(revision, "0015")) {
+                    } else if (StringUtils.endsWithCaseInsensitive(revision, "0012") || StringUtils.endsWithCaseInsensitive(revision, "0015")) {
                         // Model A+
                         isRaspberryPi = true;
-                    } else if (StringUtils.equalsIgnoreCase(revision, "a01040") || StringUtils.equalsIgnoreCase(revision, "a01041") || StringUtils.equalsIgnoreCase(revision, "a21041")) {
+                    } else if (StringUtils.endsWithCaseInsensitive(revision, "a01040") || StringUtils.endsWithCaseInsensitive(revision, "a01041") || StringUtils.endsWithCaseInsensitive(revision, "a21041")) {
                         // Pi 2 Model B v1.0,v1.1,v1.2
                         isRaspberryPi = true;
-                    } else if (StringUtils.equalsIgnoreCase(revision, "a22042")) {
+                    } else if (StringUtils.endsWithCaseInsensitive(revision, "a22042")) {
                         // Pi 2 Model B v1.2
                         isRaspberryPi = true;
-                    } else if (StringUtils.equalsIgnoreCase(revision, "900021")) {
+                    } else if (StringUtils.endsWithCaseInsensitive(revision, "900021")) {
                         // Pi 2 Model A+ V1.1
                         isRaspberryPi = true;
-                    } else if (StringUtils.equalsIgnoreCase(revision, "900032")) {
+                    } else if (StringUtils.endsWithCaseInsensitive(revision, "900032")) {
                         // Pi 2 Model B+ V1.2
                         isRaspberryPi = true;
-                    } else if (StringUtils.equalsIgnoreCase(revision, "900092")) {
+                    } else if (StringUtils.endsWithCaseInsensitive(revision, "900092")) {
                         // Pi Zero v1.2
                         isRaspberryPi = true;
-                    } else if (StringUtils.equalsIgnoreCase(revision, "900093") || StringUtils.equalsIgnoreCase(revision, "920093")) {
+                    } else if (StringUtils.endsWithCaseInsensitive(revision, "900093") || StringUtils.endsWithCaseInsensitive(revision, "920093")) {
                         // Pi Zero v1.3
                         isRaspberryPi = true;
-                    } else if (StringUtils.equalsIgnoreCase(revision, "9000C1") || StringUtils.equalsIgnoreCase(revision, "0x9000C1")) {
+                    } else if (StringUtils.endsWithCaseInsensitive(revision, "9000C1") || StringUtils.endsWithCaseInsensitive(revision, "0x9000C1")) {
                         // Pi Zero W
                         isRaspberryPi = true;
-                    } else if (StringUtils.equalsIgnoreCase(revision, "a020a0 ")) {
+                    } else if (StringUtils.endsWithCaseInsensitive(revision, "a020a0 ")) {
                         // Compute Module 3 (and CM3 Lite)
                         isRaspberryPi = true;
-                    } else if (StringUtils.equalsIgnoreCase(revision, "a02082") || StringUtils.equalsIgnoreCase(revision, "a22082") || StringUtils.equalsIgnoreCase(revision, "a32082")) {
+                    } else if (StringUtils.endsWithCaseInsensitive(revision, "a02082") || StringUtils.endsWithCaseInsensitive(revision, "a22082") || StringUtils.endsWithCaseInsensitive(revision, "a32082")) {
                         // Pi 3 Model B
                         isRaspberryPi = true;
                     }
@@ -499,7 +496,7 @@ public class CrossSystem {
         }
         /*
          * remove ending dots, not allowed under windows and others os maybe too
-         * 
+         *
          * Do not end a file or directory name with a space or a period.
          */
         pathPart = pathPart.replaceFirst("\\.+$", "");

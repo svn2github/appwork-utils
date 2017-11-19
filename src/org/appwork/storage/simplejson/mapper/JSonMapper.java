@@ -1,5 +1,5 @@
 /**
- * 
+ *
  * ====================================================================================================================================================
  *         "AppWork Utilities" License
  *         The "AppWork Utilities" will be called [The Product] from now on.
@@ -7,16 +7,16 @@
  *         Copyright (c) 2009-2015, AppWork GmbH <e-mail@appwork.org>
  *         Schwabacher Straße 117
  *         90763 Fürth
- *         Germany   
+ *         Germany
  * === Preamble ===
  *     This license establishes the terms under which the [The Product] Source Code & Binary files may be used, copied, modified, distributed, and/or redistributed.
  *     The intent is that the AppWork GmbH is able to provide their utilities library for free to non-commercial projects whereas commercial usage is only permitted after obtaining a commercial license.
  *     These terms apply to all files that have the [The Product] License header (IN the file), a <filename>.license or <filename>.info (like mylib.jar.info) file that contains a reference to this license.
- * 	
+ *
  * === 3rd Party Licences ===
  *     Some parts of the [The Product] use or reference 3rd party libraries and classes. These parts may have different licensing conditions. Please check the *.license and *.info files of included libraries
- *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header. 	
- * 	
+ *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header.
+ *
  * === Definition: Commercial Usage ===
  *     If anybody or any organization is generating income (directly or indirectly) by using [The Product] or if there's any commercial interest or aspect in what you are doing, we consider this as a commercial usage.
  *     If your use-case is neither strictly private nor strictly educational, it is commercial. If you are unsure whether your use-case is commercial or not, consider it as commercial or contact us.
@@ -25,9 +25,9 @@
  *     If you want to use [The Product] in a commercial way (see definition above), you have to obtain a paid license from AppWork GmbH.
  *     Contact AppWork for further details: <e-mail@appwork.org>
  * === Non-Commercial Usage ===
- *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the 
+ *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the
  *     "GNU Affero General Public License" (http://www.gnu.org/licenses/agpl-3.0.en.html).
- * 	
+ *
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
@@ -64,7 +64,6 @@ import org.appwork.utils.reflection.Clazz;
  *
  */
 public class JSonMapper {
-
     /**
      * @param value
      * @param type
@@ -89,7 +88,6 @@ public class JSonMapper {
             } else if (type == double.class) {
                 //
                 v = ((Number) v).doubleValue();
-
             }
         } else if (type == Boolean.class) {
             v = ((Boolean) v).booleanValue();
@@ -108,27 +106,21 @@ public class JSonMapper {
         } else if (type == Double.class) {
             //
             v = ((Number) v).doubleValue();
-
         }
-
         return v;
     }
 
-    private boolean                                ignorePrimitiveNullMapping    = false;
-
-    private boolean                                ignoreIllegalArgumentMappings = false;
-
+    private boolean                                  ignorePrimitiveNullMapping    = false;
+    private boolean                                  ignoreIllegalArgumentMappings = false;
     /**
      * @param value
      * @param type
      * @return
      */
-    private boolean                                ignoreIllegalEnumMappings     = false;
-
-    private final HashMap<Class<?>, TypeMapper<?>> typeMapper;
+    private boolean                                  ignoreIllegalEnumMappings     = false;
+    protected final HashMap<Class<?>, TypeMapper<?>> typeMapper;
 
     public JSonMapper() {
-
         typeMapper = new HashMap<Class<?>, TypeMapper<?>>();
         this.addMapper(File.class, new FileMapper());
         this.addMapper(Class.class, new ClassMapper());
@@ -143,7 +135,6 @@ public class JSonMapper {
      */
     public <T> void addMapper(final Class<T> class1, final TypeMapper<T> fileMapper) {
         typeMapper.put(class1, fileMapper);
-
     }
 
     /**
@@ -154,7 +145,6 @@ public class JSonMapper {
     @SuppressWarnings("unchecked")
     public JSonNode create(final Object obj) throws MapperException {
         try {
-
             if (obj == null) {
                 return new JSonValue(null);
             }
@@ -196,11 +186,9 @@ public class JSonMapper {
                 return new JSonValue(((Float) obj).doubleValue());
             } else if (obj instanceof Double) {
                 return new JSonValue(((Double) obj).doubleValue());
-
             } else if (obj instanceof String) {
                 return new JSonValue((String) obj);
             } else if (obj instanceof Map) {
-
                 final JSonObject ret = new JSonObject();
                 Entry<Object, Object> next;
                 for (final Iterator<Entry<Object, Object>> it = ((Map<Object, Object>) obj).entrySet().iterator(); it.hasNext();) {
@@ -227,15 +215,13 @@ public class JSonMapper {
                 return new JSonValue(((Class<?>) obj).getName());
             } else if ((mapper = typeMapper.get(clazz)) != null) {
                 return mapper.map(obj);
-            } else/* if (obj instanceof Storable) */{
+            } else/* if (obj instanceof Storable) */ {
                 final ClassCache cc = ClassCache.getClassCache(clazz);
                 final JSonObject ret = new JSonObject();
                 for (final Getter g : cc.getGetter()) {
-
                     ret.put(g.getKey(), create(g.getValue(obj)));
                 }
                 return ret;
-
             }
         } catch (final IllegalArgumentException e) {
             e.printStackTrace();
@@ -244,13 +230,10 @@ public class JSonMapper {
         } catch (final InvocationTargetException e) {
             e.printStackTrace();
         } catch (final SecurityException e) {
-
             e.printStackTrace();
         } catch (final NoSuchMethodException e) {
-
             e.printStackTrace();
         }
-
         return null;
     }
 
@@ -275,7 +258,6 @@ public class JSonMapper {
     public Object jsonToObject(final JSonNode json, Type type) throws MapperException {
         final ClassCache cc;
         try {
-
             Class<?> clazz = null;
             if (type instanceof ParameterizedType) {
                 Type typ = ((ParameterizedType) type).getRawType();
@@ -290,9 +272,7 @@ public class JSonMapper {
                 // actual array class
                 type = clazz = Array.newInstance((Class<?>) ((GenericArrayType) type).getGenericComponentType(), 0).getClass();
             }
-
             if (clazz == null || clazz == Object.class) {
-
                 if (json instanceof JSonArray) {
                     type = clazz = LinkedList.class;
                 } else if (json instanceof JSonObject) {
@@ -311,16 +291,12 @@ public class JSonMapper {
                     case NULL:
                     case STRING:
                         type = clazz = String.class;
-
                     }
-
                 }
             }
             final TypeMapper<?> tm = typeMapper.get(clazz);
             if (tm != null) {
-
                 return tm.reverseMap(json);
-
             }
             if (json instanceof JSonValue) {
                 if (!Clazz.isPrimitive(type) && !Clazz.isString(type) && type != Object.class && ((JSonValue) json).getValue() != null && !Clazz.isEnum(type)) {
@@ -335,9 +311,7 @@ public class JSonMapper {
                         return JSonMapper.cast(((JSonValue) json).getValue(), (Class) type);
                     } else {
                         return ((JSonValue) json).getValue();
-
                     }
-
                 case STRING:
                     if (type instanceof Class && ((Class<?>) type).isEnum()) {
                         try {
@@ -351,10 +325,8 @@ public class JSonMapper {
                     } else {
                         return ((JSonValue) json).getValue();
                     }
-
                 case NULL:
                     return null;
-
                 }
             }
             if (type instanceof ParameterizedType) {
@@ -386,9 +358,7 @@ public class JSonMapper {
                     } else if (json instanceof JSonObject) {
                         type = HashMap.class;
                     }
-
                 }
-
                 if (Collection.class.isAssignableFrom(clazz)) {
                     final Collection<Object> inst = (Collection<Object>) mapClasses(clazz).newInstance();
                     final JSonArray obj = (JSonArray) json;
@@ -413,29 +383,22 @@ public class JSonMapper {
                     } else {
                         gType = void.class;
                     }
-
                     Entry<String, JSonNode> next;
                     for (final Iterator<Entry<String, JSonNode>> it = obj.entrySet().iterator(); it.hasNext();) {
                         next = it.next();
                         inst.put(next.getKey(), this.jsonToObject(next.getValue(), gType));
                     }
-
                     return inst;
-
                 } else if (clazz.isArray()) {
                     final JSonArray obj = (JSonArray) json;
                     final Object arr = Array.newInstance(mapClasses(clazz.getComponentType()), obj.size());
                     for (int i = 0; i < obj.size(); i++) {
                         final Object v = this.jsonToObject(obj.get(i), clazz.getComponentType());
-
                         Array.set(arr, i, v);
-
                     }
                     return arr;
                 } else {
-
                     if (json instanceof JSonArray) {
-
                         final java.util.List<Object> inst = new ArrayList<Object>();
                         final JSonArray obj = (JSonArray) json;
                         final Type gs = clazz.getGenericSuperclass();
@@ -449,7 +412,6 @@ public class JSonMapper {
                             inst.add(this.jsonToObject(n, gType));
                         }
                         return inst;
-
                     } else {
                         final JSonObject obj = (JSonObject) json;
                         if (Clazz.isPrimitive(clazz)) {
@@ -460,14 +422,11 @@ public class JSonMapper {
                                 throw new IllegalArgumentException("Cannot Map " + obj + " to " + clazz);
                             }
                         }
-
                         cc = ClassCache.getClassCache(clazz);
-
                         final Object inst = cc.getInstance();
                         JSonNode value;
                         Object v;
                         for (final Setter s : cc.getSetter()) {
-
                             value = obj.get(s.getKey());
                             if (value == null) {
                                 continue;
@@ -480,12 +439,10 @@ public class JSonMapper {
                                 final TypeVariable<?>[] genericTypes = clazz.getTypeParameters();
                                 for (int i = 0; i < genericTypes.length; i++) {
                                     if (StringUtils.equals(((TypeVariable) fieldType).getName(), genericTypes[i].getName())) {
-
                                         fieldType = actualTypes[i];
                                         break;
                                     }
                                 }
-
                             }
                             v = this.jsonToObject(value, fieldType);
                             try {
@@ -498,9 +455,7 @@ public class JSonMapper {
                                 }
                                 throw e;
                             }
-
                         }
-
                         return inst;
                     }
                 }
@@ -531,7 +486,6 @@ public class JSonMapper {
      */
     @SuppressWarnings("unchecked")
     public <T> T jsonToObject(final JSonNode json, final TypeRef<T> type) throws MapperException {
-
         return (T) this.jsonToObject(json, type.getType());
     }
 
@@ -547,9 +501,7 @@ public class JSonMapper {
             } else if (Map.class.isAssignableFrom(class1)) {
                 return HashMap.class;
             }
-
             throw new MapperException("Interface not supported: " + class1);
-
         }
         return class1;
     }
@@ -565,5 +517,4 @@ public class JSonMapper {
     public void setIgnorePrimitiveNullMapping(final boolean ignoreIllegalNullArguments) {
         ignorePrimitiveNullMapping = ignoreIllegalNullArguments;
     }
-
 }

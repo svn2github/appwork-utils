@@ -232,16 +232,22 @@ public abstract class SimpleUseNet {
                 // user/pass correct
                 return;
             case 481:
-                throw new InvalidAuthException();
+                throw new InvalidAuthException(response.getResponseCode() + "|" + response.getMessage());
             case 482:
                 if (StringUtils.containsIgnoreCase(response.getMessage(), "incorrect")) {
-                    throw new InvalidAuthException();
+                    throw new InvalidAuthException(response.getResponseCode() + "|" + response.getMessage());
+                }
+                if (StringUtils.containsIgnoreCase(response.getMessage(), "expired")) {
+                    throw new InvalidAuthException(response.getResponseCode() + "|" + response.getMessage());
+                }
+                if (StringUtils.containsIgnoreCase(response.getMessage(), "suspended")) {
+                    throw new InvalidAuthException(response.getResponseCode() + "|" + response.getMessage());
                 }
                 break;
             case 502:
                 if (StringUtils.containsIgnoreCase(response.getMessage(), "Authentication Failed")) {
                     // user/pass incorrect
-                    throw new InvalidAuthException();
+                    throw new InvalidAuthException(response.getResponseCode() + "|" + response.getMessage());
                 }
             }
         }

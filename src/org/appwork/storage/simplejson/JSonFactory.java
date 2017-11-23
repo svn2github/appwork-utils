@@ -1,5 +1,5 @@
 /**
- * 
+ *
  * ====================================================================================================================================================
  *         "AppWork Utilities" License
  *         The "AppWork Utilities" will be called [The Product] from now on.
@@ -7,16 +7,16 @@
  *         Copyright (c) 2009-2015, AppWork GmbH <e-mail@appwork.org>
  *         Schwabacher Straße 117
  *         90763 Fürth
- *         Germany   
+ *         Germany
  * === Preamble ===
  *     This license establishes the terms under which the [The Product] Source Code & Binary files may be used, copied, modified, distributed, and/or redistributed.
  *     The intent is that the AppWork GmbH is able to provide their utilities library for free to non-commercial projects whereas commercial usage is only permitted after obtaining a commercial license.
  *     These terms apply to all files that have the [The Product] License header (IN the file), a <filename>.license or <filename>.info (like mylib.jar.info) file that contains a reference to this license.
- * 	
+ *
  * === 3rd Party Licences ===
  *     Some parts of the [The Product] use or reference 3rd party libraries and classes. These parts may have different licensing conditions. Please check the *.license and *.info files of included libraries
- *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header. 	
- * 	
+ *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header.
+ *
  * === Definition: Commercial Usage ===
  *     If anybody or any organization is generating income (directly or indirectly) by using [The Product] or if there's any commercial interest or aspect in what you are doing, we consider this as a commercial usage.
  *     If your use-case is neither strictly private nor strictly educational, it is commercial. If you are unsure whether your use-case is commercial or not, consider it as commercial or contact us.
@@ -25,9 +25,9 @@
  *     If you want to use [The Product] in a commercial way (see definition above), you have to obtain a paid license from AppWork GmbH.
  *     Contact AppWork for further details: <e-mail@appwork.org>
  * === Non-Commercial Usage ===
- *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the 
+ *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the
  *     "GNU Affero General Public License" (http://www.gnu.org/licenses/agpl-3.0.en.html).
- * 	
+ *
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
@@ -37,7 +37,6 @@ package org.appwork.storage.simplejson;
  * @author thomas
  */
 public class JSonFactory {
-
     public static boolean       DEBUG  = false;
     private int                 global = 0;
     private char                c;
@@ -75,7 +74,9 @@ public class JSonFactory {
         try {
             sb.delete(0, sb.length());
             c = str.charAt(global++);
-            if (c != '\"') { throw bam("'\"' expected"); }
+            if (c != '\"') {
+                throw bam("'\"' expected");
+            }
             boolean escaped = false;
             while (true) {
                 c = str.charAt(global++);
@@ -111,10 +112,8 @@ public class JSonFactory {
                         case 'b':
                             sb.append('\b');
                             continue;
-
                         case 'u':
                             sb2.delete(0, sb2.length());
-
                             // this.global++;
                             counter = global + 4;
                             for (; global < counter; global++) {
@@ -124,11 +123,10 @@ public class JSonFactory {
                                 }
                             }
                             // this.global--;
-
                             if (sb2.length() == 0) {
                                 sb.append((char) 0);
                             } else {
-                                sb.append((char) Short.parseShort(sb2.toString(), 16));
+                                sb.append((char) Integer.parseInt(sb2.toString(), 16));
                             }
                             continue;
                         default:
@@ -158,7 +156,9 @@ public class JSonFactory {
             debug += '\u2934';
             System.err.println(debug);
         }
-        if (global >= str.length()) { throw bam("Ended unexpected"); }
+        if (global >= str.length()) {
+            throw bam("Ended unexpected");
+        }
         return str.charAt(global);
     }
 
@@ -174,7 +174,6 @@ public class JSonFactory {
 
     private JSonArray parseArray() throws ParserException {
         global++;
-
         final JSonArray ret = new JSonArray();
         while (true) {
             // skip whitespace
@@ -243,7 +242,6 @@ public class JSonFactory {
         String key;
         global++;
         final JSonObject ret = new JSonObject();
-
         skipWhiteSpace();
         c = getChar();
         if (c == '}') {
@@ -252,20 +250,21 @@ public class JSonFactory {
         }
         while (true) {
             // check for object end markers
-
             bs: switch (c) {
-
             case '"':
                 key = findString();
                 skipWhiteSpace();
                 c = getChar();
-
-                if (c != ':') { throw bam("':' expected"); }
+                if (c != ':') {
+                    throw bam("':' expected");
+                }
                 global++;
                 skipWhiteSpace();
                 ret.put(key, parseValue());
                 skipWhiteSpace();
-                if (global >= str.length()) { throw bam("} or , expected"); }
+                if (global >= str.length()) {
+                    throw bam("} or , expected");
+                }
                 c = getChar();
                 switch (c) {
                 case ',':
@@ -282,7 +281,6 @@ public class JSonFactory {
             default:
                 throw bam("\" expected");
             }
-
             skipWhiteSpace();
             c = getChar();
         }
@@ -294,7 +292,6 @@ public class JSonFactory {
 
     private JSonNode parseValue() throws ParserException {
         global = skipWhiteSpace();
-
         switch (getChar()) {
         case '{':
             return parseObject();
@@ -321,7 +318,6 @@ public class JSonFactory {
             global++;
             throw bam("Illegal Char");
         }
-
     }
 
     private int skipWhiteSpace() {
@@ -340,7 +336,9 @@ public class JSonFactory {
      * @throws ParserException
      */
     public static String decodeJavaScriptString(String str) throws ParserException {
-        if (str == null) { return null; }
+        if (str == null) {
+            return null;
+        }
         StringBuilder sb = new StringBuilder();
         StringBuilder sb2 = new StringBuilder();
         boolean escaped = false;
@@ -348,7 +346,9 @@ public class JSonFactory {
         int global = 0;
         int counter = 0;
         c = str.charAt(global++);
-        if (c != '\"') { throw new ParserException("'\"' expected"); }
+        if (c != '\"') {
+            throw new ParserException("'\"' expected");
+        }
         sb.append("\"");
         while (global < str.length()) {
             c = str.charAt(global++);
@@ -385,10 +385,8 @@ public class JSonFactory {
                     // case 'b':
                     // sb.append('\b');
                     // continue;
-
                     case 'x':
                         sb2.delete(0, sb2.length());
-
                         // this.global++;
                         counter = global + 2;
                         for (; global < counter; global++) {
@@ -398,7 +396,6 @@ public class JSonFactory {
                             }
                         }
                         // this.global--;
-
                         if (sb2.length() == 0) {
                             sb.append((char) 0);
                         } else {
@@ -406,7 +403,6 @@ public class JSonFactory {
                         }
                         continue;
                     default:
-
                     }
                 } else {
                     global--;
@@ -418,5 +414,4 @@ public class JSonFactory {
         }
         throw new ParserException("Unfinished String");
     }
-
 }

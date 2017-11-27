@@ -34,6 +34,7 @@
 package org.appwork.utils.encoding;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 /**
  * @author daniel
@@ -61,12 +62,10 @@ public class URLEncode {
                     sb.append("+");
                 } else {
                     /* hex formatted */
-                    sb.append("%");
-                    final String append = Integer.toHexString(ch);
-                    if (append.length() < 2) {
-                        sb.append("0");
+                    try {
+                        sb.append(URLEncoder.encode("" + ch, "UTF-8"));
+                    } catch (UnsupportedEncodingException ignore) {
                     }
-                    sb.append(append);
                 }
             }
         }
@@ -86,12 +85,10 @@ public class URLEncode {
                 sb.append(ch);
             } else {
                 /* hex formatted */
-                sb.append("%");
-                final String append = Integer.toHexString(ch);
-                if (append.length() < 2) {
-                    sb.append("0");
+                try {
+                    sb.append(URLEncoder.encode("" + ch, "UTF-8"));
+                } catch (UnsupportedEncodingException ignore) {
                 }
-                sb.append(append);
             }
         }
         return sb.toString();

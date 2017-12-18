@@ -34,6 +34,7 @@
 package org.appwork.utils.formatter;
 
 import java.text.DateFormatSymbols;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -49,8 +50,15 @@ import org.appwork.utils.BinaryLogic;
 import org.appwork.utils.Regex;
 
 public class TimeFormatter {
+    public static void main(String[] args) throws ParseException {
+        SimpleDateFormat df = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.UK);
+        System.out.println(df.format(new Date()));
+        df.setTimeZone(TimeZone.getTimeZone("CET"));
+        Date date = df.parse("Mon, 11 Dec 2017 14:05:30 GMT");
+        System.out.println(date);
+    }
 
-    private static final java.util.List<SimpleDateFormat> dateformats  = new ArrayList<SimpleDateFormat>();
+    private static final java.util.List<SimpleDateFormat> dateformats = new ArrayList<SimpleDateFormat>();
     static {
         try {
             SimpleDateFormat sdf;
@@ -81,9 +89,9 @@ public class TimeFormatter {
             e.printStackTrace();
         }
     }
-    public static final int                               HIDE_SECONDS = 1 << 1;
-    public static final int                               HIDE_MARKER  = 1 << 2;
-    public static final int                               CLOCK        = 1 << 3;
+    public static final int HIDE_SECONDS = 1 << 1;
+    public static final int HIDE_MARKER  = 1 << 2;
+    public static final int CLOCK        = 1 << 3;
 
     public static String formatMilliSeconds(final long totalSeconds, final int flags) {
         return TimeFormatter.formatSeconds(totalSeconds / 1000, flags);
@@ -92,14 +100,12 @@ public class TimeFormatter {
     public static String formatSeconds(long totalSeconds, final int flags) {
         long days, hours, minutes, seconds;
         final StringBuilder string = new StringBuilder();
-
         days = totalSeconds / (24 * 60 * 60);
         totalSeconds -= days * 24 * 60 * 60;
         hours = totalSeconds / (60 * 60);
         totalSeconds -= hours * 60 * 60;
         minutes = totalSeconds / 60;
         seconds = totalSeconds - minutes * 60;
-
         if (!BinaryLogic.containsAll(flags, TimeFormatter.CLOCK)) {
             /* show days as extra field */
             if (days != 0) {
@@ -121,7 +127,6 @@ public class TimeFormatter {
                 string.append('h');
             }
         }
-
         if (minutes != 0 || string.length() != 0 || BinaryLogic.containsAll(flags, TimeFormatter.CLOCK)) {
             if (string.length() != 0) {
                 string.append(':');
@@ -132,7 +137,6 @@ public class TimeFormatter {
             }
         }
         if (BinaryLogic.containsNone(flags, TimeFormatter.HIDE_SECONDS)) {
-
             if (string.length() != 0) {
                 string.append(':');
             }
@@ -140,7 +144,6 @@ public class TimeFormatter {
             if (BinaryLogic.containsNone(flags, TimeFormatter.HIDE_MARKER)) {
                 string.append('s');
             }
-
         }
         return string.toString();
     }
@@ -174,11 +177,9 @@ public class TimeFormatter {
         if (matches == null || matches.length == 0) {
             matches = new Regex(wait, Pattern.compile("([\\d]+)")).getMatches();
         }
-
         if (matches == null || matches.length == 0) {
             return -1;
         }
-
         double res = 0;
         if (matches[0].length == 1) {
             res = Double.parseDouble(matches[0][0]);
@@ -186,7 +187,6 @@ public class TimeFormatter {
         if (matches[0].length == 2) {
             res = Double.parseDouble(matches[0][0] + "." + matches[0][1]);
         }
-
         if (org.appwork.utils.Regex.matches(wait, Pattern.compile("(h|st)", Pattern.CASE_INSENSITIVE))) {
             res *= 60 * 60 * 1000l;
         } else if (org.appwork.utils.Regex.matches(wait, Pattern.compile("(m)", Pattern.CASE_INSENSITIVE))) {

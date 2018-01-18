@@ -56,6 +56,7 @@ import java.awt.event.WindowStateListener;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -71,12 +72,12 @@ import org.appwork.utils.StringUtils;
  *
  */
 public class WindowsWindowManager extends WindowManager {
-    private Robot                            robot;
-    private String                           blocker;
-    protected HashMap<Window, ResetRunnable> runnerMap;
+    private final AtomicReference<Robot>     robot                = new AtomicReference<Robot>(null);
+    private volatile String                  blocker;
+    protected HashMap<Window, ResetRunnable> runnerMap            = new HashMap<Window, ResetRunnable>();
     private int                              foregroundLock       = -1;
-    private boolean                          altWorkaroundEnabled = true;
-    private int[]                            altWorkaroundKeys    = new int[] { KeyEvent.VK_CONTROL, KeyEvent.VK_ALT, KeyEvent.VK_SHIFT };
+    private volatile boolean                 altWorkaroundEnabled = false;
+    private volatile int[]                   altWorkaroundKeys    = new int[] { KeyEvent.VK_CONTROL, KeyEvent.VK_ALT, KeyEvent.VK_SHIFT };
 
     public boolean isAltWorkaroundEnabled() {
         return altWorkaroundEnabled;
@@ -117,7 +118,6 @@ public class WindowsWindowManager extends WindowManager {
     }
 
     public WindowsWindowManager() {
-        runnerMap = new HashMap<Window, ResetRunnable>();
         initForegroundLock();
     }
 
@@ -145,7 +145,7 @@ public class WindowsWindowManager extends WindowManager {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.utils.swing.WindowManager#toFront(java.awt.Window)
      */
     @Override
@@ -231,7 +231,7 @@ public class WindowsWindowManager extends WindowManager {
             // Tested: WIN7
             // org.appwork.utils.swing.WindowsWindowManager.setVisible(Window,
             // boolean, boolean, boolean) method
-            if (requestFocus && foregroundLock > 0 && altWorkaroundEnabled) {
+            if (requestFocus && foregroundLock > 0 && isAltWorkaroundEnabled()) {
                 try {
                     pressAlt();
                     toFront(w);
@@ -257,7 +257,8 @@ public class WindowsWindowManager extends WindowManager {
      *
      */
     private void releaseAlt() {
-        if (altWorkaroundEnabled) {
+        if (isAltWorkaroundEnabled()) {
+            final Robot robot = this.robot.getAndSet(null);
             if (robot != null) {
                 // System.out.println("key: Alt released");
                 // actually, we only need to asure that alt is pressed during
@@ -269,10 +270,9 @@ public class WindowsWindowManager extends WindowManager {
                 // we probably need this workaround only if
                 // foregroundtimeoutlock
                 // is>0
-                for (final int key : altWorkaroundKeys) {
+                for (final int key : getAltWorkaroundKeys()) {
                     robot.keyRelease(key);
                 }
-                robot = null;
             }
         }
     }
@@ -282,9 +282,11 @@ public class WindowsWindowManager extends WindowManager {
      * @throws AWTException
      */
     private void pressAlt() throws AWTException {
-        if (altWorkaroundEnabled) {
+        if (isAltWorkaroundEnabled()) {
+            Robot robot = this.robot.get();
             if (robot == null) {
                 robot = new Robot();
+                this.robot.getAndSet(robot);
             }
             // System.out.println("key: Alt+sh pressed");
             // actually, we only need to asure that alt is pressed during
@@ -295,7 +297,7 @@ public class WindowsWindowManager extends WindowManager {
             // should not create problems
             // we probably need this workaround only if foregroundtimeoutlock
             // is>0
-            for (final int key : altWorkaroundKeys) {
+            for (final int key : getAltWorkaroundKeys()) {
                 robot.keyPress(key);
             }
         }
@@ -335,7 +337,7 @@ public class WindowsWindowManager extends WindowManager {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.utils.swing.WindowManager#setVisible(java.awt.Window, boolean, boolean, boolean)
      */
     @Override
@@ -585,25 +587,25 @@ public class WindowsWindowManager extends WindowManager {
         /* 389 */switch (id) {
         /* 391 */case 200: /* 391 */
             return "WINDOW_OPENED";
-        /* 394 */case 201: /* 394 */
+            /* 394 */case 201: /* 394 */
             return "WINDOW_CLOSING";
-        /* 397 */case 202: /* 397 */
+            /* 397 */case 202: /* 397 */
             return "WINDOW_CLOSED";
-        /* 400 */case 203: /* 400 */
+            /* 400 */case 203: /* 400 */
             return "WINDOW_ICONIFIED";
-        /* 403 */case 204: /* 403 */
+            /* 403 */case 204: /* 403 */
             return "WINDOW_DEICONIFIED";
-        /* 406 */case 205: /* 406 */
+            /* 406 */case 205: /* 406 */
             return "WINDOW_ACTIVATED";
-        /* 409 */case 206: /* 409 */
+            /* 409 */case 206: /* 409 */
             return "WINDOW_DEACTIVATED";
-        /* 412 */case 207: /* 412 */
+            /* 412 */case 207: /* 412 */
             return "WINDOW_GAINED_FOCUS";
-        /* 415 */case 208: /* 415 */
+            /* 415 */case 208: /* 415 */
             return "WINDOW_LOST_FOCUS";
-        /* 418 */case 209: /* 418 */
+            /* 418 */case 209: /* 418 */
             return "WINDOW_STATE_CHANGED";
-        /* 421 */default:/* 421 */
+            /* 421 */default:/* 421 */
             return "unknown type";
         }
     }

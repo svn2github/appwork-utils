@@ -114,7 +114,7 @@ public class IconIO {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see javax.swing.Icon#getIconHeight()
          */
         @Override
@@ -125,7 +125,7 @@ public class IconIO {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see javax.swing.Icon#getIconWidth()
          */
         @Override
@@ -136,7 +136,7 @@ public class IconIO {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see javax.swing.Icon#paintIcon(java.awt.Component, java.awt.Graphics, int, int)
          */
         @Override
@@ -152,7 +152,7 @@ public class IconIO {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see org.appwork.swing.components.IdentifierInterface#toIdentifier()
          */
         @Override
@@ -192,16 +192,16 @@ public class IconIO {
             @Override
             public final int filterRGB(final int x, final int y, final int rgb) {
                 final int r = (rgb & 0xFF0000) >> 16;
-        final int g = (rgb & 0xFF00) >> 8;
-        final int b = rgb & 0xFF;
-        if (r >= r1 && r <= r2 && g >= g1 && g <= g2 && b >= b1 && b <= b2) {
-            // Set fully transparent but keep color
-            // calculate a alpha value based on the distance between the
-            // range borders and the pixel color
-            final int dist = (Math.abs(r - (r1 + r2) / 2) + Math.abs(g - (g1 + g2) / 2) + Math.abs(b - (b1 + b2) / 2)) * 2;
-            return new Color(r, g, b, Math.min(255, dist)).getRGB();
-        }
-        return rgb;
+                final int g = (rgb & 0xFF00) >> 8;
+                final int b = rgb & 0xFF;
+                if (r >= r1 && r <= r2 && g >= g1 && g <= g2 && b >= b1 && b <= b2) {
+                    // Set fully transparent but keep color
+                    // calculate a alpha value based on the distance between the
+                    // range borders and the pixel color
+                    final int dist = (Math.abs(r - (r1 + r2) / 2) + Math.abs(g - (g1 + g2) / 2) + Math.abs(b - (b1 + b2) / 2)) * 2;
+                    return new Color(r, g, b, Math.min(255, dist)).getRGB();
+                }
+                return rgb;
             }
         };
         final ImageProducer ip = new FilteredImageSource(image.getSource(), filter);
@@ -883,49 +883,57 @@ public class IconIO {
 
     public static Image getImageFromSVG(URL url, int w, int h) throws IOException {
         try {
-            SVGUniverse universe = new SVGUniverse();
-            // String svg = IO.readURLToString(url);
             InputStream is = null;
             try {
-                URI uri = universe.loadSVG(is = url.openStream(), "dummy.svg");
-                SVGDiagram diagram = universe.getDiagram(uri);
-                // Rectangle dp = diagram.getDeviceViewport();
-                // Rectangle2D vr = diagram.getViewRect();
-                // Rectangle2D bb = diagram.getRoot().getBoundingBox();
-                diagram.updateTime(0d);
-                diagram.setIgnoringClipHeuristic(true);
-                if (w <= 0) {
-                    w = (int) diagram.getWidth();
+                is = url.openStream();
+                if (is != null) {
+                    final SVGUniverse universe = new SVGUniverse();
+                    final URI uri = universe.loadSVG(is, "dummy.svg");
+                    final SVGDiagram diagram = universe.getDiagram(uri);
+                    // Rectangle dp = diagram.getDeviceViewport();
+                    // Rectangle2D vr = diagram.getViewRect();
+                    // Rectangle2D bb = diagram.getRoot().getBoundingBox();
+                    diagram.updateTime(0d);
+                    diagram.setIgnoringClipHeuristic(true);
+                    if (w <= 0) {
+                        w = (int) diagram.getWidth();
+                    }
+                    if (h <= 0) {
+                        h = (int) diagram.getHeight();
+                    }
+                    final double faktor = 1d / Math.max((double) diagram.getWidth() / w, (double) diagram.getHeight() / h);
+                    final int width = Math.max((int) (diagram.getWidth() * faktor), 1);
+                    final int height = Math.max((int) (diagram.getHeight() * faktor), 1);
+                    final BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
+                    final Graphics2D g = bi.createGraphics();
+                    try {
+                        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                        int x = 0;
+                        int y = 0;
+                        g.translate(x, y);
+                        final Rectangle2D.Double rect = new Rectangle2D.Double();
+                        diagram.getViewRect(rect);
+                        AffineTransform scaleXform = new AffineTransform();
+                        scaleXform.setToScale(width / rect.width, height / rect.height);
+                        AffineTransform oldXform = g.getTransform();
+                        g.transform(scaleXform);
+                        diagram.render(g);
+                        g.setTransform(oldXform);
+                        g.translate(-x, -y);
+                    } finally {
+                        g.dispose();
+                    }
+                    return bi;
+                } else {
+                    throw new IOException("Not found:" + url);
                 }
-                if (h <= 0) {
-                    h = (int) diagram.getHeight();
-                }
-                double faktor = 1d / Math.max((double) diagram.getWidth() / w, (double) diagram.getHeight() / h);
-                int width = Math.max((int) (diagram.getWidth() * faktor), 1);
-                int height = Math.max((int) (diagram.getHeight() * faktor), 1);
-                BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
-                Graphics2D g = bi.createGraphics();
-                try {
-                    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                    int x = 0;
-                    int y = 0;
-                    g.translate(x, y);
-                    final Rectangle2D.Double rect = new Rectangle2D.Double();
-                    diagram.getViewRect(rect);
-                    AffineTransform scaleXform = new AffineTransform();
-                    scaleXform.setToScale(width / rect.width, height / rect.height);
-                    AffineTransform oldXform = g.getTransform();
-                    g.transform(scaleXform);
-                    diagram.render(g);
-                    g.setTransform(oldXform);
-                    g.translate(-x, -y);
-                } finally {
-                    g.dispose();
-                }
-                return bi;
             } finally {
-                is.close();
+                if (is != null) {
+                    is.close();
+                }
             }
+        } catch (IOException e) {
+            throw e;
         } catch (Throwable e) {
             throw new IOException(e);
         }

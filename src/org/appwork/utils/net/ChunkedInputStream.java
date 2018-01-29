@@ -46,7 +46,7 @@ public class ChunkedInputStream extends InputStream implements StreamValidEOF {
     private volatile int      nextChunkSize = 0;
     private volatile int      nextChunkLeft = 0;
     private volatile long     completeSize  = 0;
-    private boolean           EOF           = false;
+    private volatile boolean  EOF           = false;
 
     public ChunkedInputStream(final InputStream is) {
         this.is = is;

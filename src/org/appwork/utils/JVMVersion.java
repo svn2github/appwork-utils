@@ -39,11 +39,12 @@ package org.appwork.utils;
  *
  */
 public class JVMVersion {
-    public final static long  JAVA15 = 15000000;
-    public final static long  JAVA16 = 16000000;
-    public final static long  JAVA17 = 17000000;
-    public final static long  JAVA18 = 18000000;
-    public final static long  JAVA19 = 19000000;
+    public final static long  JAVA15  = 15000000;
+    public final static long  JAVA16  = 16000000;
+    public final static long  JAVA17  = 17000000;
+    public final static long  JAVA18  = 18000000;
+    public final static long  JAVA19  = 9000000000000l;
+    public final static long  JAVA_10 = 10000000000000l;
     private static final long VERSION;
     static {
         long version = -1;
@@ -52,6 +53,7 @@ public class JVMVersion {
             version = parseJavaVersionString(versionString);
         } catch (final Throwable ignore) {
             ignore.printStackTrace();
+            version = JAVA16;
         }
         VERSION = version;
     }
@@ -80,40 +82,46 @@ public class JVMVersion {
     }
 
     public static long parseJavaVersionString(String version) {
-        String v = new Regex(version, "^(\\d+\\.\\d+\\.\\d+)").getMatch(0);
-        if (v == null) {
-            if (version.startsWith("9")) {
-                long ret = 19000000l;
-                final String u = new Regex(version, "u(\\d+)").getMatch(0);
-                if (u != null) {
-                    /* append update number */
-                    ret = ret + Long.parseLong(u) * 1000;
-                }
-                final String b = new Regex(version, "\\+(\\d+)$").getMatch(0);
-                if (b != null) {
-                    /* append build number */
-                    ret = ret + Long.parseLong(b);
-                }
-                return ret;
-            }
-            // fallback to Java 1.6
-            return 16000000l;
-        } else {
-            final String u = new Regex(version, "^.*?_(\\d+)").getMatch(0);
-            final String b = new Regex(version, "^.*?(_|-)b(\\d+)$").getMatch(1);
-            v = v.replaceAll("\\.", "");
-            /* 170uubbb */
-            /* eg 1.6 = 16000000 */
-            long ret = Long.parseLong(v) * 100000;
-            if (u != null) {
-                /* append update number */
-                ret = ret + Long.parseLong(u) * 1000;
-            }
-            if (b != null) {
-                /* append build number */
-                ret = ret + Long.parseLong(b);
-            }
-            return ret;
+        if (version != null) {
+            // remove trailing LTS
+            version = version.replaceFirst("\\s*-\\s*LTS$", "");
         }
+        final String majorFeature = new Regex(version, "^(\\d+)").getMatch(0);
+        final String minorInterim = new Regex(version, "^\\d+\\.(\\d+)").getMatch(0);
+        final String securityUpdate = new Regex(version, "^\\d+\\.\\d+\\.(\\d+)").getMatch(0);
+        // final String patch = new Regex(version, "^\\d+\\.\\d+\\.\\d+\\.(\\d+)").getMatch(0);
+        long ret = 0;
+        final String u;
+        final String b;
+        if ("1".equals(majorFeature) && minorInterim != null) {
+            // java 1.5 - java 1.8
+            ret = Long.parseLong(minorInterim) * 1000 * 1000 + 10000000;
+            u = new Regex(version, "^.*?_(\\d+)").getMatch(0);
+            b = new Regex(version, "^.*?(_|-)b(\\d+)$").getMatch(1);
+            // ignore securityUpdate
+        } else if (majorFeature != null) {
+            // java 1.9, java 10, java 11...
+            ret = Long.parseLong(majorFeature) * 1000 * 1000 * 1000 * 1000l;
+            u = new Regex(version, "u(\\d+)").getMatch(0);
+            b = new Regex(version, "\\+(\\d+)$").getMatch(0);
+            if (minorInterim != null) {
+                ret += Math.min(999, Long.parseLong(minorInterim)) * 1000 * 1000 * 1000l;
+            }
+            if (securityUpdate != null) {
+                ret += Math.min(999, Long.parseLong(securityUpdate)) * 1000 * 1000;
+            }
+        } else {
+            // fallback to Java 1.6
+            return JAVA16;
+        }
+        if (u != null) {
+            /* append update number */
+            ret += Math.min(999, Long.parseLong(u)) * 1000;
+        }
+        if (b != null) {
+            /* append build number */
+            ret += Math.min(999, Long.parseLong(b));
+        }
+        return ret;
     }
 }

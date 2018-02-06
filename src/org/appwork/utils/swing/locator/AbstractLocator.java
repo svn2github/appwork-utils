@@ -48,21 +48,21 @@ import org.appwork.utils.swing.SwingUtils;
  *
  */
 public abstract class AbstractLocator implements Locator {
-
     public static Point correct(final Point point, final Window d) {
         final Dimension prefSize = d.getSize();
-
         return correct(point, prefSize);
-
     }
 
     public static Point correct(final Point point, final Dimension prefSize) {
         final GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-
         final Rectangle preferedRect = new Rectangle(point.x, point.y, prefSize.width, prefSize.height);
         GraphicsDevice biggestInteresctionScreem = SwingUtils.getScreenByBounds(preferedRect);
         if (biggestInteresctionScreem == null) {
             biggestInteresctionScreem = ge.getDefaultScreenDevice();
+        }
+        if (biggestInteresctionScreem == null) {
+            System.out.println("GraphicsEnvironment.getDefaultScreenDevice returned null?!");
+            return preferedRect.getLocation();
         }
         final Rectangle bounds = SwingUtils.getUsableScreenBounds(biggestInteresctionScreem);
         switch (CrossSystem.getOS()) {
@@ -74,13 +74,11 @@ public abstract class AbstractLocator implements Locator {
              * panes x location is 0, but the windows x location is -8 <br> this workaround increases the usably space for 16 pixel to each
              * size. this is not correct, and windows might not be correced 100%, but ar least correctly positioned windows will not get
              * corrected badly
-             * 
              */
             bounds.x -= 16;
             bounds.y -= 16;
             bounds.width += 32;
             bounds.height += 32;
-
         }
         if (preferedRect.x + preferedRect.width > bounds.x + bounds.width) {
             preferedRect.x = bounds.x + bounds.width - preferedRect.width;
@@ -91,11 +89,9 @@ public abstract class AbstractLocator implements Locator {
         if (preferedRect.x < bounds.x) {
             preferedRect.x = bounds.x;
         }
-
         if (preferedRect.y < bounds.y) {
             preferedRect.y = bounds.y;
         }
-
         return preferedRect.getLocation();
     }
 
@@ -108,7 +104,6 @@ public abstract class AbstractLocator implements Locator {
         point = AbstractLocator.correct(point, dialog);
         final GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
         final GraphicsDevice[] screens = ge.getScreenDevices();
-
         // for (final GraphicsDevice screen : screens) {
         for (final GraphicsDevice screen : screens) {
             final Rectangle bounds = screen.getDefaultConfiguration().getBounds();
@@ -129,8 +124,6 @@ public abstract class AbstractLocator implements Locator {
                 // }
             }
         }
-
         return new CenterOfScreenLocator().getLocationOnScreen(dialog);
-
     }
 }

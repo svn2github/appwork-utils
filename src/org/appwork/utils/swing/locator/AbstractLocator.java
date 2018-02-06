@@ -61,6 +61,7 @@ public abstract class AbstractLocator implements Locator {
             biggestInteresctionScreem = ge.getDefaultScreenDevice();
         }
         if (biggestInteresctionScreem == null) {
+            // maybe just a java 10 ea bug
             System.out.println("GraphicsEnvironment.getDefaultScreenDevice returned null?!");
             return preferedRect.getLocation();
         }

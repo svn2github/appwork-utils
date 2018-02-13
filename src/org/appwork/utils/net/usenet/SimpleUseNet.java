@@ -57,11 +57,7 @@ public abstract class SimpleUseNet {
         HEAD {
             @Override
             public boolean isMultiLineResponse(int code) {
-                switch (code) {
-                case 221:
-                    return true;
-                }
-                return false;
+                return code == 221;
             }
         },
         AUTHINFO_USER {
@@ -76,7 +72,14 @@ public abstract class SimpleUseNet {
                 return "AUTHINFO PASS";
             }
         },
+        DATE,
         BODY,
+        HELP {
+            @Override
+            public boolean isMultiLineResponse(int code) {
+                return code == 100;
+            }
+        },
         STAT,
         QUIT;
         public boolean isMultiLineResponse(int code) {

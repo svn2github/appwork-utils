@@ -81,6 +81,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableColumnModelEvent;
 import javax.swing.event.TableColumnModelListener;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
@@ -242,10 +243,11 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
         this.createColumns();
         getModel().autoColumnWidth();
         // get defaultbackground and Foregroundcolors
-        Component c = super.getCellRenderer(0, 0).getTableCellRendererComponent(this, "", true, false, 0, 0);
+        final TableCellRenderer renderer = new DefaultTableCellRenderer();
+        Component c = renderer.getTableCellRendererComponent(this, null, true, false, 0, 0);
         this.columnBackgroundSelected = c.getBackground();
         this.columnForegroundSelected = c.getForeground();
-        c = super.getCellRenderer(0, 0).getTableCellRendererComponent(this, "", false, false, 0, 0);
+        c = renderer.getTableCellRendererComponent(this, null, false, false, 0, 0);
         this.columnBackground = c.getBackground();
         this.columnForeground = c.getForeground();
         this.addPropertyChangeListener("dropLocation", this);

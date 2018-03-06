@@ -101,7 +101,8 @@ public abstract class KeyHandler<RawClass> {
     }
 
     protected boolean isDefaultOnNull() {
-        return defaultOnNull;
+        final boolean isPrimitive = getRawClass().isPrimitive();
+        return defaultOnNull || isPrimitive;
     }
 
     public File getPath() {

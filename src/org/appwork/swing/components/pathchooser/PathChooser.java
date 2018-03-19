@@ -81,7 +81,7 @@ public class PathChooser extends MigPanel {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent )
          */
         @Override
@@ -119,7 +119,7 @@ public class PathChooser extends MigPanel {
 
             /*
              * (non-Javadoc)
-             *
+             * 
              * @see org.appwork.swing.components.ExtTextField#getText()
              */
             @Override
@@ -142,7 +142,7 @@ public class PathChooser extends MigPanel {
 
             /*
              * (non-Javadoc)
-             *
+             * 
              * @see org.appwork.swing.components.ExtTextField#onChanged()
              */
             @Override
@@ -162,7 +162,7 @@ public class PathChooser extends MigPanel {
 
                 /*
                  * (non-Javadoc)
-                 *
+                 * 
                  * @see org.appwork.swing.components.searchcombo.SearchComboBox#getProtoType(java.util.List)
                  */
                 @Override
@@ -230,7 +230,11 @@ public class PathChooser extends MigPanel {
     }
 
     protected String getProtoType(SearchComboBox<String> comboBox, List<String> model) {
-        return comboBox.getProtoType(model);
+        if (comboBox.usePrototype() && model != null && model.size() > 0) {
+            return model.get(0);
+        } else {
+            return null;
+        }
     }
 
     @Override

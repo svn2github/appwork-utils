@@ -152,7 +152,7 @@ public abstract class SearchComboBox<T> extends JComboBox {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see javax.swing.ComboBoxEditor#addActionListener(java.awt.event. ActionListener)
          */
         @Override
@@ -272,7 +272,7 @@ public abstract class SearchComboBox<T> extends JComboBox {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see javax.swing.event.DocumentListener#changedUpdate(javax.swing.event .DocumentEvent)
          */
         @Override
@@ -303,7 +303,7 @@ public abstract class SearchComboBox<T> extends JComboBox {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see javax.swing.ComboBoxEditor#getEditorComponent()
          */
         @Override
@@ -314,7 +314,7 @@ public abstract class SearchComboBox<T> extends JComboBox {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see javax.swing.ComboBoxEditor#getItem()
          */
         @Override
@@ -329,7 +329,7 @@ public abstract class SearchComboBox<T> extends JComboBox {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see javax.swing.event.DocumentListener#insertUpdate(javax.swing.event .DocumentEvent)
          */
         @Override
@@ -340,7 +340,7 @@ public abstract class SearchComboBox<T> extends JComboBox {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see javax.swing.ComboBoxEditor#removeActionListener(java.awt.event. ActionListener)
          */
         @Override
@@ -350,7 +350,7 @@ public abstract class SearchComboBox<T> extends JComboBox {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see javax.swing.event.DocumentListener#removeUpdate(javax.swing.event .DocumentEvent)
          */
         @Override
@@ -375,7 +375,7 @@ public abstract class SearchComboBox<T> extends JComboBox {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see javax.swing.ComboBoxEditor#selectAll()
          */
         @Override
@@ -385,7 +385,7 @@ public abstract class SearchComboBox<T> extends JComboBox {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see javax.swing.ComboBoxEditor#setItem(java.lang.Object)
          */
         @SuppressWarnings("unchecked")
@@ -495,16 +495,15 @@ public abstract class SearchComboBox<T> extends JComboBox {
         return element != null && matches != null && (element.startsWith(matches) || this.isSearchCaseSensitive() == false && element.toLowerCase(Locale.ENGLISH).startsWith(matches));
     }
 
-    private int               actualMaximumRowCount = 8;
-    public boolean            autoCompletionEnabled = true;
+    private int               actualMaximumRowCount  = 8;
+    public boolean            autoCompletionEnabled  = true;
     /**
      *
      */
-    private static final long serialVersionUID      = 6475635443708682554L;
-    private final ColorState  helpColorSet          = new ColorState(Color.LIGHT_GRAY);
-    private final ColorState  badColorSet           = new ColorState(Color.RED);
-    private final ColorState  normalColorSet        = new ColorState(Color.BLACK);
-
+    private static final long serialVersionUID       = 6475635443708682554L;
+    private final ColorState  helpColorSet           = new ColorState(Color.LIGHT_GRAY);
+    private final ColorState  badColorSet            = new ColorState(Color.RED);
+    private final ColorState  normalColorSet         = new ColorState(Color.BLACK);
     {
         this.normalColorSet.setForeground(this.getForeground());
         final Color disabled = (Color) UIManager.get("TextField.disabledForeground");
@@ -512,11 +511,10 @@ public abstract class SearchComboBox<T> extends JComboBox {
             this.helpColorSet.setForeground(disabled);
         }
     }
-
-    private String      helptext;
-    private boolean     unkownTextInputAllowed = false;
-    protected ImageIcon badgeIcon;
-    private ColorState  currentColorSet;
+    private String            helptext;
+    private boolean           unkownTextInputAllowed = false;
+    protected ImageIcon       badgeIcon;
+    private ColorState        currentColorSet;
 
     /**
      * @param plugins
@@ -752,15 +750,22 @@ public abstract class SearchComboBox<T> extends JComboBox {
         this.updateHelpText();
     }
 
+    public T getProtoType(List<T> model) {
+        if (this.usePrototype() && model != null && model.size() > 0) {
+            return model.get(0);
+        } else {
+            return null;
+        }
+    }
+
     /**
      * Sets the Model for this combobox
      *
      * @param listModel
      */
     public void setList(final List<T> listModel) {
-        Object prototype = null;
-        if (this.usePrototype() && listModel.size() > 0) {
-            prototype = listModel.get(0);
+        final Object prototype = getProtoType(listModel);
+        if (this.usePrototype()) {
             this.setPrototypeDisplayValue(prototype);
         }
         super.setModel(new DefaultComboBoxModel(listModel.toArray(new Object[] {})));

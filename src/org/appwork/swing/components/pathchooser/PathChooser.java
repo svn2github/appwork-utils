@@ -51,6 +51,8 @@ import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.filechooser.FileFilter;
 
+import net.miginfocom.swing.MigLayout;
+
 import org.appwork.storage.JSonStorage;
 import org.appwork.swing.MigPanel;
 import org.appwork.swing.components.ExtButton;
@@ -65,8 +67,6 @@ import org.appwork.utils.swing.dialog.DialogClosedException;
 import org.appwork.utils.swing.dialog.ExtFileChooserDialog;
 import org.appwork.utils.swing.dialog.FileChooserSelectionMode;
 import org.appwork.utils.swing.dialog.FileChooserType;
-
-import net.miginfocom.swing.MigLayout;
 
 public class PathChooser extends MigPanel {
     private class BrowseAction extends AbstractAction {
@@ -160,6 +160,16 @@ public class PathChooser extends MigPanel {
                     return PathChooser.this.txt;
                 }
 
+                /*
+                 * (non-Javadoc)
+                 *
+                 * @see org.appwork.swing.components.searchcombo.SearchComboBox#getProtoType(java.util.List)
+                 */
+                @Override
+                public String getProtoType(List<String> model) {
+                    return PathChooser.this.getProtoType(this, model);
+                }
+
                 @Override
                 protected Icon getIconForValue(final String value) {
                     return null;
@@ -217,6 +227,10 @@ public class PathChooser extends MigPanel {
         if (preSelection != null) {
             this.setFile(new File(preSelection));
         }
+    }
+
+    protected String getProtoType(SearchComboBox<String> comboBox, List<String> model) {
+        return comboBox.getProtoType(model);
     }
 
     @Override

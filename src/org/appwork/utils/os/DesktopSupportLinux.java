@@ -307,7 +307,7 @@ public class DesktopSupportLinux implements DesktopSupport {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.utils.os.DesktopSupport#getDefaultDownloadDirectory()
      */
     @Override
@@ -332,5 +332,15 @@ public class DesktopSupportLinux implements DesktopSupport {
             }
         }
         return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.appwork.utils.os.DesktopSupport#getProcessExecutablePathByPID(int)
+     */
+    @Override
+    public String getProcessExecutablePathByPID(int pid) throws NotSupportedException {
+        throw new NotSupportedException("Operating System not supported");
     }
 }

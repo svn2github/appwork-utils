@@ -40,6 +40,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
 import org.appwork.exceptions.WTFException;
@@ -47,6 +48,8 @@ import org.appwork.utils.Application;
 import org.appwork.utils.Files;
 import org.appwork.utils.IO;
 import org.appwork.utils.Regex;
+import org.appwork.utils.StringUtils;
+import org.appwork.utils.logging2.LogInterface;
 import org.appwork.utils.os.CrossSystem.OperatingSystem;
 import org.appwork.utils.processes.ProcessBuilderFactory;
 import org.appwork.utils.processes.ProcessOutput;
@@ -318,8 +321,12 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
             String str = result.getStdOutString().trim();
             return Regex.getLines(str)[2];
         } catch (Throwable e) {
-            throw new WTFException(e);
+            return null;
         }
+    }
+
+    public static void main(String[] args) {
+        new DesktopSupportWindows().getProcessExecutablePathByPID(10584);
     }
 
     /**
@@ -339,7 +346,6 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
                 }
             }
         } catch (Throwable e) {
-            throw new WTFException(e);
         }
         return null;
     }
@@ -364,5 +370,81 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
             throw new WTFException(e);
         }
         return -1;
+    }
+
+    public static String getProgramFiles(LogInterface logger) {
+        String ret = null;
+        try {
+            final String[] pathes = new String[] { "PROGRAMW6432", "ProgramFiles" };
+            pathloop: for (String name : pathes) {
+                for (final Entry<String, String> es : System.getenv().entrySet()) {
+                    if (StringUtils.equalsIgnoreCase(es.getKey(), name) && StringUtils.isNotEmpty(es.getValue())) {
+                        final File testProgramFiles = new File(es.getValue());
+                        if (testProgramFiles.exists()) {
+                            ret = es.getValue();
+                            break pathloop;
+                        }
+                    }
+                }
+            }
+        } catch (final Throwable e) {
+            if (logger != null) {
+                logger.log(e);
+            }
+        }
+        if (StringUtils.isEmpty(ret)) {
+            for (File path : File.listRoots()) {
+                ret = new File(path, "Program Files").getAbsolutePath();
+                if (!new File(ret).exists()) {
+                    ret = null;
+                } else {
+                    break;
+                }
+            }
+        }
+        if (ret != null) {
+            while (ret.endsWith("/") || ret.endsWith("\\")) {
+                ret = ret.substring(0, ret.length() - 1);
+            }
+        }
+        return ret;
+    }
+
+    public static String get32BitProgramFiles(LogInterface logger) {
+        String ret = null;
+        try {
+            final String[] pathes = new String[] { "ProgramFiles(x86)", "ProgramFiles" };
+            pathloop: for (String name : pathes) {
+                for (final Entry<String, String> es : System.getenv().entrySet()) {
+                    if (StringUtils.equalsIgnoreCase(es.getKey(), name) && StringUtils.isNotEmpty(es.getValue())) {
+                        final File testProgramFiles = new File(es.getValue());
+                        if (testProgramFiles.exists()) {
+                            ret = es.getValue();
+                            break pathloop;
+                        }
+                    }
+                }
+            }
+        } catch (final Throwable e) {
+            if (logger != null) {
+                logger.log(e);
+            }
+        }
+        if (StringUtils.isEmpty(ret)) {
+            for (File path : File.listRoots()) {
+                ret = CrossSystem.is64BitOperatingSystem() ? new File(path, "Program Files (x86)").getAbsolutePath() : new File(path, "Program Files").getAbsolutePath();
+                if (!new File(ret).exists()) {
+                    ret = null;
+                } else {
+                    break;
+                }
+            }
+        }
+        if (ret != null) {
+            while (ret.endsWith("/") || ret.endsWith("\\")) {
+                ret = ret.substring(0, ret.length() - 1);
+            }
+        }
+        return ret;
     }
 }

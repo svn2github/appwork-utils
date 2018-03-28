@@ -105,7 +105,7 @@ public class DesktopSupportJavaDesktop implements DesktopSupport {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.utils.os.DesktopSupport#shutdown()
      */
     @Override
@@ -116,7 +116,7 @@ public class DesktopSupportJavaDesktop implements DesktopSupport {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.utils.os.DesktopSupport#standby()
      */
     @Override
@@ -127,7 +127,7 @@ public class DesktopSupportJavaDesktop implements DesktopSupport {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.utils.os.DesktopSupport#hibernate()
      */
     @Override
@@ -138,11 +138,21 @@ public class DesktopSupportJavaDesktop implements DesktopSupport {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.utils.os.DesktopSupport#getDefaultDownloadDirectory()
      */
     @Override
     public String getDefaultDownloadDirectory() {
         return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.appwork.utils.os.DesktopSupport#getProcessExecutablePathByPID(int)
+     */
+    @Override
+    public String getProcessExecutablePathByPID(int pid) throws NotSupportedException {
+        throw new NotSupportedException("Operating System not supported");
     }
 }

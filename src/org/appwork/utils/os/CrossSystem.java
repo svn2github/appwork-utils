@@ -871,7 +871,7 @@ public class CrossSystem {
         }
     }
 
-    public static long getPID() {
+    public static int getPID() {
         final RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
         try {
             final String jvmName = runtimeMXBean.getName();
@@ -882,7 +882,7 @@ public class CrossSystem {
              * @return
              */
             if (index >= 1) {
-                return Long.parseLong(jvmName.substring(0, index));
+                return Integer.parseInt(jvmName.substring(0, index), 10);
             }
         } catch (Throwable e) {
         }
@@ -895,7 +895,7 @@ public class CrossSystem {
             final Object vmManagement = jvmField.get(runtimeMXBean);
             final Method getProcessIdMethod = vmManagement.getClass().getDeclaredMethod("getProcessId");
             getProcessIdMethod.setAccessible(true);
-            return (Integer) getProcessIdMethod.invoke(vmManagement);
+            return ((Number) getProcessIdMethod.invoke(vmManagement)).intValue();
         } catch (final Throwable e) {
         }
         return -1;

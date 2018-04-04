@@ -303,7 +303,7 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
      * @param pid
      * @return
      */
-    public String getProcessCommandlineByPID(int pid) {
+    public String getProcessCommandlineByPID(long pid) {
         ProcessOutput result;
         try {
             result = ProcessBuilderFactory.runCommand("wmic", "process", "where", "ProcessID=" + pid, "get", "CommandLine");
@@ -314,7 +314,7 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
         }
     }
 
-    public String getProcessExecutablePathByPID(int pid) {
+    public String getProcessExecutablePathByPID(long pid) {
         ProcessOutput result;
         try {
             result = ProcessBuilderFactory.runCommand("wmic", "process", "where", "ProcessID=" + pid, "get", "ExecutablePath");

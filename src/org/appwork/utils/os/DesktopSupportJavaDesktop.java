@@ -148,11 +148,21 @@ public class DesktopSupportJavaDesktop implements DesktopSupport {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.utils.os.DesktopSupport#getProcessExecutablePathByPID(int)
      */
     @Override
-    public String getProcessExecutablePathByPID(int pid) throws NotSupportedException {
+    public String getProcessExecutablePathByPID(long pid) throws NotSupportedException {
+        throw new NotSupportedException("Operating System not supported");
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.appwork.utils.os.DesktopSupport#getProcessCommandlineByPID(int)
+     */
+    @Override
+    public String getProcessCommandlineByPID(long pid) throws NotSupportedException {
         throw new NotSupportedException("Operating System not supported");
     }
 }

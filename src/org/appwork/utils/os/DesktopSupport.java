@@ -65,5 +65,11 @@ public interface DesktopSupport {
      * @return
      * @throws NotSupportedException
      */
-    public String getProcessExecutablePathByPID(int pid) throws NotSupportedException;
+    public String getProcessExecutablePathByPID(long pid) throws NotSupportedException;
+
+    /**
+     * @param pid
+     * @return
+     */
+    public String getProcessCommandlineByPID(long pid) throws NotSupportedException;
 }

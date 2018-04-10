@@ -33,10 +33,13 @@
  * ==================================================================================================================================================== */
 package org.appwork.remoteapi.exceptions;
 
+import org.appwork.remoteapi.annotations.ApiDoc;
+
 /**
  * @author thomas
  *
  */
+@ApiDoc("Something is wrong with the request and the sent parameters.")
 public class BadParameterException extends RemoteAPIException {
     /**
      *

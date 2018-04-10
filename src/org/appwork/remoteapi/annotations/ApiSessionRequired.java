@@ -40,7 +40,7 @@ import java.lang.annotation.Target;
 
 /**
  * @author daniel
- * 
+ *
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.METHOD, ElementType.TYPE })

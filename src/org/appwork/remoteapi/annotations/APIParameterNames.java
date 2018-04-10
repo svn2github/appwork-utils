@@ -44,6 +44,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.METHOD })
+@HiddenForHelpDocs
 public @interface APIParameterNames {
     String[] value();
 }

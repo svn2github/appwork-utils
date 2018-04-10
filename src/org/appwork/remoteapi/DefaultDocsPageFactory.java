@@ -332,7 +332,7 @@ public class DefaultDocsPageFactory extends InterfaceHandler<Object> {
         HTMLStringBuilder nav = new HTMLStringBuilder();
         Template template = readHTMLTemplate();
         addTitle(template);
-        ArrayList<InterfaceHandler<RemoteAPIInterface>> handlerList = new ArrayList<InterfaceHandler<RemoteAPIInterface>>(api.getHandlerMap().values());
+        ArrayList<InterfaceHandler<RemoteAPIInterface>> handlerList = createInterfaceHandlerList();
         Collections.sort(handlerList, new Comparator<InterfaceHandler<RemoteAPIInterface>>() {
             @Override
             public int compare(InterfaceHandler<RemoteAPIInterface> o1, InterfaceHandler<RemoteAPIInterface> o2) {
@@ -708,6 +708,10 @@ public class DefaultDocsPageFactory extends InterfaceHandler<Object> {
         addNavigation(nav, template);
         addContent(content, template);
         return template.build();
+    }
+
+    protected ArrayList<InterfaceHandler<RemoteAPIInterface>> createInterfaceHandlerList() {
+        return new ArrayList<InterfaceHandler<RemoteAPIInterface>>(api.getHandlerMap().values());
     }
 
     /**

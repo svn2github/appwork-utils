@@ -172,6 +172,10 @@ public class InterfaceHandler<T> {
         }
     }
 
+    public java.util.List<Class<T>> getInterfaceClasses() {
+        return new ArrayList<Class<T>>(interfaceClasses);
+    }
+
     public int getAuthLevel(final Method m) {
         final Integer auth = this.methodsAuthLevel.get(m);
         if (auth != null) {

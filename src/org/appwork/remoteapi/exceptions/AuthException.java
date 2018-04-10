@@ -33,10 +33,13 @@
  * ==================================================================================================================================================== */
 package org.appwork.remoteapi.exceptions;
 
+import org.appwork.remoteapi.annotations.ApiDoc;
+
 /**
  * @author Thomas
  *
  */
+@ApiDoc("Authentication failed or you are not allowed to access the requested resource.")
 public class AuthException extends RemoteAPIException {
     /**
      * @param errorForbidden

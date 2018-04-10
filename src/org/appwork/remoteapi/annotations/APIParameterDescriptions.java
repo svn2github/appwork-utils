@@ -31,45 +31,20 @@
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
-package org.appwork.remoteapi.exceptions;
+package org.appwork.remoteapi.annotations;
 
-import org.appwork.remoteapi.annotations.ApiDoc;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * @author Thomas
+ * @author thomas
  *
  */
-@ApiDoc("Something unexpected happened. The server could not handle your request correctly.")
-public class InternalApiException extends RemoteAPIException {
-    /**
-     * @param errorForbidden
-     */
-    public InternalApiException(final Throwable e) {
-        super(e, RemoteAPIError.INTERNAL_SERVER_ERROR);
-    }
-
-    /**
-     *
-     */
-    public InternalApiException() {
-        super(RemoteAPIError.INTERNAL_SERVER_ERROR);
-    }
-
-    /**
-     * @param string
-     */
-    public InternalApiException(String msg) {
-        this(new RuntimeException(msg));
-    }
-
-    /**
-     * @param e
-     * @return
-     */
-    public static InternalApiException get(Throwable e) {
-        if (e instanceof InternalApiException) {
-            return (InternalApiException) e;
-        }
-        return new InternalApiException(e);
-    }
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ ElementType.METHOD })
+@HiddenForHelpDocs
+public @interface APIParameterDescriptions {
+    String[] value();
 }

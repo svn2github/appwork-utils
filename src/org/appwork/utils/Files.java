@@ -367,7 +367,7 @@ public class Files {
         }
     }
 
-    public static <T extends Exception> void walkThroughStructure(final FileHandler<T> handler, final File file) throws T {
+    public static <ExceptionType extends Exception> void walkThroughStructure(final org.appwork.utils.FileHandler<ExceptionType> handler, final File file) throws ExceptionType {
         handler.intro(file);
         try {
             Files.internalWalkThroughStructure(handler, file, 0);

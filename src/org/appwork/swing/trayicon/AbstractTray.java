@@ -306,6 +306,6 @@ public abstract class AbstractTray implements MouseListener, MouseMotionListener
      * @param msg
      */
     public void showMessage(String title, String msg) {
-        trayIcon.displayMessage("TimerTracker", msg, MessageType.INFO);
+        trayIcon.displayMessage(title, msg, MessageType.WARNING);
     }
 }

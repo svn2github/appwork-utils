@@ -43,10 +43,10 @@ import org.appwork.utils.swing.dialog.DialogCanceledException;
 import org.appwork.utils.swing.dialog.DialogClosedException;
 
 public class ConsoleDialog {
-    private AbstractConsole console;
-    private boolean         stdBefore;
-    private boolean         errBefore;
-    private String          title;
+    private final AbstractConsole console;
+    private boolean               stdBefore;
+    private boolean               errBefore;
+    private String                title;
 
     public ConsoleDialog(String string) {
         this.console = AbstractConsole.newInstance();

@@ -289,7 +289,7 @@ public class Socks5SocketConnection extends SocketConnection {
         }
         if (resp[1] != 0) {
             if (logger != null) {
-                logger.append("<-AUTH Invalid!\r\n");
+                logger.append("<-AUTH Invalid!:" + resp[1] + "\r\n");
             }
             throw new InvalidAuthException("Socks5 auth invalid:" + resp[1]);
         } else {
@@ -305,7 +305,7 @@ public class Socks5SocketConnection extends SocketConnection {
         final OutputStream os = proxySocket.getOutputStream();
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         if (logger != null) {
-            logger.append("->SOCKS5 Hello\r\n");
+            logger.append("->SOCKS5 Hello to:" + SocketConnection.getRootEndPointSocketAddress(proxySocket) + "\r\n");
         }
         /* socks5 */
         bos.write((byte) 5);
@@ -345,22 +345,20 @@ public class Socks5SocketConnection extends SocketConnection {
         final int[] resp = SocketConnection.byteArrayToIntArray(read);
         if (resp[0] != 5) {
             throw new IOException("Invalid response:" + resp[0]);
-        }
-        if (resp[1] == 255) {
+        } else if (resp[1] == 255) {
             if (logger != null) {
                 logger.append("<-SOCKS5 Authentication Denied\r\n");
             }
             throw new IOException("Socks5HTTPConnection: no acceptable authentication method found");
-        }
-        if (resp[1] == 2) {
+        } else if (resp[1] == 2) {
             if (!plainAuthPossible && logger != null) {
                 logger.append("->SOCKS5 Plain auth required but not offered!\r\n");
             }
             return AUTH.PLAIN;
-        }
-        if (resp[1] == 0) {
+        } else if (resp[1] == 0) {
             return AUTH.NONE;
+        } else {
+            throw new IOException("Unsupported auth:" + resp[1]);
         }
-        throw new IOException("Unsupported auth:" + resp[1]);
     }
 }

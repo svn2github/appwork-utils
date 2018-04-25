@@ -183,7 +183,7 @@ public class Socks4SocketConnection extends SocketConnection {
     protected void sayHello(final SocketStreamInterface proxySocket, final StringBuffer logger) throws IOException {
         final OutputStream os = proxySocket.getOutputStream();
         if (logger != null) {
-            logger.append("->SOCKS4 Hello\r\n");
+            logger.append("->SOCKS4 Hello to:" + SocketConnection.getRootEndPointSocketAddress(proxySocket) + "\r\n");
         }
         /* socks4 */
         os.write((byte) 4);

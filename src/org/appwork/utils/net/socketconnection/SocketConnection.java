@@ -63,38 +63,6 @@ import org.appwork.utils.net.httpconnection.SocketStreamInterface;
  *
  */
 public abstract class SocketConnection extends Socket {
-    protected static class EndpointConnectException extends ConnectException {
-        private static final long serialVersionUID = -1993301003920927143L;
-
-        public EndpointConnectException() {
-            super();
-        }
-
-        public EndpointConnectException(String msg) {
-            super(msg);
-        }
-    }
-
-    protected static class InvalidAuthException extends IOException {
-        private static final long serialVersionUID = -6926931806394311910L;
-
-        public InvalidAuthException() {
-            super();
-        }
-
-        public InvalidAuthException(String message, Throwable cause) {
-            super(message, cause);
-        }
-
-        public InvalidAuthException(String message) {
-            super(message);
-        }
-
-        public InvalidAuthException(Throwable cause) {
-            super(cause);
-        }
-    }
-
     protected SocketAddress endPointSocketAddress;
 
     public static SocketAddress getRootEndPointSocketAddress(final SocketStreamInterface socketStream) {

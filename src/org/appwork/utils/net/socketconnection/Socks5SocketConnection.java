@@ -37,6 +37,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -56,7 +57,84 @@ import org.appwork.utils.net.httpconnection.SocksHTTPconnection.DESTTYPE;
  *
  */
 public class Socks5SocketConnection extends SocketConnection {
+    public static enum CONNECT_ERROR {
+        GENERAL_SERVER_FAILURE("Socks5 general server failure"),
+        NOT_ALLOWED_BY_RULESET("Socks5 connection not allowed by ruleset"),
+        NETWORK_UNREACHABLE("Network is unreachable"),
+        HOST_UNREACHABLE("Host is unreachable"),
+        CONNECTION_REFUSED("Connection refused"),
+        TTL_EXPIRED("TTL expired"),
+        COMMMAND_NOT_SUPPORTED("Command not supported"),
+        ADDRESS_TYPE_NOT_SUPPORTED("Address type not supported"),
+        ADDRESS_TYPE_NOT_SUPPORTED_IPV4("Address type not supported: IPv4"),
+        ADDRESS_TYPE_NOT_SUPPORTED_IPV6("Address type not supported: IPv6"),
+        ADDRESS_TYPE_NOT_SUPPORTED_DOMAIN("Address type not supported: Domain"),
+        UNKNOWN("Unknown");
+        private final String msg;
+
+        private CONNECT_ERROR(String msg) {
+            this.msg = msg;
+        }
+
+        public String getMsg() {
+            return msg;
+        }
+    }
+
+    public static enum AUTH_ERROR {
+        ERROR,
+        MISSING_PLAIN,
+        DENIED,
+        UNSUPPORTED
+    }
+
     private final DESTTYPE destType;
+
+    public class Socks5AuthException extends IOException {
+        private static final long serialVersionUID = -6926931806394311910L;
+        private final AUTH_ERROR  error;
+
+        private Socks5AuthException(AUTH_ERROR error) {
+            super(error.name());
+            this.error = error;
+        }
+
+        private Socks5AuthException(AUTH_ERROR error, final String msg) {
+            super(error.name() + ":" + msg);
+            this.error = error;
+        }
+
+        public AUTH_ERROR getError() {
+            return error;
+        }
+
+        public HTTPProxy getProxy() {
+            return Socks5SocketConnection.this.getProxy();
+        }
+    }
+
+    public class Socks5EndpointConnectException extends ConnectException {
+        private static final long   serialVersionUID = -1993301003920927143L;
+        private final CONNECT_ERROR error;
+
+        private Socks5EndpointConnectException(CONNECT_ERROR error) {
+            super(error.msg);
+            this.error = error;
+        }
+
+        private Socks5EndpointConnectException(CONNECT_ERROR error, String msg) {
+            super(error.msg + ":" + msg);
+            this.error = error;
+        }
+
+        public CONNECT_ERROR getError() {
+            return error;
+        }
+
+        public HTTPProxy getProxy() {
+            return Socks5SocketConnection.this.getProxy();
+        }
+    }
 
     protected DESTTYPE getDestType(final SocketAddress endpoint) {
         if (endpoint != null && endpoint instanceof InetSocketAddress) {
@@ -100,19 +178,17 @@ public class Socks5SocketConnection extends SocketConnection {
             case PLAIN:
                 switch (authOffer) {
                 case NONE:
-                    throw new InvalidAuthException();
+                    throw new Socks5AuthException(AUTH_ERROR.MISSING_PLAIN);
                 case PLAIN:
                     authPlain(proxySocket, userName, passWord, logger);
                     break;
                 }
                 break;
-            default:
-                throw new IOException("Unsupported AUTH:" + authRequest);
             }
             return establishConnection(this, proxySocket, setEndPointSocketAddress(endPoint), this.getDestType(endPoint), logger);
-        } catch (final InvalidAuthException e) {
+        } catch (final Socks5AuthException e) {
             throw new ProxyAuthException(e, proxy);
-        } catch (final EndpointConnectException e) {
+        } catch (final Socks5EndpointConnectException e) {
             throw new ProxyEndpointConnectException(e, getProxy(), endPoint);
         } catch (final IOException e) {
             throw new ProxyConnectException(e, this.getProxy());
@@ -207,23 +283,30 @@ public class Socks5SocketConnection extends SocketConnection {
         case 0:
             break;
         case 1:
-            throw new IOException("Socks5 general server failure");
+            throw new Socks5EndpointConnectException(CONNECT_ERROR.GENERAL_SERVER_FAILURE);
         case 2:
-            throw new EndpointConnectException("Socks5 connection not allowed by ruleset");
+            throw new Socks5EndpointConnectException(CONNECT_ERROR.NOT_ALLOWED_BY_RULESET);
         case 3:
-            throw new EndpointConnectException("Network is unreachable");
+            throw new Socks5EndpointConnectException(CONNECT_ERROR.NETWORK_UNREACHABLE);
         case 4:
-            throw new EndpointConnectException("Host is unreachable");
+            throw new Socks5EndpointConnectException(CONNECT_ERROR.HOST_UNREACHABLE);
         case 5:
-            throw new EndpointConnectException("Connection refused");
+            throw new Socks5EndpointConnectException(CONNECT_ERROR.CONNECTION_REFUSED);
         case 6:
-            throw new EndpointConnectException("TTL expired");
+            throw new Socks5EndpointConnectException(CONNECT_ERROR.TTL_EXPIRED);
         case 7:
-            throw new EndpointConnectException("Command not supported");
+            throw new Socks5EndpointConnectException(CONNECT_ERROR.COMMMAND_NOT_SUPPORTED);
         case 8:
-            throw new EndpointConnectException("Address type not supported:" + usedDestType);
+            switch (usedDestType) {
+            case DOMAIN:
+                throw new Socks5EndpointConnectException(CONNECT_ERROR.ADDRESS_TYPE_NOT_SUPPORTED_DOMAIN);
+            case IPV4:
+                throw new Socks5EndpointConnectException(CONNECT_ERROR.ADDRESS_TYPE_NOT_SUPPORTED_IPV4);
+            case IPV6:
+                throw new Socks5EndpointConnectException(CONNECT_ERROR.ADDRESS_TYPE_NOT_SUPPORTED_IPV6);
+            }
         default:
-            throw new EndpointConnectException("Socks5 could not establish connection, status=" + resp[1]);
+            throw new Socks5EndpointConnectException(CONNECT_ERROR.UNKNOWN, "status=" + resp[1]);
         }
         if (resp[3] == 1) {
             /* ipv4 response */
@@ -251,7 +334,7 @@ public class Socks5SocketConnection extends SocketConnection {
                 logger.append("<-BOUND IPv6:" + InetAddress.getByAddress(connectedIP) + ":" + (ByteBuffer.wrap(connectedPort).getShort() & 0xffff) + "\r\n");
             }
         } else {
-            throw new IOException("Socks5 unsupported address Type " + resp[3]);
+            throw new Socks5EndpointConnectException(CONNECT_ERROR.ADDRESS_TYPE_NOT_SUPPORTED, String.valueOf(resp[3]));
         }
         return proxySocket;
     }
@@ -291,7 +374,7 @@ public class Socks5SocketConnection extends SocketConnection {
             if (logger != null) {
                 logger.append("<-AUTH Invalid!:" + resp[1] + "\r\n");
             }
-            throw new InvalidAuthException("Socks5 auth invalid:" + resp[1]);
+            throw new Socks5AuthException(AUTH_ERROR.ERROR, String.valueOf(resp[1]));
         } else {
             if (logger != null) {
                 logger.append("<-AUTH Valid!\r\n");
@@ -349,7 +432,7 @@ public class Socks5SocketConnection extends SocketConnection {
             if (logger != null) {
                 logger.append("<-SOCKS5 Authentication Denied\r\n");
             }
-            throw new IOException("Socks5HTTPConnection: no acceptable authentication method found");
+            throw new Socks5AuthException(AUTH_ERROR.DENIED);
         } else if (resp[1] == 2) {
             if (!plainAuthPossible && logger != null) {
                 logger.append("->SOCKS5 Plain auth required but not offered!\r\n");
@@ -358,7 +441,7 @@ public class Socks5SocketConnection extends SocketConnection {
         } else if (resp[1] == 0) {
             return AUTH.NONE;
         } else {
-            throw new IOException("Unsupported auth:" + resp[1]);
+            throw new Socks5AuthException(AUTH_ERROR.UNSUPPORTED, String.valueOf(resp[1]));
         }
     }
 }

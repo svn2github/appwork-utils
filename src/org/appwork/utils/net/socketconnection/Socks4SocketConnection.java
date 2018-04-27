@@ -37,13 +37,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 
 import org.appwork.utils.net.httpconnection.HTTPProxy;
-import org.appwork.utils.net.httpconnection.ProxyAuthException;
 import org.appwork.utils.net.httpconnection.ProxyConnectException;
 import org.appwork.utils.net.httpconnection.ProxyEndpointConnectException;
 import org.appwork.utils.net.httpconnection.SocketStreamInterface;
@@ -55,6 +55,45 @@ import org.appwork.utils.net.httpconnection.SocksHTTPconnection.DESTTYPE;
  */
 public class Socks4SocketConnection extends SocketConnection {
     private final DESTTYPE destType;
+
+    public static enum CONNECT_ERROR {
+        REJECTED("Socks4 request rejected or failed"),
+        CLIENT_IDENTD_UNREACHABLE("Socks4 request failed because client is not running identd (or not reachable from the server)"),
+        CLIENT_IDENTD_AUTH("Socks4 request failed because client's identd could not confirm the user ID string in the request"),
+        UNKNOWN("Unknown");
+        private final String msg;
+
+        private CONNECT_ERROR(String msg) {
+            this.msg = msg;
+        }
+
+        public String getMsg() {
+            return msg;
+        }
+    }
+
+    public class Socks4EndpointConnectException extends ConnectException {
+        private static final long   serialVersionUID = -1993301003920927143L;
+        private final CONNECT_ERROR error;
+
+        private Socks4EndpointConnectException(CONNECT_ERROR error) {
+            super(error.msg);
+            this.error = error;
+        }
+
+        private Socks4EndpointConnectException(CONNECT_ERROR error, String msg) {
+            super(error.msg + ":" + msg);
+            this.error = error;
+        }
+
+        public CONNECT_ERROR getError() {
+            return error;
+        }
+
+        public HTTPProxy getProxy() {
+            return Socks4SocketConnection.this.getProxy();
+        }
+    }
 
     protected DESTTYPE getDestType(final SocketAddress endpoint) {
         if (endpoint != null && endpoint instanceof InetSocketAddress) {
@@ -85,9 +124,7 @@ public class Socks4SocketConnection extends SocketConnection {
         try {
             sayHello(proxySocket, logger);
             return establishConnection(this, proxySocket, proxy.getUser(), setEndPointSocketAddress(endPoint), this.getDestType(endPoint), logger);
-        } catch (final InvalidAuthException e) {
-            throw new ProxyAuthException(e, proxy);
-        } catch (final EndpointConnectException e) {
+        } catch (final Socks4EndpointConnectException e) {
             throw new ProxyEndpointConnectException(e, proxy, endPoint);
         } catch (final IOException e) {
             throw new ProxyConnectException(e, proxy);
@@ -162,13 +199,13 @@ public class Socks4SocketConnection extends SocketConnection {
         case 0x5a:
             break;
         case 0x5b:
-            throw new EndpointConnectException("Socks4 request rejected or failed");
+            throw new Socks4EndpointConnectException(CONNECT_ERROR.REJECTED);
         case 0x5c:
-            throw new EndpointConnectException("Socks4 request failed because client is not running identd (or not reachable from the server)");
+            throw new Socks4EndpointConnectException(CONNECT_ERROR.CLIENT_IDENTD_UNREACHABLE);
         case 0x5d:
-            throw new EndpointConnectException("Socks4 request failed because client's identd could not confirm the user ID string in the request");
+            throw new Socks4EndpointConnectException(CONNECT_ERROR.CLIENT_IDENTD_AUTH);
         default:
-            throw new EndpointConnectException("Socks4 could not establish connection, status=" + resp[1]);
+            throw new Socks4EndpointConnectException(CONNECT_ERROR.UNKNOWN, String.valueOf(resp[1]));
         }
         /* port */
         final byte[] connectedPort = SocketConnection.ensureRead(is, 2, null);

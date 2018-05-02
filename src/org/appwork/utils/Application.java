@@ -52,7 +52,6 @@ import java.net.URLClassLoader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -72,7 +71,7 @@ import org.appwork.utils.os.CrossSystem;
  *
  */
 public class Application {
-    private static Boolean IS_JARED = null;
+    private static Boolean              IS_JARED      = null;
     static {
         if (System.getProperty("NO_SYSOUT_REDIRECT") == null) {
             Application.redirectOutputStreams();
@@ -640,8 +639,8 @@ public class Application {
     }
 
     public static class PauseableOutputStream extends OutputStream {
-        private final PrintStream     _out;
-        private ByteArrayOutputStream buffer;
+        private final PrintStream              _out;
+        private volatile ByteArrayOutputStream buffer;
 
         /**
          * @param out
@@ -657,7 +656,7 @@ public class Application {
          */
         @Override
         public void write(int paramInt) throws IOException {
-            if (this.branches != null) {
+            if (branches.size() > 0) {
                 for (OutputStream os : this.branches) {
                     try {
                         os.write(paramInt);
@@ -679,7 +678,7 @@ public class Application {
          */
         @Override
         public void write(byte[] b) throws IOException {
-            if (this.branches != null) {
+            if (branches.size() > 0) {
                 for (OutputStream os : this.branches) {
                     try {
                         os.write(b);
@@ -701,7 +700,7 @@ public class Application {
          */
         @Override
         public void write(byte[] buff, int off, int len) throws IOException {
-            if (this.branches != null) {
+            if (branches.size() > 0) {
                 for (OutputStream os : this.branches) {
                     try {
                         os.write(buff, off, len);
@@ -727,12 +726,10 @@ public class Application {
                 this.buffer.flush();
                 return;
             }
-            if (this.branches != null) {
-                for (OutputStream os : this.branches) {
-                    try {
-                        os.flush();
-                    } catch (Throwable e) {
-                    }
+            for (OutputStream os : this.branches) {
+                try {
+                    os.flush();
+                } catch (Throwable e) {
                 }
             }
             this._out.flush();
@@ -749,12 +746,10 @@ public class Application {
                 this.buffer.close();
                 this.setBufferEnabled(false);
             }
-            if (this.branches != null) {
-                for (OutputStream os : this.branches) {
-                    try {
-                        os.close();
-                    } catch (Throwable e) {
-                    }
+            for (OutputStream os : this.branches) {
+                try {
+                    os.close();
+                } catch (Throwable e) {
                 }
             }
             this._out.close();
@@ -784,39 +779,35 @@ public class Application {
             }
         }
 
-        private List<OutputStream> branches = null;
+        private final CopyOnWriteArrayList<OutputStream> branches = new CopyOnWriteArrayList<OutputStream>();
 
         /**
          * @param bufferedOutputStream
          */
-        public void addBranch(OutputStream os) {
-            if (this.branches == null) {
-                this.branches = new CopyOnWriteArrayList<OutputStream>();
-            }
-            this.branches.add(os);
+        public boolean addBranch(OutputStream os) {
+            return os != null && branches.addIfAbsent(os);
         }
 
-        public void removeBranch(OutputStream os) {
-            if (branches == null) {
-                return;
-            }
-            branches.remove(os);
+        public boolean removeBranch(OutputStream os) {
+            return os != null && branches.remove(os);
         }
 
         /**
          * @param branches2
          */
         public void setBranches(ArrayList<OutputStream> branches2) {
-            this.branches = new CopyOnWriteArrayList<OutputStream>(branches2);
+            this.branches.clear();
+            if (branches2 != null) {
+                this.branches.addAll(branches2);
+            }
         }
 
         /**
          * @param outputStream
          */
         public void setBranch(OutputStream outputStream) {
-            CopyOnWriteArrayList<OutputStream> branches = new CopyOnWriteArrayList<OutputStream>();
-            branches.add(outputStream);
-            this.branches = branches;
+            this.branches.clear();
+            addBranch(outputStream);
         }
     }
 

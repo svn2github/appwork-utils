@@ -55,6 +55,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
@@ -71,7 +72,7 @@ import org.appwork.utils.os.CrossSystem;
  *
  */
 public class Application {
-    private static Boolean              IS_JARED      = null;
+    private static Boolean IS_JARED = null;
     static {
         if (System.getProperty("NO_SYSOUT_REDIRECT") == null) {
             Application.redirectOutputStreams();
@@ -571,7 +572,7 @@ public class Application {
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Java 1.6 Update 18 has a serious bug in garbage collector!");
             /*
              * java 1.6 update 18 has a bug in garbage collector, causes java crashes
-             * 
+             *
              * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6847956
              */
             return true;
@@ -594,7 +595,7 @@ public class Application {
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("freezing AppKit thread bug");
             /*
              * http://bugs.java.com/view_bug.do?bug_id=8025588
-             * 
+             *
              * Frozen AppKit thread
              */
             return true;
@@ -651,7 +652,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.io.OutputStream#write(int)
          */
         @Override
@@ -673,7 +674,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.io.OutputStream#write(byte[])
          */
         @Override
@@ -695,7 +696,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.io.OutputStream#write(byte[], int, int)
          */
         @Override
@@ -717,7 +718,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.io.OutputStream#flush()
          */
         @Override
@@ -739,7 +740,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.io.OutputStream#close()
          */
         @Override
@@ -790,9 +791,32 @@ public class Application {
          */
         public void addBranch(OutputStream os) {
             if (this.branches == null) {
-                this.branches = new ArrayList<OutputStream>();
+                this.branches = new CopyOnWriteArrayList<OutputStream>();
             }
             this.branches.add(os);
+        }
+
+        public void removeBranch(OutputStream os) {
+            if (branches == null) {
+                return;
+            }
+            branches.remove(os);
+        }
+
+        /**
+         * @param branches2
+         */
+        public void setBranches(ArrayList<OutputStream> branches2) {
+            this.branches = new CopyOnWriteArrayList<OutputStream>(branches2);
+        }
+
+        /**
+         * @param outputStream
+         */
+        public void setBranch(OutputStream outputStream) {
+            CopyOnWriteArrayList<OutputStream> branches = new CopyOnWriteArrayList<OutputStream>();
+            branches.add(outputStream);
+            this.branches = branches;
         }
     }
 

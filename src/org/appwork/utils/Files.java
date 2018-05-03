@@ -143,7 +143,7 @@ public class Files {
         }
         if (file.exists() && !fd && breakOnError) {
             if (exception != null) {
-                throw exception;
+                throw new IOException("Could not delete " + file, exception);
             }
             throw new IOException("Could not delete " + file);
         }

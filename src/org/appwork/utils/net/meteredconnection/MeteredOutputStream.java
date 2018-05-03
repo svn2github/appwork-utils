@@ -43,22 +43,20 @@ import org.appwork.utils.speedmeter.SpeedMeterInterface;
  *
  */
 public class MeteredOutputStream extends OutputStream implements SpeedMeterInterface {
-    private final OutputStream  out;
-    private SpeedMeterInterface speedmeter       = null;
-    private long                transfered       = 0;
-    private long                transfered2      = 0;
-    private long                time             = 0;
-    private long                speed            = 0;
-    private int                 offset;
-    private int                 checkStep        = 1024;
+    private final OutputStream        out;
+    private final SpeedMeterInterface speedmeter;
+    private long                      transfered       = 0;
+    private long                      transfered2      = 0;
+    private long                      time             = 0;
+    private long                      speed            = 0;
+    private int                       offset;
+    private int                       checkStep        = 1024;
     // private final static int HIGHStep = 524288;
-    public final static int     LOWStep          = 1024;
-    private int                 rest;
-    private int                 todo;
-    private long                lastTime;
-    private long                lastTrans;
-    private long                timeForCheckStep = 0;
-    private int                 timeCheck        = 0;
+    public final static int           LOWStep          = 1024;
+    private int                       rest;
+    private int                       todo;
+    private long                      timeForCheckStep = 0;
+    private int                       timeCheck        = 0;
 
     /**
      * constructor for MeteredOutputStream
@@ -66,7 +64,7 @@ public class MeteredOutputStream extends OutputStream implements SpeedMeterInter
      * @param out
      */
     public MeteredOutputStream(final OutputStream out) {
-        this.out = out;
+        this(out, null);
     }
 
     /**
@@ -95,27 +93,31 @@ public class MeteredOutputStream extends OutputStream implements SpeedMeterInter
     }
 
     public synchronized long getValue(Resolution resolution) {
-        if (this.time == 0) {
-            this.time = getTime();
-            this.transfered2 = this.transfered;
+        final long now = getTime();
+        final long trans = transfered;
+        if (time == 0) {
+            time = now;
+            transfered2 = trans;
             return 0;
         }
-        if (getTime() - this.time < 1000) {
-            if (this.speedmeter != null) {
-                return this.speedmeter.getValue(resolution);
+        final long last = now - time;
+        if (last < resolution.factor) {
+            if (speedmeter != null) {
+                return speedmeter.getValue(resolution);
+            } else {
+                return speed;
             }
-            return this.speed;
         }
-        this.lastTime = getTime() - this.time;
-        this.time = getTime();
-        this.lastTrans = this.transfered - this.transfered2;
-        this.transfered2 = this.transfered;
-        if (this.speedmeter != null) {
-            this.speedmeter.putBytes(this.lastTrans, this.lastTime);
-            return this.speedmeter.getValue(resolution);
+        time = now;
+        final long diff = trans - transfered2;
+        transfered2 = trans;
+        if (speedmeter != null) {
+            speedmeter.putBytes(diff, last);
+            speed = speedmeter.getValue(resolution);
+            return speed;
         } else {
-            this.speed = this.lastTrans / this.lastTime * 1000;
-            return this.speed;
+            speed = (diff / last) * 1000;
+            return speed;
         }
     }
 
@@ -153,8 +155,9 @@ public class MeteredOutputStream extends OutputStream implements SpeedMeterInter
     protected long getTime() {
         if (speedmeter != null) {
             return speedmeter.getResolution().getTime();
+        } else {
+            return System.currentTimeMillis();
         }
-        return System.currentTimeMillis();
     }
 
     @Override
@@ -192,8 +195,9 @@ public class MeteredOutputStream extends OutputStream implements SpeedMeterInter
     public Resolution getResolution() {
         if (speedmeter != null) {
             return speedmeter.getResolution();
+        } else {
+            return Resolution.MILLI_SECONDS;
         }
-        return null;
     }
 
     @Override

@@ -42,19 +42,17 @@ import org.appwork.utils.speedmeter.SpeedMeterInterface;
  *
  */
 public class MeteredThrottledOutputStream extends ThrottledOutputStream implements SpeedMeterInterface {
-    private SpeedMeterInterface speedmeter = null;
-    private long                time       = 0;
-    private long                speed      = 0;
-    private long                lastTime;
-    private long                lastTrans;
-    private long                transferedCounter3;
-    private final Object        LOCK       = new Object();
+    private final SpeedMeterInterface speedmeter;
+    private long                      time  = 0;
+    private long                      speed = 0;
+    private long                      transferedCounter3;
+    private final Object              LOCK  = new Object();
 
     /**
      * @param out
      */
     public MeteredThrottledOutputStream(OutputStream out) {
-        super(out);
+        this(out, null);
     }
 
     public MeteredThrottledOutputStream(OutputStream out, SpeedMeterInterface speedmeter) {
@@ -65,8 +63,9 @@ public class MeteredThrottledOutputStream extends ThrottledOutputStream implemen
     protected long getTime() {
         if (speedmeter != null) {
             return speedmeter.getResolution().getTime();
+        } else {
+            return System.currentTimeMillis();
         }
-        return getTime();
     }
 
     /*
@@ -78,40 +77,37 @@ public class MeteredThrottledOutputStream extends ThrottledOutputStream implemen
     public Resolution getResolution() {
         if (speedmeter != null) {
             return speedmeter.getResolution();
+        } else {
+            return Resolution.MILLI_SECONDS;
         }
-        return null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.appwork.utils.SpeedMeterInterface#getSpeedMeter()
-     */
-    public long getValue(Resolution resolution) {
-        synchronized (LOCK) {
-            if (time == 0) {
-                time = getTime();
-                transferedCounter3 = transferedCounter;
-                return 0;
-            }
-            if (getTime() - time < 1000) {
-                if (speedmeter != null) {
-                    return speedmeter.getValue(resolution);
-                }
-                return speed;
-            }
-            lastTime = getTime() - time;
-            time = getTime();
-            lastTrans = transferedCounter - transferedCounter3;
-            transferedCounter3 = transferedCounter;
-            if (speedmeter != null) {
-                speedmeter.putBytes(lastTrans, lastTime);
-                speed = speedmeter.getValue(resolution);
-                return speed;
+    public synchronized long getValue(Resolution resolution) {
+        final long now = getTime();
+        final long trans = transferedCounter;
+        if (this.time == 0) {
+            this.transferedCounter3 = trans;
+            this.time = now;
+            return 0;
+        }
+        final long last = now - time;
+        if (last < 1000) {
+            if (this.speedmeter != null) {
+                return this.speedmeter.getValue(resolution);
             } else {
-                speed = (lastTrans / lastTime) * 1000;
-                return speed;
+                return this.speed;
             }
+        }
+        final long diff = trans - this.transferedCounter3;
+        this.transferedCounter3 = trans;
+        this.time = now;
+        if (this.speedmeter != null) {
+            this.speedmeter.putBytes(diff, last);
+            this.speed = this.speedmeter.getValue(resolution);
+            return this.speed;
+        } else {
+            this.speed = diff / last * 1000;
+            return this.speed;
         }
     }
 

@@ -46,13 +46,13 @@ public class AverageSpeedMeter implements SpeedMeterInterface {
     private final Object     LOCK    = new Object();
     private long             stalled = 0;
     private long             timeout = -1;          /*
-                                                     * no timeout for stalled connections
-                                                     */
+     * no timeout for stalled connections
+     */
     private final Resolution resolution;
     private long             totalValue;
     private long             totalTime;
 
-    public Resolution getResolution() {
+    public final Resolution getResolution() {
         return resolution;
     }
 
@@ -67,6 +67,9 @@ public class AverageSpeedMeter implements SpeedMeterInterface {
         this.bytes = new long[this.size];
         this.times = new long[this.size];
         this.index = 0;
+        if (resolution == null) {
+            throw new IllegalArgumentException("Resolution is null!");
+        }
         this.resolution = resolution;
         this.resetSpeedmeter();
     }
@@ -90,21 +93,24 @@ public class AverageSpeedMeter implements SpeedMeterInterface {
     /**
      * returns the current value of the speedmeter. Use the scalingfactor to define the require unit. <br>
      * example:<br>
-     * If you put values in nanoseconds, you need a scalingfactor of 1000*1000*1000 to get a value in seconds
+     *
      *
      */
     public long getValue(Resolution requestedResolution) {
+        final long time;
+        final long value;
         synchronized (this.LOCK) {
             aggregate();
-            // at least one second
-            if (totalTime > getMinimumDuration()) {
-                return (long) ((totalValue * (getResolution().factor / (double) requestedResolution.factor)) / totalTime);
-            }
-            return 0;
+            time = totalTime;
+            value = totalValue;
         }
+        if (time > getMinimumDuration()) {
+            return (long) ((value * (getResolution().factor / (double) requestedResolution.factor)) / time);
+        }
+        return 0;
     }
 
-    protected long getMinimumDuration() {
+    protected final long getMinimumDuration() {
         return getResolution().factor;
     }
 
@@ -113,21 +119,20 @@ public class AverageSpeedMeter implements SpeedMeterInterface {
      */
     private void aggregate() {
         synchronized (this.LOCK) {
-            if (!this.changed) {
-                return;
-            }
-            long totalValue = 0;
-            long totalTime = this.stalled;
-            for (int i = 0; i < this.size; i++) {
-                if (this.bytes[i] < 0) {
-                    continue;
+            if (this.changed) {
+                long totalValue = 0;
+                long totalTime = this.stalled;
+                for (int i = 0; i < this.size; i++) {
+                    if (this.bytes[i] < 0) {
+                        continue;
+                    }
+                    totalValue += this.bytes[i];
+                    totalTime += this.times[i];
                 }
-                totalValue += this.bytes[i];
-                totalTime += this.times[i];
+                this.totalValue = totalValue;
+                this.totalTime = totalTime;
+                changed = false;
             }
-            this.totalValue = totalValue;
-            this.totalTime = totalTime;
-            changed = false;
         }
     }
 

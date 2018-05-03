@@ -42,18 +42,16 @@ import org.appwork.utils.speedmeter.SpeedMeterInterface;
  *
  */
 public class MeteredThrottledInputStream extends ThrottledInputStream implements SpeedMeterInterface {
-    private SpeedMeterInterface speedmeter = null;
-    private long                time       = 0;
-    private long                speed      = 0;
-    private long                lastTime;
-    private long                lastTrans;
-    private long                transferedCounter3;
+    private final SpeedMeterInterface speedmeter;
+    private long                      time  = 0;
+    private long                      speed = 0;
+    private long                      transferedCounter3;
 
     /**
      * @param in
      */
     public MeteredThrottledInputStream(final InputStream in) {
-        super(in);
+        this(in, null);
     }
 
     public MeteredThrottledInputStream(final InputStream in, final SpeedMeterInterface speedmeter) {
@@ -61,35 +59,31 @@ public class MeteredThrottledInputStream extends ThrottledInputStream implements
         this.speedmeter = speedmeter;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.appwork.utils.SpeedMeterInterface#getSpeedMeter()
-     */
     public synchronized long getValue(Resolution resolution) {
+        final long now = getTime();
+        final long trans = transferedCounter;
         if (this.time == 0) {
-            this.transferedCounter3 = this.transferedCounter;
-            this.time = getTime();
+            this.transferedCounter3 = trans;
+            this.time = now;
             return 0;
         }
-        if (getTime() - this.time < 1000) {
+        final long last = now - time;
+        if (last < 1000) {
             if (this.speedmeter != null) {
                 return this.speedmeter.getValue(resolution);
+            } else {
+                return this.speed;
             }
-            return this.speed;
         }
-        final long tmp2 = this.transferedCounter;
-        this.lastTrans = tmp2 - this.transferedCounter3;
-        final long tmp = getTime();
-        this.lastTime = tmp - this.time;
-        this.transferedCounter3 = tmp2;
-        this.time = tmp;
+        final long diff = trans - this.transferedCounter3;
+        this.transferedCounter3 = trans;
+        this.time = now;
         if (this.speedmeter != null) {
-            this.speedmeter.putBytes(this.lastTrans, this.lastTime);
+            this.speedmeter.putBytes(diff, last);
             this.speed = this.speedmeter.getValue(resolution);
             return this.speed;
         } else {
-            this.speed = this.lastTrans / this.lastTime * 1000;
+            this.speed = diff / last * 1000;
             return this.speed;
         }
     }
@@ -97,8 +91,9 @@ public class MeteredThrottledInputStream extends ThrottledInputStream implements
     protected long getTime() {
         if (speedmeter != null) {
             return speedmeter.getResolution().getTime();
+        } else {
+            return System.currentTimeMillis();
         }
-        return getTime();
     }
 
     /*
@@ -110,8 +105,9 @@ public class MeteredThrottledInputStream extends ThrottledInputStream implements
     public Resolution getResolution() {
         if (speedmeter != null) {
             return speedmeter.getResolution();
+        } else {
+            return Resolution.MILLI_SECONDS;
         }
-        return null;
     }
 
     /*

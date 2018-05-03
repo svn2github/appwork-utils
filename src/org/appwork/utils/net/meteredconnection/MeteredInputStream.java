@@ -43,9 +43,9 @@ import org.appwork.utils.speedmeter.SpeedMeterInterface;
  *
  */
 public class MeteredInputStream extends InputStream implements SpeedMeterInterface {
-    private InputStream         in;
-    private SpeedMeterInterface speedmeter = null;
-    private long                transfered = 0;
+    private final InputStream         in;
+    private final SpeedMeterInterface speedmeter;
+    private long                      transfered = 0;
 
     public long getTransfered() {
         return transfered;
@@ -53,7 +53,6 @@ public class MeteredInputStream extends InputStream implements SpeedMeterInterfa
 
     private long            transfered2      = 0;
     private long            time             = 0;
-    private int             readTmp1;
     private long            speed            = 0;
     private int             offset;
     private int             checkStep        = 1024;
@@ -63,8 +62,6 @@ public class MeteredInputStream extends InputStream implements SpeedMeterInterfa
     private int             lastRead;
     private int             rest;
     private int             lastRead2;
-    private long            lastTime;
-    private long            lastTrans;
     private long            timeForCheckStep = 0;
     private int             timeCheck        = 0;
 
@@ -74,7 +71,7 @@ public class MeteredInputStream extends InputStream implements SpeedMeterInterfa
      * @param in
      */
     public MeteredInputStream(InputStream in) {
-        this.in = in;
+        this(in, null);
     }
 
     /**
@@ -90,11 +87,11 @@ public class MeteredInputStream extends InputStream implements SpeedMeterInterfa
 
     @Override
     public int read() throws IOException {
-        readTmp1 = in.read();
-        if (readTmp1 != -1) {
+        final int ret = in.read();
+        if (ret != -1) {
             transfered++;
         }
-        return readTmp1;
+        return ret;
     }
 
     public int getCheckStepSize() {
@@ -171,33 +168,31 @@ public class MeteredInputStream extends InputStream implements SpeedMeterInterfa
         in.close();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.appwork.utils.SpeedMeterInterface#getSpeedMeter()
-     */
     public synchronized long getValue(Resolution resolution) {
+        final long now = getTime();
+        final long trans = transfered;
         if (time == 0) {
-            time = getTime();
-            transfered2 = transfered;
+            time = now;
+            transfered2 = trans;
             return 0;
         }
-        if (getTime() - time < 1000) {
+        final long last = now - time;
+        if (last < resolution.factor) {
             if (speedmeter != null) {
                 return speedmeter.getValue(resolution);
+            } else {
+                return speed;
             }
-            return speed;
         }
-        lastTime = getTime() - time;
-        time = getTime();
-        lastTrans = transfered - transfered2;
-        transfered2 = transfered;
+        time = now;
+        final long diff = trans - transfered2;
+        transfered2 = trans;
         if (speedmeter != null) {
-            speedmeter.putBytes(lastTrans, lastTime);
+            speedmeter.putBytes(diff, last);
             speed = speedmeter.getValue(resolution);
             return speed;
         } else {
-            speed = (lastTrans / lastTime) * 1000;
+            speed = (diff / last) * 1000;
             return speed;
         }
     }
@@ -205,8 +200,9 @@ public class MeteredInputStream extends InputStream implements SpeedMeterInterfa
     protected long getTime() {
         if (speedmeter != null) {
             return speedmeter.getResolution().getTime();
+        } else {
+            return System.currentTimeMillis();
         }
-        return System.currentTimeMillis();
     }
 
     /*
@@ -218,8 +214,9 @@ public class MeteredInputStream extends InputStream implements SpeedMeterInterfa
     public Resolution getResolution() {
         if (speedmeter != null) {
             return speedmeter.getResolution();
+        } else {
+            return Resolution.MILLI_SECONDS;
         }
-        return null;
     }
 
     /*

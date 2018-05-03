@@ -106,7 +106,7 @@ public class AverageSpeedMeter implements SpeedMeterInterface {
                 totalValue += this.bytes[i];
                 totalTime += this.times[i];
             }
-            if (totalTime >= 1000) {
+            if (totalTime >= getResolution().factor) {
                 this.speed = totalValue * (getResolution().factor / requestedResolution.factor) / totalTime;
             }
             this.changed = false;

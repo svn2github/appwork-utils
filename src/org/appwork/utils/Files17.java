@@ -220,13 +220,13 @@ public class Files17 {
         return getUsableDiskspace(path, false);
     }
 
-    public static void deleteIfExists(final File file) throws IOException {
+    public static boolean deleteIfExists(final File file) throws IOException {
         final Path path = file.toPath();
         try {
-            java.nio.file.Files.deleteIfExists(path);
+            return java.nio.file.Files.deleteIfExists(path);
         } catch (final IOException e) {
             if (file.setWritable(true)) {
-                java.nio.file.Files.deleteIfExists(path);
+                return java.nio.file.Files.deleteIfExists(path);
             } else {
                 throw e;
             }

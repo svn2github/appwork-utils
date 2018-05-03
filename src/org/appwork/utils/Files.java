@@ -130,8 +130,7 @@ public class Files {
         IOException exception = null;
         if (Application.getJavaVersion() >= Application.JAVA17) {
             try {
-                Files17.deleteIfExists(file);
-                deleted = true;
+                deleted = Files17.deleteIfExists(file);
             } catch (final IOException e) {
                 exception = e;
                 if (!file.exists() || file.delete()) {

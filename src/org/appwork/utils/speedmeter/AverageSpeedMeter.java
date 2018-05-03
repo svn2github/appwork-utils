@@ -96,8 +96,16 @@ public class AverageSpeedMeter implements SpeedMeterInterface {
     public long getValue(Resolution requestedResolution) {
         synchronized (this.LOCK) {
             aggregate();
-            return (long) ((totalValue * (getResolution().factor / (double) requestedResolution.factor)) / totalTime);
+            // at least one second
+            if (totalTime > getMinimumDuration()) {
+                return (long) ((totalValue * (getResolution().factor / (double) requestedResolution.factor)) / totalTime);
+            }
+            return 0;
         }
+    }
+
+    protected long getMinimumDuration() {
+        return getResolution().factor;
     }
 
     /**

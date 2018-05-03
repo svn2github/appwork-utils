@@ -171,14 +171,14 @@ public class MeteredInputStream extends InputStream implements SpeedMeterInterfa
      * @see org.appwork.utils.SpeedMeterInterface#getSpeedMeter()
      */
 
-    public synchronized long getSpeedMeter() {
+    public synchronized long getValue(long scalingFactor) {
         if (time == 0) {
             time = System.currentTimeMillis();
             transfered2 = transfered;
             return 0;
         }
         if (System.currentTimeMillis() - time < 1000) {
-            if (speedmeter != null) return speedmeter.getSpeedMeter();
+            if (speedmeter != null) return speedmeter.getValue(1000);
             return speed;
         }
         lastTime = System.currentTimeMillis() - time;
@@ -187,7 +187,7 @@ public class MeteredInputStream extends InputStream implements SpeedMeterInterfa
         transfered2 = transfered;
         if (speedmeter != null) {
             speedmeter.putSpeedMeter(lastTrans, lastTime);
-            speed = speedmeter.getSpeedMeter();
+            speed = speedmeter.getValue(1000);
             return speed;
         } else {
             speed = (lastTrans / lastTime) * 1000;

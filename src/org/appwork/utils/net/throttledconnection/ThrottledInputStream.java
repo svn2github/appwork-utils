@@ -60,7 +60,7 @@ public class ThrottledInputStream extends InputStream implements ThrottledConnec
         int read = 0;
         final byte[] buffer = new byte[1024];
         while ((read = is.read(buffer)) != -1) {
-            final long speed = is.getSpeedMeter();
+            final long speed = is.getValue(1000);
             System.out.println("speed is " + speed + " limit is " + is.getLimit() + " difference " + (is.getLimit() - speed));
         }
     }

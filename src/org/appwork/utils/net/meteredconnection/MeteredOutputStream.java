@@ -95,14 +95,14 @@ public class MeteredOutputStream extends OutputStream implements SpeedMeterInter
         return this.checkStep;
     }
 
-    public synchronized long getSpeedMeter() {
+    public synchronized long getValue(long scalingFactor) {
         if (this.time == 0) {
             this.time = System.currentTimeMillis();
             this.transfered2 = this.transfered;
             return 0;
         }
         if (System.currentTimeMillis() - this.time < 1000) {
-            if (this.speedmeter != null) { return this.speedmeter.getSpeedMeter(); }
+            if (this.speedmeter != null) { return this.speedmeter.getValue(1000); }
             return this.speed;
         }
         this.lastTime = System.currentTimeMillis() - this.time;
@@ -111,7 +111,7 @@ public class MeteredOutputStream extends OutputStream implements SpeedMeterInter
         this.transfered2 = this.transfered;
         if (this.speedmeter != null) {
             this.speedmeter.putSpeedMeter(this.lastTrans, this.lastTime);
-            return this.speedmeter.getSpeedMeter();
+            return this.speedmeter.getValue(1000);
         } else {
             this.speed = this.lastTrans / this.lastTime * 1000;
             return this.speed;

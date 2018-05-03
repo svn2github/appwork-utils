@@ -67,14 +67,14 @@ public class MeteredThrottledInputStream extends ThrottledInputStream implements
      * 
      * @see org.appwork.utils.SpeedMeterInterface#getSpeedMeter()
      */
-    public synchronized long getSpeedMeter() {
+    public synchronized long getValue(long scalingFactor) {
         if (this.time == 0) {
             this.transferedCounter3 = this.transferedCounter;
             this.time = System.currentTimeMillis();
             return 0;
         }
         if (System.currentTimeMillis() - this.time < 1000) {
-            if (this.speedmeter != null) { return this.speedmeter.getSpeedMeter(); }
+            if (this.speedmeter != null) { return this.speedmeter.getValue(1000); }
             return this.speed;
         }
         final long tmp2 = this.transferedCounter;
@@ -85,7 +85,7 @@ public class MeteredThrottledInputStream extends ThrottledInputStream implements
         this.time = tmp;
         if (this.speedmeter != null) {
             this.speedmeter.putSpeedMeter(this.lastTrans, this.lastTime);
-            this.speed = this.speedmeter.getSpeedMeter();
+            this.speed = this.speedmeter.getValue(1000);
             return this.speed;
         } else {
             this.speed = this.lastTrans / this.lastTime * 1000;

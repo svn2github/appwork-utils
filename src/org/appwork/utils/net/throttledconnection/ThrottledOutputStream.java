@@ -60,7 +60,7 @@ public class ThrottledOutputStream extends OutputStream implements ThrottledConn
         final byte[] buffer = new byte[18 * 1024];
         while (true) {
             os.write(buffer);
-            final long speed = os.getSpeedMeter();
+            final long speed = os.getValue(1000);
             System.out.println("speed is " + speed + " limit is " + os.getLimit() + " difference " + (os.getLimit() - speed));
         }
     }

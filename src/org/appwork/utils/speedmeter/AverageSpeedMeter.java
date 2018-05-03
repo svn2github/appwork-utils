@@ -47,8 +47,8 @@ public class AverageSpeedMeter implements SpeedMeterInterface {
     private final Object LOCK    = new Object();
     private long         stalled = 0;
     private long         timeout = -1;          /*
-                                                 * no timeout for stalled connections
-                                                 */
+                                                  * no timeout for stalled connections
+                                                  */
 
     /**
      * constructor for AverageSpeedMeter with default size 5
@@ -68,15 +68,6 @@ public class AverageSpeedMeter implements SpeedMeterInterface {
         this.times = new long[this.size];
         this.index = 0;
         this.resetSpeedMeter();
-    }
-
-    @Deprecated
-    /**
-     * @deprecated use getValue(long) instead
-     * @return
-     */
-    public long getSpeedMeter() {
-        return getValue(1000);
     }
 
     /**
@@ -109,7 +100,7 @@ public class AverageSpeedMeter implements SpeedMeterInterface {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.utils.speedmeter.SpeedMeterInterface#getSpeedMeter()
      */
     public void putSpeedMeter(final long x, final long time) {
@@ -135,7 +126,7 @@ public class AverageSpeedMeter implements SpeedMeterInterface {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.utils.speedmeter.SpeedMeterInterface#putSpeedMeter(long, long)
      */
     public void resetSpeedMeter() {
@@ -152,7 +143,7 @@ public class AverageSpeedMeter implements SpeedMeterInterface {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.utils.speedmeter.SpeedMeterInterface#resetSpeedMeter()
      */
     public void setStallTimeout(final long timeout) {

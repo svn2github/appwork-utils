@@ -35,53 +35,27 @@ package org.appwork.utils.net.throttledconnection;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
-
-import org.appwork.utils.net.NullInputStream;
-import org.appwork.utils.speedmeter.AverageSpeedMeter;
 
 /**
  * @author daniel
- * 
+ *
  */
 public class ThrottledInputStream extends InputStream implements ThrottledConnection {
-
-    /**
-     * Tester
-     * 
-     * @param args
-     * @throws MalformedURLException
-     * @throws IOException
-     * @throws InterruptedException
-     */
-    public static void main(final String[] args) throws MalformedURLException, IOException, InterruptedException {
-        final MeteredThrottledInputStream is = new MeteredThrottledInputStream(new NullInputStream(), new AverageSpeedMeter(5));
-        is.setLimit(19 * 1022);
-        int read = 0;
-        final byte[] buffer = new byte[1024];
-        while ((read = is.read(buffer)) != -1) {
-            final long speed = is.getValue(1000);
-            System.out.println("speed is " + speed + " limit is " + is.getLimit() + " difference " + (is.getLimit() - speed));
-        }
-    }
-
     private ThrottledConnectionHandler handler;
     private InputStream                in;
     protected volatile long            transferedCounter  = 0;
     protected volatile long            transferedCounter2 = 0;
     private volatile int               limitCurrent       = 0;
     private int                        limitCounter       = 0;
-
     private int                        lastRead2;
     private long                       slotTimeLeft       = 0;
-
     private long                       lastTimeReset      = 0;
     private final long                 onems              = 1000000l;
     private final long                 onesec             = 1000000000l;
 
     /**
      * constructor for not managed ThrottledInputStream
-     * 
+     *
      * @param in
      */
     public ThrottledInputStream(final InputStream in) {
@@ -214,7 +188,7 @@ public class ThrottledInputStream extends InputStream implements ThrottledConnec
 
     /**
      * set a new ThrottledConnectionHandler
-     * 
+     *
      * @param manager
      */
     public void setHandler(final ThrottledConnectionHandler manager) {
@@ -239,8 +213,9 @@ public class ThrottledInputStream extends InputStream implements ThrottledConnec
 
     /**
      * sets limit 0: no limit >0: use limit
-     * 
-     * @param bytes/S
+     *
+     * @param bytes
+     *            /S
      */
     public void setLimit(final int kpsLimit) {
         if (kpsLimit == this.limitCurrent) {
@@ -258,5 +233,4 @@ public class ThrottledInputStream extends InputStream implements ThrottledConnec
     public long transfered() {
         return this.transferedCounter;
     }
-
 }

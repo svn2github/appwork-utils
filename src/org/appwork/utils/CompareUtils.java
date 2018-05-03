@@ -1,5 +1,7 @@
 package org.appwork.utils;
 
+import java.util.Arrays;
+
 public class CompareUtils {
     /**
      * @param x
@@ -44,5 +46,20 @@ public class CompareUtils {
             return 1;
         }
         return x.compareTo(y);
+    }
+
+    /**
+     * @param hash
+     * @param hash2
+     * @return
+     */
+    public static boolean equals(byte[] hash, byte[] hash2) {
+        if (hash == hash2) {
+            return true;
+        }
+        if (hash == null || hash2 == null) {
+            return false;
+        }
+        return Arrays.equals(hash, hash2);
     }
 }

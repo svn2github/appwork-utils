@@ -126,11 +126,25 @@ public class Files {
             }
         }
         LoggerFactory.getDefaultLogger().finer(" Delete file " + file);
-        final boolean fd = file.delete();
+        boolean fd = false;
+        IOException exception = null;
+        if (Application.getJavaVersion() >= Application.JAVA17) {
+            try {
+                java.nio.file.Files.deleteIfExists(file.toPath());
+                fd = true;
+            } catch (IOException e) {
+                exception = e;
+            }
+        } else {
+            fd = file.delete();
+        }
         if (fd) {
             ret++;
         }
         if (file.exists() && !fd && breakOnError) {
+            if (exception != null) {
+                throw exception;
+            }
             throw new IOException("Could not delete " + file);
         }
         return ret;

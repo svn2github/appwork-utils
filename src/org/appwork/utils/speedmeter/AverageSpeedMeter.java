@@ -43,13 +43,14 @@ public class AverageSpeedMeter implements SpeedMeterInterface {
     private final int        size;
     private int              index;
     private boolean          changed = false;
-    private long             speed   = 0;
     private final Object     LOCK    = new Object();
     private long             stalled = 0;
     private long             timeout = -1;          /*
                                                      * no timeout for stalled connections
                                                      */
     private final Resolution resolution;
+    private long             totalValue;
+    private long             totalTime;
 
     public Resolution getResolution() {
         return resolution;
@@ -94,8 +95,18 @@ public class AverageSpeedMeter implements SpeedMeterInterface {
      */
     public long getValue(Resolution requestedResolution) {
         synchronized (this.LOCK) {
+            aggregate();
+            return (long) ((totalValue * (getResolution().factor / (double) requestedResolution.factor)) / totalTime);
+        }
+    }
+
+    /**
+     *
+     */
+    private void aggregate() {
+        synchronized (this.LOCK) {
             if (!this.changed) {
-                return this.speed;
+                return;
             }
             long totalValue = 0;
             long totalTime = this.stalled;
@@ -106,11 +117,9 @@ public class AverageSpeedMeter implements SpeedMeterInterface {
                 totalValue += this.bytes[i];
                 totalTime += this.times[i];
             }
-            if (totalTime >= getResolution().factor) {
-                this.speed = totalValue * (getResolution().factor / requestedResolution.factor) / totalTime;
-            }
-            this.changed = false;
-            return this.speed;
+            this.totalValue = totalValue;
+            this.totalTime = totalTime;
+            changed = false;
         }
     }
 
@@ -152,7 +161,8 @@ public class AverageSpeedMeter implements SpeedMeterInterface {
                 this.times[this.index] = 0;
             }
             this.index = 0;
-            this.speed = 0;
+            this.totalTime = 0;
+            this.totalValue = 0;
             this.changed = true;
         }
     }

@@ -106,8 +106,9 @@ public class AverageSpeedMeter implements SpeedMeterInterface {
         }
         if (time > getMinimumDuration()) {
             return (long) ((value * (getResolution().factor / (double) requestedResolution.factor)) / time);
+        } else {
+            return 0;
         }
-        return 0;
     }
 
     protected final long getMinimumDuration() {

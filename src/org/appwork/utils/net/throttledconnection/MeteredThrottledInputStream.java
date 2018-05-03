@@ -66,27 +66,27 @@ public class MeteredThrottledInputStream extends ThrottledInputStream implements
      *
      * @see org.appwork.utils.SpeedMeterInterface#getSpeedMeter()
      */
-    public synchronized long getValue(final long scalingFactor) {
+    public synchronized long getValue(Resolution resolution) {
         if (this.time == 0) {
             this.transferedCounter3 = this.transferedCounter;
-            this.time = System.currentTimeMillis();
+            this.time = getTime();
             return 0;
         }
-        if (System.currentTimeMillis() - this.time < 1000) {
+        if (getTime() - this.time < 1000) {
             if (this.speedmeter != null) {
-                return this.speedmeter.getValue(scalingFactor);
+                return this.speedmeter.getValue(resolution);
             }
             return this.speed;
         }
         final long tmp2 = this.transferedCounter;
         this.lastTrans = tmp2 - this.transferedCounter3;
-        final long tmp = System.currentTimeMillis();
+        final long tmp = getTime();
         this.lastTime = tmp - this.time;
         this.transferedCounter3 = tmp2;
         this.time = tmp;
         if (this.speedmeter != null) {
-            this.speedmeter.putSpeedMeter(this.lastTrans, this.lastTime);
-            this.speed = this.speedmeter.getValue(scalingFactor);
+            this.speedmeter.putBytes(this.lastTrans, this.lastTime);
+            this.speed = this.speedmeter.getValue(resolution);
             return this.speed;
         } else {
             this.speed = this.lastTrans / this.lastTime * 1000;
@@ -94,12 +94,32 @@ public class MeteredThrottledInputStream extends ThrottledInputStream implements
         }
     }
 
+    protected long getTime() {
+        if (speedmeter != null) {
+            return speedmeter.getResolution().getTime();
+        }
+        return getTime();
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.appwork.utils.speedmeter.SpeedMeterInterface#getResolution()
+     */
+    @Override
+    public Resolution getResolution() {
+        if (speedmeter != null) {
+            return speedmeter.getResolution();
+        }
+        return null;
+    }
+
     /*
      * (non-Javadoc)
      *
      * @see org.appwork.utils.SpeedMeterInterface#putSpeedMeter(long, long)
      */
-    public void putSpeedMeter(final long bytes, final long time) {
+    public void putBytes(final long bytes, final long time) {
     }
 
     /*
@@ -107,11 +127,11 @@ public class MeteredThrottledInputStream extends ThrottledInputStream implements
      *
      * @see org.appwork.utils.SpeedMeterInterface#resetSpeedMeter()
      */
-    public synchronized void resetSpeedMeter() {
+    public synchronized void resetSpeedmeter() {
         if (this.speedmeter != null) {
-            this.speedmeter.resetSpeedMeter();
+            this.speedmeter.resetSpeedmeter();
         }
-        this.time = System.currentTimeMillis();
+        this.time = getTime();
         this.speed = 0;
         this.transferedCounter3 = this.transferedCounter;
     }

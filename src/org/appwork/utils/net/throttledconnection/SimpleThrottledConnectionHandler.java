@@ -142,7 +142,7 @@ public class SimpleThrottledConnectionHandler implements ThrottledConnectionHand
                 public void run() {
                     this.setName(SimpleThrottledConnectionHandler.this.name);
                     /* reset SpeedMeter */
-                    SimpleThrottledConnectionHandler.this.speedMeter.resetSpeedMeter();
+                    SimpleThrottledConnectionHandler.this.speedMeter.resetSpeedmeter();
                     final HashMap<ThrottledConnection, SpeedAssignHelp> speedAssignHelpMap = new HashMap<ThrottledConnection, SpeedAssignHelp>();
                     while (true) {
                         final java.util.List<ThrottledConnection> lConnections = SimpleThrottledConnectionHandler.this.connections;
@@ -178,7 +178,7 @@ public class SimpleThrottledConnectionHandler implements ThrottledConnectionHand
                             }
                         }
                         SimpleThrottledConnectionHandler.this.bandwidth = newBandwidth;
-                        SimpleThrottledConnectionHandler.this.speedMeter.putSpeedMeter(lastRoundTraffic, sleepTime);
+                        SimpleThrottledConnectionHandler.this.speedMeter.putBytes(lastRoundTraffic, sleepTime);
                         int left = lConnections.size();
                         int limitLeft = SimpleThrottledConnectionHandler.this.limit;
                         for (final ThrottledConnection con : lConnections) {
@@ -196,7 +196,7 @@ public class SimpleThrottledConnectionHandler implements ThrottledConnectionHand
                     synchronized (SimpleThrottledConnectionHandler.this.watchDogLOCK) {
                         SimpleThrottledConnectionHandler.this.watchDog = null;
                         SimpleThrottledConnectionHandler.this.bandwidth = 0;
-                        SimpleThrottledConnectionHandler.this.speedMeter.resetSpeedMeter();
+                        SimpleThrottledConnectionHandler.this.speedMeter.resetSpeedmeter();
                     }
                 }
             };

@@ -38,10 +38,44 @@ package org.appwork.utils.speedmeter;
  *
  */
 public interface SpeedMeterInterface {
+    public static enum Resolution {
+        SECONDS(1l) {
+            @Override
+            public long getTime() {
+                return System.currentTimeMillis() / 1000;
+            }
+        },
+        MILLI_SECONDS(1000l) {
+            @Override
+            public long getTime() {
+                return System.currentTimeMillis();
+            }
+        },
+        MICRO_SECONDS(1000 * 1000l) {
+            @Override
+            public long getTime() {
+                return System.nanoTime() / 1000;
+            }
+        },
+        NANO_SECONDS(1000 * 1000 * 1000l) {
+            @Override
+            public long getTime() {
+                return System.nanoTime();
+            }
+        };
+        public final long factor;
+
+        public abstract long getTime();
+
+        private Resolution(long factor) {
+            this.factor = factor;
+        }
+    }
+
     /**
      * resets the speed meter
      */
-    public void resetSpeedMeter();
+    public void resetSpeedmeter();
 
     /**
      * returns the current value of the speedmeter. Use the scalingfactor to define the require unit. <br>
@@ -49,7 +83,7 @@ public interface SpeedMeterInterface {
      * If you put values in nanoseconds, you need a scalingfactor of 1000*1000*1000 to get a value in seconds
      *
      */
-    public long getValue(long scalingFactor);
+    public long getValue(Resolution resolution);
 
     /**
      * put bytes/time into this speed meter
@@ -57,5 +91,10 @@ public interface SpeedMeterInterface {
      * @param bytes
      * @param time
      */
-    public void putSpeedMeter(long bytes, long time);
+    public void putBytes(long bytes, long time);
+
+    /**
+     * @return
+     */
+    public Resolution getResolution();
 }

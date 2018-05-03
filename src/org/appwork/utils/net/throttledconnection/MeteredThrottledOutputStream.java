@@ -39,7 +39,7 @@ import org.appwork.utils.speedmeter.SpeedMeterInterface;
 
 /**
  * @author daniel
- * 
+ *
  */
 public class MeteredThrottledOutputStream extends ThrottledOutputStream implements SpeedMeterInterface {
     private SpeedMeterInterface speedmeter = null;
@@ -62,31 +62,51 @@ public class MeteredThrottledOutputStream extends ThrottledOutputStream implemen
         this.speedmeter = speedmeter;
     }
 
+    protected long getTime() {
+        if (speedmeter != null) {
+            return speedmeter.getResolution().getTime();
+        }
+        return getTime();
+    }
+
     /*
      * (non-Javadoc)
-     * 
+     *
+     * @see org.appwork.utils.speedmeter.SpeedMeterInterface#getResolution()
+     */
+    @Override
+    public Resolution getResolution() {
+        if (speedmeter != null) {
+            return speedmeter.getResolution();
+        }
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     *
      * @see org.appwork.utils.SpeedMeterInterface#getSpeedMeter()
      */
-    public long getValue(final long scalingFactor) {
+    public long getValue(Resolution resolution) {
         synchronized (LOCK) {
             if (time == 0) {
-                time = System.currentTimeMillis();
+                time = getTime();
                 transferedCounter3 = transferedCounter;
                 return 0;
             }
-            if (System.currentTimeMillis() - time < 1000) {
+            if (getTime() - time < 1000) {
                 if (speedmeter != null) {
-                    return speedmeter.getValue(scalingFactor);
+                    return speedmeter.getValue(resolution);
                 }
                 return speed;
             }
-            lastTime = System.currentTimeMillis() - time;
-            time = System.currentTimeMillis();
+            lastTime = getTime() - time;
+            time = getTime();
             lastTrans = transferedCounter - transferedCounter3;
             transferedCounter3 = transferedCounter;
             if (speedmeter != null) {
-                speedmeter.putSpeedMeter(lastTrans, lastTime);
-                speed = speedmeter.getValue(scalingFactor);
+                speedmeter.putBytes(lastTrans, lastTime);
+                speed = speedmeter.getValue(resolution);
                 return speed;
             } else {
                 speed = (lastTrans / lastTime) * 1000;
@@ -97,23 +117,23 @@ public class MeteredThrottledOutputStream extends ThrottledOutputStream implemen
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.utils.SpeedMeterInterface#putSpeedMeter(long, long)
      */
-    public void putSpeedMeter(long bytes, long time) {
+    public void putBytes(long bytes, long time) {
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.utils.SpeedMeterInterface#resetSpeedMeter()
      */
-    public void resetSpeedMeter() {
+    public void resetSpeedmeter() {
         synchronized (LOCK) {
             if (speedmeter != null) {
-                speedmeter.resetSpeedMeter();
+                speedmeter.resetSpeedmeter();
             }
-            time = System.currentTimeMillis();
+            time = getTime();
             speed = 0;
             transferedCounter3 = transferedCounter;
         }

@@ -40,7 +40,7 @@ import org.appwork.utils.speedmeter.SpeedMeterInterface;
 
 /**
  * @author daniel
- * 
+ *
  */
 public class MeteredOutputStream extends OutputStream implements SpeedMeterInterface {
     private final OutputStream  out;
@@ -62,7 +62,7 @@ public class MeteredOutputStream extends OutputStream implements SpeedMeterInter
 
     /**
      * constructor for MeteredOutputStream
-     * 
+     *
      * @param out
      */
     public MeteredOutputStream(final OutputStream out) {
@@ -71,7 +71,7 @@ public class MeteredOutputStream extends OutputStream implements SpeedMeterInter
 
     /**
      * constructor for MeteredOutputStream with custom SpeedMeter
-     * 
+     *
      * @param out
      * @param speedmeter
      */
@@ -94,25 +94,25 @@ public class MeteredOutputStream extends OutputStream implements SpeedMeterInter
         return this.checkStep;
     }
 
-    public synchronized long getValue(final long scalingFactor) {
+    public synchronized long getValue(Resolution resolution) {
         if (this.time == 0) {
-            this.time = System.currentTimeMillis();
+            this.time = getTime();
             this.transfered2 = this.transfered;
             return 0;
         }
-        if (System.currentTimeMillis() - this.time < 1000) {
+        if (getTime() - this.time < 1000) {
             if (this.speedmeter != null) {
-                return this.speedmeter.getValue(scalingFactor);
+                return this.speedmeter.getValue(resolution);
             }
             return this.speed;
         }
-        this.lastTime = System.currentTimeMillis() - this.time;
-        this.time = System.currentTimeMillis();
+        this.lastTime = getTime() - this.time;
+        this.time = getTime();
         this.lastTrans = this.transfered - this.transfered2;
         this.transfered2 = this.transfered;
         if (this.speedmeter != null) {
-            this.speedmeter.putSpeedMeter(this.lastTrans, this.lastTime);
-            return this.speedmeter.getValue(scalingFactor);
+            this.speedmeter.putBytes(this.lastTrans, this.lastTime);
+            return this.speedmeter.getValue(resolution);
         } else {
             this.speed = this.lastTrans / this.lastTime * 1000;
             return this.speed;
@@ -121,33 +121,40 @@ public class MeteredOutputStream extends OutputStream implements SpeedMeterInter
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.utils.SpeedMeterInterface#putSpeedMeter(long, long)
      */
-    public void putSpeedMeter(final long bytes, final long time) {
+    public void putBytes(final long bytes, final long time) {
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.utils.SpeedMeterInterface#resetSpeedMeter()
      */
-    public synchronized void resetSpeedMeter() {
+    public synchronized void resetSpeedmeter() {
         if (this.speedmeter != null) {
-            this.speedmeter.resetSpeedMeter();
+            this.speedmeter.resetSpeedmeter();
         }
         this.speed = 0;
         this.transfered2 = this.transfered;
-        this.time = System.currentTimeMillis();
+        this.time = getTime();
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.utils.SpeedMeterInterface#getSpeedMeter()
      */
     public void setCheckStepSize(final int step) {
         this.checkStep = Math.min(MeteredOutputStream.LOWStep, this.checkStep);
+    }
+
+    protected long getTime() {
+        if (speedmeter != null) {
+            return speedmeter.getResolution().getTime();
+        }
+        return System.currentTimeMillis();
     }
 
     @Override
@@ -159,9 +166,9 @@ public class MeteredOutputStream extends OutputStream implements SpeedMeterInter
             if (this.todo > this.checkStep) {
                 this.todo = this.checkStep;
             }
-            this.timeForCheckStep = System.currentTimeMillis();
+            this.timeForCheckStep = getTime();
             this.out.write(b, this.offset, this.todo);
-            this.timeCheck = (int) (System.currentTimeMillis() - this.timeForCheckStep);
+            this.timeCheck = (int) (getTime() - this.timeForCheckStep);
             if (this.timeCheck > 1000) {
                 /* we want 2 update per second */
                 this.checkStep = Math.max(MeteredOutputStream.LOWStep, this.todo / this.timeCheck * 500);
@@ -174,6 +181,19 @@ public class MeteredOutputStream extends OutputStream implements SpeedMeterInter
             this.rest -= this.todo;
             this.offset += this.todo;
         }
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.appwork.utils.speedmeter.SpeedMeterInterface#getResolution()
+     */
+    @Override
+    public Resolution getResolution() {
+        if (speedmeter != null) {
+            return speedmeter.getResolution();
+        }
+        return null;
     }
 
     @Override

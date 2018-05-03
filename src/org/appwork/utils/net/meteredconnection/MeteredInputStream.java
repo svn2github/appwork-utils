@@ -40,7 +40,7 @@ import org.appwork.utils.speedmeter.SpeedMeterInterface;
 
 /**
  * @author daniel
- * 
+ *
  */
 public class MeteredInputStream extends InputStream implements SpeedMeterInterface {
     private InputStream         in;
@@ -70,7 +70,7 @@ public class MeteredInputStream extends InputStream implements SpeedMeterInterfa
 
     /**
      * constructor for MeterdInputStream
-     * 
+     *
      * @param in
      */
     public MeteredInputStream(InputStream in) {
@@ -79,7 +79,7 @@ public class MeteredInputStream extends InputStream implements SpeedMeterInterfa
 
     /**
      * constructor for MeteredInputStream with custom SpeedMeter
-     * 
+     *
      * @param in
      * @param speedmeter
      */
@@ -115,9 +115,9 @@ public class MeteredInputStream extends InputStream implements SpeedMeterInterfa
             if (todo > checkStep) {
                 todo = checkStep;
             }
-            timeForCheckStep = System.currentTimeMillis();
+            timeForCheckStep = getTime();
             lastRead = in.read(b, offset, todo);
-            timeCheck = (int) (System.currentTimeMillis() - timeForCheckStep);
+            timeCheck = (int) (getTime() - timeForCheckStep);
             if (lastRead == -1) {
                 break;
             }
@@ -173,28 +173,28 @@ public class MeteredInputStream extends InputStream implements SpeedMeterInterfa
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.utils.SpeedMeterInterface#getSpeedMeter()
      */
-    public synchronized long getValue(final long scalingFactor) {
+    public synchronized long getValue(Resolution resolution) {
         if (time == 0) {
-            time = System.currentTimeMillis();
+            time = getTime();
             transfered2 = transfered;
             return 0;
         }
-        if (System.currentTimeMillis() - time < 1000) {
+        if (getTime() - time < 1000) {
             if (speedmeter != null) {
-                return speedmeter.getValue(scalingFactor);
+                return speedmeter.getValue(resolution);
             }
             return speed;
         }
-        lastTime = System.currentTimeMillis() - time;
-        time = System.currentTimeMillis();
+        lastTime = getTime() - time;
+        time = getTime();
         lastTrans = transfered - transfered2;
         transfered2 = transfered;
         if (speedmeter != null) {
-            speedmeter.putSpeedMeter(lastTrans, lastTime);
-            speed = speedmeter.getValue(scalingFactor);
+            speedmeter.putBytes(lastTrans, lastTime);
+            speed = speedmeter.getValue(resolution);
             return speed;
         } else {
             speed = (lastTrans / lastTime) * 1000;
@@ -202,25 +202,45 @@ public class MeteredInputStream extends InputStream implements SpeedMeterInterfa
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.appwork.utils.SpeedMeterInterface#putSpeedMeter(long, long)
-     */
-    public void putSpeedMeter(long bytes, long time) {
+    protected long getTime() {
+        if (speedmeter != null) {
+            return speedmeter.getResolution().getTime();
+        }
+        return System.currentTimeMillis();
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
+     * @see org.appwork.utils.speedmeter.SpeedMeterInterface#getResolution()
+     */
+    @Override
+    public Resolution getResolution() {
+        if (speedmeter != null) {
+            return speedmeter.getResolution();
+        }
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.appwork.utils.SpeedMeterInterface#putSpeedMeter(long, long)
+     */
+    public void putBytes(long bytes, long time) {
+    }
+
+    /*
+     * (non-Javadoc)
+     *
      * @see org.appwork.utils.SpeedMeterInterface#resetSpeedMeter()
      */
-    public synchronized void resetSpeedMeter() {
+    public synchronized void resetSpeedmeter() {
         if (speedmeter != null) {
-            speedmeter.resetSpeedMeter();
+            speedmeter.resetSpeedmeter();
         }
         speed = 0;
         transfered2 = transfered;
-        time = System.currentTimeMillis();
+        time = getTime();
     }
 }

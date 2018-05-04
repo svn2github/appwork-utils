@@ -33,17 +33,20 @@
  * ==================================================================================================================================================== */
 package org.appwork.utils;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.zip.CRC32;
 import java.util.zip.CheckedInputStream;
 import java.util.zip.CheckedOutputStream;
 
 import org.appwork.utils.formatter.HexFormatter;
+import org.appwork.utils.net.LimitedInputStream;
 import org.appwork.utils.net.NullOutputStream;
 
 public class Hash {
@@ -59,9 +62,7 @@ public class Hash {
      */
     public static String getBytesHash(final byte[] download, final String type) {
         try {
-            final MessageDigest md = MessageDigest.getInstance(type);
-            final byte[] digest = md.digest(download);
-            return HexFormatter.byteArrayToHex(digest);
+            return getHash(new ByteArrayInputStream(download), type, -1);
         } catch (final Throwable e) {
             e.printStackTrace();
         }
@@ -79,111 +80,68 @@ public class Hash {
     }
 
     public static long getCRC32(final File arg) throws IOException {
-        FileInputStream fis = null;
-        CheckedInputStream cis = null;
+        final FileInputStream fis = new FileInputStream(arg);
         try {
-            fis = new FileInputStream(arg);
-            cis = new CheckedInputStream(fis, new CRC32());
+            final CheckedInputStream cis = new CheckedInputStream(fis, new CRC32());
             final byte readBuffer[] = new byte[32767];
             while (cis.read(readBuffer) >= 0) {
             }
             return cis.getChecksum().getValue();
         } finally {
-            try {
-                cis.close();
-            } catch (final Throwable e) {
-            }
-            try {
-                fis.close();
-            } catch (final Throwable e) {
-            }
+            fis.close();
         }
-    }
-
-    public static byte[] getFileHashBytes(final File arg, final String type) {
-        if (arg == null || !arg.exists() || arg.isDirectory()) {
-            return null;
-        }
-        FileInputStream fis = null;
-        MessageDigest md = null;
-        try {
-            md = MessageDigest.getInstance(type);
-            // if (true) { throw new IOException("Any IOEXCeption"); }
-            final byte[] b = new byte[32767];
-            fis = new FileInputStream(arg);
-            int n = 0;
-            while ((n = fis.read(b)) >= 0) {
-                if (n > 0) {
-                    md.update(b, 0, n);
-                }
-            }
-        } catch (final Throwable e) {
-            e.printStackTrace();
-            return null;
-        } finally {
-            try {
-                fis.close();
-            } catch (final Throwable e) {
-            }
-        }
-        return md.digest();
     }
 
     public static String getFileHash(final File arg, final String type) {
-        byte[] bytes = Hash.getFileHashBytes(arg, type);
-        if (bytes == null) {
-            return null;
-        }
-        return HexFormatter.byteArrayToHex(bytes);
+        return getFileHash(arg, type, -1);
     }
 
     public static String getFileHash(final File arg, final String type, final long maxHash) {
+        if (arg == null || !arg.exists() || arg.isDirectory()) {
+            return null;
+        }
         try {
-            return getFileHash(new FileInputStream(arg), type, maxHash);
-        } catch (FileNotFoundException e) {
+            final FileInputStream fis = new FileInputStream(arg);
+            try {
+                return getHash(fis, type, maxHash);
+            } finally {
+                try {
+                    fis.close();
+                } catch (IOException ignore) {
+                }
+            }
+        } catch (FileNotFoundException ignore) {
             return null;
         }
     }
 
-    public static String getFileHash(final InputStream is, final String type, final long maxHash) {
-        InputStream fis = null;
-        MessageDigest md = null;
+    public static String getHash(final InputStream is, final String type, final long maxRead) {
         try {
-            md = MessageDigest.getInstance(type);
-            // if (true) { throw new IOException("Any IOEXCeption"); }
-            int bufferSize = 32767;
-            if (maxHash < bufferSize) {
-                bufferSize = (int) maxHash;
+            final MessageDigest md = MessageDigest.getInstance(type);
+            final byte[] buf = new byte[32767];
+            final InputStream inputStream;
+            if (maxRead < 0) {
+                inputStream = is;
+            } else {
+                inputStream = new LimitedInputStream(is, maxRead);
             }
-            final byte[] b = new byte[bufferSize];
-            fis = is;
-            int n = 0;
-            long todo = maxHash;
-            while ((n = fis.read(b, 0, bufferSize)) >= 0) {
-                if (n > 0) {
-                    md.update(b, 0, n);
-                }
-                if (maxHash > 0 && n > 0) {
-                    todo -= n;
-                    if (todo == 0) {
-                        break;
-                    }
-                    if (todo < bufferSize) {
-                        bufferSize = (int) todo;
-                    }
+            while (true) {
+                final int read = inputStream.read(buf);
+                if (read > 0) {
+                    md.update(buf, 0, read);
+                } else if (read == -1) {
+                    break;
                 }
             }
-        } catch (final Throwable e) {
+            final byte[] digest = md.digest();
+            return HexFormatter.byteArrayToHex(digest);
+        } catch (final IOException e) {
             e.printStackTrace();
             return null;
-        } finally {
-            try {
-                fis.close();
-            } catch (final Throwable e) {
-            }
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            return null;
         }
-        final byte[] digest = md.digest();
-        return HexFormatter.byteArrayToHex(digest);
     }
 
     /**
@@ -236,9 +194,7 @@ public class Hash {
 
     public static String getStringHash(final String arg, final String type) {
         try {
-            final MessageDigest md = MessageDigest.getInstance(type);
-            final byte[] digest = md.digest(arg.getBytes("UTF-8"));
-            return HexFormatter.byteArrayToHex(digest);
+            return getBytesHash(arg.getBytes("UTF-8"), type);
         } catch (final Throwable e) {
             e.printStackTrace();
         }

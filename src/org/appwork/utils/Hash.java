@@ -62,7 +62,7 @@ public class Hash {
      */
     public static String getBytesHash(final byte[] download, final String type) {
         try {
-            return getHash(new ByteArrayInputStream(download), type, -1);
+            return getHash(new ByteArrayInputStream(download), type, -1, true);
         } catch (final Throwable e) {
             e.printStackTrace();
         }
@@ -101,21 +101,13 @@ public class Hash {
             return null;
         }
         try {
-            final FileInputStream fis = new FileInputStream(arg);
-            try {
-                return getHash(fis, type, maxHash);
-            } finally {
-                try {
-                    fis.close();
-                } catch (IOException ignore) {
-                }
-            }
+            return getHash(new FileInputStream(arg), type, maxHash, true);
         } catch (FileNotFoundException ignore) {
             return null;
         }
     }
 
-    public static String getHash(final InputStream is, final String type, final long maxRead) {
+    public static String getHash(final InputStream is, final String type, final long maxRead, boolean closeStream) {
         try {
             final MessageDigest md = MessageDigest.getInstance(type);
             final byte[] buf = new byte[32767];
@@ -141,6 +133,13 @@ public class Hash {
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
             return null;
+        } finally {
+            if (closeStream) {
+                try {
+                    is.close();
+                } catch (IOException ignore) {
+                }
+            }
         }
     }
 

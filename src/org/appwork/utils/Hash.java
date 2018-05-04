@@ -35,7 +35,9 @@ package org.appwork.utils;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.MessageDigest;
 import java.util.zip.CRC32;
 import java.util.zip.CheckedInputStream;
@@ -136,10 +138,15 @@ public class Hash {
     }
 
     public static String getFileHash(final File arg, final String type, final long maxHash) {
-        if (arg == null || !arg.exists() || arg.isDirectory()) {
+        try {
+            return getFileHash(new FileInputStream(arg), type, maxHash);
+        } catch (FileNotFoundException e) {
             return null;
         }
-        FileInputStream fis = null;
+    }
+
+    public static String getFileHash(final InputStream is, final String type, final long maxHash) {
+        InputStream fis = null;
         MessageDigest md = null;
         try {
             md = MessageDigest.getInstance(type);
@@ -149,7 +156,7 @@ public class Hash {
                 bufferSize = (int) maxHash;
             }
             final byte[] b = new byte[bufferSize];
-            fis = new FileInputStream(arg);
+            fis = is;
             int n = 0;
             long todo = maxHash;
             while ((n = fis.read(b, 0, bufferSize)) >= 0) {

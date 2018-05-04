@@ -12,25 +12,37 @@ public class ExtIOException extends IOException {
     private String          desc;
     private IOExceptionType type;
 
-    public ExtIOException(Exception e, IOExceptionType type) {
+    public ExtIOException(Throwable e, IOExceptionType type) {
         super(e);
         this.type = type;
     }
 
-    public ExtIOException(Exception e, IOExceptionType type, String message) {
+    public ExtIOException(Throwable e, IOExceptionType type, String message) {
         super(message, e);
         this.type = type;
     }
 
-    public static ExtIOException getInstance(Exception e, IOExceptionType type) {
+    public static ExtIOException getInstance(Throwable e, IOExceptionType type) {
         if (e instanceof ExtIOException && ((ExtIOException) e).type == type) {
             return (ExtIOException) e;
         }
-
         return new ExtIOException(e, type);
     }
 
-    public ExtIOException(Exception e, IOExceptionType type, String msg, String streamInfo) {
+    /**
+     * @param errorCouldNotDeleteFILE
+     * @param e
+     * @param local
+     * @param absolutePath
+     */
+    public ExtIOException(String msg, Throwable e, IOExceptionType type, String streamInfo) {
+        super(msg + "( " + streamInfo + ")", e);
+        this.type = type;
+        this.desc = msg;
+        this.streamInfo = streamInfo;
+    }
+
+    public ExtIOException(Throwable e, IOExceptionType type, String msg, String streamInfo) {
         super(msg + "( " + streamInfo + ")", e);
         this.type = type;
         this.desc = msg;
@@ -51,5 +63,4 @@ public class ExtIOException extends IOException {
     public String getStreamInfo() {
         return this.streamInfo;
     }
-
 }

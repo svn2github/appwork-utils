@@ -73,13 +73,11 @@ public class SyntheticaHelper {
     }
 
     public String getDefaultFont() {
-        switch (CrossSystem.getOS()) {
-        case WINDOWS_7:
-        case WINDOWS_8:
-        case WINDOWS_VISTA:
+        if (CrossSystem.isWindows() && CrossSystem.getOS().isMinimum(CrossSystem.OS.WINDOWS_VISTA)) {
             return "Segoe UI";
+        } else {
+            return null;
         }
-        return null;
     }
 
     /**
@@ -142,14 +140,13 @@ public class SyntheticaHelper {
         final URL url = Application.getRessourceURL("cfg/synthetica-license.key");
         if (url == null) {
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Missing Look And Feel License. Reverted to your System Look And Feel!");
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Missing Look And Feel License. Reverted to your System Look And Feel!");
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Missing Look And Feel License.");
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("You can only use Synthetica Look and Feel in official JDownloader versions.");
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Reverted to your System Look And Feel!");
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("If you are a developer, and want to do some gui work on the offical JDownloader Look And Feel, write e-mail@appwork.org to get a developer Look And Feel Key");
             throw new WTFException("No Synthetica License Found!");
+        } else {
+            return IO.readURLToString(url);
         }
-        return IO.readURLToString(url);
     }
 
     /**
@@ -157,6 +154,7 @@ public class SyntheticaHelper {
      * @throws IOException
      */
     public void load(final String laf, String license) throws IOException {
+        LoggerFactory.getDefaultLogger().log(new Exception("here").fillInStackTrace());
         if (UIManager.get("Synthetica.animation.enabled") != null) {
             LoggerFactory.getDefaultLogger().info("Synthetica Look And Feel is already Set");
             return;

@@ -46,14 +46,18 @@ public class ConsoleDialog {
     private final AbstractConsole console;
     private boolean               stdBefore;
     private boolean               errBefore;
-    private String                title;
+    private final String          title;
 
-    public ConsoleDialog(String string) {
-        this.console = AbstractConsole.newInstance();
+    public ConsoleDialog(AbstractConsole console, String string) {
+        this.console = console;
         if (this.console == null) {
             throw new RuntimeException("No Console Available!");
         }
         this.title = string;
+    }
+
+    public ConsoleDialog(String string) {
+        this(AbstractConsole.newInstance(), string);
     }
 
     public void start() {

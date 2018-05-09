@@ -157,7 +157,7 @@ public class SyntheticaHelper {
         LoggerFactory.getDefaultLogger().log(new Exception("here").fillInStackTrace());
         if (UIManager.get("Synthetica.animation.enabled") != null) {
             LoggerFactory.getDefaultLogger().info("Synthetica Look And Feel is already Set");
-            return;
+            // return;
         }
         if (CrossSystem.isMac()) {
             if (checkIfMacInitWillFail()) {

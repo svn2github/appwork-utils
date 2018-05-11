@@ -56,7 +56,7 @@ public class GetRequest extends HttpRequest {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.utils.net.httpserver.requests.HttpRequestInterface# getParameterbyKey(java.lang.String)
      */
     @Override

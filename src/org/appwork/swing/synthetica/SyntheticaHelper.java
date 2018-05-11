@@ -154,7 +154,6 @@ public class SyntheticaHelper {
      * @throws IOException
      */
     public void load(final String laf, String license) throws IOException {
-        LoggerFactory.getDefaultLogger().log(new Exception("here").fillInStackTrace());
         if (UIManager.get("Synthetica.animation.enabled") != null) {
             LoggerFactory.getDefaultLogger().info("Synthetica Look And Feel is already Set");
             // return;

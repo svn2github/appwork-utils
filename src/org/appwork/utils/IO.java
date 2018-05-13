@@ -646,7 +646,9 @@ public class IO {
             if (file.exists() && !append) {
                 throw new IllegalArgumentException("File already exists: " + file);
             }
-            file.createNewFile();
+            if (!file.exists()) {
+                file.createNewFile();
+            }
             if (!file.isFile()) {
                 throw new IllegalArgumentException("Is not a file: " + file);
             }

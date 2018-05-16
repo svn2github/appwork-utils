@@ -48,6 +48,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.RandomAccessFile;
+import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URL;
@@ -780,5 +781,24 @@ public class IO {
             }
             throw e;
         }
+    }
+
+    /**
+     * @param stdOutStringReader
+     * @return
+     * @throws IOException
+     */
+    public static String readToString(Reader reader) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        char[] buffer = new char[48];
+        for (;;) {
+            int count = reader.read(buffer);
+            if (count > 0) {
+                sb.append(buffer, 0, count);
+            } else if (count < 0) {
+                break;
+            }
+        }
+        return sb.toString();
     }
 }

@@ -65,6 +65,9 @@ public abstract class LogSourceProvider {
     /**
      *
      */
+    /**
+     *
+     */
     protected static final String            LOG_INIT_DONE = "LOG_INIT_DONE";
     protected final HashMap<String, LogSink> logSinks      = new HashMap<String, LogSink>();
     private final int                        maxSize;
@@ -110,22 +113,25 @@ public abstract class LogSourceProvider {
     public static final String         LOG_NO_CONSOLE         = "LOG_NO_CONSOLE";
     public static final String         LOG_NO_FILE            = "LOG_NO_FILE";
     public static final String         LOG_SINGLE_LOGGER_NAME = "LOG_SINGLE_LOGGER_NAME";
-    static {
-        ShutdownController.getInstance().addShutdownEvent(new ShutdownEvent() {
-            @Override
-            public void onShutdown(final ShutdownRequest shutdownRequest) {
-                LogSourceProvider.flushAllSinks(FLUSH.CLOSE);
-            }
-
-            @Override
-            public String toString() {
-                return "flushing logs to disk";
-            }
-        });
-    }
+    public static boolean              FIRST                  = true;
+    public static boolean              AUTO_CLEANUP           = true;
 
     public LogSourceProvider(final long timeStamp) {
         synchronized (INIT_LOCK) {
+            if (FIRST) {
+                FIRST = false;
+                ShutdownController.getInstance().addShutdownEvent(new ShutdownEvent() {
+                    @Override
+                    public void onShutdown(final ShutdownRequest shutdownRequest) {
+                        LogSourceProvider.flushAllSinks(FLUSH.CLOSE);
+                    }
+
+                    @Override
+                    public String toString() {
+                        return "flushing logs to disk";
+                    }
+                });
+            }
             this.initTime = timeStamp;
             if (!"true".equalsIgnoreCase(System.getProperty(LOG_NO_CONSOLE))) {
                 this.consoleHandler = new LogConsoleHandler();
@@ -164,49 +170,51 @@ public abstract class LogSourceProvider {
                 logFolder.mkdirs();
             }
             if (LogSourceProvider.TRASHLOCK.compareAndSet(false, true)) {
-                new Thread("LogsCleanup") {
-                    long newestTimeStamp = -1;
+                if (AUTO_CLEANUP) {
+                    new Thread("LogsCleanup") {
+                        long newestTimeStamp = -1;
 
-                    @Override
-                    public void run() {
-                        final File oldLogs[] = logBaseFolder.listFiles(new FilenameFilter() {
-                            final long   removeTimeStamp = timeStamp - config.getCleanupLogsOlderThanXDays() * 24 * 60 * 60 * 1000l;
-                            final int    currentLength   = String.valueOf(System.currentTimeMillis()).length();
-                            final String regex           = "^(\\d{" + (currentLength - 1) + "," + (currentLength + 1) + "})_.+";
+                        @Override
+                        public void run() {
+                            final File oldLogs[] = logBaseFolder.listFiles(new FilenameFilter() {
+                                final long   removeTimeStamp = timeStamp - config.getCleanupLogsOlderThanXDays() * 24 * 60 * 60 * 1000l;
+                                final int    currentLength   = String.valueOf(System.currentTimeMillis()).length();
+                                final String regex           = "^(\\d{" + (currentLength - 1) + "," + (currentLength + 1) + "})_.+";
 
-                            @Override
-                            public boolean accept(final File dir, final String name) {
-                                if (dir.exists() && dir.isDirectory() && name.matches(regex)) {
-                                    final String timeStamp = new Regex(name, regex).getMatch(0);
-                                    long times = 0;
-                                    if (timeStamp != null && (times = Long.parseLong(timeStamp)) < this.removeTimeStamp) {
-                                        if (newestTimeStamp == -1 || times > newestTimeStamp) {
-                                            /*
-                                             * find the latest logfolder, so we can keep it
-                                             */
-                                            newestTimeStamp = times;
+                                @Override
+                                public boolean accept(final File dir, final String name) {
+                                    if (dir.exists() && dir.isDirectory() && name.matches(regex)) {
+                                        final String timeStamp = new Regex(name, regex).getMatch(0);
+                                        long times = 0;
+                                        if (timeStamp != null && (times = Long.parseLong(timeStamp)) < this.removeTimeStamp) {
+                                            if (newestTimeStamp == -1 || times > newestTimeStamp) {
+                                                /*
+                                                 * find the latest logfolder, so we can keep it
+                                                 */
+                                                newestTimeStamp = times;
+                                            }
+                                            return true;
                                         }
-                                        return true;
                                     }
+                                    return false;
                                 }
-                                return false;
-                            }
-                        });
-                        if (oldLogs != null) {
-                            for (final File oldLog : oldLogs) {
-                                try {
-                                    if (this.newestTimeStamp > 0 && oldLog.getName().contains(this.newestTimeStamp + "")) {
-                                        /* always keep at least the last logfolder! */
-                                        continue;
+                            });
+                            if (oldLogs != null) {
+                                for (final File oldLog : oldLogs) {
+                                    try {
+                                        if (this.newestTimeStamp > 0 && oldLog.getName().contains(this.newestTimeStamp + "")) {
+                                            /* always keep at least the last logfolder! */
+                                            continue;
+                                        }
+                                        Files.deleteRecursiv(oldLog);
+                                    } catch (final IOException e) {
+                                        e.printStackTrace();
                                     }
-                                    Files.deleteRecursiv(oldLog);
-                                } catch (final IOException e) {
-                                    e.printStackTrace();
                                 }
                             }
                         }
-                    }
-                }.start();
+                    }.start();
+                }
             }
             INSTANCES.add(this);
             System.setProperty(LOG_INIT_DONE, INSTANCES.size() + " instances");

@@ -76,8 +76,8 @@ public class StringUtils {
      * taken from http://stackoverflow.com/questions/4731055/whitespace-matching-regex-java
      */
     final private static String whitespace_chars = "[" /*
-     * dummy empty string for homogeneity
-     */
+                                                        * dummy empty string for homogeneity
+                                                        */
             + "\\u0009" // CHARACTER
             // TABULATION
             + "\\u000A" // LINE
@@ -362,5 +362,20 @@ public class StringUtils {
             ret.add(string);
         }
         return ret;
+    }
+
+    /**
+     * a wrapper around String.replaceAll with nullcheck on the actual text
+     *
+     * @param string
+     * @param string2
+     * @param changeLogText
+     * @return
+     */
+    public static String replaceAllByRegex(String regex, String replacement, String text) {
+        if (isEmpty(text)) {
+            return text;
+        }
+        return text.replaceAll(regex, replacement);
     }
 }

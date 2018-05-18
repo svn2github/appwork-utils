@@ -217,4 +217,29 @@ public class Exceptions {
             throw new RuntimeException(ex);
         }
     }
+
+    /**
+     * @param e
+     * @param b
+     * @return
+     */
+    public static String toCauseChainClassString(Throwable e, boolean simple) {
+        if (e == null) {
+            return null;
+        }
+        StringBuilder sb = new StringBuilder();
+        Throwable last = null;
+        while (true) {
+            if (last == e || e == null) {
+                break;
+            }
+            if (sb.length() > 0) {
+                sb.append(" < ");
+            }
+            sb.append(simple ? e.getClass().getSimpleName() : e.getClass().getName());
+            last = e;
+            e = e.getCause();
+        }
+        return sb.toString();
+    }
 }

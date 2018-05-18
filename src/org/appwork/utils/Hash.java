@@ -104,10 +104,14 @@ public class Hash {
             return getHash(new FileInputStream(arg), type, maxHash, true);
         } catch (FileNotFoundException ignore) {
             return null;
+        } catch (InterruptedException e) {
+            // restores the interrupted flag
+            Thread.currentThread().interrupt();
+            return null;
         }
     }
 
-    public static String getHash(final InputStream is, final String type, final long maxRead, boolean closeStream) {
+    public static String getHash(final InputStream is, final String type, final long maxRead, boolean closeStream) throws InterruptedException {
         try {
             final MessageDigest md = MessageDigest.getInstance(type);
             final byte[] buf = new byte[32767];
@@ -118,6 +122,9 @@ public class Hash {
                 inputStream = new LimitedInputStream(is, maxRead);
             }
             while (true) {
+                if (Thread.interrupted()) {
+                    throw new InterruptedException();
+                }
                 final int read = inputStream.read(buf);
                 if (read > 0) {
                     md.update(buf, 0, read);

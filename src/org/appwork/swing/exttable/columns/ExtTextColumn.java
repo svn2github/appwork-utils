@@ -65,11 +65,16 @@ import org.appwork.utils.swing.SwingUtils;
 import org.appwork.utils.swing.renderer.RenderLabel;
 import org.appwork.utils.swing.renderer.RendererMigPanel;
 
-public abstract class ExtTextColumn<E> extends ExtColumn<E> implements ActionListener, FocusListener {
-    private static final long     serialVersionUID = 2114805529462086691L;
-    protected JLabel              rendererField;
+public abstract class ExtTextColumn<E> extends ExtColumn<E>implements ActionListener, FocusListener {
+    private static final long serialVersionUID = 2114805529462086691L;
+    protected JLabel          rendererField;
+
+    public JLabel getRendererField() {
+        return rendererField;
+    }
+
     protected JTextField          editorField;
-    private final Border          defaultBorder    = BorderFactory.createEmptyBorder(0, 5, 0, 5);
+    private final Border          defaultBorder = BorderFactory.createEmptyBorder(0, 5, 0, 5);
     private Color                 rendererForeground;
     private Color                 editorForeground;
     private Font                  rendererFont;
@@ -78,7 +83,7 @@ public abstract class ExtTextColumn<E> extends ExtColumn<E> implements ActionLis
     protected JLabel              rendererIcon;
     protected JPanel              renderer;
     protected JLabel              editorIconLabel;
-    protected final AtomicInteger noSet            = new AtomicInteger(0);
+    protected final AtomicInteger noSet         = new AtomicInteger(0);
 
     public void setNoSet(boolean b) {
         if (b) {
@@ -267,6 +272,10 @@ public abstract class ExtTextColumn<E> extends ExtColumn<E> implements ActionLis
         } else {
             this.rendererField.setText(str);
         }
+    }
+
+    public JLabel getRendererIcon() {
+        return rendererIcon;
     }
 
     /**

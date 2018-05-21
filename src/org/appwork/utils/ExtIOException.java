@@ -17,6 +17,20 @@ public class ExtIOException extends IOException {
         this.type = type;
     }
 
+    public ExtIOException getOriginCause() {
+        Throwable last = null;
+        Throwable e = this;
+        ExtIOException deepest = this;
+        while (e != null && (last == null || last != e.getCause())) {
+            if (e instanceof ExtIOException) {
+                deepest = (ExtIOException) e;
+            }
+            last = e;
+            e = e.getCause();
+        }
+        return deepest;
+    }
+
     public ExtIOException(Throwable e, IOExceptionType type, String message) {
         super(message, e);
         this.type = type;

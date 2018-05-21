@@ -1,5 +1,5 @@
 /**
- * 
+ *
  * ====================================================================================================================================================
  *         "AppWork Utilities" License
  *         The "AppWork Utilities" will be called [The Product] from now on.
@@ -7,16 +7,16 @@
  *         Copyright (c) 2009-2015, AppWork GmbH <e-mail@appwork.org>
  *         Schwabacher Straße 117
  *         90763 Fürth
- *         Germany   
+ *         Germany
  * === Preamble ===
  *     This license establishes the terms under which the [The Product] Source Code & Binary files may be used, copied, modified, distributed, and/or redistributed.
  *     The intent is that the AppWork GmbH is able to provide their utilities library for free to non-commercial projects whereas commercial usage is only permitted after obtaining a commercial license.
  *     These terms apply to all files that have the [The Product] License header (IN the file), a <filename>.license or <filename>.info (like mylib.jar.info) file that contains a reference to this license.
- * 	
+ *
  * === 3rd Party Licences ===
  *     Some parts of the [The Product] use or reference 3rd party libraries and classes. These parts may have different licensing conditions. Please check the *.license and *.info files of included libraries
- *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header. 	
- * 	
+ *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header.
+ *
  * === Definition: Commercial Usage ===
  *     If anybody or any organization is generating income (directly or indirectly) by using [The Product] or if there's any commercial interest or aspect in what you are doing, we consider this as a commercial usage.
  *     If your use-case is neither strictly private nor strictly educational, it is commercial. If you are unsure whether your use-case is commercial or not, consider it as commercial or contact us.
@@ -25,9 +25,9 @@
  *     If you want to use [The Product] in a commercial way (see definition above), you have to obtain a paid license from AppWork GmbH.
  *     Contact AppWork for further details: <e-mail@appwork.org>
  * === Non-Commercial Usage ===
- *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the 
+ *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the
  *     "GNU Affero General Public License" (http://www.gnu.org/licenses/agpl-3.0.en.html).
- * 	
+ *
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
@@ -59,13 +59,10 @@ public class ClassCache {
      * @throws SecurityException
      */
     protected static ClassCache create(final Class<? extends Object> clazz) throws SecurityException, NoSuchMethodException {
-
         final ClassCache cc = new ClassCache(clazz);
         Getter g;
         Setter s;
-
         Class<? extends Object> cls = clazz;
-
         final HashSet<String> ignores = new HashSet<String>();
         do {
             final Ignores ig = cls.getAnnotation(Ignores.class);
@@ -75,16 +72,13 @@ public class ClassCache {
                 }
             }
             for (final Method m : cls.getDeclaredMethods()) {
-
                 if (m.getAnnotation(Ignore.class) != null || ignores.contains(m.toString())) {
                     continue;
                 }
-
                 if (m.getName().startsWith("get") && m.getParameterTypes().length == 0 && m.getReturnType() != void.class) {
                     cc.getter.add(g = new Getter(createKey(m.getName().substring(3)), m));
                     cc.getterMap.put(g.getKey(), g);
                     // org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer(m.toString());
-
                 } else if (m.getName().startsWith("is") && m.getParameterTypes().length == 0 && m.getReturnType() != void.class) {
                     cc.getter.add(g = new Getter(createKey(m.getName().substring(2)), m));
                     cc.getterMap.put(g.getKey(), g);
@@ -94,13 +88,11 @@ public class ClassCache {
                     cc.setterMap.put(s.getKey(), s);
                     // org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer(m.toString());
                 }
-
             }
         } while ((cls = cls.getSuperclass()) != null && cls != Object.class);
         // we do not want to serialize object's getter
         for (final Constructor<?> c : clazz.getDeclaredConstructors()) {
             if (c.getParameterTypes().length == 0) {
-
                 try {
                     c.setAccessible(true);
                     cc.constructor = c;
@@ -115,7 +107,6 @@ public class ClassCache {
             final int lastIndex = clazz.getName().lastIndexOf(".");
             final String pkg = lastIndex > 0 ? clazz.getName().substring(0, lastIndex) : "";
             if (pkg.startsWith("java") || pkg.startsWith("sun.")) {
-
                 org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("No Null Constructor in " + clazz + " found. De-Json-serial will fail");
             } else {
                 throw new NoSuchMethodException(" Class " + clazz + " requires a null constructor. please add private " + clazz.getSimpleName() + "(){}");
@@ -156,6 +147,7 @@ public class ClassCache {
     public static ClassCache getClassCache(final Class<? extends Object> clazz) throws SecurityException, NoSuchMethodException {
         ClassCache cc = ClassCache.CACHE.get(clazz);
         if (cc == null) {
+            System.out.println("ClassCache: " + clazz);
             cc = ClassCache.create(clazz);
             ClassCache.CACHE.put(clazz, cc);
         }
@@ -163,7 +155,6 @@ public class ClassCache {
     }
 
     protected Constructor<? extends Object> constructor;
-
     protected final Class<? extends Object> clazz;
     protected final java.util.List<Getter>  getter;
     protected final java.util.List<Setter>  setter;
@@ -197,7 +188,6 @@ public class ClassCache {
      * @throws IllegalArgumentException
      */
     public Object getInstance() throws IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException {
-
         return constructor.newInstance(ClassCache.EMPTY_OBJECT);
     }
 
@@ -215,7 +205,5 @@ public class ClassCache {
      */
     public static void put(final Class<?> class1, final ClassCache stackTraceElementClassCache) {
         CACHE.put(class1, stackTraceElementClassCache);
-
     }
-
 }

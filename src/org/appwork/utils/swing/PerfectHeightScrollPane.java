@@ -7,10 +7,10 @@ import java.awt.Insets;
 import java.awt.event.MouseWheelEvent;
 
 import javax.swing.JScrollPane;
+import javax.swing.JViewport;
 import javax.swing.ScrollPaneConstants;
 
 public class PerfectHeightScrollPane extends JScrollPane {
-
     public PerfectHeightScrollPane(Component view) {
         super(view);
         setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
@@ -24,7 +24,6 @@ public class PerfectHeightScrollPane extends JScrollPane {
         } else {
             super.processEvent(e);
         }
-
     }
 
     @Override
@@ -32,7 +31,8 @@ public class PerfectHeightScrollPane extends JScrollPane {
         Dimension ret = super.getPreferredSize();
         Insets borderInsets = getBorder().getBorderInsets(this);
         Component view = getViewport().getView();
-        ret.height = view.getPreferredSize().height + 20 + borderInsets.top + borderInsets.bottom + getColumnHeader().getPreferredSize().height;
+        JViewport ch = getColumnHeader();
+        ret.height = view.getPreferredSize().height + 20 + borderInsets.top + borderInsets.bottom + (ch == null ? 0 : ch.getPreferredSize().height);
         return ret;
     }
 }

@@ -101,7 +101,7 @@ public class TranslationUtils {
             }
             for (final String lng : lngs) {
                 final File f = new File(file + "/" + class1.getSimpleName() + "." + lng + ".lng");
-                final String txt = TranslationFactory.create(class1)._getHandler().createFile(lng, prov, addComments);
+                final String txt = TranslationFactory.create(class1, "en")._getHandler().createFile(lng, prov, addComments);
                 f.delete();
                 IO.writeStringToFile(f, txt);
                 System.out.println("Wrote " + f);

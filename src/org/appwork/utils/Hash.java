@@ -63,6 +63,9 @@ public class Hash {
     public static String getBytesHash(final byte[] download, final String type) {
         try {
             return getHash(new ByteArrayInputStream(download), type, -1, true);
+        } catch (InterruptedException e) {
+            // restores the interrupted flag
+            Thread.currentThread().interrupt();
         } catch (final Throwable e) {
             e.printStackTrace();
         }

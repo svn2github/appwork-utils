@@ -113,7 +113,7 @@ public abstract class LogSourceProvider {
     public static final String         LOG_NO_CONSOLE         = "LOG_NO_CONSOLE";
     public static final String         LOG_NO_FILE            = "LOG_NO_FILE";
     public static final String         LOG_SINGLE_LOGGER_NAME = "LOG_SINGLE_LOGGER_NAME";
-    public static boolean              FIRST                  = true;
+    private static boolean             FIRST                  = true;
     public static boolean              AUTO_CLEANUP           = true;
 
     public LogSourceProvider(final long timeStamp) {

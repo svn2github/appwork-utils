@@ -12,8 +12,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.appwork.storage.JSonStorage;
-import org.appwork.storage.Storable;
 import org.appwork.utils.GetterSetter;
 
 public class CleanedJSonObject {
@@ -149,7 +147,7 @@ public class CleanedJSonObject {
 
     protected Object toMap() {
         try {
-            System.out.println(this.toString());
+            // System.out.println(this.toString());
             if (this.object == null) {
                 return null;
             }

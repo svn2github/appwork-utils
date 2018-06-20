@@ -144,7 +144,7 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
     }
 
     private FileChooserSelectionMode fileSelectionMode = FileChooserSelectionMode.FILES_AND_DIRECTORIES;
-    private FileFilter               fileFilter;
+    private FileFilter[]             fileFilter;
     private boolean                  multiSelection    = false;
     private File                     preSelection;
     protected ModdedJFileChooser     fc;
@@ -409,7 +409,7 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
         return f.isFile();
     }
 
-    public FileFilter getFileFilter() {
+    public FileFilter[] getFileFilter() {
         return fileFilter;
     }
 
@@ -581,7 +581,6 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
                     directoryModel = listener;
                     return;
                 }
-    
                 super.addPropertyChangeListener(listener);
             }
 
@@ -707,7 +706,15 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
             fc.setFileSelectionMode(fileSelectionMode.getId());
         }
         if (fileFilter != null) {
-            fc.setFileFilter(fileFilter);
+            if (fileFilter.length == 1) {
+                fc.setFileFilter(fileFilter[0]);
+            } else {
+                for (FileFilter filter : fileFilter) {
+                    if (filter != null) {
+                        fc.addChoosableFileFilter(filter);
+                    }
+                }
+            }
         }
         if (multiSelection) {
             fc.setMultiSelectionEnabled(true);
@@ -1111,7 +1118,7 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
         }
     }
 
-    public void setFileFilter(final FileFilter fileFilter) {
+    public void setFileFilter(final FileFilter... fileFilter) {
         this.fileFilter = fileFilter;
     }
 

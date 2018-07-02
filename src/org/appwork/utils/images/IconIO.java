@@ -114,7 +114,7 @@ public class IconIO {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see javax.swing.Icon#getIconHeight()
          */
         @Override
@@ -125,7 +125,7 @@ public class IconIO {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see javax.swing.Icon#getIconWidth()
          */
         @Override
@@ -136,7 +136,7 @@ public class IconIO {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see javax.swing.Icon#paintIcon(java.awt.Component, java.awt.Graphics, int, int)
          */
         @Override
@@ -152,7 +152,7 @@ public class IconIO {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see org.appwork.swing.components.IdentifierInterface#toIdentifier()
          */
         @Override
@@ -192,16 +192,16 @@ public class IconIO {
             @Override
             public final int filterRGB(final int x, final int y, final int rgb) {
                 final int r = (rgb & 0xFF0000) >> 16;
-                final int g = (rgb & 0xFF00) >> 8;
-                final int b = rgb & 0xFF;
-                if (r >= r1 && r <= r2 && g >= g1 && g <= g2 && b >= b1 && b <= b2) {
-                    // Set fully transparent but keep color
-                    // calculate a alpha value based on the distance between the
-                    // range borders and the pixel color
-                    final int dist = (Math.abs(r - (r1 + r2) / 2) + Math.abs(g - (g1 + g2) / 2) + Math.abs(b - (b1 + b2) / 2)) * 2;
-                    return new Color(r, g, b, Math.min(255, dist)).getRGB();
-                }
-                return rgb;
+        final int g = (rgb & 0xFF00) >> 8;
+        final int b = rgb & 0xFF;
+        if (r >= r1 && r <= r2 && g >= g1 && g <= g2 && b >= b1 && b <= b2) {
+            // Set fully transparent but keep color
+            // calculate a alpha value based on the distance between the
+            // range borders and the pixel color
+            final int dist = (Math.abs(r - (r1 + r2) / 2) + Math.abs(g - (g1 + g2) / 2) + Math.abs(b - (b1 + b2) / 2)) * 2;
+            return new Color(r, g, b, Math.min(255, dist)).getRGB();
+        }
+        return rgb;
             }
         };
         final ImageProducer ip = new FilteredImageSource(image.getSource(), filter);
@@ -284,7 +284,7 @@ public class IconIO {
                     return ret;
                 }
             } catch (final IOException e) {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(new IOException("URL:" + resource, e).fillInStackTrace());
             } finally {
                 try {
                     is.close();
@@ -935,7 +935,7 @@ public class IconIO {
         } catch (IOException e) {
             throw e;
         } catch (Throwable e) {
-            throw new IOException(e);
+            throw new IOException("URL:" + url, e);
         }
     }
 }

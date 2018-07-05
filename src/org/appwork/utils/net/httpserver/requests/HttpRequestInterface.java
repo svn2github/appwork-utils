@@ -43,6 +43,10 @@ import org.appwork.utils.net.HeaderCollection;
  *
  */
 public interface HttpRequestInterface {
+    /**
+     * The requestpath is the resourcepath WITHOUT NAMESPACES like /jcgi/ or anything like this. If you need the full path, use
+     * {@link #getRequestedURL(String)}
+     */
     public String getRequestedPath();
 
     public String getParameterbyKey(String key) throws IOException;
@@ -55,6 +59,10 @@ public interface HttpRequestInterface {
      */
     public long getId();
 
+    /**
+     * the requestedURL is the full resourcepath WITH NAMESPACES like /jcgi/ or anything like this. If you need the cropped normalized path
+     * use {@link #getRequestedPath(String)}
+     */
     public String getRequestedURL();
 
     /**

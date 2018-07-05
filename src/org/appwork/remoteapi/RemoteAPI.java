@@ -222,7 +222,7 @@ public class RemoteAPI implements HttpRequestHandler {
         }
         return new OutputStream() {
             boolean wrapperHeader = wrapJQuery && request != null && request.getJqueryCallback() != null;
-            boolean wrapperEnd = wrapJQuery && request != null && request.getJqueryCallback() != null;
+            boolean wrapperEnd    = wrapJQuery && request != null && request.getJqueryCallback() != null;
 
             @Override
             public void close() throws IOException {
@@ -513,7 +513,7 @@ public class RemoteAPI implements HttpRequestHandler {
     }
 
     public RemoteAPIMethod getRemoteAPIMethod(final HttpRequest request) throws BasicRemoteAPIException {
-        final String path = request.getRequestedPath();
+        final String path = getRequestPathWithoutNamespace(request);
         String[] intf = new Regex(path, RemoteAPI.INTF).getRow(0);
         if (intf == null || intf.length != 3) {
             if ("/".equals(path)) {
@@ -551,6 +551,15 @@ public class RemoteAPI implements HttpRequestHandler {
             return new RemoteAPIMethod(namespace, ret, methodName);
         }
         return null;
+    }
+
+    protected String getRequestPathWithoutNamespace(final HttpRequest request) {
+        String ret = request.getRequestedPath();
+        int index = ret.lastIndexOf("/", ret.lastIndexOf("/") - 1);
+        if (index < 0) {
+            return ret;
+        }
+        return ret.substring(index);
     }
 
     protected InterfaceHandler<RemoteAPIInterface> getInterfaceByNamespace(String namespace) {

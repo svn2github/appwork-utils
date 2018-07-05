@@ -99,14 +99,16 @@ public abstract class HttpRequest implements HttpRequestInterface {
     }
 
     /**
-     * The path without additional namespaces (like jcgi/
+     * The requestpath is the resourcepath WITHOUT NAMESPACES like /jcgi/ or anything like this. If you need the full path, use
+     * {@link #getRequestedURL(String)}
      */
     public String getRequestedPath() {
         return requestedPath;
     }
 
     /**
-     * this full path (incl. jcgi)
+     * the requestedURL is the full resourcepath WITH NAMESPACES like /jcgi/ or anything like this. If you need the cropped normalized path
+     * use {@link #getRequestedPath(String)}
      */
     public String getRequestedURL() {
         return requestedURL;
@@ -141,7 +143,8 @@ public abstract class HttpRequest implements HttpRequestInterface {
 
     /**
      * @param requestedPath
-     *            the requestedPath to set
+     *            The requestpath is the resourcepath WITHOUT NAMESPACES like /jcgi/ or anything like this. If you need the full path, use
+     *            {@link #setRequestedURL(String)} the requestedPath to set
      */
     public void setRequestedPath(final String requestedPath) {
         this.requestedPath = requestedPath;
@@ -149,7 +152,9 @@ public abstract class HttpRequest implements HttpRequestInterface {
 
     /**
      * @param requestedURL
-     *            the requestedURL to set
+     *
+     *            the requestedURL is the full resourcepath WITH NAMESPACES like /jcgi/ or anything like this. If you need the cropped
+     *            normalized path use {@link #setRequestedPath(String)} the requestedURL to set
      */
     public void setRequestedURL(final String requestedURL) {
         this.requestedURL = requestedURL;

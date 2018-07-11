@@ -127,10 +127,13 @@ public class CrossSystem {
         WINDOWS_SERVER_2003(OSFamily.WINDOWS),
         WINDOWS_SERVER_2008(OSFamily.WINDOWS),
         WINDOWS_7(OSFamily.WINDOWS),
+        WINDOWS_SERVER_2008_R2(OSFamily.WINDOWS),
         WINDOWS_8(OSFamily.WINDOWS),
         WINDOWS_SERVER_2012(OSFamily.WINDOWS),
-        WINDOWS_SERVER_2016(OSFamily.WINDOWS),
-        WINDOWS_10(OSFamily.WINDOWS);
+        WINDOWS_8_1(OSFamily.WINDOWS),
+        WINDOWS_SERVER_2012_R2(OSFamily.WINDOWS),
+        WINDOWS_10(OSFamily.WINDOWS),
+        WINDOWS_SERVER_2016(OSFamily.WINDOWS);
         private final OSFamily family;
 
         private OperatingSystem(final OSFamily family) {
@@ -664,7 +667,11 @@ public class CrossSystem {
             if (os.contains("windows 10")) {
                 return OperatingSystem.WINDOWS_10;
             } else if (os.contains("windows 8")) {
-                return OperatingSystem.WINDOWS_8;
+                if (os.contains("8.1")) {
+                    return OperatingSystem.WINDOWS_8_1;
+                } else {
+                    return OperatingSystem.WINDOWS_8;
+                }
             } else if (os.contains("windows 7")) {
                 return OperatingSystem.WINDOWS_7;
             } else if (os.contains("windows xp")) {
@@ -678,9 +685,17 @@ public class CrossSystem {
             } else if (os.contains("windows server 2003")) {
                 return OperatingSystem.WINDOWS_SERVER_2003;
             } else if (os.contains("windows server 2008")) {
-                return OperatingSystem.WINDOWS_SERVER_2008;
+                if (os.contains("r2")) {
+                    return OperatingSystem.WINDOWS_SERVER_2008_R2;
+                } else {
+                    return OperatingSystem.WINDOWS_SERVER_2008;
+                }
             } else if (os.contains("windows server 2012")) {
-                return OperatingSystem.WINDOWS_SERVER_2012;
+                if (os.contains("r2")) {
+                    return OperatingSystem.WINDOWS_SERVER_2012_R2;
+                } else {
+                    return OperatingSystem.WINDOWS_SERVER_2012;
+                }
             } else if (os.contains("windows server 2016")) {
                 return OperatingSystem.WINDOWS_SERVER_2016;
             } else if (os.contains("nt")) {

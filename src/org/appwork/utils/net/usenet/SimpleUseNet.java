@@ -258,11 +258,11 @@ public abstract class SimpleUseNet {
     }
 
     private final ByteArrayOutputStream lineBuffer = new ByteArrayOutputStream() {
-        @Override
-        public synchronized byte[] toByteArray() {
-            return buf;
-        };
-    };
+                                                       @Override
+                                                       public synchronized byte[] toByteArray() {
+                                                           return buf;
+                                                       };
+                                                   };
 
     protected synchronized String readLine() throws IOException {
         return readLine(lineBuffer);
@@ -377,7 +377,7 @@ public abstract class SimpleUseNet {
         case 222:
             break;
         case 430:
-            throw new MessageBodyNotFoundException();
+            throw new MessageBodyNotFoundException(messageID);
         default:
             throw new UnknownResponseException(response);
         }

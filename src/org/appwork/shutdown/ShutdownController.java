@@ -40,7 +40,6 @@ import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -76,7 +75,7 @@ public class ShutdownController extends Thread {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see org.appwork.shutdown.ShutdownEvent#run()
          */
         @Override
@@ -152,17 +151,18 @@ public class ShutdownController extends Thread {
                     return (Thread) key;
                 }
             };
-            // TODO: jdk9
+            // INFO: All illegal access operations will be denied in a future release /from Java9 on
             final Field field = Class.forName("java.lang.ApplicationShutdownHooks").getDeclaredField("hooks");
             field.setAccessible(true);
             final Map<Thread, Thread> hooks = (Map<Thread, Thread>) field.get(null);
-            synchronized (hooks) {
-                final Set<Thread> threads = hooks.keySet();
-                for (final Thread hook : threads) {
-                    this.addShutdownEvent(new ShutdownEventWrapper(hook));
+            if (hooks != null) {
+                synchronized (hooks) {
+                    for (final Thread hook : hooks.keySet()) {
+                        this.addShutdownEvent(new ShutdownEventWrapper(hook));
+                    }
                 }
-                field.set(null, hookDelegater);
             }
+            field.set(null, hookDelegater);
         } catch (final Throwable e) {
             LoggerFactory.getDefaultLogger().log(e);
             Runtime.getRuntime().addShutdownHook(this);

@@ -36,10 +36,14 @@ package org.appwork.utils.net.usenet;
 import java.io.IOException;
 
 public class MessageBodyNotFoundException extends IOException {
-    public MessageBodyNotFoundException() {
+    private final String messageID;
+
+    public MessageBodyNotFoundException(String messageID) {
+        super(messageID);
+        this.messageID = messageID;
     }
 
-    public MessageBodyNotFoundException(String msg) {
-        super(msg);
+    public final String getMessageID() {
+        return messageID;
     }
 }

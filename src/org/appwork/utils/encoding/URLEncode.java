@@ -43,10 +43,6 @@ import java.net.URLEncoder;
 public class URLEncode {
     private static final String RFC2396CHARS = "0123456789" + "abcdefghijklmnopqrstuvwxyz" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ" + "-_.!~*'()";
 
-    public static void main(String[] args) throws UnsupportedEncodingException {
-        System.out.println(URLEncode.encodeRFC2396("\r\n"));
-    }
-
     /* http://www.ietf.org/rfc/rfc2396.txt */
     public static String encodeRFC2396(final String input) throws UnsupportedEncodingException {
         final StringBuilder sb = new StringBuilder();

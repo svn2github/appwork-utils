@@ -46,14 +46,9 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.net.NetworkInterface;
-import java.net.SocketException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.security.MessageDigest;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -68,13 +63,9 @@ import org.appwork.shutdown.ShutdownRequest;
 import org.appwork.uio.InputDialogInterface;
 import org.appwork.uio.UIOManager;
 import org.appwork.utils.Application;
-import org.appwork.utils.Hash;
 import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
-import org.appwork.utils.encoding.Base64;
-import org.appwork.utils.formatter.HexFormatter;
 import org.appwork.utils.locale._AWU;
-import org.appwork.utils.logging2.extmanager.LoggerFactory;
 import org.appwork.utils.os.mime.Mime;
 import org.appwork.utils.os.mime.MimeFactory;
 import org.appwork.utils.processes.ProcessBuilderFactory;
@@ -500,7 +491,7 @@ public class CrossSystem {
         }
         /*
          * remove ending dots, not allowed under windows and others os maybe too
-         *
+         * 
          * Do not end a file or directory name with a space or a period.
          */
         pathPart = pathPart.replaceFirst("\\.+$", "");
@@ -954,36 +945,37 @@ public class CrossSystem {
     }
 
     public static boolean is64BitArch() {
-        final String wow64Arch = System.getenv("PROCESSOR_ARCHITEW6432");
-        if (wow64Arch != null) {
-            // cpu architecture
-            // null = 32Bit
-            // AMD64 = 64Bit
-            return wow64Arch.trim().endsWith("64");
-        }
-        final String arch = System.getenv("PROCESSOR_ARCHITECTURE");
-        if (arch != null) {
-            // process architecture
-            // x86 = 32Bit
-            // AMD64 = 64Bit
-            return arch.trim().endsWith("64");
+        if (CrossSystem.isWindows()) {
+            final String wow64Arch = System.getenv("PROCESSOR_ARCHITEW6432");
+            if (wow64Arch != null) {
+                // cpu architecture
+                // null = 32Bit
+                // AMD64 = 64Bit
+                return wow64Arch.trim().endsWith("64");
+            }
+            final String arch = System.getenv("PROCESSOR_ARCHITECTURE");
+            if (arch != null) {
+                // process architecture
+                // x86 = 32Bit
+                // AMD64 = 64Bit
+                return arch.trim().endsWith("64");
+            }
         }
         final String osArch = System.getProperty("os.arch");
         final boolean is64bit;
         if (osArch != null) {
+            // 32Bit JVM on 64Bit OS will still return 32Bit
             if ("i386".equals(osArch)) {
                 is64bit = false;
             } else if ("x86".equals(osArch)) {
                 is64bit = false;
             } else if ("sparc".equals(osArch)) {
                 is64bit = false;
-            } else if ("amd64".equals(osArch)) {
+            } else if ("amd64".equals(osArch) || "amd_64".equals(osArch)) {
                 is64bit = true;
             } else if ("ppc64".equals(osArch)) {
                 is64bit = true;
             } else if ("ia64".equals(osArch)) {
-                is64bit = true;
-            } else if ("amd_64".equals(osArch)) {
                 is64bit = true;
             } else if ("x86_64".equals(osArch)) {
                 is64bit = true;
@@ -1652,80 +1644,6 @@ public class CrossSystem {
             }
         } else {
             Toolkit.getDefaultToolkit().beep();
-        }
-    }
-
-    /**
-     * tries to generate an hardware ID from the available network Interfaces. may return NULL
-     *
-     * @return
-     * @throws SocketException
-     */
-    public static String generateNetworkIdentifier() {
-        try {
-            Enumeration<NetworkInterface> netifs;
-            String netID = null;
-            // LoggerFactory.getDefaultLogger().info("Scan MACs");
-            netifs = NetworkInterface.getNetworkInterfaces();
-            // final StringBuilder macs = new StringBuilder();
-            HashSet<String> dupes = new HashSet<String>();
-            ArrayList<String> list = new ArrayList<String>();
-            while (netifs.hasMoreElements()) {
-                final NetworkInterface netif = netifs.nextElement();
-                // LoggerFactory.getDefaultLogger().info("* " + netif);
-                if (netif.isLoopback()) {
-                    // LoggerFactory.getDefaultLogger().info("- Loopback");
-                    continue;
-                }
-                if (netif.isPointToPoint()) {
-                    // LoggerFactory.getDefaultLogger().info("- P2P");
-                    continue;
-                }
-                if (netif.isVirtual()) {
-                    // LoggerFactory.getDefaultLogger().info("- VIRT");
-                    continue;
-                }
-                String macString;
-                final byte[] macBytes = netif.getHardwareAddress();
-                if (macBytes != null) {
-                    macString = HexFormatter.byteArrayToHex(macBytes).toLowerCase(Locale.ENGLISH);
-                    if (dupes.add(macString)) {
-                        // LoggerFactory.getDefaultLogger().info("+ " + macString);
-                        list.add(macString.toUpperCase(Locale.ENGLISH));
-                        continue;
-                    } else {
-                        // LoggerFactory.getDefaultLogger().info("- MACDUPE");
-                    }
-                } else {
-                    // LoggerFactory.getDefaultLogger().info("- NOMAC");
-                }
-            }
-            Collections.sort(list);
-            StringBuilder sb = new StringBuilder();
-            for (String s : list) {
-                sb.append(s);
-                sb.append("\r\n");
-            }
-            netID = Base64.encodeToString(HexFormatter.hexToByteArray(Hash.getMD5(sb.toString())), false);
-            return netID;
-        } catch (Throwable e) {
-            LoggerFactory.getDefaultLogger().log(e);
-        }
-        return null;
-    }
-
-    /**
-     * @return
-     */
-    public static String generateHardwareID() {
-        MessageDigest md;
-        try {
-            md = MessageDigest.getInstance("SHA256");
-            md.update(Base64.decodeFast(generateNetworkIdentifier()));
-            md.update((byte) Runtime.getRuntime().availableProcessors());
-            return Base64.encodeToString(md.digest(), false);
-        } catch (Throwable e) {
-            throw new WTFException(e);
         }
     }
 }

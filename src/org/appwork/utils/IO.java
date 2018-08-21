@@ -52,10 +52,10 @@ import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URL;
+import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
 
-import org.appwork.exceptions.WTFException;
 import org.appwork.utils.Files.AbstractHandler;
 import org.appwork.utils.os.CrossSystem;
 
@@ -154,6 +154,7 @@ public class IO {
                     }
                 }
             } catch (final IOException e) {
+               
                 throw e;
             } finally {
                 try {
@@ -491,6 +492,9 @@ public class IO {
             if (maxSize > 0) {
                 int done = 0;
                 while (done < maxSize && (len = input.read(buffer, 0, Math.min(buffer.length, maxSize - done))) != -1) {
+                    if (Thread.currentThread().isInterrupted()) {
+                        throw new ClosedByInterruptException();
+                    }
                     if (len > 0) {
                         baos.write(buffer, 0, len);
                         done += len;
@@ -498,6 +502,9 @@ public class IO {
                 }
             } else {
                 while ((len = input.read(buffer)) != -1) {
+                    if (Thread.currentThread().isInterrupted()) {
+                        throw new ClosedByInterruptException();
+                    }
                     if (len > 0) {
                         baos.write(buffer, 0, len);
                     }
@@ -737,9 +744,6 @@ public class IO {
             FileOutputStream out = null;
             boolean deleteFile = true;
             try {
-                if (false) {
-                    new WTFException("Write to File:" + file).printStackTrace();
-                }
                 out = new FileOutputStream(file);
                 out.write(data);
                 out.flush();

@@ -109,7 +109,7 @@ public class DesktopSupportJavaDesktop implements DesktopSupport {
      * @see org.appwork.utils.os.DesktopSupport#shutdown()
      */
     @Override
-    public boolean shutdown(boolean force) {
+    public boolean shutdown(boolean force) throws InterruptedException {
         // TODO Auto-generated method stub
         return false;
     }
@@ -120,7 +120,7 @@ public class DesktopSupportJavaDesktop implements DesktopSupport {
      * @see org.appwork.utils.os.DesktopSupport#standby()
      */
     @Override
-    public boolean standby() {
+    public boolean standby() throws InterruptedException {
         // TODO Auto-generated method stub
         return false;
     }
@@ -131,7 +131,7 @@ public class DesktopSupportJavaDesktop implements DesktopSupport {
      * @see org.appwork.utils.os.DesktopSupport#hibernate()
      */
     @Override
-    public boolean hibernate() {
+    public boolean hibernate() throws InterruptedException {
         // TODO Auto-generated method stub
         return false;
     }
@@ -152,7 +152,7 @@ public class DesktopSupportJavaDesktop implements DesktopSupport {
      * @see org.appwork.utils.os.DesktopSupport#getProcessExecutablePathByPID(int)
      */
     @Override
-    public String getProcessExecutablePathByPID(long pid) throws NotSupportedException {
+    public String getProcessExecutablePathByPID(long pid) throws NotSupportedException, InterruptedException {
         throw new NotSupportedException("Operating System not supported");
     }
 
@@ -162,7 +162,7 @@ public class DesktopSupportJavaDesktop implements DesktopSupport {
      * @see org.appwork.utils.os.DesktopSupport#getProcessCommandlineByPID(int)
      */
     @Override
-    public String getProcessCommandlineByPID(long pid) throws NotSupportedException {
+    public String getProcessCommandlineByPID(long pid) throws NotSupportedException, InterruptedException {
         throw new NotSupportedException("Operating System not supported");
     }
 }

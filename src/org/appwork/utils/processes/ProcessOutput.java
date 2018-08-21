@@ -36,26 +36,41 @@ package org.appwork.utils.processes;
 import java.io.UnsupportedEncodingException;
 
 import org.appwork.exceptions.WTFException;
+import org.appwork.utils.Exceptions;
 
 /**
  * @author Thomas
  *
  */
 public class ProcessOutput {
-    private final static String CONSOLE_CHARSET = ProcessBuilderFactory.getConsoleCodepage();
-    private final int           exitCode;
-    private final byte[]        stdOutData;
-    private final byte[]        errOutData;
+    private final int    exitCode;
+    private final byte[] stdOutData;
+    private final byte[] errOutData;
+    private String       codePage;
 
     /**
+     * @param codePage
      * @param waitFor
      * @param byteArray
      * @param byteArray2
+     * @throws InterruptedException
      */
-    public ProcessOutput(int exitCode, byte[] stdOut, byte[] errOut) {
+    public ProcessOutput(int exitCode, byte[] stdOut, byte[] errOut, String codePage) {
         this.exitCode = exitCode;
         this.stdOutData = stdOut;
         this.errOutData = errOut;
+        this.codePage = codePage;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        // TODO Auto-generated method stub
+        return "Exitcode: " + getExitCode() + " STD:" + getStdOutString() + " ERR:" + getErrOutString();
     }
 
     public String getStdOutString(String charset) throws UnsupportedEncodingException {
@@ -80,31 +95,28 @@ public class ProcessOutput {
 
     public String getStdOutString() {
         try {
-            return getStdOutString(CONSOLE_CHARSET);
+            return getStdOutString(codePage);
         } catch (UnsupportedEncodingException e) {
             try {
                 return getStdOutString("UTF-8");
             } catch (UnsupportedEncodingException e2) {
-                final WTFException t = new WTFException(e2);
-                t.addSuppressed(e);
-                throw t;
+                throw Exceptions.addSuppressed(new WTFException(e2), e);
             }
         }
     }
 
     /**
      * @return
+     * @throws InterruptedException
      */
     public String getErrOutString() {
         try {
-            return getErrOutString(CONSOLE_CHARSET);
+            return getErrOutString(codePage);
         } catch (UnsupportedEncodingException e) {
             try {
                 return getErrOutString("UTF-8");
             } catch (UnsupportedEncodingException e2) {
-                final WTFException t = new WTFException(e2);
-                t.addSuppressed(e);
-                throw t;
+                throw Exceptions.addSuppressed(new WTFException(e2), e);
             }
         }
     }

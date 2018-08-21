@@ -51,11 +51,11 @@ public interface DesktopSupport {
 
     public void openFile(File file) throws IOException;
 
-    public boolean shutdown(boolean force);
+    public boolean shutdown(boolean force) throws InterruptedException;
 
-    public boolean standby();
+    public boolean standby() throws InterruptedException;
 
-    public boolean hibernate();
+    public boolean hibernate() throws InterruptedException;
 
     public String getDefaultDownloadDirectory();
 
@@ -64,12 +64,14 @@ public interface DesktopSupport {
      *            the executable path for the given pid
      * @return
      * @throws NotSupportedException
+     * @throws InterruptedException
      */
-    public String getProcessExecutablePathByPID(long pid) throws NotSupportedException;
+    public String getProcessExecutablePathByPID(long pid) throws NotSupportedException, InterruptedException;
 
     /**
      * @param pid
      * @return
+     * @throws InterruptedException
      */
-    public String getProcessCommandlineByPID(long pid) throws NotSupportedException;
+    public String getProcessCommandlineByPID(long pid) throws NotSupportedException, InterruptedException;
 }

@@ -491,7 +491,7 @@ public class CrossSystem {
         }
         /*
          * remove ending dots, not allowed under windows and others os maybe too
-         * 
+         *
          * Do not end a file or directory name with a space or a period.
          */
         pathPart = pathPart.replaceFirst("\\.+$", "");
@@ -908,10 +908,6 @@ public class CrossSystem {
         } catch (final Throwable e) {
         }
         return -1;
-    }
-
-    public static void main(String[] args) {
-        getPID();
     }
 
     public static String NEWLINE = null;
@@ -1479,23 +1475,24 @@ public class CrossSystem {
         return new String[] { name, extension };
     }
 
-    public static void standbySystem() {
+    public static void standbySystem() throws InterruptedException {
         CrossSystem.DESKTOP_SUPPORT.standby();
     }
 
-    public static void hibernateSystem() {
+    public static void hibernateSystem() throws InterruptedException {
         CrossSystem.DESKTOP_SUPPORT.hibernate();
     }
 
-    public static void shutdownSystem(final boolean force) {
+    public static void shutdownSystem(final boolean force) throws InterruptedException {
         CrossSystem.DESKTOP_SUPPORT.shutdown(force);
     }
 
     /**
      * @return
      * @throws SecuritySoftwareException
+     * @throws InterruptedException
      */
-    public static SecuritySoftwareResponse getAntiVirusSoftwareInfo() throws UnsupportedOperationException, SecuritySoftwareException {
+    public static SecuritySoftwareResponse getAntiVirusSoftwareInfo() throws UnsupportedOperationException, SecuritySoftwareException, InterruptedException {
         String response = null;
         try {
             if (!CrossSystem.isWindows()) {
@@ -1511,6 +1508,8 @@ public class CrossSystem {
             }
             return parseWindowWMIResponse(response, null);
         } catch (UnsupportedOperationException e) {
+            throw e;
+        } catch (InterruptedException e) {
             throw e;
         } catch (Throwable e) {
             throw new SecuritySoftwareException(e, response);
@@ -1557,9 +1556,10 @@ public class CrossSystem {
     /**
      * @return
      * @throws SecuritySoftwareException
+     * @throws InterruptedException
      *
      */
-    public static SecuritySoftwareResponse getFirewallSoftwareInfo() throws UnsupportedOperationException, SecuritySoftwareException {
+    public static SecuritySoftwareResponse getFirewallSoftwareInfo() throws UnsupportedOperationException, SecuritySoftwareException, InterruptedException {
         String response = null;
         try {
             if (!CrossSystem.isWindows()) {
@@ -1576,6 +1576,8 @@ public class CrossSystem {
             return parseWindowWMIResponse(response, null);
         } catch (UnsupportedOperationException e) {
             throw e;
+        } catch (InterruptedException e) {
+            throw e;
         } catch (Throwable e) {
             throw new SecuritySoftwareException(e, response);
         }
@@ -1584,9 +1586,10 @@ public class CrossSystem {
     /**
      * @return
      * @throws SecuritySoftwareException
+     * @throws InterruptedException
      *
      */
-    public static SecuritySoftwareResponse getAntiSpySoftwareInfo() throws UnsupportedOperationException, SecuritySoftwareException {
+    public static SecuritySoftwareResponse getAntiSpySoftwareInfo() throws UnsupportedOperationException, SecuritySoftwareException, InterruptedException {
         String response = null;
         try {
             if (!CrossSystem.isWindows()) {
@@ -1602,12 +1605,14 @@ public class CrossSystem {
             return parseWindowWMIResponse(response, null);
         } catch (UnsupportedOperationException e) {
             throw e;
+        } catch (InterruptedException e) {
+            throw e;
         } catch (Throwable e) {
             throw new SecuritySoftwareException(e, response);
         }
     }
 
-    public static boolean isProcessRunning(String path) throws UnexpectedResponseException {
+    public static boolean isProcessRunning(String path) throws UnexpectedResponseException, InterruptedException {
         String response = null;
         try {
             if (!CrossSystem.isWindows()) {
@@ -1623,6 +1628,8 @@ public class CrossSystem {
             } else if (StringUtils.isEmpty(response)) {
                 return false;
             }
+        } catch (InterruptedException e) {
+            throw e;
         } catch (UnsupportedOperationException e) {
             throw e;
         } catch (Throwable e) {

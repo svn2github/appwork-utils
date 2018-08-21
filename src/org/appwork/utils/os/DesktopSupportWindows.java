@@ -104,7 +104,7 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
     }
 
     @Override
-    public boolean shutdown(boolean force) {
+    public boolean shutdown(boolean force) throws InterruptedException {
         switch (CrossSystem.OS) {
         case WINDOWS_2003:
         case WINDOWS_VISTA:
@@ -121,11 +121,15 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
                 /* force shutdown */
                 try {
                     ProcessBuilderFactory.runCommand(new String[] { "shutdown.exe", "-s", "-f", "-t", "01" });
+                } catch (InterruptedException e) {
+                    throw e;
                 } catch (Exception e) {
                     org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
                 }
                 try {
                     ProcessBuilderFactory.runCommand(new String[] { "%windir%\\system32\\shutdown.exe", "-s", "-f", "-t", "01" });
+                } catch (InterruptedException e) {
+                    throw e;
                 } catch (Exception e) {
                     org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
                 }
@@ -133,11 +137,15 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
                 /* normal shutdown */
                 try {
                     ProcessBuilderFactory.runCommand(new String[] { "shutdown.exe", "-s", "-t", "01" });
+                } catch (InterruptedException e) {
+                    throw e;
                 } catch (Exception e) {
                     org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
                 }
                 try {
                     ProcessBuilderFactory.runCommand(new String[] { "%windir%\\system32\\shutdown.exe", "-s", "-t", "01" });
+                } catch (InterruptedException e) {
+                    throw e;
                 } catch (Exception e) {
                     org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
                 }
@@ -153,6 +161,8 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
                     } finally {
                         Files.deleteRecursiv(f);
                     }
+                } catch (InterruptedException e) {
+                    throw e;
                 } catch (Exception e) {
                     org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
                 }
@@ -162,11 +172,15 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
             /* older windows versions */
             try {
                 ProcessBuilderFactory.runCommand(new String[] { "RUNDLL32.EXE", "user,ExitWindows" });
+            } catch (InterruptedException e) {
+                throw e;
             } catch (Exception e) {
                 org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
             }
             try {
                 ProcessBuilderFactory.runCommand(new String[] { "RUNDLL32.EXE", "Shell32,SHExitWindowsEx", "1" });
+            } catch (InterruptedException e) {
+                throw e;
             } catch (Exception e) {
                 org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
             }
@@ -176,7 +190,7 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
     }
 
     @Override
-    public boolean standby() {
+    public boolean standby() throws InterruptedException {
         switch (CrossSystem.OS) {
         case WINDOWS_2003:
         case WINDOWS_VISTA:
@@ -192,24 +206,34 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
                 String path = CrossSystem.is64BitOperatingSystem() ? Application.getResource("tools\\Windows\\elevate\\Elevate64.exe").getAbsolutePath() : Application.getResource("tools\\Windows\\elevate\\Elevate32.exe").getAbsolutePath();
                 try {
                     ProcessBuilderFactory.runCommand(new String[] { path, "powercfg", "-hibernate", "off" });
+                } catch (InterruptedException iEx) {
+                    throw iEx;
                 } catch (Throwable e) {
                     org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
                 }
             }
             try {
                 ProcessBuilderFactory.runCommand(new String[] { "powercfg.exe", "hibernate off" });
+            } catch (InterruptedException iEx) {
+                throw iEx;
             } catch (Exception e) {
                 try {
                     ProcessBuilderFactory.runCommand(new String[] { "%windir%\\system32\\powercfg.exe", "hibernate off" });
+                } catch (InterruptedException iEx) {
+                    throw iEx;
                 } catch (Exception ex) {
                     org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(ex);
                 }
             }
             try {
                 ProcessBuilderFactory.runCommand(new String[] { "RUNDLL32.EXE", "powrprof.dll,SetSuspendState" });
+            } catch (InterruptedException iEx) {
+                throw iEx;
             } catch (Exception e) {
                 try {
                     ProcessBuilderFactory.runCommand(new String[] { "%windir%\\system32\\RUNDLL32.EXE", "powrprof.dll,SetSuspendState" });
+                } catch (InterruptedException iEx) {
+                    throw iEx;
                 } catch (Exception e1) {
                     org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
                 }
@@ -229,7 +253,7 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
      * @see org.appwork.utils.os.DesktopSupport#hibernate()
      */
     @Override
-    public boolean hibernate() {
+    public boolean hibernate() throws InterruptedException {
         switch (CrossSystem.OS) {
         case WINDOWS_2003:
         case WINDOWS_VISTA:
@@ -245,25 +269,35 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
                 String path = CrossSystem.is64BitOperatingSystem() ? Application.getResource("tools\\Windows\\elevate\\Elevate64.exe").getAbsolutePath() : Application.getResource("tools\\Windows\\elevate\\Elevate32.exe").getAbsolutePath();
                 try {
                     ProcessBuilderFactory.runCommand(new String[] { path, "powercfg", "-hibernate", "on" });
+                } catch (InterruptedException iEx) {
+                    throw iEx;
                 } catch (Throwable e) {
                     org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
                 }
             }
             try {
                 ProcessBuilderFactory.runCommand(new String[] { "powercfg.exe", "hibernate on" });
+            } catch (InterruptedException iEx) {
+                throw iEx;
             } catch (Exception e) {
                 try {
                     ProcessBuilderFactory.runCommand(new String[] { "%windir%\\system32\\powercfg.exe", "hibernate on" });
+                } catch (InterruptedException iEx) {
+                    throw iEx;
                 } catch (Exception ex) {
                     org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(ex);
                 }
             }
             try {
                 ProcessBuilderFactory.runCommand(new String[] { "RUNDLL32.EXE", "powrprof.dll,SetSuspendState" });
+            } catch (InterruptedException iEx) {
+                throw iEx;
             } catch (Exception e) {
                 org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
                 try {
                     ProcessBuilderFactory.runCommand(new String[] { "%windir%\\system32\\RUNDLL32.EXE", "powrprof.dll,SetSuspendState" });
+                } catch (InterruptedException iEx) {
+                    throw iEx;
                 } catch (Exception ex) {
                     org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(ex);
                 }
@@ -277,7 +311,7 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
         return true;
     }
 
-    private static boolean isHibernateActivated() {
+    private static boolean isHibernateActivated() throws InterruptedException {
         ProcessOutput status;
         try {
             status = ProcessBuilderFactory.runCommand(new String[] { "powercfg", "-a" });
@@ -293,6 +327,8 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
                     return false;
                 }
             }
+        } catch (InterruptedException e) {
+            throw e;
         } catch (Exception e) {
             org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
         }
@@ -302,38 +338,40 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
     /**
      * @param pid
      * @return
+     * @throws InterruptedException
      */
-    public String getProcessCommandlineByPID(long pid) {
+    public String getProcessCommandlineByPID(long pid) throws InterruptedException {
         ProcessOutput result;
         try {
             result = ProcessBuilderFactory.runCommand("wmic", "process", "where", "ProcessID=" + pid, "get", "CommandLine");
             String str = result.getStdOutString().trim();
             return Regex.getLines(str)[2];
+        } catch (InterruptedException e) {
+            throw e;
         } catch (Throwable e) {
             throw new WTFException(e);
         }
     }
 
-    public String getProcessExecutablePathByPID(long pid) {
+    public String getProcessExecutablePathByPID(long pid) throws InterruptedException {
         ProcessOutput result;
         try {
             result = ProcessBuilderFactory.runCommand("wmic", "process", "where", "ProcessID=" + pid, "get", "ExecutablePath");
             String str = result.getStdOutString().trim();
             return Regex.getLines(str)[2];
+        } catch (InterruptedException e) {
+            throw e;
         } catch (Throwable e) {
             return null;
         }
     }
 
-    public static void main(String[] args) {
-        new DesktopSupportWindows().getProcessExecutablePathByPID(10584);
-    }
-
     /**
      * @param pid
      * @return
+     * @throws InterruptedException
      */
-    public String getProcessNameByPID(int pid) {
+    public String getProcessNameByPID(int pid) throws InterruptedException {
         ProcessOutput result;
         try {
             result = ProcessBuilderFactory.runCommand("cmd", "/c", "tasklist", "|", "findstr", String.valueOf(pid));
@@ -345,6 +383,8 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
                     return name;
                 }
             }
+        } catch (InterruptedException e) {
+            throw e;
         } catch (Throwable e) {
         }
         return null;
@@ -353,8 +393,9 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
     /**
      * @param i
      * @return
+     * @throws InterruptedException
      */
-    public int getPIDForRemoteAddress(SocketAddress adr) {
+    public int getPIDForRemoteAddress(SocketAddress adr) throws InterruptedException {
         ProcessOutput result;
         try {
             result = ProcessBuilderFactory.runCommand("cmd", "/c", "netstat", "-o", "-n", "-a", "|", "findstr", ((InetSocketAddress) adr).getAddress().getHostAddress() + ":" + ((InetSocketAddress) adr).getPort());
@@ -366,6 +407,8 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
                     return Integer.parseInt(pid);
                 }
             }
+        } catch (InterruptedException iEx) {
+            throw iEx;
         } catch (Throwable e) {
             throw new WTFException(e);
         }

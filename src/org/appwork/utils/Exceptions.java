@@ -203,16 +203,18 @@ public class Exceptions {
     }
 
     /**
+     * @param <E>
      * @param err
      * @param e
      */
-    public static void addSuppressed(Throwable throwing, Throwable additional) {
+    public static <E extends Throwable> E addSuppressed(E throwing, Throwable additional) {
         if (addSuppressedMethod == null) {
             // unsupported JVM - ignore
-            return;
+            return throwing;
         }
         try {
             addSuppressedMethod.invoke(throwing, additional);
+            return throwing;
         } catch (Throwable ex) {
             throw new RuntimeException(ex);
         }

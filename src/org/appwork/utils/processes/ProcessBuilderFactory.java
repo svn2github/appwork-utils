@@ -33,9 +33,11 @@
  * ==================================================================================================================================================== */
 package org.appwork.utils.processes;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.concurrent.atomic.AtomicReference;
@@ -106,7 +108,7 @@ public class ProcessBuilderFactory {
         final ByteArrayOutputStream errorStream = new ByteArrayOutputStream();
         final ByteArrayOutputStream sdtStream = new ByteArrayOutputStream();
         int exitCode = runCommand(pb, errorStream, sdtStream);
-        return new ProcessOutput(exitCode, sdtStream.toByteArray(), errorStream.toByteArray());
+        return new ProcessOutput(exitCode, sdtStream.toByteArray(), errorStream.toByteArray(), getConsoleCodepage());
     }
 
     public static int runCommand(ProcessBuilder pb, final OutputStream errorStream, final OutputStream sdtStream) throws IOException, InterruptedException {
@@ -125,79 +127,86 @@ public class ProcessBuilderFactory {
         // System.out.println("Start Process " + pb.command());
         //
         final Process process = pb.start();
-        final AtomicReference<IOException> exception = new AtomicReference<IOException>();
-        if (osHandler == null || !osHandler.setProcess(process)) {
-            process.getOutputStream().close();
-        }
-        final Thread reader1 = new Thread("Process-Reader-Std") {
-            @Override
-            public void run() {
-                try {
-                    // System.out.println("Start Process-Reader-Std");
-                    ProcessBuilderFactory.readStreamToOutputStream(process.getInputStream(), sdtStream);
-                } catch (IOException e) {
-                    exception.compareAndSet(null, e);
-                    e.printStackTrace();
-                    try {
-                        process.exitValue();
-                    } catch (IllegalThreadStateException e2) {
-                        // System.out.println("Process still running. Killing it");
-                        process.destroy();
-                    }
-                } finally {
-                    // System.out.println("Stop Process-Reader-Std");
-                }
+        try {
+            final AtomicReference<IOException> exception = new AtomicReference<IOException>();
+            if (osHandler == null || !osHandler.setProcess(process)) {
+                process.getOutputStream().close();
             }
-        };
-        // TODO check if pb.redirectErrorStream()
-        final Thread reader2 = new Thread("Process-Reader-Error") {
-            @Override
-            public void run() {
-                try {
-                    // System.out.println("Start Process-Reader-Error");
-                    ProcessBuilderFactory.readStreamToOutputStream(process.getErrorStream(), errorStream);
-                } catch (IOException e) {
-                    exception.compareAndSet(null, e);
-                    e.printStackTrace();
+            final Thread reader1 = new Thread("Process-Reader-Std") {
+                @Override
+                public void run() {
                     try {
-                        process.exitValue();
-                    } catch (IllegalThreadStateException e2) {
-                        // System.out.println("Process still running. Killing it");
-                        process.destroy();
+                        // System.out.println("Start Process-Reader-Std");
+                        ProcessBuilderFactory.readStreamToOutputStream(process.getInputStream(), sdtStream);
+                    } catch (IOException e) {
+                        exception.compareAndSet(null, e);
+                        e.printStackTrace();
+                        try {
+                            process.exitValue();
+                        } catch (IllegalThreadStateException e2) {
+                            // System.out.println("Process still running. Killing it");
+                            process.destroy();
+                        }
+                    } finally {
+                        // System.out.println("Stop Process-Reader-Std");
                     }
-                } finally {
-                    // System.out.println("Stop Process-Reader-Error");
                 }
+            };
+            // TODO check if pb.redirectErrorStream()
+            final Thread reader2 = new Thread("Process-Reader-Error") {
+                @Override
+                public void run() {
+                    try {
+                        // System.out.println("Start Process-Reader-Error");
+                        ProcessBuilderFactory.readStreamToOutputStream(process.getErrorStream(), errorStream);
+                    } catch (IOException e) {
+                        exception.compareAndSet(null, e);
+                        e.printStackTrace();
+                        try {
+                            process.exitValue();
+                        } catch (IllegalThreadStateException e2) {
+                            // System.out.println("Process still running. Killing it");
+                            process.destroy();
+                        }
+                    } finally {
+                        // System.out.println("Stop Process-Reader-Error");
+                    }
+                }
+            };
+            if (CrossSystem.isWindows()) {
+                reader1.setPriority(Thread.NORM_PRIORITY + 1);
+                reader2.setPriority(Thread.NORM_PRIORITY + 1);
             }
-        };
-        if (CrossSystem.isWindows()) {
-            reader1.setPriority(Thread.NORM_PRIORITY + 1);
-            reader2.setPriority(Thread.NORM_PRIORITY + 1);
-        }
-        reader1.setDaemon(true);
-        reader2.setDaemon(true);
-        reader1.start();
-        reader2.start();
-        // System.out.println("Wait for Process");
-        final int returnCode = process.waitFor();
-        // System.out.println("Process returned: " + returnCode);
-        if (reader1.isAlive()) {
-            // System.out.println("Wait for Process-Reader-Std");
-            reader1.join(5000);
+            reader1.setDaemon(true);
+            reader2.setDaemon(true);
+            reader1.start();
+            reader2.start();
+            // System.out.println("Wait for Process");
+            final int returnCode = process.waitFor();
+            // System.out.println("Process returned: " + returnCode);
             if (reader1.isAlive()) {
-                // System.out.println("Process-Reader-Std still alive!");
-                reader1.interrupt();
+                // System.out.println("Wait for Process-Reader-Std");
+                reader1.join(5000);
+                if (reader1.isAlive()) {
+                    // System.out.println("Process-Reader-Std still alive!");
+                    reader1.interrupt();
+                }
             }
-        }
-        if (reader2.isAlive()) {
-            // System.out.println("Wait fo Process-Reader-Error");
-            reader2.join(5000);
             if (reader2.isAlive()) {
-                // System.out.println("Process-Reader-Error still alive!");
-                reader2.interrupt();
+                // System.out.println("Wait fo Process-Reader-Error");
+                reader2.join(5000);
+                if (reader2.isAlive()) {
+                    // System.out.println("Process-Reader-Error still alive!");
+                    reader2.interrupt();
+                }
+            }
+            return returnCode;
+        } finally {
+            try {
+                process.destroy();
+            } catch (Throwable e) {
             }
         }
-        return returnCode;
     }
 
     public static ProcessBuilder create(final java.util.List<String> splitCommandString) {
@@ -261,32 +270,87 @@ public class ProcessBuilderFactory {
         }
     }
 
+    public static void main(String[] args) throws InterruptedException {
+        System.out.println(getConsoleCodepage());
+        ;
+    }
+
     /**
      * @return
+     * @throws InterruptedException
      */
-    public static String getConsoleCodepage() {
+    public static String getConsoleCodepage() throws InterruptedException {
         if (StringUtils.isEmpty(CONSOLE_CODEPAGE)) {
             switch (CrossSystem.getOSFamily()) {
             case WINDOWS:
+                ProcessBuilder pb = ProcessBuilderFactory.create("cmd", "/c", "chcp");
+                Process process;
                 try {
-                    String result = runCommand("cmd", "/c", "chcp").getStdOutString("ASCII");
-                    result = new Regex(result, ":\\s*(\\d+)").getMatch(0);
-                    if (StringUtils.isNotEmpty(result)) {
-                        final String cp = "cp" + result.trim();
-                        // https://msdn.microsoft.com/en-us/library/dd317756%28VS.85%29.aspx
-                        if ("CP65001".equalsIgnoreCase(cp)) {
-                            CONSOLE_CODEPAGE = "UTF-8";
-                        } else {
-                            CONSOLE_CODEPAGE = cp;
+                    process = pb.start();
+                    Thread th = new Thread() {
+                        public void run() {
+                            try {
+                                process.getOutputStream().close();
+                                BufferedReader f = new BufferedReader(new InputStreamReader(process.getInputStream(), "ASCII"));
+                                String line;
+                                final StringBuilder ret = new StringBuilder();
+                                final String sep = System.getProperty("line.separator");
+                                while ((line = f.readLine()) != null) {
+                                    if (Thread.interrupted()) {
+                                        return;
+                                    }
+                                    if (ret.length() > 0) {
+                                        ret.append(sep);
+                                    } else if (line.startsWith("\uFEFF")) {
+                                        /*
+                                         * Workaround for this bug: http://bugs.sun.com/view_bug.do?bug_id=4508058
+                                         * http://bugs.sun.com/view_bug.do?bug_id=6378911
+                                         */
+                                        line = line.substring(1);
+                                    }
+                                    ret.append(line);
+                                }
+                                process.destroy();
+                                String result = ret.toString();
+                                ///
+                                result = new Regex(result, ":\\s*(\\d+)").getMatch(0);
+                                if (StringUtils.isNotEmpty(result)) {
+                                    final String cp = "cp" + result.trim();
+                                    // https://msdn.microsoft.com/en-us/library/dd317756%28VS.85%29.aspx
+                                    if ("CP65001".equalsIgnoreCase(cp)) {
+                                        CONSOLE_CODEPAGE = "UTF-8";
+                                    } else {
+                                        CONSOLE_CODEPAGE = cp;
+                                    }
+                                }
+                            } catch (Throwable e) {
+                                LoggerFactory.getDefaultLogger().log(e);
+                            } finally {
+                                try {
+                                    process.destroy();
+                                } catch (Throwable e) {
+                                }
+                            }
+                        };
+                    };
+                    th.start();
+                    try {
+                        th.join();
+                    } catch (InterruptedException e) {
+                        try {
+                            process.destroy();
+                        } catch (Throwable e1) {
                         }
+                        throw e;
                     }
-                } catch (Throwable e) {
-                    LoggerFactory.getDefaultLogger().log(e);
+                } catch (IOException e1) {
+                    LoggerFactory.getDefaultLogger().log(e1);
                 }
                 break;
             default:
                 break;
             }
+            LoggerFactory.getDefaultLogger().info("Console Codepage: " + CONSOLE_CODEPAGE + "(" + Charset.defaultCharset().displayName() + ")");
             if (StringUtils.isEmpty(CONSOLE_CODEPAGE)) {
                 CONSOLE_CODEPAGE = Charset.defaultCharset().displayName();
             }

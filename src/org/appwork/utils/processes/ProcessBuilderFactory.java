@@ -283,15 +283,15 @@ public class ProcessBuilderFactory {
         if (StringUtils.isEmpty(CONSOLE_CODEPAGE)) {
             switch (CrossSystem.getOSFamily()) {
             case WINDOWS:
-                ProcessBuilder pb = ProcessBuilderFactory.create("cmd", "/c", "chcp");
-                Process process;
+                final ProcessBuilder pb = ProcessBuilderFactory.create("cmd", "/c", "chcp");
+                final Process process;
                 try {
                     process = pb.start();
-                    Thread th = new Thread() {
+                    final Thread th = new Thread() {
                         public void run() {
                             try {
                                 process.getOutputStream().close();
-                                BufferedReader f = new BufferedReader(new InputStreamReader(process.getInputStream(), "ASCII"));
+                                final BufferedReader f = new BufferedReader(new InputStreamReader(process.getInputStream(), "ASCII"));
                                 String line;
                                 final StringBuilder ret = new StringBuilder();
                                 final String sep = System.getProperty("line.separator");
@@ -312,7 +312,7 @@ public class ProcessBuilderFactory {
                                 }
                                 process.destroy();
                                 String result = ret.toString();
-                                ///
+                                // /
                                 result = new Regex(result, ":\\s*(\\d+)").getMatch(0);
                                 if (StringUtils.isNotEmpty(result)) {
                                     final String cp = "cp" + result.trim();

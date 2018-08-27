@@ -301,7 +301,7 @@ public class JSonMapper {
             if (json instanceof JSonValue) {
                 if (!Clazz.isPrimitive(type) && !Clazz.isString(type) && type != Object.class && ((JSonValue) json).getValue() != null && !Clazz.isEnum(type)) {
                     //
-                    throw new MapperException(json + " cannot be mapped to " + type);
+                    throw new IllegalArgumentException(json + " cannot be mapped to " + type);
                 }
                 switch (((JSonValue) json).getType()) {
                 case BOOLEAN:
@@ -333,14 +333,24 @@ public class JSonMapper {
                 final ParameterizedType pType = (ParameterizedType) type;
                 Type raw = pType.getRawType();
                 if (raw instanceof Class && Collection.class.isAssignableFrom((Class) raw)) {
-                    final Collection<Object> inst = (Collection<Object>) mapClasses((Class) raw).newInstance();
+                    Collection<Object> inst;
+                    try {
+                        inst = (Collection<Object>) mapClasses((Class) raw).newInstance();
+                    } catch (Exception e) {
+                        throw new MapperException("Could not create instance of " + raw, e);
+                    }
                     final JSonArray obj = (JSonArray) json;
                     for (final JSonNode n : obj) {
                         inst.add(this.jsonToObject(n, pType.getActualTypeArguments()[0]));
                     }
                     return inst;
                 } else if (raw instanceof Class && Map.class.isAssignableFrom((Class) raw)) {
-                    final Map<String, Object> inst = (Map<String, Object>) mapClasses((Class) raw).newInstance();
+                    Map<String, Object> inst;
+                    try {
+                        inst = (Map<String, Object>) mapClasses((Class) raw).newInstance();
+                    } catch (Exception e) {
+                        throw new MapperException("Could not create instance of " + raw, e);
+                    }
                     final JSonObject obj = (JSonObject) json;
                     Entry<String, JSonNode> next;
                     for (final Iterator<Entry<String, JSonNode>> it = obj.entrySet().iterator(); it.hasNext();) {
@@ -360,7 +370,12 @@ public class JSonMapper {
                     }
                 }
                 if (Collection.class.isAssignableFrom(clazz)) {
-                    final Collection<Object> inst = (Collection<Object>) mapClasses(clazz).newInstance();
+                    Collection<Object> inst;
+                    try {
+                        inst = (Collection<Object>) mapClasses(clazz).newInstance();
+                    } catch (Exception e) {
+                        throw new MapperException("Could not create instance of " + clazz, e);
+                    }
                     final JSonArray obj = (JSonArray) json;
                     final Type gs = clazz.getGenericSuperclass();
                     final Type gType;
@@ -374,7 +389,12 @@ public class JSonMapper {
                     }
                     return inst;
                 } else if (Map.class.isAssignableFrom(clazz)) {
-                    final Map<String, Object> inst = (Map<String, Object>) mapClasses(clazz).newInstance();
+                    Map<String, Object> inst;
+                    try {
+                        inst = (Map<String, Object>) mapClasses(clazz).newInstance();
+                    } catch (Exception e) {
+                        throw new MapperException("Could not create instance of " + clazz, e);
+                    }
                     final JSonObject obj = (JSonObject) json;
                     final Type gs = clazz.getGenericSuperclass();
                     final Type gType;
@@ -422,15 +442,22 @@ public class JSonMapper {
                                 throw new IllegalArgumentException("Cannot Map " + obj + " to " + clazz);
                             }
                         }
-                        cc = ClassCache.getClassCache(clazz);
-                        final Object inst = cc.getInstance();
+                        Object inst = null;
+                        try {
+                            cc = ClassCache.getClassCache(clazz);
+                            inst = cc.getInstance();
+                        } catch (Exception e1) {
+                            throw new MapperException("Could not create instance of " + clazz, e1);
+                        }
                         JSonNode value;
                         Object v;
-                        for (final Setter s : cc.getSetter()) {
-                            value = obj.get(s.getKey());
-                            if (value == null) {
+                        for (Entry<String, JSonNode> es : obj.entrySet()) {
+                            Setter s = cc.getSetter(es.getKey());
+                            if (s == null) {
+                                onClassFieldMissing(inst, es.getKey(), es.getValue());
                                 continue;
                             }
+                            value = es.getValue();
                             //
                             Type fieldType = s.getType();
                             // special handling for generic fields
@@ -444,7 +471,11 @@ public class JSonMapper {
                                     }
                                 }
                             }
-                            v = this.jsonToObject(value, fieldType);
+                            try {
+                                v = this.jsonToObject(value, fieldType);
+                            } catch (IllegalArgumentException e) {
+                                throw new MapperException("Cannot convert " + es.getKey() + "=" + value + " to type " + fieldType, e);
+                            }
                             try {
                                 s.setValue(inst, v);
                             } catch (final IllegalArgumentException e) {
@@ -454,6 +485,8 @@ public class JSonMapper {
                                     continue;
                                 }
                                 throw e;
+                            } catch (Exception e) {
+                                throw new MapperException("Could not set value " + clazz + "." + s.getKey() + "=" + v, e);
                             }
                         }
                         return inst;
@@ -462,20 +495,31 @@ public class JSonMapper {
             } else {
                 System.err.println("TYPE?!");
             }
-        } catch (final SecurityException e) {
-            e.printStackTrace();
-        } catch (final NoSuchMethodException e) {
-            e.printStackTrace();
-        } catch (final IllegalArgumentException e) {
-            e.printStackTrace();
-        } catch (final InstantiationException e) {
-            e.printStackTrace();
-        } catch (final IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (final InvocationTargetException e) {
-            e.printStackTrace();
+            // } catch (final SecurityException e) {
+            // e.printStackTrace();
+            // } catch (final NoSuchMethodException e) {
+            // e.printStackTrace();
+            // } catch (final IllegalArgumentException e) {
+            // e.printStackTrace();
+            // } catch (final InstantiationException e) {
+            // e.printStackTrace();
+            // } catch (final IllegalAccessException e) {
+            // e.printStackTrace();
+            // } catch (final InvocationTargetException e) {
+            // e.printStackTrace();
+        } finally {
         }
         return null;
+    }
+
+    /**
+     * @param inst
+     * @param key
+     * @param value
+     * @throws MapperException
+     */
+    protected void onClassFieldMissing(Object inst, String key, JSonNode value) throws MapperException {
+        // TODO Auto-generated method stub
     }
 
     /**

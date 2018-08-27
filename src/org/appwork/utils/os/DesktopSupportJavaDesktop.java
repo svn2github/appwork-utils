@@ -58,6 +58,10 @@ public class DesktopSupportJavaDesktop implements DesktopSupport {
         }
     }
 
+    public long[] killProcessesByExecutablePath(String path, int exitCode) throws InterruptedException, NotSupportedException {
+        throw new NotSupportedException("Operating System not supported");
+    }
+
     @Override
     public boolean isBrowseURLSupported() {
         if (this.browseURLSupported != null) {

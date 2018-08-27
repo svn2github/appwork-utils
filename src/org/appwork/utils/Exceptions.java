@@ -35,7 +35,6 @@ package org.appwork.utils;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.Method;
 import java.util.HashSet;
@@ -184,8 +183,8 @@ public class Exceptions {
         if (thrown == null) {
             return "";
         }
-        final StringWriter sw = new StringWriter();
-        final PrintWriter pw = new PrintWriter(sw);
+        final java.io.StringWriter sw = new java.io.StringWriter();
+        final java.io.PrintWriter pw = new java.io.PrintWriter(sw);
         thrown.printStackTrace(pw);
         pw.close();
         return sw.toString();

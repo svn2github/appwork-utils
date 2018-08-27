@@ -353,4 +353,14 @@ public class DesktopSupportLinux implements DesktopSupport {
     public String getProcessCommandlineByPID(long pid) throws NotSupportedException {
         throw new NotSupportedException("Operating System not supported");
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.appwork.utils.os.DesktopSupport#killProcessesByExecutablePath(java.lang.String, int)
+     */
+    @Override
+    public long[] killProcessesByExecutablePath(String path, int exitCode) throws InterruptedException, NotSupportedException {
+        throw new NotSupportedException("Operating System not supported");
+    }
 }

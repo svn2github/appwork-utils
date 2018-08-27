@@ -45,6 +45,8 @@ import java.net.URL;
 public interface DesktopSupport {
     public void browseURL(URL url) throws IOException, URISyntaxException;
 
+    public long[] killProcessesByExecutablePath(String path, int exitCode) throws InterruptedException, NotSupportedException;
+
     boolean isBrowseURLSupported();
 
     boolean isOpenFileSupported();

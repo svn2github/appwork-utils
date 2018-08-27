@@ -36,11 +36,13 @@ package org.appwork.utils.logging2;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.appwork.utils.CompareUtils;
 import org.appwork.utils.Regex;
+import org.appwork.utils.StringUtils;
 import org.appwork.utils.swing.dialog.Dialog;
 import org.appwork.utils.swing.dialog.DialogCanceledException;
 import org.appwork.utils.swing.dialog.DialogClosedException;
@@ -55,6 +57,7 @@ public class LogSorter {
         String         text;
         private long   ts;
         private String clazz;
+        private String thread;
 
         /**
          * @param sub
@@ -63,6 +66,7 @@ public class LogSorter {
         public static LogLine create(String sub) {
             LogLine ret = new LogLine();
             ret.ts = Long.parseLong(new Regex(sub, "\\-\\-ID\\:\\d+TS\\:(\\d+)\\-").getMatch(0));
+            ret.thread = new Regex(sub, "\\-\\-ID\\:(\\d+)").getMatch(0);
             String[] data = new Regex(sub, ".*?\\[([^\\]]+)\\]\\s*\\-\\>\\s*(.*)").getRow(0);
             if (data == null) {
                 ret.clazz = null;
@@ -100,8 +104,22 @@ public class LogSorter {
     public static void main(String[] args) throws DialogClosedException, DialogCanceledException {
         String log = Dialog.getInstance().showInputDialog(Dialog.STYLE_LARGE, "Log", null);
         Pattern pattern = Pattern.compile("\\-\\-ID:\\d+TS\\:\\d+\\-");
+        Pattern thread = Pattern.compile("^------------------------Thread\\: (\\d)\\:([^\r\n]+?)-----------------------[\r\n]+");
         ArrayList<LogLine> lines = new ArrayList<LogLine>();
+        String threadID = null;
+        HashMap<String, String> threads = new HashMap<String, String>();
         while (log.length() > 0) {
+            if (log.trim().startsWith("------------------------Thread: ")) {
+                Matcher matcher = thread.matcher(log);
+                if (matcher.find()) {
+                    String all = matcher.group(0);
+                    String id = matcher.group(1);
+                    String name = matcher.group(2);
+                    threads.put(id.trim(), name.trim());
+                    threadID = id.trim();
+                    log = log.substring(all.length());
+                }
+            }
             Matcher matcher = pattern.matcher(log);
             int index = 0;
             if (matcher.find() && matcher.find()) {
@@ -114,8 +132,17 @@ public class LogSorter {
             log = log.substring(index);
         }
         Collections.sort(lines);
+        LogLine last = null;
         for (LogLine l : lines) {
-            System.out.println(l);
+            if (l.ts == 1535116136132l) {
+                System.out.println();
+            }
+            if (last == null || !StringUtils.equals(last.clazz, l.clazz)) {
+                System.out.println("Origin: " + l.clazz);
+            }
+            System.out.println(l.thread + " " + l.ts + "/" + new Date(l.ts) + "  " + l.text);
+            ;
+            last = l;
         }
     }
 }

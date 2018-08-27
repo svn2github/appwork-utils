@@ -378,4 +378,19 @@ public class StringUtils {
         }
         return text.replaceAll(regex, replacement);
     }
+
+    /**
+     * @param a
+     * @param b
+     * @return
+     */
+    public static boolean equalsTreatNullasEmpty(String a, String b) {
+        if (a == null) {
+            a = "";
+        }
+        if (b == null) {
+            b = "";
+        }
+        return equals(a, b);
+    }
 }

@@ -50,6 +50,7 @@ import org.appwork.utils.IO;
 import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.logging2.LogInterface;
+import org.appwork.utils.logging2.extmanager.LoggerFactory;
 import org.appwork.utils.os.CrossSystem.OperatingSystem;
 import org.appwork.utils.processes.ProcessBuilderFactory;
 import org.appwork.utils.processes.ProcessOutput;
@@ -359,6 +360,46 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
             result = ProcessBuilderFactory.runCommand("wmic", "process", "where", "ProcessID=" + pid, "get", "ExecutablePath");
             String str = result.getStdOutString().trim();
             return Regex.getLines(str)[2];
+        } catch (InterruptedException e) {
+            throw e;
+        } catch (Throwable e) {
+            return null;
+        }
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+        Application.setApplication(".appwork");
+        DesktopSupportWindows ds = new DesktopSupportWindows();
+        // String path = ds.getProcessExecutablePathByPID(15640);
+        long[] result = ds.killProcessesByExecutablePath("C:\\Program Files (x86)\\Google\\Chrome\\Application", 1);
+        System.out.println(1);
+    }
+
+    /**
+     * Kills all processes that contain the executable path. This works as a "LIKE". that means C:\Program Files
+     * (x86)\Google\Chrome\Application would kill ALL executeables within this path
+     *
+     * @param path
+     * @param exitCode
+     * @return
+     * @throws InterruptedException
+     */
+    public long[] killProcessesByExecutablePath(String path, int exitCode) throws InterruptedException {
+        ProcessOutput result;
+        try {
+            result = ProcessBuilderFactory.runCommand("wmic", "process", "where", "ExecutablePath like '%" + path.replace("\\", "\\\\") + "%'", "Terminate", String.valueOf(exitCode));
+            String str = result.getStdOutString().trim();
+            LoggerFactory.getDefaultLogger().info(result.toString());
+            String[] terminated = new Regex(str, "Win32_Process\\.Handle=\"(\\d+)\"\\)\\-\\>Terminate\\(\\)").getColumn(0);
+            if (terminated == null) {
+                return new long[] {};
+            }
+            long[] ret = new long[terminated.length];
+            int i = 0;
+            for (String term : terminated) {
+                ret[i++] = Long.parseLong(term);
+            }
+            return ret;
         } catch (InterruptedException e) {
             throw e;
         } catch (Throwable e) {

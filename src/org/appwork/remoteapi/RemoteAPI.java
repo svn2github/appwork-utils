@@ -63,6 +63,7 @@ import org.appwork.remoteapi.exceptions.AuthException;
 import org.appwork.remoteapi.exceptions.BadParameterException;
 import org.appwork.remoteapi.exceptions.BasicRemoteAPIException;
 import org.appwork.remoteapi.exceptions.InternalApiException;
+import org.appwork.remoteapi.exceptions.RemoteAPIException;
 import org.appwork.remoteapi.responsewrapper.DataObject;
 import org.appwork.storage.JSonStorage;
 import org.appwork.storage.TypeRef;
@@ -331,7 +332,11 @@ public class RemoteAPI implements HttpRequestHandler {
                     parameters[i] = response;
                 } else {
                     try {
-                        parameters[i] = RemoteAPI.convert(request.getParameters()[count], method.getGenericParameterTypes()[i]);
+                        String json = request.getParameters()[count];
+                        Type type = method.getGenericParameterTypes()[i];
+                        parameters[i] = jsonToParameterObject(json, type);
+                    } catch (final BasicRemoteAPIException e) {
+                        throw e;
                     } catch (final Throwable e) {
                         throw new BadParameterException(e, request.getParameters()[count]);
                     }
@@ -372,6 +377,10 @@ public class RemoteAPI implements HttpRequestHandler {
                 throw ret;
             }
         }
+    }
+
+    protected Object jsonToParameterObject(String json, Type type) throws RemoteAPIException {
+        return RemoteAPI.convert(json, type);
     }
 
     /**

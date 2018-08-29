@@ -55,6 +55,7 @@ import org.appwork.net.protocol.http.HTTPConstants;
 import org.appwork.txtresource.TranslationFactory;
 import org.appwork.utils.Application;
 import org.appwork.utils.Exceptions;
+import org.appwork.utils.Interruptible;
 import org.appwork.utils.InterruptibleThread;
 import org.appwork.utils.logging2.LogInterface;
 import org.appwork.utils.net.ChunkedOutputStream;
@@ -65,8 +66,6 @@ import org.appwork.utils.net.httpconnection.HTTPConnection;
 import org.appwork.utils.net.httpconnection.HTTPConnection.RequestMethod;
 import org.appwork.utils.net.httpconnection.HTTPConnectionFactory;
 import org.appwork.utils.net.httpconnection.HTTPProxy;
-
-import sun.nio.ch.Interruptible;
 
 public class BasicHTTP implements Interruptible {
     public static void main(final String[] args) throws MalformedURLException, IOException, InterruptedException {
@@ -171,13 +170,14 @@ public class BasicHTTP implements Interruptible {
 
     @Override
     public void interrupt(Thread arg0) {
-        HTTPConnection con = connection;
+        final HTTPConnection con = connection;
         if (con != null) {
             try {
-                synchronized (con) {
-                    con.disconnect();
-                }
+                con.disconnect();
             } catch (Throwable e) {
+                if (this.logger != null) {
+                    logger.log(e);
+                }
             }
         }
     }
@@ -196,9 +196,8 @@ public class BasicHTTP implements Interruptible {
     protected void download(final URL url, final DownloadProgress progress, final long maxSize, final OutputStream baos, final long resumePosition, final long redirectTimeoutTimeStamp) throws BasicHTTPException, InterruptedException {
         synchronized (this.lock) {
             InputStream input = null;
-            int ioExceptionWhere = 0;
             connection = null;
-            boolean addedInterruptible = InterruptibleThread.add(this) == Boolean.TRUE;
+            final boolean addedInterruptible = Boolean.TRUE.equals(InterruptibleThread.add(this));
             try {
                 this.connection = HTTPConnectionFactory.createHTTPConnection(url, this.proxy);
                 this.setAllowedResponseCodes(this.connection);
@@ -216,9 +215,7 @@ public class BasicHTTP implements Interruptible {
                 if (progress != null) {
                     progress.onConnect();
                 }
-                synchronized (connection) {
-                    this.connection.connect();
-                }
+                this.connection.connect();
                 final boolean ranged = this.connection.getRequestProperty("Range") != null;
                 if (ranged && this.connection.getResponseCode() == 200) {
                     throw new BadRangeResponse(this.connection);
@@ -263,20 +260,25 @@ public class BasicHTTP implements Interruptible {
                     progress.setLoaded(loaded);
                 }
                 while (true) {
-                    ioExceptionWhere = 1;
-                    if ((len = input.read(b)) == -1) {
-                        break;
+                    try {
+                        if ((len = input.read(b)) == -1) {
+                            break;
+                        }
+                    } catch (IOException e) {
+                        throw new ReadIOException(e);
                     }
                     if (Thread.interrupted()) {
                         throw new InterruptedException();
                     }
                     if (len > 0) {
                         if (progress != null) {
-                            ioExceptionWhere = 0;
                             progress.onBytesLoaded(b, len);
                         }
-                        ioExceptionWhere = 2;
-                        baos.write(b, 0, len);
+                        try {
+                            baos.write(b, 0, len);
+                        } catch (IOException e) {
+                            throw new WriteIOException(e);
+                        }
                         loaded += len;
                         if (maxSize > 0 && loaded > maxSize) {
                             throw new IOException("Max size exeeded!");
@@ -286,26 +288,19 @@ public class BasicHTTP implements Interruptible {
                         }
                     }
                 }
-                ioExceptionWhere = 0;
                 if (this.connection.getCompleteContentLength() >= 0) {
                     if (loaded != this.connection.getCompleteContentLength()) {
                         throw new IOException("Incomplete download! " + loaded + " from " + this.connection.getCompleteContentLength());
                     }
                 }
-            } catch (final BasicHTTPException e) {
+            } catch (final ReadIOException e) {
                 throw handleInterrupt(new BasicHTTPException(this.connection, e));
-            } catch (final InterruptedException e) {
-                throw e;
-            } catch (final Exception e) {
-                final BasicHTTPException throwE;
-                if (ioExceptionWhere == 1) {
-                    throwE = new BasicHTTPException(this.connection, new ReadIOException(e));
-                } else if (ioExceptionWhere == 2) {
-                    throwE = new BasicHTTPException(this.connection, new WriteIOException(e));
-                } else {
-                    throwE = new BasicHTTPException(this.connection, e);
-                }
-                throw handleInterrupt(new BasicHTTPException(this.connection, throwE));
+            } catch (final WriteIOException e) {
+                throw handleInterrupt(new BasicHTTPException(this.connection, e));
+            } catch (final BasicHTTPException e) {
+                throw handleInterrupt(e);
+            } catch (final IOException e) {
+                throw handleInterrupt(new BasicHTTPException(this.connection, new ReadIOException(e)));
             } finally {
                 if (addedInterruptible) {
                     InterruptibleThread.remove(this);
@@ -350,7 +345,7 @@ public class BasicHTTP implements Interruptible {
             BufferedReader in = null;
             InputStreamReader isr = null;
             connection = null;
-            boolean addedInterruptible = InterruptibleThread.add(this) == Boolean.TRUE;
+            final boolean addedInterruptible = Boolean.TRUE.equals(InterruptibleThread.add(this));
             try {
                 this.connection = HTTPConnectionFactory.createHTTPConnection(url, this.proxy);
                 this.setAllowedResponseCodes(this.connection);
@@ -387,8 +382,14 @@ public class BasicHTTP implements Interruptible {
                     sb.append(str);
                 }
                 return sb.toString();
+            } catch (final ReadIOException e) {
+                throw handleInterrupt(new BasicHTTPException(this.connection, e));
+            } catch (final WriteIOException e) {
+                throw handleInterrupt(new BasicHTTPException(this.connection, e));
+            } catch (final BasicHTTPException e) {
+                throw handleInterrupt(e);
             } catch (final IOException e) {
-                throw handleInterrupt(new BasicHTTPException(this.connection, new BasicHTTPException(this.connection, new ReadIOException(e))));
+                throw handleInterrupt(new BasicHTTPException(this.connection, new ReadIOException(e)));
             } finally {
                 if (addedInterruptible) {
                     InterruptibleThread.remove(this);
@@ -451,7 +452,7 @@ public class BasicHTTP implements Interruptible {
         boolean close = true;
         synchronized (this.lock) {
             connection = null;
-            boolean addedInterruptible = InterruptibleThread.add(this) == Boolean.TRUE;
+            final boolean addedInterruptible = Boolean.TRUE.equals(InterruptibleThread.add(this));
             try {
                 this.connection = HTTPConnectionFactory.createHTTPConnection(url, this.proxy);
                 this.setAllowedResponseCodes(this.connection);
@@ -480,10 +481,14 @@ public class BasicHTTP implements Interruptible {
                 close = false;
                 this.checkResponseCode();
                 return this.connection;
-            } catch (final InterruptedException e) {
-                throw e;
-            } catch (final Exception e) {
-                throw handleInterrupt(new BasicHTTPException(this.connection, new BasicHTTPException(this.connection, new ReadIOException(e))));
+            } catch (final ReadIOException e) {
+                throw handleInterrupt(new BasicHTTPException(this.connection, e));
+            } catch (final WriteIOException e) {
+                throw handleInterrupt(new BasicHTTPException(this.connection, e));
+            } catch (final BasicHTTPException e) {
+                throw handleInterrupt(e);
+            } catch (final IOException e) {
+                throw handleInterrupt(new BasicHTTPException(this.connection, new ReadIOException(e)));
             } finally {
                 if (addedInterruptible) {
                     InterruptibleThread.remove(this);
@@ -510,7 +515,7 @@ public class BasicHTTP implements Interruptible {
         synchronized (this.lock) {
             final byte[] buffer = new byte[64000];
             connection = null;
-            boolean addedInterruptible = InterruptibleThread.add(this) == Boolean.TRUE;
+            final boolean addedInterruptible = Boolean.TRUE.equals(InterruptibleThread.add(this));
             try {
                 this.connection = HTTPConnectionFactory.createHTTPConnection(url, this.proxy);
                 this.setAllowedResponseCodes(this.connection);
@@ -565,12 +570,20 @@ public class BasicHTTP implements Interruptible {
                 } else {
                     outputStream = this.connection.getOutputStream();
                 }
-                int read = 0;
-                while ((read = is.read(buffer)) != -1) {
+                while (true) {
+                    final int read;
+                    try {
+                        read = is.read(buffer);
+                    } catch (IOException e) {
+                        throw new ReadIOException(e);
+                    }
+                    if (read == -1) {
+                        break;
+                    }
                     try {
                         outputStream.write(buffer, 0, read);
                     } catch (final IOException e) {
-                        throw new BasicHTTPException(this.connection, new WriteIOException(e));
+                        throw new WriteIOException(e);
                     }
                     if (progress != null) {
                         progress.onBytesUploaded(buffer, read);
@@ -597,6 +610,8 @@ public class BasicHTTP implements Interruptible {
                 throw handleInterrupt(new BasicHTTPException(this.connection, e));
             } catch (final WriteIOException e) {
                 throw handleInterrupt(new BasicHTTPException(this.connection, e));
+            } catch (final BasicHTTPException e) {
+                throw handleInterrupt(e);
             } catch (final IOException e) {
                 throw handleInterrupt(new BasicHTTPException(this.connection, new ReadIOException(e)));
             } finally {
@@ -635,12 +650,9 @@ public class BasicHTTP implements Interruptible {
      */
     public void postPage(final URL url, byte[] byteData, final OutputStream baos, final DownloadProgress uploadProgress, final DownloadProgress downloadProgress) throws InterruptedException, BasicHTTPException {
         synchronized (this.lock) {
-            // final OutputStreamWriter writer = null;
-            // final BufferedReader reader = null;
             OutputStream outputStream = null;
-            // final InputStreamReader isr = null;
             connection = null;
-            boolean addedInterruptible = InterruptibleThread.add(this) == Boolean.TRUE;
+            final boolean addedInterruptible = Boolean.TRUE.equals(InterruptibleThread.add(this));
             try {
                 this.connection = HTTPConnectionFactory.createHTTPConnection(url, this.proxy);
                 this.setAllowedResponseCodes(this.connection);
@@ -709,10 +721,10 @@ public class BasicHTTP implements Interruptible {
                 this.connection.finalizeConnect();
                 this.checkResponseCode();
                 final byte[] b = new byte[32767];
-                int len = 0;
                 long loaded = 0;
                 final InputStream input = this.connection.getInputStream();
                 while (true) {
+                    final int len;
                     try {
                         if ((len = input.read(b)) == -1) {
                             break;
@@ -745,24 +757,14 @@ public class BasicHTTP implements Interruptible {
                 throw handleInterrupt(new BasicHTTPException(this.connection, e));
             } catch (final WriteIOException e) {
                 throw handleInterrupt(new BasicHTTPException(this.connection, e));
+            } catch (final BasicHTTPException e) {
+                throw handleInterrupt(e);
             } catch (final IOException e) {
                 throw handleInterrupt(new BasicHTTPException(this.connection, new ReadIOException(e)));
             } finally {
                 if (addedInterruptible) {
                     InterruptibleThread.remove(this);
                 }
-                // try {
-                // reader.close();
-                // } catch (final Throwable e) {
-                // }
-                // try {
-                // isr.close();
-                // } catch (final Throwable e) {
-                // }
-                // try {
-                // writer.close();
-                // } catch (final Throwable e) {
-                // }
                 try {
                     outputStream.close();
                 } catch (final Throwable e) {

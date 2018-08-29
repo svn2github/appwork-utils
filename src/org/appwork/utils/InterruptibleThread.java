@@ -3,8 +3,6 @@ package org.appwork.utils;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import sun.nio.ch.Interruptible;
-
 public class InterruptibleThread extends Thread {
     /**
      * @param string
@@ -33,7 +31,7 @@ public class InterruptibleThread extends Thread {
     @Override
     public void interrupt() {
         super.interrupt();
-        for (Interruptible b : interruptibles) {
+        for (final Interruptible b : interruptibles) {
             b.interrupt(this);
         }
     }
@@ -52,18 +50,20 @@ public class InterruptibleThread extends Thread {
     }
 
     public static Boolean add(Interruptible interruptible) {
-        Thread ct = Thread.currentThread();
+        final Thread ct = Thread.currentThread();
         if (ct instanceof InterruptibleThread) {
             return ((InterruptibleThread) ct).addInterruptible(interruptible);
+        } else {
+            return null;
         }
-        return null;
     }
 
     public static Boolean remove(Interruptible interruptible) {
-        Thread ct = Thread.currentThread();
+        final Thread ct = Thread.currentThread();
         if (ct instanceof InterruptibleThread) {
             return ((InterruptibleThread) ct).removeInterruptible(interruptible);
+        } else {
+            return null;
         }
-        return null;
     }
 }

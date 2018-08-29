@@ -376,6 +376,9 @@ public class BasicHTTP implements Interruptible {
                 String str;
                 final StringBuilder sb = new StringBuilder();
                 while ((str = in.readLine()) != null) {
+                    if (Thread.interrupted()) {
+                        throw new InterruptedException();
+                    }
                     if (sb.length() > 0) {
                         sb.append("\r\n");
                     }
@@ -710,6 +713,9 @@ public class BasicHTTP implements Interruptible {
                             break;
                         }
                         outputStream.write(byteData, offset, part);
+                        if (Thread.interrupted()) {
+                            throw new InterruptedException();
+                        }
                         outputStream.flush();
                         offset += part;
                         if (uploadProgress != null) {

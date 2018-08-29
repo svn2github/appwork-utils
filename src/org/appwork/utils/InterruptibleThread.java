@@ -13,6 +13,14 @@ public class InterruptibleThread extends Thread {
         super(string);
     }
 
+    /**
+     * @param runnable
+     * @param string
+     */
+    public InterruptibleThread(Runnable runnable, String string) {
+        super(runnable, string);
+    }
+
     public List<Interruptible> getInterruptibles() {
         return java.util.Collections.unmodifiableList(interruptibles);
     }

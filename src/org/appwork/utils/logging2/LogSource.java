@@ -124,13 +124,13 @@ public class LogSource extends Logger implements LogInterface, ClearableLogInter
 
     /*
      * creates a LogCollector with given name
-     * 
+     *
      * maxLogRecordsInMemory defines how many log records this logger will buffer in memory before logging to parent's handlers
-     * 
+     *
      * <0 = unlimited in memory, manual flush needed
-     * 
+     *
      * 0 = forward directly to parent's handlers
-     * 
+     *
      * >0 = limited
      */
     public LogSource(final String name, final int maxLogRecordsInMemory) {
@@ -284,6 +284,14 @@ public class LogSource extends Logger implements LogInterface, ClearableLogInter
     }
 
     public void log(Throwable e) {
+        String thrownAt = null;
+        for (StackTraceElement es : new Exception().getStackTrace()) {
+            if (LogSource.class.getName().equals(es.getClassName())) {
+                continue;
+            }
+            thrownAt = es.toString();
+            break;
+        }
         if (e == null) {
             e = new NullPointerException("e is null");
         }
@@ -294,8 +302,9 @@ public class LogSource extends Logger implements LogInterface, ClearableLogInter
         if (lvl == null) {
             lvl = Level.SEVERE;
         }
-        final LogRecord lr = new LogRecord(lvl, Exceptions.getStackTrace(e));
+        final LogRecord lr = new LogRecord(lvl, "Exception thrown at " + thrownAt + ":\r\n" + Exceptions.getStackTrace(e));
         lr.setLoggerName(this.getName());
+        // lr.setThrown(e);
         this.log(lr);
         if (this.isAutoFlushOnThrowable()) {
             this.flush();

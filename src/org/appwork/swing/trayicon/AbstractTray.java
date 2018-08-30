@@ -160,6 +160,22 @@ public abstract class AbstractTray implements MouseListener, MouseMotionListener
             AbstractTray.this.jpopup = null;
         } else {
             AbstractTray.this.jpopup = AbstractTray.this.createMenu(e);
+            int countMenuItems = 0;
+            JMenuItem theOneAndOnly = null;
+            for (Component c : jpopup.getComponents()) {
+                if (c instanceof JMenuItem) {
+                    countMenuItems++;
+                    if (countMenuItems == 1) {
+                        theOneAndOnly = (JMenuItem) c;
+                    } else {
+                        theOneAndOnly = null;
+                    }
+                }
+            }
+            if (theOneAndOnly != null) {
+                theOneAndOnly.doClick();
+                return;
+            }
             Dimension ps = AbstractTray.this.jpopup.getPreferredSize();
             // SwingUtils.getUsableScreenBounds(SwingUtils.getScreenByLocation(e.getX(), e.getY()));
             final GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();

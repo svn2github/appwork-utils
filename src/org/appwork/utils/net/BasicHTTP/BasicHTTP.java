@@ -796,8 +796,9 @@ public class BasicHTTP implements Interruptible {
     private <E extends Throwable> E handleInterrupt(E exception) throws InterruptedException, E {
         if (Thread.interrupted()) {
             throw Exceptions.addSuppressed(new InterruptedException("Connection Closed by Interrupt"), exception);
+        } else {
+            return exception;
         }
-        return exception;
     }
 
     public String postPage(final URL url, final String data) throws BasicHTTPException, InterruptedException {

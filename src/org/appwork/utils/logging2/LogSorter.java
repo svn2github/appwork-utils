@@ -40,6 +40,7 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.appwork.utils.Application;
 import org.appwork.utils.CompareUtils;
 import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
@@ -102,6 +103,7 @@ public class LogSorter {
     }
 
     public static void main(String[] args) throws DialogClosedException, DialogCanceledException {
+        Application.setApplication(".appwork");
         String log = Dialog.getInstance().showInputDialog(Dialog.STYLE_LARGE, "Log", null);
         Pattern pattern = Pattern.compile("\\-\\-ID:\\d+TS\\:\\d+\\-");
         Pattern thread = Pattern.compile("^------------------------Thread\\: (\\d)\\:([^\r\n]+?)-----------------------[\r\n]+");

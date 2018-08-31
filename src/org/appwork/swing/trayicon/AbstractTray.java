@@ -40,7 +40,9 @@ public abstract class AbstractTray implements MouseListener, MouseMotionListener
     private TrayIconPopup                               jpopup;
     protected BasicAction[]                             actions;
     private DelayedRunnable                             doubleclickDelayer;
-    private Runnable                                    runable;
+    private Runnable                                    executeSingleClick;
+    private long                                        pressedTime;
+    private boolean                                     debugMenuEnabled;
 
     public AbstractTray(BasicAction... basicActions) {
         this.actions = basicActions;
@@ -75,12 +77,16 @@ public abstract class AbstractTray implements MouseListener, MouseMotionListener
         this.doubleclickDelayer = new DelayedRunnable(EXECUTER, 150) {
             @Override
             public void delayedrun() {
-                if (AbstractTray.this.runable != null) {
-                    AbstractTray.this.runable.run();
+                if (AbstractTray.this.executeSingleClick != null) {
+                    AbstractTray.this.executeSingleClick.run();
                 }
             }
         };
         systemTray.add(this.trayIcon);
+    }
+
+    protected boolean isDebugMenuRequested(MouseEvent e) {
+        return debugMenuEnabled || (e.isControlDown() && e.isShiftDown());
     }
 
     /**
@@ -117,7 +123,7 @@ public abstract class AbstractTray implements MouseListener, MouseMotionListener
         if (CrossSystem.isContextMenuTrigger(e)) {
             onContextClick(e);
         } else if (e.getClickCount() == 1) {
-            this.runable = new Runnable() {
+            this.executeSingleClick = new Runnable() {
                 @Override
                 public void run() {
                     new EDTRunner() {
@@ -129,10 +135,31 @@ public abstract class AbstractTray implements MouseListener, MouseMotionListener
                 }
             };
             this.doubleclickDelayer.resetAndStart();
-        } else if (e.getClickCount() != 1) {
+        } else if (e.getClickCount() == 2) {
             this.doubleclickDelayer.stop();
-            this.runable = null;
-            onDoubleClick(e);
+            this.executeSingleClick = new Runnable() {
+                @Override
+                public void run() {
+                    new EDTRunner() {
+                        @Override
+                        protected void runInEDT() {
+                            onDoubleClick(e);
+                        }
+                    };
+                }
+            };
+            this.doubleclickDelayer.resetAndStart();
+        } else if (e.getClickCount() > 2) {
+            this.doubleclickDelayer.stop();
+            this.executeSingleClick = null;
+            if (e.getClickCount() == 5) {
+                debugMenuEnabled = true;
+                try {
+                    showMenu(e);
+                } finally {
+                    debugMenuEnabled = false;
+                }
+            }
         }
     }
 
@@ -225,6 +252,7 @@ public abstract class AbstractTray implements MouseListener, MouseMotionListener
 
     @Override
     public void mousePressed(MouseEvent e) {
+        pressedTime = System.currentTimeMillis();
     }
 
     protected TrayIconPopup createMenu(MouseEvent e) {
@@ -239,7 +267,7 @@ public abstract class AbstractTray implements MouseListener, MouseMotionListener
     }
 
     protected void createMenuDebug(MouseEvent e, final TrayIconPopup jpopup) {
-        if (e.isControlDown() && e.isShiftDown()) {
+        if (isDebugMenuRequested(e)) {
             Component spacer = Box.createGlue();
             spacer.setPreferredSize(new Dimension(10, 5));
             jpopup.add(spacer);
@@ -301,6 +329,9 @@ public abstract class AbstractTray implements MouseListener, MouseMotionListener
 
     @Override
     public void mouseReleased(MouseEvent e) {
+        long pressDuration = System.currentTimeMillis() - pressedTime;
+        System.out.println(pressDuration);
+        System.out.println(1);
         // if (e.isPopupTrigger()) {
         // Dimension ps = jpopup.getPreferredSize();
         //

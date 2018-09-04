@@ -19,6 +19,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.MouseInfo;
 import java.awt.Point;
+import java.awt.PointerInfo;
 import java.awt.TrayIcon;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -71,21 +72,24 @@ public class TrayMouseAdapter implements MouseListener, MouseMotionListener {
                         new EDTRunner() {
                             @Override
                             protected void runInEDT() {
-                                Point point = MouseInfo.getPointerInfo().getLocation();
-                                if (!TrayMouseAdapter.this.isOver(point)) {
-                                    MouseEvent me;
-                                    me = new MouseEvent(TrayMouseAdapter.this.dummy, 0, System.currentTimeMillis(), 0, point.x, point.y, 0, false);
-                                    me.setSource(TrayMouseAdapter.this.lastEvent.getSource());
-                                    TrayMouseAdapter.this.mouseExited(me);
-                                    loop = false;
-                                    return;
-                                } else {
-                                    if ((System.currentTimeMillis() - enterTime) >= TOOLTIP_DELAY && !mouseStay) {
-                                        mouseStay = true;
+                                PointerInfo pi = MouseInfo.getPointerInfo();
+                                if (pi != null) {
+                                    Point point = pi.getLocation();
+                                    if (!TrayMouseAdapter.this.isOver(point)) {
                                         MouseEvent me;
                                         me = new MouseEvent(TrayMouseAdapter.this.dummy, 0, System.currentTimeMillis(), 0, point.x, point.y, 0, false);
-                                        me.setSource(TrayMouseAdapter.this);
-                                        TrayMouseAdapter.this.deligate.mouseStay(me);
+                                        me.setSource(TrayMouseAdapter.this.lastEvent.getSource());
+                                        TrayMouseAdapter.this.mouseExited(me);
+                                        loop = false;
+                                        return;
+                                    } else {
+                                        if ((System.currentTimeMillis() - enterTime) >= TOOLTIP_DELAY && !mouseStay) {
+                                            mouseStay = true;
+                                            MouseEvent me;
+                                            me = new MouseEvent(TrayMouseAdapter.this.dummy, 0, System.currentTimeMillis(), 0, point.x, point.y, 0, false);
+                                            me.setSource(TrayMouseAdapter.this);
+                                            TrayMouseAdapter.this.deligate.mouseStay(me);
+                                        }
                                     }
                                 }
                             }

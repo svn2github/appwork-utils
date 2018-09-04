@@ -37,6 +37,7 @@ import java.awt.Font;
 
 import javax.swing.Icon;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.event.HyperlinkEvent;
@@ -200,6 +201,7 @@ public class ConfirmDialog extends AbstractDialog<Integer> implements ConfirmDia
         textField.setBackground(null);
         textField.setOpaque(false);
         textField.setFocusable(false);
+        textField.setForeground(new JLabel().getForeground());
         textField.putClientProperty("Synthetica.opaque", Boolean.FALSE);
         textField.setCaretPosition(0);
         if (BinaryLogic.containsAll(flagMask, Dialog.STYLE_LARGE)) {

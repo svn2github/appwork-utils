@@ -41,6 +41,7 @@ import java.awt.event.MouseListener;
 
 import javax.swing.Icon;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
@@ -177,6 +178,7 @@ public class InputDialog extends AbstractDialog<String> implements KeyListener, 
             textField.setFont(font);
             this.textField.setText(this.message);
             this.textField.setEditable(false);
+            textField.setForeground(new JLabel().getForeground());
             this.textField.setBackground(null);
             this.textField.setOpaque(false);
             this.textField.putClientProperty("Synthetica.opaque", Boolean.FALSE);

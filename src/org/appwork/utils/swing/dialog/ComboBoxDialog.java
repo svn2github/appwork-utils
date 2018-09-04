@@ -38,6 +38,7 @@ import java.util.Arrays;
 import javax.swing.Icon;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextPane;
 import javax.swing.ListCellRenderer;
@@ -84,7 +85,6 @@ public class ComboBoxDialog extends AbstractDialog<Integer> implements ComboBoxD
     public ComboBoxDialog(final int flag, final String title, final String question, final Object[] options, final int defaultSelection, final Icon icon, final String okText, final String cancelText, final ListCellRenderer renderer) {
         super(flag, title, icon, okText, cancelText);
         org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Dialog    [" + okText + "][" + cancelText + "]\r\nflag:  " + Integer.toBinaryString(flag) + "\r\ntitle: " + title + "\r\nmsg:   \r\n" + question + "\r\noptions:   \r\n" + Arrays.toString(options) + "\r\ndef:" + defaultSelection);
-
         message = question;
         this.renderer = renderer;
         defaultAnswer = defaultSelection < 0 ? 0 : defaultSelection;
@@ -106,13 +106,11 @@ public class ComboBoxDialog extends AbstractDialog<Integer> implements ComboBoxD
      * @return
      */
     protected JComboBox getComboBox(final Object[] options2) {
-
         final JComboBox ret = new JComboBox(options2);
         final ListCellRenderer rend = getRenderer(ret.getRenderer());
         if (rend != null) {
             ret.setRenderer(rend);
         }
-
         try {
             if (defaultAnswer < options.length && defaultAnswer >= 0) {
                 ret.setSelectedIndex(defaultAnswer);
@@ -151,14 +149,12 @@ public class ComboBoxDialog extends AbstractDialog<Integer> implements ComboBoxD
         textpane.setBorder(null);
         textpane.setBackground(null);
         textpane.setOpaque(false);
+        textpane.setForeground(new JLabel().getForeground());
         textpane.putClientProperty("Synthetica.opaque", Boolean.FALSE);
         textpane.setText(message);
         textpane.setEditable(false);
-
         contentpane.add(textpane);
-
         box = getComboBox(options);
-
         // no idea what this has been good for
         // if (this.getDesiredSize() != null) {
         // this.box.setBounds(0, 0, (int) this.getDesiredSize().getWidth(),
@@ -169,7 +165,6 @@ public class ComboBoxDialog extends AbstractDialog<Integer> implements ComboBoxD
         // this.box.setMaximumSize(new Dimension(450, 600));
         // }
         contentpane.add(box, "pushy,growy,height 24!");
-
         return contentpane;
     }
 
@@ -190,7 +185,6 @@ public class ComboBoxDialog extends AbstractDialog<Integer> implements ComboBoxD
      */
     @Override
     public String getMessage() {
-
         return message;
     }
 
@@ -205,11 +199,9 @@ public class ComboBoxDialog extends AbstractDialog<Integer> implements ComboBoxD
         for (int i = 0; i < ret.length; i++) {
             if (options[i] instanceof LabelInterface) {
                 ret[i] = ((LabelInterface) options[i]).getLabel();
-
             } else {
                 ret[i] = String.valueOf(options[i]);
             }
-
         }
         return ret;
     }
@@ -224,5 +216,4 @@ public class ComboBoxDialog extends AbstractDialog<Integer> implements ComboBoxD
         // TODO Auto-generated method stub
         return defaultAnswer;
     }
-
 }

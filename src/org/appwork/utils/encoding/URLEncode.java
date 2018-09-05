@@ -34,6 +34,7 @@
 package org.appwork.utils.encoding;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 
 /**
@@ -66,6 +67,67 @@ public class URLEncode {
             }
         }
         return sb.toString();
+    }
+
+    public static String decodeURIComponent(final String input) {
+        try {
+            return decodeURIComponent(input, "UTF-8", true);
+        } catch (UnsupportedEncodingException ignore) {
+        } catch (IllegalArgumentException ignore) {
+        }
+        return null;
+    }
+
+    public static String decodeURIComponent(final String input, final String charSet, final boolean ignoreDecodeError) throws UnsupportedEncodingException, IllegalArgumentException {
+        if (input == null) {
+            return null;
+        }
+        final StringBuilder ret = new StringBuilder();
+        final StringBuilder decode = new StringBuilder("");
+        int nextStep = 0;
+        for (int i = 0; i < input.length(); i++) {
+            final char ch = input.charAt(i);
+            if (ch == '%') {
+                decode.append(ch);
+                nextStep = 1;
+            } else {
+                switch (nextStep) {
+                case 1:
+                case 2:
+                    decode.append(ch);
+                    nextStep++;
+                    break;
+                default:
+                    if (decode.length() > 0) {
+                        nextStep = 0;
+                        try {
+                            ret.append(URLDecoder.decode(decode.toString(), charSet));
+                        } catch (IllegalArgumentException e) {
+                            if (ignoreDecodeError) {
+                                ret.append(decode);
+                            } else {
+                                throw e;
+                            }
+                        }
+                        decode.delete(0, decode.length());
+                    }
+                    ret.append(ch);
+                    break;
+                }
+            }
+        }
+        if (decode.length() > 0) {
+            try {
+                ret.append(URLDecoder.decode(decode.toString(), charSet));
+            } catch (IllegalArgumentException e) {
+                if (ignoreDecodeError) {
+                    ret.append(decode);
+                } else {
+                    throw e;
+                }
+            }
+        }
+        return ret.toString();
     }
 
     public static String encodeURIComponent(final String input) {

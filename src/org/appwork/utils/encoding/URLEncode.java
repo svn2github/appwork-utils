@@ -135,18 +135,28 @@ public class URLEncode {
             return null;
         }
         final StringBuilder sb = new StringBuilder();
+        final StringBuilder encode = new StringBuilder();
         for (int i = 0; i < input.length(); i++) {
             final char ch = input.charAt(i);
             if (ch == ' ') {
                 sb.append("%20");
             } else if (URLEncode.RFC2396CHARS.indexOf(ch) != -1) {
+                if (encode.length() > 0) {
+                    try {
+                        sb.append(URLEncoder.encode(encode.toString(), "UTF-8"));
+                    } catch (UnsupportedEncodingException ignore) {
+                    }
+                    encode.delete(0, encode.length());
+                }
                 sb.append(ch);
             } else {
-                /* hex formatted */
-                try {
-                    sb.append(URLEncoder.encode("" + ch, "UTF-8"));
-                } catch (UnsupportedEncodingException ignore) {
-                }
+                encode.append(ch);
+            }
+        }
+        if (encode.length() > 0) {
+            try {
+                sb.append(URLEncoder.encode(encode.toString(), "UTF-8"));
+            } catch (UnsupportedEncodingException ignore) {
             }
         }
         return sb.toString();

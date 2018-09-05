@@ -117,7 +117,53 @@ public class HTTPConnectionUtils {
     public final static byte R = (byte) 13;
     public final static byte N = (byte) 10;
 
+    public static class DispositionHeader {
+        private final String header;
+
+        public String getHeader() {
+            return header;
+        }
+
+        private final String raw;
+
+        public final String getRaw() {
+            return raw;
+        }
+
+        public final String getFilename() {
+            return filename;
+        }
+
+        public final String getEncoding() {
+            return encoding;
+        }
+
+        @Override
+        public String toString() {
+            return "RAW:" + getRaw() + "|Decoded:" + getFilename() + "|Encoding:" + getEncoding();
+        }
+
+        private final String filename;
+        private final String encoding;
+
+        private DispositionHeader(final String header, final String raw, final String filename, final String encoding) {
+            this.raw = raw;
+            this.filename = filename;
+            this.encoding = encoding;
+            this.header = header;
+        }
+    }
+
     public static String getFileNameFromDispositionHeader(final String contentdisposition) {
+        final DispositionHeader ret = parseDispositionHeader(contentdisposition);
+        if (ret != null) {
+            return ret.getFilename();
+        } else {
+            return null;
+        }
+    }
+
+    public static DispositionHeader parseDispositionHeader(final String contentdisposition) {
         // http://greenbytes.de/tech/tc2231/
         if (!StringUtils.isEmpty(contentdisposition)) {
             if (contentdisposition.matches("^\\s*attachment;?\\s*$")) {
@@ -130,21 +176,21 @@ public class HTTPConnectionUtils {
                     org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Missing encoding: " + contentdisposition);
                     return null;
                 }
-                final String filename = new Regex(contentdisposition, "(?:;| |^)filename\\*\\s*=\\s*.+?''(.*?)($|;\\s*|;$)").getMatch(0);
-                if (filename == null) {
+                final String raw = new Regex(contentdisposition, "(?:;| |^)filename\\*\\s*=\\s*.+?''(.*?)($|;\\s*|;$)").getMatch(0);
+                if (raw == null) {
                     org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Broken/Unsupported: " + contentdisposition);
                     return null;
                 } else {
                     try {
-                        String ret = URLDecoder.decode(filename.trim(), encoding.trim()).trim();
-                        ret = ret.replaceFirst("^" + Matcher.quoteReplacement("\\") + "+", Matcher.quoteReplacement("_"));
-                        if (StringUtils.isNotEmpty(ret)) {
-                            return ret;
+                        String fileName = URLDecoder.decode(raw.trim(), encoding.trim()).trim();
+                        fileName = fileName.replaceFirst("^" + Matcher.quoteReplacement("\\") + "+", Matcher.quoteReplacement("_"));
+                        if (StringUtils.isNotEmpty(fileName)) {
+                            return new DispositionHeader(contentdisposition, raw, fileName, encoding);
                         } else {
                             return null;
                         }
                     } catch (final Exception e) {
-                        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Decoding Error: " + filename + "|" + encoding + "|" + contentdisposition);
+                        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Decoding Error: " + raw + "|" + encoding + "|" + contentdisposition);
                         return null;
                     }
                 }
@@ -154,10 +200,11 @@ public class HTTPConnectionUtils {
                     try {
                         final String base64 = special[1] != null ? special[1].trim() : null;
                         final String encoding = special[0] != null ? special[0].trim() : null;
-                        String ret = URLDecoder.decode(new String(Base64.decode(base64), encoding), encoding).trim();
-                        ret = ret.replaceFirst("^" + Matcher.quoteReplacement("\\") + "+", Matcher.quoteReplacement("_"));
-                        if (StringUtils.isNotEmpty(ret)) {
-                            return ret;
+                        final String raw = new String(Base64.decode(base64), encoding);
+                        String fileName = URLDecoder.decode(raw, encoding).trim();
+                        fileName = fileName.replaceFirst("^" + Matcher.quoteReplacement("\\") + "+", Matcher.quoteReplacement("_"));
+                        if (StringUtils.isNotEmpty(fileName)) {
+                            return new DispositionHeader(contentdisposition, raw, fileName, encoding);
                         } else {
                             return null;
                         }
@@ -166,14 +213,14 @@ public class HTTPConnectionUtils {
                         return null;
                     }
                 }
-                final String filename = new Regex(contentdisposition, "(?:;| |^)(filename|file_name|name)\\s*=\\s*(\"|'|)(.*?)(\\2$|\\2;$|\\2;.)").getMatch(2);
-                if (filename == null) {
+                final String raw = new Regex(contentdisposition, "(?:;| |^)(filename|file_name|name)\\s*=\\s*(\"|'|)(.*?)(\\2$|\\2;$|\\2;.)").getMatch(2);
+                if (raw == null) {
                     org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Broken/Unsupported: " + contentdisposition);
                 } else {
-                    String ret = filename.trim();
-                    ret = ret.replaceFirst("^" + Matcher.quoteReplacement("\\") + "+", Matcher.quoteReplacement("_"));
-                    if (StringUtils.isNotEmpty(ret)) {
-                        return ret;
+                    String fileName = raw.trim();
+                    fileName = fileName.replaceFirst("^" + Matcher.quoteReplacement("\\") + "+", Matcher.quoteReplacement("_"));
+                    if (StringUtils.isNotEmpty(fileName)) {
+                        return new DispositionHeader(contentdisposition, raw, fileName, null);
                     } else {
                         return null;
                     }

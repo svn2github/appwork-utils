@@ -62,6 +62,10 @@ public interface HTTPConnection {
         }
     }
 
+    void setLegacyConnectEnabled(boolean enabled);
+
+    boolean isLegacyConnectEnabled();
+
     /**
      * establish a connection
      *

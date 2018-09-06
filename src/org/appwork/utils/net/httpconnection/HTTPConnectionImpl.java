@@ -174,6 +174,7 @@ public class HTTPConnectionImpl implements HTTPConnection {
     protected InetAddress                        lastConnection       = null;
     protected int                                lastConnectionPort   = -1;
     protected String                             hostName;
+    private boolean                              legacyConnectFlag    = true;
     private final static PublicSuffixList        PSL                  = PublicSuffixList.getInstance();
 
     public KEEPALIVE getKeepAlive() {
@@ -194,11 +195,11 @@ public class HTTPConnectionImpl implements HTTPConnection {
     protected static final HashMap<String, LinkedList<KeepAliveSocketStream>> KEEPALIVEPOOL         = new HashMap<String, LinkedList<KeepAliveSocketStream>>();
     protected static final Object                                             LOCK                  = new Object();
     protected static final DelayedRunnable                                    KEEPALIVECLEANUPTIMER = new DelayedRunnable(10000, 30000) {
-                                                                                                        @Override
-                                                                                                        public void delayedrun() {
-                                                                                                            cleanupKeepAlivePools();
-                                                                                                        }
-                                                                                                    };
+        @Override
+        public void delayedrun() {
+            cleanupKeepAlivePools();
+        }
+    };
 
     private static final void cleanupKeepAlivePools() {
         synchronized (HTTPConnectionImpl.LOCK) {
@@ -1230,6 +1231,9 @@ public class HTTPConnectionImpl implements HTTPConnection {
     }
 
     public InputStream getInputStream() throws IOException {
+        if (!isLegacyConnectEnabled() && !isConnectionSocketValid()) {
+            throw new IllegalStateException("not connected!");
+        }
         this.connect();
         this.connectInputStream();
         final int code = this.getResponseCode();
@@ -1594,5 +1598,15 @@ public class HTTPConnectionImpl implements HTTPConnection {
     @Override
     public boolean isSSLTrustALL() {
         return this.sslTrustALL;
+    }
+
+    @Override
+    public void setLegacyConnectEnabled(boolean enabled) {
+        this.legacyConnectFlag = enabled;
+    }
+
+    @Override
+    public boolean isLegacyConnectEnabled() {
+        return legacyConnectFlag;
     }
 }

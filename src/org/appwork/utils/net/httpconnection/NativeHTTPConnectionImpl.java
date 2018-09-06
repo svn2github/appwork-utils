@@ -91,6 +91,7 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
     private boolean                                     connected            = false;
     private boolean                                     wasConnected         = false;
     private boolean                                     sslTrustALL          = false;
+    private boolean                                     legacyConnectFlag    = true;
     private final static WeakHashMap<Thread, HTTPProxy> availableProxies     = new WeakHashMap<Thread, HTTPProxy>();
     static {
         try {
@@ -381,6 +382,9 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
 
     @Override
     public InputStream getInputStream() throws IOException {
+        if (!isLegacyConnectEnabled() && !this.isConnected()) {
+            throw new IllegalStateException("not connected!");
+        }
         this.connect();
         this.connectInputStream();
         final int code = this.getResponseCode();
@@ -682,5 +686,15 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
     @Override
     public boolean isSSLTrustALL() {
         return this.sslTrustALL;
+    }
+
+    @Override
+    public void setLegacyConnectEnabled(boolean enabled) {
+        this.legacyConnectFlag = enabled;
+    }
+
+    @Override
+    public boolean isLegacyConnectEnabled() {
+        return legacyConnectFlag;
     }
 }

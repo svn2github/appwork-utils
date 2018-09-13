@@ -76,13 +76,14 @@ public class LoggerFactory extends LogSourceProvider {
             ((ExtLogManager) logManager).setLoggerFactory(instance);
             return instance;
         } catch (final Throwable e) {
-            e.printStackTrace();
             final LogManager logManager = java.util.logging.LogManager.getLogManager();
-            if (logManager != null) {
-                System.err.println("Logmanager:" + logManager + "|ClassLoader:" + logManager.getClass().getClassLoader());
-            } else {
-                System.err.println("Logmanager: null");
-            }
+            // if possible, no sysouts or syserrs here. they would appear in every application startup without any change to block them
+            // e.printStackTrace();
+            // if (logManager != null) {
+            // System.err.println("Logmanager:" + logManager + "|ClassLoader:" + logManager.getClass().getClassLoader());
+            // } else {
+            // System.err.println("Logmanager: null");
+            // }
             try {
                 if (logManager != null) {
                     // seems like the logmanager has already been set, and is
@@ -177,7 +178,7 @@ public class LoggerFactory extends LogSourceProvider {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.utils.logging2.LogSourceProvider#getLogger(java.lang.String)
      */
     @Override

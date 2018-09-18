@@ -413,9 +413,13 @@ public class YEncInputStream extends InputStream {
         final String trailer = new String(lineBuffer, 0, lineSize, "ISO-8859-1");
         final String sizeValue = getValue(trailer, "size", NUMBER);
         final long size = sizeValue != null ? Long.parseLong(sizeValue) : -1;
-        if (decodedBytes < size) {
-            throw new IOException("decoded-size-error");
+        if (isMultiPart()) {
+            pcrc32Value = getValue(trailer, "pcrc32", CRC32);
+            crc32Value = getValue(trailer, " crc32", CRC32);// space is important to differ between pcrc32 and crc32
         }
+        // read body to end to drain inputstream
+        readBodyEnd(inputStream);
+        // error checks
         if (isMultiPart()) {
             if (size != getPartSize()) {
                 throw new IOException("part-size-error");
@@ -427,14 +431,14 @@ public class YEncInputStream extends InputStream {
                     throw new IOException("part-index-error:" + getPartIndex() + "!=" + partValueInt);
                 }
             }
-            pcrc32Value = getValue(trailer, "pcrc32", CRC32);
-            crc32Value = getValue(trailer, " crc32", CRC32);// space is important to differ between pcrc32 and crc32
         } else {
             if (size != getSize()) {
                 throw new IOException("size-error");
             }
         }
-        readBodyEnd(inputStream);
+        if (decodedBytes < size) {
+            throw new IOException("decoded-size-error");
+        }
     }
 
     /**
@@ -449,10 +453,9 @@ public class YEncInputStream extends InputStream {
             final int size = client.readLine(is, buffer);
             if (size > 0) {
                 final String line = new String(buffer.toByteArray(), 0, size, "ISO-8859-1");
-                if (!".".equals(line)) {
-                    throw new IOException("missing body termination(end): " + line);
+                if (".".equals(line)) {
+                    break;
                 }
-                break;
             } else if (size == -1) {
                 throw new EOFException();
             }

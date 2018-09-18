@@ -85,7 +85,7 @@ public abstract class AbstractTray implements MouseListener, MouseMotionListener
         systemTray.add(this.trayIcon);
     }
 
-    protected boolean isDebugMenuRequested(MouseEvent e) {
+    public boolean isDebugMenuRequested(MouseEvent e) {
         return debugMenuEnabled || (e.isControlDown() && e.isShiftDown());
     }
 

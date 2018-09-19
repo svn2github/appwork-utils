@@ -163,7 +163,9 @@ public abstract class Queue {
                     }
                 }
             } catch (final InterruptedException e) {
-                item.handleException(e);
+                if (!item.handleException(e)) {
+                    Thread.currentThread().interrupt();
+                }
             }
             if (item.getExeption() != null) {
                 // throw exception if item canot handle the exception itself

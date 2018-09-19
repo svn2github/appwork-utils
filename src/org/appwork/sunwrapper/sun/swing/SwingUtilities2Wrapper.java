@@ -38,6 +38,7 @@ import java.awt.FontMetrics;
 
 import javax.swing.JComponent;
 
+import org.appwork.utils.Exceptions;
 import org.appwork.utils.JVMVersion;
 import org.appwork.utils.logging2.extmanager.LoggerFactory;
 
@@ -50,6 +51,27 @@ public class SwingUtilities2Wrapper {
     // TODO:jdk9
     private final static boolean JDK9TEST                    = JVMVersion.isJAVA19Test();
 
+    private static String internalClipStringIfNecessary(JComponent component, FontMetrics fontMetrics, String str, int availableWidth) {
+        if (str == null || str.length() == 0 || str.trim().length() == 0) {
+            return str;
+        }
+        final char[] charArray = str.toCharArray();
+        int length = charArray.length;
+        while (length > 0) {
+            final int stringWidth = fontMetrics.charsWidth(charArray, 0, length);
+            if (stringWidth > availableWidth) {
+                length--;
+            } else {
+                if (length == charArray.length) {
+                    return str;
+                } else {
+                    return new String(charArray, 0, length);
+                }
+            }
+        }
+        return "";
+    }
+
     /**
      * @param rendererField
      * @param fontMetrics
@@ -59,28 +81,14 @@ public class SwingUtilities2Wrapper {
      */
     public static String clipStringIfNecessary(JComponent component, FontMetrics fontMetrics, String str, int availableWidth) {
         try {
-            if (CLIP_STRING_IF_NECESSARY_OK) {
-                if (JDK9TEST) {
-                    if (str == null || str.length() == 0 || str.trim().length() == 0) {
-                        return str;
-                    }
-                    final char[] charArray = str.toCharArray();
-                    int length = charArray.length;
-                    while (length > 0) {
-                        final int stringWidth = fontMetrics.charsWidth(charArray, 0, length);
-                        if (stringWidth > availableWidth) {
-                            length--;
-                        } else {
-                            if (length == charArray.length) {
-                                return str;
-                            } else {
-                                return new String(charArray, 0, length);
-                            }
-                        }
-                    }
-                    return "";
+            if (!CLIP_STRING_IF_NECESSARY_OK || JDK9TEST) {
+                return internalClipStringIfNecessary(component, fontMetrics, str, availableWidth);
+            } else {
+                try {
+                    return sun.swing.SwingUtilities2.clipStringIfNecessary(component, fontMetrics, str, availableWidth);
+                } catch (ArrayIndexOutOfBoundsException e) {
+                    return internalClipStringIfNecessary(component, fontMetrics, str, availableWidth);
                 }
-                return sun.swing.SwingUtilities2.clipStringIfNecessary(component, fontMetrics, str, availableWidth);
             }
         } catch (final NoClassDefFoundError e) {
             CLIP_STRING_IF_NECESSARY_OK = false;
@@ -90,6 +98,8 @@ public class SwingUtilities2Wrapper {
             CLIP_STRING_IF_NECESSARY_OK = false;
             System.err.println("sun.swing.SwingUtilities2.clipStringIfNecessary failed");
             LoggerFactory.I().getLogger(SwingUtilities2Wrapper.class.getName()).log(e);
+        } catch (final Exception ignore) {
+            System.err.println("sun.swing.SwingUtilities2.clipStringIfNecessary failed:" + Exceptions.getStackTrace(ignore));
         }
         return str;
     }

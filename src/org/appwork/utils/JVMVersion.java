@@ -45,6 +45,7 @@ public class JVMVersion {
     public final static long  JAVA18  = 18000000;
     public final static long  JAVA19  = 9000000000000l;
     public final static long  JAVA_10 = 10000000000000l;
+    public final static long  JAVA_11 = 11000000000000l;
     private static final long VERSION;
     static {
         long version = -1;

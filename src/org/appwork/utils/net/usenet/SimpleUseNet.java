@@ -258,11 +258,11 @@ public abstract class SimpleUseNet {
     }
 
     private final ByteArrayOutputStream lineBuffer = new ByteArrayOutputStream() {
-                                                       @Override
-                                                       public synchronized byte[] toByteArray() {
-                                                           return buf;
-                                                       };
-                                                   };
+        @Override
+        public synchronized byte[] toByteArray() {
+            return buf;
+        };
+    };
 
     protected synchronized String readLine() throws IOException {
         return readLine(lineBuffer);
@@ -372,6 +372,10 @@ public abstract class SimpleUseNet {
     }
 
     public synchronized InputStream requestMessageBodyAsInputStream(final String messageID) throws IOException {
+        return requestMessageBodyAsInputStream(messageID, true);
+    }
+
+    public synchronized InputStream requestMessageBodyAsInputStream(final String messageID, boolean autoDecode) throws IOException {
         final CommandResponse response = sendCmd(COMMAND.BODY, wrapMessageID(messageID));
         switch (response.getResponseCode()) {
         case 222:
@@ -381,31 +385,35 @@ public abstract class SimpleUseNet {
         default:
             throw new UnknownResponseException(response);
         }
-        final ByteArrayOutputStream buffer = new ByteArrayOutputStream() {
-            @Override
-            public synchronized byte[] toByteArray() {
-                return buf;
+        if (!autoDecode) {
+            return new BodyInputStream(this);
+        } else {
+            final ByteArrayOutputStream buffer = new ByteArrayOutputStream() {
+                @Override
+                public synchronized byte[] toByteArray() {
+                    return buf;
+                };
             };
-        };
-        while (true) {
-            buffer.reset();
-            final int lineLength = readLine(getInputStream(), buffer);
-            if (lineLength > 0) {
-                String line = new String(buffer.toByteArray(), 0, lineLength, "ISO-8859-1");
-                logger.info("Read Response:" + line);
-                if (line.startsWith("=ybegin")) {
-                    logger.info("yEnc Body detected");
-                    return new YEncInputStream(this, buffer);
+            while (true) {
+                buffer.reset();
+                final int lineLength = readLine(getInputStream(), buffer);
+                if (lineLength > 0) {
+                    String line = new String(buffer.toByteArray(), 0, lineLength, "ISO-8859-1");
+                    logger.info("Read Response:" + line);
+                    if (line.startsWith("=ybegin")) {
+                        logger.info("yEnc Body detected");
+                        return new YEncInputStream(this, buffer);
+                    }
+                    if (line.matches("^begin \\d{3} .+")) {
+                        logger.info("uuEncode Body detected");
+                        return new UUInputStream(this, buffer);
+                    }
+                } else if (lineLength == -1) {
+                    break;
                 }
-                if (line.matches("^begin \\d{3} .+")) {
-                    logger.info("uuEncode Body detected");
-                    return new UUInputStream(this, buffer);
-                }
-            } else if (lineLength == -1) {
-                break;
             }
+            throw new IOException("Unknown Body Format");
         }
-        throw new IOException("Unknown Body Format");
     }
 
     private synchronized void sendCommand(String request) throws IOException {

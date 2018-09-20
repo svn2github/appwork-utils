@@ -64,6 +64,7 @@ public class UUInputStream extends InputStream {
     private boolean eof          = false;
     private int     dataIndex    = 0;
     private int     dataLength   = -1;
+    private String  trailer      = null;
 
     private void readNextLine() throws IOException {
         buffer.reset();
@@ -162,13 +163,17 @@ public class UUInputStream extends InputStream {
     private void parseTrailer(final InputStream inputStream) throws IOException {
         buffer.reset();
         client.readLine(inputStream, buffer);
-        final String line = new String(buffer.toByteArray(), 0, buffer.size(), "ISO-8859-1");
+        trailer = new String(buffer.toByteArray(), 0, buffer.size(), "ISO-8859-1");
         // read body to end to drain inputstream
         readBodyEnd(inputStream);
         // error checks
-        if (!"end".equals(line)) {
-            throw new IOException("missing body termination(end): " + line);
+        if (!"end".equals(trailer)) {
+            throw new IOException("missing body termination(end): " + trailer);
         }
+    }
+
+    public String getTrailer() {
+        return trailer;
     }
 
     private void readBodyEnd(final InputStream is) throws IOException {

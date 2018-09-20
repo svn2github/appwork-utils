@@ -49,6 +49,7 @@ public class YEncInputStream extends InputStream {
     private final ByteArrayOutputStream buffer;
     private final long                  size;
     private final String                name;
+    private String                      yEncTrailer  = null;
     private final int                   lineLength;
     private final boolean               isMultiPart;
     private final long                  partBegin;
@@ -211,6 +212,7 @@ public class YEncInputStream extends InputStream {
     private int          encodedLength     = 0;
     private boolean      skipYEndDetection = false;
     private int          lineIndex         = 0;
+    private boolean      lineEscapedDot    = false;
 
     private synchronized final int fillDecodedBuffer() throws IOException {
         if (decodedIndex < decodedLength) {
@@ -239,6 +241,10 @@ public class YEncInputStream extends InputStream {
                 for (; encodedIndex < encodedLength; encodedIndex++) {
                     final int encoded = encodedBuffer[encodedIndex] & 0xff;
                     if (encoded == 10 || encoded == 13) { // LF or CR
+                        if (lineEscapedDot) {
+                            decodedBuffer[decodedIndex++] = (byte) (((byte) (46 - 42)) & 0xff);
+                            lineEscapedDot = false;
+                        }
                         yEncMarker = false;
                         lineIndex = 0;
                         skipYEndDetection = false;
@@ -253,13 +259,15 @@ public class YEncInputStream extends InputStream {
                                 } else {
                                     skipYEndDetection = true;
                                     lastDecodeIndex = encodedIndex;
-                                    if (encoded == 46) {// .
+                                    if (encoded == 46) {
+                                        // .
                                         // NNTP-protocol requires to double a dot in the first colum when a line is sent - and to detect a
                                         // double dot (and remove one of them) when receiving a line.
+                                        // skipDoubleDotDetection = true;
+                                        lineEscapedDot = true;
                                         continue;
                                     } else {
-                                        final byte decoded = (byte) (((byte) (encoded - 42)) & 0xff);
-                                        decodedBuffer[decodedLength++] = decoded;
+                                        decodedBuffer[decodedLength++] = (byte) (((byte) (encoded - 42)) & 0xff);
                                         continue;
                                     }
                                 }
@@ -269,8 +277,7 @@ public class YEncInputStream extends InputStream {
                                     continue;
                                 } else {
                                     skipYEndDetection = true;
-                                    final byte decoded = (byte) (((byte) (encoded - 106)) & 0xff);
-                                    decodedBuffer[decodedLength++] = decoded;
+                                    decodedBuffer[decodedLength++] = (byte) (((byte) (encoded - 106)) & 0xff);
                                     lastDecodeIndex = encodedIndex;
                                     continue;
                                 }
@@ -318,17 +325,21 @@ public class YEncInputStream extends InputStream {
                                 break;
                             }
                         }
+                        if (lineEscapedDot) {
+                            if (encoded != 46) {
+                                decodedBuffer[decodedLength++] = (byte) (((byte) (46 - 42)) & 0xff);
+                            }
+                            lineEscapedDot = false;
+                        }
                         if (yEncMarker == false) {
                             if (encoded == 61) { // =
                                 yEncMarker = true;
                             } else {
-                                final byte decoded = (byte) (((byte) (encoded - 42)) & 0xff);
-                                decodedBuffer[decodedLength++] = decoded;
+                                decodedBuffer[decodedLength++] = (byte) (((byte) (encoded - 42)) & 0xff);
                                 lastDecodeIndex = encodedIndex;
                             }
                         } else {
-                            final byte decoded = (byte) (((byte) (encoded - 106)) & 0xff);
-                            decodedBuffer[decodedLength++] = decoded;
+                            decodedBuffer[decodedLength++] = (byte) (((byte) (encoded - 106)) & 0xff);
                             yEncMarker = false;
                             lastDecodeIndex = encodedIndex;
                         }
@@ -408,37 +419,43 @@ public class YEncInputStream extends InputStream {
      */
     private void parseTrailer(final InputStream inputStream) throws IOException {
         buffer.reset();
-        final int lineSize = client.readLine(inputStream, buffer);
+        final int lineSize = readLine(inputStream);
         final byte[] lineBuffer = buffer.toByteArray();
-        final String trailer = new String(lineBuffer, 0, lineSize, "ISO-8859-1");
-        final String sizeValue = getValue(trailer, "size", NUMBER);
+        yEncTrailer = new String(lineBuffer, 0, lineSize, "ISO-8859-1");
+        final String sizeValue = getValue(yEncTrailer, "size", NUMBER);
         final long size = sizeValue != null ? Long.parseLong(sizeValue) : -1;
-        if (isMultiPart()) {
-            pcrc32Value = getValue(trailer, "pcrc32", CRC32);
-            crc32Value = getValue(trailer, " crc32", CRC32);// space is important to differ between pcrc32 and crc32
-        }
+        pcrc32Value = getValue(yEncTrailer, "pcrc32", CRC32);
+        crc32Value = getValue(yEncTrailer, " crc32", CRC32);// space is important to differ between pcrc32 and crc32
         // read body to end to drain inputstream
         readBodyEnd(inputStream);
         // error checks
         if (isMultiPart()) {
             if (size != getPartSize()) {
-                throw new IOException("part-size-error");
+                throw new IOException("part-size-error:" + size + "<->" + getPartSize() + "|yEncTrailer:" + yEncTrailer);
             }
-            final String partValueString = getValue(trailer, "part", NUMBER);
+            final String partValueString = getValue(yEncTrailer, "part", NUMBER);
             if (partValueString != null) {
                 final int partValueInt = Integer.parseInt(partValueString);
                 if (partValueInt != getPartIndex()) {
-                    throw new IOException("part-index-error:" + getPartIndex() + "!=" + partValueInt);
+                    throw new IOException("part-index-error:" + getPartIndex() + "<->" + partValueInt + "|yEncTrailer:" + yEncTrailer);
                 }
             }
         } else {
             if (size != getSize()) {
-                throw new IOException("size-error");
+                throw new IOException("size-error:" + size + "<->" + getSize() + "|yEncTrailer:" + yEncTrailer);
             }
         }
         if (decodedBytes < size) {
-            throw new IOException("decoded-size-error");
+            throw new IOException("decoded-size-error:" + decodedBytes + "<->" + size + "|yEncTrailer:" + yEncTrailer);
         }
+    }
+
+    public String getYEncTrailer() {
+        return yEncTrailer;
+    }
+
+    protected int readLine(InputStream is) throws IOException {
+        return client.readLine(is, buffer);
     }
 
     /**
@@ -450,7 +467,7 @@ public class YEncInputStream extends InputStream {
     private void readBodyEnd(final InputStream is) throws IOException {
         while (true) {
             buffer.reset();
-            final int size = client.readLine(is, buffer);
+            final int size = readLine(is);
             if (size > 0) {
                 final String line = new String(buffer.toByteArray(), 0, size, "ISO-8859-1");
                 if (".".equals(line)) {

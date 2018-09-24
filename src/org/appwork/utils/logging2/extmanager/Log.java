@@ -40,7 +40,6 @@ import org.appwork.utils.logging2.LogInterface;
  *
  */
 public class Log {
-
     public static void warning(String msg) {
         DF.warning(msg);
     }
@@ -73,7 +72,6 @@ public class Log {
      * Default Logger Quick Access
      */
     public static final LogInterface DF = new LogInterface() {
-
         @Override
         public void warning(String msg) {
             LoggerFactory.getDefaultLogger().warning(msg);
@@ -108,6 +106,11 @@ public class Log {
         public void fine(String msg) {
             LoggerFactory.getDefaultLogger().fine(msg);
         }
-    };
 
+        @Override
+        public void exception(String msg, Throwable e) {
+            severe(msg);
+            log(e);
+        }
+    };
 }

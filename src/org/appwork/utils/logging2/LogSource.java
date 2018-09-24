@@ -423,4 +423,15 @@ public class LogSource extends Logger implements LogInterface, ClearableLogInter
         }
         return sb.toString();
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.appwork.utils.logging2.LogInterface#exception(java.lang.String, java.lang.Throwable)
+     */
+    @Override
+    public void exception(String msg, Throwable e) {
+        severe(msg);
+        log(e);
+    }
 }

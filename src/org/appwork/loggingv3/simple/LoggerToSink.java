@@ -41,7 +41,7 @@ import org.appwork.loggingv3.AbstractLogger;
  *
  */
 public class LoggerToSink extends AbstractLogger {
-    private SinkProvider sinkProvider;
+    protected final SinkProvider sinkProvider;
 
     /**
      * @param simpleLoggerFactory
@@ -50,11 +50,6 @@ public class LoggerToSink extends AbstractLogger {
         this.sinkProvider = sinkprovider;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.appwork.utils.logging2.LogInterface#info(java.lang.String)
-     */
     @Override
     public void info(String msg) {
         if (msg == null || msg.trim().length() == 0) {
@@ -63,11 +58,6 @@ public class LoggerToSink extends AbstractLogger {
         sinkProvider.publish(new LogRecord2(this, msg));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.appwork.utils.logging2.LogInterface#log(java.lang.Throwable)
-     */
     @Override
     public void log(Throwable e) {
         sinkProvider.publish(new LogRecord2(this, getStackTrace(e)));

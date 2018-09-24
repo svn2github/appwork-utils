@@ -41,83 +41,34 @@ import org.appwork.utils.logging2.LogInterface;
  *
  */
 public class NullLogger implements LogInterface {
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.appwork.utils.logging2.LogInterface#info(java.lang.String)
-     */
     @Override
     public void info(String msg) {
-        // TODO Auto-generated method stub
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.appwork.utils.logging2.LogInterface#log(java.lang.Throwable)
-     */
     @Override
     public void log(Throwable e) {
-        // TODO Auto-generated method stub
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.appwork.utils.logging2.LogInterface#fine(java.lang.String)
-     */
     @Override
     public void fine(String msg) {
-        // TODO Auto-generated method stub
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.appwork.utils.logging2.LogInterface#finest(java.lang.String)
-     */
     @Override
     public void finest(String msg) {
-        // TODO Auto-generated method stub
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.appwork.utils.logging2.LogInterface#severe(java.lang.String)
-     */
     @Override
     public void severe(String msg) {
-        // TODO Auto-generated method stub
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.appwork.utils.logging2.LogInterface#finer(java.lang.String)
-     */
     @Override
     public void finer(String msg) {
-        // TODO Auto-generated method stub
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.appwork.utils.logging2.LogInterface#warning(java.lang.String)
-     */
     @Override
     public void warning(String msg) {
-        // TODO Auto-generated method stub
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.appwork.utils.logging2.LogInterface#exception(java.lang.String, java.lang.Throwable)
-     */
-    @Override
     public void exception(String msg, Throwable e) {
-        // TODO Auto-generated method stub
     }
 }

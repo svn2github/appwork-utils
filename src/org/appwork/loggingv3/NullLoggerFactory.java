@@ -41,7 +41,7 @@ import org.appwork.utils.logging2.LogInterface;
  *
  */
 public class NullLoggerFactory implements LogV3Factory {
-    private NullLogger nullLogger;
+    private final NullLogger nullLogger;
 
     /**
      *

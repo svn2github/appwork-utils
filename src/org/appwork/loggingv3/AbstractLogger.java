@@ -56,11 +56,6 @@ public abstract class AbstractLogger implements LogInterface {
         return last;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.appwork.utils.logging2.LogInterface#log(java.lang.Throwable)
-     */
     @Override
     public void log(Throwable e) {
         info(getStackTrace(e));
@@ -77,62 +72,31 @@ public abstract class AbstractLogger implements LogInterface {
         return sw.toString();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.appwork.utils.logging2.LogInterface#fine(java.lang.String)
-     */
     @Override
     public void fine(String msg) {
         info(msg);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.appwork.utils.logging2.LogInterface#finest(java.lang.String)
-     */
     @Override
     public void finest(String msg) {
         info(msg);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.appwork.utils.logging2.LogInterface#severe(java.lang.String)
-     */
     @Override
     public void severe(String msg) {
         info(msg);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.appwork.utils.logging2.LogInterface#finer(java.lang.String)
-     */
     @Override
     public void finer(String msg) {
         info(msg);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.appwork.utils.logging2.LogInterface#warning(java.lang.String)
-     */
     @Override
     public void warning(String msg) {
         info(msg);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.appwork.utils.logging2.LogInterface#exception(java.lang.String, java.lang.Throwable)
-     */
-    @Override
     public void exception(String msg, Throwable e) {
         info(msg + "\r\n" + getStackTrace(e));
     }

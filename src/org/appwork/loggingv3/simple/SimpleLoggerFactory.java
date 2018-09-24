@@ -51,16 +51,10 @@ import org.appwork.utils.logging2.LogInterface;
  *
  */
 public class SimpleLoggerFactory implements LogV3Factory, SinkProvider {
-    private CopyOnWriteArrayList<Sink>    sinks;
-    private HashMap<String, LoggerToSink> logger;
+    protected final CopyOnWriteArrayList<Sink>    sinks  = new CopyOnWriteArrayList<Sink>();
+    protected final HashMap<String, LoggerToSink> logger = new HashMap<String, LoggerToSink>();
 
-    /**
-     *
-     */
     public SimpleLoggerFactory() {
-        // TODO Auto-generated constructor stub
-        sinks = new CopyOnWriteArrayList<Sink>();
-        logger = new HashMap<String, LoggerToSink>();
     }
 
     public void initDefaults() {
@@ -68,30 +62,21 @@ public class SimpleLoggerFactory implements LogV3Factory, SinkProvider {
         addSink(new LogToStdOutSink());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.appwork.loggingv3.LogV3Factory#getLogger(java.lang.String)
-     */
     @Override
     public LogInterface getLogger(Object name) {
         if (name == null) {
             return getDefaultLogger();
-        }
-        synchronized (logger) {
-            LoggerToSink ret = logger.get(name.toString());
-            if (ret == null) {
-                logger.put(name.toString(), ret = new LoggerToSink(this));
+        } else {
+            synchronized (logger) {
+                LoggerToSink ret = logger.get(name.toString());
+                if (ret == null) {
+                    logger.put(name.toString(), ret = new LoggerToSink(this));
+                }
+                return ret;
             }
-            return ret;
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.appwork.loggingv3.LogV3Factory#getDefaultLogger()
-     */
     @Override
     public LogInterface getDefaultLogger() {
         return getLogger(LogV3.class.getSimpleName());
@@ -101,18 +86,14 @@ public class SimpleLoggerFactory implements LogV3Factory, SinkProvider {
      * @param logToFileSink
      */
     public void addSink(Sink sink) {
-        sinks.remove(sink);
-        sinks.add(sink);
+        if (sink != null) {
+            sinks.addIfAbsent(sink);
+        }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.appwork.loggingv3.simple.SinkProvider#publish(java.lang.String)
-     */
     @Override
     public void publish(LogRecord2 record) {
-        for (Sink sink : sinks) {
+        for (final Sink sink : sinks) {
             sink.publish(record);
         }
     }

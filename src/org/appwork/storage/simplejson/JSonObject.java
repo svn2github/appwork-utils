@@ -35,6 +35,7 @@ package org.appwork.storage.simplejson;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import org.appwork.utils.StringUtils;
 
@@ -69,8 +70,8 @@ public class JSonObject extends HashMap<String, JSonNode> implements JSonNode {
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("{");
-        Entry<String, JSonNode> next;
-        for (final Iterator<Entry<String, JSonNode>> it = this.entrySet().iterator(); it.hasNext();) {
+        Map.Entry<String, JSonNode> next;
+        for (final Iterator<Map.Entry<String, JSonNode>> it = this.entrySet().iterator(); it.hasNext();) {
             if (sb.length() > 1) {
                 sb.append(",");
             }
@@ -95,8 +96,8 @@ public class JSonObject extends HashMap<String, JSonNode> implements JSonNode {
         for (java.util.Map.Entry<String, JSonNode> es : entrySet()) {
             keyLength = Math.max(JSonUtils.escape(es.getKey()).length() + 2/* quotes */, keyLength);
         }
-        Entry<String, JSonNode> next;
-        for (final Iterator<Entry<String, JSonNode>> it = this.entrySet().iterator(); it.hasNext();) {
+        Map.Entry<String, JSonNode> next;
+        for (final Iterator<Map.Entry<String, JSonNode>> it = this.entrySet().iterator(); it.hasNext();) {
             if (sb.length() > 3) {
                 sb.append(",\r\n");
             }

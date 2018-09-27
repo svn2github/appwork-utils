@@ -33,18 +33,36 @@
  * ==================================================================================================================================================== */
 package org.appwork.loggingv3.simple.sink;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.nio.file.StandardCopyOption;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import org.appwork.loggingv3.LogV3;
 import org.appwork.loggingv3.simple.LogRecord2;
+import org.appwork.utils.CompareUtils;
+import org.appwork.utils.Exceptions;
+import org.appwork.utils.Files;
+import org.appwork.utils.IO;
 
 /**
  * @author Thomas
@@ -52,15 +70,33 @@ import org.appwork.loggingv3.simple.LogRecord2;
  *
  */
 public class LogToFileSink extends AbstractSink {
-    private String filepattern;
-    private File   logRoot;
-    private File   logFolder;
-    private String timeTag;
+    /**
+     *
+     */
+    private static final String           REGEX_DATE_LOGS    = "^logs_(.*)_\\d+(\\.zip)?$";
+    /**
+     *
+     */
+    private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("yyyy.MM.dd_HH.mm.ss.SSS");
+    private String                        filepattern;
+    private File                          logRoot;
+    private File                          logFolder;
+    private String                        timeTag;
+    private boolean                       shutdown;
+    private boolean                       enabled            = true;
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
 
     /**
      * @param string
      */
-    public LogToFileSink(File root, String filepattern, int zipLevel, CompressionMode compressMode) {
+    public LogToFileSink(File root, String filepattern, int zipLevel) {
         logRoot = root;
         logRoot.mkdirs();
         timeTag = createTimeTag();
@@ -69,7 +105,6 @@ public class LogToFileSink extends AbstractSink {
         }
         this.filepattern = filepattern;
         this.zipLevel = zipLevel;
-        this.compressMode = compressMode;
         Runtime.getRuntime().addShutdownHook(new Thread("ShutdownHook: Logger") {
             /*
              * (non-Javadoc)
@@ -81,6 +116,140 @@ public class LogToFileSink extends AbstractSink {
                 onShutdown();
             }
         });
+        initPostCleanupAndCompressionThread();
+    }
+
+    protected void initPostCleanupAndCompressionThread() {
+        new Thread("Cleanup & compress Logs") {
+            public void run() {
+                runPostCleanupAndCompressionThread();
+            };
+        }.start();
+    }
+
+    public static class LogFolder {
+        public final File path;
+        public final long time;
+
+        /**
+         * @param f
+         * @param time
+         */
+        public LogFolder(File f, long time) {
+            path = f;
+            this.time = time;
+        }
+
+        /**
+         * @return
+         */
+        public long getSize() {
+            if (path.isFile()) {
+                return path.length();
+            }
+            return Files.getDirectorySize(path);
+        }
+    }
+
+    public void keepOnlyLatestByBytes(long bytes) {
+        ArrayList<LogFolder> logFolders = getLogFilesOrFolders(true);
+        Collections.sort(logFolders, new Comparator<LogFolder>() {
+            @Override
+            public int compare(LogFolder o1, LogFolder o2) {
+                return CompareUtils.compare(o2.time, o1.time);
+            }
+        });
+        long sizeSoFar = 0l;
+        for (LogFolder f : logFolders) {
+            sizeSoFar += f.getSize();
+            if (sizeSoFar > bytes) {
+                LogV3.info("Cleanup Logs: " + f.path);
+                try {
+                    Files.deleteRecursive(f.path, false);
+                } catch (IOException e) {
+                    LogV3.defaultLogger().exception("Could not delete Logfolder: " + f.path, e);
+                }
+            }
+        }
+    }
+
+    /**
+     * @return
+     */
+    public ArrayList<LogFolder> getLogFilesOrFolders(boolean exludeCurrent) {
+        File[] folders = logRoot.listFiles(createFileFilter());
+        ArrayList<LogFolder> files = new ArrayList<>();
+        if (folders != null) {
+            for (File f : folders) {
+                if (logFolder != null && logFolder.equals(f) && exludeCurrent) {
+                    continue;
+                }
+                Matcher matcher = Pattern.compile(REGEX_DATE_LOGS).matcher(f.getName());
+                if (matcher.find()) {
+                    Date date = null;
+                    try {
+                        date = SIMPLE_DATE_FORMAT.parse(matcher.group(1));
+                    } catch (ParseException e) {
+                    }
+                    if (date != null) {
+                        files.add(new LogFolder(f, date.getTime()));
+                    }
+                }
+            }
+        }
+        return files;
+    }
+
+    /**
+     * @return
+     */
+    private FilenameFilter createFileFilter() {
+        return new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                // if (logFolder != null && name.equals(logFolder.getName())) {
+                //
+                // }
+                Matcher matcher = Pattern.compile(REGEX_DATE_LOGS).matcher(name);
+                if (matcher.find()) {
+                    Date date = null;
+                    try {
+                        date = SIMPLE_DATE_FORMAT.parse(matcher.group(1));
+                    } catch (ParseException e) {
+                    }
+                    if (date != null) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        };
+    }
+
+    /**
+     * cleanup and compress log folders from previous sessions. The cleanup process runs in a shutdown hook, and may have been interrupted,
+     * or the process itself may have been killed. In this case, this code cleans up old folders and ensures that all are compressed
+     * properly
+     */
+    public void runPostCleanupAndCompressionThread() {
+        synchronized (WORK_ON_FOLDERS_AND_FILES_LOCK) {
+            File[] folders = logRoot.listFiles(createFileFilter());
+            if (folders != null) {
+                for (File f : folders) {
+                    if (f.isFile()) {
+                        continue;
+                    }
+                    if (logFolder != null && logFolder.equals(f)) {
+                        continue;
+                    }
+                    try {
+                        packToSingleZip(f);
+                    } catch (Throwable e) {
+                        LogV3.logger(LogToFileSink.class).exception("Failed to compress old logfolder " + f, e);
+                    }
+                }
+            }
+        }
     }
 
     public File getLogRoot() {
@@ -96,22 +265,130 @@ public class LogToFileSink extends AbstractSink {
      */
     protected void onShutdown() {
         synchronized (this) {
-            try {
-                if (zipOut != null) {
-                    fos.flush();
-                    zipOut.closeEntry();
-                    zipOut.close();
+            this.shutdown = true;
+            closeOldFile();
+            while (compressionThreadsRunning.get() > 0) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    return;
                 }
-                if (fos != null) {
-                    fos.close();
-                }
-            } catch (Throwable e) {
             }
+            packToSingleZip(logFolder, new File(logFolder.getAbsolutePath() + ".zip"), true);
+        }
+    }
+
+    /**
+     * @param f
+     */
+    private void packToSingleZip(File logFolder) {
+        packToSingleZip(logFolder, new File(logFolder.getAbsolutePath() + ".zip"), true);
+    }
+
+    /**
+     * @param logFolder2
+     */
+    private void packToSingleZip(File logFolder, File zip, boolean delete) {
+        try {
+            if (zip.exists()) {
+                // zip only exists if it is complete
+                // if the process got killed during cleanup, we have to delete remaining .deleteMe files
+                for (File f : logFolder.listFiles()) {
+                    if (f.getName().endsWith(".deleteMe")) {
+                        f.delete();
+                    }
+                }
+                if (logFolder.listFiles().length == 0) {
+                    logFolder.delete();
+                }
+                return;
+            }
+            File tmp = new File(zip.getAbsolutePath() + ".tmp");
+            java.nio.file.Files.deleteIfExists(tmp.toPath());
+            ZipOutputStream zipout = new ZipOutputStream(new FileOutputStream(tmp));
+            try {
+                zipout.setLevel(zipLevel);
+                writeFolderToZip(logFolder, delete, zipout, false);
+                zipout.close();
+                java.nio.file.Files.move(tmp.toPath(), zip.toPath(), StandardCopyOption.ATOMIC_MOVE);
+                for (File f : logFolder.listFiles()) {
+                    if (f.getName().endsWith(".deleteMe")) {
+                        f.delete();
+                    }
+                }
+                if (logFolder.listFiles().length == 0) {
+                    logFolder.delete();
+                }
+            } finally {
+                zipout.close();
+            }
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
+
+    protected void writeFolderToZip(File logFolder, boolean delete, ZipOutputStream zipout, boolean addSubfolder) throws FileNotFoundException, IOException, Error, InterruptedException {
+        try {
+            for (File f : logFolder.listFiles()) {
+                if (Thread.interrupted()) {
+                    throw new InterruptedException();
+                }
+                if (f.isFile()) {
+                    if (f.getName().endsWith(".zip")) {
+                        ZipInputStream zis = new ZipInputStream(new BufferedInputStream(new FileInputStream(f)));
+                        try {
+                            ZipEntry entry;
+                            while ((entry = zis.getNextEntry()) != null) {
+                                if (Thread.interrupted()) {
+                                    throw new InterruptedException();
+                                }
+                                if (addSubfolder) {
+                                    zipout.putNextEntry(new ZipEntry(logFolder.getName() + "/" + entry.getName()));
+                                } else {
+                                    zipout.putNextEntry(new ZipEntry(entry.getName()));
+                                }
+                                try {
+                                    IO.readStreamToOutputStream(-1, zis, zipout, false);
+                                } finally {
+                                    zipout.closeEntry();
+                                    zipout.flush();
+                                }
+                            }
+                        } finally {
+                            zis.close();
+                        }
+                        if (delete) {
+                            java.nio.file.Files.move(f.toPath(), new File(f.getAbsolutePath() + ".deleteMe").toPath(), StandardCopyOption.ATOMIC_MOVE);
+                        }
+                    } else if (f.getName().endsWith(".txt")) {
+                        if (addSubfolder) {
+                            zipout.putNextEntry(new ZipEntry(logFolder.getName() + "/" + f.getName()));
+                        } else {
+                            zipout.putNextEntry(new ZipEntry(f.getName()));
+                        }
+                        try {
+                            IO.readStreamToOutputStream(-1, new BufferedInputStream(new FileInputStream(f)), zipout, true);
+                        } finally {
+                            zipout.closeEntry();
+                            zipout.flush();
+                        }
+                        if (delete) {
+                            java.nio.file.Files.move(f.toPath(), new File(f.getAbsolutePath() + ".deleteMe").toPath(), StandardCopyOption.ATOMIC_MOVE);
+                        }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            if (Thread.interrupted()) {
+                throw Exceptions.addSuppressed(new InterruptedException(), e);
+            }
+            throw e;
         }
     }
 
     protected String createTimeTag() {
-        return new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss.SSS").format(new Date());
+        return SIMPLE_DATE_FORMAT.format(new Date());
     }
 
     private File currentFile = null;
@@ -120,9 +397,8 @@ public class LogToFileSink extends AbstractSink {
         return currentFile;
     }
 
-    private BufferedWriter  fos;
-    private int             zipLevel     = 3;
-    private CompressionMode compressMode = CompressionMode.ZIP_FOLDER;
+    private BufferedWriter fos;
+    private int            zipLevel = 3;
 
     /*
      * (non-Javadoc)
@@ -132,6 +408,12 @@ public class LogToFileSink extends AbstractSink {
     @Override
     public void publish(LogRecord2 record) {
         synchronized (this) {
+            if (!isEnabled()) {
+                return;
+            }
+            if (shutdown) {
+                return;
+            }
             if (counter == null || counter.written >= getMaxFileSize()) {
                 nextFile();
             }
@@ -147,7 +429,6 @@ public class LogToFileSink extends AbstractSink {
     }
 
     int                          files = 0;
-    private ZipOutputStream      zipOut;
     private CountingOutputStream counter;
 
     /**
@@ -155,6 +436,8 @@ public class LogToFileSink extends AbstractSink {
      */
     private void nextFile() {
         try {
+            File file = null;
+            closeOldFile();
             if (logFolder == null) {
                 int i = 1;
                 while (logFolder == null || logFolder.exists()) {
@@ -162,65 +445,72 @@ public class LogToFileSink extends AbstractSink {
                 }
             }
             files++;
-            File file = null;
-            switch (compressMode) {
-            case ZIP_FOLDER:
-                if (zipOut == null) {
-                    logFolder.getParentFile().mkdirs();
-                    zipOut = new ZipOutputStream(new FileOutputStream(currentFile = new File(logFolder.getAbsolutePath() + ".zip")));
-                    fos = new BufferedWriter(new OutputStreamWriter(counter = new CountingOutputStream(zipOut), "UTF-8"));
-                    zipOut.setLevel(zipLevel);
-                } else {
-                    fos.flush();
-                    zipOut.closeEntry();
-                    counter.written = 0;
+            while (file == null || file.exists()) {
+                file = new File(logFolder, filepattern.replace("\\d", createFileIndexTag(files) + "-" + createTimeTag()));
+                if (file.exists()) {
+                    files++;
                 }
-                zipOut.putNextEntry(new ZipEntry(filepattern.replace("\\d", createFileIndexTag(files))));
-                break;
-            case ZIP_FILES:
-                try {
-                    if (zipOut != null) {
-                        fos.flush();
-                        zipOut.closeEntry();
-                        zipOut.close();
-                        fos.close();
-                        zipOut = null;
-                        fos = null;
-                    }
-                } catch (IOException e1) { // TODO: WAS JETZT?
-                    // TODO Auto-generated catch block
-                    e1.printStackTrace();
-                }
-                while (file == null || file.exists()) {
-                    file = new File(logFolder, filepattern.replace("\\d", createFileIndexTag(files)));
-                    if (file.exists()) {
-                        files++;
-                    }
-                }
-                file.getParentFile().mkdirs();
-                fos = new BufferedWriter(new OutputStreamWriter(counter = new CountingOutputStream(zipOut = new ZipOutputStream(new FileOutputStream(file.getAbsolutePath() + ".zip"))), "UTF-8"));
-                zipOut.putNextEntry(new ZipEntry(file.getName()));
-                this.currentFile = file;
-                break;
-            case NONE:
-                if (fos != null) {
-                    fos.close();
-                    fos = null;
-                }
-                while (file == null || file.exists()) {
-                    file = new File(logFolder, filepattern.replace("\\d", createFileIndexTag(files)));
-                    if (file.exists()) {
-                        files++;
-                    }
-                }
-                file.getParentFile().mkdirs();
-                fos = new BufferedWriter(new OutputStreamWriter(counter = new CountingOutputStream(new FileOutputStream(file)), "UTF-8"));
-                this.currentFile = file;
-                break;
             }
+            file.getParentFile().mkdirs();
+            fos = new BufferedWriter(new OutputStreamWriter(counter = new CountingOutputStream(new FileOutputStream(file)), "UTF-8"));
+            this.currentFile = file;
         } catch (IOException e) {
             // TODO: WAS JETZT?
             // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    private AtomicInteger compressionThreadsRunning = new AtomicInteger(0);
+
+    /**
+     *
+     */
+    protected void closeOldFile() {
+        try {
+            if (fos != null) {
+                fos.close();
+                fos = null;
+                final File cf = currentFile;
+                Thread th = new Thread("compress log") {
+                    public void run() {
+                        synchronized (WORK_ON_FOLDERS_AND_FILES_LOCK) {
+                            try {
+                                compress(cf, new File(cf.getAbsolutePath() + ".zip"));
+                            } finally {
+                                compressionThreadsRunning.decrementAndGet();
+                            }
+                        }
+                    };
+                };
+                compressionThreadsRunning.incrementAndGet();
+                th.start();
+            }
+        } catch (IOException e1) { // TODO: WAS JETZT?
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+    }
+
+    /**
+     * @param currentFile2
+     * @param file
+     */
+    protected void compress(File file, File zip) {
+        try {
+            ZipOutputStream zipout;
+            zip.delete();
+            File tmp = new File(zip.getAbsolutePath() + ".tmp");
+            tmp.delete();
+            zipout = new ZipOutputStream(new FileOutputStream(tmp));
+            zipout.setLevel(zipLevel);
+            zipout.putNextEntry(new ZipEntry(file.getName()));
+            IO.readStreamToOutputStream(-1, new BufferedInputStream(new FileInputStream(file)), zipout, true);
+            zipout.closeEntry();
+            zipout.close();
+            java.nio.file.Files.move(tmp.toPath(), zip.toPath(), StandardCopyOption.ATOMIC_MOVE);
+            file.delete();
+        } catch (Throwable e) {
             e.printStackTrace();
         }
     }
@@ -280,7 +570,7 @@ public class LogToFileSink extends AbstractSink {
         return ret;
     }
 
-    private int maxFileSize = 200 * 1024;
+    private int maxFileSize = 50 * 1024 * 1024;
 
     public int getMaxFileSize() {
         return maxFileSize;
@@ -288,5 +578,103 @@ public class LogToFileSink extends AbstractSink {
 
     public void setMaxFileSize(int maxFileSize) {
         this.maxFileSize = maxFileSize;
+    }
+
+    private Object WORK_ON_FOLDERS_AND_FILES_LOCK = new Object();
+
+    /**
+     * @return
+     * @throws Error
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public File exportFull() throws IOException, Error, InterruptedException {
+        synchronized (WORK_ON_FOLDERS_AND_FILES_LOCK) {
+            ArrayList<LogFolder> logFolders = getLogFilesOrFolders(false);
+            Collections.sort(logFolders, new Comparator<LogFolder>() {
+                @Override
+                public int compare(LogFolder o1, LogFolder o2) {
+                    return CompareUtils.compare(o1.time, o2.time);
+                }
+            });
+            String name;
+            if (logFolders.size() > 1) {
+                name = SIMPLE_DATE_FORMAT.format(new Date(logFolders.get(0).time)) + " - " + SIMPLE_DATE_FORMAT.format(new Date(logFolders.get(logFolders.size() - 1).time));
+            } else {
+                name = SIMPLE_DATE_FORMAT.format(new Date(logFolders.get(0).time));
+            }
+            File zip = new File(logRoot, "packages/" + name + ".zip");
+            zip.getParentFile().mkdirs();
+            File tmp = new File(zip.getAbsolutePath() + ".tmp");
+            ZipOutputStream zipout = new ZipOutputStream(new FileOutputStream(tmp));
+            IOException ioException = null;
+            try {
+                zipout.setLevel(9);
+                extendExport(zipout);
+                for (LogFolder f : logFolders) {
+                    if (Thread.interrupted()) {
+                        throw new InterruptedException();
+                    }
+                    if (f.path.isFile()) {
+                        ZipInputStream zis = new ZipInputStream(new BufferedInputStream(new FileInputStream(f.path)));
+                        try {
+                            ZipEntry entry;
+                            while ((entry = zis.getNextEntry()) != null) {
+                                if (Thread.interrupted()) {
+                                    throw new InterruptedException();
+                                }
+                                zipout.putNextEntry(new ZipEntry(Files.getFileNameWithoutExtension(f.path.getName()) + "/" + entry.getName()));
+                                IO.readStreamToOutputStream(-1, zis, zipout, false);
+                                zipout.closeEntry();
+                            }
+                        } finally {
+                            zis.close();
+                        }
+                    } else {
+                        if (f.path.equals(logFolder)) {
+                            synchronized (this) {
+                                boolean restoreFos = false;
+                                if (fos != null) {
+                                    restoreFos = true;
+                                    fos.close();
+                                }
+                                try {
+                                    writeFolderToZip(f.path, false, zipout, true);
+                                } finally {
+                                    if (restoreFos) {
+                                        CountingOutputStream oldCounter = counter;
+                                        fos = new BufferedWriter(new OutputStreamWriter(counter = new CountingOutputStream(new FileOutputStream(currentFile, true)), "UTF-8"));
+                                        counter.written = oldCounter.written;
+                                    }
+                                }
+                            }
+                        } else {
+                            writeFolderToZip(f.path, false, zipout, true);
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                ioException = e;
+            } finally {
+                zipout.close();
+            }
+            if (ioException != null) {
+                tmp.delete();
+                if (Thread.interrupted()) {
+                    throw Exceptions.addSuppressed(new InterruptedException(), ioException);
+                }
+                throw ioException;
+            }
+            java.nio.file.Files.move(tmp.toPath(), zip.toPath(), StandardCopyOption.ATOMIC_MOVE);
+            return zip;
+        }
+    }
+
+    /**
+     * @param zipout
+     * @throws IOException
+     */
+    protected void extendExport(ZipOutputStream zipout) throws IOException {
+        // TODO Auto-generated method stub
     }
 }

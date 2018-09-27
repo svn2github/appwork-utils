@@ -188,7 +188,7 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
             }
             JSonStorage.getPlainStorage("Dialogs").clear();
         } catch (final Exception e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
         }
     }
 
@@ -564,7 +564,7 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
             //
             // if (this.returnBitMask == 0) {
             // this.setVisible(true);
-            // org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Answer: Parent Closed ");
+            // org.appwork.loggingv3.LogV3.fine("Answer: Parent Closed ");
             // this.returnBitMask |= Dialog.RETURN_CLOSED;
             // this.setVisible(false);
             //
@@ -609,10 +609,10 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
 
     public void actionPerformed(final ActionEvent e) {
         if (e.getSource() == this.okButton) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Answer: Button<OK:" + this.okButton.getText() + ">");
+            org.appwork.loggingv3.LogV3.fine("Answer: Button<OK:" + this.okButton.getText() + ">");
             this.setReturnmask(true);
         } else if (e.getSource() == this.cancelButton) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Answer: Button<CANCEL:" + this.cancelButton.getText() + ">");
+            org.appwork.loggingv3.LogV3.fine("Answer: Button<CANCEL:" + this.cancelButton.getText() + ">");
             this.setReturnmask(false);
         }
         this.dispose();
@@ -688,7 +688,7 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
         if (this.initialized) {
             return;
         }
-        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Display Dialog: " + this);
+        org.appwork.loggingv3.LogV3.info("Display Dialog: " + this);
         this.initialized = true;
         this._init();
     }
@@ -781,7 +781,7 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
                         return true;
                     }
                 } catch (final Exception e) {
-                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                    org.appwork.loggingv3.LogV3.log(e);
                 }
             }
         }
@@ -814,14 +814,14 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
      */
     public void forceDummyInit() {
         if (Application.isHeadless()) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Force Dummy Init");
+            org.appwork.loggingv3.LogV3.info("Force Dummy Init");
             AbstractDialog.this.initialized = true;
             AbstractDialog.this.dummyInit = true;
         } else {
             new EDTRunner() {
                 @Override
                 protected void runInEDT() {
-                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Force Dummy Init");
+                    org.appwork.loggingv3.LogV3.info("Force Dummy Init");
                     AbstractDialog.this.initialized = true;
                     AbstractDialog.this.dummyInit = true;
                 }
@@ -1353,7 +1353,7 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
                     if (AbstractDialog.this.isDisposed()) {
                         return;
                     }
-                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Answer: Key<ESCAPE>");
+                    org.appwork.loggingv3.LogV3.fine("Answer: Key<ESCAPE>");
                     AbstractDialog.this.setReturnmask(false);
                     AbstractDialog.this.returnBitMask |= Dialog.RETURN_ESC;
                     AbstractDialog.this.dispose();
@@ -1373,14 +1373,14 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
      */
     public void resetDummyInit() {
         if (org.appwork.utils.Application.isHeadless()) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Reset Dummy Info");
+            org.appwork.loggingv3.LogV3.info("Reset Dummy Info");
             AbstractDialog.this.initialized = false;
             AbstractDialog.this.dummyInit = false;
         } else {
             new EDTRunner() {
                 @Override
                 protected void runInEDT() {
-                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Reset Dummy Info");
+                    org.appwork.loggingv3.LogV3.info("Reset Dummy Info");
                     AbstractDialog.this.initialized = false;
                     AbstractDialog.this.dummyInit = false;
                 }
@@ -1576,7 +1576,7 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
                     }
                 }
             } catch (final Exception e) {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                org.appwork.loggingv3.LogV3.log(e);
             }
         }
         return ret;
@@ -1665,14 +1665,14 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
 
     public void windowClosing(final WindowEvent arg0) {
         if (this.closeAllowed()) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Answer: Button<[X]>");
+            org.appwork.loggingv3.LogV3.fine("Answer: Button<[X]>");
             if (this.isDeveloperMode() && this.isDisposed()) {
                 throw new IllegalStateException("Dialog already disposed");
             }
             this.returnBitMask |= Dialog.RETURN_CLOSED;
             this.dispose();
         } else {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("(Answer: Tried [X] bot not allowed)");
+            org.appwork.loggingv3.LogV3.fine("(Answer: Tried [X] bot not allowed)");
         }
     }
 

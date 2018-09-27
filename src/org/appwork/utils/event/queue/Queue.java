@@ -316,7 +316,7 @@ public abstract class Queue {
             if (t != null && t instanceof QueueThread) {
                 if (t == getQueueThread()) {
                     if (debugFlag) {
-                        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Multiple queues detected-> external synchronization may be required! " + item);
+                        org.appwork.loggingv3.LogV3.warning("Multiple queues detected-> external synchronization may be required! " + item);
                     }
                     return true;
                 }
@@ -326,7 +326,7 @@ public abstract class Queue {
                      * loop prevention: while can only loop max QUEUELOOPPREVENTION times, cause no more different queues exist
                      */
                     if (debugFlag) {
-                        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("QueueLoopPrevention!");
+                        org.appwork.loggingv3.LogV3.warning("QueueLoopPrevention!");
                     }
                     break;
                 }
@@ -431,8 +431,8 @@ public abstract class Queue {
                         onItemHandled(item);
                     }
                 } catch (final Throwable e) {
-                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Queue rescued!");
-                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                    org.appwork.loggingv3.LogV3.info("Queue rescued!");
+                    org.appwork.loggingv3.LogV3.log(e);
                 }
             }
         } finally {

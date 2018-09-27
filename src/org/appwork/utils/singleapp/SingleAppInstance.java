@@ -392,7 +392,7 @@ public class SingleAppInstance {
                         }
                     } catch (final IOException e) {
                         if (daemonRunning) {
-                            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                            org.appwork.loggingv3.LogV3.log(e);
                         }
                     } finally {
                         if (client != null) {
@@ -416,7 +416,7 @@ public class SingleAppInstance {
                     SingleAppInstance.this.serverSocket.close();
                 } catch (final Throwable e) {
                     if (daemonRunning) {
-                        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                        org.appwork.loggingv3.LogV3.log(e);
                     }
                 }
             }

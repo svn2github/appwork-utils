@@ -47,6 +47,7 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.filechooser.FileSystemView;
 
+import org.appwork.loggingv3.LogV3;
 import org.appwork.sunwrapper.sun.awt.shell.ShellFolderWrapper;
 import org.appwork.utils.Application;
 import org.appwork.utils.IO;
@@ -54,11 +55,8 @@ import org.appwork.utils.IO.SYNC;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.ImageProvider.ImageProvider;
 import org.appwork.utils.images.IconIO;
-import org.appwork.utils.logging2.LogSource;
-import org.appwork.utils.logging2.extmanager.LoggerFactory;
 
 public class MimeWindows extends MimeDefault {
-
     @Override
     public Icon getFileIcon(final String extension, final int width, final int height) throws IOException {
         final String iconKey = "osFileIcon_" + super.getIconKey(extension, width, height);
@@ -99,9 +97,8 @@ public class MimeWindows extends MimeDefault {
                             ret = ImageProvider.toImageIcon(FileSystemView.getFileSystemView().getSystemIcon(tempFile));
                         }
                     } catch (final Throwable e) {
-                        final LogSource logger = LoggerFactory.I().getCurrentClassLogger();
-                        logger.log(e);
-                        logger.severe("TempFile:" + tempFile);
+                        LogV3.log(e);
+                        LogV3.severe("TempFile:" + tempFile);
                         // http://www.oracle.com/technetwork/java/faq-sun-packages-142232.html
                         ret = ImageProvider.toImageIcon(FileSystemView.getFileSystemView().getSystemIcon(tempFile));
                     } finally {
@@ -119,7 +116,7 @@ public class MimeWindows extends MimeDefault {
                     }
                 }
             } catch (final Throwable e) {
-                LoggerFactory.I().getCurrentClassLogger().log(e);
+                LogV3.log(e);
             }
         }
         if (ret == null || ret.getIconWidth() < width || ret.getIconHeight() < height) {
@@ -176,7 +173,7 @@ public class MimeWindows extends MimeDefault {
                     return false;
                 }
             } catch (final Throwable e) {
-                LoggerFactory.I().getCurrentClassLogger().log(e);
+                LogV3.log(e);
             }
         }
         return false;

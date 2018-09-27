@@ -33,7 +33,7 @@
  * ==================================================================================================================================================== */
 package org.appwork.sunwrapper.sun.net.www.protocol.http;
 
-import org.appwork.utils.logging2.extmanager.LoggerFactory;
+import org.appwork.loggingv3.LogV3;
 
 /**
  * @author Thomas
@@ -47,9 +47,9 @@ public class AuthCacheValueWrapper {
         try {
             sun.net.www.protocol.http.AuthCacheValue.setAuthCache(new sun.net.www.protocol.http.AuthCacheImpl());
         } catch (final NoClassDefFoundError e) {
-            LoggerFactory.I().getLogger(AuthCacheValueWrapper.class.getName()).log(e);
+            LogV3.I().getLogger(AuthCacheValueWrapper.class.getName()).log(e);
         } catch (final IllegalAccessError e) {
-            LoggerFactory.I().getLogger(AuthCacheValueWrapper.class.getName()).log(e);
+            LogV3.I().getLogger(AuthCacheValueWrapper.class.getName()).log(e);
         }
     }
 }

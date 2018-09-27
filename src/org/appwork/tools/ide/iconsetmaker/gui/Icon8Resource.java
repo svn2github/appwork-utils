@@ -17,7 +17,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.appwork.utils.StringUtils;
-import org.appwork.utils.logging2.extmanager.LoggerFactory;
+import org.appwork.loggingv3.LogV3;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -137,17 +137,17 @@ public class Icon8Resource {
 
                 @Override
                 public void warning(SAXParseException exception) throws SAXException {
-                    LoggerFactory.getDefaultLogger().log(exception);
+                    LogV3.log(exception);
                 }
 
                 @Override
                 public void fatalError(SAXParseException exception) throws SAXException {
-                    LoggerFactory.getDefaultLogger().log(exception);
+                    LogV3.log(exception);
                 }
 
                 @Override
                 public void error(SAXParseException exception) throws SAXException {
-                    LoggerFactory.getDefaultLogger().log(exception);
+                    LogV3.log(exception);
                 }
             });
             Document doc = docBuilder.parse(new ByteArrayInputStream(svg.getBytes("iso-8859-1")));

@@ -153,7 +153,7 @@ public class SimpleHTTP {
                 final String loc = Loc.getLocale().split("_")[0];
                 this.connection.setRequestProperty("Accept-Language", loc);
             } catch (final Throwable e) {
-                // org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                // org.appwork.loggingv3.LogV3.log(e);
             }
             this.connection.setRequestProperty("User-Agent", "AppWork " + Application.getApplication());
             this.connection.setRequestProperty("Connection", "Close");
@@ -294,7 +294,7 @@ public class SimpleHTTP {
                             sb.append("RESPONSE: " + next.getKey() + " = " + value);
                         }
                     }
-                          org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info(sb.toString());
+                          org.appwork.loggingv3.LogV3.info(sb.toString());
                 }
                 return sb2.toString();
 
@@ -367,7 +367,7 @@ public class SimpleHTTP {
                     final String loc = Loc.getLocale().split("_")[0];
                     this.connection.setRequestProperty("Accept-Language", loc);
                 } catch (final Throwable e) {
-                    // org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                    // org.appwork.loggingv3.LogV3.log(e);
                 }
                 this.connection.setRequestProperty("User-Agent", "AppWork " + Application.getApplication());
                 this.connection.setRequestProperty("Connection", "Close");
@@ -410,7 +410,7 @@ public class SimpleHTTP {
                             sb.append("RESPONSE: " + next.getKey() + " = " + value);
                         }
                     }
-                          org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info(sb.toString());
+                          org.appwork.loggingv3.LogV3.info(sb.toString());
                 }
                 return this.connection;
             } finally {
@@ -445,7 +445,7 @@ public class SimpleHTTP {
                         final String loc = Loc.getLocale().split("_")[0];
                         this.connection.setRequestProperty("Accept-Language", loc);
                     } catch (final Throwable e) {
-                        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                        org.appwork.loggingv3.LogV3.log(e);
                     }
                 }
                 this.connection.setRequestProperty("User-Agent", "AppWork " + Application.getApplication());
@@ -498,7 +498,7 @@ public class SimpleHTTP {
                             sb.append("RESPONSE: " + next.getKey() + " = " + value);
                         }
                     }
-                          org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info(sb.toString());
+                          org.appwork.loggingv3.LogV3.info(sb.toString());
                 }
                 return this.connection;
 

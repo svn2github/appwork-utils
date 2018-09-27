@@ -91,7 +91,7 @@ public class SwingAnimator {
 
                 }
             } catch (final Throwable t) {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(t);
+                org.appwork.loggingv3.LogV3.log(t);
                 SwingAnimator.this.timer.stop();
                 SwingAnimator.this.timer = null;
                 this.finalizer.run();

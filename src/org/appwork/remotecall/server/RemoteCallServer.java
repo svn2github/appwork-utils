@@ -123,10 +123,10 @@ public class RemoteCallServer {
             final Throwable cause = e1.getCause();
             if (cause != null) {
                 if (cause instanceof ResponseAlreadySentException) { throw (ResponseAlreadySentException) cause; }
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e1);
+                org.appwork.loggingv3.LogV3.log(e1);
                 throw new ServerInvokationException(handleRequestError(requestor, cause), requestor);
             }
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e1);
+            org.appwork.loggingv3.LogV3.log(e1);
             throw new ServerInvokationException(handleRequestError(requestor, new RuntimeException(e1)), requestor);
         } catch (final ServerInvokationException e) {
             throw e;
@@ -148,7 +148,7 @@ public class RemoteCallServer {
 
     protected String handleRequestError(final Requestor requestor, final Throwable e) {
         // TODO byte[]-generated method stub
-        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+        org.appwork.loggingv3.LogV3.log(e);
         final StringBuilder sb = new StringBuilder();
 
         try {

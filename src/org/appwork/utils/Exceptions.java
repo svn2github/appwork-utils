@@ -39,7 +39,7 @@ import java.io.Writer;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 
-import org.appwork.utils.logging2.extmanager.LoggerFactory;
+import org.appwork.loggingv3.LogV3;
 
 /**
  * @author $Author: unknown$
@@ -197,7 +197,7 @@ public class Exceptions {
         } catch (NoSuchMethodException ex) {
             // This is the case for JDK < 7
         } catch (SecurityException ex) {
-            LoggerFactory.getDefaultLogger().log(ex);
+            LogV3.log(ex);
         }
     }
 

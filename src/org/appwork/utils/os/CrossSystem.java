@@ -1295,7 +1295,7 @@ public class CrossSystem {
                 try {
                     CrossSystem._openFILE(file);
                 } catch (final IOException e) {
-                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                    org.appwork.loggingv3.LogV3.log(e);
                 }
             }
         };
@@ -1315,7 +1315,7 @@ public class CrossSystem {
         try {
             CrossSystem.openUrlOrThrowException(url);
         } catch (final Throwable e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
         }
     }
 
@@ -1330,7 +1330,7 @@ public class CrossSystem {
         try {
             CrossSystem.openUrlOrThrowException(urlString);
         } catch (final Throwable e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
             try {
                 final String question = _AWU.T.crossSystem_open_url_failed_msg();
                 final InputDialog dialog = new InputDialog(UIOManager.LOGIC_COUNTDOWN | UIOManager.BUTTONS_HIDE_CANCEL, _AWU.T.DIALOG_INPUT_TITLE(), question, urlString, Dialog.getIconByText(question), null, null);
@@ -1346,7 +1346,7 @@ public class CrossSystem {
      */
     public static void restartApplication(final File jar, final String... parameters) {
         try {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("restartApplication " + jar + " " + parameters.length);
+            org.appwork.loggingv3.LogV3.info("restartApplication " + jar + " " + parameters.length);
             final java.util.List<String> nativeParameters = new ArrayList<String>();
             File runin = null;
             if (CrossSystem.isMac()) {
@@ -1368,9 +1368,9 @@ public class CrossSystem {
                 }
             }
             if (nativeParameters.isEmpty()) {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Find Jarfile");
+                org.appwork.loggingv3.LogV3.info("Find Jarfile");
                 final File jarFile = jar;
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Find Jarfile " + jarFile);
+                org.appwork.loggingv3.LogV3.info("Find Jarfile " + jarFile);
                 runin = jarFile.getParentFile();
                 if (CrossSystem.isWindows() || CrossSystem.isOS2()) {
                     final File exeFile = new File(jarFile.getParentFile(), jarFile.getName().substring(0, jarFile.getName().length() - 4) + ".exe");
@@ -1392,12 +1392,12 @@ public class CrossSystem {
                     nativeParameters.add(s);
                 }
             }
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Start " + nativeParameters);
+            org.appwork.loggingv3.LogV3.info("Start " + nativeParameters);
             final ProcessBuilder pb = ProcessBuilderFactory.create(nativeParameters.toArray(new String[] {}));
             /*
              * needed because the root is different for jre/class version
              */
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Root: " + runin);
+            org.appwork.loggingv3.LogV3.info("Root: " + runin);
             if (runin != null) {
                 pb.directory(runin);
             }
@@ -1411,11 +1411,11 @@ public class CrossSystem {
                     try {
                         pb.start();
                     } catch (final IOException e) {
-                        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                        org.appwork.loggingv3.LogV3.log(e);
                     }
                 }
             });
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Start " + ShutdownController.getInstance().requestShutdown(true));
+            org.appwork.loggingv3.LogV3.info("Start " + ShutdownController.getInstance().requestShutdown(true));
         } catch (final Throwable e) {
             throw new WTFException(e);
         }
@@ -1523,7 +1523,7 @@ public class CrossSystem {
         SecuritySoftwareResponse list = new SecuritySoftwareResponse();
         list.setResponse(response);
         if (StringUtils.isNotEmpty(response)) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info(response);
+            org.appwork.loggingv3.LogV3.info(response);
             String[] lines = response.split("[\r\n]{1,2}");
             String firstKey = null;
             SecuritySoftwareInfo ret = new SecuritySoftwareInfo();

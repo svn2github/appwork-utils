@@ -84,7 +84,7 @@ public class ComboBoxDialog extends AbstractDialog<Integer> implements ComboBoxD
      */
     public ComboBoxDialog(final int flag, final String title, final String question, final Object[] options, final int defaultSelection, final Icon icon, final String okText, final String cancelText, final ListCellRenderer renderer) {
         super(flag, title, icon, okText, cancelText);
-        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Dialog    [" + okText + "][" + cancelText + "]\r\nflag:  " + Integer.toBinaryString(flag) + "\r\ntitle: " + title + "\r\nmsg:   \r\n" + question + "\r\noptions:   \r\n" + Arrays.toString(options) + "\r\ndef:" + defaultSelection);
+        org.appwork.loggingv3.LogV3.fine("Dialog    [" + okText + "][" + cancelText + "]\r\nflag:  " + Integer.toBinaryString(flag) + "\r\ntitle: " + title + "\r\nmsg:   \r\n" + question + "\r\noptions:   \r\n" + Arrays.toString(options) + "\r\ndef:" + defaultSelection);
         message = question;
         this.renderer = renderer;
         defaultAnswer = defaultSelection < 0 ? 0 : defaultSelection;
@@ -116,7 +116,7 @@ public class ComboBoxDialog extends AbstractDialog<Integer> implements ComboBoxD
                 ret.setSelectedIndex(defaultAnswer);
             }
         } catch (final Exception e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
         }
         return ret;
     }

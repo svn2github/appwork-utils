@@ -40,7 +40,7 @@ import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.plaf.ComponentUI;
 
-import org.appwork.utils.logging2.extmanager.LoggerFactory;
+import org.appwork.loggingv3.LogV3;
 
 /**
  * @author Thomas
@@ -57,9 +57,9 @@ public class DefaultLookupWrapper {
         try {
             return sun.swing.DefaultLookup.getColor(comp, ui, key);
         } catch (final NoClassDefFoundError e) {
-            LoggerFactory.I().getLogger(DefaultLookupWrapper.class.getName()).log(e);
+            LogV3.I().getLogger(DefaultLookupWrapper.class.getName()).log(e);
         } catch (final IllegalAccessError e) {
-            LoggerFactory.I().getLogger(DefaultLookupWrapper.class.getName()).log(e);
+            LogV3.I().getLogger(DefaultLookupWrapper.class.getName()).log(e);
         }
         return (Color) UIManager.get("TableHeader.focusCellForeground", comp.getLocale());
     }
@@ -74,9 +74,9 @@ public class DefaultLookupWrapper {
         try {
             return sun.swing.DefaultLookup.getBorder(comp, ui, key);
         } catch (final NoClassDefFoundError e) {
-            LoggerFactory.I().getLogger(DefaultLookupWrapper.class.getName()).log(e);
+            LogV3.I().getLogger(DefaultLookupWrapper.class.getName()).log(e);
         } catch (final IllegalAccessError e) {
-            LoggerFactory.I().getLogger(DefaultLookupWrapper.class.getName()).log(e);
+            LogV3.I().getLogger(DefaultLookupWrapper.class.getName()).log(e);
         }
         return (Border) UIManager.get("TableHeader.focusCellBorder", comp.getLocale());
     }

@@ -38,7 +38,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 
 import org.appwork.sunwrapper.WrapperNotAvailableException;
-import org.appwork.utils.logging2.extmanager.LoggerFactory;
+import org.appwork.loggingv3.LogV3;
 
 /**
  * @author Thomas
@@ -57,10 +57,10 @@ public class ShellFolderWrapper {
         } catch (FileNotFoundException e) {
             throw e;
         } catch (final NoClassDefFoundError e) {
-            LoggerFactory.I().getLogger(ShellFolderWrapper.class.getName()).log(e);
+            LogV3.I().getLogger(ShellFolderWrapper.class.getName()).log(e);
             throw new WrapperNotAvailableException(e);
         } catch (final IllegalAccessError e) {
-            LoggerFactory.I().getLogger(ShellFolderWrapper.class.getName()).log(e);
+            LogV3.I().getLogger(ShellFolderWrapper.class.getName()).log(e);
             throw new WrapperNotAvailableException(e);
         }
     }
@@ -76,9 +76,9 @@ public class ShellFolderWrapper {
         } catch (InternalError e) {
             throw e;
         } catch (final NoClassDefFoundError e) {
-            LoggerFactory.I().getLogger(ShellFolderWrapper.class.getName()).log(e);
+            LogV3.I().getLogger(ShellFolderWrapper.class.getName()).log(e);
         } catch (final IllegalAccessError e) {
-            LoggerFactory.I().getLogger(ShellFolderWrapper.class.getName()).log(e);
+            LogV3.I().getLogger(ShellFolderWrapper.class.getName()).log(e);
         }
         return f;
     }
@@ -92,9 +92,9 @@ public class ShellFolderWrapper {
         try {
             return ((sun.awt.shell.ShellFolder) networkFolder).listFiles(b);
         } catch (final NoClassDefFoundError e) {
-            LoggerFactory.I().getLogger(ShellFolderWrapper.class.getName()).log(e);
+            LogV3.I().getLogger(ShellFolderWrapper.class.getName()).log(e);
         } catch (final IllegalAccessError e) {
-            LoggerFactory.I().getLogger(ShellFolderWrapper.class.getName()).log(e);
+            LogV3.I().getLogger(ShellFolderWrapper.class.getName()).log(e);
         }
         return networkFolder.listFiles();
     }
@@ -107,9 +107,9 @@ public class ShellFolderWrapper {
         try {
             return f instanceof sun.awt.shell.ShellFolder;
         } catch (final NoClassDefFoundError e) {
-            LoggerFactory.I().getLogger(ShellFolderWrapper.class.getName()).log(e);
+            LogV3.I().getLogger(ShellFolderWrapper.class.getName()).log(e);
         } catch (final IllegalAccessError e) {
-            LoggerFactory.I().getLogger(ShellFolderWrapper.class.getName()).log(e);
+            LogV3.I().getLogger(ShellFolderWrapper.class.getName()).log(e);
         }
         return false;
     }
@@ -122,9 +122,9 @@ public class ShellFolderWrapper {
         try {
             return sun.awt.shell.ShellFolder.get(key);
         } catch (final NoClassDefFoundError e) {
-            LoggerFactory.I().getLogger(ShellFolderWrapper.class.getName()).log(e);
+            LogV3.I().getLogger(ShellFolderWrapper.class.getName()).log(e);
         } catch (final IllegalAccessError e) {
-            LoggerFactory.I().getLogger(ShellFolderWrapper.class.getName()).log(e);
+            LogV3.I().getLogger(ShellFolderWrapper.class.getName()).log(e);
         }
         return null;
     }
@@ -138,9 +138,9 @@ public class ShellFolderWrapper {
         try {
             return sun.awt.shell.ShellFolder.getShellFolder(file);
         } catch (final NoClassDefFoundError e) {
-            LoggerFactory.I().getLogger(ShellFolderWrapper.class.getName()).log(e);
+            LogV3.I().getLogger(ShellFolderWrapper.class.getName()).log(e);
         } catch (final IllegalAccessError e) {
-            LoggerFactory.I().getLogger(ShellFolderWrapper.class.getName()).log(e);
+            LogV3.I().getLogger(ShellFolderWrapper.class.getName()).log(e);
         }
         return null;
     }

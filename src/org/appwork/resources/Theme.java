@@ -199,7 +199,7 @@ public class Theme implements MinTimeWeakReferenceCleanup {
                 ret = IconIO.getImageIcon(url, size);
                 ret = this.modify(ret, relativePath);
                 if (url == null) {
-                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(new Exception("Icon missing: " + this.getPath("images/", relativePath, ".png", false)));
+                    org.appwork.loggingv3.LogV3.log(new Exception("Icon missing: " + this.getPath("images/", relativePath, ".png", false)));
                 }
             }
             if (useCache && ret != null) {
@@ -271,7 +271,7 @@ public class Theme implements MinTimeWeakReferenceCleanup {
                 relativePath = relativePath.substring(in + 1);
             }
         } catch (Throwable e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe(Exceptions.getStackTrace(e));
+            org.appwork.loggingv3.LogV3.severe(Exceptions.getStackTrace(e));
         }
     }
 
@@ -373,7 +373,7 @@ public class Theme implements MinTimeWeakReferenceCleanup {
         try {
             return IO.readURLToString(url);
         } catch (final IOException e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
         }
         return null;
     }

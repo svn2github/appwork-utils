@@ -50,7 +50,7 @@ import org.appwork.utils.IO;
 import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.logging2.LogInterface;
-import org.appwork.utils.logging2.extmanager.LoggerFactory;
+import org.appwork.loggingv3.LogV3;
 import org.appwork.utils.os.CrossSystem.OperatingSystem;
 import org.appwork.utils.processes.ProcessBuilderFactory;
 import org.appwork.utils.processes.ProcessOutput;
@@ -125,14 +125,14 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
                 } catch (InterruptedException e) {
                     throw e;
                 } catch (Exception e) {
-                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                    org.appwork.loggingv3.LogV3.log(e);
                 }
                 try {
                     ProcessBuilderFactory.runCommand(new String[] { "%windir%\\system32\\shutdown.exe", "-s", "-f", "-t", "01" });
                 } catch (InterruptedException e) {
                     throw e;
                 } catch (Exception e) {
-                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                    org.appwork.loggingv3.LogV3.log(e);
                 }
             } else {
                 /* normal shutdown */
@@ -141,14 +141,14 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
                 } catch (InterruptedException e) {
                     throw e;
                 } catch (Exception e) {
-                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                    org.appwork.loggingv3.LogV3.log(e);
                 }
                 try {
                     ProcessBuilderFactory.runCommand(new String[] { "%windir%\\system32\\shutdown.exe", "-s", "-t", "01" });
                 } catch (InterruptedException e) {
                     throw e;
                 } catch (Exception e) {
-                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                    org.appwork.loggingv3.LogV3.log(e);
                 }
             }
             if (CrossSystem.OS == OperatingSystem.WINDOWS_2000 || CrossSystem.OS == OperatingSystem.WINDOWS_NT) {
@@ -165,7 +165,7 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
                 } catch (InterruptedException e) {
                     throw e;
                 } catch (Exception e) {
-                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                    org.appwork.loggingv3.LogV3.log(e);
                 }
             }
             break;
@@ -176,14 +176,14 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
             } catch (InterruptedException e) {
                 throw e;
             } catch (Exception e) {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                org.appwork.loggingv3.LogV3.log(e);
             }
             try {
                 ProcessBuilderFactory.runCommand(new String[] { "RUNDLL32.EXE", "Shell32,SHExitWindowsEx", "1" });
             } catch (InterruptedException e) {
                 throw e;
             } catch (Exception e) {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                org.appwork.loggingv3.LogV3.log(e);
             }
             break;
         }
@@ -210,7 +210,7 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
                 } catch (InterruptedException iEx) {
                     throw iEx;
                 } catch (Throwable e) {
-                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                    org.appwork.loggingv3.LogV3.log(e);
                 }
             }
             try {
@@ -223,7 +223,7 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
                 } catch (InterruptedException iEx) {
                     throw iEx;
                 } catch (Exception ex) {
-                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(ex);
+                    org.appwork.loggingv3.LogV3.log(ex);
                 }
             }
             try {
@@ -236,13 +236,13 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
                 } catch (InterruptedException iEx) {
                     throw iEx;
                 } catch (Exception e1) {
-                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                    org.appwork.loggingv3.LogV3.log(e);
                 }
             }
             break;
         case WINDOWS_OTHERS:
             /* older windows versions */
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("no standby support, use shutdown");
+            org.appwork.loggingv3.LogV3.info("no standby support, use shutdown");
             return false;
         }
         return true;
@@ -273,7 +273,7 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
                 } catch (InterruptedException iEx) {
                     throw iEx;
                 } catch (Throwable e) {
-                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                    org.appwork.loggingv3.LogV3.log(e);
                 }
             }
             try {
@@ -286,7 +286,7 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
                 } catch (InterruptedException iEx) {
                     throw iEx;
                 } catch (Exception ex) {
-                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(ex);
+                    org.appwork.loggingv3.LogV3.log(ex);
                 }
             }
             try {
@@ -294,19 +294,19 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
             } catch (InterruptedException iEx) {
                 throw iEx;
             } catch (Exception e) {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                org.appwork.loggingv3.LogV3.log(e);
                 try {
                     ProcessBuilderFactory.runCommand(new String[] { "%windir%\\system32\\RUNDLL32.EXE", "powrprof.dll,SetSuspendState" });
                 } catch (InterruptedException iEx) {
                     throw iEx;
                 } catch (Exception ex) {
-                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(ex);
+                    org.appwork.loggingv3.LogV3.log(ex);
                 }
             }
             break;
         case WINDOWS_OTHERS:
             /* older windows versions */
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("no hibernate support, use shutdown");
+            org.appwork.loggingv3.LogV3.info("no hibernate support, use shutdown");
             return false;
         }
         return true;
@@ -331,7 +331,7 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
         } catch (InterruptedException e) {
             throw e;
         } catch (Exception e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
         }
         return true;
     }
@@ -389,7 +389,7 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
         try {
             result = ProcessBuilderFactory.runCommand("wmic", "process", "where", "ExecutablePath like '%" + path.replace("\\", "\\\\") + "%'", "Terminate", String.valueOf(exitCode));
             String str = result.getStdOutString().trim();
-            LoggerFactory.getDefaultLogger().info(result.toString());
+            LogV3.info(result.toString());
             String[] terminated = new Regex(str, "Win32_Process\\.Handle=\"(\\d+)\"\\)\\-\\>Terminate\\(\\)").getColumn(0);
             if (terminated == null) {
                 return new long[] {};

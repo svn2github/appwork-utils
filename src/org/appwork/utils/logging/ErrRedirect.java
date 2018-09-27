@@ -66,7 +66,7 @@ public class ErrRedirect extends Thread {
             System.setErr(this.printStream);
             this.start();
         } catch (final IOException e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
         }
     }
 
@@ -115,7 +115,7 @@ public class ErrRedirect extends Thread {
                 }
                 this.printStream.flush();
             } catch (final Throwable e) {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                org.appwork.loggingv3.LogV3.log(e);
                 break;
             }
         }

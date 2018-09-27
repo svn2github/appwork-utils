@@ -20,7 +20,7 @@ import org.appwork.utils.FileHandler;
 import org.appwork.utils.Files;
 import org.appwork.utils.Hash;
 import org.appwork.utils.ide.IDEUtils;
-import org.appwork.utils.logging2.extmanager.LoggerFactory;
+import org.appwork.loggingv3.LogV3;
 import org.appwork.utils.swing.EDTHelper;
 import org.appwork.utils.swing.EDTRunner;
 import org.appwork.utils.swing.dialog.DialogCanceledException;
@@ -206,7 +206,7 @@ public class IconSetMaker {
                             nameTags = p.getProperty("name");
                         }
                     } catch (Throwable e) {
-                        LoggerFactory.getDefaultLogger().log(e);
+                        LogV3.log(e);
                     }
                     if (ir == null) {
                         ir = new IconResource(IconSetMaker.this, rel, Hash.getMD5(f));

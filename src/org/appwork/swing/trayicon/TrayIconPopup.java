@@ -25,7 +25,7 @@ import java.awt.event.MouseListener;
 import javax.swing.JPopupMenu;
 import javax.swing.Popup;
 
-import org.appwork.utils.logging2.extmanager.LoggerFactory;
+import org.appwork.loggingv3.LogV3;
 import org.appwork.utils.swing.EDTHelper;
 import org.appwork.utils.swing.EDTRunner;
 
@@ -106,7 +106,7 @@ public final class TrayIconPopup extends JPopupMenu implements MouseListener {
                                                 }
                                             }
                                         } catch (Throwable e) {
-                                            LoggerFactory.getDefaultLogger().log(e);
+                                            LogV3.log(e);
                                         }
                                     }
                                     if (activeFrame) {

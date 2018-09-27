@@ -36,7 +36,7 @@ package org.appwork.controlling;
 import java.util.ArrayList;
 
 import org.appwork.utils.NullsafeAtomicReference;
-import org.appwork.utils.logging2.extmanager.LoggerFactory;
+import org.appwork.loggingv3.LogV3;
 
 /**
  * @author daniel
@@ -105,7 +105,7 @@ public class SingleReachableState {
                 run.run();
             }
         } catch (final Throwable e) {
-            LoggerFactory.I().getDefaultLogger().log(e);
+            LogV3.I().getDefaultLogger().log(e);
         }
     }
 

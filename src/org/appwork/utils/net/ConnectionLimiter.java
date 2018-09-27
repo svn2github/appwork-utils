@@ -138,7 +138,7 @@ public class ConnectionLimiter {
                 if (ms < 0) {
                     ms = System.currentTimeMillis();
                 }
-                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("block 250 ms for " + this.maxConcurrent + " connectionlimit");
+                      org.appwork.loggingv3.LogV3.warning("block 250 ms for " + this.maxConcurrent + " connectionlimit");
                 this.eventSender.fireEvent(new BasicEvent<Long>(this, ConnectionLimiter.WAIT_DUETO_MAXSIMULTAN_LIMIT_START, System.currentTimeMillis() - ms, null));
                 waiting = true;
                 Thread.sleep(250);
@@ -166,7 +166,7 @@ public class ConnectionLimiter {
                         wait = Math.max(250, it.next() - (System.currentTimeMillis() - this.timeTime));
                     }
                     waiting = true;
-                          org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("wait " + wait + " ms because we got " + this.list.size() + " connections the last minute");
+                          org.appwork.loggingv3.LogV3.warning("wait " + wait + " ms because we got " + this.list.size() + " connections the last minute");
                     this.eventSender.fireEvent(new BasicEvent<Long>(this, ConnectionLimiter.WAIT_DUETO_CONNECTIONSPERMINUTE_LIMIT_START, wait, null));
 
                     Thread.sleep(wait);

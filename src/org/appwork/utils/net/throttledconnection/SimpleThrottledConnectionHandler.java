@@ -153,7 +153,7 @@ public class SimpleThrottledConnectionHandler implements ThrottledConnectionHand
                         try {
                             Thread.sleep(sleepTime);
                         } catch (final InterruptedException e) {
-                            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                            org.appwork.loggingv3.LogV3.log(e);
                         }
                         long lastTraffic = 0;
                         int newBandwidth = 0;

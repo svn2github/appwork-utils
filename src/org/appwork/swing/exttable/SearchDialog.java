@@ -99,7 +99,7 @@ public abstract class SearchDialog extends JDialog implements WindowListener, Ac
             caseSensitive.addActionListener(saveListener);
             regularExpression.addActionListener(saveListener);
         } catch (final Exception e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
         }
         caseSensitive.setVisible(BinaryLogic.containsNone(flag, SearchDialog.NO_CASE_FLAG));
         regularExpression.setVisible(BinaryLogic.containsNone(flag, SearchDialog.NO_REGEX_FLAG));

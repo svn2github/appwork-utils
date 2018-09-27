@@ -49,7 +49,7 @@ import javax.swing.filechooser.FileSystemView;
 import org.appwork.storage.config.JsonConfig;
 import org.appwork.sunwrapper.sun.awt.shell.ShellFolderWrapper;
 import org.appwork.utils.locale._AWU;
-import org.appwork.utils.logging2.extmanager.LoggerFactory;
+import org.appwork.loggingv3.LogV3;
 import org.appwork.utils.os.CrossSystem;
 
 /**
@@ -78,7 +78,7 @@ public class ExtFileSystemView extends FileSystemView {
         // try {
         // if (view.networkFolder != null) {
         // view.networkFolder.listFiles();
-        // LoggerFactory.I().getDefaultLogger().info("List Networkfolder done " +
+        // LogV3.I().getDefaultLogger().info("List Networkfolder done " +
         // (System.currentTimeMillis() -
         // tt));
         // }
@@ -147,13 +147,13 @@ public class ExtFileSystemView extends FileSystemView {
         try {
             final File[] ret;
             if (dir == this.networkFolder) {
-                LoggerFactory.I().getDefaultLogger().info("getFilesShellfolder");
+                LogV3.I().getDefaultLogger().info("getFilesShellfolder");
                 ret = this.getFilesShellfolder((NetWorkFolder) dir, useFileHiding);
             } else {
-                LoggerFactory.I().getDefaultLogger().info("org.getFiles(dir, useFileHiding);");
+                LogV3.I().getDefaultLogger().info("org.getFiles(dir, useFileHiding);");
                 ret = this.org.getFiles(dir, useFileHiding);
             }
-            LoggerFactory.I().getDefaultLogger().info("getFiles: ms:" + (System.currentTimeMillis() - t) + " " + dir + "|" + ret.length);
+            LogV3.I().getDefaultLogger().info("getFiles: ms:" + (System.currentTimeMillis() - t) + " " + dir + "|" + ret.length);
             final java.util.List<File> filtered = new ArrayList<File>();
             for (final File f : ret) {
                 if (f.getName().equals(ExtFileSystemView.VIRTUAL_NETWORKFOLDER)) {
@@ -167,10 +167,10 @@ public class ExtFileSystemView extends FileSystemView {
                 }
                 filtered.add(f);
             }
-            LoggerFactory.I().getDefaultLogger().info("Return Files for " + dir + "(" + useFileHiding + "): " + filtered.size());
+            LogV3.I().getDefaultLogger().info("Return Files for " + dir + "(" + useFileHiding + "): " + filtered.size());
             return filtered.toArray(new File[] {});
         } finally {
-            LoggerFactory.I().getDefaultLogger().info("getFiles(end): ms:" + (System.currentTimeMillis() - t) + " " + dir);
+            LogV3.I().getDefaultLogger().info("getFiles(end): ms:" + (System.currentTimeMillis() - t) + " " + dir);
         }
     }
 
@@ -230,7 +230,7 @@ public class ExtFileSystemView extends FileSystemView {
     @Override
     public File[] getRoots() {
         final long t = System.currentTimeMillis();
-        LoggerFactory.I().getDefaultLogger().info("Get Roots");
+        LogV3.I().getDefaultLogger().info("Get Roots");
         if (this.roots != null) {
             return this.roots;
         }
@@ -241,7 +241,7 @@ public class ExtFileSystemView extends FileSystemView {
                     return (File[]) ShellFolderWrapper.get("fileChooserComboBoxFolders");
                 }
             });
-            LoggerFactory.I().getDefaultLogger().info("Listed Base folders " + (System.currentTimeMillis() - t));
+            LogV3.I().getDefaultLogger().info("Listed Base folders " + (System.currentTimeMillis() - t));
             final LinkedHashSet<File> unique = new LinkedHashSet<File>() {
                 /*
                  * (non-Javadoc)
@@ -300,7 +300,7 @@ public class ExtFileSystemView extends FileSystemView {
                     if (f.getParentFile() == null || !f.getParentFile().equals(home)) {
                         unique.add(f);
                     }
-                    LoggerFactory.I().getDefaultLogger().info("Basefolder: " + f.getName() + " - " + f + " - " + CrossSystem.getOSString());
+                    LogV3.I().getDefaultLogger().info("Basefolder: " + f.getName() + " - " + f + " - " + CrossSystem.getOSString());
                 }
             }
             final File[] nroots = unique.toArray(new File[] {});
@@ -312,7 +312,7 @@ public class ExtFileSystemView extends FileSystemView {
             this.roots = nroots;
             return this.roots;
         } finally {
-            LoggerFactory.I().getDefaultLogger().info("Roots: " + (System.currentTimeMillis() - t));
+            LogV3.I().getDefaultLogger().info("Roots: " + (System.currentTimeMillis() - t));
         }
     }
 

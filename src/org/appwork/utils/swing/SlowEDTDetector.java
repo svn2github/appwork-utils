@@ -39,7 +39,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.appwork.scheduler.DelayedRunnable;
-import org.appwork.utils.logging2.LogSource;
+import org.appwork.utils.logging2.LogInterface;
 
 /**
  * @author daniel
@@ -53,7 +53,7 @@ public class SlowEDTDetector {
     private final DelayedRunnable detector;
     private final long            maxEDTBlockingTime;
 
-    public SlowEDTDetector(final long maxEDTBlockingTime, final LogSource logger) {
+    public SlowEDTDetector(final long maxEDTBlockingTime, final LogInterface logger) {
         this.maxEDTBlockingTime = maxEDTBlockingTime;
         this.detector = new DelayedRunnable(maxEDTBlockingTime, maxEDTBlockingTime) {
 

@@ -40,7 +40,7 @@ import javax.swing.JComponent;
 
 import org.appwork.utils.Exceptions;
 import org.appwork.utils.JVMVersion;
-import org.appwork.utils.logging2.extmanager.LoggerFactory;
+import org.appwork.loggingv3.LogV3;
 
 /**
  * @author Thomas
@@ -93,11 +93,11 @@ public class SwingUtilities2Wrapper {
         } catch (final NoClassDefFoundError e) {
             CLIP_STRING_IF_NECESSARY_OK = false;
             System.err.println("sun.swing.SwingUtilities2.clipStringIfNecessary failed");
-            LoggerFactory.I().getLogger(SwingUtilities2Wrapper.class.getName()).log(e);
+            LogV3.I().getLogger(SwingUtilities2Wrapper.class.getName()).log(e);
         } catch (final IllegalAccessError e) {
             CLIP_STRING_IF_NECESSARY_OK = false;
             System.err.println("sun.swing.SwingUtilities2.clipStringIfNecessary failed");
-            LoggerFactory.I().getLogger(SwingUtilities2Wrapper.class.getName()).log(e);
+            LogV3.I().getLogger(SwingUtilities2Wrapper.class.getName()).log(e);
         } catch (final Exception ignore) {
             System.err.println("sun.swing.SwingUtilities2.clipStringIfNecessary failed:" + Exceptions.getStackTrace(ignore));
         }
@@ -112,9 +112,9 @@ public class SwingUtilities2Wrapper {
         try {
             sun.swing.SwingUtilities2.setSkipClickCount(dispatchComponent, i);
         } catch (final NoClassDefFoundError e) {
-            LoggerFactory.I().getLogger(SwingUtilities2Wrapper.class.getName()).log(e);
+            LogV3.I().getLogger(SwingUtilities2Wrapper.class.getName()).log(e);
         } catch (final IllegalAccessError e) {
-            LoggerFactory.I().getLogger(SwingUtilities2Wrapper.class.getName()).log(e);
+            LogV3.I().getLogger(SwingUtilities2Wrapper.class.getName()).log(e);
         }
     }
 }

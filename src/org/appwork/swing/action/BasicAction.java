@@ -146,7 +146,7 @@ public abstract class BasicAction extends AbstractAction {
     // } else if (new Regex(split[i], "^META$").matches()) {
     // mod = mod | KeyEvent.META_DOWN_MASK;
     // } else {
-    //       org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info(getName() + " Shortcuts: skipping wrong modifier " + mod +
+    //       org.appwork.loggingv3.LogV3.info(getName() + " Shortcuts: skipping wrong modifier " + mod +
     // " in " + accelerator);
     // }
     // }
@@ -155,14 +155,14 @@ public abstract class BasicAction extends AbstractAction {
     // final int m = (Integer) f.get(null);
     // putValue(AbstractAction.ACCELERATOR_KEY, ks = KeyStroke.getKeyStroke(m,
     // mod));
-    //       org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finest(getName() + " Shortcuts: mapped " + accelerator + " to " +
+    //       org.appwork.loggingv3.LogV3.finest(getName() + " Shortcuts: mapped " + accelerator + " to " +
     // ks);
     // } catch (final Exception e) {
     // // JDLogger.exception(e);
     // putValue(AbstractAction.ACCELERATOR_KEY, ks =
     // KeyStroke.getKeyStroke(accelerator.charAt(accelerator.length() - 1),
     // Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-    //       org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finest(getName() + " Shortcuts: mapped " + accelerator + " to " +
+    //       org.appwork.loggingv3.LogV3.finest(getName() + " Shortcuts: mapped " + accelerator + " to " +
     // ks + " (Exception)");
     // }
     // }

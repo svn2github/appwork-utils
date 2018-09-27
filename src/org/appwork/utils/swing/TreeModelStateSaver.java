@@ -115,7 +115,7 @@ public class TreeModelStateSaver {
 
                     }
                 } catch (final Throwable e) {
-                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                    org.appwork.loggingv3.LogV3.log(e);
                 }
                 return null;
             }
@@ -138,14 +138,14 @@ public class TreeModelStateSaver {
                         TreeModelStateSaver.this.tree.expandPath(TreeModelStateSaver.this.treePath);
                     }
                 } catch (final Throwable e) {
-                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                    org.appwork.loggingv3.LogV3.log(e);
                 }
 
                 for (int i = 0; i < TreeModelStateSaver.this.tree.getModel().getChildCount(node); i++) {
                     try {
                         TreeModelStateSaver.this.restoreState(TreeModelStateSaver.this.tree.getModel().getChild(node, i), new ArrayList<Object>(path));
                     } catch (final Throwable e) {
-                        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                        org.appwork.loggingv3.LogV3.log(e);
                     }
                 }
                 return null;
@@ -176,7 +176,7 @@ public class TreeModelStateSaver {
             this.treePath = new TreePath(path.toArray(new Object[] {}));
             this.expandCache.put(node, this.tree.isExpanded(this.treePath));
         } catch (final Exception e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
 
         }
 
@@ -185,7 +185,7 @@ public class TreeModelStateSaver {
             try {
                 this.saveState(this.tree.getModel().getChild(node, i), new ArrayList<Object>(path));
             } catch (final Exception e) {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                org.appwork.loggingv3.LogV3.log(e);
             }
             this.tree.getModel().getChildCount(node);
         }

@@ -20,7 +20,7 @@ import javax.swing.SwingUtilities;
 import org.appwork.storage.JSonStorage;
 import org.appwork.swing.components.IDIcon;
 import org.appwork.swing.components.IconComponentInterface;
-import org.appwork.utils.logging2.extmanager.LoggerFactory;
+import org.appwork.loggingv3.LogV3;
 
 public class IconSetMakerAdapter implements AWTEventListener {
     private ArrayList<Component> find(Container p, Point point) {
@@ -117,7 +117,7 @@ public class IconSetMakerAdapter implements AWTEventListener {
                         }
 
                     } catch (Throwable e) {
-                        LoggerFactory.getDefaultLogger().log(e);
+                        LogV3.log(e);
 
                     }
                 }

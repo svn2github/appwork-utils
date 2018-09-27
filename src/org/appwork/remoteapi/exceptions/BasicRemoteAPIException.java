@@ -171,9 +171,9 @@ public class BasicRemoteAPIException extends Exception implements HttpConnection
      */
     public void writeToLogger(LogInterface logger) {
         if (request == null) {
-            logger.info("Exception in Request **\r\n" + Exceptions.getStackTrace(this));
+            logger.info("Exception in Request **\r\n" + Exceptions.getStackTrace(this) + "\r\ndata:" + data);
         } else {
-            logger.info("Exception in Request " + request.getId() + "\r\n" + Exceptions.getStackTrace(this));
+            logger.info("Exception in Request " + request.getId() + "/" + request.getRequestedURL() + "\r\n" + Exceptions.getStackTrace(this) + "\r\ndata:" + data);
         }
     }
 }

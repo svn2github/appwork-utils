@@ -36,7 +36,7 @@ package org.appwork.utils.logging;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.appwork.utils.logging2.extmanager.LoggerFactory;
+import org.appwork.loggingv3.LogV3;
 
 /**
  * @author daniel
@@ -57,7 +57,7 @@ public class Log {
 
     @Deprecated
     public static void exception(final Level level, final Throwable e) {
-        LoggerFactory.getDefaultLogger().log(e);
+        LogV3.log(e);
     }
 
     @Deprecated
@@ -66,7 +66,7 @@ public class Log {
 
     @Deprecated
     public static void exception(Throwable e) {
-        LoggerFactory.getDefaultLogger().log(e);
+        LogV3.log(e);
     }
 
     @Deprecated

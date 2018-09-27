@@ -202,7 +202,7 @@ public class CustomOriginalTableColumn extends TableColumn {
         super.setWidth(width);
         if (width != getWidth() && extColumn.getModel().isColumnVisible(extColumn.getIndex())) {
 
-                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Bad Column Implementation: " + extColumn.getModel().getClass().getName() + "/" + extColumn.getName() + " Min: " + super.getMinWidth() + " Max: " + super.getMaxWidth());
+                  org.appwork.loggingv3.LogV3.severe("Bad Column Implementation: " + extColumn.getModel().getClass().getName() + "/" + extColumn.getName() + " Min: " + super.getMinWidth() + " Max: " + super.getMaxWidth());
         }
         // if (getModelIndex() == 8) {
         // System.out.println("w-->" + getWidth());

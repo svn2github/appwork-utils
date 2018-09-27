@@ -90,7 +90,7 @@ public class SearchDialog extends AbstractDialog<String> implements KeyListener,
             JSonStorage.getStorage("SearchDialog").put("caseSensitive", caseSensitive.isSelected());
             JSonStorage.getStorage("SearchDialog").put("regularExpression", regularExpression.isSelected());
         } catch (final Exception e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
         }
         return input.getText();
     }

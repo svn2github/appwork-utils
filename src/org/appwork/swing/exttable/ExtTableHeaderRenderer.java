@@ -129,7 +129,7 @@ public class ExtTableHeaderRenderer extends DefaultTableCellRenderer implements 
             focusForeground = DefaultLookupWrapper.getColor(this, ui, "TableHeader.focusCellForeground");
             focusBackground = DefaultLookupWrapper.getColor(this, ui, "TableHeader.focusCellBackground");
         } catch (final Throwable e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
         }
         if (focusForeground == null) {
             focusForeground = header.getForeground();
@@ -143,7 +143,7 @@ public class ExtTableHeaderRenderer extends DefaultTableCellRenderer implements 
             focusBorder = DefaultLookupWrapper.getBorder(this, ui, "TableHeader.focusCellBorder");
             cellBorder = DefaultLookupWrapper.getBorder(this, ui, "TableHeader.cellBorder");
         } catch (final Throwable e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
             // avoid that the block above kills edt
         }
         if (focusBorder == null) {
@@ -220,7 +220,7 @@ public class ExtTableHeaderRenderer extends DefaultTableCellRenderer implements 
                 // g2.setComposite(comp);
             }
         } catch (final RuntimeException e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
         }
     }
 }

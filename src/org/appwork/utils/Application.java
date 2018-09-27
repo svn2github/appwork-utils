@@ -60,8 +60,8 @@ import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
 
 import org.appwork.exceptions.WTFException;
+import org.appwork.loggingv3.LogV3;
 import org.appwork.utils.logging2.LogInterface;
-import org.appwork.utils.logging2.extmanager.LoggerFactory;
 import org.appwork.utils.os.CrossSystem;
 
 /**
@@ -71,7 +71,7 @@ import org.appwork.utils.os.CrossSystem;
  *
  */
 public class Application {
-    private static Boolean              IS_JARED      = null;
+    private static Boolean IS_JARED = null;
     static {
         if (System.getProperty("NO_SYSOUT_REDIRECT") == null) {
             Application.redirectOutputStreams();
@@ -153,7 +153,7 @@ public class Application {
             method.setAccessible(true);
             method.invoke(cl, new Object[] { url });
         } catch (final Throwable t) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(t);
+            org.appwork.loggingv3.LogV3.log(t);
             throw new IOException("Failed to add URL to system classloader: URL:" + url + "ClassLoader:" + cl, t);
         }
     }
@@ -195,7 +195,7 @@ public class Application {
         final URL url = Application.getRessourceURL(name);
         final String prot = url.getProtocol();
         final String path = url.getPath();
-        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info(url + "");
+        org.appwork.loggingv3.LogV3.info(url + "");
         if (!"jar".equals(prot)) {
             throw new WTFException("Works in Jared mode only");
         }
@@ -206,32 +206,11 @@ public class Application {
         try {
             return new File(new URL(path.substring(0, index + 4)).toURI());
         } catch (final MalformedURLException e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
         } catch (final URISyntaxException e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
         }
         return null;
-    }
-
-    /**
-     * @param object
-     * @return
-     */
-    public static String getJarName(Class<?> clazz) {
-        if (clazz == null) {
-            clazz = Application.class;
-        }
-        final String name = clazz.getName().replaceAll("\\.", "/") + ".class";
-        final String url = Application.getRessourceURL(name).toString();
-        final int index = url.indexOf(".jar!");
-        if (index < 0) {
-            throw new IllegalStateException("No JarName Found");
-        }
-        try {
-            return new File(new URL(url.substring(4, index + 4)).toURI()).getName();
-        } catch (final Exception e) {
-        }
-        throw new IllegalStateException("No JarName Found");
     }
 
     public static long getJavaVersion() {
@@ -347,6 +326,27 @@ public class Application {
     }
 
     /**
+     * @param object
+     * @return
+     */
+    public static String getJarName(Class<?> clazz) {
+        if (clazz == null) {
+            clazz = Application.class;
+        }
+        final String name = clazz.getName().replaceAll("\\.", "/") + ".class";
+        final String url = Application.getRessourceURL(name).toString();
+        final int index = url.indexOf(".jar!");
+        if (index < 0) {
+            throw new IllegalStateException("No JarName Found");
+        }
+        try {
+            return new File(new URL(url.substring(4, index + 4)).toURI()).getName();
+        } catch (final Exception e) {
+        }
+        throw new IllegalStateException("No JarName Found");
+    }
+
+    /**
      * Detects the applications home directory. it is either the pass of the appworkutils.jar or HOME/
      */
     public static String getRoot(final Class<?> rootOfClazz) {
@@ -377,7 +377,7 @@ public class Application {
                 Application.ROOT = appRoot.getAbsolutePath();
                 // System.out.println("Application Root: " + Application.ROOT + " (jared) " + rootOfClazz);
             } catch (final URISyntaxException e) {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                org.appwork.loggingv3.LogV3.log(e);
                 Application.ROOT = System.getProperty("user.home") + System.getProperty("file.separator") + Application.APP_FOLDER + System.getProperty("file.separator");
                 // System.out.println("Application Root: " + Application.ROOT + " (jared but error) " + rootOfClazz);
             }
@@ -408,7 +408,7 @@ public class Application {
                 appRoot = null;
             }
         } catch (java.io.UnsupportedEncodingException e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
         }
         if (appRoot == null) {
             appRoot = new File(path);
@@ -452,7 +452,7 @@ public class Application {
             }
             return appRoot;
         } catch (final URISyntaxException e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
             return null;
         }
     }
@@ -530,7 +530,7 @@ public class Application {
         final String name = rootOfClazz.getName().replaceAll("\\.", "/") + ".class";
         final ClassLoader cll = Application.class.getClassLoader();
         if (cll == null) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("getContextClassLoader() is null");
+            org.appwork.loggingv3.LogV3.severe("getContextClassLoader() is null");
             Application.IS_JARED = Boolean.TRUE;
             return true;
         }
@@ -558,17 +558,17 @@ public class Application {
     public static boolean isOutdatedJavaVersion(final boolean supportJAVA15) {
         final long java = Application.getJavaVersion();
         if (java < Application.JAVA16 && !CrossSystem.isMac()) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Java 1.6 should be available on your System, please upgrade!");
+            org.appwork.loggingv3.LogV3.warning("Java 1.6 should be available on your System, please upgrade!");
             /* this is no mac os, so please use java>=1.6 */
             return true;
         }
         if (java < Application.JAVA16 && !supportJAVA15) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Java 1.5 no longer supported!");
+            org.appwork.loggingv3.LogV3.warning("Java 1.5 no longer supported!");
             /* we no longer support java 1.5 */
             return true;
         }
         if (java >= 16018000l && java < 16019000l) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Java 1.6 Update 18 has a serious bug in garbage collector!");
+            org.appwork.loggingv3.LogV3.warning("Java 1.6 Update 18 has a serious bug in garbage collector!");
             /*
              * java 1.6 update 18 has a bug in garbage collector, causes java crashes
              *
@@ -577,21 +577,21 @@ public class Application {
             return true;
         }
         if (java >= 16010000l && java < 16011000l) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Java 1.6 Update 10 has a swing bug!");
+            org.appwork.loggingv3.LogV3.warning("Java 1.6 Update 10 has a swing bug!");
             /*
              * 16010.26 http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6657923
              */
             return true;
         }
         if (CrossSystem.isMac() && java >= Application.JAVA17 && java < 17006000l) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("leaking semaphores bug");
+            org.appwork.loggingv3.LogV3.warning("leaking semaphores bug");
             /*
              * leaking semaphores http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7166379
              */
             return true;
         }
         if (CrossSystem.isMac() && java >= 17250000l && java < 17550000l) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("freezing AppKit thread bug");
+            org.appwork.loggingv3.LogV3.warning("freezing AppKit thread bug");
             /*
              * http://bugs.java.com/view_bug.do?bug_id=8025588
              *
@@ -629,6 +629,14 @@ public class Application {
             }
         }
         url = Application.getRessourceURL("build.json");
+        if (url != null) {
+            try {
+                logger.info(url + ":\r\n" + IO.readURLToString(url));
+            } catch (final IOException e1) {
+                logger.log(e1);
+            }
+        }
+        url = Application.getRessourceURL("version.txt");
         if (url != null) {
             try {
                 logger.info(url + ":\r\n" + IO.readURLToString(url));
@@ -853,7 +861,7 @@ public class Application {
         Application.ROOT = null;
         Application.APP_FOLDER = newAppFolder;
         Application.ensureFrameWorkInit();
-        LoggerFactory.getDefaultLogger().info("Application Root: " + getRoot(Application.class));
+        LogV3.info("Application Root: " + getRoot(Application.class));
     }
 
     /**
@@ -935,7 +943,7 @@ public class Application {
             return;
         }
         DID_INIT = true;
-        org.appwork.utils.logging2.extmanager.LoggerFactory.I();
+        // org.appwork.loggingv3.LogV3.I;
         org.appwork.shutdown.ShutdownController.getInstance();
     }
 

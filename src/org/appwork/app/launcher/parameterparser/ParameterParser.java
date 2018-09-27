@@ -39,10 +39,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 
+import org.appwork.loggingv3.LogV3;
 import org.appwork.utils.IO;
 import org.appwork.utils.event.Eventsender;
-import org.appwork.utils.logging2.LogSource;
-import org.appwork.utils.logging2.extmanager.LoggerFactory;
+import org.appwork.utils.logging2.LogInterface;
 import org.appwork.utils.parser.ShellParser;
 
 /**
@@ -61,20 +61,17 @@ public class ParameterParser {
      */
     private final Eventsender<CommandSwitchListener, CommandSwitch> eventSender;
     private HashMap<String, CommandSwitch>                          map;
-    private LogSource                                               logger;
+    private LogInterface                                            logger;
     private ArrayList<CommandSwitch>                                list;
 
     public ParameterParser(final String[] args) {
-        logger = LoggerFactory.I().getLogger(getClass().getSimpleName());
+        logger = LogV3.I().getLogger(getClass().getSimpleName());
         rawArguments = args;
         eventSender = new Eventsender<CommandSwitchListener, CommandSwitch>() {
-
             @Override
             protected void fireEvent(final CommandSwitchListener listener, final CommandSwitch event) {
                 listener.executeCommandSwitch(event);
-
             }
-
         };
     }
 
@@ -126,19 +123,16 @@ public class ParameterParser {
      * @return
      */
     public ParameterParser parse(final File file) {
-
         map = new HashMap<String, CommandSwitch>();
         list = new ArrayList<CommandSwitch>();
         this.parse(rawArguments);
         if (file != null && file.exists()) {
-
             try {
                 this.parse(ShellParser.splitCommandString(IO.readFileToString(file).replaceAll("[\r\n]", " ")).toArray(new String[] {}));
             } catch (final IOException e) {
                 logger.log(e);
             }
         }
-
         return this;
     }
 
@@ -146,7 +140,6 @@ public class ParameterParser {
      * @param startArguments2
      */
     private void parse(final String[] startArguments) {
-
         String switchCommand = null;
         final java.util.List<String> params = new ArrayList<String>();
         for (String var : startArguments) {
@@ -164,7 +157,6 @@ public class ParameterParser {
                     list.add(cs);
                 }
                 switchCommand = var;
-
                 params.clear();
             } else {
                 params.add(var);
@@ -188,5 +180,4 @@ public class ParameterParser {
     public void setList(ArrayList<CommandSwitch> list) {
         this.list = list;
     }
-
 }

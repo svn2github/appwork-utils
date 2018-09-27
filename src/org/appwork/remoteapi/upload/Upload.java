@@ -140,7 +140,7 @@ public abstract class Upload {
             header.put(HTTPConstants.HEADER_RESPONSE_CONTENT_RANGE, "bytes */" + getLocalSize());
             this.checkInterrupted();
             con = shttp.openPostConnection(this.getUploadURL(), null, new ByteArrayInputStream(new byte[0]), header, 0);
-            // LoggerFactory.getDefaultLogger().info("GRZ Open Connection " + (System.currentTimeMillis() - tt));
+            // LogV3.info("GRZ Open Connection " + (System.currentTimeMillis() - tt));
             this.parseResponse(con);
             return this.remoteSize;
         } finally {
@@ -327,7 +327,7 @@ public abstract class Upload {
             header.put(HTTPConstants.HEADER_RESPONSE_CONTENT_RANGE, "bytes " + remoteSize + "-" + rangeEnd + "/" + getLocalSize());
             this.checkInterrupted();
             con = shttp.openPostConnection(this.getUploadURL(), uploadProgress, dis, header, uploadSize);
-            // LoggerFactory.getDefaultLogger().info("UC Open Connection " + (System.currentTimeMillis() - tt));
+            // LogV3.info("UC Open Connection " + (System.currentTimeMillis() - tt));
             this.parseResponse(con);
             final String remoteHash = new String(IO.readStream(1024, con.getInputStream()), "UTF-8");
             final String localHash = HexFormatter.byteArrayToHex(dis.getMessageDigest().digest());

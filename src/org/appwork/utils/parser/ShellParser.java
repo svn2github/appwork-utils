@@ -131,7 +131,7 @@ public class ShellParser {
                     while (true) {
                         if (nq == -1) {
                             nq = command.length() - 1;
-                                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Malformed commandstring");
+                                  org.appwork.loggingv3.LogV3.warning("Malformed commandstring");
                             break;
                         }
                         int escapes = 0;
@@ -151,7 +151,7 @@ public class ShellParser {
                     while (true) {
                         if (nq == -1) {
                             nq = command.length() - 1;
-                                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Malformed commandstring");
+                                  org.appwork.loggingv3.LogV3.warning("Malformed commandstring");
                             break;
                         }
                         int escapes = 0;

@@ -35,7 +35,7 @@ package org.appwork.sunwrapper.sun.awt.image;
 
 import java.awt.Image;
 
-import org.appwork.utils.logging2.extmanager.LoggerFactory;
+import org.appwork.loggingv3.LogV3;
 
 /**
  * @author Thomas
@@ -50,9 +50,9 @@ public class ToolkitImageWrapper {
         try {
             return image instanceof sun.awt.image.ToolkitImage;
         } catch (final NoClassDefFoundError e) {
-            LoggerFactory.I().getLogger(ToolkitImageWrapper.class.getName()).log(e);
+            LogV3.I().getLogger(ToolkitImageWrapper.class.getName()).log(e);
         } catch (final IllegalAccessError e) {
-            LoggerFactory.I().getLogger(ToolkitImageWrapper.class.getName()).log(e);
+            LogV3.I().getLogger(ToolkitImageWrapper.class.getName()).log(e);
         }
         return false;
     }

@@ -99,7 +99,7 @@ public class TranslationFactory {
                     }
                     name = name.substring(index + 1, name.length() - 4);
                     if (ret.add(name)) {
-                        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info(name + " found in " + file);
+                        org.appwork.loggingv3.LogV3.info(name + " found in " + file);
                     }
                 } catch (final Throwable e) {
                     // Invalid LanguageFile nameing
@@ -164,7 +164,7 @@ public class TranslationFactory {
                             }
                             name = name.substring(index + 1, name.length() - 4);
                             if (ret.add(name)) {
-                                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer(name + " found in " + new File(jarName));
+                                org.appwork.loggingv3.LogV3.finer(name + " found in " + new File(jarName));
                             }
                         }
                     }
@@ -173,7 +173,7 @@ public class TranslationFactory {
                 }
             }
         } catch (final Exception e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
         }
     }
 
@@ -212,7 +212,7 @@ public class TranslationFactory {
             if (defs != null) {
                 for (final String s : defs.lngs()) {
                     if (ret.add(s)) {
-                        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer(s + " src: " + clazz + " Defaults");
+                        org.appwork.loggingv3.LogV3.finer(s + " src: " + clazz + " Defaults");
                     }
                 }
             }

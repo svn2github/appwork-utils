@@ -38,11 +38,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
 import org.appwork.exceptions.WTFException;
 import org.appwork.utils.Application;
+import org.appwork.utils.FileHandler;
 import org.appwork.utils.Files;
 import org.appwork.utils.IO;
 import org.tmatesoft.svn.core.SVNCancelException;
@@ -86,7 +88,6 @@ import org.tmatesoft.svn.core.wc.SVNWCClient;
 import org.tmatesoft.svn.core.wc.SVNWCUtil;
 
 public class Subversion implements ISVNEventHandler {
-
     /**
      * checks wether logins are correct or not
      *
@@ -96,9 +97,7 @@ public class Subversion implements ISVNEventHandler {
      * @return
      */
     public static boolean checkLogin(final String url, final String user, final String pass) {
-
         return Boolean.TRUE.equals(new LocaleRunnable<Boolean, RuntimeException>() {
-
             @Override
             protected Boolean run() throws RuntimeException {
                 Subversion subversion = null;
@@ -107,7 +106,6 @@ public class Subversion implements ISVNEventHandler {
                     return true;
                 } catch (final SVNException e) {
                 } finally {
-
                     try {
                         subversion.dispose();
                     } catch (final Throwable e) {
@@ -115,9 +113,7 @@ public class Subversion implements ISVNEventHandler {
                 }
                 return false;
             }
-
         }.runEnglish());
-
     }
 
     private SVNRepository             repository;
@@ -126,7 +122,6 @@ public class Subversion implements ISVNEventHandler {
     private SVNClientManager          clientManager;
     private SVNUpdateClient           updateClient;
     private SVNCommitClient           commitClient;
-
     private SVNWCClient               wcClient;
     private SVNStatusClient           statusClient;
 
@@ -169,19 +164,15 @@ public class Subversion implements ISVNEventHandler {
     // Locale.setDefault(bef);
     // }
     // }
-
     public Subversion(final String url, final String user, final String pass) throws SVNException {
         new LocaleRunnable<Boolean, SVNException>() {
-
             @Override
             protected Boolean run() throws SVNException {
                 try {
                     setupType(url);
                     authManager = SVNWCUtil.createDefaultAuthenticationManager(user, pass);
-
                     ((DefaultSVNAuthenticationManager) authManager).setAuthenticationForced(true);
                     repository.setAuthenticationManager(authManager);
-
                     checkRoot();
                     return null;
                 } catch (final SVNException e) {
@@ -189,9 +180,7 @@ public class Subversion implements ISVNEventHandler {
                     throw e;
                 }
             }
-
         }.runEnglish();
-
     }
 
     /**
@@ -202,33 +191,23 @@ public class Subversion implements ISVNEventHandler {
     }
 
     public long checkout(final File file, final SVNRevision revision, final SVNDepth i) throws SVNException {
-
         return new LocaleRunnable<Long, SVNException>() {
-
             @Override
             protected Long run() throws SVNException {
-
                 file.mkdirs();
-
                 final SVNUpdateClient updateClient = getUpdateClient();
-
                 updateClient.setIgnoreExternals(false);
                 SVNRevision rev = revision;
                 if (rev == null) {
                     rev = SVNRevision.HEAD;
                 }
-
                 return updateClient.doCheckout(svnurl, file, rev, rev, i, true);
-
             }
-
         }.runEnglish().longValue();
-
     }
 
     private void checkRoot() throws SVNException {
         new LocaleRunnable<Void, SVNException>() {
-
             @Override
             protected Void run() throws SVNException {
                 final SVNNodeKind nodeKind = repository.checkPath("", -1);
@@ -241,9 +220,7 @@ public class Subversion implements ISVNEventHandler {
                 }
                 return null;
             }
-
         }.runEnglish();
-
     }
 
     /**
@@ -255,15 +232,12 @@ public class Subversion implements ISVNEventHandler {
      */
     public void cleanUp(final File dstPath, final boolean deleteWCProperties) throws SVNException {
         new LocaleRunnable<Void, SVNException>() {
-
             @Override
             protected Void run() throws SVNException {
                 getWCClient().doCleanup(dstPath, deleteWCProperties);
                 return null;
             }
-
         }.runEnglish();
-
     }
 
     /**
@@ -278,79 +252,72 @@ public class Subversion implements ISVNEventHandler {
         return commit(message, dstPath);
     }
 
-    public SVNCommitInfo commit(final String message, final File... dstPathes) throws SVNException {
+    public SVNCommitInfo commit(final String message, final SVNCommitPacket packet) throws SVNException {
         return new LocaleRunnable<SVNCommitInfo, SVNException>() {
-
             @Override
             protected SVNCommitInfo run() throws SVNException {
-                for (File f : dstPathes) {
-                    getWCClient().doAdd(f, true, false, true, SVNDepth.INFINITY, false, false);
-                }
-
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Create CommitPacket");
-                final SVNCommitPacket packet = getCommitClient().doCollectCommitItems(dstPathes, false, false, SVNDepth.INFINITY, null);
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Transfer Package");
                 if (packet == SVNCommitPacket.EMPTY) {
                     return null;
                 }
                 return getCommitClient().doCommit(packet, true, false, message, null);
             }
-
         }.runEnglish();
+    }
 
+    public SVNCommitInfo commit(final String message, final File... dstPathes) throws SVNException {
+        return new LocaleRunnable<SVNCommitInfo, SVNException>() {
+            @Override
+            protected SVNCommitInfo run() throws SVNException {
+                for (File f : dstPathes) {
+                    getWCClient().doAdd(f, true, false, true, SVNDepth.INFINITY, false, false);
+                }
+                org.appwork.loggingv3.LogV3.finer("Create CommitPacket");
+                final SVNCommitPacket packet = getCommitClient().doCollectCommitItems(dstPathes, false, false, SVNDepth.INFINITY, null);
+                org.appwork.loggingv3.LogV3.finer("Transfer Package");
+                if (packet == SVNCommitPacket.EMPTY) {
+                    return null;
+                }
+                return getCommitClient().doCommit(packet, true, false, message, null);
+            }
+        }.runEnglish();
     }
 
     public void dispose() {
-
         new LocaleRunnable<Void, RuntimeException>() {
-
             @Override
             protected Void run() throws RuntimeException {
                 try {
                     repository.closeSession();
                 } catch (final Throwable e) {
                 }
-
                 getClientManager().dispose();
-
                 return null;
             }
-
         }.runEnglish();
-
     }
 
     public long downloadFile(final String url, final File resource, final SVNRevision head) throws SVNException {
-
         return new LocaleRunnable<Long, SVNException>() {
-
             @Override
             protected Long run() throws SVNException {
                 return getUpdateClient().doExport(SVNURL.parseURIDecoded(url), resource, head, head, null, true, null);
             }
-
         }.runEnglish().longValue();
-
     }
 
     public long export(final File file) throws SVNException, IOException {
         try {
             return new LocaleRunnable<Long, Exception>() {
-
                 @Override
                 protected Long run() throws Exception {
                     Files.deleteRecursiv(file);
                     file.mkdirs();
-
                     final ISVNEditor exportEditor = new ExportEditor(file);
                     final long rev = latestRevision();
                     final ISVNReporterBaton reporterBaton = new ExportReporterBaton(rev);
-
                     repository.update(rev, null, true, reporterBaton, exportEditor);
-
                     return rev;
                 }
-
             }.runEnglish().longValue();
         } catch (SVNException e) {
             throw e;
@@ -359,7 +326,6 @@ public class Subversion implements ISVNEventHandler {
         } catch (Exception e) {
             throw new WTFException(e);
         }
-
     }
 
     /**
@@ -373,43 +339,28 @@ public class Subversion implements ISVNEventHandler {
     @SuppressWarnings("unchecked")
     public java.util.List<SVNLogEntry> getChangeset(final long start, final long end) throws SVNException {
         return new LocaleRunnable<List<SVNLogEntry>, SVNException>() {
-
             @Override
             public List<SVNLogEntry> run() throws SVNException {
-
                 final Collection<SVNLogEntry> log = repository.log(new String[] { "" }, null, start, end, true, true);
-
                 final java.util.List<SVNLogEntry> list = new ArrayList<SVNLogEntry>();
                 list.addAll(log);
                 return list;
-
             }
-
-            public List<SVNLogEntry> runEnglish() {
-                // TODO Auto-generated method stub
-                return null;
-            }
-
         }.runEnglish();
-
     }
 
-    private synchronized SVNClientManager getClientManager() {
-
+    public synchronized SVNClientManager getClientManager() {
         if (clientManager == null) {
             final DefaultSVNOptions options = new DefaultSVNOptions(null, true) {
                 private String[] ignorePatterns;
-
                 {
                     ignorePatterns = new String[] {};
                 }
 
                 @Override
                 public String[] getIgnorePatterns() {
-
                     return ignorePatterns;
                 }
-
             };
             options.setIgnorePatterns(null);
             clientManager = SVNClientManager.newInstance(options, authManager);
@@ -418,12 +369,10 @@ public class Subversion implements ISVNEventHandler {
     }
 
     public SVNCommitClient getCommitClient() {
-
         if (commitClient == null) {
             commitClient = getClientManager().getCommitClient();
             commitClient.setEventHandler(this);
             commitClient.setCommitParameters(new ISVNCommitParameters() {
-
                 @Override
                 public boolean onDirectoryDeletion(final File directory) {
                     return false;
@@ -446,7 +395,6 @@ public class Subversion implements ISVNEventHandler {
             });
         }
         return commitClient;
-
     }
 
     /**
@@ -457,40 +405,42 @@ public class Subversion implements ISVNEventHandler {
      */
     public java.util.List<SVNInfo> getInfo(final File file) {
         return new LocaleRunnable<List<SVNInfo>, RuntimeException>() {
-
             @Override
             protected List<SVNInfo> run() throws RuntimeException {
                 final java.util.List<SVNInfo> ret = new ArrayList<SVNInfo>();
                 try {
                     getWCClient().doInfo(file, SVNRevision.UNDEFINED, SVNRevision.WORKING, SVNDepth.getInfinityOrEmptyDepth(true), null, new ISVNInfoHandler() {
-
                         @Override
                         public void handleInfo(final SVNInfo info) {
                             ret.add(info);
                         }
-
                     });
                 } catch (final SVNException e) {
                     e.printStackTrace();
                 }
                 return ret;
             }
-
         }.runEnglish();
+    }
 
+    public SVNDirEntry getRemoteEntry(final String resource, final long revision) throws SVNException {
+        return new LocaleRunnable<SVNDirEntry, SVNException>() {
+            @Override
+            protected SVNDirEntry run() throws SVNException {
+                final SVNDirEntry de = getRepository().getDir(resource, revision, false, null);
+                return de;
+            }
+        }.runEnglish();
     }
 
     public long getRemoteRevision(final String resource) throws SVNException {
         return new LocaleRunnable<Long, SVNException>() {
-
             @Override
             protected Long run() throws SVNException {
                 final SVNDirEntry de = getRepository().getDir(resource, -1, false, null);
                 return de.getRevision();
             }
-
         }.runEnglish().longValue();
-
     }
 
     /**
@@ -503,53 +453,39 @@ public class Subversion implements ISVNEventHandler {
     }
 
     public long getRevision(final File resource) throws SVNException {
-
         return new LocaleRunnable<Long, SVNException>() {
-
             @Override
             protected Long run() throws SVNException {
                 final long[] ret = new long[] { -1 };
-
                 getWCClient().doInfo(resource, SVNRevision.UNDEFINED, SVNRevision.WORKING, SVNDepth.EMPTY, null, new ISVNInfoHandler() {
-
                     @Override
                     public void handleInfo(final SVNInfo info) {
                         final long rev = info.getCommittedRevision().getNumber();
                         if (rev > ret[0]) {
                             ret[0] = rev;
                         }
-
                     }
-
                 });
-
                 return ret[0];
             }
-
         }.runEnglish().longValue();
-
     }
 
     public long getRevisionNoException(final File resource) throws SVNException {
-
         try {
             return getRevision(resource);
         } catch (final SVNException e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
         }
         return -1;
-
     }
 
-    private SVNStatusClient getStatusClient() {
-
+    public SVNStatusClient getStatusClient() {
         if (statusClient == null) {
             statusClient = getClientManager().getStatusClient();
             statusClient.setEventHandler(this);
         }
-
         return statusClient;
-
     }
 
     public SVNUpdateClient getUpdateClient() {
@@ -557,7 +493,6 @@ public class Subversion implements ISVNEventHandler {
             updateClient = getClientManager().getUpdateClient();
             updateClient.setEventHandler(this);
         }
-
         return updateClient;
     }
 
@@ -566,7 +501,6 @@ public class Subversion implements ISVNEventHandler {
             wcClient = getClientManager().getWCClient();
             wcClient.setEventHandler(this);
         }
-
         return wcClient;
     }
 
@@ -587,36 +521,34 @@ public class Subversion implements ISVNEventHandler {
             /*
              * The item is scheduled for addition.
              */
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("A     " + event.getFile());
+            org.appwork.loggingv3.LogV3.fine("A     " + event.getFile());
             return;
         } else if (action == SVNEventAction.COPY) {
             /*
              * The item is scheduled for addition with history (copied, in other words).
              */
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("A  +  " + event.getFile());
+            org.appwork.loggingv3.LogV3.fine("A  +  " + event.getFile());
             return;
         } else if (action == SVNEventAction.DELETE) {
             /*
              * The item is scheduled for deletion.
              */
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("D     " + event.getFile());
+            org.appwork.loggingv3.LogV3.fine("D     " + event.getFile());
             return;
         } else if (action == SVNEventAction.LOCKED) {
             /*
              * The item is locked.
              */
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("L     " + event.getFile());
+            org.appwork.loggingv3.LogV3.fine("L     " + event.getFile());
             return;
         } else if (action == SVNEventAction.LOCK_FAILED) {
             /*
              * Locking operation failed.
              */
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("failed to lock    " + event.getFile());
+            org.appwork.loggingv3.LogV3.fine("failed to lock    " + event.getFile());
             return;
         }
-
         /* Updatehandler */
-
         if (action == SVNEventAction.UPDATE_ADD) {
             /*
              * the item was added
@@ -644,7 +576,6 @@ public class Subversion implements ISVNEventHandler {
                  * The file item is in a state of Conflict. That is, changes received from the repository during an update, overlap with
                  * local changes the user has in his working copy.
                  */
-
                 pathChangeType = "C";
             } else if (contentsStatus == SVNStatusType.MERGED) {
                 /*
@@ -657,17 +588,16 @@ public class Subversion implements ISVNEventHandler {
             /*
              * for externals definitions
              */
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Fetching external item into '" + event.getFile().getAbsolutePath() + "'");
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("External at revision " + event.getRevision());
+            org.appwork.loggingv3.LogV3.fine("Fetching external item into '" + event.getFile().getAbsolutePath() + "'");
+            org.appwork.loggingv3.LogV3.fine("External at revision " + event.getRevision());
             return;
         } else if (action == SVNEventAction.UPDATE_COMPLETED) {
             /*
              * Working copy update is completed. Prints out the revision.
              */
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("At revision " + event.getRevision());
+            org.appwork.loggingv3.LogV3.fine("At revision " + event.getRevision());
             return;
         }
-
         /*
          * Status of properties of an item. SVNStatusType also contains information on the properties state.
          */
@@ -689,13 +619,11 @@ public class Subversion implements ISVNEventHandler {
              */
             propertiesChangeType = "G";
         }
-
         /*
          * Gets the status of the lock.
          */
         String lockLabel = nullString;
         final SVNStatusType lockType = event.getLockStatus();
-
         if (lockType == SVNStatusType.LOCK_UNLOCKED) {
             /*
              * The lock is broken by someone.
@@ -703,21 +631,19 @@ public class Subversion implements ISVNEventHandler {
             lockLabel = "B";
         }
         if (pathChangeType != nullString || propertiesChangeType != nullString || lockLabel != nullString) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine(pathChangeType + propertiesChangeType + lockLabel + "       " + event.getFile());
+            org.appwork.loggingv3.LogV3.fine(pathChangeType + propertiesChangeType + lockLabel + "       " + event.getFile());
         }
-
         /*
          * Comitghandler
          */
-
         if (action == SVNEventAction.COMMIT_MODIFIED) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Sending   " + event.getFile());
+            org.appwork.loggingv3.LogV3.fine("Sending   " + event.getFile());
         } else if (action == SVNEventAction.COMMIT_DELETED) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Deleting   " + event.getFile());
+            org.appwork.loggingv3.LogV3.fine("Deleting   " + event.getFile());
         } else if (action == SVNEventAction.COMMIT_REPLACED) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Replacing   " + event.getFile());
+            org.appwork.loggingv3.LogV3.fine("Replacing   " + event.getFile());
         } else if (action == SVNEventAction.COMMIT_DELTA_SENT) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Transmitting file data....");
+            org.appwork.loggingv3.LogV3.fine("Transmitting file data....");
         } else if (action == SVNEventAction.COMMIT_ADDED) {
             /*
              * Gets the MIME-type of the item.
@@ -727,16 +653,14 @@ public class Subversion implements ISVNEventHandler {
                 /*
                  * If the item is a binary file
                  */
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Adding  (bin)  " + event.getFile());
+                org.appwork.loggingv3.LogV3.fine("Adding  (bin)  " + event.getFile());
             } else {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Adding         " + event.getFile());
+                org.appwork.loggingv3.LogV3.fine("Adding         " + event.getFile());
             }
         }
-
     }
 
     public long latestRevision() throws SVNException {
-
         return repository.getLatestRevision();
     }
 
@@ -747,17 +671,12 @@ public class Subversion implements ISVNEventHandler {
      * @throws InterruptedException
      */
     public List<SVNDirEntry> listFiles(final FilePathFilter filePathFilter, final String path) throws SVNException, InterruptedException {
-
         final java.util.List<SVNDirEntry> ret = new ArrayList<SVNDirEntry>();
         final Collection entries = new LocaleRunnable<Collection, SVNException>() {
-
             @Override
             protected Collection run() throws SVNException {
-
                 return repository.getDir(path, -1, null, (Collection) null);
-
             }
-
         }.runEnglish();
         final Iterator iterator = entries.iterator();
         while (iterator.hasNext()) {
@@ -769,7 +688,6 @@ public class Subversion implements ISVNEventHandler {
                 entry.setRelativePath((path.equals("") ? "" : path + "/") + entry.getName());
                 ret.add(entry);
                 System.out.println("/" + (path.equals("") ? "" : path + "/") + entry.getName() + " ( author: '" + entry.getAuthor() + "'; revision: " + entry.getRevision() + "; date: " + entry.getDate() + ")");
-
             }
             ;
             if (entry.getKind() == SVNNodeKind.DIR) {
@@ -788,19 +706,15 @@ public class Subversion implements ISVNEventHandler {
      */
     public void lock(final File dstPath, final String message) throws SVNException {
         new LocaleRunnable<Void, SVNException>() {
-
             @Override
             protected Void run() throws SVNException {
                 getWCClient().doLock(new File[] { dstPath }, false, message);
                 return null;
             }
-
         }.runEnglish();
-
     }
 
     public void resolveConflictedFile(final SVNInfo info, final File file, final ResolveHandler handler) throws Exception {
-
         final String mine = "<<<<<<< .mine";
         final String delim = "=======";
         final String theirs = ">>>>>>> .r";
@@ -808,7 +722,6 @@ public class Subversion implements ISVNEventHandler {
         String pre, post;
         while (true) {
             int mineStart = txt.indexOf(mine);
-
             if (mineStart < 0) {
                 break;
             }
@@ -819,7 +732,6 @@ public class Subversion implements ISVNEventHandler {
             while (end < txt.length() && txt.charAt(end) != '\r' && txt.charAt(end) != '\n') {
                 end++;
             }
-
             pre = txt.substring(0, mineStart - mine.length());
             post = txt.substring(end);
             while (pre.endsWith("\r") || pre.endsWith("\n")) {
@@ -836,18 +748,13 @@ public class Subversion implements ISVNEventHandler {
             if (post.trim().length() == 0) {
                 post = post.trim();
             }
-
             final String ftxt = txt;
             final int fmineStart = mineStart;
             final String solve = new LocaleRunnable<String, Exception>() {
-
                 @Override
                 protected String run() throws SVNException {
-
                     return handler.resolveConflict(info, file, ftxt, fmineStart, delimStart, delimStart + delim.length(), theirsEnd);
-
                 }
-
             }.runEnglish();
             if (solve == null) {
                 throw new Exception("Could not resolve");
@@ -856,16 +763,13 @@ public class Subversion implements ISVNEventHandler {
         }
         file.delete();
         IO.writeStringToFile(file, txt);
-
     }
 
     public void resolveConflicts(final File file, final ResolveHandler handler) throws SVNException {
         new LocaleRunnable<Void, SVNException>() {
-
             @Override
             protected Void run() throws SVNException {
                 getWCClient().doInfo(file, SVNRevision.UNDEFINED, SVNRevision.WORKING, SVNDepth.getInfinityOrEmptyDepth(true), null, new ISVNInfoHandler() {
-
                     @Override
                     public void handleInfo(final SVNInfo info) {
                         final File file = info.getConflictWrkFile();
@@ -873,7 +777,7 @@ public class Subversion implements ISVNEventHandler {
                             try {
                                 Subversion.this.resolveConflictedFile(info, info.getFile(), handler);
                                 Subversion.this.getWCClient().doResolve(info.getFile(), SVNDepth.INFINITY, null);
-                                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine(file + " resolved");
+                                org.appwork.loggingv3.LogV3.fine(file + " resolved");
                             } catch (final Exception e) {
                                 e.printStackTrace();
                             }
@@ -882,9 +786,7 @@ public class Subversion implements ISVNEventHandler {
                 });
                 return null;
             }
-
         }.runEnglish();
-
     }
 
     public void revert(final File dstPath) throws SVNException {
@@ -899,13 +801,11 @@ public class Subversion implements ISVNEventHandler {
      */
     public void revert(final File dstPath, final boolean deleteUnversionedFiles) throws SVNException {
         new LocaleRunnable<Void, SVNException>() {
-
             @Override
             protected Void run() throws SVNException {
                 try {
                     if (deleteUnversionedFiles) {
                         getStatusClient().doStatus(dstPath, SVNRevision.HEAD, SVNDepth.INFINITY, false, true, false, false, new ISVNStatusHandler() {
-
                             @Override
                             public void handleStatus(SVNStatus status) throws SVNException {
                                 SVNStatusType statusType = status.getContentsStatus();
@@ -916,7 +816,6 @@ public class Subversion implements ISVNEventHandler {
                                         throw new WTFException(e);
                                     }
                                 }
-
                             }
                         }, null);
                     }
@@ -925,24 +824,19 @@ public class Subversion implements ISVNEventHandler {
                     cleanUp(dstPath, false);
                     throw e;
                 } catch (final SVNException e) {
-
                     cleanUp(dstPath, false);
                     throw e;
                 }
                 return null;
             }
-
         }.runEnglish();
-
     }
 
     private void setupType(final String url) throws SVNException {
         new LocaleRunnable<Void, SVNException>() {
-
             @Override
             protected Void run() throws SVNException {
                 svnurl = SVNURL.parseURIDecoded(url);
-
                 if (url.startsWith("http")) {
                     DAVRepositoryFactory.setup();
                     repository = SVNRepositoryFactory.create(svnurl);
@@ -955,43 +849,31 @@ public class Subversion implements ISVNEventHandler {
                 }
                 return null;
             }
-
         }.runEnglish();
-
     }
 
     public void showInfo(final File wcPath, final SVNRevision revision, final boolean isRecursive) throws SVNException {
-
         new LocaleRunnable<Void, SVNException>() {
-
             @Override
             protected Void run() throws SVNException {
                 if (revision == null) {
                     getWCClient().doInfo(wcPath, SVNRevision.UNDEFINED, SVNRevision.HEAD, SVNDepth.getInfinityOrEmptyDepth(isRecursive), null, new InfoEventHandler());
-
                 } else {
                     getWCClient().doInfo(wcPath, SVNRevision.UNDEFINED, revision, SVNDepth.getInfinityOrEmptyDepth(isRecursive), null, new InfoEventHandler());
                 }
-
                 return null;
             }
-
         }.runEnglish();
-
     }
 
     public void showStatus(final File wcPath, final boolean isRecursive, final boolean isRemote, final boolean isReportAll, final boolean isIncludeIgnored, final boolean isCollectParentExternals) throws SVNException {
         new LocaleRunnable<Void, SVNException>() {
-
             @Override
             protected Void run() throws SVNException {
                 getClientManager().getStatusClient().doStatus(wcPath, SVNRevision.HEAD, SVNDepth.fromRecurse(isRecursive), isRemote, isReportAll, isIncludeIgnored, isCollectParentExternals, new StatusEventHandler(isRemote), null);
-
                 return null;
             }
-
         }.runEnglish();
-
     }
 
     /**
@@ -1003,15 +885,12 @@ public class Subversion implements ISVNEventHandler {
      */
     public void unlock(final File dstPath) throws SVNException {
         new LocaleRunnable<Void, SVNException>() {
-
             @Override
             protected Void run() throws SVNException {
                 getWCClient().doUnlock(new File[] { dstPath }, false);
                 return null;
             }
-
         }.runEnglish();
-
     }
 
     /**
@@ -1024,13 +903,10 @@ public class Subversion implements ISVNEventHandler {
      */
     public long update(final File file, final SVNRevision revision) throws SVNException {
         return this.update(file, revision, SVNDepth.INFINITY);
-
     }
 
     public long update(final File file, final SVNRevision revision, final SVNDepth i) throws SVNException {
-
         return new LocaleRunnable<Long, SVNException>() {
-
             @Override
             protected Long run() throws SVNException {
                 SVNDepth fi = i;
@@ -1039,42 +915,33 @@ public class Subversion implements ISVNEventHandler {
                 }
                 // JDIO.removeDirectoryOrFile(file);
                 file.mkdirs();
-
                 final SVNUpdateClient updateClient = getUpdateClient();
-
                 updateClient.setIgnoreExternals(false);
                 SVNRevision frevision = revision;
                 if (frevision == null) {
                     frevision = SVNRevision.HEAD;
                 }
-
                 try {
-
                     // getWCClient().doAdd(path, force, mkdir, climbUnversionedParents,
                     // depth, includeIgnored, makeParents);
                     // long ret = updateClient.doCheckout(svnurl, file, frevision,
                     // frevision, i, true);
-                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("SVN Update at " + file + " to Revision " + frevision + " depths:" + fi + "  " + svnurl);
+                    org.appwork.loggingv3.LogV3.info("SVN Update at " + file + " to Revision " + frevision + " depths:" + fi + "  " + svnurl);
                     long ret = updateClient.doUpdate(file, frevision, fi, false, true);
                     if (ret < 0) {
                         // no working copy?
                         ret = updateClient.doCheckout(svnurl, file, frevision, frevision, fi, true);
-
                     }
                     return ret;
                 } catch (final Exception e) {
-                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info(e.getMessage());
-                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("SVN Checkout at " + file + "  " + svnurl);
+                    org.appwork.loggingv3.LogV3.info(e.getMessage());
+                    org.appwork.loggingv3.LogV3.info("SVN Checkout at " + file + "  " + svnurl);
                     return updateClient.doCheckout(svnurl, file, frevision, frevision, fi, true);
-
                 } finally {
-                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("SVN Update finished");
+                    org.appwork.loggingv3.LogV3.info("SVN Update finished");
                 }
-
             }
-
         }.runEnglish().longValue();
-
     }
 
     /**
@@ -1086,20 +953,16 @@ public class Subversion implements ISVNEventHandler {
      */
     public void write(final String path, final String commitmessage, final byte[] content) throws SVNException, IOException {
         this.write(path, commitmessage, new ByteArrayInputStream(content));
-
     }
 
     public SVNCommitInfo write(final String path, final String commitmessage, final ByteArrayInputStream is) throws SVNException, IOException {
         try {
             return new LocaleRunnable<SVNCommitInfo, Exception>() {
-
                 @Override
                 protected SVNCommitInfo run() throws Exception {
                     final File file = new File(Application.getTempResource("svnwrite_" + System.currentTimeMillis()), path);
                     downloadFile(svnurl + (svnurl.toString().endsWith("/") ? "" : "/") + path, file, SVNRevision.HEAD);
-
                     final SVNDeltaGenerator generator = new SVNDeltaGenerator();
-
                     final ISVNEditor commitEditor = getRepository().getCommitEditor(commitmessage, null);
                     try {
                         commitEditor.openRoot(-1);
@@ -1114,12 +977,9 @@ public class Subversion implements ISVNEventHandler {
                         if (commitEditor != null) {
                             commitEditor.abortEdit();
                         }
-
                         Files.deleteRecursiv(file.getParentFile());
-
                     }
                 }
-
             }.runEnglish();
         } catch (SVNException e) {
             throw e;
@@ -1128,7 +988,90 @@ public class Subversion implements ISVNEventHandler {
         } catch (Exception e) {
             throw new WTFException(e);
         }
-
     }
 
+    /**
+     * @param date
+     * @throws SVNException
+     */
+    public long getRevisionByDate(final Date date) throws SVNException {
+        return new LocaleRunnable<Long, SVNException>() {
+            @Override
+            protected Long run() throws SVNException {
+                return repository.getDatedRevision(date);
+            }
+        }.runEnglish().longValue();
+    }
+
+    /**
+     * @param s
+     * @return
+     * @throws SVNException
+     */
+    public SVNCommitPacket getCommitDelta(final File... dstPathes) throws SVNException {
+        return new LocaleRunnable<SVNCommitPacket, SVNException>() {
+            @Override
+            protected SVNCommitPacket run() throws SVNException {
+                try {
+                    // for (File f : dstPathes) {
+                    // unlock(f);
+                    // }
+                    for (final File folder : dstPathes) {
+                        cleanUp(folder, false);
+                        Files.walkThroughStructure(new FileHandler<SVNException>() {
+                            @Override
+                            public void intro(File f) throws SVNException {
+                                // TODO Auto-generated method stub
+                            }
+
+                            @Override
+                            public boolean onFile(File f, int depths) throws SVNException {
+                                String rel = Files.getRelativePath(folder, f);
+                                if ("bin".equals(rel)) {
+                                    return false;
+                                }
+                                if ("dist".equals(rel)) {
+                                    return false;
+                                }
+                                if ("update".equals(rel)) {
+                                    return false;
+                                }
+                                if (f.getName().equals(".svn")) {
+                                    return false;
+                                }
+                                try {
+                                    System.out.println(f);
+                                    getWCClient().doAdd(f, false, false, true, SVNDepth.IMMEDIATES, false, false);
+                                } catch (SVNException e) {
+                                    if (e.getMessage().contains("E150002")) {
+                                        // already version controlled
+                                        return true;
+                                    }
+                                    e.printStackTrace();
+                                    return false;
+                                }
+                                return true;
+                            }
+
+                            @Override
+                            public void outro(File f) throws RuntimeException {
+                                // TODO Auto-generated method stub
+                            }
+                        }, folder);
+                    }
+                    // getWCClient().doSetProperty(new File(path), "sv:ignore", "bin", true, false, null);
+                    org.appwork.loggingv3.LogV3.finer("calculate Changes");
+                    final SVNCommitPacket packet = getCommitClient().doCollectCommitItems(dstPathes, true, false, SVNDepth.INFINITY, null);
+                    if (packet == SVNCommitPacket.EMPTY) {
+                        return null;
+                    }
+                    return packet;
+                } finally {
+                    for (File f : dstPathes) {
+                        cleanUp(f, false);
+                    }
+                }
+            }
+        }.runEnglish();
+    }
 }

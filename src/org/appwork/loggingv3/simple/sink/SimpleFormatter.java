@@ -83,7 +83,7 @@ public class SimpleFormatter implements Formatter {
         String pre = "--" + fillPre(String.valueOf(record.thread.getId()), " ", threadID) + fillPost("(" + abbr(record.thread.getName(), maxThreadNameLength) + ")", " ", threadName) + " " + fillPre(longTimestamp.format(new Date(record.timestamp)), " ", timestamp) + " - " + fillPost("" + abbr(String.valueOf(sourceString) + "", maxSourceStringLength), " ", thrownAt) + " > ";
         int line = 0;
         int preLength = pre.length();
-        String[] lines = message.split("\\s*[\r\n]+\\s*");
+        String[] lines = message.split("[\r\n]+");
         for (String s : lines) {
             if (s.trim().length() > 0) {
                 if (line == 0) {

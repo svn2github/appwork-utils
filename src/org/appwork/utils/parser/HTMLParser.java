@@ -66,7 +66,7 @@ public class HTMLParser {
                 }
             }
         } catch (final Exception e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
         }
         return HTMLParser.removeDuplicates(ret);
     }

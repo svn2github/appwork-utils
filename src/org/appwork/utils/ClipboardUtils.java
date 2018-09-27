@@ -102,8 +102,8 @@ public class ClipboardUtils {
                     }
                 }
             } catch (final Exception e) {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning(inString);
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning(e.getMessage());
+                org.appwork.loggingv3.LogV3.warning(inString);
+                org.appwork.loggingv3.LogV3.warning(e.getMessage());
             }
         }
         return files;
@@ -139,8 +139,8 @@ public class ClipboardUtils {
                     }
                 }
             } catch (final Exception e) {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning(inString);
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning(e.getMessage());
+                org.appwork.loggingv3.LogV3.warning(inString);
+                org.appwork.loggingv3.LogV3.warning(e.getMessage());
             }
         }
         return files;
@@ -207,7 +207,7 @@ public class ClipboardUtils {
                 links.addAll(HTMLParser.findUrls(content));
             }
         } catch (final Exception e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info(e.getMessage());
+            org.appwork.loggingv3.LogV3.info(e.getMessage());
         }
         return links;
     }

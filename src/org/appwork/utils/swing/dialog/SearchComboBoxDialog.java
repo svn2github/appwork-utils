@@ -87,7 +87,7 @@ public class SearchComboBoxDialog<Type> extends AbstractDialog<Type> implements 
      */
     public SearchComboBoxDialog(final int flag, final String title, final String question, final Type[] options, final Type defaultSelection, final ImageIcon icon, final String okText, final String cancelText) {
         super(flag, title, icon, okText, cancelText);
-              org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Dialog    [" + okText + "][" + cancelText + "]\r\nflag:  " + Integer.toBinaryString(flag) + "\r\ntitle: " + title + "\r\nmsg:   \r\n" + question + "\r\noptions:   \r\n" + Arrays.toString(options) + "\r\ndef:" + defaultSelection);
+              org.appwork.loggingv3.LogV3.fine("Dialog    [" + okText + "][" + cancelText + "]\r\nflag:  " + Integer.toBinaryString(flag) + "\r\ntitle: " + title + "\r\nmsg:   \r\n" + question + "\r\noptions:   \r\n" + Arrays.toString(options) + "\r\ndef:" + defaultSelection);
 
         message = question;
 

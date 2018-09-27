@@ -113,23 +113,23 @@ public abstract class EDTHelper<T> implements Runnable {
         try {
             if (Application.isHeadless()) {
                 if (this.caller != null) {
-                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(this.caller);
+                    org.appwork.loggingv3.LogV3.log(this.caller);
                 }
             }
             this.returnValue = this.edtRun();
         } catch (HeadlessException e) {
             this.exception = e;
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
-                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Unhandled Headless Exception in EDT");
+            org.appwork.loggingv3.LogV3.log(e);
+                  org.appwork.loggingv3.LogV3.severe("Unhandled Headless Exception in EDT");
             if (this.caller != null) {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(this.caller);
+                org.appwork.loggingv3.LogV3.log(this.caller);
             }
         } catch (final RuntimeException e) {
             this.exception = e;
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
         } catch (final Error e) {
             this.error = e;
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
         } finally {
             this.done = true;
         }

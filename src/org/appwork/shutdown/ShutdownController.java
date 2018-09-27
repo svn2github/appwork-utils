@@ -45,7 +45,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.appwork.utils.Exceptions;
 import org.appwork.utils.logging2.LogInterface;
-import org.appwork.utils.logging2.extmanager.LoggerFactory;
+import org.appwork.loggingv3.LogV3;
 
 public class ShutdownController extends Thread {
     class ShutdownEventWrapper extends ShutdownEvent {
@@ -164,14 +164,14 @@ public class ShutdownController extends Thread {
             }
             field.set(null, hookDelegater);
         } catch (final Throwable e) {
-            LoggerFactory.getDefaultLogger().log(e);
+            LogV3.log(e);
             Runtime.getRuntime().addShutdownHook(this);
         }
     }
 
     public void addShutdownEvent(final ShutdownEvent event) {
         if (this.isAlive()) {
-            LoggerFactory.getDefaultLogger().log(new IllegalStateException("Cannot add hooks during shutdown"));
+            LogV3.log(new IllegalStateException("Cannot add hooks during shutdown"));
             return;
         }
         if (event instanceof ShutdownEventWrapper) {
@@ -211,7 +211,7 @@ public class ShutdownController extends Thread {
                     }
                 });
             } catch (final Throwable e) {
-                LoggerFactory.getDefaultLogger().log(e);
+                LogV3.log(e);
             }
         }
     }
@@ -346,40 +346,40 @@ public class ShutdownController extends Thread {
             this.collectVetos(request);
             final java.util.List<ShutdownVetoException> vetos = request.getVetos();
             if (vetos.size() == 0) {
-                LoggerFactory.getDefaultLogger().info("No Vetos");
+                LogV3.info("No Vetos");
                 ShutdownVetoListener[] localList = null;
                 synchronized (this.vetoListeners) {
                     localList = this.vetoListeners.toArray(new ShutdownVetoListener[] {});
                 }
-                LoggerFactory.getDefaultLogger().info("Fire onShutDownEvents");
+                LogV3.info("Fire onShutDownEvents");
                 for (final ShutdownVetoListener v : localList) {
                     try {
-                        LoggerFactory.getDefaultLogger().info("Call onShutdown: " + v);
+                        LogV3.info("Call onShutdown: " + v);
                         v.onShutdown(request);
                     } catch (final Throwable e) {
-                        LoggerFactory.getDefaultLogger().log(e);
+                        LogV3.log(e);
                     } finally {
-                        LoggerFactory.getDefaultLogger().info("Call onShutdown done: " + v);
+                        LogV3.info("Call onShutdown done: " + v);
                     }
                 }
                 if (this.shutDown.compareAndSet(false, true)) {
-                    LoggerFactory.getDefaultLogger().info("Create ExitThread");
+                    LogV3.info("Create ExitThread");
                     try {
                         request.onShutdown();
                     } catch (final Throwable e) {
-                        LoggerFactory.getDefaultLogger().severe(Exceptions.getStackTrace(e));
+                        LogV3.severe(Exceptions.getStackTrace(e));
                     }
                     this.exitThread = new Thread("ShutdownThread") {
                         @Override
                         public void run() {
                             ShutdownController.this.shutdownRequest = request;
-                            LoggerFactory.getDefaultLogger().info("Exit Now: Code: " + ShutdownController.this.getExitCode());
+                            LogV3.info("Exit Now: Code: " + ShutdownController.this.getExitCode());
                             System.exit(ShutdownController.this.getExitCode());
                         }
                     };
                     this.exitThread.start();
                 }
-                LoggerFactory.getDefaultLogger().info("Wait");
+                LogV3.info("Wait");
                 while (this.exitThread.isAlive()) {
                     try {
                         Thread.sleep(500);
@@ -390,7 +390,7 @@ public class ShutdownController extends Thread {
                 log("DONE");
                 return true;
             } else {
-                LoggerFactory.getDefaultLogger().info("Vetos found");
+                LogV3.info("Vetos found");
                 ShutdownVetoListener[] localList = null;
                 synchronized (this.vetoListeners) {
                     localList = this.vetoListeners.toArray(new ShutdownVetoListener[] {});
@@ -400,7 +400,7 @@ public class ShutdownController extends Thread {
                         /* make sure noone changes content of vetos */
                         v.onShutdownVeto(request);
                     } catch (final Throwable e) {
-                        LoggerFactory.getDefaultLogger().log(e);
+                        LogV3.log(e);
                     }
                 }
                 request.onShutdownVeto();
@@ -483,7 +483,7 @@ public class ShutdownController extends Thread {
             }
             log("Shutdown Hooks Finished");
         } catch (final Throwable e1) {
-            // do not use Log here. If LoggerFactory.getDefaultLogger().log(e1); throws an
+            // do not use Log here. If LogV3.log(e1); throws an
             // exception,
             // we have to catch it here without the risk of another exception.
         }

@@ -122,7 +122,7 @@ public abstract class QueueAction<T, E extends Throwable> {
      * @return
      */
     public boolean handleException(final Throwable e) {
-        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+        org.appwork.loggingv3.LogV3.log(e);
         return false;
     }
 
@@ -196,14 +196,14 @@ public abstract class QueueAction<T, E extends Throwable> {
         try {
             this.preRun();
         } catch (final Throwable e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
         }
         try {
             this.result = this.run();
         } catch (final Throwable th) {
 
             if (queue != null && queue.isDebug()) {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("QueueActionCallerStackTrace:\r\n" + this.callerStackTrace);
+                org.appwork.loggingv3.LogV3.severe("QueueActionCallerStackTrace:\r\n" + this.callerStackTrace);
             }
             this.exeption = th;
             if (th instanceof RuntimeException) {
@@ -215,7 +215,7 @@ public abstract class QueueAction<T, E extends Throwable> {
             try {
                 this.postRun();
             } catch (final Throwable e) {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                org.appwork.loggingv3.LogV3.log(e);
             }
         }
     }

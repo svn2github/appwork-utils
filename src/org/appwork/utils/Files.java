@@ -44,8 +44,9 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicLong;
 
-import org.appwork.utils.logging2.extmanager.LoggerFactory;
+import org.appwork.loggingv3.LogV3;
 import org.appwork.utils.os.CrossSystem;
 
 public class Files {
@@ -125,7 +126,7 @@ public class Files {
                 }
             }
         }
-        LoggerFactory.getDefaultLogger().finer(" Delete file " + file);
+        LogV3.logger(Files.class).finer("Delete file " + file);
         boolean deleted = false;
         IOException exception = null;
         if (Application.getJavaVersion() >= Application.JAVA17) {
@@ -515,7 +516,7 @@ public class Files {
                     }
                 }
             } catch (IOException e) {
-                LoggerFactory.getDefaultLogger().log(e);
+                LogV3.log(e);
             }
         }
         if (bestRootMatch == null) {
@@ -563,5 +564,31 @@ public class Files {
                 return path.getFreeSpace();
             }
         }
+    }
+
+    /**
+     * @param path
+     * @return
+     */
+    public static long getDirectorySize(File path) {
+        final AtomicLong bytes = new AtomicLong(0);
+        Files.walkThroughStructure(new FileHandler<RuntimeException>() {
+            @Override
+            public void intro(File f) throws RuntimeException {
+            }
+
+            @Override
+            public boolean onFile(File f, int depths) throws RuntimeException {
+                if (f.isFile()) {
+                    bytes.addAndGet(f.length());
+                }
+                return true;
+            }
+
+            @Override
+            public void outro(File f) throws RuntimeException {
+            }
+        }, path);
+        return bytes.get();
     }
 }

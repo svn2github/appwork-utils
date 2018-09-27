@@ -44,7 +44,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
-import org.appwork.utils.logging2.extmanager.LoggerFactory;
+import org.appwork.loggingv3.LogV3;
 import org.appwork.utils.os.CrossSystem;
 
 public class ProcessBuilderFactory {
@@ -324,7 +324,7 @@ public class ProcessBuilderFactory {
                                     }
                                 }
                             } catch (Throwable e) {
-                                LoggerFactory.getDefaultLogger().log(e);
+                                LogV3.log(e);
                             } finally {
                                 try {
                                     process.destroy();
@@ -344,13 +344,13 @@ public class ProcessBuilderFactory {
                         throw e;
                     }
                 } catch (IOException e1) {
-                    LoggerFactory.getDefaultLogger().log(e1);
+                    LogV3.log(e1);
                 }
                 break;
             default:
                 break;
             }
-            LoggerFactory.getDefaultLogger().info("Console Codepage: " + CONSOLE_CODEPAGE + "(" + Charset.defaultCharset().displayName() + ")");
+            LogV3.info("Console Codepage: " + CONSOLE_CODEPAGE + "(" + Charset.defaultCharset().displayName() + ")");
             if (StringUtils.isEmpty(CONSOLE_CODEPAGE)) {
                 CONSOLE_CODEPAGE = Charset.defaultCharset().displayName();
             }

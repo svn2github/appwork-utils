@@ -64,7 +64,7 @@ public class ExportReporterBaton implements ISVNReporterBaton {
             reporter.finishReport();
         } catch (SVNException svne) {
             reporter.abortReport();
-                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Report failed.");
+                  org.appwork.loggingv3.LogV3.fine("Report failed.");
         }
     }
 }

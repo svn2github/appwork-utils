@@ -39,9 +39,9 @@ import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.appwork.loggingv3.LogV3;
 import org.appwork.utils.formatter.TimeFormatter;
-import org.appwork.utils.logging2.LogSource;
-import org.appwork.utils.logging2.extmanager.LoggerFactory;
+import org.appwork.utils.logging2.LogInterface;
 
 /**
  * @author thomas
@@ -52,7 +52,7 @@ public class TimeTracker {
     private final String                            id;
     private final CopyOnWriteArrayList<TrackerRule> rules   = new CopyOnWriteArrayList<TrackerRule>();
     private final LinkedList<TrackedEntry>          entries = new LinkedList<TrackedEntry>();
-    private final LogSource                         logger;
+    private final LogInterface                      logger;
 
     public String getId() {
         return id;
@@ -63,7 +63,7 @@ public class TimeTracker {
      */
     public TimeTracker(String typeID) {
         this.id = typeID;
-        logger = LoggerFactory.I().getLogger("TimeTracker " + id);
+        logger = LogV3.I().getLogger("TimeTracker " + id);
     }
 
     public void addRule(TrackerRule rule) {
@@ -73,7 +73,6 @@ public class TimeTracker {
     }
 
     public void wait(final TrackerJob job) throws InterruptedException {
-
         if (rules.size() == 0 || job == null) {
             return;
         }

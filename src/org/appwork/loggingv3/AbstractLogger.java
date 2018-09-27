@@ -48,7 +48,7 @@ public abstract class AbstractLogger implements LogInterface {
             if (es.getClassName().startsWith(LogV3.class.getPackage().getName()) || es.getClassName().startsWith("org.slf4j.") || es.getClassName().contains("Logger") || es.getClassName().contains("logging")) {
                 continue;
             }
-            if (es.getMethodName().equals("log") || es.getMethodName().equals("info") || es.getMethodName().equals("messageLogged") || es.getMethodName().equals("fireMessageLoggedEvent") || es.getMethodName().equals("fireMessageLogged")) {
+            if (es.getMethodName().equals("log") || es.getMethodName().equals("info") || es.getMethodName().equals("messageLogged") || es.getMethodName().equals("fireMessageLoggedEvent") || es.getMethodName().equals("fireMessageLogged") || es.getMethodName().contains("Logger") || es.getMethodName().contains("logger")) {
                 continue;
             }
             return es;

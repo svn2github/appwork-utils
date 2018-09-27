@@ -45,9 +45,9 @@ import java.net.SocketAddress;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
+import org.appwork.loggingv3.LogV3;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.logging2.LogInterface;
-import org.appwork.utils.logging2.extmanager.LoggerFactory;
 import org.appwork.utils.net.httpconnection.HTTPProxy;
 import org.appwork.utils.net.httpconnection.JavaSSLSocketStreamFactory;
 import org.appwork.utils.net.socketconnection.SocketConnection;
@@ -139,7 +139,7 @@ public abstract class SimpleUseNet {
         if (logger != null) {
             this.logger = logger;
         } else {
-            this.logger = LoggerFactory.getDefaultLogger();
+            this.logger = LogV3.I().getDefaultLogger();
         }
     }
 

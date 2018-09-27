@@ -302,7 +302,7 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
                 return bounds.contains(point);
             }
         } catch (final Exception e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
         }
         return false;
     }
@@ -320,7 +320,7 @@ public class ToolTipController implements MouseListener, MouseMotionListener, Wi
                 return bounds.contains(locationOnScreen);
             }
         } catch (final Exception e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
         }
         return false;
     }

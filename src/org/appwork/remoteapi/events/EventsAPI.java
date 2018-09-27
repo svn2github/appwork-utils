@@ -51,7 +51,7 @@ import org.appwork.remoteapi.events.local.LocalEventsAPIEvent;
 import org.appwork.remoteapi.events.local.LocalEventsAPIEventSender;
 import org.appwork.remoteapi.exceptions.APIFileNotFoundException;
 import org.appwork.remoteapi.exceptions.InternalApiException;
-import org.appwork.utils.logging2.extmanager.LoggerFactory;
+import org.appwork.loggingv3.LogV3;
 
 /**
  * @author daniel
@@ -115,7 +115,7 @@ public class EventsAPI implements EventsAPIInterface, RemoteAPIEventsSender {
                 try {
                     ret.add(Pattern.compile(pat));
                 } catch (final Throwable e) {
-                    LoggerFactory.getDefaultLogger().log(e);
+                    LogV3.log(e);
                 }
             }
         }

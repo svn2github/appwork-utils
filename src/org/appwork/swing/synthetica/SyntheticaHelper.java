@@ -52,7 +52,7 @@ import org.appwork.utils.Application;
 import org.appwork.utils.IO;
 import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
-import org.appwork.utils.logging2.extmanager.LoggerFactory;
+import org.appwork.loggingv3.LogV3;
 import org.appwork.utils.os.CrossSystem;
 
 public class SyntheticaHelper {
@@ -139,10 +139,10 @@ public class SyntheticaHelper {
     public String readLicense() throws IOException {
         final URL url = Application.getRessourceURL("cfg/synthetica-license.key");
         if (url == null) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Missing Look And Feel License. Reverted to your System Look And Feel!");
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("You can only use Synthetica Look and Feel in official JDownloader versions.");
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Reverted to your System Look And Feel!");
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("If you are a developer, and want to do some gui work on the offical JDownloader Look And Feel, write e-mail@appwork.org to get a developer Look And Feel Key");
+            org.appwork.loggingv3.LogV3.warning("Missing Look And Feel License. Reverted to your System Look And Feel!");
+            org.appwork.loggingv3.LogV3.warning("You can only use Synthetica Look and Feel in official JDownloader versions.");
+            org.appwork.loggingv3.LogV3.warning("Reverted to your System Look And Feel!");
+            org.appwork.loggingv3.LogV3.warning("If you are a developer, and want to do some gui work on the offical JDownloader Look And Feel, write e-mail@appwork.org to get a developer Look And Feel Key");
             throw new WTFException("No Synthetica License Found!");
         } else {
             return IO.readURLToString(url);
@@ -155,7 +155,7 @@ public class SyntheticaHelper {
      */
     public void load(final String laf, String license) throws IOException {
         if (UIManager.get("Synthetica.animation.enabled") != null) {
-            LoggerFactory.getDefaultLogger().info("Synthetica Look And Feel is already Set");
+            LogV3.info("Synthetica Look And Feel is already Set");
             // return;
         }
         if (CrossSystem.isMac()) {
@@ -170,7 +170,7 @@ public class SyntheticaHelper {
         if (StringUtils.isEmpty(license)) {
             license = readLicense();
         }
-        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("LaF init: " + laf);
+        org.appwork.loggingv3.LogV3.info("LaF init: " + laf);
         final long start = System.currentTimeMillis();
         try {
             setLicense(license);
@@ -192,7 +192,7 @@ public class SyntheticaHelper {
             UIManager.put("Synthetica.font.respectSystemDPI", config.isFontRespectsSystemDPI());
             int fontScale = getFontScaleFaktor(config, locale);
             if (config.isFontRespectsSystemDPI() && fontScale != 100) {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("SystemDPI might interfere with JD's FontScaling");
+                org.appwork.loggingv3.LogV3.warning("SystemDPI might interfere with JD's FontScaling");
             }
             UIManager.put("Synthetica.font.scaleFactor", fontScale);
             UIManager.put("Synthetica.animation.enabled", config.isAnimationEnabled());
@@ -222,19 +222,19 @@ public class SyntheticaHelper {
             ExtPasswordField.MASK = "*******";
         } finally {
             final long time = System.currentTimeMillis() - start;
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("LAF Init duration: " + time + "ms");
+            org.appwork.loggingv3.LogV3.info("LAF Init duration: " + time + "ms");
         }
     }
 
     public void setLicense(String license) {
         /* we save around x-400 ms here by not using AES */
         if (license == null) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Missing Look And Feel License. Reverted to your System Look And Feel!");
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Missing Look And Feel License. Reverted to your System Look And Feel!");
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Missing Look And Feel License.");
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("You can only use Synthetica Look and Feel in official JDownloader versions.");
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Reverted to your System Look And Feel!");
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("If you are a developer, and want to do some gui work on the offical JDownloader Look And Feel, write e-mail@appwork.org to get a developer Look And Feel Key");
+            org.appwork.loggingv3.LogV3.warning("Missing Look And Feel License. Reverted to your System Look And Feel!");
+            org.appwork.loggingv3.LogV3.warning("Missing Look And Feel License. Reverted to your System Look And Feel!");
+            org.appwork.loggingv3.LogV3.warning("Missing Look And Feel License.");
+            org.appwork.loggingv3.LogV3.warning("You can only use Synthetica Look and Feel in official JDownloader versions.");
+            org.appwork.loggingv3.LogV3.warning("Reverted to your System Look And Feel!");
+            org.appwork.loggingv3.LogV3.warning("If you are a developer, and want to do some gui work on the offical JDownloader Look And Feel, write e-mail@appwork.org to get a developer Look And Feel Key");
             throw new WTFException("No Synthetica License Found!");
         }
         /*

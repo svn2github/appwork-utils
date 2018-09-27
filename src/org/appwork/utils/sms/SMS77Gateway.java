@@ -67,7 +67,7 @@ public class SMS77Gateway {
         try {
             sb.append("?u=" + URLEncoder.encode(this.userName, "UTF-8") + "&p=" + URLEncoder.encode(this.userPass, "UTF-8"));
         } catch (final UnsupportedEncodingException e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
             sb.append("?u=" + this.userName + "&p=" + this.userPass);
         }
 

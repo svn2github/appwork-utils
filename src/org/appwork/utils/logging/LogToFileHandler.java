@@ -116,7 +116,7 @@ public class LogToFileHandler extends java.util.logging.Handler {
                 lwriter.flush();
             }
         } catch (final IOException e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
         }
     }
 
@@ -130,9 +130,9 @@ public class LogToFileHandler extends java.util.logging.Handler {
                 }
             } catch (final IOException e) {
                 if (e.getMessage().contains("not enough")) {
-                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Cannot write log, Disk is full!");
+                    org.appwork.loggingv3.LogV3.severe("Cannot write log, Disk is full!");
                 } else {
-                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                    org.appwork.loggingv3.LogV3.log(e);
                 }
             }
 

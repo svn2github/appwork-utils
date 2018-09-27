@@ -83,7 +83,7 @@ public class Crypto {
             try {
                 return new String(ret, "UTF-8");
             } catch (UnsupportedEncodingException e) {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                org.appwork.loggingv3.LogV3.log(e);
             }
         }
         return null;
@@ -97,7 +97,7 @@ public class Crypto {
             cipher.init(Cipher.DECRYPT_MODE, skeySpec, ivSpec);
             return cipher.doFinal(b);
         } catch (final Exception e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
             final IvParameterSpec ivSpec = new IvParameterSpec(iv);
             final SecretKeySpec skeySpec = new SecretKeySpec(key, "AES");
             try {
@@ -105,7 +105,7 @@ public class Crypto {
                 cipher.init(Cipher.DECRYPT_MODE, skeySpec, ivSpec);
                 cipher.doFinal(b);
             } catch (final Exception e1) {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e1);
+                org.appwork.loggingv3.LogV3.log(e1);
             }
         }
         return null;
@@ -126,7 +126,7 @@ public class Crypto {
         try {
             return encryptByteArray(string.getBytes("UTF-8"), key, iv);
         } catch (final Exception e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
         }
         return null;
     }

@@ -78,7 +78,7 @@ import org.appwork.swing.components.IconIdentifier;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.URLStream;
 import org.appwork.utils.ImageProvider.ImageProvider;
-import org.appwork.utils.logging2.extmanager.LoggerFactory;
+import org.appwork.loggingv3.LogV3;
 import org.appwork.utils.net.Base64InputStream;
 import org.appwork.utils.net.Base64OutputStream;
 
@@ -284,7 +284,7 @@ public class IconIO {
                     return ret;
                 }
             } catch (final IOException e) {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(new IOException("URL:" + resource, e).fillInStackTrace());
+                org.appwork.loggingv3.LogV3.log(new IOException("URL:" + resource, e).fillInStackTrace());
             } finally {
                 try {
                     is.close();
@@ -427,7 +427,7 @@ public class IconIO {
             try {
                 return new ImageIcon(getImageFromSVG(resource, size, size));
             } catch (IOException e) {
-                LoggerFactory.getDefaultLogger().log(e);
+                LogV3.log(e);
                 return new ImageIcon(ImageProvider.createIcon("DUMMY", size, size));
             }
         }

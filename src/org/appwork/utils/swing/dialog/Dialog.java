@@ -198,7 +198,7 @@ public class Dialog {
                 return AWUTheme.I().getIcon(Dialog.ICON_INFO, 32);
             }
         } catch (final Throwable e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
             return null;
         }
     }

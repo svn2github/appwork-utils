@@ -43,7 +43,7 @@ import java.util.regex.Pattern;
 import org.appwork.exceptions.WTFException;
 import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
-import org.appwork.utils.logging2.extmanager.LoggerFactory;
+import org.appwork.loggingv3.LogV3;
 
 /**
  * @author daniel
@@ -176,7 +176,7 @@ public class URLHelper {
                 final String newQuery = tmp.getPath().substring(index);
                 if (newQuery.matches("^[a-zA-Z0-9%]+=.*?")) {
                     final String newURL = createURL(tmp.getProtocol(), tmp.getUserInfo(), tmp.getHost(), tmp.getPort(), newPath, newQuery, tmp.getRef());
-                    LoggerFactory.getDefaultLogger().info("Apply auto fix '&->?'|" + url + "|" + newURL);
+                    LogV3.info("Apply auto fix '&->?'|" + url + "|" + newURL);
                     return new URL(newURL);
                 }
             }

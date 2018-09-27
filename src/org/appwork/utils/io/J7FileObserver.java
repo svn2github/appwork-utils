@@ -170,7 +170,7 @@ public abstract class J7FileObserver implements Runnable {
 
             }
         } catch (final IOException e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
 
         }
 

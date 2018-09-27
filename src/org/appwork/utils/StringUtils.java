@@ -76,8 +76,8 @@ public class StringUtils {
      * taken from http://stackoverflow.com/questions/4731055/whitespace-matching-regex-java
      */
     final private static String whitespace_chars = "[" /*
-     * dummy empty string for homogeneity
-     */
+                                                        * dummy empty string for homogeneity
+                                                        */
             + "\\u0009" // CHARACTER
             // TABULATION
             + "\\u000A" // LINE
@@ -208,14 +208,20 @@ public class StringUtils {
         return pass.equalsIgnoreCase(pass2);
     }
 
+    private static String EMPTY_SPACE_STRING = "                                                                                                                                                     ";
+
     public static String fillPre(final String string, final String filler, final int minCount) {
         if (string.length() >= minCount) {
             return string;
         }
         final StringBuilder sb = new StringBuilder();
         sb.append(string);
-        while (sb.length() < minCount) {
-            sb.insert(0, filler);
+        if (" ".equals(filler) && minCount - sb.length() <= EMPTY_SPACE_STRING.length()) {
+            sb.insert(0, EMPTY_SPACE_STRING.substring(0, minCount - sb.length()));
+        } else {
+            while (sb.length() < minCount) {
+                sb.insert(0, filler);
+            }
         }
         return sb.toString();
     }
@@ -226,8 +232,12 @@ public class StringUtils {
         }
         final StringBuilder sb = new StringBuilder();
         sb.append(string);
-        while (sb.length() < minCount) {
-            sb.append(filler);
+        if (" ".equals(filler) && minCount - sb.length() <= EMPTY_SPACE_STRING.length()) {
+            sb.append(EMPTY_SPACE_STRING.substring(0, minCount - sb.length()));
+        } else {
+            while (sb.length() < minCount) {
+                sb.append(filler);
+            }
         }
         return sb.toString();
     }

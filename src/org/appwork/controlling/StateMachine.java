@@ -165,7 +165,7 @@ public class StateMachine {
                 this.path.add(new StatePathEntry(newState));
             }
 
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finest(this.owner + " State changed " + this.currentState + " -> " + newState);
+            org.appwork.loggingv3.LogV3.finest(this.owner + " State changed " + this.currentState + " -> " + newState);
             this.currentState = newState;
         }
         this.eventSender.fireEvent(event);
@@ -302,7 +302,7 @@ public class StateMachine {
                 throw new StateConflictException("Cannot reset from state " + this.currentState);
             }
             event = new StateEvent(this, StateEvent.Types.CHANGED, this.currentState, this.initState);
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finest(this.owner + " State changed (reset) " + this.currentState + " -> " + this.initState);
+            org.appwork.loggingv3.LogV3.finest(this.owner + " State changed (reset) " + this.currentState + " -> " + this.initState);
             this.currentState = this.initState;
             synchronized (this.lock2) {
                 this.path.clear();

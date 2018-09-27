@@ -97,7 +97,7 @@ public class ExportEditor implements ISVNEditor {
                 throw new SVNException(err);
             }
         }
-              org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("dir added: " + path);
+              org.appwork.loggingv3.LogV3.fine("dir added: " + path);
     }
 
     /**

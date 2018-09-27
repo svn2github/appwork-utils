@@ -140,8 +140,8 @@ public class TranslateResource {
                     final String txt = this.read(this.url);
                     this.data = TranslationUtils.restoreFromString(txt, TranslateData.class);
                 } catch (final Throwable e) {
-                          org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Error in Translation File: " + this.url);
-                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                          org.appwork.loggingv3.LogV3.severe("Error in Translation File: " + this.url);
+                    org.appwork.loggingv3.LogV3.log(e);
                     this.data = new TranslateData();
                 }
             }
@@ -236,7 +236,7 @@ public class TranslateResource {
                      * Workaround for this bug: http://bugs.sun.com/view_bug.do?bug_id=4508058
                      * http://bugs.sun.com/view_bug.do?bug_id=6378911
                      */
-                          org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning(url + " is UTF-8 with BOM. Please remove BOM");
+                          org.appwork.loggingv3.LogV3.warning(url + " is UTF-8 with BOM. Please remove BOM");
                     line = line.substring(1);
                 }
 
@@ -277,7 +277,7 @@ public class TranslateResource {
         // instead of using the annotations
         final Default lngAn = method.getAnnotation(Default.class);
         if (lngAn == null) {
-                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("Default missing for: " + method);
+                  org.appwork.loggingv3.LogV3.warning("Default missing for: " + method);
             return null;
         }
         for (int i = 0; i < lngAn.lngs().length; i++) {

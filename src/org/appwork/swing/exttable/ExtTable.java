@@ -231,7 +231,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
             // if (suggestedRowHeight > 0) {
             // suggestedRowHeight += 8;
             // }
-            // org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Using SuggestedRowHeight of " +
+            // org.appwork.loggingv3.LogV3.info("Using SuggestedRowHeight of " +
             // suggestedRowHeight +
             // " instead of setPreferredSize of " + ExtTable.this.rowHeight);
             // preferredSize.height = suggestedRowHeight;
@@ -355,7 +355,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
                     try {
                         ExtTable.this.getStorage().put(ExtTable.this.getColumnStoreKey("POS_COL_", i), ExtTable.this.getModel().getExtColumnByModelIndex(tcm.getColumn(i).getModelIndex()).getID());
                     } catch (final Exception e1) {
-                        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e1);
+                        org.appwork.loggingv3.LogV3.log(e1);
                     }
                 }
             }
@@ -470,7 +470,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
                         }
                     }
                 } catch (final Exception e) {
-                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                    org.appwork.loggingv3.LogV3.log(e);
                 }
             } else {
                 for (final TableColumn ritem : columns.values()) {
@@ -1587,7 +1587,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
             try {
                 this.getStorage().put(this.getColumnStoreKey("WIDTH_COL_", col.getID()), col.getDefaultWidth());
             } catch (final Exception e) {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                org.appwork.loggingv3.LogV3.log(e);
             }
         }
     }
@@ -1613,7 +1613,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
             try {
                 this.getStorage().put(this.getColumnStoreKey("POS_COL_", i), col.getID());
             } catch (final Exception e1) {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e1);
+                org.appwork.loggingv3.LogV3.log(e1);
             }
         }
     }
@@ -1627,7 +1627,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
             try {
                 this.getStorage().put(this.getColumnStoreKey("VISABLE_COL_", col.getID()), col.isDefaultVisible());
             } catch (final Exception e) {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                org.appwork.loggingv3.LogV3.log(e);
             }
         }
     }
@@ -1647,7 +1647,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
                 col.getTableColumn().setPreferredWidth(col.getTableColumn().getWidth());
                 ExtTable.this.getStorage().put(this.getColumnStoreKey("WIDTH_COL_", col.getID()), col.getTableColumn().getWidth());
             } catch (final Exception e) {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                org.appwork.loggingv3.LogV3.log(e);
             }
         }
     }
@@ -1786,7 +1786,7 @@ public class ExtTable<E> extends JTable implements ToolTipHandler, PropertyChang
                 };
             }
         } catch (final IOException e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
         }
     }
 

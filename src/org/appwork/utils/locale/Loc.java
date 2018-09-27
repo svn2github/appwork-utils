@@ -245,7 +245,7 @@ public class Loc {
                 }
             }
         } catch (final Exception e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
         }
         return ret.toArray(new String[] {});
 
@@ -279,12 +279,12 @@ public class Loc {
             throw new IllegalArgumentException();
         }
         if (Loc.DATA == null) {
-                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("No parsed localization found! Loading now from saved localization file!");
+                  org.appwork.loggingv3.LogV3.warning("No parsed localization found! Loading now from saved localization file!");
             try {
                 Loc.setLocale(Loc.CFG.get(Loc.PROPERTY_LOCALE, Loc.FALLBACK_LOCALE));
             } catch (final Exception e) {
 
-                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe("Error while loading the stored localization name!");
+                      org.appwork.loggingv3.LogV3.severe("Error while loading the stored localization name!");
                 Loc.setLocale(Loc.FALLBACK_LOCALE);
             }
             if (Loc.DATA == null) {
@@ -337,7 +337,7 @@ public class Loc {
         }
 
         if (Loc.DATA != null) {
-                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Previous HashMap will be overwritten!");
+                  org.appwork.loggingv3.LogV3.finer("Previous HashMap will be overwritten!");
         }
         Loc.DATA = new HashMap<Integer, String>();
 
@@ -370,7 +370,7 @@ public class Loc {
         } catch (final FileNotFoundException e) {
             throw new IllegalArgumentException(e);
         } catch (final Exception e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
         } finally {
             try {
                 reader.close();
@@ -410,14 +410,14 @@ public class Loc {
                 Loc.CFG.put(Loc.PROPERTY_LOCALE, loc);
                 Loc.parseLocalization(file);
             } else {
-                      org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("The language " + loc + " isn't available! Parsing default (" + Loc.FALLBACK_LOCALE + ".loc) one!");
+                      org.appwork.loggingv3.LogV3.info("The language " + loc + " isn't available! Parsing default (" + Loc.FALLBACK_LOCALE + ".loc) one!");
                 Loc.locale = Loc.getDefaultLocale();
                 final String[] locs = Loc.locale.split("_");
                 Locale.setDefault(new Locale(locs[0], locs[1]));
                 Loc.parseLocalization(Loc.getResourceURL(Loc.FALLBACK_LOCALE));
             }
         } catch (final Exception e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
         }
     }
 }

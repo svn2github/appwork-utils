@@ -38,7 +38,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.appwork.loggingv3.LogV3;
 import org.appwork.loggingv3.LogV3Factory;
-import org.appwork.loggingv3.simple.sink.CompressionMode;
 import org.appwork.loggingv3.simple.sink.LogToFileSink;
 import org.appwork.loggingv3.simple.sink.LogToStdOutSink;
 import org.appwork.loggingv3.simple.sink.Sink;
@@ -53,13 +52,38 @@ import org.appwork.utils.logging2.LogInterface;
 public class SimpleLoggerFactory implements LogV3Factory, SinkProvider {
     protected final CopyOnWriteArrayList<Sink>    sinks  = new CopyOnWriteArrayList<Sink>();
     protected final HashMap<String, LoggerToSink> logger = new HashMap<String, LoggerToSink>();
+    protected LogToFileSink                       sinkToFile;
+
+    public LogToFileSink getSinkToFile() {
+        return sinkToFile;
+    }
+
+    public void setSinkToFile(LogToFileSink sinkToFile) {
+        removeSink(this.sinkToFile);
+        this.sinkToFile = sinkToFile;
+        addSink(sinkToFile);
+    }
+
+    public LogToStdOutSink getSinkToConsole() {
+        return sinkToConsole;
+    }
+
+    public void setSinkToConsole(LogToStdOutSink sinkToConsole) {
+        removeSink(this.sinkToConsole);
+        this.sinkToConsole = sinkToConsole;
+        addSink(sinkToConsole);
+    }
+
+    protected LogToStdOutSink sinkToConsole;
 
     public SimpleLoggerFactory() {
     }
 
     public void initDefaults() {
-        addSink(new LogToFileSink(Application.getResource("logs"), "Logs_\\d.txt", 1, CompressionMode.NONE));
-        addSink(new LogToStdOutSink());
+        sinkToFile = new LogToFileSink(Application.getResource("logs"), "Logs_\\d.txt", 1);
+        sinkToConsole = new LogToStdOutSink();
+        addSink(sinkToFile);
+        addSink(sinkToConsole);
     }
 
     @Override
@@ -88,6 +112,15 @@ public class SimpleLoggerFactory implements LogV3Factory, SinkProvider {
     public void addSink(Sink sink) {
         if (sink != null) {
             sinks.addIfAbsent(sink);
+        }
+    }
+
+    /**
+     * @param logToFileSink
+     */
+    public void removeSink(Sink sink) {
+        if (sink != null) {
+            sinks.remove(sink);
         }
     }
 

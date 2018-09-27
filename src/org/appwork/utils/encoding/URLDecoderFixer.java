@@ -115,7 +115,7 @@ public class URLDecoderFixer extends URLDecoder {
             }
         }
         if (exceptionFixed) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(new Exception("URLDecoderFixer: had to fix " + s));
+            org.appwork.loggingv3.LogV3.log(new Exception("URLDecoderFixer: had to fix " + s));
         }
         return needToChange ? sb.toString() : s;
     }

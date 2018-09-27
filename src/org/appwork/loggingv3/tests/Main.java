@@ -33,27 +33,36 @@
  * ==================================================================================================================================================== */
 package org.appwork.loggingv3.tests;
 
-import org.appwork.loggingv3.LogV3;
-import org.appwork.loggingv3.simple.SimpleLoggerFactory;
-import org.appwork.loggingv3.simple.sink.CompressionMode;
-import org.appwork.loggingv3.simple.sink.LogToFileSink;
-import org.appwork.loggingv3.simple.sink.LogToStdOutSink;
-import org.appwork.utils.Application;
-
 /**
  * @author Thomas
  * @date 19.09.2018
  *
  */
 public class Main {
-    public static void main(String[] args) {
-        SimpleLoggerFactory loggerFactory = new SimpleLoggerFactory();
-        loggerFactory.addSink(new LogToFileSink(Application.getResource("logs"), "ConnectM_\\d.txt", 1, CompressionMode.NONE));
-        loggerFactory.addSink(new LogToStdOutSink());
-        LogV3.setFactory(loggerFactory);
-        //
-        for (int i = 0; i < 50000; i++) {
-            LogV3.info("Ich logge gerne zum " + i + ". mal QUATSCH!");
-        }
+    public static void main(String[] args) throws InterruptedException {
+        Runtime.getRuntime().addShutdownHook(new Thread("ShutdownHook: Logger") {
+            {
+                setDaemon(true);
+            }
+
+            /*
+             * (non-Javadoc)
+             *
+             * @see java.lang.Thread#run()
+             */
+            @Override
+            public void run() {
+                while (true) {
+                    System.out.println(System.currentTimeMillis());
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        System.exit(0);
     }
 }

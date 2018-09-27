@@ -70,7 +70,7 @@ import org.appwork.storage.TypeRef;
 import org.appwork.utils.Application;
 import org.appwork.utils.IO;
 import org.appwork.utils.Regex;
-import org.appwork.utils.logging2.extmanager.LoggerFactory;
+import org.appwork.loggingv3.LogV3;
 import org.appwork.utils.net.ChunkedOutputStream;
 import org.appwork.utils.net.HTTPHeader;
 import org.appwork.utils.net.httpserver.HttpConnection.HttpConnectionType;
@@ -731,7 +731,7 @@ public class RemoteAPI implements HttpRequestHandler {
                             // try {
                             // System.out.println("Register: " + c.getName() +
                             // "->" + namespace);
-                            LoggerFactory.getDefaultLogger().info("Try to register API namespace /" + namespace + " = " + c);
+                            LogV3.info("Try to register API namespace /" + namespace + " = " + c);
                             InterfaceHandler<RemoteAPIInterface> handler = linterfaces.get(namespace);
                             if (handler == null) {
                                 handler = createHandler(x, c, defaultAuthLevel);

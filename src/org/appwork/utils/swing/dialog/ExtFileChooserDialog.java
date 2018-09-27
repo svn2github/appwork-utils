@@ -189,14 +189,14 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
     @Override
     public void actionPerformed(final ActionEvent e) {
         if (e.getSource() == okButton) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Answer: Button<OK:" + okButton.getText() + ">");
+            org.appwork.loggingv3.LogV3.fine("Answer: Button<OK:" + okButton.getText() + ">");
             if (fcUI != null) {
                 fcUI.getApproveSelectionAction().actionPerformed(e);
             } else {
                 setReturnmask(true);
             }
         } else if (e.getSource() == cancelButton) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Answer: Button<CANCEL:" + cancelButton.getText() + ">");
+            org.appwork.loggingv3.LogV3.fine("Answer: Button<CANCEL:" + cancelButton.getText() + ">");
             setReturnmask(false);
         }
         dispose();
@@ -675,16 +675,16 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
         fc.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(final ActionEvent e) {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info(e + "");
+                org.appwork.loggingv3.LogV3.info(e + "");
                 if (JFileChooser.CANCEL_SELECTION.equals(e.getActionCommand())) {
-                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Answer: FC CANCEL>");
+                    org.appwork.loggingv3.LogV3.fine("Answer: FC CANCEL>");
                     // this is called indirectly through #setReturnmask(false).
                     // so we use super here to avoid a loop
                     ExtFileChooserDialog.super.setReturnmask(false);
                     //
                     ExtFileChooserDialog.this.dispose();
                 } else if (JFileChooser.APPROVE_SELECTION.equals(e.getActionCommand())) {
-                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Answer: FC APPROVE>");
+                    org.appwork.loggingv3.LogV3.fine("Answer: FC APPROVE>");
                     ExtFileChooserDialog.this.setReturnmask(true);
                     ExtFileChooserDialog.this.dispose();
                 }
@@ -694,7 +694,7 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
         try {
             fcUI = (BasicFileChooserUI) fc.getUI();
         } catch (final Throwable e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
         }
         System.out.println("Duration 5  " + (System.currentTimeMillis() - t));
         if (isFilePreviewEnabled()) {
@@ -728,7 +728,7 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
             // find and eliminate file.filePath=null file objects.
             presel = null;
         }
-        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("Given presel: " + presel);
+        org.appwork.loggingv3.LogV3.info("Given presel: " + presel);
         if (presel == null) {
             final String path = getIDConfig().getLastSelection();
             presel = StringUtils.isEmpty(path) ? null : new File(path);
@@ -785,7 +785,7 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
         } catch (final Throwable t1) {
             // might throw exceptions, because the path, and the whole
             // detailsview thingy is part of the ui/LAF
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(t1);
+            org.appwork.loggingv3.LogV3.log(t1);
         }
         if (fileSelectionMode.getId() == FileChooserSelectionMode.DIRECTORIES_ONLY.getId() && fc.getComponentCount() >= 4) {
             ((JComponent) fc.getComponent(3)).getComponent(1).setVisible(false);
@@ -1032,7 +1032,7 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
                     });
                 }
             } catch (final Throwable e) {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                org.appwork.loggingv3.LogV3.log(e);
             }
         }
         if (directoryModel != null) {
@@ -1203,7 +1203,7 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
             } catch (final Throwable t) {
                 // might throw exceptions, because the path, and the whole
                 // detailsview thingy is part of the ui/LAF
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(t);
+                org.appwork.loggingv3.LogV3.log(t);
             }
             break;
         case LIST:
@@ -1213,7 +1213,7 @@ public class ExtFileChooserDialog extends AbstractDialog<File[]> {
             } catch (final Throwable t) {
                 // might throw exceptions, because the path, and the whole
                 // detailsview thingy is part of the ui/LAF
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(t);
+                org.appwork.loggingv3.LogV3.log(t);
             }
             break;
         }

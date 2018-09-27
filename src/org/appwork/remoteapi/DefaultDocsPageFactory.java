@@ -70,7 +70,7 @@ import org.appwork.utils.CompareUtils;
 import org.appwork.utils.IO;
 import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
-import org.appwork.utils.logging2.extmanager.LoggerFactory;
+import org.appwork.loggingv3.LogV3;
 import org.appwork.utils.net.HTTPHeader;
 
 public class DefaultDocsPageFactory extends InterfaceHandler<Object> {
@@ -953,7 +953,7 @@ public class DefaultDocsPageFactory extends InterfaceHandler<Object> {
                     ret.addAll(getTypes(g.getMethod().getGenericParameterTypes()[0], dupe));
                 }
             } catch (Throwable e) {
-                LoggerFactory.getDefaultLogger().log(e);
+                LogV3.log(e);
             }
         } else if (returnType instanceof ParameterizedType) {
             Type raw = ((ParameterizedType) returnType).getRawType();

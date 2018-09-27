@@ -104,7 +104,7 @@ public class InvocationHandlerImpl<T extends RemoteCallInterface> implements Inv
                         JSonStorage.canStore(t, false);
                     }
                 } catch (final InvalidTypeException e) {
-                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                    org.appwork.loggingv3.LogV3.log(e);
                     throw new InterfaceParseException("Json Serialize not possible for " + m);
                 }
                 for (final Class<?> e : m.getExceptionTypes()) {

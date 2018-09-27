@@ -374,7 +374,7 @@ public class ProxyDialog extends AbstractDialog<HTTPProxy> implements CaretListe
             ret.setUser(txtUser.getText());
             return ret;
         } catch (final Throwable e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
             return null;
         }
     }

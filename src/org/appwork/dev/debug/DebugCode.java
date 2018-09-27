@@ -41,7 +41,7 @@ public abstract class DebugCode<T> {
 
     public DebugCode() {
         if (Application.isJared(DebugCode.class)) throw new Error("Debug code left!");
-        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(new Exception("Run Debug Code. Remove me!"));
+        org.appwork.loggingv3.LogV3.log(new Exception("Run Debug Code. Remove me!"));
         ret = run();
     }
 
@@ -50,7 +50,7 @@ public abstract class DebugCode<T> {
      */
     public DebugCode(T b) {
         if (Application.isJared(DebugCode.class)) throw new Error("Debug code left!");
-        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(new Exception("Run Debug Code. Remove me!"));
+        org.appwork.loggingv3.LogV3.log(new Exception("Run Debug Code. Remove me!"));
         ret=b;
     }
 

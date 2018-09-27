@@ -556,7 +556,7 @@ public class HttpConnection implements Runnable, RawHttpConnectionInterface {
                 this.close();
             }
             // if (getHook() == null) {
-            // LoggerFactory.getDefaultLogger().finer("No Connection Hook!");
+            // LogV3.finer("No Connection Hook!");
             // }
         }
     }

@@ -244,27 +244,27 @@ public class DesktopSupportLinux implements DesktopSupport {
         try {
             dbusPowerState("Shutdown");
         } catch (Throwable e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
         }
         try {
             ProcessBuilderFactory.runCommand(new String[] { "dcop", "--all-sessions", "--all-users", "ksmserver", "ksmserver", "logout", "0", "2", "0" });
         } catch (Throwable e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
         }
         try {
             ProcessBuilderFactory.runCommand("poweroff");
         } catch (Throwable e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
         }
         try {
             ProcessBuilderFactory.runCommand(new String[] { "sudo", "shutdown", "-P", "now" });
         } catch (Throwable e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
         }
         try {
             ProcessBuilderFactory.runCommand(new String[] { "sudo", "shutdown", "-Ph", "now" });
         } catch (Throwable e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
         }
         return true;
     }
@@ -277,7 +277,7 @@ public class DesktopSupportLinux implements DesktopSupport {
                 ProcessBuilderFactory.runCommand("dbus-send", "--system", "--print-reply", "--dest=org.freedesktop.login1", "/org/freedesktop/login1", "org.freedesktop.login1.Manager." + command, "boolean:true");
             }
         } catch (Throwable e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
         }
     }
 
@@ -287,8 +287,8 @@ public class DesktopSupportLinux implements DesktopSupport {
             dbusPowerState("Suspend");
             return true;
         } catch (Throwable e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("no standby support, use shutdown");
+            org.appwork.loggingv3.LogV3.log(e);
+            org.appwork.loggingv3.LogV3.info("no standby support, use shutdown");
             return false;
         }
     }
@@ -299,8 +299,8 @@ public class DesktopSupportLinux implements DesktopSupport {
             dbusPowerState("Hibernate");
             return true;
         } catch (Throwable e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("no hibernate support, use shutdown");
+            org.appwork.loggingv3.LogV3.log(e);
+            org.appwork.loggingv3.LogV3.info("no hibernate support, use shutdown");
             return false;
         }
     }

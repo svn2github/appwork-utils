@@ -33,6 +33,7 @@
  * ==================================================================================================================================================== */
 package org.appwork.loggingv3;
 
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.lang.reflect.Method;
 
 import org.appwork.utils.logging2.LogInterface;
@@ -43,7 +44,20 @@ import org.appwork.utils.logging2.LogInterface;
  *
  */
 public class LogV3 {
+    static {
+        Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+            @Override
+            public void uncaughtException(final Thread t, final Throwable e) {
+                LogV3.logger(t).exception("Uncaught Exception in: " + t.getId() + "=" + t.getName(), e);
+            }
+        });
+    }
+
     public static LogV3Factory I() {
+        if (INSTANCE == null) {
+            // this can only happen, if there is a LogV3 call in the LoggerFactory init itself
+            INSTANCE = new LogV3FactoryImpl();
+        }
         return INSTANCE;
     }
 
@@ -61,9 +75,11 @@ public class LogV3 {
         }
         try {
             LogV3Factory ret = (LogV3Factory) Class.forName(System.getProperty("LogV3_FACTORY", load)).newInstance();
-            Method initDefaults = ret.getClass().getMethod("initDefaults", new Class[] {});
-            if (initDefaults != null) {
+            try {
+                Method initDefaults = ret.getClass().getMethod("initDefaults", new Class[] {});
                 initDefaults.invoke(ret, new Object[] {});
+            } catch (NoSuchMethodException e) {
+                // Thats ok, this method is optional
             }
             return ret;
         } catch (Throwable e) {
@@ -142,5 +158,12 @@ public class LogV3 {
      */
     public static void setFactory(LogV3Factory instance) {
         INSTANCE = instance;
+    }
+
+    /**
+     *
+     */
+    public static LogV3Factory getFactory() {
+        return INSTANCE;
     }
 }

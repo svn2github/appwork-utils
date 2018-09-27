@@ -142,7 +142,7 @@ public class HTTPProxy {
                 }
             }
         } catch (final Throwable e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
         }
         return ret;
     }
@@ -261,7 +261,7 @@ public class HTTPProxy {
             try {
                 final String autoProxy = new Regex(result, "AutoConfigURL\\s+REG_SZ\\s+([^\r\n]+)").getMatch(0);
                 if (!StringUtils.isEmpty(autoProxy)) {
-                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("AutoProxy.pac Script found: " + autoProxy);
+                    org.appwork.loggingv3.LogV3.info("AutoProxy.pac Script found: " + autoProxy);
                 }
             } catch (final Exception e) {
             }
@@ -312,7 +312,7 @@ public class HTTPProxy {
                 }
             }
         } catch (final Throwable e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
         }
         return ret;
     }

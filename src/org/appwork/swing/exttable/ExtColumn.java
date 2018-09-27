@@ -190,7 +190,7 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
                 }
             }
         } catch (final Throwable e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
         }
     }
 
@@ -863,7 +863,7 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
                 w = ExtColumn.this.getModel().getTable().getColumnStore("WIDTH_COL_", ExtColumn.this.getID(), w);
                 w = adjustWidth(w);
             } catch (final Exception e) {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                org.appwork.loggingv3.LogV3.log(e);
             } finally {
                 // System.out.println(tableColumn + " Set - >" + w);
                 tableColumn.setPreferredWidth(w);

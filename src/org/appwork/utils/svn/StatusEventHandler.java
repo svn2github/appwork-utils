@@ -62,7 +62,7 @@ public class StatusEventHandler implements ISVNStatusHandler, ISVNEventHandler {
          * won't be dispatched.
          */
         if (action == SVNEventAction.STATUS_COMPLETED) {
-                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine("Status against revision:  " + event.getRevision());
+                  org.appwork.loggingv3.LogV3.fine("Status against revision:  " + event.getRevision());
         }
 
     }
@@ -244,6 +244,6 @@ public class StatusEventHandler implements ISVNStatusHandler, ISVNEventHandler {
          * client's command "svn status"
          */
 
-              org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().fine(pathChangeType + propertiesChangeType + (isLocked ? "L" : " ") + (isAddedWithHistory ? "+" : " ") + (isSwitched ? "S" : " ") + lockLabel + "  " + remoteChangeType + "  " + workingRevision + offsets[0] + (lastChangedRevision >= 0 ? String.valueOf(lastChangedRevision) : "?") + offsets[1] + (status.getAuthor() != null ? status.getAuthor() : "?") + offsets[2] + status.getFile().getPath());
+              org.appwork.loggingv3.LogV3.fine(pathChangeType + propertiesChangeType + (isLocked ? "L" : " ") + (isAddedWithHistory ? "+" : " ") + (isSwitched ? "S" : " ") + lockLabel + "  " + remoteChangeType + "  " + workingRevision + offsets[0] + (lastChangedRevision >= 0 ? String.valueOf(lastChangedRevision) : "?") + offsets[1] + (status.getAuthor() != null ? status.getAuthor() : "?") + offsets[2] + status.getFile().getPath());
     }
 }

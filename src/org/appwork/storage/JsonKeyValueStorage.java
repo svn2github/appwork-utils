@@ -48,12 +48,12 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.appwork.exceptions.WTFException;
+import org.appwork.loggingv3.LogV3;
 import org.appwork.storage.config.handler.StorageHandler;
 import org.appwork.utils.Application;
 import org.appwork.utils.IO;
 import org.appwork.utils.ModifyLock;
 import org.appwork.utils.logging2.LogInterface;
-import org.appwork.utils.logging2.extmanager.LoggerFactory;
 
 public class JsonKeyValueStorage extends Storage {
     private final Map<String, Object> internalMap;
@@ -131,7 +131,7 @@ public class JsonKeyValueStorage extends Storage {
      * @return
      */
     protected LogInterface getDefaultLogger() {
-        return LoggerFactory.getDefaultLogger();
+        return LogV3.I().getDefaultLogger();
     }
 
     public JsonKeyValueStorage(final String name) throws StorageException {
@@ -271,7 +271,7 @@ public class JsonKeyValueStorage extends Storage {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.storage.Storage#getID()
      */
     @Override
@@ -556,7 +556,7 @@ public class JsonKeyValueStorage extends Storage {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.storage.Storage#size()
      */
     @Override

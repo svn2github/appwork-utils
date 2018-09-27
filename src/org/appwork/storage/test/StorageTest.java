@@ -64,7 +64,7 @@ public class StorageTest {
             final long mytinyint = s.get("TINYLONG", (long) 0);
             Assert.assertTrue("Restore error", mytinyint == 100l);
         } catch (final Exception e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
             Assert.fail(e.getMessage());
         }
     }
@@ -87,7 +87,7 @@ public class StorageTest {
             s.put("NOTNULL", (String) null);
 
         } catch (final Exception e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
             Assert.fail(e.getMessage());
         }
 

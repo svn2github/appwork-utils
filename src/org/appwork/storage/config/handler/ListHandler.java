@@ -248,14 +248,14 @@ public abstract class ListHandler<T> extends KeyHandler<T> {
             final File jsonPath = getPath();
             final byte[] cryptKey = getCryptKey();
             if (jsonPath != null && jsonPath.exists()) {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Read Config(File): " + jsonPath.getAbsolutePath());
+                org.appwork.loggingv3.LogV3.finer("Read Config(File): " + jsonPath.getAbsolutePath());
                 readObject = JSonStorage.restoreFrom(jsonPath, cryptKey == null, cryptKey, getTypeRef(), dummyObject);
                 readFlag.set(jsonPath.exists());
             }
             if (readObject == dummyObject || !readFlag.get()) {
                 final URL jsonURL = getURL();
                 if (jsonURL != null) {
-                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Read Config(URL): " + jsonURL);
+                    org.appwork.loggingv3.LogV3.finer("Read Config(URL): " + jsonURL);
                     readObject = JSonStorage.restoreFromByteArray(IO.readURL(jsonURL), cryptKey == null, cryptKey, getTypeRef(), dummyObject);
                     readFlag.set(true);
                 }

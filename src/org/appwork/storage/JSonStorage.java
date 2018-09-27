@@ -75,16 +75,13 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 public class JSonStorage {
     /* hash map contains file location as string and the storage instance */
     private static final HashMap<String, Storage>     MAP         = new HashMap<String, Storage>();
-
     private static JSONMapper                         JSON_MAPPER = new SimpleMapper();
     /* default key for encrypted json */
     static public byte[]                              KEY         = new byte[] { 0x01, 0x02, 0x11, 0x01, 0x01, 0x54, 0x01, 0x01, 0x01, 0x01, 0x12, 0x01, 0x01, 0x01, 0x22, 0x01 };
     private static final HashMap<File, AtomicInteger> LOCKS       = new HashMap<File, AtomicInteger>();
-
     static {
         /* shutdown hook to save all open Storages */
         ShutdownController.getInstance().addShutdownEvent(new ShutdownEvent() {
-
             @Override
             public long getMaxDuration() {
                 return 0;
@@ -104,9 +101,7 @@ public class JSonStorage {
             public String toString() {
                 return "ShutdownEvent: Save JSonStorages";
             }
-
         });
-
     }
 
     /**
@@ -198,7 +193,6 @@ public class JSonStorage {
                 JSonStorage.canStoreIntern(t, path + "(" + t + ")", allowNonStorableObjects, dupeID);
             }
             return;
-
         } else if (gType instanceof GenericArrayType) {
             final GenericArrayType atype = (GenericArrayType) gType;
             final Type t = atype.getGenericComponentType();
@@ -208,7 +202,6 @@ public class JSonStorage {
             throw new InvalidTypeException(gType, "Generic Type Structure not implemented: " + gType.getClass() + " in " + path);
         }
         throw new InvalidTypeException(gType, "Type " + path + " is not supported.");
-
     }
 
     /**
@@ -294,7 +287,7 @@ public class JSonStorage {
                 }
                 return restoreFromInputStream(is, type, def);
             } catch (final Throwable e) {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                org.appwork.loggingv3.LogV3.log(e);
             } finally {
                 try {
                     if (fis != null) {
@@ -321,7 +314,6 @@ public class JSonStorage {
      *            defaultvalue. if typeref is not set, the method tries to use the class of def as restoreclass
      * @return
      */
-
     public static <E> E restoreFrom(final String string, final TypeRef<E> type, final E def) {
         final boolean plain = string.toLowerCase().endsWith(".json");
         return JSonStorage.restoreFrom(Application.getResource(string), plain, JSonStorage.KEY, type, def);
@@ -351,7 +343,7 @@ public class JSonStorage {
                 }
                 return restoreFromByteArray(byteArray, type, def);
             } catch (final Exception e) {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                org.appwork.loggingv3.LogV3.log(e);
             }
         }
         return def;
@@ -365,7 +357,7 @@ public class JSonStorage {
             cipher.init(Cipher.DECRYPT_MODE, skeySpec, ivSpec);
             return cipher.doFinal(b);
         } catch (final Exception e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
             final IvParameterSpec ivSpec = new IvParameterSpec(iv);
             final SecretKeySpec skeySpec = new SecretKeySpec(key, "AES");
             try {
@@ -373,7 +365,7 @@ public class JSonStorage {
                 cipher.init(Cipher.DECRYPT_MODE, skeySpec, ivSpec);
                 cipher.doFinal(b);
             } catch (final Exception e1) {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e1);
+                org.appwork.loggingv3.LogV3.log(e1);
             }
         }
         return null;
@@ -421,7 +413,7 @@ public class JSonStorage {
             try {
                 return restoreFromByteArray(string.getBytes("UTF-8"), type, def);
             } catch (UnsupportedEncodingException e) {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                org.appwork.loggingv3.LogV3.log(e);
             }
         }
         return def;
@@ -437,7 +429,7 @@ public class JSonStorage {
                     return (E) JSonStorage.JSON_MAPPER.byteArrayToObject(byteArray, def.getClass());
                 }
             } catch (final Exception e) {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                org.appwork.loggingv3.LogV3.log(e);
             }
         }
         return def;
@@ -453,14 +445,14 @@ public class JSonStorage {
                     return (E) JSonStorage.JSON_MAPPER.inputStreamToObject(is, def.getClass());
                 }
             } catch (final Exception e) {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                org.appwork.loggingv3.LogV3.log(e);
             }
         }
         return def;
     }
 
     private static void close() {
-        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Start Saving Storage");
+        org.appwork.loggingv3.LogV3.finer("Start Saving Storage");
         final List<Storage> storages;
         synchronized (JSonStorage.MAP) {
             storages = new ArrayList<Storage>(JSonStorage.MAP.values());
@@ -469,16 +461,16 @@ public class JSonStorage {
             try {
                 storage.save();
             } catch (final Throwable e) {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                org.appwork.loggingv3.LogV3.log(e);
             } finally {
                 try {
                     storage.close();
                 } catch (final Throwable e2) {
-                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e2);
+                    org.appwork.loggingv3.LogV3.log(e2);
                 }
             }
         }
-        org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("ENDED Saving Storage");
+        org.appwork.loggingv3.LogV3.finer("ENDED Saving Storage");
     }
 
     public static void saveTo(final File file, final boolean plain, final byte[] key, final String json) throws StorageException {
@@ -673,5 +665,4 @@ public class JSonStorage {
     public static <E> E convert(Object o, TypeRef<E> typeRef) {
         return JSON_MAPPER.convert(o, typeRef);
     }
-
 }

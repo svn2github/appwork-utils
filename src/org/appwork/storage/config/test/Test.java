@@ -70,8 +70,8 @@ public class Test {
             final BadInterface jc = JsonConfig.create(BadInterface.class);
         } catch (final Throwable e) {
 
-                  org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().info("This exception is ok, because BadInterface is malformed due to various reasons");
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                  org.appwork.loggingv3.LogV3.info("This exception is ok, because BadInterface is malformed due to various reasons");
+            org.appwork.loggingv3.LogV3.log(e);
         }
         try {
             final MyInterface jc = JsonConfig.create(MyInterface.class);
@@ -164,7 +164,7 @@ public class Test {
             System.out.println(MyInterface.CFG.getDefault());
         } catch (final RuntimeException e) {
             // seems like the interface is malformed
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
 
             System.out.println("TEST FAILED");
         }

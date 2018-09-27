@@ -56,15 +56,18 @@ public class SimpleMapper implements JSONMapper {
 
     public SimpleMapper() {
         mapper = new JSonMapper() {
-
             @Override
             public JSonNode create(final Object obj) throws MapperException {
                 for (final JsonSerializerEntry se : serializer) {
                     if (obj != null && se.clazz.isAssignableFrom(obj.getClass())) {
                         return new JSonNode() {
-
                             @Override
                             public String toString() {
+                                return se.serializer.toJSonString(obj);
+                            }
+
+                            @Override
+                            public String toPrettyString() {
                                 return se.serializer.toJSonString(obj);
                             }
                         };
@@ -103,10 +106,24 @@ public class SimpleMapper implements JSONMapper {
         serializer.add(new JsonSerializerEntry(clazz, jsonSerializer));
     }
 
+    private boolean prettyPrintEnabled = true;
+
+    public boolean isPrettyPrintEnabled() {
+        return prettyPrintEnabled;
+    }
+
+    public void setPrettyPrintEnabled(boolean prettyPrintEnabled) {
+        this.prettyPrintEnabled = prettyPrintEnabled;
+    }
+
     @Override
     public String objectToString(final Object value) throws JSonMapperException {
         try {
-            return mapper.create(value).toString();
+            if (isPrettyPrintEnabled()) {
+                return mapper.create(value).toPrettyString();
+            } else {
+                return mapper.create(value).toString();
+            }
         } catch (final MapperException e) {
             throw new JSonMapperException(e);
         }
@@ -137,7 +154,6 @@ public class SimpleMapper implements JSONMapper {
 
     @Override
     public <T> T convert(Object object, TypeRef<T> type) throws JSonMapperException {
-
         try {
             return mapper.jsonToObject(mapper.create(object), type);
         } catch (MapperException e) {
@@ -240,5 +256,4 @@ public class SimpleMapper implements JSONMapper {
             throw new JSonMapperException(e);
         }
     }
-
 }

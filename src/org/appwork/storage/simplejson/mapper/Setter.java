@@ -115,7 +115,7 @@ public class Setter {
         try {
             this.method.invoke(inst, parameter);
         } catch (final IllegalArgumentException e) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().severe(this.method + " " + parameter + " ->" + parameter.getClass());
+            org.appwork.loggingv3.LogV3.severe(this.method + " " + parameter + " ->" + parameter.getClass());
             throw e;
         }
     }

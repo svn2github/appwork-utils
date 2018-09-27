@@ -56,7 +56,7 @@ public class PerformanceTest {
             System.out.println("TEST SUCCESSFULL");
         } catch (final RuntimeException e) {
             // seems like the interface is malformed
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+            org.appwork.loggingv3.LogV3.log(e);
 
             System.out.println("TEST FAILED");
         }

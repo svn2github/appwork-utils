@@ -50,6 +50,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.appwork.exceptions.WTFException;
+import org.appwork.loggingv3.LogV3;
 import org.appwork.scheduler.DelayedRunnable;
 import org.appwork.shutdown.ShutdownController;
 import org.appwork.shutdown.ShutdownEvent;
@@ -76,7 +77,6 @@ import org.appwork.utils.Files;
 import org.appwork.utils.ReflectionUtils;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.logging2.LogInterface;
-import org.appwork.utils.logging2.extmanager.LoggerFactory;
 import org.appwork.utils.reflection.Clazz;
 import org.appwork.utils.swing.dialog.Dialog;
 
@@ -174,7 +174,7 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
     }
 
     public static void flushWrites() {
-        final LogInterface logger = org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger();
+        final LogInterface logger = org.appwork.loggingv3.LogV3.I().getDefaultLogger();
         while (true) {
             synchronized (DELAYEDWRITES) {
                 final Iterator<Runnable> it = DELAYEDWRITES.values().iterator();
@@ -296,7 +296,7 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
         this.path = filePath;
         preInit(path, configInterface);
         if (filePath.getName().endsWith(".json") || filePath.getName().endsWith(".ejs")) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning(filePath + " should not have an extension!!");
+            org.appwork.loggingv3.LogV3.warning(filePath + " should not have an extension!!");
         }
         final File expected = Application.getResource("cfg/" + configInterface.getName());
         String storageID = null;
@@ -321,7 +321,7 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
             this.validateKeys(cryptedStorage);
         }
         try {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Init StorageHandler for Interface:" + configInterface.getName() + "|Path:" + this.path);
+            org.appwork.loggingv3.LogV3.finer("Init StorageHandler for Interface:" + configInterface.getName() + "|Path:" + this.path);
             this.parseInterface();
         } catch (final InterfaceParseException e) {
             throw e;
@@ -365,7 +365,7 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
             this.validateKeys(cryptedStorage);
         }
         try {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Init StorageHandler for Interface:" + configInterface.getName() + "|Path:" + this.path);
+            org.appwork.loggingv3.LogV3.finer("Init StorageHandler for Interface:" + configInterface.getName() + "|Path:" + this.path);
             this.parseInterface();
         } catch (final Throwable e) {
             throw new InterfaceParseException(e);
@@ -383,7 +383,7 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
             this.validateKeys(cryptedStorage);
         }
         try {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Init StorageHandler for Interface:" + configInterface.getName() + "|Path:" + this.path);
+            org.appwork.loggingv3.LogV3.finer("Init StorageHandler for Interface:" + configInterface.getName() + "|Path:" + this.path);
             this.parseInterface();
         } catch (final Throwable e) {
             throw new InterfaceParseException(e);
@@ -404,7 +404,7 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
         this.configInterface = configInterface;
         this.relativCPPath = classPath;
         if (classPath.endsWith(".json") || classPath.endsWith(".ejs")) {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning(classPath + " should not have an extension!!");
+            org.appwork.loggingv3.LogV3.warning(classPath + " should not have an extension!!");
         }
         this.path = Application.getResource(classPath);
         preInit(path, configInterface);
@@ -423,7 +423,7 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
             this.validateKeys(cryptedStorage);
         }
         try {
-            org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer("Init StorageHandler for Interface:" + configInterface.getName() + "|Path:" + this.path);
+            org.appwork.loggingv3.LogV3.finer("Init StorageHandler for Interface:" + configInterface.getName() + "|Path:" + this.path);
             this.parseInterface();
         } catch (final Throwable e) {
             throw new InterfaceParseException(e);
@@ -863,7 +863,7 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
                     if (keyGetterMap.containsKey(key)) {
                         if (m.getName().equals(keyGetterMap.get(key).getName()) && getParameterCount(m) == getParameterCount(keyGetterMap.get(key))) {
                             // overridden method. that's ok
-                            LoggerFactory.getDefaultLogger().info("Overridden Config Key found " + keyGetterMap.get(key) + "<-->" + m);
+                            LogV3.info("Overridden Config Key found " + keyGetterMap.get(key) + "<-->" + m);
                             continue;
                         }
                         this.error(new InterfaceParseException("Key " + key + " Dupe found! " + keyGetterMap.get(key) + "<-->" + m));
@@ -922,7 +922,7 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
                     if (keyGetterMap.containsKey(key)) {
                         if (m.getName().equals(keyGetterMap.get(key).getName()) && getParameterCount(m) == getParameterCount(keyGetterMap.get(key))) {
                             // overridden method. that's ok
-                            LoggerFactory.getDefaultLogger().info("Overridden Config Key found " + keyGetterMap.get(key) + "<-->" + m);
+                            LogV3.info("Overridden Config Key found " + keyGetterMap.get(key) + "<-->" + m);
                             continue;
                         }
                         this.error(new InterfaceParseException("Key " + key + " Dupe found! " + keyGetterMap.get(key) + "<-->" + m));
@@ -953,7 +953,7 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
                     if (keySetterMap.containsKey(key)) {
                         if (m.getName().equals(keyGetterMap.get(key).getName()) && getParameterCount(m) == getParameterCount(keyGetterMap.get(key))) {
                             // overridden method. that's ok
-                            LoggerFactory.getDefaultLogger().info("Overridden Config Key found " + keyGetterMap.get(key) + "<-->" + m);
+                            LogV3.info("Overridden Config Key found " + keyGetterMap.get(key) + "<-->" + m);
                             continue;
                         }
                         this.error(new InterfaceParseException("Key " + key + " Dupe found! " + keySetterMap.get(key) + "<-->" + m));

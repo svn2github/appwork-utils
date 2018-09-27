@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import org.appwork.loggingv3.LogV3;
 import org.appwork.storage.simplejson.Ignore;
 import org.appwork.storage.simplejson.Ignores;
 
@@ -78,15 +79,15 @@ public class ClassCache {
                 if (m.getName().startsWith("get") && m.getParameterTypes().length == 0 && m.getReturnType() != void.class) {
                     cc.getter.add(g = new Getter(createKey(m.getName().substring(3)), m));
                     cc.getterMap.put(g.getKey(), g);
-                    // org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer(m.toString());
+                    // org.appwork.loggingv3.LogV3.finer(m.toString());
                 } else if (m.getName().startsWith("is") && m.getParameterTypes().length == 0 && m.getReturnType() != void.class) {
                     cc.getter.add(g = new Getter(createKey(m.getName().substring(2)), m));
                     cc.getterMap.put(g.getKey(), g);
-                    // org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer(m.toString());
+                    // org.appwork.loggingv3.LogV3.finer(m.toString());
                 } else if (m.getName().startsWith("set") && m.getParameterTypes().length == 1) {
                     cc.setter.add(s = new Setter(createKey(m.getName().substring(3)), m));
                     cc.setterMap.put(s.getKey(), s);
-                    // org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().finer(m.toString());
+                    // org.appwork.loggingv3.LogV3.finer(m.toString());
                 }
             }
         } while ((cls = cls.getSuperclass()) != null && cls != Object.class);
@@ -97,7 +98,7 @@ public class ClassCache {
                     c.setAccessible(true);
                     cc.constructor = c;
                 } catch (final java.lang.SecurityException e) {
-                    org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().log(e);
+                    org.appwork.loggingv3.LogV3.log(e);
                 }
                 break;
             }
@@ -107,7 +108,7 @@ public class ClassCache {
             final int lastIndex = clazz.getName().lastIndexOf(".");
             final String pkg = lastIndex > 0 ? clazz.getName().substring(0, lastIndex) : "";
             if (pkg.startsWith("java") || pkg.startsWith("sun.")) {
-                org.appwork.utils.logging2.extmanager.LoggerFactory.getDefaultLogger().warning("No Null Constructor in " + clazz + " found. De-Json-serial will fail");
+                org.appwork.loggingv3.LogV3.warning("No Null Constructor in " + clazz + " found. De-Json-serial will fail");
             } else {
                 throw new NoSuchMethodException(" Class " + clazz + " requires a null constructor. please add private " + clazz.getSimpleName() + "(){}");
             }
@@ -147,7 +148,7 @@ public class ClassCache {
     public static ClassCache getClassCache(final Class<? extends Object> clazz) throws SecurityException, NoSuchMethodException {
         ClassCache cc = ClassCache.CACHE.get(clazz);
         if (cc == null) {
-            System.out.println("ClassCache: " + clazz);
+            LogV3.logger(ClassCache.class).finer("ClassCache: " + clazz);
             cc = ClassCache.create(clazz);
             ClassCache.CACHE.put(clazz, cc);
         }

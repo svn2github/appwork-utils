@@ -108,7 +108,7 @@ public class LogToFileSink extends AbstractSink {
         Runtime.getRuntime().addShutdownHook(new Thread("ShutdownHook: Logger") {
             /*
              * (non-Javadoc)
-             *
+             * 
              * @see java.lang.Thread#run()
              */
             @Override
@@ -178,7 +178,7 @@ public class LogToFileSink extends AbstractSink {
      */
     public ArrayList<LogFolder> getLogFilesOrFolders(boolean exludeCurrent) {
         File[] folders = logRoot.listFiles(createFileFilter());
-        ArrayList<LogFolder> files = new ArrayList<>();
+        ArrayList<LogFolder> files = new ArrayList<LogFolder>();
         if (folders != null) {
             for (File f : folders) {
                 if (logFolder != null && logFolder.equals(f) && exludeCurrent) {
@@ -402,7 +402,7 @@ public class LogToFileSink extends AbstractSink {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.loggingv3.simple.sink.Sink#publish(java.lang.String)
      */
     @Override

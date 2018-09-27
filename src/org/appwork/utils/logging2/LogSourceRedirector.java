@@ -31,9 +31,9 @@
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
-package org.appwork.loggingv3;
+package org.appwork.utils.logging2;
 
-import org.appwork.utils.logging2.LogInterface;
+import org.appwork.loggingv3.LogV3Factory;
 import org.appwork.utils.logging2.extmanager.LoggerFactory;
 
 /**

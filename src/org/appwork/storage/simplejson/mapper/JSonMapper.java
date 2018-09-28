@@ -167,6 +167,8 @@ public class JSonMapper {
                     return new JSonValue(((Float) obj).doubleValue());
                 } else if (clazz == double.class) {
                     return new JSonValue(((Double) obj).doubleValue());
+                } else {
+                    throw new MapperException("Unknown Primitive Type: " + clazz);
                 }
             } else if (clazz.isEnum()) {
                 return new JSonValue(obj + "");
@@ -224,17 +226,16 @@ public class JSonMapper {
                 return ret;
             }
         } catch (final IllegalArgumentException e) {
-            e.printStackTrace();
+            throw new MapperException(e);
         } catch (final IllegalAccessException e) {
-            e.printStackTrace();
+            throw new MapperException(e);
         } catch (final InvocationTargetException e) {
-            e.printStackTrace();
+            throw new MapperException(e);
         } catch (final SecurityException e) {
-            e.printStackTrace();
+            throw new MapperException(e);
         } catch (final NoSuchMethodException e) {
-            e.printStackTrace();
+            throw new MapperException(e);
         }
-        return null;
     }
 
     public boolean isIgnoreIllegalArgumentMappings() {

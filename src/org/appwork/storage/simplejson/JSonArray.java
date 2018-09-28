@@ -35,6 +35,8 @@ package org.appwork.storage.simplejson;
 
 import java.util.ArrayList;
 
+import org.appwork.exceptions.WTFException;
+
 /**
  * @author thomas
  *
@@ -80,25 +82,30 @@ public class JSonArray extends ArrayList<JSonNode> implements JSonNode {
             return "[]";
         }
         final StringBuilder sb = new StringBuilder();
-        sb.append("[\r\n");
-        for (final JSonNode n : this) {
-            if (sb.length() > 3) {
-                sb.append(",\r\n");
-            }
-            String[] lines = n.toPrettyString().split("[\r\n]+");
-            boolean first = true;
-            for (String line : lines) {
-                if (first) {
-                } else {
-                    sb.append("\r\n");
+        try {
+            sb.append("[\r\n");
+            for (final JSonNode n : this) {
+                if (sb.length() > 3) {
+                    sb.append(",\r\n");
                 }
-                first = false;
-                sb.append(org.appwork.storage.simplejson.JSonObject.PRETTY_PRINT_LAYER_INSET + line);
+                String[] lines = n.toPrettyString().split("[\r\n]+");
+                boolean first = true;
+                for (String line : lines) {
+                    if (first) {
+                    } else {
+                        sb.append("\r\n");
+                    }
+                    first = false;
+                    sb.append(org.appwork.storage.simplejson.JSonObject.PRETTY_PRINT_LAYER_INSET + line);
+                }
             }
-        }
-        sb.append("\r\n]");
-        if (sb.length() < 40) {
-            return toString();
+            sb.append("\r\n]");
+            if (sb.length() < 40) {
+                return toString();
+            }
+        } catch (Throwable e) {
+            System.out.println(1);
+            throw new WTFException(e);
         }
         return sb.toString();
     }

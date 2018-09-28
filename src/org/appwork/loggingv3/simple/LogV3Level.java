@@ -33,54 +33,12 @@
  * ==================================================================================================================================================== */
 package org.appwork.loggingv3.simple;
 
-import org.appwork.loggingv3.AbstractLogger;
-import org.appwork.utils.logging2.LogInterface;
-
 /**
  * @author Thomas
- * @date 21.09.2018
+ * @date 28.09.2018
  *
  */
-public class LogRecord2 {
-    public final String       message;
-    public final Thread       thread;
-    public final long         timestamp;
-    private StackTraceElement thrownAt;
-    private LogInterface      logger;
-    private LogV3Level        level = LogV3Level.UNDEFINED;
-
-    public LogInterface getLogger() {
-        return logger;
-    }
-
-    public LogV3Level getLevel() {
-        return level;
-    }
-
-    /**
-     * @param info
-     * @param msg
-     */
-    public LogRecord2(LogInterface logger, String msg) {
-        this.logger = logger;
-        this.message = msg;
-        thread = Thread.currentThread();
-        timestamp = System.currentTimeMillis();
-        thrownAt = AbstractLogger.getThrownAt();
-    }
-
-    public LogRecord2 level(LogV3Level level) {
-        if (level == null) {
-            level = LogV3Level.UNDEFINED;
-        }
-        this.level = level;
-        return this;
-    }
-
-    /**
-     * @return
-     */
-    public StackTraceElement getThrownAt() {
-        return thrownAt;
-    }
+public enum LogV3Level {
+    EXCEPTION,
+    UNDEFINED
 }

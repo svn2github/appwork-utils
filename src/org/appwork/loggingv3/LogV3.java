@@ -74,7 +74,7 @@ public class LogV3 {
             load = LogV3FactoryImpl.class.getName();
         }
         try {
-            LogV3Factory ret = (LogV3Factory) Class.forName(System.getProperty("LogV3_FACTORY", load)).newInstance();
+            LogV3Factory ret = (LogV3Factory) Class.forName(System.getProperty("org.appwork.LoggerFactory", load)).newInstance();
             try {
                 Method initDefaults = ret.getClass().getMethod("initDefaults", new Class[] {});
                 initDefaults.invoke(ret, new Object[] {});

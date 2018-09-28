@@ -60,6 +60,16 @@ public class LoggerToSink extends AbstractLogger {
 
     @Override
     public void log(Throwable e) {
-        sinkProvider.publish(new LogRecord2(this, getStackTrace(e)));
+        sinkProvider.publish(new LogRecord2(this, getStackTrace(e)).level(LogV3Level.EXCEPTION));
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.appwork.loggingv3.AbstractLogger#exception(java.lang.String, java.lang.Throwable)
+     */
+    @Override
+    public void exception(String msg, Throwable e) {
+        sinkProvider.publish(new LogRecord2(this, msg + "\r\n" + getStackTrace(e)).level(LogV3Level.EXCEPTION));
     }
 }

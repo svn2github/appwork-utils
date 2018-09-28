@@ -41,7 +41,6 @@ import org.appwork.loggingv3.LogV3Factory;
 import org.appwork.loggingv3.simple.sink.LogToFileSink;
 import org.appwork.loggingv3.simple.sink.LogToStdOutSink;
 import org.appwork.loggingv3.simple.sink.Sink;
-import org.appwork.utils.Application;
 import org.appwork.utils.logging2.LogInterface;
 
 /**
@@ -80,9 +79,10 @@ public class SimpleLoggerFactory implements LogV3Factory, SinkProvider {
     }
 
     public void initDefaults() {
-        sinkToFile = new LogToFileSink(Application.getResource("logs"), "Logs_\\d.txt", 1);
         sinkToConsole = new LogToStdOutSink();
-        addSink(sinkToFile);
+        // do not add a file sink by default. Else every application that uses the lib, will create log files. this must be enabled in the
+        // application itself, usually by overwriting the facrory and put its path in the properties
+        // addSink(sinkToFile);
         addSink(sinkToConsole);
     }
 

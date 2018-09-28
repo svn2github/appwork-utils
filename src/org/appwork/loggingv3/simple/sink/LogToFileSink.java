@@ -80,7 +80,7 @@ public class LogToFileSink extends AbstractSink {
     private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("yyyy.MM.dd_HH.mm.ss.SSS");
     private String                        filepattern;
     private File                          logRoot;
-    private File                          logFolder;
+    protected File                        logFolder;
     private String                        timeTag;
     private boolean                       shutdown;
     private boolean                       enabled            = true;
@@ -108,7 +108,7 @@ public class LogToFileSink extends AbstractSink {
         Runtime.getRuntime().addShutdownHook(new Thread("ShutdownHook: Logger") {
             /*
              * (non-Javadoc)
-             * 
+             *
              * @see java.lang.Thread#run()
              */
             @Override
@@ -233,20 +233,14 @@ public class LogToFileSink extends AbstractSink {
      */
     public void runPostCleanupAndCompressionThread() {
         synchronized (WORK_ON_FOLDERS_AND_FILES_LOCK) {
-            File[] folders = logRoot.listFiles(createFileFilter());
-            if (folders != null) {
-                for (File f : folders) {
-                    if (f.isFile()) {
-                        continue;
-                    }
-                    if (logFolder != null && logFolder.equals(f)) {
-                        continue;
-                    }
-                    try {
-                        packToSingleZip(f);
-                    } catch (Throwable e) {
-                        LogV3.logger(LogToFileSink.class).exception("Failed to compress old logfolder " + f, e);
-                    }
+            for (LogFolder f : getLogFilesOrFolders(true)) {
+                if (f.path.isFile()) {
+                    continue;
+                }
+                try {
+                    packToSingleZip(f.path);
+                } catch (Throwable e) {
+                    LogV3.logger(LogToFileSink.class).exception("Failed to compress old logfolder " + f, e);
                 }
             }
         }
@@ -275,6 +269,12 @@ public class LogToFileSink extends AbstractSink {
                     return;
                 }
             }
+            runPackToSingleFileOnShutdown();
+        }
+    }
+
+    protected void runPackToSingleFileOnShutdown() {
+        if (logFolder != null) {
             packToSingleZip(logFolder, new File(logFolder.getAbsolutePath() + ".zip"), true);
         }
     }
@@ -402,7 +402,7 @@ public class LogToFileSink extends AbstractSink {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.loggingv3.simple.sink.Sink#publish(java.lang.String)
      */
     @Override
@@ -439,10 +439,7 @@ public class LogToFileSink extends AbstractSink {
             File file = null;
             closeOldFile();
             if (logFolder == null) {
-                int i = 1;
-                while (logFolder == null || logFolder.exists()) {
-                    logFolder = new File(logRoot, "logs_" + timeTag + "_" + (i++));
-                }
+                initLogFolder();
             }
             files++;
             while (file == null || file.exists()) {
@@ -461,6 +458,13 @@ public class LogToFileSink extends AbstractSink {
         }
     }
 
+    protected void initLogFolder() {
+        int i = 1;
+        while (logFolder == null || logFolder.exists()) {
+            logFolder = new File(logRoot, "logs_" + timeTag + "_" + (i++));
+        }
+    }
+
     private AtomicInteger compressionThreadsRunning = new AtomicInteger(0);
 
     /**
@@ -471,25 +475,29 @@ public class LogToFileSink extends AbstractSink {
             if (fos != null) {
                 fos.close();
                 fos = null;
-                final File cf = currentFile;
-                Thread th = new Thread("compress log") {
-                    public void run() {
-                        synchronized (WORK_ON_FOLDERS_AND_FILES_LOCK) {
-                            try {
-                                compress(cf, new File(cf.getAbsolutePath() + ".zip"));
-                            } finally {
-                                compressionThreadsRunning.decrementAndGet();
-                            }
-                        }
-                    };
-                };
-                compressionThreadsRunning.incrementAndGet();
-                th.start();
+                startAsyncCompressionAfterLogRotation();
             }
         } catch (IOException e1) { // TODO: WAS JETZT?
             // TODO Auto-generated catch block
             e1.printStackTrace();
         }
+    }
+
+    protected void startAsyncCompressionAfterLogRotation() {
+        final File cf = currentFile;
+        Thread th = new Thread("compress log") {
+            public void run() {
+                synchronized (WORK_ON_FOLDERS_AND_FILES_LOCK) {
+                    try {
+                        compress(cf, new File(cf.getAbsolutePath() + ".zip"));
+                    } finally {
+                        compressionThreadsRunning.decrementAndGet();
+                    }
+                }
+            };
+        };
+        compressionThreadsRunning.incrementAndGet();
+        th.start();
     }
 
     /**
@@ -631,7 +639,7 @@ public class LogToFileSink extends AbstractSink {
                             zis.close();
                         }
                     } else {
-                        if (f.path.equals(logFolder)) {
+                        if (logFolder != null && f.path.equals(logFolder)) {
                             synchronized (this) {
                                 boolean restoreFos = false;
                                 if (fos != null) {

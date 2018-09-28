@@ -48,6 +48,12 @@ public class LogToStdOutSink extends AbstractSink {
      */
     @Override
     public void publish(LogRecord2 record) {
-        System.out.println(format(record));
+        switch (record.getLevel()) {
+        case EXCEPTION:
+            System.err.println(format(record));
+            break;
+        default:
+            System.out.println(format(record));
+        }
     }
 }

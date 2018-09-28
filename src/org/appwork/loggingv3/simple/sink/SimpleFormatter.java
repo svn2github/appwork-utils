@@ -77,7 +77,10 @@ public class SimpleFormatter implements Formatter {
         StackTraceElement source = record.getThrownAt();
         String sourceString = source.getClassName();
         if (StringUtils.isNotEmpty(source.getFileName()) && source.getLineNumber() >= 0) {
-            sourceString = sourceString.substring(0, sourceString.lastIndexOf(".")) + " (" + source.getFileName() + ":" + source.getLineNumber() + ")";
+            int li = sourceString.lastIndexOf(".");
+            if (li > 0) {
+                sourceString = sourceString.substring(0, li) + " (" + source.getFileName() + ":" + source.getLineNumber() + ")";
+            }
         }
         sourceString += "." + source.getMethodName();
         String pre = "--" + fillPre(String.valueOf(record.thread.getId()), " ", threadID) + fillPost("(" + abbr(record.thread.getName(), maxThreadNameLength) + ")", " ", threadName) + " " + fillPre(longTimestamp.format(new Date(record.timestamp)), " ", timestamp) + " - " + fillPost("" + abbr(String.valueOf(sourceString) + "", maxSourceStringLength), " ", thrownAt) + " > ";

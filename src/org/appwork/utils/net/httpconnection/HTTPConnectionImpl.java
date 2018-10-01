@@ -65,6 +65,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.zip.GZIPInputStream;
 
+import org.appwork.loggingv3.LogV3;
 import org.appwork.net.protocol.http.HTTPConstants;
 import org.appwork.scheduler.DelayedRunnable;
 import org.appwork.utils.Application;
@@ -195,11 +196,11 @@ public class HTTPConnectionImpl implements HTTPConnection {
     protected static final HashMap<String, LinkedList<KeepAliveSocketStream>> KEEPALIVEPOOL         = new HashMap<String, LinkedList<KeepAliveSocketStream>>();
     protected static final Object                                             LOCK                  = new Object();
     protected static final DelayedRunnable                                    KEEPALIVECLEANUPTIMER = new DelayedRunnable(10000, 30000) {
-        @Override
-        public void delayedrun() {
-            cleanupKeepAlivePools();
-        }
-    };
+                                                                                                        @Override
+                                                                                                        public void delayedrun() {
+                                                                                                            cleanupKeepAlivePools();
+                                                                                                        }
+                                                                                                    };
 
     private static final void cleanupKeepAlivePools() {
         synchronized (HTTPConnectionImpl.LOCK) {
@@ -1300,6 +1301,27 @@ public class HTTPConnectionImpl implements HTTPConnection {
         final StringBuilder sb = new StringBuilder();
         sb.append("----------------Request Information-------------\r\n");
         sb.append("URL: ").append(this.getURL()).append("\r\n");
+        try {
+            org.appwork.utils.parser.UrlQuery query = org.appwork.utils.parser.UrlQuery.parse(getURL().getQuery());
+            if (query.list().size() > 0) {
+                sb.append("GET-Parameter: ").append("\r\n");
+                int max = 0;
+                for (org.appwork.utils.KeyValueStringEntry p : query.list()) {
+                    if (p.getKey() != null) {
+                        max = Math.max(p.getKey().length(), max);
+                    }
+                }
+                for (org.appwork.utils.KeyValueStringEntry p : query.list()) {
+                    try {
+                        sb.append("   " + org.appwork.utils.StringUtils.fillPost(p.getKey() == null ? "" : p.getKey(), " ", max)).append(" : ").append(query.getDecoded(p.getKey())).append("\r\n");
+                    } catch (UnsupportedEncodingException e) {
+                        LogV3.logger(HTTPConnectionImpl.class).exception("Error during toString", e);
+                    }
+                }
+            }
+        } catch (Throwable e) {
+            LogV3.logger(HTTPConnectionImpl.class).exception("Error during toString", e);
+        }
         final SocketStreamInterface socketStream = getConnectionSocket();
         final Socket lhttpSocket;
         if (socketStream != null) {

@@ -80,6 +80,8 @@ public class SimpleFormatter implements Formatter {
             int li = sourceString.lastIndexOf(".");
             if (li > 0) {
                 sourceString = sourceString.substring(0, li) + " (" + source.getFileName() + ":" + source.getLineNumber() + ")";
+            } else {
+                sourceString = "DEBUG" + sourceString;
             }
         }
         sourceString += "." + source.getMethodName();

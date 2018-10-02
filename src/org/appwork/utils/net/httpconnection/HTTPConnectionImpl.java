@@ -69,6 +69,7 @@ import org.appwork.loggingv3.LogV3;
 import org.appwork.net.protocol.http.HTTPConstants;
 import org.appwork.scheduler.DelayedRunnable;
 import org.appwork.utils.Application;
+import org.appwork.utils.KeyValueStringEntry;
 import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.net.Base64InputStream;
@@ -80,6 +81,7 @@ import org.appwork.utils.net.SocketFactory;
 import org.appwork.utils.net.StreamValidEOF;
 import org.appwork.utils.net.httpconnection.HTTPConnectionUtils.IPVERSION;
 import org.appwork.utils.os.CrossSystem;
+import org.appwork.utils.parser.UrlQuery;
 
 public class HTTPConnectionImpl implements HTTPConnection {
     public static enum KEEPALIVE {
@@ -196,11 +198,11 @@ public class HTTPConnectionImpl implements HTTPConnection {
     protected static final HashMap<String, LinkedList<KeepAliveSocketStream>> KEEPALIVEPOOL         = new HashMap<String, LinkedList<KeepAliveSocketStream>>();
     protected static final Object                                             LOCK                  = new Object();
     protected static final DelayedRunnable                                    KEEPALIVECLEANUPTIMER = new DelayedRunnable(10000, 30000) {
-                                                                                                        @Override
-                                                                                                        public void delayedrun() {
-                                                                                                            cleanupKeepAlivePools();
-                                                                                                        }
-                                                                                                    };
+        @Override
+        public void delayedrun() {
+            cleanupKeepAlivePools();
+        }
+    };
 
     private static final void cleanupKeepAlivePools() {
         synchronized (HTTPConnectionImpl.LOCK) {
@@ -1302,16 +1304,16 @@ public class HTTPConnectionImpl implements HTTPConnection {
         sb.append("----------------Request Information-------------\r\n");
         sb.append("URL: ").append(this.getURL()).append("\r\n");
         try {
-            org.appwork.utils.parser.UrlQuery query = org.appwork.utils.parser.UrlQuery.parse(getURL().getQuery());
+            final UrlQuery query = UrlQuery.parse(getURL().getQuery());
             if (query.list().size() > 0) {
-                sb.append("GET-Parameter: ").append("\r\n");
+                sb.append("URL-Parameter" + (query.list().size() > 1 ? "s" : "") + ":").append("\r\n");
                 int max = 0;
-                for (org.appwork.utils.KeyValueStringEntry p : query.list()) {
+                for (KeyValueStringEntry p : query.list()) {
                     if (p.getKey() != null) {
                         max = Math.max(p.getKey().length(), max);
                     }
                 }
-                for (org.appwork.utils.KeyValueStringEntry p : query.list()) {
+                for (KeyValueStringEntry p : query.list()) {
                     try {
                         sb.append("   " + org.appwork.utils.StringUtils.fillPost(p.getKey() == null ? "" : p.getKey(), " ", max)).append(" : ").append(query.getDecoded(p.getKey())).append("\r\n");
                     } catch (UnsupportedEncodingException e) {

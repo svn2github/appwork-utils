@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ResourceSet {
-
     private String                  name;
     private ArrayList<IconResource> icons;
 
@@ -23,7 +22,18 @@ public class ResourceSet {
 
     public void add(IconResource ir) {
         icons.add(ir);
-
     }
 
+    /**
+     * @param s
+     * @return
+     */
+    public boolean contains(String s) {
+        for (IconResource i : icons) {
+            if (i.getPath().equals(s)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

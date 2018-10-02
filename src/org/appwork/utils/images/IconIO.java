@@ -73,17 +73,20 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
 import org.appwork.exceptions.WTFException;
+import org.appwork.loggingv3.LogV3;
 import org.appwork.swing.components.IDIcon;
 import org.appwork.swing.components.IconIdentifier;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.URLStream;
 import org.appwork.utils.ImageProvider.ImageProvider;
-import org.appwork.loggingv3.LogV3;
 import org.appwork.utils.net.Base64InputStream;
 import org.appwork.utils.net.Base64OutputStream;
 
 import com.kitfox.svg.SVGDiagram;
+import com.kitfox.svg.SVGElement;
+import com.kitfox.svg.SVGElementException;
 import com.kitfox.svg.SVGUniverse;
+import com.kitfox.svg.animation.AnimationElement;
 
 public class IconIO {
     public static class ScaledIcon implements Icon, IDIcon {
@@ -192,16 +195,16 @@ public class IconIO {
             @Override
             public final int filterRGB(final int x, final int y, final int rgb) {
                 final int r = (rgb & 0xFF0000) >> 16;
-        final int g = (rgb & 0xFF00) >> 8;
-        final int b = rgb & 0xFF;
-        if (r >= r1 && r <= r2 && g >= g1 && g <= g2 && b >= b1 && b <= b2) {
-            // Set fully transparent but keep color
-            // calculate a alpha value based on the distance between the
-            // range borders and the pixel color
-            final int dist = (Math.abs(r - (r1 + r2) / 2) + Math.abs(g - (g1 + g2) / 2) + Math.abs(b - (b1 + b2) / 2)) * 2;
-            return new Color(r, g, b, Math.min(255, dist)).getRGB();
-        }
-        return rgb;
+                final int g = (rgb & 0xFF00) >> 8;
+                final int b = rgb & 0xFF;
+                if (r >= r1 && r <= r2 && g >= g1 && g <= g2 && b >= b1 && b <= b2) {
+                    // Set fully transparent but keep color
+                    // calculate a alpha value based on the distance between the
+                    // range borders and the pixel color
+                    final int dist = (Math.abs(r - (r1 + r2) / 2) + Math.abs(g - (g1 + g2) / 2) + Math.abs(b - (b1 + b2) / 2)) * 2;
+                    return new Color(r, g, b, Math.min(255, dist)).getRGB();
+                }
+                return rgb;
             }
         };
         final ImageProducer ip = new FilteredImageSource(image.getSource(), filter);
@@ -882,6 +885,10 @@ public class IconIO {
     }
 
     public static Image getImageFromSVG(URL url, int w, int h) throws IOException {
+        return getImageFromSVG(url, w, h, null);
+    }
+
+    public static Image getImageFromSVG(URL url, int w, int h, Color color) throws IOException {
         try {
             InputStream is = null;
             try {
@@ -893,6 +900,14 @@ public class IconIO {
                     // Rectangle dp = diagram.getDeviceViewport();
                     // Rectangle2D vr = diagram.getViewRect();
                     // Rectangle2D bb = diagram.getRoot().getBoundingBox();
+                    if (color != null) {
+                        SVGElement root = diagram.getRoot();
+                        // set color
+                        float alpha = color.getAlpha() / 255f;
+                        String hex = "#" + String.format("%02x%02x%02x", color.getRed(), color.getGreen(), color.getBlue());
+                        // root.setAttribute("fill", AnimationElement.AT_CSS, hex);
+                        setColor(root, alpha, hex);
+                    }
                     diagram.updateTime(0d);
                     diagram.setIgnoringClipHeuristic(true);
                     if (w <= 0) {
@@ -936,6 +951,23 @@ public class IconIO {
             throw e;
         } catch (Throwable e) {
             throw new IOException("URL:" + url, e);
+        }
+    }
+
+    protected static void setColor(SVGElement root, float alpha, String hex) throws SVGElementException {
+        if (root.hasAttribute("fill", AnimationElement.AT_CSS)) {
+            root.setAttribute("fill", AnimationElement.AT_CSS, hex);
+        } else {
+            root.addAttribute("fill", AnimationElement.AT_CSS, hex);
+        }
+        if (root.hasAttribute("fill-opacity", AnimationElement.AT_CSS)) {
+            root.setAttribute("fill-opacity", AnimationElement.AT_CSS, alpha + "");
+        } else {
+            root.addAttribute("fill-opacity", AnimationElement.AT_CSS, alpha + "");
+        }
+        for (int i = 0; i < root.getNumChildren(); i++) {
+            SVGElement child = root.getChild(i);
+            setColor(child, alpha, hex);
         }
     }
 }

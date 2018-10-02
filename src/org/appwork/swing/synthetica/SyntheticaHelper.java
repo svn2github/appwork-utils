@@ -45,6 +45,7 @@ import javax.swing.JWindow;
 import javax.swing.UIManager;
 
 import org.appwork.exceptions.WTFException;
+import org.appwork.loggingv3.LogV3;
 import org.appwork.storage.config.JsonConfig;
 import org.appwork.swing.components.ExtPasswordField;
 import org.appwork.txtresource.TranslationFactory;
@@ -52,7 +53,6 @@ import org.appwork.utils.Application;
 import org.appwork.utils.IO;
 import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
-import org.appwork.loggingv3.LogV3;
 import org.appwork.utils.os.CrossSystem;
 
 public class SyntheticaHelper {
@@ -108,10 +108,12 @@ public class SyntheticaHelper {
         int fontScale = -1;
         try {
             fontScale = Integer.parseInt(translationFileConfig.config_fontscale_faktor());
+            LogV3.logger(this).info("Get FontScale from Translationfile: " + fontScale);
         } catch (final Exception e) {
         }
         if (config.getFontScaleFactor() != 100 || fontScale <= 0) {
             fontScale = config.getFontScaleFactor();
+            LogV3.logger(this).info("Get FontScale from config: " + fontScale);
         }
         return fontScale;
     }
@@ -213,6 +215,9 @@ public class SyntheticaHelper {
             final String fontName = getFontName(config, locale);
             int fontSize = de.javasoft.plaf.synthetica.SyntheticaLookAndFeel.getFont().getSize();
             fontSize = fontScale * fontSize / 100;
+            LogV3.logger(this).info("FontName: " + fontName);
+            LogV3.logger(this).info("FontSize: " + fontSize);
+            LogV3.logger(this).info("FontScale: " + fontScale);
             if (fontName != null) {
                 /* change Font */
                 final int oldStyle = de.javasoft.plaf.synthetica.SyntheticaLookAndFeel.getFont().getStyle();

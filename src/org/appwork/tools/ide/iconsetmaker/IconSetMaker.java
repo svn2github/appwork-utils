@@ -8,11 +8,14 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 
 import org.appwork.exceptions.WTFException;
+import org.appwork.loggingv3.LogV3;
+import org.appwork.resources.IconRef;
 import org.appwork.swing.synthetica.SyntheticaHelper;
 import org.appwork.tools.ide.iconsetmaker.gui.IconSetterGui;
 import org.appwork.utils.Application;
@@ -20,7 +23,6 @@ import org.appwork.utils.FileHandler;
 import org.appwork.utils.Files;
 import org.appwork.utils.Hash;
 import org.appwork.utils.ide.IDEUtils;
-import org.appwork.loggingv3.LogV3;
 import org.appwork.utils.swing.EDTHelper;
 import org.appwork.utils.swing.EDTRunner;
 import org.appwork.utils.swing.dialog.DialogCanceledException;
@@ -39,15 +41,37 @@ public class IconSetMaker {
         return themesFolder;
     }
 
-    private File themesFolder;
+    private File                                themesFolder;
+    private ArrayList<Class<? extends IconRef>> required;
+    private HashSet<String>                     icons;
+    private String                              themeNamespace;
 
     /**
      * @param rel
      * @param projectFolder
+     * @param required
+     *            TODO
+     * @param themeNamespace
+     *            TODO
      */
-    public IconSetMaker(String rel, File projectFolder) {
+    public IconSetMaker(String rel, File projectFolder, ArrayList<Class<? extends IconRef>> required, String themeNamespace) {
         this.projectFolder = projectFolder;
         themesFolder = new File(projectFolder, rel);
+        this.required = required;
+        icons = new HashSet<String>();
+        this.themeNamespace = themeNamespace;
+        // HashMap<String, Collection<Class<? extends IconRef>>> clsMap = new HashMap<String, Collection<Class<? extends IconRef>>>();
+        for (Class<? extends IconRef> cl : required) {
+            for (IconRef e : cl.getEnumConstants()) {
+                icons.add(e.path());
+                // Collection<Class<? extends IconRef>> ls = clsMap.get(e.path());
+                // if (ls == null) {
+                // ls = new HashSet<Class<? extends IconRef>>();
+                // clsMap.put(e.path(), ls);
+                // }
+                // ls.add(cl);
+            }
+        }
     }
 
     public static void main(String[] args) throws Throwable {
@@ -67,7 +91,7 @@ public class IconSetMaker {
             }
         }.waitForEDT();
         // WORKSPACE = IDEUtils.getProjectFolder();
-        new IconSetMaker(args[0], IDEUtils.getProjectFolder(Class.forName(new Exception().getStackTrace()[1].getClassName()))).run();
+        new IconSetMaker(args[0], IDEUtils.getProjectFolder(Class.forName(new Exception().getStackTrace()[1].getClassName())), null, null).run();
     }
 
     private IconSetterGui gui;
@@ -78,7 +102,7 @@ public class IconSetMaker {
         return standardSet;
     }
 
-    private void run() throws Throwable {
+    public void run() throws Throwable {
         this.gui = initGui();
         scanThemes();
         gui.onThemesScanned();
@@ -234,6 +258,14 @@ public class IconSetMaker {
             public void outro(File f) throws RuntimeException {
             }
         }, theme);
+        String rel = Files.getRelativePath(projectFolder, theme);
+        for (String s : icons) {
+            s = themeNamespace + "images/" + s;
+            if (!set.contains(s)) {
+                set.add(new IconResource(IconSetMaker.this, s, null));
+            }
+            System.out.println(s);
+        }
         return set;
     }
 

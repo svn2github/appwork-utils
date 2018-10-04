@@ -67,7 +67,7 @@ public class CompareUtils {
      * @param b
      * @return
      */
-    public static boolean equalsObjects(Object a, Object b) {
+    public static boolean equals(Object a, Object b) {
         if (a == b) {
             return true;
         }
@@ -86,7 +86,7 @@ public class CompareUtils {
      * @param extensions2
      * @return
      */
-    public static boolean equalsMaps(Map<Object, Object> a, Map<Object, Object> b) {
+    public static boolean equals(Map<?, ?> a, Map<?, ?> b) {
         if (a == b) {
             return true;
         }
@@ -96,8 +96,8 @@ public class CompareUtils {
         if (a.size() != b.size()) {
             return false;
         }
-        for (Entry<Object, Object> es : a.entrySet()) {
-            if (!equalsObjects(es.getValue(), b.get(es.getKey()))) {
+        for (Entry<?, ?> es : a.entrySet()) {
+            if (!equals(es.getValue(), b.get(es.getKey()))) {
                 return false;
             }
         }

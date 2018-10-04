@@ -53,19 +53,21 @@ public class CompareUtils {
     /**
      * @param hash
      * @param hash2
+     * @deprecated use Arrays.equals instead
      * @return
      */
     public static boolean equals(byte[] hash, byte[] hash2) {
-        if (hash == hash2) {
-            return true;
-        }
-        if (hash == null || hash2 == null) {
-            return false;
-        }
         return Arrays.equals(hash, hash2);
     }
 
-    public static boolean equals(Object a, Object b) {
+    /**
+     * returns true of both objects are null or their.equals method match
+     *
+     * @param a
+     * @param b
+     * @return
+     */
+    public static boolean equalsObjects(Object a, Object b) {
         if (a == b) {
             return true;
         }
@@ -77,11 +79,14 @@ public class CompareUtils {
     }
 
     /**
+     * this.method does not go rekursive. the values of the maps are compared via org.appwork.utils.CompareUtils.equalsObjects(Object,
+     * Object) (both null or equals
+     *
      * @param extensions
      * @param extensions2
      * @return
      */
-    public static boolean equals(Map<Object, Object> a, Map<Object, Object> b) {
+    public static boolean equalsMaps(Map<Object, Object> a, Map<Object, Object> b) {
         if (a == b) {
             return true;
         }
@@ -92,7 +97,7 @@ public class CompareUtils {
             return false;
         }
         for (Entry<Object, Object> es : a.entrySet()) {
-            if (!equals(es.getValue(), b.get(es.getKey()))) {
+            if (!equalsObjects(es.getValue(), b.get(es.getKey()))) {
                 return false;
             }
         }

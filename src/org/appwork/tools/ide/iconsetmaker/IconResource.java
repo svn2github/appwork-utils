@@ -16,9 +16,9 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
 import org.appwork.utils.images.IconIO;
+import org.appwork.utils.images.SVGIO;
 
 public class IconResource {
-
     private String       path;
     private String       standardMd5;
     private IconSetMaker owner;
@@ -45,7 +45,6 @@ public class IconResource {
 
     public String getTags(ResourceSet resourceSet) {
         String name = new File(path).getName();
-
         HashSet<String> tags2 = new HashSet<String>();
         tags2.addAll(tags);
         addTags(tags2, name);
@@ -53,26 +52,20 @@ public class IconResource {
         if (svg.exists()) {
             String str;
             try {
-
                 Properties props = new Properties();
                 FileInputStream fis = new FileInputStream(svg);
                 try {
                     props.load(fis);
-
                 } finally {
                     fis.close();
                 }
                 if (props.getProperty("name") != null) {
                     addTags(tags2, props.getProperty("name"));
-
                 }
-
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
         }
-
         StringBuilder sb = new StringBuilder();
         for (String s : tags2) {
             if (sb.length() > 0) {
@@ -85,25 +78,19 @@ public class IconResource {
 
     public Icon getIcon(String name, int size) {
         File file = new File(owner.getThemesFolder(), "/themes/" + name + "/" + getPath() + ".svg");
-
         if (file.exists()) {
-
             try {
-
-                Image image = IconIO.getImageFromSVG(file.toURI().toURL(), size, size);
+                Image image = SVGIO.getImageFromSVG(file.toURI().toURL(), size, size);
                 Graphics g = image.getGraphics();
                 g.setColor(Color.RED);
                 g.drawRect(0, 0, image.getWidth(null) - 1, image.getHeight(null) - 1);
                 g.dispose();
                 return new ImageIcon(image);
             } catch (IOException e) {
-
                 return null;
             }
-
         } else {
             file = new File(owner.getThemesFolder(), "themes/" + name + "/" + getPath() + ".png");
-
             try {
                 BufferedImage image = size > 0 ? IconIO.getScaledInstance(ImageIO.read(file), size, size) : ImageIO.read(file);
                 Graphics g = image.getGraphics();
@@ -112,22 +99,18 @@ public class IconResource {
                 g.dispose();
                 return new ImageIcon(image);
             } catch (Throwable e) {
-
                 return null;
             }
         }
     }
 
     public File getFile(ResourceSet resoureSet, String ext) {
-
         return new File(owner.getThemesFolder(), "themes/" + resoureSet.getName() + "/" + getPath() + "." + ext);
-
     }
 
     private HashSet<String> tags = new HashSet<String>();
 
     public void addTags(String name) {
-
         // name = name.replaceAll("\\..+$", "");
         addTags(tags, name);
     }
@@ -145,5 +128,4 @@ public class IconResource {
         name = name.toLowerCase(Locale.ENGLISH);
         return name;
     }
-
 }

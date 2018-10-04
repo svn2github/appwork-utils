@@ -48,7 +48,6 @@ import java.awt.Toolkit;
 import java.awt.Transparency;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
@@ -64,7 +63,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.net.URL;
 import java.util.HashMap;
 
@@ -81,12 +79,6 @@ import org.appwork.utils.URLStream;
 import org.appwork.utils.ImageProvider.ImageProvider;
 import org.appwork.utils.net.Base64InputStream;
 import org.appwork.utils.net.Base64OutputStream;
-
-import com.kitfox.svg.SVGDiagram;
-import com.kitfox.svg.SVGElement;
-import com.kitfox.svg.SVGElementException;
-import com.kitfox.svg.SVGUniverse;
-import com.kitfox.svg.animation.AnimationElement;
 
 public class IconIO {
     public static class ScaledIcon implements Icon, IDIcon {
@@ -195,16 +187,16 @@ public class IconIO {
             @Override
             public final int filterRGB(final int x, final int y, final int rgb) {
                 final int r = (rgb & 0xFF0000) >> 16;
-                final int g = (rgb & 0xFF00) >> 8;
-                final int b = rgb & 0xFF;
-                if (r >= r1 && r <= r2 && g >= g1 && g <= g2 && b >= b1 && b <= b2) {
-                    // Set fully transparent but keep color
-                    // calculate a alpha value based on the distance between the
-                    // range borders and the pixel color
-                    final int dist = (Math.abs(r - (r1 + r2) / 2) + Math.abs(g - (g1 + g2) / 2) + Math.abs(b - (b1 + b2) / 2)) * 2;
-                    return new Color(r, g, b, Math.min(255, dist)).getRGB();
-                }
-                return rgb;
+        final int g = (rgb & 0xFF00) >> 8;
+        final int b = rgb & 0xFF;
+        if (r >= r1 && r <= r2 && g >= g1 && g <= g2 && b >= b1 && b <= b2) {
+            // Set fully transparent but keep color
+            // calculate a alpha value based on the distance between the
+            // range borders and the pixel color
+            final int dist = (Math.abs(r - (r1 + r2) / 2) + Math.abs(g - (g1 + g2) / 2) + Math.abs(b - (b1 + b2) / 2)) * 2;
+            return new Color(r, g, b, Math.min(255, dist)).getRGB();
+        }
+        return rgb;
             }
         };
         final ImageProducer ip = new FilteredImageSource(image.getSource(), filter);
@@ -428,7 +420,10 @@ public class IconIO {
     public static ImageIcon getImageIcon(final URL resource, final int size) {
         if (resource != null && StringUtils.endsWithCaseInsensitive(resource.getPath(), ".svg")) {
             try {
-                return new ImageIcon(getImageFromSVG(resource, size, size));
+                return new ImageIcon(SVGIO.getImageFromSVG(resource, size, size));
+            } catch (NoClassDefFoundError e) {
+                LogV3.log(e);
+                return new ImageIcon(ImageProvider.createIcon("DUMMY", size, size));
             } catch (IOException e) {
                 LogV3.log(e);
                 return new ImageIcon(ImageProvider.createIcon("DUMMY", size, size));
@@ -882,92 +877,5 @@ public class IconIO {
         }
         final Base64InputStream is = new Base64InputStream(new ByteArrayInputStream(dataURL.getBytes("UTF-8")));
         return ImageIO.read(is);
-    }
-
-    public static Image getImageFromSVG(URL url, int w, int h) throws IOException {
-        return getImageFromSVG(url, w, h, null);
-    }
-
-    public static Image getImageFromSVG(URL url, int w, int h, Color color) throws IOException {
-        try {
-            InputStream is = null;
-            try {
-                is = url.openStream();
-                if (is != null) {
-                    final SVGUniverse universe = new SVGUniverse();
-                    final URI uri = universe.loadSVG(is, "dummy.svg");
-                    final SVGDiagram diagram = universe.getDiagram(uri);
-                    // Rectangle dp = diagram.getDeviceViewport();
-                    // Rectangle2D vr = diagram.getViewRect();
-                    // Rectangle2D bb = diagram.getRoot().getBoundingBox();
-                    if (color != null) {
-                        SVGElement root = diagram.getRoot();
-                        // set color
-                        float alpha = color.getAlpha() / 255f;
-                        String hex = "#" + String.format("%02x%02x%02x", color.getRed(), color.getGreen(), color.getBlue());
-                        // root.setAttribute("fill", AnimationElement.AT_CSS, hex);
-                        setColor(root, alpha, hex);
-                    }
-                    diagram.updateTime(0d);
-                    diagram.setIgnoringClipHeuristic(true);
-                    if (w <= 0) {
-                        w = (int) diagram.getWidth();
-                    }
-                    if (h <= 0) {
-                        h = (int) diagram.getHeight();
-                    }
-                    final double faktor = 1d / Math.max((double) diagram.getWidth() / w, (double) diagram.getHeight() / h);
-                    final int width = Math.max((int) (diagram.getWidth() * faktor), 1);
-                    final int height = Math.max((int) (diagram.getHeight() * faktor), 1);
-                    final BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
-                    final Graphics2D g = bi.createGraphics();
-                    try {
-                        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                        int x = 0;
-                        int y = 0;
-                        g.translate(x, y);
-                        final Rectangle2D.Double rect = new Rectangle2D.Double();
-                        diagram.getViewRect(rect);
-                        AffineTransform scaleXform = new AffineTransform();
-                        scaleXform.setToScale(width / rect.width, height / rect.height);
-                        AffineTransform oldXform = g.getTransform();
-                        g.transform(scaleXform);
-                        diagram.render(g);
-                        g.setTransform(oldXform);
-                        g.translate(-x, -y);
-                    } finally {
-                        g.dispose();
-                    }
-                    return bi;
-                } else {
-                    throw new IOException("Not found:" + url);
-                }
-            } finally {
-                if (is != null) {
-                    is.close();
-                }
-            }
-        } catch (IOException e) {
-            throw e;
-        } catch (Throwable e) {
-            throw new IOException("URL:" + url, e);
-        }
-    }
-
-    protected static void setColor(SVGElement root, float alpha, String hex) throws SVGElementException {
-        if (root.hasAttribute("fill", AnimationElement.AT_CSS)) {
-            root.setAttribute("fill", AnimationElement.AT_CSS, hex);
-        } else {
-            root.addAttribute("fill", AnimationElement.AT_CSS, hex);
-        }
-        if (root.hasAttribute("fill-opacity", AnimationElement.AT_CSS)) {
-            root.setAttribute("fill-opacity", AnimationElement.AT_CSS, alpha + "");
-        } else {
-            root.addAttribute("fill-opacity", AnimationElement.AT_CSS, alpha + "");
-        }
-        for (int i = 0; i < root.getNumChildren(); i++) {
-            SVGElement child = root.getChild(i);
-            setColor(child, alpha, hex);
-        }
     }
 }

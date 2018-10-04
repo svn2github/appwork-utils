@@ -1,6 +1,8 @@
 package org.appwork.utils;
 
 import java.util.Arrays;
+import java.util.Map;
+import java.util.Map.Entry;
 
 public class CompareUtils {
     /**
@@ -61,5 +63,39 @@ public class CompareUtils {
             return false;
         }
         return Arrays.equals(hash, hash2);
+    }
+
+    public static boolean equals(Object a, Object b) {
+        if (a == b) {
+            return true;
+        }
+        if (a == null || b == null) {
+            return false;
+        }
+        // Objects.equals(a, b) is 1.7+
+        return a.equals(b);
+    }
+
+    /**
+     * @param extensions
+     * @param extensions2
+     * @return
+     */
+    public static boolean equals(Map<Object, Object> a, Map<Object, Object> b) {
+        if (a == b) {
+            return true;
+        }
+        if (a == null || b == null) {
+            return false;
+        }
+        if (a.size() != b.size()) {
+            return false;
+        }
+        for (Entry<Object, Object> es : a.entrySet()) {
+            if (!equals(es.getValue(), b.get(es.getKey()))) {
+                return false;
+            }
+        }
+        return false;
     }
 }

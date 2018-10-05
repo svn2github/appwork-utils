@@ -491,7 +491,7 @@ public class CrossSystem {
         }
         /*
          * remove ending dots, not allowed under windows and others os maybe too
-         *
+         * 
          * Do not end a file or directory name with a space or a period.
          */
         pathPart = pathPart.replaceFirst("\\.+$", "");
@@ -1199,48 +1199,23 @@ public class CrossSystem {
         return CrossSystem.OS.getFamily() == OSFamily.OS2;
     }
 
-    /**
-     * @param ks
-     * @return
-     */
     public static boolean isPasteSelectionTrigger(final KeyStroke ks) {
-        // TODO Auto-generated method stub
         return ks == CrossSystem.KEY_STROKE_PASTE;
     }
 
-    /**
-     * @param ks
-     * @return
-     */
     public static boolean isSearchTrigger(final KeyStroke ks) {
-        // TODO Auto-generated method stub
         return ks == CrossSystem.KEY_STROKE_SEARCH;
     }
 
-    /**
-     * @param ks
-     * @return
-     */
     public static boolean isSelectionAllTrigger(final KeyStroke ks) {
-        // TODO Auto-generated method stub
         return ks == CrossSystem.KEY_STROKE_SELECT_ALL;
     }
 
-    /**
-     * @param ks
-     * @return
-     */
     public static boolean isSelectionDownTrigger(final KeyStroke ks) {
-        // TODO Auto-generated method stub
         return ks == CrossSystem.KEY_STROKE_DOWN;
     }
 
-    /**
-     * @param ks
-     * @return
-     */
     public static boolean isSelectionUpTrigger(final KeyStroke ks) {
-        // TODO Auto-generated method stub
         return ks == CrossSystem.KEY_STROKE_UP;
     }
 

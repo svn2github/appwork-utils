@@ -207,7 +207,7 @@ public class Exceptions {
      * @param e
      */
     public static <E extends Throwable> E addSuppressed(E throwing, Throwable additional) {
-        if (addSuppressedMethod == null) {
+        if (addSuppressedMethod == null || additional == null) {
             // unsupported JVM - ignore
             return throwing;
         }

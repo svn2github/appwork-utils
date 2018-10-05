@@ -90,21 +90,21 @@ public class CrossSystem {
          * List must be sorted by release Date!!
          */
         MAC(OSFamily.MAC),
-        MAC_CHEETAH(OSFamily.MAC),
-        MAC_PUMA(OSFamily.MAC),
-        MAC_JAGUAR(OSFamily.MAC),
-        MAC_PANTHER(OSFamily.MAC),
-        MAC_TIGER(OSFamily.MAC),
-        MAC_LEOPOARD(OSFamily.MAC),
-        MAC_SNOW_LEOPOARD(OSFamily.MAC),
-        MAC_LION(OSFamily.MAC),
-        MAC_MOUNTAIN_LION(OSFamily.MAC),
-        MAC_MAVERICKS(OSFamily.MAC),
-        MAC_YOSEMITE(OSFamily.MAC),
-        MAC_EL_CAPITAN(OSFamily.MAC),
-        MAC_SIERRA(OSFamily.MAC),
-        MAC_HIGH_SIERRA(OSFamily.MAC),
-        MAC_MOJAVE(OSFamily.MAC),
+        MAC_CHEETAH(OSFamily.MAC), // 10.0
+        MAC_PUMA(OSFamily.MAC), // 10.1
+        MAC_JAGUAR(OSFamily.MAC), // 10.2
+        MAC_PANTHER(OSFamily.MAC), // 10.3
+        MAC_TIGER(OSFamily.MAC), // 10.4
+        MAC_LEOPOARD(OSFamily.MAC), // 10.5
+        MAC_SNOW_LEOPOARD(OSFamily.MAC), // 10.6
+        MAC_LION(OSFamily.MAC), // 10.7
+        MAC_MOUNTAIN_LION(OSFamily.MAC), // 10.8
+        MAC_MAVERICKS(OSFamily.MAC), // 10.9
+        MAC_YOSEMITE(OSFamily.MAC), // 10.10
+        MAC_EL_CAPITAN(OSFamily.MAC), // 10.11
+        MAC_SIERRA(OSFamily.MAC), // 10.12
+        MAC_HIGH_SIERRA(OSFamily.MAC), // 10.13
+        MAC_MOJAVE(OSFamily.MAC), // 10.14
         OS2(OSFamily.OS2),
         /*
          * List must be sorted by release Date!!

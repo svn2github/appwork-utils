@@ -34,14 +34,100 @@
 package org.appwork.utils.net.usenet;
 
 import java.io.ByteArrayOutputStream;
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.sun.corba.se.spi.legacy.connection.GetEndPointInfoAgainException;
+
 public class YEncInputStream extends InputStream {
+    public class YEncIndexException extends IOException {
+        private final String messageID;
+        private final int    expected;
+
+        public String getMessageID() {
+            return messageID;
+        }
+
+        public int getIndex() {
+            return index;
+        }
+
+        public int getExpected() {
+            return expected;
+        }
+
+        private final int index;
+
+        protected YEncIndexException(final int index) {
+            super("part-index-error:" + index + "<->" + YEncInputStream.this.getPartIndex() + "|yEncTrailer:" + getYEncTrailer());
+            this.index = index;
+            this.messageID = getMessageID();
+            this.expected = getPartIndex();
+        }
+    }
+
+    public class YEncSizeException extends IOException {
+        private final long size;
+
+        public long getSize() {
+            return size;
+        }
+
+        public String getMessageID() {
+            return messageID;
+        }
+
+        private final long expected;
+
+        public long getExpected() {
+            return expected;
+        }
+
+        private final String  messageID;
+        private final boolean isMultiPart;
+
+        public boolean isMultiPart() {
+            return isMultiPart;
+        }
+
+        protected YEncSizeException(final long size) {
+            super((YEncInputStream.this.isMultiPart() ? "part-" : "") + "size-error:" + size + "<->" + YEncInputStream.this.getPartSize() + "|yEncTrailer:" + getYEncTrailer());
+            this.size = size;
+            this.expected = getPartSize();
+            this.messageID = getMessageID();
+            this.isMultiPart = isMultiPart();
+        }
+    }
+
+    public class YEncDecodedSizeException extends IOException {
+        private final long size;
+
+        public long getSize() {
+            return size;
+        }
+
+        public long getExpected() {
+            return expected;
+        }
+
+        public String getMessageID() {
+            return messageID;
+        }
+
+        private final long   expected;
+        private final String messageID;
+
+        protected YEncDecodedSizeException(final long size, final long expected) {
+            super("decoded-size-error:" + size + "<->" + expected + "|yEncTrailer:" + getYEncTrailer());
+            this.size = size;
+            this.expected = expected;
+            this.messageID = getMessageID();
+        }
+    }
+
     /**
      * http://www.yenc.org/yenc-draft.1.3.txt
      */
@@ -99,6 +185,11 @@ public class YEncInputStream extends InputStream {
     private final int          partIndex;
     private final int          partTotal;
     private final SimpleUseNet client;
+    private final String       messageID;
+
+    public String getMessageID() {
+        return messageID;
+    }
 
     /**
      * returns the number of total parts in a multi-part yEnc encoded original file
@@ -119,7 +210,8 @@ public class YEncInputStream extends InputStream {
         return 0;
     }
 
-    protected YEncInputStream(SimpleUseNet client, ByteArrayOutputStream buffer) throws IOException {
+    protected YEncInputStream(SimpleUseNet client, final String messageID, ByteArrayOutputStream buffer) throws IOException {
+        this.messageID = messageID;
         this.client = client;
         this.inputStream = client.getInputStream();
         this.buffer = buffer;
@@ -422,31 +514,31 @@ public class YEncInputStream extends InputStream {
         final int lineSize = readLine(inputStream);
         final byte[] lineBuffer = buffer.toByteArray();
         yEncTrailer = new String(lineBuffer, 0, lineSize, "ISO-8859-1");
-        final String sizeValue = getValue(yEncTrailer, "size", NUMBER);
+        final String sizeValue = getValue(getYEncTrailer(), "size", NUMBER);
         final long size = sizeValue != null ? Long.parseLong(sizeValue) : -1;
-        pcrc32Value = getValue(yEncTrailer, "pcrc32", CRC32);
-        crc32Value = getValue(yEncTrailer, " crc32", CRC32);// space is important to differ between pcrc32 and crc32
+        pcrc32Value = getValue(getYEncTrailer(), "pcrc32", CRC32);
+        crc32Value = getValue(getYEncTrailer(), " crc32", CRC32);// space is important to differ between pcrc32 and crc32
         // read body to end to drain inputstream
         readBodyEnd(inputStream);
         // error checks
         if (isMultiPart()) {
             if (size != getPartSize()) {
-                throw new IOException("part-size-error:" + size + "<->" + getPartSize() + "|yEncTrailer:" + yEncTrailer);
+                throw new YEncSizeException(size);
             }
-            final String partValueString = getValue(yEncTrailer, "part", NUMBER);
+            final String partValueString = getValue(getYEncTrailer(), "part", NUMBER);
             if (partValueString != null) {
                 final int partValueInt = Integer.parseInt(partValueString);
                 if (partValueInt != getPartIndex()) {
-                    throw new IOException("part-index-error:" + getPartIndex() + "<->" + partValueInt + "|yEncTrailer:" + yEncTrailer);
+                    throw new YEncIndexException(partValueInt);
                 }
             }
         } else {
             if (size != getSize()) {
-                throw new IOException("size-error:" + size + "<->" + getSize() + "|yEncTrailer:" + yEncTrailer);
+                throw new YEncSizeException(size);
             }
         }
         if (decodedBytes < size) {
-            throw new IOException("decoded-size-error:" + decodedBytes + "<->" + size + "|yEncTrailer:" + yEncTrailer);
+            throw new YEncDecodedSizeException(decodedBytes, size);
         }
     }
 
@@ -465,16 +557,12 @@ public class YEncInputStream extends InputStream {
      * @throws IOException
      */
     private void readBodyEnd(final InputStream is) throws IOException {
+        final BodyInputStream bodyInputStream = new BodyInputStream(is);
+        final byte[] bodyEndBuf = new byte[32];
         while (true) {
-            buffer.reset();
-            final int size = readLine(is);
-            if (size > 0) {
-                final String line = new String(buffer.toByteArray(), 0, size, "ISO-8859-1");
-                if (".".equals(line)) {
-                    break;
-                }
-            } else if (size == -1) {
-                throw new EOFException();
+            if (bodyInputStream.read(bodyEndBuf) == -1) {
+                bodyInputStream.close();
+                break;
             }
         }
     }

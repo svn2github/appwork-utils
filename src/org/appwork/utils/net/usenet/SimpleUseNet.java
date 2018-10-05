@@ -402,7 +402,7 @@ public abstract class SimpleUseNet {
                     logger.info("Read Response:" + line);
                     if (line.startsWith("=ybegin")) {
                         logger.info("yEnc Body detected");
-                        return new YEncInputStream(this, buffer);
+                        return new YEncInputStream(this, messageID, buffer);
                     }
                     if (line.matches("^begin \\d{3} .+")) {
                         logger.info("uuEncode Body detected");

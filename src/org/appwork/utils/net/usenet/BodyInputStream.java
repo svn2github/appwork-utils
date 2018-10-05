@@ -46,7 +46,11 @@ public class BodyInputStream extends InputStream {
     private final InputStream inputStream;
 
     protected BodyInputStream(SimpleUseNet client) throws IOException {
-        this.inputStream = client.getInputStream();
+        this(client.getInputStream());
+    }
+
+    protected BodyInputStream(InputStream inputStream) throws IOException {
+        this.inputStream = inputStream;
     }
 
     private int singleDotLineState = 0;

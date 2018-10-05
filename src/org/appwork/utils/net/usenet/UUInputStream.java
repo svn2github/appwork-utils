@@ -34,7 +34,6 @@
 package org.appwork.utils.net.usenet;
 
 import java.io.ByteArrayOutputStream;
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -177,16 +176,12 @@ public class UUInputStream extends InputStream {
     }
 
     private void readBodyEnd(final InputStream is) throws IOException {
+        final BodyInputStream bodyInputStream = new BodyInputStream(is);
+        final byte[] bodyEndBuf = new byte[32];
         while (true) {
-            buffer.reset();
-            final int size = client.readLine(is, buffer);
-            if (size > 0) {
-                final String line = new String(buffer.toByteArray(), 0, size, "ISO-8859-1");
-                if (".".equals(line)) {
-                    break;
-                }
-            } else if (size == -1) {
-                throw new EOFException();
+            if (bodyInputStream.read(bodyEndBuf) == -1) {
+                bodyInputStream.close();
+                break;
             }
         }
     }

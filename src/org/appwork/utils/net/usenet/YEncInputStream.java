@@ -40,7 +40,7 @@ import java.io.PushbackInputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.sun.corba.se.spi.legacy.connection.GetEndPointInfoAgainException;
+import org.appwork.utils.Exceptions;
 
 public class YEncInputStream extends InputStream {
     public class YEncIndexException extends IOException {
@@ -519,26 +519,38 @@ public class YEncInputStream extends InputStream {
         pcrc32Value = getValue(getYEncTrailer(), "pcrc32", CRC32);
         crc32Value = getValue(getYEncTrailer(), " crc32", CRC32);// space is important to differ between pcrc32 and crc32
         // read body to end to drain inputstream
-        readBodyEnd(inputStream);
-        // error checks
-        if (isMultiPart()) {
-            if (size != getPartSize()) {
-                throw new YEncSizeException(size);
-            }
-            final String partValueString = getValue(getYEncTrailer(), "part", NUMBER);
-            if (partValueString != null) {
-                final int partValueInt = Integer.parseInt(partValueString);
-                if (partValueInt != getPartIndex()) {
-                    throw new YEncIndexException(partValueInt);
+        IOException throwLater = null;
+        try {
+            readBodyEnd(inputStream);
+        } catch (IOException e) {
+            throwLater = e;
+        }
+        try {
+            // error checks
+            if (isMultiPart()) {
+                if (size != getPartSize()) {
+                    throw new YEncSizeException(size);
+                }
+                final String partValueString = getValue(getYEncTrailer(), "part", NUMBER);
+                if (partValueString != null) {
+                    final int partValueInt = Integer.parseInt(partValueString);
+                    if (partValueInt != getPartIndex()) {
+                        throw new YEncIndexException(partValueInt);
+                    }
+                }
+            } else {
+                if (size != getSize()) {
+                    throw new YEncSizeException(size);
                 }
             }
-        } else {
-            if (size != getSize()) {
-                throw new YEncSizeException(size);
+            if (decodedBytes < size) {
+                throw new YEncDecodedSizeException(decodedBytes, size);
             }
+        } catch (IOException e) {
+            throw Exceptions.addSuppressed(e, throwLater);
         }
-        if (decodedBytes < size) {
-            throw new YEncDecodedSizeException(decodedBytes, size);
+        if (throwLater != null) {
+            throw throwLater;
         }
     }
 

@@ -55,6 +55,23 @@ public class AWFCOutputStream extends OutputStream {
     protected boolean            headerWritten               = false;
     protected final AWFCUtils    utils;
     private boolean              closing                     = false;
+    private int                  version                     = 1;
+
+    public synchronized void setVersion(int version) throws IllegalArgumentException, IllegalStateException {
+        if (headerWritten) {
+            throw new IllegalStateException("header already written");
+        }
+        switch (version) {
+        case 1:
+            // version 1, doesn't store hash for files with size == 0
+        case 2:
+            // version 2, does store hash for files with size == 0
+            break;
+        default:
+            throw new IllegalArgumentException("Unknown AWFC Version " + version);
+        }
+        this.version = version;
+    }
 
     public AWFCOutputStream(final OutputStream os, final MessageDigest md) {
         this.os = os;
@@ -192,6 +209,10 @@ public class AWFCOutputStream extends OutputStream {
         this.getCurrentOutputStream().write(b);
     }
 
+    public int getVersion() {
+        return version;
+    }
+
     protected void writeAWFCEntry(final AWFCEntryOptions awfcEntryOptions) throws IOException {
         final AWFCEntry entry = awfcEntryOptions.getEntry();
         /* write filePath */
@@ -210,7 +231,7 @@ public class AWFCOutputStream extends OutputStream {
         if (entry.isFile()) {
             /* write entrySize */
             this.utils.writeLongOptimized(entry.getSize());
-            if (this.md != null && entry.getSize() > 0) {
+            if (this.md != null && (entry.getSize() > 0 || getVersion() >= 2)) {
                 /* only write Hash when MessageDigest is set */
                 if (entry.getHash() == null) {
                     throw new IOException("Hash is missing for Entry: " + entry);
@@ -225,8 +246,9 @@ public class AWFCOutputStream extends OutputStream {
 
     protected synchronized void writeAWFCHeader() throws IOException {
         this.headerWritten = true;
-        /* write AWFC Version 1 */
-        this.write(1);
+        version = getVersion();
+        /* write AWFC Version */
+        this.write(version);
         /* write MessageDigest set */
         this.utils.writeBoolean(this.md != null);
         if (this.md != null) {

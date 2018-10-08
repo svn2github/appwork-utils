@@ -70,6 +70,10 @@ public class BasicRemoteAPIException extends Exception implements HttpConnection
         this(e, "UNKNOWN", ResponseCode.SERVERERROR_INTERNAL, null);
     }
 
+    public BasicRemoteAPIException(final ResponseCode code2) {
+        this(null, code2.name(), code2, null);
+    }
+
     /**
      * @param name
      * @param code2
@@ -119,9 +123,13 @@ public class BasicRemoteAPIException extends Exception implements HttpConnection
         return handle(response, false);
     }
 
+    protected Object getErrorObject() {
+        return new DeviceErrorResponse(this.getType(), getData());
+    }
+
     public boolean handle(final HttpResponse response, boolean gzip) throws IOException {
         byte[] bytes;
-        final String str = JSonStorage.serializeToJson(new DeviceErrorResponse(this.getType(), getData()));
+        final String str = JSonStorage.serializeToJson(getErrorObject());
         bytes = str.getBytes("UTF-8");
         if (gzip) {
             response.getResponseHeaders().add(new HTTPHeader(HTTPConstants.HEADER_RESPONSE_CONTENT_ENCODING, "gzip"));

@@ -54,6 +54,7 @@ public class AWFCInputStream extends InputStream {
     private AWFCEntryOptions   currentEntry = null;
     private final byte[]       skipBuffer   = new byte[32767];
     private AWFCUtils          utils;
+    private int                version      = -1;
 
     public AWFCInputStream(final InputStream is) {
         this.is = is;
@@ -84,6 +85,12 @@ public class AWFCInputStream extends InputStream {
             return this.lis;
         } else {
             return this.is;
+        }
+    }
+
+    private void verifyHash(AWFCEntryOptions entry, final byte[] hash) throws IOException {
+        if ((true || entry.getEntry().getSize() > 0 || getVersion() >= 2) && !Arrays.equals(hash, AWFCInputStream.this.currentEntry.getEntry().getHash())) {
+            throw new IOException("Wrong hash for Entry: " + AWFCInputStream.this.currentEntry.getEntry());
         }
     }
 
@@ -120,9 +127,7 @@ public class AWFCInputStream extends InputStream {
                             if (hash == null) {
                                 hash = md.digest();
                             }
-                            if (!Arrays.equals(hash, AWFCInputStream.this.currentEntry.getEntry().getHash())) {
-                                throw new IOException("Wrong hash for Entry: " + AWFCInputStream.this.currentEntry.getEntry());
-                            }
+                            verifyHash(currentEntry, hash);
                         }
                     }
                     return ret;
@@ -138,9 +143,7 @@ public class AWFCInputStream extends InputStream {
                             if (hash == null) {
                                 hash = md.digest();
                             }
-                            if (!Arrays.equals(hash, AWFCInputStream.this.currentEntry.getEntry().getHash())) {
-                                throw new IOException("Wrong hash for Entry: " + AWFCInputStream.this.currentEntry.getEntry());
-                            }
+                            verifyHash(currentEntry, hash);
                         }
                     }
                     return ret;
@@ -221,13 +224,13 @@ public class AWFCInputStream extends InputStream {
         final int entryOptions = this.utils.ensureRead();
         final boolean isFolder = (entryOptions & 1) == 0;
         final boolean hasPayLoad = (entryOptions & 2) == 0;
-        AWFCEntry entry = null;
+        final AWFCEntry entry;
         if (isFolder) {
             entry = new AWFCEntry(path + "/", 0, null);
         } else {
             final long size = this.utils.readLongOptimized();
             final byte[] hash;
-            if (this.md != null && size > 0) {
+            if (this.md != null && (size > 0 || getVersion() >= 2)) {
                 hash = this.utils.ensureRead(this.md.getDigestLength(), null);
             } else {
                 hash = null;
@@ -237,9 +240,19 @@ public class AWFCInputStream extends InputStream {
         return new AWFCEntryOptions(entry, !hasPayLoad);
     }
 
+    public int getVersion() {
+        return version;
+    }
+
     private synchronized void readAWFCHeader() throws IOException {
-        final int version = this.utils.ensureRead();
-        if (version != 1) {
+        version = this.utils.ensureRead();
+        switch (version) {
+        case 1:
+            // version 1, doesn't store hash for files with size == 0
+        case 2:
+            // version 2, does store hash for files with size == 0
+            break;
+        default:
             throw new IOException("Unknown AWFC Version " + version);
         }
         if (this.utils.readBoolean()) {

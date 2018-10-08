@@ -53,7 +53,7 @@ public class BodyInputStream extends InputStream {
         this.inputStream = inputStream;
     }
 
-    private int singleDotLineState = 0;
+    private int singleDotLineState = -1;
 
     @Override
     public synchronized int read() throws IOException {
@@ -65,6 +65,14 @@ public class BodyInputStream extends InputStream {
                 throw new EOFException("singleDotLineState:" + singleDotLineState);
             } else {
                 switch (singleDotLineState) {
+                case -1:
+                    // special handling in case the current line is already the last single dot line
+                    if (ret == '.') {
+                        singleDotLineState = 3;
+                    } else {
+                        singleDotLineState = 0;
+                    }
+                    break;
                 case 0:
                     if (ret == 13) {
                         singleDotLineState++;

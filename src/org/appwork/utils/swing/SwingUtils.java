@@ -43,6 +43,8 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.Window;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
@@ -51,6 +53,7 @@ import javax.swing.AbstractButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.Timer;
 import javax.swing.text.JTextComponent;
 
 import org.appwork.utils.StringUtils;
@@ -66,17 +69,13 @@ public class SwingUtils {
     public static Point getCenter(final Component parentFrame, final Window frame) {
         final Point point = new Point();
         int x = 0, y = 0;
-
         if (parentFrame == null || frame == null) {
             point.setLocation(x, y);
             return point;
         }
-
         x = parentFrame.getLocation().x + parentFrame.getSize().width / 2 - frame.getSize().width / 2;
         y = parentFrame.getLocation().y + parentFrame.getSize().height / 2 - frame.getSize().height / 2;
-
         point.setLocation(x, y);
-
         return point;
     }
 
@@ -87,7 +86,6 @@ public class SwingUtils {
     public static JComponent getComponentByName(final JComponent frame, final String name) {
         JComponent ret = null;
         for (final Component c : frame.getComponents()) {
-
             if (c instanceof JComponent) {
                 if (c.getName() != null && c.getName().equals(name)) {
                     return (JComponent) c;
@@ -96,12 +94,10 @@ public class SwingUtils {
                     if (ret != null) {
                         return ret;
                     }
-
                 }
             }
         }
         return null;
-
     }
 
     public static Window getWindowForComponent(final Component parentComponent) {
@@ -160,7 +156,6 @@ public class SwingUtils {
      */
     public static void printComponentTree(final JComponent fc) {
         printComponentTree(fc, "");
-
     }
 
     /**
@@ -168,16 +163,13 @@ public class SwingUtils {
      * @param string
      */
     private static void printComponentTree(final JComponent fc, final String string) {
-
         // c.setVisible(false);
         for (int i = 0; i < fc.getComponentCount(); i++) {
             final Component cc = fc.getComponent(i);
             System.out.println(string + "[" + i + "]" + cc.getClass().getSuperclass().getSimpleName() + ":" + cc + " Opaque: " + cc.isOpaque());
-
             if (cc instanceof JComponent) {
                 printComponentTree((JComponent) cc, string + "[" + i + "]");
             }
-
         }
     }
 
@@ -188,30 +180,22 @@ public class SwingUtils {
      * @param k
      */
     public static JComponent getParent(JComponent parent, final int... path) {
-
         for (final int i : path) {
             parent = (JComponent) parent.getComponent(i);
         }
         return parent;
-
     }
 
     public static GraphicsDevice getScreenByLocation(Point p) {
         final GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-
         final GraphicsDevice[] screens = ge.getScreenDevices();
-
         for (final GraphicsDevice screen : screens) {
             final Rectangle bounds = screen.getDefaultConfiguration().getBounds();
-
             if (bounds.contains(p)) {
                 return screen;
-
             }
-
         }
         return null;
-
     }
 
     /**
@@ -241,7 +225,6 @@ public class SwingUtils {
      */
     public static GraphicsDevice getScreenByBounds(Rectangle bounds) {
         final GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-
         final GraphicsDevice[] screens = ge.getScreenDevices();
         Rectangle biggestIntersection = null;
         GraphicsDevice bestScreen = null;
@@ -258,7 +241,6 @@ public class SwingUtils {
                     }
                 }
             }
-
         }
         return (biggestIntersection == null || biggestIntersection.width * biggestIntersection.height == 0) ? null : bestScreen;
     }
@@ -285,18 +267,27 @@ public class SwingUtils {
             return null;
         }
         final GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-
         final GraphicsDevice[] screens = ge.getScreenDevices();
-
         for (final GraphicsDevice screen : screens) {
-
             if (StringUtils.equals(screen.getIDstring(), screenID)) {
                 return screen;
-
             }
-
         }
         return null;
     }
 
+    /**
+     * @param runnable
+     * @param i
+     */
+    public static void invokeLater(final Runnable runnable, int delayInMS) {
+        Timer timer = new Timer(delayInMS, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                runnable.run();
+            }
+        });
+        timer.setRepeats(false);
+        timer.start();
+    }
 }

@@ -146,6 +146,9 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
         }
         Component component = renderer.getTableCellRendererComponent(getModel().getTable(), this.getName(), false, false, -1, 2);
         Dimension pref = component.getPreferredSize();
+        if (getModel() != null) {
+            pref.width += Math.max(getModel().createSortASCIcon().getIconWidth(), getModel().createSortDESCIcon().getIconWidth());
+        }
         return pref.width;
     }
 
@@ -947,7 +950,6 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
      */
     public void setForcedWidth(int value) {
         forcedWidth = value;
-       
         TableColumn in = getInternalColumn();
         if (in != null) {
             in.setWidth(value);

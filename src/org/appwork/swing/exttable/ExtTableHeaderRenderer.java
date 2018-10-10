@@ -182,7 +182,7 @@ public class ExtTableHeaderRenderer extends DefaultTableCellRenderer implements 
         final Border orgBorder = getBorder();
         final int widthDif = column.getWidth() - getPreferredSize().width;
         final boolean smallLockIcon = widthDif < lockedWidth.getIconWidth();
-        final Icon icon = column.getModel().getSortColumn().getSortIcon();
+        final Icon icon = column.getModel().getSortColumn() == null ? null : column.getModel().getSortColumn().getSortIcon();
         try {
             if (paintLock && !smallLockIcon) {
                 setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(0, 0, 0, lockedWidth.getIconWidth()), orgBorder));

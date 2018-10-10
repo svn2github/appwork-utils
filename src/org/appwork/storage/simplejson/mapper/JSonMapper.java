@@ -170,7 +170,7 @@ public class JSonMapper {
                 } else {
                     throw new MapperException("Unknown Primitive Type: " + clazz);
                 }
-            } else if (clazz.isEnum()) {
+            } else if (clazz.isEnum() || Enum.class.isAssignableFrom(clazz)) {
                 return new JSonValue(obj + "");
             } else if (obj instanceof Boolean) {
                 return new JSonValue(((Boolean) obj).booleanValue());

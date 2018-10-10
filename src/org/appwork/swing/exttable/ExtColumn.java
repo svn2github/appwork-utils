@@ -72,20 +72,16 @@ import org.appwork.utils.swing.SwingUtils;
  * @author $Author: unknown$
  */
 public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCellEditor, TableCellRenderer {
-
     protected static Color           background             = null;
     protected static Color           backgroundselected     = null;
-
     protected static Color           foreground             = null;
     protected static Color           foregroundselected     = null;
-
     private static final long        serialVersionUID       = -2662459732650363059L;
     protected static final Border    DEFAULT_BORDER         = BorderFactory.createEmptyBorder(0, 5, 0, 5);
     /**
      * If this colum is editable, this parameter says how many clicks are required to start edit mode
      */
     private int                      clickcount             = 2;
-
     /**
      * The model this column belongs to
      */
@@ -94,21 +90,17 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
      * The columns Title.
      */
     private final String             name;
-
     /**
      * Sorting algorithms run in an own thread
      */
     private static Thread            sortThread             = null;
     private static Object            sortLOCK               = new Object();
-
     protected ExtDefaultRowSorter<E> rowSorter;
     private String                   id;
     private TableColumn              tableColumn;
-
     private String                   sortOrderIdentifier;
     protected final ToolTip          tooltip;
     private boolean                  editableProgrammaticly = false;
-
     public static final String       SORT_DESC              = "DESC";
     public static final String       SORT_ASC               = "ASC";
     protected volatile boolean       modifying              = false;
@@ -125,11 +117,21 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
         this.name = name;
         this.model = table;
         this.sortOrderIdentifier = null;
-
         this.id = this.generateID();
         // sort function
         this.rowSorter = new ExtDefaultRowSorter<E>();
         this.tooltip = new ToolTip();
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        // TODO Auto-generated method stub
+        return getClass().getSimpleName() + ":" + getModel().getModelID() + "." + getName();
     }
 
     /**
@@ -140,7 +142,7 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
         TableColumn tableColumn = this.getTableColumn();
         TableCellRenderer renderer = tableColumn.getHeaderRenderer();
         if (renderer == null) {
-            renderer = getModel().getTable().getTableHeader().getDefaultRenderer();
+            renderer = getModel().getTable().createDefaultHeaderRenderer(this);
         }
         Component component = renderer.getTableCellRendererComponent(getModel().getTable(), this.getName(), false, false, -1, 2);
         Dimension pref = component.getPreferredSize();
@@ -157,15 +159,11 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
             return;
         }
         final Rectangle visibleRect = table.getVisibleRect();
-
         final Rectangle first = table.getCellRect(0, getIndex(), true);
-
         final int w = getWidth() - Math.max(0, visibleRect.x - first.x);
         if (w > 0) {
             table.repaint(Math.max(first.x, visibleRect.x), visibleRect.y, w, visibleRect.height);
-
         }
-
     }
 
     /**
@@ -175,17 +173,14 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
      * @param row
      */
     protected void adaptHighlighters(final E value, final JComponent comp, final boolean isSelected, final boolean hasFocus, final int row) {
-
         try {
             final List<ExtComponentRowHighlighter<E>> hs = this.getModel().getExtComponentRowHighlighters();
             // set background back
             SwingUtils.setOpaque(comp, false);
             comp.setBackground(getDefaultBackground());
             comp.setForeground(getDefaultForeground());
-
             for (final ExtComponentRowHighlighter<E> rh : hs) {
                 if (rh.highlight(this, comp, value, isSelected, hasFocus, row)) {
-
                     // no break. we may have mixing highlighters
                 }
             }
@@ -218,21 +213,18 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
      */
     protected void configureCurrentlyEditingComponent(final E value, final boolean isSelected, final int row, final int column) {
         // TODO Auto-generated method stub
-
     }
 
     abstract public void configureEditorComponent(final E value, final boolean isSelected, final int row, final int column);
 
     public void configureEditorHighlighters(final JComponent component, final E value, final boolean isSelected, final int row) {
         this.adaptHighlighters(value, component, isSelected, true, row);
-
     }
 
     abstract public void configureRendererComponent(final E value, final boolean isSelected, final boolean hasFocus, final int row, final int column);
 
     public void configureRendererHighlighters(final JComponent component, final E value, final boolean isSelected, final boolean hasFocus, final int row) {
         this.adaptHighlighters(value, component, isSelected, hasFocus, row);
-
     }
 
     /**
@@ -245,7 +237,6 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
             // } else if (isAutoWidthEnabled()) {
             // // resize is not possible anyway
             // return null;
-
         } else {
             final JPopupMenu ret = new JPopupMenu();
             if (getModel().getTable().isColumnLockingFeatureEnabled()) {
@@ -254,7 +245,6 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
             }
             return ret;
         }
-
     }
 
     public ExtTooltip createToolTip(final Point position, final E obj) {
@@ -262,44 +252,35 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
         if (txt == null || txt.length() == 0) {
             return null;
         }
-
         this.tooltip.setTipText(txt);
         return this.tooltip;
     }
 
     public void doSort() {
         final String newID = ExtColumn.this.getNextSortIdentifier();
-
         System.out.println("Sort: " + newID);
         synchronized (ExtColumn.sortLOCK) {
             if (ExtColumn.sortThread != null && ExtColumn.sortThread.isAlive()) {
                 return;
             }
-
             ExtColumn.sortThread = new Thread("TableSorter " + this.getID()) {
                 @Override
                 public void run() {
                     try {
                         // get selections before sorting
                         final Integer sel = new EDTHelper<Integer>() {
-
                             @Override
                             public Integer edtRun() {
-
                                 final Container p = getModel().getTable().getParent();
                                 if (p == null || !(p instanceof JViewport)) {
                                     return 0;
                                 }
                                 final JViewport viewport = (JViewport) p;
-
                                 final Rectangle rec = viewport.getViewRect();
                                 return getModel().getTable().rowAtPoint(new Point(0, (int) (rec.getY() + 15)));
-
                             }
                         }.getReturnValue();
-
                         final Rectangle view = new EDTHelper<Rectangle>() {
-
                             @Override
                             public Rectangle edtRun() {
                                 final Container p = getModel().getTable().getParent();
@@ -309,10 +290,8 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
                                 final JViewport viewport = (JViewport) p;
                                 final Rectangle rec = viewport.getViewRect();
                                 return rec;
-
                             }
                         }.getReturnValue();
-
                         final E selObject = getModel().getObjectbyRow(sel.intValue());
                         final java.util.List<E> data = ExtColumn.this.model.getElements();
                         try {
@@ -322,21 +301,17 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
                         } catch (final Exception e) {
                         }
                         ExtColumn.this.getModel()._fireTableStructureChanged(data, true);
-
                         if (view != null) {
                             new EDTHelper<Object>() {
-
                                 @Override
                                 public Object edtRun() {
                                     ExtColumn.this.getModel().getTable().getTableHeader().repaint();
-
                                     if (getModel().getTable().getSelectedRowCount() > 0) {
                                         getModel().getTable().scrollToSelection(view.x);
                                     } else {
                                         // scroll to 0,
                                         // getModel().getRowforObject(selObject)
                                         getModel().getTable().scrollToRow(0, view.x);
-
                                     }
                                     return null;
                                 }
@@ -358,7 +333,6 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
      */
     public void extendControlButtonMenu(final JPopupMenu popup) {
         // TODO Auto-generated method stub
-
     }
 
     protected String generateID() {
@@ -389,7 +363,6 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
      * @return
      */
     public int getDefaultWidth() {
-
         return 100;
     }
 
@@ -421,9 +394,7 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
      * @return
      */
     public String getID() {
-
         return this.id;
-
     }
 
     /**
@@ -433,7 +404,6 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
      */
     public int getIndex() {
         return this.getModel().getTable().convertColumnIndexToView(this.tableColumn.getModelIndex());
-
     }
 
     /**
@@ -471,7 +441,6 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
      */
     protected String getNextSortIdentifier() {
         return this.getModel().getNextSortIdentifier(this.getSortOrderIdentifier());
-
     }
 
     /**
@@ -505,7 +474,6 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
      */
     public Icon getSortIcon() {
         return this.getModel().getSortIcon(this.getSortOrderIdentifier());
-
     }
 
     public String getSortOrderIdentifier() {
@@ -552,7 +520,6 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
     @Override
     final public Component getTableCellEditorComponent(final JTable table, final Object value, final boolean isSelected, final int row, final int column) {
         return this.getTableCellEditorComponent(table, (E) value, isSelected, row, column, false);
-
     }
 
     @SuppressWarnings("unchecked")
@@ -562,7 +529,6 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
             this.modifying = true;
             final JComponent ret = this.getRendererComponent((E) value, isSelected, hasFocus, row, column);
             this.resetRenderer();
-
             this.configureRendererHighlighters(ret, (E) value, isSelected, hasFocus, row);
             this.configureRendererComponent((E) value, isSelected, hasFocus, row, column);
             ret.setEnabled(this.getModel().getTable().isEnabled() && this.isEnabled((E) value));
@@ -628,7 +594,6 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
      * @return
      */
     protected boolean isDefaultResizable() {
-
         return true;
     }
 
@@ -653,7 +618,6 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
      * @return if the row with obj is editable
      */
     protected boolean isEditable(final E obj, final boolean enabled) {
-
         return enabled && this.isEditable(obj);
     }
 
@@ -690,7 +654,6 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
      * @return
      */
     public boolean isPaintHeaderText() {
-
         return true;
     }
 
@@ -797,12 +760,10 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
     }
 
     public void setResizable(boolean resizeAllowed) {
-
         // getInternalColumn().setMinWidth(getMinWidth());
         // getInternalColumn().setMaxWidth(getMaxWidth());
         this.getModel().getStorage().put(getModel().getTable().getColumnStoreKey("ColumnWidthLocked_", this.getID()), !resizeAllowed);
         this.updateColumnGui();
-
         // if
         // (!this.getModel().getExtColumnByViewIndex(this.getModel().getExtViewColumnCount()
         // - 1).isResizable()) {
@@ -812,9 +773,7 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
         // this.getModel().getTable().setAutoResizeFallbackEnabled(false);
         //
         // }
-
         new EDTRunner() {
-
             @Override
             protected void runInEDT() {
                 ExtColumn.this.getModel().getTable().getTableHeader().repaint();
@@ -822,14 +781,11 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
             }
         };
         getModel().getTable().fireColumnModelUpdate();
-
     }
 
     public Dimension getCellSizeEstimation(E element, int row) {
-
         Component c = getTableCellRendererComponent(getModel().getTable(), element, false, false, row, 1);
         return c.getPreferredSize();
-
     }
 
     /**
@@ -855,7 +811,6 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
      */
     public void setTableColumn(final TableColumn tableColumn, final boolean updateSize) {
         this.tableColumn = tableColumn;
-
         if (updateSize) {
             // Set stored columnwidth
             int w = ExtColumn.this.getDefaultWidth();
@@ -872,12 +827,9 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
             this.updateColumnGui();
         }
         if (forcedWidth > 0) {
-
             tableColumn.setWidth(forcedWidth);
             tableColumn.setPreferredWidth(forcedWidth);
-
         }
-
     }
 
     /**
@@ -912,7 +864,6 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
      * By default. if we start an editor, the row will be selected. If you want the framework not to select the current editing row,
      * overwrite this method to return false
      */
-
     @Override
     public boolean shouldSelectCell(final EventObject anEvent) {
         return this.isSelectRowWhenEditing(anEvent);
@@ -920,34 +871,27 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
 
     public void startEditing(final E obj) {
         new EDTRunner() {
-
             @Override
             protected void runInEDT() {
                 ExtColumn.this.editableProgrammaticly = true;
                 try {
                     ExtColumn.this.getModel().getTable().editCellAt(ExtColumn.this.getModel().getTable().getModel().getRowforObject(obj), ExtColumn.this.getIndex());
-
                 } finally {
                     ExtColumn.this.editableProgrammaticly = false;
                 }
             }
         };
-
     }
 
     /**
      *
      */
     private void updateColumnGui() {
-
         new EDTRunner() {
-
             @Override
             protected void runInEDT() {
-
                 // if (ExtColumn.this.isResizable() || true) {
                 ExtColumn.this.getModel().getTable().saveWidthsRatio();
-
                 ExtColumn.this.tableColumn.setMaxWidth(ExtColumn.this.getMaxWidth() < 0 ? Integer.MAX_VALUE : ExtColumn.this.getMaxWidth());
                 ExtColumn.this.tableColumn.setMinWidth(ExtColumn.this.getMinWidth() < 0 ? 15 : ExtColumn.this.getMinWidth());
                 ExtColumn.this.tableColumn.setResizable(true);
@@ -959,10 +903,8 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
                 // int m = ExtColumn.this.tableColumn.getWidth();
                 // ExtColumn.this.tableColumn.setMinWidth(m);
                 // }
-
             }
         };
-
     }
 
     /**
@@ -974,14 +916,12 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
         } else {
             return _AWU.T.tableheader_tooltip_locked(getName());
         }
-
     }
 
     /**
      * @return
      */
     public boolean isPaintSortIcon() {
-
         return true;
     }
 
@@ -1007,6 +947,7 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
      */
     public void setForcedWidth(int value) {
         forcedWidth = value;
+       
         TableColumn in = getInternalColumn();
         if (in != null) {
             in.setWidth(value);
@@ -1022,5 +963,4 @@ public abstract class ExtColumn<E> extends AbstractCellEditor implements TableCe
         }
         return forcedWidth;
     }
-
 }

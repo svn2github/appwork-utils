@@ -717,6 +717,10 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
                             // System.out.println(w.getName() + " - " + w);
                         }
                     }
+                    if (windowStack.size() > 0) {
+                        Window lastActive = windowStack.get(windowStack.size() - 1);
+                        lastActive.requestFocus();
+                    }
                 }
                 if (AbstractDialog.this.isDisposed()) {
                     return;

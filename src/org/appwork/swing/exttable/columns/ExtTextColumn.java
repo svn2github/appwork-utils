@@ -65,7 +65,7 @@ import org.appwork.utils.swing.SwingUtils;
 import org.appwork.utils.swing.renderer.RenderLabel;
 import org.appwork.utils.swing.renderer.RendererMigPanel;
 
-public abstract class ExtTextColumn<E> extends ExtColumn<E>implements ActionListener, FocusListener {
+public abstract class ExtTextColumn<E> extends ExtColumn<E> implements ActionListener, FocusListener {
     private static final long serialVersionUID = 2114805529462086691L;
     protected JLabel          rendererField;
 

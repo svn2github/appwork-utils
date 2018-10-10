@@ -35,11 +35,14 @@ package org.appwork.utils.swing.windowmanager;
 
 import java.awt.Frame;
 import java.awt.Window;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowFocusListener;
+import java.util.Map.Entry;
+import java.util.WeakHashMap;
 
 import javax.swing.JFrame;
 
 import org.appwork.utils.os.CrossSystem;
-
 
 public abstract class WindowManager {
     public static enum FrameState {
@@ -63,7 +66,6 @@ public abstract class WindowManager {
             this.id = i;
         }
 
-
         public static WindowExtendedState get(final int state) {
             if ((state & Frame.MAXIMIZED_BOTH) != 0) {
                 return MAXIMIZED_BOTH;
@@ -80,7 +82,6 @@ public abstract class WindowManager {
     public static void setCustom(WindowManager instance) {
         INSTANCE = instance;
     }
-
 
     private static WindowManager createOsWindowManager() {
         if (CrossSystem.isWindows()) {
@@ -99,11 +100,12 @@ public abstract class WindowManager {
         return WindowManager.INSTANCE;
     }
 
+    protected WeakHashMap<Window, WindowMetaInfo> windowMetaMap;
+    protected WindowFocusListener                 windowFocusListener;
 
     public WindowExtendedState getExtendedState(final Frame w) {
         return WindowExtendedState.get(w.getExtendedState());
     }
-
 
     public boolean hasFocus(final Window window) {
         if (window != null && window.isFocusOwner()) {
@@ -129,6 +131,52 @@ public abstract class WindowManager {
         this.setVisible(w, false, state);
     }
 
+    /**
+     *
+     */
+    public static class WindowMetaInfo {
+        protected long lostFocus;
+        protected long gainedFocus;
+    }
+
+    public Window getLatestFocusedWindow() {
+        WindowMetaInfo meta = null;
+        Window window = null;
+        for (Entry<Window, WindowMetaInfo> es : windowMetaMap.entrySet()) {
+            if (es.getKey() != null && es.getKey().isDisplayable()) {
+                WindowMetaInfo value = es.getValue();
+                if (meta == null || meta.gainedFocus < value.gainedFocus) {
+                    meta = value;
+                    window = es.getKey();
+                }
+            }
+        }
+        return window;
+    }
+
+    public WindowMetaInfo getMetaInfo(Window window) {
+        WindowMetaInfo ret = windowMetaMap.get(window);
+        if (ret == null) {
+            windowMetaMap.put(window, ret = new WindowMetaInfo());
+        }
+        return ret;
+    }
+
+    public WindowManager() {
+        windowMetaMap = new WeakHashMap<Window, WindowMetaInfo>();
+        windowFocusListener = new WindowFocusListener() {
+            @Override
+            public void windowLostFocus(WindowEvent e) {
+                getMetaInfo(e.getWindow()).lostFocus = System.currentTimeMillis();
+            }
+
+            @Override
+            public void windowGainedFocus(WindowEvent e) {
+                getMetaInfo(e.getWindow()).gainedFocus = System.currentTimeMillis();
+            }
+        };
+    }
+
     public void setExtendedState(final Frame w, final WindowExtendedState state) {
         if (state == null) {
             throw new NullPointerException("State is null");
@@ -152,7 +200,6 @@ public abstract class WindowManager {
 
     abstract public void setVisible(Window w, boolean visible, FrameState state);
 
-
     abstract public void setZState(Window w, FrameState state);
 
     public void show(final Window w) {
@@ -162,7 +209,6 @@ public abstract class WindowManager {
     public void show(final Window w, final FrameState state) {
         this.setVisible(w, true, state);
     }
-
 
     public boolean hasFocus() {
         for (final Window w : Window.getWindows()) {

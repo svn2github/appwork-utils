@@ -136,8 +136,8 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
     protected void init(final String id) {
         this.extComponentRowHighlighters = new ArrayList<ExtComponentRowHighlighter<E>>();
         this.modelID = id;
-        this.iconAsc = ExtTableIcon.TABLE_SORT_ASC.get(6);
-        this.iconDesc = ExtTableIcon.TABLE_SORT_DESC.get(6);
+        this.iconAsc = createSortASCIcon();
+        this.iconDesc = createSortDESCIcon();
         this.initModel();
         /**
          * we use this PropertyChangeListener to avoid tableRefresh while the table is in editing mode
@@ -157,6 +157,14 @@ public abstract class ExtTableModel<E> extends AbstractTableModel {
                 }
             }
         };
+    }
+
+    protected Icon createSortDESCIcon() {
+        return ExtTableIcon.TABLE_SORT_DESC.get(6);
+    }
+
+    protected Icon createSortASCIcon() {
+        return ExtTableIcon.TABLE_SORT_ASC.get(6);
     }
 
     @Override

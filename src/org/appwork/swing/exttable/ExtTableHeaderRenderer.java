@@ -182,9 +182,13 @@ public class ExtTableHeaderRenderer extends DefaultTableCellRenderer implements 
         final Border orgBorder = getBorder();
         final int widthDif = column.getWidth() - getPreferredSize().width;
         final boolean smallLockIcon = widthDif < lockedWidth.getIconWidth();
+        final Icon icon = column.getModel().getSortColumn().getSortIcon();
         try {
             if (paintLock && !smallLockIcon) {
                 setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(0, 0, 0, lockedWidth.getIconWidth()), orgBorder));
+            }
+            if (paintIcon && icon != null) {
+                setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(0, icon.getIconWidth(), 0, 0), getBorder()));
             }
             super.paintComponent(g);
         } finally {
@@ -193,7 +197,6 @@ public class ExtTableHeaderRenderer extends DefaultTableCellRenderer implements 
         try {
             if (paintIcon) {
                 final int left = 2;
-                final Icon icon = column.getModel().getSortColumn().getSortIcon();
                 if (icon != null) {
                     final Graphics2D g2 = (Graphics2D) g;
                     // final Composite comp = g2.getComposite();

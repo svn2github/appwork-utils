@@ -145,7 +145,7 @@ public class WindowsWindowManager extends WindowManager {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.utils.swing.WindowManager#toFront(java.awt.Window)
      */
     @Override
@@ -337,11 +337,13 @@ public class WindowsWindowManager extends WindowManager {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.utils.swing.WindowManager#setVisible(java.awt.Window, boolean, boolean, boolean)
      */
     @Override
     public void setVisible(final Window w, final boolean visible, final FrameState state) {
+        w.removeWindowFocusListener(windowFocusListener);
+        w.addWindowFocusListener(windowFocusListener);
         if (w.isVisible() && visible) {
             setZState(w, state);
             return;
@@ -587,25 +589,25 @@ public class WindowsWindowManager extends WindowManager {
         /* 389 */switch (id) {
         /* 391 */case 200: /* 391 */
             return "WINDOW_OPENED";
-            /* 394 */case 201: /* 394 */
+        /* 394 */case 201: /* 394 */
             return "WINDOW_CLOSING";
-            /* 397 */case 202: /* 397 */
+        /* 397 */case 202: /* 397 */
             return "WINDOW_CLOSED";
-            /* 400 */case 203: /* 400 */
+        /* 400 */case 203: /* 400 */
             return "WINDOW_ICONIFIED";
-            /* 403 */case 204: /* 403 */
+        /* 403 */case 204: /* 403 */
             return "WINDOW_DEICONIFIED";
-            /* 406 */case 205: /* 406 */
+        /* 406 */case 205: /* 406 */
             return "WINDOW_ACTIVATED";
-            /* 409 */case 206: /* 409 */
+        /* 409 */case 206: /* 409 */
             return "WINDOW_DEACTIVATED";
-            /* 412 */case 207: /* 412 */
+        /* 412 */case 207: /* 412 */
             return "WINDOW_GAINED_FOCUS";
-            /* 415 */case 208: /* 415 */
+        /* 415 */case 208: /* 415 */
             return "WINDOW_LOST_FOCUS";
-            /* 418 */case 209: /* 418 */
+        /* 418 */case 209: /* 418 */
             return "WINDOW_STATE_CHANGED";
-            /* 421 */default:/* 421 */
+        /* 421 */default:/* 421 */
             return "unknown type";
         }
     }

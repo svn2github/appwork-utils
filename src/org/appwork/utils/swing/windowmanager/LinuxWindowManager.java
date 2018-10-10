@@ -51,9 +51,7 @@ import org.appwork.utils.NullsafeAtomicReference;
  *
  */
 public class LinuxWindowManager extends WindowManager {
-
     private abstract class LinuxWindowListener implements WindowListener {
-
         private final AtomicBoolean removed = new AtomicBoolean(false);
 
         public boolean remove(final Window w, final boolean undo) {
@@ -96,7 +94,6 @@ public class LinuxWindowManager extends WindowManager {
         @Override
         public void windowOpened(final WindowEvent e) {
         }
-
     }
 
     private class LinuxWindowListenerMap {
@@ -111,7 +108,6 @@ public class LinuxWindowManager extends WindowManager {
     private final int                                         toBackTimer     = 100;
     private final int                                         toFrontTimer    = 100;
     private boolean                                           useAlwaysOnTop  = false;
-
     private final WeakHashMap<Window, LinuxWindowListenerMap> windowListeners = new WeakHashMap<Window, LinuxWindowListenerMap>();
 
     public boolean isDebugFlag() {
@@ -139,7 +135,8 @@ public class LinuxWindowManager extends WindowManager {
 
     @Override
     public void setVisible(final Window w, final boolean visible, final FrameState state) {
-        System.out.println(visible + " " + w + " " + state);
+        w.removeWindowFocusListener(windowFocusListener);
+        w.addWindowFocusListener(windowFocusListener);
         if (visible == false) {
             w.setVisible(false);
         } else {
@@ -189,7 +186,6 @@ public class LinuxWindowManager extends WindowManager {
                  * make window visible again and put to back, we need to invokeLater as w.setVisible(true) may block
                  */
                 SwingUtilities.invokeLater(new Runnable() {
-
                     @Override
                     public void run() {
                         /* window to back */
@@ -199,11 +195,9 @@ public class LinuxWindowManager extends WindowManager {
                         }
                         /* delay restoring of focusable properties */
                         LinuxWindowManager.this.timer.schedule(new TimerTask() {
-
                             @Override
                             public void run() {
                                 SwingUtilities.invokeLater(new Runnable() {
-
                                     @Override
                                     public void run() {
                                         try {
@@ -220,7 +214,6 @@ public class LinuxWindowManager extends WindowManager {
                                 });
                             }
                         }, LinuxWindowManager.this.toBackTimer);
-
                     };
                 });
                 /* this blocks for dialogs */
@@ -242,7 +235,6 @@ public class LinuxWindowManager extends WindowManager {
                     }
                     /* window is not active, so we need to bring it to top */
                     listener = new LinuxWindowListener() {
-
                         @Override
                         public void undo(final Window w) {
                             System.out.println("Request toFront(reset AlwaysOnTop workaround): " + w);
@@ -254,7 +246,6 @@ public class LinuxWindowManager extends WindowManager {
                             if (this.remove(e.getWindow(), true)) {
                                 if (requestFocus) {
                                     SwingUtilities.invokeLater(new Runnable() {
-
                                         @Override
                                         public void run() {
                                             if (LinuxWindowManager.this.isDebugFlag()) {
@@ -273,7 +264,6 @@ public class LinuxWindowManager extends WindowManager {
                             if (this.remove(e.getWindow(), true)) {
                                 if (requestFocus) {
                                     SwingUtilities.invokeLater(new Runnable() {
-
                                         @Override
                                         public void run() {
                                             if (LinuxWindowManager.this.isDebugFlag()) {
@@ -305,16 +295,13 @@ public class LinuxWindowManager extends WindowManager {
                      * w.setVisible(true) may block, so we need to invokeLater
                      */
                     SwingUtilities.invokeLater(new Runnable() {
-
                         @Override
                         public void run() {
                             /* delay restoring of focusable properties */
                             LinuxWindowManager.this.timer.schedule(new TimerTask() {
-
                                 @Override
                                 public void run() {
                                     SwingUtilities.invokeLater(new Runnable() {
-
                                         @Override
                                         public void run() {
                                             w.toFront();
@@ -334,7 +321,6 @@ public class LinuxWindowManager extends WindowManager {
                                     });
                                 }
                             }, LinuxWindowManager.this.toFrontTimer);
-
                         }
                     });
                     if (!w.isVisible()) {
@@ -349,7 +335,6 @@ public class LinuxWindowManager extends WindowManager {
                 }
                 if (requestFocus) {
                     SwingUtilities.invokeLater(new Runnable() {
-
                         @Override
                         public void run() {
                             if (LinuxWindowManager.this.isDebugFlag()) {

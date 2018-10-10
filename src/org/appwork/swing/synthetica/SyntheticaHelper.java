@@ -33,16 +33,23 @@
  * ==================================================================================================================================================== */
 package org.appwork.swing.synthetica;
 
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.Window;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
 
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JWindow;
 import javax.swing.UIManager;
+import javax.swing.plaf.synth.ColorType;
+import javax.swing.plaf.synth.SynthContext;
+import javax.swing.plaf.synth.SynthUI;
 
 import org.appwork.exceptions.WTFException;
 import org.appwork.loggingv3.LogV3;
@@ -279,5 +286,42 @@ public class SyntheticaHelper {
             }
         }
         return false;
+    }
+
+    /**
+     * @param jButton
+     * @return
+     */
+    public static Color getTextForeGroundForComponent(JComponent comp) {
+        Method getUI;
+        try {
+            getUI = comp.getClass().getMethod("getUI", new Class[] {});
+        } catch (NoSuchMethodException e) {
+            throw new WTFException(e);
+        } catch (SecurityException e) {
+            throw new WTFException(e);
+        }
+        if (getUI == null) {
+            return null;
+        }
+        SynthUI ui;
+        try {
+            ui = (SynthUI) getUI.invoke(comp, new Object[] {});
+        } catch (IllegalAccessException e) {
+            throw new WTFException(e);
+        } catch (IllegalArgumentException e) {
+            throw new WTFException(e);
+        } catch (InvocationTargetException e) {
+            throw new WTFException(e);
+        }
+        SynthContext context = ui.getContext(comp);
+        Color ret = context.getStyle().getColor(context, ColorType.TEXT_FOREGROUND);
+        if (ret == null) {
+            ret = context.getStyle().getColor(context, ColorType.FOREGROUND);
+        }
+        if (ret == null) {
+            return comp.getForeground();
+        }
+        return ret;
     }
 }

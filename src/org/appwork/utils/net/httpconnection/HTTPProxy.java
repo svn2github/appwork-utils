@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import org.appwork.storage.config.annotations.LabelInterface;
 import org.appwork.utils.IO;
 import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
@@ -47,13 +48,49 @@ import org.appwork.utils.locale._AWU;
 import org.appwork.utils.processes.ProcessBuilderFactory;
 
 public class HTTPProxy {
-    public static enum TYPE {
-        NONE,
-        DIRECT,
-        SOCKS4,
-        SOCKS5,
-        HTTP,
-        HTTPS
+    public static enum TYPE implements LabelInterface {
+        NONE {
+            @Override
+            public String getLabel() {
+                return _AWU.T.proxy_type_none();
+            }
+        },
+        DIRECT {
+            @Override
+            public String getLabel() {
+                return _AWU.T.proxy_type_direct();
+            }
+        },
+        HTTP {
+            @Override
+            public String getLabel() {
+                return _AWU.T.proxy_type_http();
+            }
+        },
+        HTTPS {
+            @Override
+            public String getLabel() {
+                return _AWU.T.proxy_type_https();
+            }
+        },
+        SOCKS4 {
+            @Override
+            public String getLabel() {
+                return _AWU.T.proxy_type_socks4();
+            }
+        },
+        SOCKS5 {
+            @Override
+            public String getLabel() {
+                return _AWU.T.proxy_type_socks5();
+            }
+        },
+        AUTO {
+            @Override
+            public String getLabel() {
+                return _AWU.T.proxy_type_auto_detect();
+            }
+        };
     }
 
     public static final HTTPProxy NONE = new HTTPProxy(TYPE.NONE) {
@@ -213,6 +250,11 @@ public class HTTPProxy {
             return null;
         }
         final HTTPProxyStorable ret = new HTTPProxyStorable();
+        fillProxyStorable(proxy, ret);
+        return ret;
+    }
+
+    public static void fillProxyStorable(final HTTPProxy proxy, final HTTPProxyStorable ret) {
         switch (proxy.getType()) {
         case NONE:
             ret.setType(HTTPProxyStorable.TYPE.NONE);
@@ -245,7 +287,6 @@ public class HTTPProxy {
         ret.setPort(proxy.getPort());
         ret.setPassword(proxy.getPass());
         ret.setUsername(proxy.getUser());
-        return ret;
     }
 
     /**
@@ -623,7 +664,33 @@ public class HTTPProxy {
 
     @Override
     public String toString() {
-        return this._toString();
+        String host = this.getHost();
+        if (StringUtils.isNotEmpty(user)) {
+            host = user + ":" + (StringUtils.isEmpty(pass) ? "-" : "*****") + "@" + this.getHost();
+        }
+        if (this.type == TYPE.NONE) {
+            return _AWU.T.proxy_none();
+        } else if (this.type == TYPE.DIRECT) {
+            return _AWU.T.proxy_direct(getLocal());
+        } else if (this.type == TYPE.HTTP) {
+            String ret = _AWU.T.proxy_http(host, this.getPort());
+            if (this.isPreferNativeImplementation()) {
+                ret = ret + "(prefer native)";
+            }
+            return ret;
+        } else if (this.type == TYPE.HTTPS) {
+            String ret = _AWU.T.proxy_https(host, this.getPort());
+            if (this.isPreferNativeImplementation()) {
+                ret = ret + "(prefer native)";
+            }
+            return ret;
+        } else if (this.type == TYPE.SOCKS5) {
+            return _AWU.T.proxy_socks5(host, this.getPort());
+        } else if (this.type == TYPE.SOCKS4) {
+            return _AWU.T.proxy_socks4(host, this.getPort());
+        } else {
+            return "UNKNOWN";
+        }
     }
 
     /**

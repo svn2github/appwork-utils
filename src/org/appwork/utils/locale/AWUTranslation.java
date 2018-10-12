@@ -458,4 +458,31 @@ public interface AWUTranslation extends TranslateInterface {
 
     @Default(lngs = { "en", "de" }, values = { "Debug- & Developer Menu", "Debug- & Entwicklermenü" })
     String debug_menu();
+
+    @Default(lngs = { "en", "de" }, values = { "Direct Gateway Connection", "Direkte Gateway Verbindung" })
+    String proxy_type_direct();
+
+    @Default(lngs = { "en", "de" }, values = { "Direct Connection", "Direkte Verbindung" })
+    String proxy_type_none();
+
+    @Default(lngs = { "en", "de" }, values = { "HTTPS(SSL) Proxy", "HTTPS(SSL) Proxy" })
+    String proxy_type_https();
+
+    @Default(lngs = { "en", "de" }, values = { "HTTP Proxy", "HTTP Proxy" })
+    String proxy_type_http();
+
+    @Default(lngs = { "en", "de" }, values = { "Socks5 Proxy", "Socks5 Proxy" })
+    String proxy_type_socks5();
+
+    @Default(lngs = { "en", "de" }, values = { "Socks4 Proxy", "Socks4 Proxy" })
+    String proxy_type_socks4();
+
+    @Default(lngs = { "en", "de" }, values = { "HTTP", "Socks4 Proxy" })
+    String ProxyDialog_https();
+
+    @Default(lngs = { "en", "de" }, values = { "Auto-detect Proxy (Proxy PAC Script)", "Automatische Erkennung (z.B. Proxy PAC Script)" })
+    String proxy_type_auto_detect();
+
+    @Default(lngs = { "en", "de" }, values = { "Port", "Port" })
+    String ProxyDialog_port_help();
 }

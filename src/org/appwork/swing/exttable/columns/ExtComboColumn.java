@@ -129,6 +129,26 @@ public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> impl
     /*
      * (non-Javadoc)
      *
+     * @see org.appwork.swing.exttable.ExtColumn#adjustWidth(int)
+     */
+    @Override
+    protected int adjustWidth(int w) {
+        // TODO Auto-generated method stub
+        return Math.max(w, getEstimatedPopupDimensions().width);
+    }
+
+    /**
+     * @return
+     */
+    protected Dimension getEstimatedPopupDimensions() {
+        JPopupMenu opup = createPopupMenu();
+        fillPopup(opup, null, dataModel.getElementAt(0), dataModel);
+        return opup.getPreferredSize();
+    }
+
+    /*
+     * (non-Javadoc)
+     *
      * @see org.appwork.swing.exttable.columns.ExtTextColumn#createEditorPanel()
      */
     @Override
@@ -304,16 +324,18 @@ public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> impl
         for (int i = 0; i < dm.getSize(); i++) {
             final ModelType o = dm.getElementAt(i);
             final JComponent bt = getPopupElement(o, selected.equals(o), value);
-            if (bt instanceof AbstractButton) {
-                ((AbstractButton) bt).addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(final ActionEvent e) {
-                        setValue(o, value);
-                        popup.setVisible(false);
-                    }
-                });
+            if (bt != null) {
+                if (bt instanceof AbstractButton) {
+                    ((AbstractButton) bt).addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(final ActionEvent e) {
+                            setValue(o, value);
+                            popup.setVisible(false);
+                        }
+                    });
+                }
+                popup.add(bt);
             }
-            popup.add(bt);
         }
     }
 

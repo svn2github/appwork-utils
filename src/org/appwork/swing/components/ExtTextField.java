@@ -55,7 +55,7 @@ public class ExtTextField extends JTextField implements CaretListener, FocusList
     /**
      *
      */
-    private static final long serialVersionUID     = -3625278218179478516L;
+    private static final long serialVersionUID = -3625278218179478516L;
     protected Color           defaultColor;
     protected Color           helpColor;
     {
@@ -68,10 +68,11 @@ public class ExtTextField extends JTextField implements CaretListener, FocusList
         }
         this.getDocument().addDocumentListener(this);
     }
-    protected String          helpText             = null;
-    private boolean           setting;
-    private boolean           clearHelpTextOnFocus = true;
-    private boolean           helperEnabled        = true;
+    protected String helpText             = null;
+    private boolean  setting;
+    private boolean  clearHelpTextOnFocus = true;
+    private boolean  helperEnabled        = true;
+    private String   textSetBySetText;
 
     public void caretUpdate(final CaretEvent arg0) {
     }
@@ -259,6 +260,7 @@ public class ExtTextField extends JTextField implements CaretListener, FocusList
             if (StringUtils.equals(t == null ? "" : t, getText())) {
                 return;
             }
+            textSetBySetText = t;
             super.setText(t);
             return;
         }
@@ -271,6 +273,7 @@ public class ExtTextField extends JTextField implements CaretListener, FocusList
                 if (StringUtils.equals(t == null ? "" : t, super.getText())) {
                     return;
                 }
+                textSetBySetText = t;
                 super.setText(t);
                 if (this.helpText != null) {
                     if (this.helpText.equals(t)) {
@@ -284,5 +287,18 @@ public class ExtTextField extends JTextField implements CaretListener, FocusList
                 this.onChanged();
             }
         }
+    }
+
+    public String getTextSetBySetText() {
+        return textSetBySetText;
+    }
+
+    /**
+     * can be used to check if the text got changed for example by typing
+     * 
+     * @return
+     */
+    public boolean isUnchangedSetText() {
+        return StringUtils.equals(textSetBySetText, getText());
     }
 }

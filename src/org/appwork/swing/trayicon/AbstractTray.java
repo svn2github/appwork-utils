@@ -41,7 +41,6 @@ public abstract class AbstractTray implements MouseListener, MouseMotionListener
     protected BasicAction[]                             actions;
     private DelayedRunnable                             doubleclickDelayer;
     private Runnable                                    executeSingleClick;
-    private long                                        pressedTime;
     private boolean                                     debugMenuEnabled;
 
     public AbstractTray(BasicAction... basicActions) {
@@ -232,6 +231,15 @@ public abstract class AbstractTray implements MouseListener, MouseMotionListener
                     }
                 }
             }
+            // if the tray icon is more left than the left edge of the popup, enlarge the popup
+            try {
+                int betterX = Math.min(position.x, ma.getEstimatedTopLeft().x);
+                if (betterX < position.x) {
+                    jpopup.setPreferredSize(new Dimension(ps.width + position.x - betterX, ps.height));
+                }
+            } catch (Throwable e2) {
+                // may throw exceptions
+            }
             if (position != null) {
                 AbstractTray.this.jpopup.show(position.x, position.y);
             }
@@ -256,7 +264,6 @@ public abstract class AbstractTray implements MouseListener, MouseMotionListener
 
     @Override
     public void mousePressed(MouseEvent e) {
-        pressedTime = System.currentTimeMillis();
     }
 
     protected TrayIconPopup createMenu(MouseEvent e) {
@@ -333,9 +340,6 @@ public abstract class AbstractTray implements MouseListener, MouseMotionListener
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        long pressDuration = System.currentTimeMillis() - pressedTime;
-        System.out.println(pressDuration);
-        System.out.println(1);
         // if (e.isPopupTrigger()) {
         // Dimension ps = jpopup.getPreferredSize();
         //

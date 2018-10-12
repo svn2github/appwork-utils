@@ -33,6 +33,8 @@
  * ==================================================================================================================================================== */
 package org.appwork.loggingv3.simple;
 
+import java.util.logging.LogRecord;
+
 import org.appwork.loggingv3.AbstractLogger;
 import org.appwork.utils.logging2.LogInterface;
 
@@ -66,6 +68,18 @@ public class LogRecord2 {
         this.message = msg;
         thread = Thread.currentThread();
         timestamp = System.currentTimeMillis();
+        thrownAt = AbstractLogger.getThrownAt();
+    }
+
+    /**
+     * @param logger2
+     * @param record
+     */
+    public LogRecord2(LogInterface logger, LogRecord record) {
+        this.logger = logger;
+        this.message = record.getMessage();
+        thread = Thread.currentThread();
+        timestamp = record.getMillis();
         thrownAt = AbstractLogger.getThrownAt();
     }
 

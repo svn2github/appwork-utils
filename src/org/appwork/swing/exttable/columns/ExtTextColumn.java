@@ -318,6 +318,7 @@ public abstract class ExtTextColumn<E> extends ExtColumn<E> implements ActionLis
              *
              * we also check for oppositeComponent to stopEditing when we click outside the window
              */
+            // do not save edits on focus lost.
             setNoSet(true);
             try {
                 ExtTextColumn.this.stopCellEditing();

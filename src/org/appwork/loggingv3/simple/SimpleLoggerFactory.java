@@ -76,6 +76,25 @@ public class SimpleLoggerFactory implements LogV3Factory, SinkProvider {
     protected LogToStdOutSink sinkToConsole;
 
     public SimpleLoggerFactory() {
+        // Logger rootLogger = Logger.getLogger("");
+        // rootLogger.setLevel(Level.ALL);
+        //
+        // rootLogger.addHandler(new Handler() {
+        // @Override
+        // public void publish(LogRecord record) {
+        // SimpleLoggerFactory.this.publish(new LogRecord2(getLogger(record.getLoggerName()), record));
+        // }
+        //
+        // @Override
+        // public void flush() {
+        // // TODO Auto-generated method stub
+        // }
+        //
+        // @Override
+        // public void close() throws SecurityException {
+        // // TODO Auto-generated method stub
+        // }
+        // });
     }
 
     public void initDefaults() {

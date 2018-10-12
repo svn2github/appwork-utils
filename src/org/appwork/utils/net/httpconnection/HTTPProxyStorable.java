@@ -35,19 +35,57 @@ package org.appwork.utils.net.httpconnection;
 
 import org.appwork.storage.JSonStorage;
 import org.appwork.storage.Storable;
+import org.appwork.storage.config.annotations.LabelInterface;
+import org.appwork.utils.locale._AWU;
 
 /**
  * @author daniel {"password":null,"address":null,"connectMethodPrefered":false,"port"
  *         :-1,"type":null,"preferNativeImplementation":false,"username":null}
  */
 public class HTTPProxyStorable implements Storable {
-    public static enum TYPE {
-        NONE,
-        DIRECT,
-        SOCKS4,
-        SOCKS5,
-        HTTP,
-        HTTPS
+    public static enum TYPE implements LabelInterface {
+        NONE {
+            @Override
+            public String getLabel() {
+                return _AWU.T.proxy_type_none();
+            }
+        },
+        DIRECT {
+            @Override
+            public String getLabel() {
+                return _AWU.T.proxy_type_direct();
+            }
+        },
+        SOCKS4 {
+            @Override
+            public String getLabel() {
+                return _AWU.T.proxy_type_socks4();
+            }
+        },
+        SOCKS5 {
+            @Override
+            public String getLabel() {
+                return _AWU.T.proxy_type_socks5();
+            }
+        },
+        HTTP {
+            @Override
+            public String getLabel() {
+                return _AWU.T.proxy_type_http();
+            }
+        },
+        HTTPS {
+            @Override
+            public String getLabel() {
+                return _AWU.T.proxy_type_https();
+            }
+        },
+        AUTO {
+            @Override
+            public String getLabel() {
+                return _AWU.T.proxy_type_auto_detect();
+            }
+        };
     }
 
     private String  username                   = null;

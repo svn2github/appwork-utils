@@ -76,64 +76,64 @@ public class StringUtils {
      * taken from http://stackoverflow.com/questions/4731055/whitespace-matching-regex-java
      */
     final private static String whitespace_chars = "[" /*
-     * dummy empty string for homogeneity
-     */
-                                                         + "\\u0009" // CHARACTER
-                                                         // TABULATION
-                                                         + "\\u000A" // LINE
-                                                         // FEED
-                                                         // (LF)
-                                                         + "\\u000B" // LINE
-                                                         // TABULATION
-                                                         + "\\u000C" // FORM
-                                                         // FEED
-                                                         // (FF)
-                                                         + "\\u000D" // CARRIAGE
-                                                         // RETURN
-                                                         // (CR)
-                                                         + "\\u0020" // SPACE
-                                                         + "\\u0085" // NEXT
-                                                         // LINE
-                                                         // (NEL)
-                                                         + "\\u00A0" // NO-BREAK
-                                                         // SPACE
-                                                         + "\\u1680" // OGHAM
-                                                         // SPACE
-                                                         // MARK
-                                                         + "\\u180E" // MONGOLIAN
-                                                         // VOWEL
-                                                         // SEPARATOR
-                                                         + "\\u2000" // EN QUAD
-                                                         + "\\u2001" // EM QUAD
-                                                         + "\\u2002" // EN SPACE
-                                                         + "\\u2003" // EM SPACE
-                                                         + "\\u2004" // THREE-PER-EM
-                                                         // SPACE
-                                                         + "\\u2005" // FOUR-PER-EM
-                                                         // SPACE
-                                                         + "\\u2006" // SIX-PER-EM
-                                                         // SPACE
-                                                         + "\\u2007" // FIGURE
-                                                         // SPACE
-                                                         + "\\u2008" // PUNCTUATION
-                                                         // SPACE
-                                                         + "\\u2009" // THIN
-                                                         // SPACE
-                                                         + "\\u200A" // HAIR
-                                                         // SPACE
-                                                         + "\\u2028" // LINE
-                                                         // SEPARATOR
-                                                         + "\\u2029" // PARAGRAPH
-                                                         // SEPARATOR
-                                                         + "\\u202F" // NARROW
-                                                         // NO-BREAK
-                                                         // SPACE
-                                                         + "\\u205F" // MEDIUM
-                                                         // MATHEMATICAL
-                                                         // SPACE
-                                                         + "\\u3000" // IDEOGRAPHIC
-                                                         // SPACE
-                                                         + "]";
+                                                        * dummy empty string for homogeneity
+                                                        */
+            + "\\u0009" // CHARACTER
+            // TABULATION
+            + "\\u000A" // LINE
+            // FEED
+            // (LF)
+            + "\\u000B" // LINE
+            // TABULATION
+            + "\\u000C" // FORM
+            // FEED
+            // (FF)
+            + "\\u000D" // CARRIAGE
+            // RETURN
+            // (CR)
+            + "\\u0020" // SPACE
+            + "\\u0085" // NEXT
+            // LINE
+            // (NEL)
+            + "\\u00A0" // NO-BREAK
+            // SPACE
+            + "\\u1680" // OGHAM
+            // SPACE
+            // MARK
+            + "\\u180E" // MONGOLIAN
+            // VOWEL
+            // SEPARATOR
+            + "\\u2000" // EN QUAD
+            + "\\u2001" // EM QUAD
+            + "\\u2002" // EN SPACE
+            + "\\u2003" // EM SPACE
+            + "\\u2004" // THREE-PER-EM
+            // SPACE
+            + "\\u2005" // FOUR-PER-EM
+            // SPACE
+            + "\\u2006" // SIX-PER-EM
+            // SPACE
+            + "\\u2007" // FIGURE
+            // SPACE
+            + "\\u2008" // PUNCTUATION
+            // SPACE
+            + "\\u2009" // THIN
+            // SPACE
+            + "\\u200A" // HAIR
+            // SPACE
+            + "\\u2028" // LINE
+            // SEPARATOR
+            + "\\u2029" // PARAGRAPH
+            // SEPARATOR
+            + "\\u202F" // NARROW
+            // NO-BREAK
+            // SPACE
+            + "\\u205F" // MEDIUM
+            // MATHEMATICAL
+            // SPACE
+            + "\\u3000" // IDEOGRAPHIC
+            // SPACE
+            + "]";
 
     public static String trim(String input) {
         if (input != null) {
@@ -208,14 +208,24 @@ public class StringUtils {
         return pass.equalsIgnoreCase(pass2);
     }
 
+    private static String EMPTY_SPACE_STRING = "                                                                                                                                                                                                                                                             ";
+
     public static String fillPre(final String string, final String filler, final int minCount) {
         if (string.length() >= minCount) {
             return string;
         }
         final StringBuilder sb = new StringBuilder();
-        sb.append(string);
-        while (sb.length() < minCount) {
-            sb.insert(0, filler);
+        int missing = minCount - string.length();
+        // the EMPTY_SPACE_STRING approach was 30% faster in my usercase (SimpleFormater(
+        if (" ".equals(filler) && missing <= EMPTY_SPACE_STRING.length()) {
+            sb.append(EMPTY_SPACE_STRING.substring(0, missing));
+            sb.append(string);
+        } else {
+            missing = missing / filler.length() + (missing % filler.length() == 0 ? 0 : 1);
+            for (int i = 0; i < missing; i++) {
+                sb.append(filler);
+            }
+            sb.append(string);
         }
         return sb.toString();
     }
@@ -225,11 +235,18 @@ public class StringUtils {
             return string;
         }
         final StringBuilder sb = new StringBuilder();
-        sb.append(string);
-        while (sb.length() < minCount) {
-            sb.append(filler);
+        int missing = minCount - string.length();
+        if (" ".equals(filler) && missing <= EMPTY_SPACE_STRING.length()) {
+            sb.append(string);
+            sb.append(EMPTY_SPACE_STRING.substring(0, missing));
+            return sb.toString();
+        } else {
+            sb.append(string);
+            while (sb.length() < minCount) {
+                sb.append(filler);
+            }
+            return sb.toString();
         }
-        return sb.toString();
     }
 
     /**
@@ -378,5 +395,21 @@ public class StringUtils {
         } else {
             return text.replaceAll(regex, replacement);
         }
+    }
+
+    /**
+     * @param defaultMessage
+     * @param i
+     * @param string
+     * @return
+     */
+    public static String abr(String defaultMessage, int max, String postfox) {
+        if (defaultMessage == null) {
+            return null;
+        }
+        if (defaultMessage.length() <= max) {
+            return defaultMessage;
+        }
+        return defaultMessage.substring(0, max) + postfox;
     }
 }

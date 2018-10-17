@@ -23,14 +23,25 @@ public class ContinuesFileLineReader {
     protected FileInputStream br;
     private LineHandler       sink;
 
+    protected void setSink(LineHandler sink) {
+        this.sink = sink;
+    }
+
     public ContinuesFileLineReader(LineHandler sink, String path) {
         this.file = new File(path);
         this.sink = sink;
     }
 
+    public ContinuesFileLineReader(String path) {
+        this.file = new File(path);
+    }
+
     private volatile IOException exceptionIOException;
 
     public synchronized ContinuesFileLineReader run() {
+        if (sink == null) {
+            throw new IllegalStateException("Sink missing");
+        }
         this.thread = new Thread("Read " + this.file) {
             private Charset charSet = Charset.forName("UTF-8");
 

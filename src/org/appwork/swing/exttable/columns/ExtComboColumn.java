@@ -62,7 +62,7 @@ public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> impl
      */
     public static class RendererPanel extends RendererMigPanel {
         private boolean editable = false;
-        private Icon    downIcon;;
+        private Icon    downIcon;         ;
 
         /**
          * @param downIcon
@@ -108,11 +108,11 @@ public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> impl
         }
     }
 
-    private static final long        serialVersionUID = 2114805529462086691L;
-    private ComboBoxModel<ModelType> dataModel;
-    protected RendererPanel          rendererPanel;
-    private Icon                     iconDown;
-    private Icon                     iconUp;
+    private static final long              serialVersionUID = 2114805529462086691L;
+    private final ComboBoxModel<ModelType> dataModel;
+    protected RendererPanel                rendererPanel;
+    private Icon                           iconDown;
+    private Icon                           iconUp;
 
     public ExtComboColumn(final String name, final ComboBoxModel<ModelType> model) {
         this(name, null, model);
@@ -133,17 +133,25 @@ public abstract class ExtComboColumn<E, ModelType> extends ExtTextColumn<E> impl
      */
     @Override
     protected int adjustWidth(int w) {
-        // TODO Auto-generated method stub
-        return Math.max(w, getEstimatedPopupDimensions().width);
+        final Dimension estimated = getEstimatedPopupDimensions();
+        if (estimated == null) {
+            return w;
+        } else {
+            return Math.max(w, estimated.width);
+        }
     }
 
     /**
      * @return
      */
     protected Dimension getEstimatedPopupDimensions() {
-        JPopupMenu opup = createPopupMenu();
-        fillPopup(opup, null, dataModel.getElementAt(0), dataModel);
-        return opup.getPreferredSize();
+        if (dataModel != null && dataModel.getSize() > 0) {
+            final JPopupMenu opup = createPopupMenu();
+            fillPopup(opup, null, dataModel.getElementAt(0), dataModel);
+            return opup.getPreferredSize();
+        } else {
+            return null;
+        }
     }
 
     /*

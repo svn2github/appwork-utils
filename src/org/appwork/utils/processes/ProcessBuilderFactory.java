@@ -42,9 +42,9 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.appwork.loggingv3.LogV3;
 import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
-import org.appwork.loggingv3.LogV3;
 import org.appwork.utils.os.CrossSystem;
 
 public class ProcessBuilderFactory {
@@ -183,22 +183,22 @@ public class ProcessBuilderFactory {
             reader2.start();
             // System.out.println("Wait for Process");
             final int returnCode = process.waitFor();
-            // System.out.println("Process returned: " + returnCode);
-            if (reader1.isAlive()) {
-                // System.out.println("Wait for Process-Reader-Std");
-                reader1.join(5000);
-                if (reader1.isAlive()) {
-                    // System.out.println("Process-Reader-Std still alive!");
-                    reader1.interrupt();
-                }
+            System.out.println("Process returned: " + returnCode);
+            while (reader1.isAlive()) {
+                System.out.println("Wait for Process-Reader-Std");
+                reader1.join(10000);
+                // if (reader1.isAlive()) {
+                // System.out.println("Process-Reader-Std still alive!");
+                // reader1.interrupt();
+                // }
             }
-            if (reader2.isAlive()) {
-                // System.out.println("Wait fo Process-Reader-Error");
-                reader2.join(5000);
-                if (reader2.isAlive()) {
-                    // System.out.println("Process-Reader-Error still alive!");
-                    reader2.interrupt();
-                }
+            while (reader2.isAlive()) {
+                System.out.println("Wait fo Process-Reader-Error");
+                reader2.join(10000);
+                // if (reader2.isAlive()) {
+                // // System.out.println("Process-Reader-Error still alive!");
+                // reader2.interrupt();
+                // }
             }
             return returnCode;
         } finally {

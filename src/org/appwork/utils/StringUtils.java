@@ -214,7 +214,7 @@ public class StringUtils {
         if (string.length() >= minCount) {
             return string;
         }
-        final StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder(minCount);
         int missing = minCount - string.length();
         // the EMPTY_SPACE_STRING approach was 30% faster in my usercase (SimpleFormater(
         if (" ".equals(filler) && missing <= EMPTY_SPACE_STRING.length()) {
@@ -234,7 +234,7 @@ public class StringUtils {
         if (string.length() >= minCount) {
             return string;
         }
-        final StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder(minCount);
         int missing = minCount - string.length();
         if (" ".equals(filler) && missing <= EMPTY_SPACE_STRING.length()) {
             sb.append(string);

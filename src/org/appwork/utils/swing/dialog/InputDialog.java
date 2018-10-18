@@ -81,7 +81,7 @@ public class InputDialog extends AbstractDialog<String> implements KeyListener, 
 
     public InputDialog(final int flag, final String title, final String message, final String defaultMessage, final Icon icon, final String okOption, final String cancelOption) {
         super(flag, title, icon, okOption, cancelOption);
-        org.appwork.loggingv3.LogV3.fine("Dialog    [" + okOption + "][" + cancelOption + "]\r\nflag:  " + Integer.toBinaryString(flag) + "\r\ntitle: " + title + "\r\nmsg:   \r\n" + message + "\r\ndef:   \r\n" + defaultMessage);
+        org.appwork.loggingv3.LogV3.fine("Dialog    [" + okOption + "][" + cancelOption + "]\r\nflag:  " + Integer.toBinaryString(flag) + "\r\ntitle: " + title + "\r\nmsg:   \r\n" + message + "\r\ndef:   \r\n" + StringUtils.abr(defaultMessage, 50, "[...]"));
         this.defaultMessage = defaultMessage;
         this.message = message;
     }

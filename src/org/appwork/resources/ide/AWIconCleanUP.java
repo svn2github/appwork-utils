@@ -42,21 +42,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
 
-import org.appwork.app.gui.copycutpaste.CutCopyPasteIcon;
 import org.appwork.exceptions.WTFException;
-import org.appwork.resources.AWIcon;
 import org.appwork.resources.IconRef;
-import org.appwork.swing.components.HeadlessCheckboxIconRef;
-import org.appwork.swing.exttable.ExtTableIcon;
-import org.appwork.swing.trayicon.TrayIconRef;
 import org.appwork.utils.FileHandler;
 import org.appwork.utils.Files;
 import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.ide.IDEUtils;
 import org.appwork.utils.os.CrossSystem;
-import org.appwork.utils.swing.dialog.DialogIcon;
-import org.appwork.utils.swing.dialog.ExtFileChooserDialogIcon;
 
 /**
  * @author thomas
@@ -64,24 +57,21 @@ import org.appwork.utils.swing.dialog.ExtFileChooserDialogIcon;
  *
  */
 public class AWIconCleanUP {
-    public static void main(String[] args) throws ClassNotFoundException {
-        cleanup("themes/themes/standard/org/appwork/images", ExtFileChooserDialogIcon.class, TrayIconRef.class, AWIcon.class, CutCopyPasteIcon.class, ExtTableIcon.class, DialogIcon.class, HeadlessCheckboxIconRef.class, HeadlessCheckboxIconRef.class);
-    }
-
     /**
+     * @param string
      * @param clazz
      * @param class1
      * @param string
      * @throws ClassNotFoundException
      */
-    public static void cleanup(String rel, Class<? extends IconRef>... classes) throws ClassNotFoundException {
+    public static void cleanup(final String setup, final String global, Class<? extends IconRef>... classes) throws ClassNotFoundException {
         File project = IDEUtils.getProjectFolder(Class.forName(new Exception().getStackTrace()[1].getClassName()));
-        final File themesFolder = new File(project, rel);
         final HashSet<String> icons = new HashSet<String>();
         HashMap<String, Collection<Class<? extends IconRef>>> clsMap = new HashMap<String, Collection<Class<? extends IconRef>>>();
         for (Class<? extends IconRef> cl : classes) {
             for (IconRef e : cl.getEnumConstants()) {
                 icons.add(e.path());
+                System.out.println(cl.getSimpleName() + "." + e + " - " + e.path());
                 Collection<Class<? extends IconRef>> ls = clsMap.get(e.path());
                 if (ls == null) {
                     ls = new HashSet<Class<? extends IconRef>>();
@@ -91,14 +81,23 @@ public class AWIconCleanUP {
             }
         }
         for (String icon : icons) {
-            File png = new File(themesFolder, icon + ".png");
-            File svg = new File(themesFolder, icon + ".svg");
-            if (!CrossSystem.caseSensitiveFileExists(png) && !CrossSystem.caseSensitiveFileExists(svg)) {
-                System.err.println("Missing: " + png + " " + clsMap.get(icon));
+            File pngThemes = new File(new File(project, setup), icon + ".png");
+            File svgThemes = new File(new File(project, setup), icon + ".svg");
+            File pngglobal = new File(new File(project, global), icon + ".png");
+            File svgglobal = new File(new File(project, global), icon + ".svg");
+            if (!CrossSystem.caseSensitiveFileExists(pngglobal) && !CrossSystem.caseSensitiveFileExists(svgglobal) && !CrossSystem.caseSensitiveFileExists(pngThemes) && !CrossSystem.caseSensitiveFileExists(svgThemes)) {
+                System.err.println("Missing Icon!: " + icon + " " + clsMap.get(icon));
             }
-            System.out.println("Expected icons: " + icon);
+            System.out.println("OK icon: " + icon);
         }
-        ;
+        findUnused(icons, new File(project, setup));
+    }
+
+    /**
+     * @param icons
+     * @param file
+     */
+    private static void findUnused(final HashSet<String> icons, final File root) {
         org.appwork.utils.Files.walkThroughStructure(new FileHandler<RuntimeException>() {
             @Override
             public void intro(File f) throws RuntimeException {
@@ -107,7 +106,7 @@ public class AWIconCleanUP {
 
             @Override
             public boolean onFile(File f, int depths) throws RuntimeException {
-                String rel = Files.getRelativePath(themesFolder, f);
+                String rel = Files.getRelativePath(root, f);
                 rel = rel.replace("\\", "/");
                 if (StringUtils.isNotEmpty(rel) && (rel.endsWith(".svg") || rel.endsWith(".png"))) {
                     rel = rel.replaceAll("\\.(png|svg)$", "");
@@ -122,7 +121,7 @@ public class AWIconCleanUP {
             public void outro(File f) throws RuntimeException {
                 // TODO Auto-generated method stub
             }
-        }, themesFolder);
+        }, root);
     }
 
     /**

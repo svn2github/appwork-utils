@@ -31,18 +31,11 @@
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
-package org.appwork.utils.swing.dialog;
-
-import java.awt.Window;
+package org.appwork.uio;
 
 /**
  * @author Thomas
  *
  */
-public interface OwnerFinder {
-    /**
-     * @param windowStack
-     * @return
-     */
-    Window findDialogOwner(AbstractDialog<?> dialogModel, WindowStack windowStack);
+public interface SliderDialogInterface extends ConfirmDialogInterface {
 }

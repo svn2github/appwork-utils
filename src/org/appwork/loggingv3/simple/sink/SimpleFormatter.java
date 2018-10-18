@@ -59,12 +59,12 @@ public class SimpleFormatter implements Formatter {
         private int i;
     }
 
-    private IntByReference threadID              = new IntByReference(3);
-    private IntByReference threadName            = new IntByReference(5);
-    private IntByReference timestamp             = new IntByReference(5);
-    private IntByReference thrownAt              = new IntByReference(5);
     private int            maxThreadNameLength   = 30;
     private int            maxSourceStringLength = 90;
+    private IntByReference threadID              = new IntByReference(3);
+    private IntByReference threadName            = new IntByReference(maxThreadNameLength + 3);
+    private IntByReference timestamp             = new IntByReference(5);
+    private IntByReference thrownAt              = new IntByReference(maxSourceStringLength + 3);
 
     /*
      * (non-Javadoc)
@@ -73,6 +73,7 @@ public class SimpleFormatter implements Formatter {
      */
     @Override
     public String format(LogRecord2 record) {
+        // long t = System.currentTimeMillis();
         String message = record.message == null ? "" : record.message;
         StackTraceElement source = record.getThrownAt();
         String sourceString = source.getClassName();
@@ -89,6 +90,7 @@ public class SimpleFormatter implements Formatter {
         int line = 0;
         int preLength = pre.length();
         String[] lines = message.split("[\r\n]+");
+        // TODO: This is pretty slow for MANY lines
         for (String s : lines) {
             if (s.trim().length() > 0) {
                 if (line == 0) {
@@ -99,6 +101,7 @@ public class SimpleFormatter implements Formatter {
                 line++;
             }
         }
+        // System.out.println(System.currentTimeMillis() - t);
         return pre;
     }
 
@@ -126,17 +129,9 @@ public class SimpleFormatter implements Formatter {
      * @param i
      * @return
      */
-    private static String fillPre(String string, String filler, int i) {
+    private static String fillPre(String string, String filler, int minCount) {
         string = string == null ? "null" : string;
-        if (string.length() == i) {
-            return string;
-        }
-        final StringBuilder sb = new StringBuilder();
-        sb.append(string);
-        while (sb.length() < i) {
-            sb.insert(0, filler);
-        }
-        return sb.toString();
+        return StringUtils.fillPre(string, filler, minCount);
     }
 
     public static String fillPost(String string, final String filler, IntByReference max) {
@@ -145,11 +140,6 @@ public class SimpleFormatter implements Formatter {
         if (string.length() == max.i) {
             return string;
         }
-        final StringBuilder sb = new StringBuilder();
-        sb.append(string);
-        while (sb.length() < max.i) {
-            sb.append(filler);
-        }
-        return sb.toString();
+        return StringUtils.fillPost(string, filler, max.i);
     }
 }

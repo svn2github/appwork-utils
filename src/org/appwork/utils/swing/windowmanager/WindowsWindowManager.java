@@ -342,6 +342,9 @@ public class WindowsWindowManager extends WindowManager {
      */
     @Override
     public void setVisible(final Window w, final boolean visible, final FrameState state) {
+        if (visible) {
+            getMetaInfo(w).setShown(System.currentTimeMillis());
+        }
         w.removeWindowFocusListener(windowFocusListener);
         w.addWindowFocusListener(windowFocusListener);
         if (w.isVisible() && visible) {

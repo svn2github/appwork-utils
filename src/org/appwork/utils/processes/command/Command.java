@@ -34,10 +34,13 @@
 package org.appwork.utils.processes.command;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.appwork.loggingv3.LogV3;
@@ -55,10 +58,13 @@ public class Command {
     public final ProcessBuilder builder;
     private LineHandler         lineHandler;
     private Process             process;
-    private LineReaderThread    stdReader;
-    private LineReaderThread    errReader;
     private int                 exitCode;
-    private LogInterface        logger;
+
+    public int getExitCode() {
+        return exitCode;
+    }
+
+    private LogInterface logger;
 
     /**
      * @param javaBinary
@@ -69,6 +75,12 @@ public class Command {
     public Command(String... cmds) {
         builder = ProcessBuilderFactory.create(cmds);
         logger = LogV3.logger(this);
+        try {
+            charset = Charset.forName(ProcessBuilderFactory.getConsoleCodepage());
+        } catch (InterruptedException e) {
+            charset = Charset.defaultCharset();
+            Thread.currentThread().interrupt();
+        }
     }
 
     public Command(List<String> cmds) {
@@ -82,15 +94,27 @@ public class Command {
     /**
      * @param lineHandler
      */
-    public void setLineHandler(LineHandler lineHandler) {
+    public Command setLineHandler(LineHandler lineHandler) {
         this.lineHandler = lineHandler;
+        return this;
     }
 
-    private class LineReaderThread extends Thread {
-        private BufferedReader reader;
-        private LineHandler    lineHandler;
-        private InputStream    inputStream;
-        private boolean        processIsDead;
+    private interface AsyncTask {
+        public void waitFor() throws IOException, InterruptedException;
+
+        public void start();
+
+        /**
+         *
+         */
+        public void interrupt();
+    }
+
+    private class LineReaderThread extends Thread implements AsyncTask {
+        private BufferedReader   reader;
+        private LineHandler      lineHandler;
+        private InputStream      inputStream;
+        private volatile boolean processIsDead;
 
         /**
          * @param lh
@@ -103,7 +127,7 @@ public class Command {
             setDaemon(true);
             lineHandler = lh;
             this.inputStream = inputStream;
-            this.reader = new BufferedReader(new InputStreamReader(inputStream, getConsoleCodePage()));
+            this.reader = new BufferedReader(new InputStreamReader(inputStream, getCharset()));
         }
 
         /*
@@ -117,10 +141,13 @@ public class Command {
                 try {
                     String line = reader.readLine();
                     if (line == null) {
-                        Thread.sleep(50);
-                    } else {
-                        lineHandler.handleLine(line, this);
+                        if (processIsDead) {
+                            return;
+                        }
+                        Thread.sleep(100);
+                        continue;
                     }
+                    lineHandler.handleLine(line, this);
                 } catch (IOException e) {
                     if (!processIsDead) {
                         logger.log(e);
@@ -131,62 +158,126 @@ public class Command {
             }
         }
 
+        /*
+         * (non-Javadoc)
+         *
+         * @see java.lang.Thread#interrupt()
+         */
+        @Override
+        public void interrupt() {
+            try {
+                inputStream.close();
+            } catch (IOException e) {
+                logger.exception("Swallowed Exception closeing Command Reader", e);
+            }
+            super.interrupt();
+        }
+
         /**
          * @throws InterruptedException
          * @throws IOException
          *
          */
-        public void waitFor() throws IOException, InterruptedException {
+        public void waitFor() throws InterruptedException {
             processIsDead = true;
-            while (isAlive() && inputStream.available() > 0) {
-                Thread.sleep(50);
+            try {
+                while (isAlive() && inputStream.available() > 0) {
+                    Thread.sleep(50);
+                }
+                interrupt();
+            } catch (IOException e) {
+                logger.exception("Swallowed Exception closeing Command Reader", e);
             }
-            inputStream.close();
         }
     }
 
+    private List<AsyncTask> asyncTasks = new ArrayList<AsyncTask>();
+    private Charset         charset;
+
+    public void setCharset(Charset charset) {
+        this.charset = charset;
+    }
+
     /**
+     * @return
      * @throws IOException
      * @throws InterruptedException
      *
      */
-    public void start(boolean closeOutputStream) throws IOException, InterruptedException {
+    public Command start(boolean closeOutputStream) throws IOException, InterruptedException {
         this.process = builder.start();
         if (closeOutputStream) {
             process.getOutputStream().close();
         }
         LineHandler lh = lineHandler;
         if (lh != null) {
-            stdReader = new LineReaderThread("STD", lh, process.getInputStream());
-            errReader = new LineReaderThread("ERR", lh, process.getErrorStream());
-            stdReader.start();
-            errReader.start();
+            asyncTasks.add(new LineReaderThread("STD", lh, process.getInputStream()));
+            asyncTasks.add(new LineReaderThread("ERR", lh, process.getErrorStream()));
         }
+        for (AsyncTask task : asyncTasks) {
+            task.start();
+        }
+        return this;
     }
 
     /**
-     * @throws InterruptedException
-     *             @throws @return @throws
+     * @throws InterruptedException @throws @return @throws
      */
-    public String getConsoleCodePage() throws InterruptedException {
-        return ProcessBuilderFactory.getConsoleCodepage();
+    public Charset getCharset() {
+        return charset;
     }
 
     /**
+     * @return
      * @throws InterruptedException
      * @throws IOException
      *
      */
-    public void waitFor() throws InterruptedException, IOException {
+    public int waitFor() throws InterruptedException, IOException {
         try {
-            exitCode = process.waitFor();
-        } finally {
-            if (stdReader != null) {
-                stdReader.waitFor();
+            try {
+                exitCode = process.waitFor();
+                return exitCode;
+            } finally {
+                for (AsyncTask task : asyncTasks) {
+                    task.waitFor();
+                }
             }
-            if (errReader != null) {
-                errReader.waitFor();
+        } catch (InterruptedException e) {
+            for (AsyncTask task : asyncTasks) {
+                task.interrupt();
             }
+            throw e;
         }
+    }
+
+    /**
+     * @param parentFile
+     * @return
+     */
+    public Command setDirectory(File directory) {
+        checkRunning();
+        builder.directory(directory);
+        return this;
+    }
+
+    /**
+     *
+     */
+    private void checkRunning() {
+        if (process != null) {
+            throw new IllegalStateException("Process already running. You have to do this  BEFORE calling #start()");
+        }
+    }
+
+    /**
+     * @param string
+     * @param name
+     * @return
+     */
+    public Command putEnvironMent(String key, String value) {
+        checkRunning();
+        builder.environment().put(key, value);
+        return this;
     }
 }

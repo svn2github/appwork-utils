@@ -37,6 +37,7 @@ import java.awt.Frame;
 import java.awt.Window;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
+import java.util.Date;
 import java.util.Map.Entry;
 import java.util.WeakHashMap;
 
@@ -135,17 +136,43 @@ public abstract class WindowManager {
      *
      */
     public static class WindowMetaInfo {
-        protected long lostFocus;
-        protected long gainedFocus;
+        private long lostFocus;
+        private long gainedFocus;
+        private long shown;
+
+        public long getShown() {
+            return shown;
+        }
+
+        public void setShown(long shown) {
+            this.shown = shown;
+        }
+
+        public long getLostFocus() {
+            return lostFocus;
+        }
+
+        public void setLostFocus(long lostFocus) {
+            this.lostFocus = lostFocus;
+        }
+
+        public long getGainedFocus() {
+            return gainedFocus;
+        }
+
+        public void setGainedFocus(long gainedFocus) {
+            this.gainedFocus = gainedFocus;
+        }
     }
 
-    public Window getLatestFocusedWindow() {
+    public Window getLatestWorkingWindow() {
         WindowMetaInfo meta = null;
         Window window = null;
         for (Entry<Window, WindowMetaInfo> es : windowMetaMap.entrySet()) {
             if (es.getKey() != null && es.getKey().isDisplayable()) {
                 WindowMetaInfo value = es.getValue();
-                if (meta == null || meta.gainedFocus < value.gainedFocus) {
+                System.out.println(es.getKey() + " " + new Date(Math.max(value.getShown(), value.gainedFocus)));
+                if (meta == null || Math.max(meta.gainedFocus, meta.getShown()) < Math.max(value.getShown(), value.gainedFocus)) {
                     meta = value;
                     window = es.getKey();
                 }
@@ -167,12 +194,12 @@ public abstract class WindowManager {
         windowFocusListener = new WindowFocusListener() {
             @Override
             public void windowLostFocus(WindowEvent e) {
-                getMetaInfo(e.getWindow()).lostFocus = System.currentTimeMillis();
+                getMetaInfo(e.getWindow()).setLostFocus(System.currentTimeMillis());
             }
 
             @Override
             public void windowGainedFocus(WindowEvent e) {
-                getMetaInfo(e.getWindow()).gainedFocus = System.currentTimeMillis();
+                getMetaInfo(e.getWindow()).setGainedFocus(System.currentTimeMillis());
             }
         };
     }

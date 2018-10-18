@@ -77,6 +77,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import org.appwork.exceptions.WTFException;
+import org.appwork.scheduler.DelayedRunnable;
 import org.appwork.storage.JSonStorage;
 import org.appwork.swing.MigPanel;
 import org.appwork.uio.CloseReason;
@@ -99,7 +100,7 @@ import org.appwork.utils.swing.windowmanager.WindowManager.FrameState;
 
 import net.miginfocom.swing.MigLayout;
 
-public abstract class AbstractDialog<T> implements ActionListener, WindowListener, OKCancelCloseUserIODefinition, WindowFocusListener {
+public abstract class AbstractDialog<T> implements ActionListener, WindowListener, OKCancelCloseUserIODefinition, WindowFocusListener, ComponentListener {
     protected static int                          BUTTON_HEIGHT           = -1;
     public static DialogLocator                   DEFAULT_LOCATOR         = null;
     public static final DialogLocator             LOCATE_CENTER_OF_SCREEN = new CenterOfScreenDialogLocator();
@@ -146,6 +147,33 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
      */
     public static OwnerFinder getGlobalOwnerFinder() {
         return AbstractDialog.OWNER_FINDER;
+    }
+
+    public void componentResized(ComponentEvent e) {
+        if (dimensorSaver != null) {
+            dimensorSaver.resetAndStart();
+        }
+    }
+
+    /**
+     * Invoked when the component's position changes.
+     */
+    public void componentMoved(ComponentEvent e) {
+        if (locatorSaver != null) {
+            locatorSaver.resetAndStart();
+        }
+    }
+
+    /**
+     * Invoked when the component has been made visible.
+     */
+    public void componentShown(ComponentEvent e) {
+    }
+
+    /**
+     * Invoked when the component has been made invisible.
+     */
+    public void componentHidden(ComponentEvent e) {
     }
 
     public static Integer getSessionDontShowAgainValue(final String key) {
@@ -1025,8 +1053,10 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
         return AbstractDialog.getGlobalOwnerFinder().findDialogOwner(this, AbstractDialog.getWindowStackByRoot(this.getDesiredRootFrame()));
     }
 
-    private int preferredHeight = -1;
-    private int preferredWidth  = -1;
+    private int             preferredHeight = -1;
+    private int             preferredWidth  = -1;
+    private DelayedRunnable dimensorSaver;
+    private DelayedRunnable locatorSaver;
 
     /**
      * override this if you want to set a special height
@@ -1288,6 +1318,41 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
             modality = ModalityType.APPLICATION_MODAL;
         }
         this.dialog = new InternDialog<T>(this, modality);
+        if (getDimensor() != null || getLocator() != null) {
+            dialog.addComponentListener(this);
+            if (getDimensor() != null) {
+                dimensorSaver = new DelayedRunnable(1000, 5000) {
+                    @Override
+                    public void delayedrun() {
+                        new EDTRunner() {
+                            @Override
+                            protected void runInEDT() {
+                                DialogDimensor dim = getDimensor();
+                                if (dim != null) {
+                                    dim.onClose(AbstractDialog.this);
+                                }
+                            }
+                        };
+                    }
+                };
+            }
+            if (getLocator() != null) {
+                locatorSaver = new DelayedRunnable(1000, 5000) {
+                    @Override
+                    public void delayedrun() {
+                        new EDTRunner() {
+                            @Override
+                            protected void runInEDT() {
+                                DialogLocator loc = getLocator();
+                                if (loc != null) {
+                                    loc.onClose(AbstractDialog.this);
+                                }
+                            }
+                        };
+                    }
+                };
+            }
+        }
         if (this.preferredSize != null) {
             this.dialog.setPreferredSize(this.preferredSize);
         }

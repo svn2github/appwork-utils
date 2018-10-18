@@ -591,12 +591,13 @@ public class LogToFileSink extends AbstractSink {
     private Object WORK_ON_FOLDERS_AND_FILES_LOCK = new Object();
 
     /**
+     * @param days
      * @return
      * @throws Error
      * @throws IOException
      * @throws InterruptedException
      */
-    public File exportFull() throws IOException, Error, InterruptedException {
+    public File exportFull(long days) throws IOException, Error, InterruptedException {
         synchronized (WORK_ON_FOLDERS_AND_FILES_LOCK) {
             ArrayList<LogFolder> logFolders = getLogFilesOrFolders(false);
             Collections.sort(logFolders, new Comparator<LogFolder>() {
@@ -617,11 +618,14 @@ public class LogToFileSink extends AbstractSink {
             ZipOutputStream zipout = new ZipOutputStream(new FileOutputStream(tmp));
             IOException ioException = null;
             try {
-                zipout.setLevel(9);
+                zipout.setLevel(4);
                 extendExport(zipout);
                 for (LogFolder f : logFolders) {
                     if (Thread.interrupted()) {
                         throw new InterruptedException();
+                    }
+                    if (f.time < days) {
+                        continue;
                     }
                     if (f.path.isFile()) {
                         ZipInputStream zis = new ZipInputStream(new BufferedInputStream(new FileInputStream(f.path)));

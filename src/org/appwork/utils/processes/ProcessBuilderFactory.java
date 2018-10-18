@@ -343,6 +343,8 @@ public class ProcessBuilderFactory {
     public static String getConsoleCodepage() throws InterruptedException {
         if (StringUtils.isEmpty(CONSOLE_CODEPAGE)) {
             switch (CrossSystem.getOSFamily()) {
+            case LINUX:
+                return System.getProperty("file.encoding");
             case WINDOWS:
                 final ProcessBuilder pb = ProcessBuilderFactory.create("cmd", "/c", "chcp");
                 final Process process;

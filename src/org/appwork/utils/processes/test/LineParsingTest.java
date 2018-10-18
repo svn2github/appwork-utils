@@ -38,28 +38,24 @@ import java.io.FileInputStream;
 import java.nio.charset.Charset;
 
 import org.appwork.utils.IO;
-import org.appwork.utils.processes.LineHandler;
-import org.appwork.utils.processes.ProcessOutputLinereadBuffer;
+import org.appwork.utils.net.LineParsingInputStream;
+import org.appwork.utils.net.LineParsingOutputStream;
+import org.appwork.utils.net.NullOutputStream;
 
 /**
  * @author daniel
  * @date 17.10.2018
  *
  */
-public class ProcessOutputLinereadBufferTest {
+public class LineParsingTest {
     /**
      * @param args
      */
     public static void main(String[] args) throws Exception {
-        ProcessOutputLinereadBuffer test = new ProcessOutputLinereadBuffer(new LineHandler() {
-            @Override
-            public void handleLine(String line, Object caller) {
-                System.out.println(line);
-            };
-        }, Charset.forName("UTF-8"));
+        LineParsingOutputStream test = new LineParsingOutputStream(Charset.forName("UTF-8"));
         if (false) {
             test.write("Test\rTest2\nTest3\r\nTest4\rTest5".getBytes("UTF-8"));
-        } else {
+        } else if (false) {
             long t = System.currentTimeMillis();
             final FileInputStream fis = new FileInputStream(new File("/home/daniel/workspaceBuild/jdlog_9829264433151.txt"));
             try {
@@ -69,6 +65,16 @@ public class ProcessOutputLinereadBufferTest {
             }
             System.out.println(System.currentTimeMillis() - t);
             System.out.println(test.getLines());
+        } else {
+            long t = System.currentTimeMillis();
+            LineParsingInputStream is = new LineParsingInputStream(new FileInputStream(new File("/home/daniel/workspaceBuild/jdlog_9829264433151.txt")), Charset.forName("UTF-8"));
+            try {
+                IO.readStreamToOutputStream(-1, is, new NullOutputStream(), true);
+            } finally {
+                is.close();
+            }
+            System.out.println(System.currentTimeMillis() - t);
+            System.out.println(is.getLines());
         }
         test.close();
     }

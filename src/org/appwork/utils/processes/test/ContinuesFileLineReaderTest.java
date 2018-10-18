@@ -33,14 +33,9 @@
  * ==================================================================================================================================================== */
 package org.appwork.utils.processes.test;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
+import java.util.concurrent.atomic.AtomicLong;
 
-import org.appwork.utils.IO;
 import org.appwork.utils.processes.ContinuesFileLineReader;
 import org.appwork.utils.processes.LineHandler;
 
@@ -54,33 +49,28 @@ public class ContinuesFileLineReaderTest {
      * @param args
      * @throws IOException
      */
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
         //
         // final String file = ContinuesFileLineReaderTest.class.getResource("ContinuesFileLineReader.txt").getFile();
-        final String file = "C:\\Users\\Thomas\\test.txt";
-        final byte[] bytes = IO.readFile(new File(file));
+        final String file = "/home/daniel/test.fifo";
+        final AtomicLong lines = new AtomicLong(0);
         ContinuesFileLineReader c = new ContinuesFileLineReader(new LineHandler() {
-            private int i = 0;
-
             @Override
             public void handleLine(String line, Object caller) {
-                System.out.println(i++ + " - " + line);
+                final long index = lines.incrementAndGet();
+                if (true) {
+                    System.out.println(index + " - " + line);
+                }
             }
         }, file, null) {
-            protected InputStream getInputStream() throws FileNotFoundException {
-                return new FileInputStream(file);
-            }
-
             /*
              * (non-Javadoc)
-             *
-             * @see org.appwork.utils.processes.ContinuesFileLineReader#toSink(java.io.ByteArrayOutputStream,
-             * org.appwork.utils.processes.ContinuesFileLineReader.NewlineSequence)
+             * 
+             * @see org.appwork.utils.processes.ContinuesFileLineReader#onWait(int, long)
              */
             @Override
-            protected void toSink(ByteArrayOutputStream bao, NewlineSequence match) {
-                // TODO Auto-generated method stub
-                // super.toSink(bao, match);
+            protected void onWait(int read, long lines) throws InterruptedException {
+                super.onWait(read, lines);
             }
         };
         //

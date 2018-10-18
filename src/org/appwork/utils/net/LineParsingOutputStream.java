@@ -62,9 +62,9 @@ public class LineParsingOutputStream extends OutputStream {
     protected final StringBuilder                 sb;
     protected int                                 lastIndex   = 0;
     protected final CharBuffer                    cb;
-    protected int                                 lines       = 0;
+    protected long                                lines       = 0;
 
-    public int getLines() {
+    public long getLines() {
         return lines;
     }
 
@@ -136,7 +136,7 @@ public class LineParsingOutputStream extends OutputStream {
                 if (c == '\r') {
                     // \r
                     lastNewLine = NEWLINE.CR;
-                    onNextLine(lastNewLine, sb, lastIndex, index);
+                    onNextLine(lastNewLine, lines, sb, lastIndex, index);
                     lines++;
                     removeIndex = index + 1;
                     lastIndex = index + 1;
@@ -147,7 +147,7 @@ public class LineParsingOutputStream extends OutputStream {
                     } else {
                         // \n
                         lastNewLine = NEWLINE.LF;
-                        onNextLine(lastNewLine, sb, lastIndex, index);
+                        onNextLine(lastNewLine, lines, sb, lastIndex, index);
                         lines++;
                     }
                     removeIndex = index + 1;
@@ -165,7 +165,7 @@ public class LineParsingOutputStream extends OutputStream {
                 lastIndex = 0;
             }
             if (sb.length() > 0 && closed) {
-                onNextLine(null, sb, 0, sb.length());
+                onNextLine(null, lines, sb, 0, sb.length());
                 lines++;
                 sb.setLength(0);
             }
@@ -174,6 +174,6 @@ public class LineParsingOutputStream extends OutputStream {
         return lines;
     }
 
-    protected void onNextLine(NEWLINE newLine, StringBuilder sb, int startIndex, int endIndex) {
+    protected void onNextLine(NEWLINE newLine, long line, StringBuilder sb, int startIndex, int endIndex) {
     }
 }

@@ -195,6 +195,9 @@ public class Command {
     private Charset         charset;
 
     public void setCharset(Charset charset) {
+        if (charset == null) {
+            throw new IllegalArgumentException("charset is null!");
+        }
         this.charset = charset;
     }
 
@@ -221,7 +224,8 @@ public class Command {
     }
 
     /**
-     * @throws InterruptedException @throws @return @throws
+     * @throws InterruptedException
+     * @throws @return @throws
      */
     public Charset getCharset() {
         return charset;

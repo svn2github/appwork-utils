@@ -62,14 +62,8 @@ public class ProcessOutput {
         this.codePage = codePage;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
-        // TODO Auto-generated method stub
         return "Exitcode: " + getExitCode() + " STD:" + getStdOutString() + " ERR:" + getErrOutString();
     }
 

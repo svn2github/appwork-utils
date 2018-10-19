@@ -76,7 +76,7 @@ public class ProcessBuilderFactory {
          * @param input
          * @param errorStream
          */
-        public ProcessStreamReader(String name, AtomicReference<IOException> exception, Process process, InputStream input, OutputStream output) {
+        public ProcessStreamReader(String name, AtomicReference<IOException> exception, Process process, final InputStream input, OutputStream output) {
             super(name);
             this.exception = exception;
             this.process = process;
@@ -90,8 +90,10 @@ public class ProcessBuilderFactory {
                 // System.out.println("Start Process-Reader-Error");
                 readStreamToOutputStream();
             } catch (IOException e) {
-                exception.compareAndSet(null, e);
-                e.printStackTrace();
+                if (!processIsDead()) {
+                    exception.compareAndSet(null, e);
+                    LogV3.logger(ProcessBuilderFactory.class).log(e);
+                }
                 try {
                     process.exitValue();
                 } catch (IllegalThreadStateException e2) {
@@ -159,10 +161,22 @@ public class ProcessBuilderFactory {
         }
 
         /**
+         * @throws InterruptedException
          *
          */
-        public void onProcessDead() {
+        public void onProcessDead() throws InterruptedException {
+            if (processIsDead) {
+                return;
+            }
             processIsDead = true;
+            try {
+                // wait until the buffer is empty and close the stream afterwards to cancel blocking readers
+                while (input.available() > 0) {
+                    Thread.sleep(50);
+                }
+                input.close();
+            } catch (IOException e) {
+            }
         }
     }
 
@@ -225,18 +239,10 @@ public class ProcessBuilderFactory {
             while (stdReader.isAlive()) {
                 System.out.println("Wait for Process-Reader-Std");
                 stdReader.join(10000);
-                // if (reader1.isAlive()) {
-                // System.out.println("Process-Reader-Std still alive!");
-                // reader1.interrupt();
-                // }
             }
             while (errorReader.isAlive()) {
                 System.out.println("Wait fo Process-Reader-Error");
                 errorReader.join(10000);
-                // if (reader2.isAlive()) {
-                // // System.out.println("Process-Reader-Error still alive!");
-                // reader2.interrupt();
-                // }
             }
             return returnCode;
         } finally {
@@ -329,11 +335,6 @@ public class ProcessBuilderFactory {
         } else {
             return input;
         }
-    }
-
-    public static void main(String[] args) throws InterruptedException {
-        System.out.println(getConsoleCodepage());
-        ;
     }
 
     /**

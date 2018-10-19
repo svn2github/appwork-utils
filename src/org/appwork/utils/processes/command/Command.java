@@ -110,7 +110,7 @@ public class Command {
         public void interrupt();
     }
 
-    private class LineReaderThread extends Thread implements AsyncTask {
+    public class LineReaderThread extends Thread implements AsyncTask {
         private final LineParsingInputStream is;
         private volatile boolean             processIsDead;
 
@@ -222,10 +222,6 @@ public class Command {
         return this;
     }
 
-    /**
-     * @throws InterruptedException
-     * @throws @return @throws
-     */
     public Charset getCharset() {
         return charset;
     }

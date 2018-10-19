@@ -1317,7 +1317,39 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
         if (this.isCallerIsEDT()) {
             modality = ModalityType.APPLICATION_MODAL;
         }
-        this.dialog = new InternDialog<T>(this, modality);
+        this.dialog = new InternDialog<T>(this, modality) {
+            /*
+             * (non-Javadoc)
+             *
+             * @see org.appwork.utils.swing.dialog.InternDialog#getPreferredSize()
+             */
+            @Override
+            public Dimension getPreferredSize() {
+                if (getDimensor() != null) {
+                    Dimension dim = getDimensor().getDimension(AbstractDialog.this);
+                    if (dim != null) {
+                        return dim;
+                    }
+                }
+                return super.getPreferredSize();
+            }
+
+            /*
+             * (non-Javadoc)
+             *
+             * @see java.awt.Component#getSize()
+             */
+            @Override
+            public Dimension getSize() {
+                if (getDimensor() != null) {
+                    Dimension dim = getDimensor().getDimension(AbstractDialog.this);
+                    if (dim != null) {
+                        return dim;
+                    }
+                }
+                return super.getSize();
+            }
+        };
         if (getDimensor() != null || getLocator() != null) {
             dialog.addComponentListener(this);
             if (getDimensor() != null) {

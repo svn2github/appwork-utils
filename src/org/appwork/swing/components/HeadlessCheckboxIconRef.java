@@ -48,7 +48,7 @@ import org.appwork.resources.IconRef;
 public enum HeadlessCheckboxIconRef implements IconRef {
     HEADLESS_checkbox_false("checkbox_false"),
     HEADLESS_checkbox_true("checkbox_true");
-    private String path;
+    private final String path;
 
     /**
      *
@@ -71,7 +71,7 @@ public enum HeadlessCheckboxIconRef implements IconRef {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.resources.IconRef#image(int)
      */
     @Override
@@ -81,7 +81,7 @@ public enum HeadlessCheckboxIconRef implements IconRef {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.resources.IconRef#path()
      */
     @Override

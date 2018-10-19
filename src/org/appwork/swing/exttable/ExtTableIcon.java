@@ -56,7 +56,7 @@ public enum ExtTableIcon implements IconRef {
     TABLE_LOCK_COLUMN("exttable/lockColumn"),
     TABLE_FINDMENU("exttable/findmenu"),
     TABLE_RESET_COLUMNS("exttable/resetColumns");
-    private String path;
+    private final String path;
 
     /**
      *
@@ -79,7 +79,7 @@ public enum ExtTableIcon implements IconRef {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.resources.IconRef#image(int)
      */
     @Override
@@ -89,7 +89,7 @@ public enum ExtTableIcon implements IconRef {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.resources.IconRef#path()
      */
     @Override

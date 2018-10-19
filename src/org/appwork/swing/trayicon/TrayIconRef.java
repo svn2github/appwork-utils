@@ -47,7 +47,7 @@ import org.appwork.resources.IconRef;
  */
 public enum TrayIconRef implements IconRef {
     trayicon("trayicon");
-    private String path;
+    private final String path;
 
     /**
      *
@@ -70,7 +70,7 @@ public enum TrayIconRef implements IconRef {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.resources.IconRef#image(int)
      */
     @Override
@@ -80,7 +80,7 @@ public enum TrayIconRef implements IconRef {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.resources.IconRef#path()
      */
     @Override

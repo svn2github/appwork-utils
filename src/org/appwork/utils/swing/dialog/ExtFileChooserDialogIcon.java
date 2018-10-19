@@ -74,8 +74,8 @@ public enum ExtFileChooserDialogIcon implements IconRef {
     DIALOG_HELP("dialog/help"),
     DIALOG_INFO("dialog/info"),
     DIALOG_LOGIN("dialog/login"),
-    DIALOG_WARNING("dialog/warning"),;
-    private String path;
+    DIALOG_WARNING("dialog/warning"), ;
+    private final String path;
 
     /**
      *
@@ -98,7 +98,7 @@ public enum ExtFileChooserDialogIcon implements IconRef {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.resources.IconRef#image(int)
      */
     @Override
@@ -108,7 +108,7 @@ public enum ExtFileChooserDialogIcon implements IconRef {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.resources.IconRef#path()
      */
     @Override

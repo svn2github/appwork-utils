@@ -54,7 +54,7 @@ public enum AWIcon implements IconRef {
     // public static final String AWIcon.FILECHOOSER_BOX = "box";
     // public static final String AWIcon.FILECHOOSER_IMAGES = "image";
     // public static final String AWIcon.FILECHOOSER_DOWNLOADS = "download";
-    private String path;
+    private final String path;
 
     /**
      *
@@ -77,7 +77,7 @@ public enum AWIcon implements IconRef {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.resources.IconRef#image(int)
      */
     @Override
@@ -87,7 +87,7 @@ public enum AWIcon implements IconRef {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.resources.IconRef#path()
      */
     @Override

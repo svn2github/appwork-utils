@@ -51,7 +51,7 @@ public enum CutCopyPasteIcon implements IconRef {
     delete("delete"),
     paste("paste"),
     select("select");
-    private String path;
+    private final String path;
 
     /**
      *
@@ -74,7 +74,7 @@ public enum CutCopyPasteIcon implements IconRef {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.resources.IconRef#image(int)
      */
     @Override
@@ -84,7 +84,7 @@ public enum CutCopyPasteIcon implements IconRef {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.resources.IconRef#path()
      */
     @Override

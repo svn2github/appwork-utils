@@ -43,11 +43,11 @@ import javax.swing.Icon;
  *
  */
 public class IconRefImpl implements IconRef {
-    private String path;
+    private final String path;
 
     /**
-    *
-    */
+     *
+     */
     public IconRefImpl(String path) {
         this.path = path;
     }
@@ -66,7 +66,7 @@ public class IconRefImpl implements IconRef {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.resources.IconRef#image(int)
      */
     @Override
@@ -76,7 +76,7 @@ public class IconRefImpl implements IconRef {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.resources.IconRef#path()
      */
     @Override

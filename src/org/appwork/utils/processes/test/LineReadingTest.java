@@ -50,16 +50,29 @@ import org.appwork.utils.processes.command.Command;
 public class LineReadingTest {
     public static void main(String[] args) throws IOException, InterruptedException, ClassNotFoundException {
         Application.setApplication(".tests");
-        File projectRoot = IDEUtils.getProjectFolder();
-        Command command = new Command(CrossSystem.getJavaBinary(), "-cp", new File(projectRoot, "bin").getAbsolutePath(), LineReadingTestProcess.class.getName());
-        command.setLineHandler(new LineHandler() {
-            @Override
-            public void handleLine(String line, Object caller) {
-                System.out.println(line);
-            }
-        });
-        command.start(true);
-        command.waitFor();
+        if (false) {
+            File projectRoot = IDEUtils.getProjectFolder();
+            Command command = new Command("cat", "/home/daniel/workspaceBuild/jdlog_9829264433151.txt", LineReadingTestProcess.class.getName());
+            command.setLineHandler(new LineHandler() {
+                @Override
+                public void handleLine(String line, Object caller) {
+                    System.out.println(line);
+                }
+            });
+            command.start(true);
+            command.waitFor();
+        } else {
+            File projectRoot = IDEUtils.getProjectFolder();
+            Command command = new Command(CrossSystem.getJavaBinary(), "-cp", new File(projectRoot, "bin").getAbsolutePath(), LineReadingTestProcess.class.getName());
+            command.setLineHandler(new LineHandler() {
+                @Override
+                public void handleLine(String line, Object caller) {
+                    System.out.println(line);
+                }
+            });
+            command.start(true);
+            command.waitFor();
+        }
         // ProcessBuilderFactory.runCommand(ProcessBuilderFactory.create(CrossSystem.getJavaBinary(), "-cp", new File(projectRoot,
         // "bin").getAbsolutePath(), LineReadingTestProcess.class.getName()), new NullOutputStream(), new NullOutputStream());
         ;

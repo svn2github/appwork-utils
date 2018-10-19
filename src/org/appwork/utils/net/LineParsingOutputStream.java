@@ -83,20 +83,31 @@ public class LineParsingOutputStream extends OutputStream {
     }
 
     @Override
-    public void write(int b) throws IOException {
-        bos.write(b);
+    public synchronized void write(int b) throws IOException {
+        if (!closed) {
+            bos.write(b);
+            this.forwardLinesToSink();
+        } else {
+            throw new IOException("stream is closed");
+        }
     }
 
     @Override
-    public void close() throws IOException {
-        this.closed = true;
-        this.forwardLinesToSink();
+    public synchronized void close() throws IOException {
+        if (!closed) {
+            closed = true;
+            this.forwardLinesToSink();
+        }
     }
 
     @Override
-    public void write(byte[] b, int off, int len) throws IOException {
-        bos.write(b, off, len);
-        this.forwardLinesToSink();
+    public synchronized void write(byte[] b, int off, int len) throws IOException {
+        if (!closed) {
+            bos.write(b, off, len);
+            this.forwardLinesToSink();
+        } else {
+            throw new IOException("stream is closed");
+        }
     }
 
     protected final int forwardLinesToSink() throws IOException {
@@ -157,17 +168,13 @@ public class LineParsingOutputStream extends OutputStream {
                 }
             }
             if (removeIndex > 0) {
-                final String rest = sb.substring(removeIndex);
-                sb.setLength(0);
-                if (rest.length() > 0) {
-                    sb.append(rest);
-                }
+                sb.delete(0, removeIndex);
                 lastIndex = 0;
             }
             if (sb.length() > 0 && closed) {
                 onNextLine(null, lines, sb, 0, sb.length());
                 lines++;
-                sb.setLength(0);
+                sb.delete(0, sb.length());
             }
             this.lines += lines;
         }

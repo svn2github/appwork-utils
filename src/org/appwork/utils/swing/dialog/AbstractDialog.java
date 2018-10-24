@@ -1174,7 +1174,12 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
      * @return if the dialog has been moved by the user
      */
     public boolean hasBeenMoved() {
-        return this.orgLocationOnScreen != null && !this.getDialog().getLocationOnScreen().equals(this.orgLocationOnScreen);
+        try {
+            return this.orgLocationOnScreen != null && !this.getDialog().getLocationOnScreen().equals(this.orgLocationOnScreen);
+        } catch (java.awt.IllegalComponentStateException e) {
+            // java.awt.IllegalComponentStateException: component must be showing on the screen to determine its location
+            return false;
+        }
     }
 
     protected void initDoNotShowAgainCheckbox(final MigPanel bottom) {

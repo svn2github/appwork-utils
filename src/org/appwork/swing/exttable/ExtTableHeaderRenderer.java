@@ -166,11 +166,15 @@ public class ExtTableHeaderRenderer extends DefaultTableCellRenderer implements 
             paintIcon = true;
         }
         setText(value == null ? "" : value.toString());
-        setBorder(hasFocus ? focusBorder : cellBorder);
+        configureBorder(value, hasFocus, row, column);
         // this.setBackground(Color.RED);
         // this.setOpaque(true);
         // System.out.println(this.getPreferredSize());
         return this;
+    }
+
+    protected void configureBorder(final Object value, final boolean hasFocus, final int row, final int column) {
+        setBorder(hasFocus ? getFocusBorder() : getCellBorder());
     }
 
     @Override

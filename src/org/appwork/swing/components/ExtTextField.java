@@ -247,11 +247,17 @@ public class ExtTextField extends JTextField implements CaretListener, FocusList
         }
     }
 
-    public void setLabelMode(final boolean b) {
+    public ExtTextField setLabelMode(final boolean b) {
         this.setEditable(!b);
         this.setFocusable(!b);
         this.setBorder(b ? null : new JTextArea().getBorder());
         SwingUtils.setOpaque(this, !b);
+        return this;
+    }
+
+    public ExtTextField text(String text) {
+        setText(text);
+        return this;
     }
 
     @Override
@@ -295,10 +301,19 @@ public class ExtTextField extends JTextField implements CaretListener, FocusList
 
     /**
      * can be used to check if the text got changed for example by typing
-     * 
+     *
      * @return
      */
     public boolean isUnchangedSetText() {
         return StringUtils.equals(textSetBySetText, getText());
+    }
+
+    /**
+     * @param b
+     * @return
+     */
+    public ExtTextField focusable(boolean b) {
+        setFocusable(b);
+        return this;
     }
 }

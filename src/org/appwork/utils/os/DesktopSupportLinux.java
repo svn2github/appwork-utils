@@ -356,11 +356,18 @@ public class DesktopSupportLinux implements DesktopSupport {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.appwork.utils.os.DesktopSupport#killProcessesByExecutablePath(java.lang.String, int)
      */
     @Override
     public long[] killProcessesByExecutablePath(String path, int exitCode) throws InterruptedException, NotSupportedException {
         throw new NotSupportedException("Operating System not supported");
+    }
+
+    public int getPrefixLength(String pathname) {
+        if (pathname.length() == 0) {
+            return 0;
+        }
+        return (pathname.charAt(0) == '/') ? 1 : 0;
     }
 }

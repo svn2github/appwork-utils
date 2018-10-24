@@ -44,6 +44,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.appwork.loggingv3.LogV3;
 import org.appwork.utils.os.CrossSystem;
 
 public class Files17 {
@@ -53,6 +54,7 @@ public class Files17 {
 
     public static File guessRoot(File file, boolean throwException) throws IOException {
         if (JVMVersion.get() >= JVMVersion.JAVA17 && JVMVersion.get() < JVMVersion.JAVA19) {
+            LogV3.logger(Files17.class).info("Guess Root for " + file);
             FileStore fileFileStore = null;
             File existingFile = file;
             while (existingFile != null) {

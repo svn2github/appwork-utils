@@ -462,6 +462,15 @@ public class TranslationHandler implements InvocationHandler {
         return lookup.get(0).getName();
     }
 
+    public String getExistingID() {
+        for (TranslateResource l : lookup) {
+            if (l.getUrl() != null || l.getData() != null) {
+                return l.getName();
+            }
+        }
+        return null;
+    }
+
     /**
      * @param id
      * @return

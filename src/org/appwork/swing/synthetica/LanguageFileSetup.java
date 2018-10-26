@@ -45,11 +45,11 @@ import org.appwork.txtresource.TranslateInterface;
 
 @Defaults(lngs = { "en" })
 public interface LanguageFileSetup extends TranslateInterface {
-    @DescriptionForTranslationEntry("Always use 'default' except for languages that do not display properly (Like Chinese or Japanese).\r\n In this case, you could change the default font scale faktor (in %) here.\r\nThis Scale Faktor is ignored, if the user set up a fontscale faktor in the advanced config.\r\nA Restart is required to take effect")
+    @DescriptionForTranslationEntry("Always use 'default' except for languages that do not display properly (Like Chinese or Japanese).\r\nIn this case, you could change the default font scale faktor (in %) here.\r\nThis Scale Faktor is ignored, if the user set up a fontscale faktor in the advanced config.\r\nA Restart is required to take effect")
     @Default(lngs = { "en" }, values = { "100" })
     String config_fontscale_faktor();
 
-    @DescriptionForTranslationEntry("Always use 'default' except for languages that do not display properly (Like Chinese or Japanese).\r\n In this case, you should use 'Dialog'")
+    @DescriptionForTranslationEntry("Always use 'default' except for languages that do not display properly (Like Chinese or Japanese).\r\nIn this case, you should use 'Dialog'")
     @Default(lngs = { "en" }, values = { "default" })
     String config_fontname();
 }

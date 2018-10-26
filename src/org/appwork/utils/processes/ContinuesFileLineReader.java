@@ -38,6 +38,7 @@ public class ContinuesFileLineReader {
     }
 
     private volatile IOException exceptionIOException;
+    protected volatile boolean   started = false;
 
     public synchronized ContinuesFileLineReader run() {
         if (thread != null && thread.isAlive()) {
@@ -57,6 +58,7 @@ public class ContinuesFileLineReader {
                         return;
                     }
                 }
+                started = true;
                 if (!isClosed()) {
                     try {
                         final FileInputStream fis = new FileInputStream(file);
@@ -105,6 +107,10 @@ public class ContinuesFileLineReader {
     public void closeAndFlush() throws InterruptedException, IOException {
         try {
             if (closedFlag.compareAndSet(false, true)) {
+                if (!started) {
+                    // not started. file is not available
+                    thread.interrupt();
+                }
                 this.thread.join();
                 if (exceptionIOException != null) {
                     throw exceptionIOException;

@@ -43,10 +43,8 @@ import java.lang.annotation.Target;
  *
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.METHOD, ElementType.FIELD, ElementType.TYPE, ElementType.PARAMETER })
+@Target({ ElementType.PARAMETER })
 @HiddenForHelpDocs
-public @interface ApiDoc {
+public @interface Name {
     String value();
-
-    String authentication() default "";
 }

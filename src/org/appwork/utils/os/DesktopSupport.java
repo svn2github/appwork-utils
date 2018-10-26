@@ -78,8 +78,8 @@ public interface DesktopSupport {
     public String getProcessCommandlineByPID(long pid) throws NotSupportedException, InterruptedException;
 
     /**
-     * root prefix is different for each oth. windiws: c:\ -3 \\-2
-     * 
+     * root prefix is different for each oth. windows: c:\ =3 \\=2
+     *
      * @param path
      * @return
      */

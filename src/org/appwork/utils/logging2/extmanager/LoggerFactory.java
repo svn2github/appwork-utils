@@ -60,7 +60,7 @@ public class LoggerFactory extends LogSourceProvider {
     private static LoggerFactory initialize() {
         try {
             // TODO: JDK9
-            if (JVMVersion.isJAVA19Test()) {
+            if (JVMVersion.isMinimumJava9()) {
                 return new LoggerFactory();
             }
             // the logmanager should not be initialized here. so setting the
@@ -178,7 +178,7 @@ public class LoggerFactory extends LogSourceProvider {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.utils.logging2.LogSourceProvider#getLogger(java.lang.String)
      */
     @Override

@@ -60,8 +60,7 @@ public class JVMVersion {
         VERSION = version;
     }
 
-    // TODO: JDK9
-    public static final boolean isJAVA19Test() {
+    public static final boolean isMinimumJava9() {
         return isMinimum(JAVA19) || "true".equals(System.getProperty("jdk9test"));
     }
 

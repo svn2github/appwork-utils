@@ -38,9 +38,9 @@ import java.awt.FontMetrics;
 
 import javax.swing.JComponent;
 
+import org.appwork.loggingv3.LogV3;
 import org.appwork.utils.Exceptions;
 import org.appwork.utils.JVMVersion;
-import org.appwork.loggingv3.LogV3;
 
 /**
  * @author Thomas
@@ -49,7 +49,7 @@ import org.appwork.loggingv3.LogV3;
 public class SwingUtilities2Wrapper {
     private static boolean       CLIP_STRING_IF_NECESSARY_OK = true;
     // TODO:jdk9
-    private final static boolean JDK9TEST                    = JVMVersion.isJAVA19Test();
+    private final static boolean JDK9TEST                    = JVMVersion.isMinimumJava9();
 
     private static String internalClipStringIfNecessary(JComponent component, FontMetrics fontMetrics, String str, int availableWidth) {
         if (str == null || str.length() == 0 || str.trim().length() == 0) {

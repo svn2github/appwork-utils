@@ -52,7 +52,6 @@ public class ContinuesFileLineReaderTest {
     public static void main(String[] args) throws Exception {
         //
         // final String file = ContinuesFileLineReaderTest.class.getResource("ContinuesFileLineReader.txt").getFile();
-        final String file = "/home/daniel/test.fifo";
         final AtomicLong lines = new AtomicLong(0);
         ContinuesFileLineReader c = new ContinuesFileLineReader(new LineHandler() {
             @Override
@@ -62,10 +61,10 @@ public class ContinuesFileLineReaderTest {
                     System.out.println(index + " - " + line);
                 }
             }
-        }, file, null) {
+        }, "e:\\log---0.2018-153503,76.txt", null) {
             /*
              * (non-Javadoc)
-             * 
+             *
              * @see org.appwork.utils.processes.ContinuesFileLineReader#onWait(int, long)
              */
             @Override

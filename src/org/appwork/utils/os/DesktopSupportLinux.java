@@ -307,7 +307,7 @@ public class DesktopSupportLinux implements DesktopSupport {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.utils.os.DesktopSupport#getDefaultDownloadDirectory()
      */
     @Override
@@ -336,7 +336,7 @@ public class DesktopSupportLinux implements DesktopSupport {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.utils.os.DesktopSupport#getProcessExecutablePathByPID(int)
      */
     @Override
@@ -346,7 +346,7 @@ public class DesktopSupportLinux implements DesktopSupport {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.utils.os.DesktopSupport#getProcessCommandlineByPID(int)
      */
     @Override
@@ -356,7 +356,7 @@ public class DesktopSupportLinux implements DesktopSupport {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.utils.os.DesktopSupport#killProcessesByExecutablePath(java.lang.String, int)
      */
     @Override
@@ -364,10 +364,12 @@ public class DesktopSupportLinux implements DesktopSupport {
         throw new NotSupportedException("Operating System not supported");
     }
 
+    @Override
     public int getPrefixLength(String pathname) {
         if (pathname.length() == 0) {
             return 0;
+        } else {
+            return (pathname.charAt(0) == '/') ? 1 : 0;
         }
-        return (pathname.charAt(0) == '/') ? 1 : 0;
     }
 }

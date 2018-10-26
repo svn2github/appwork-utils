@@ -40,20 +40,23 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.security.AccessController;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
 import org.appwork.exceptions.WTFException;
+import org.appwork.loggingv3.LogV3;
 import org.appwork.utils.Application;
 import org.appwork.utils.Files;
 import org.appwork.utils.IO;
 import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.logging2.LogInterface;
-import org.appwork.loggingv3.LogV3;
 import org.appwork.utils.os.CrossSystem.OperatingSystem;
 import org.appwork.utils.processes.ProcessBuilderFactory;
 import org.appwork.utils.processes.ProcessOutput;
+
+import sun.security.action.GetPropertyAction;
 
 /**
  * @author daniel
@@ -250,7 +253,7 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.appwork.utils.os.DesktopSupport#hibernate()
      */
     @Override
@@ -492,6 +495,45 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
             }
         }
         return ret;
+    }
+
+    /**
+     * @param c0
+     * @return
+     */
+    private boolean isDriveLetter(char c) {
+        return ((c >= 'a') && (c <= 'z')) || ((c >= 'A') && (c <= 'Z'));
+    }
+
+    private final char SLASH = AccessController.doPrivileged(new GetPropertyAction("file.separator")).charAt(0);
+
+    /*
+     * (non-Javadoc) from java.io.WinNTFileSystem.prefixLength(String);
+     * 
+     * @see org.appwork.utils.os.DesktopSupport#getPrefixLength(java.lang.String)
+     */
+    @Override
+    public int getPrefixLength(String path) {
+        final char slash = SLASH;
+        final int n = path.length();
+        if (n == 0) {
+            return 0;
+        }
+        final char c0 = path.charAt(0);
+        final char c1 = (n > 1) ? path.charAt(1) : 0;
+        if (c0 == slash) {
+            if (c1 == slash) {
+                return 2; /* Absolute UNC pathname "\\\\foo" */
+            }
+            return 1; /* Drive-relative "\\foo" */
+        }
+        if (isDriveLetter(c0) && (c1 == ':')) {
+            if ((n > 2) && (path.charAt(2) == slash)) {
+                return 3; /* Absolute local pathname "z:\\foo" */
+            }
+            return 2; /* Directory-relative "z:foo" */
+        }
+        return 0; /* Completely relative */
     }
 
     public static String get32BitProgramFiles(LogInterface logger) {

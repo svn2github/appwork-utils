@@ -39,9 +39,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.security.AccessController;
-
-import sun.security.action.GetPropertyAction;
 
 /**
  * @author daniel
@@ -173,42 +170,12 @@ public class DesktopSupportJavaDesktop implements DesktopSupport {
         throw new NotSupportedException("Operating System not supported");
     }
 
-    /**
-     * @param c0
-     * @return
-     */
-    private boolean isDriveLetter(char c) {
-        return ((c >= 'a') && (c <= 'z')) || ((c >= 'A') && (c <= 'Z'));
-    }
-
-    private final char SLASH = AccessController.doPrivileged(new GetPropertyAction("file.separator")).charAt(0);
-
-    /*
-     * (non-Javadoc) from java.io.WinNTFileSystem.prefixLength(String);
-     *
-     * @see org.appwork.utils.os.DesktopSupport#getPrefixLength(java.lang.String)
-     */
     @Override
-    public int getPrefixLength(String path) {
-        char slash = SLASH;
-        int n = path.length();
-        if (n == 0) {
+    public int getPrefixLength(String pathname) {
+        if (pathname.length() == 0) {
             return 0;
+        } else {
+            return (pathname.charAt(0) == '/') ? 1 : 0;
         }
-        char c0 = path.charAt(0);
-        char c1 = (n > 1) ? path.charAt(1) : 0;
-        if (c0 == slash) {
-            if (c1 == slash) {
-                return 2; /* Absolute UNC pathname "\\\\foo" */
-            }
-            return 1; /* Drive-relative "\\foo" */
-        }
-        if (isDriveLetter(c0) && (c1 == ':')) {
-            if ((n > 2) && (path.charAt(2) == slash)) {
-                return 3; /* Absolute local pathname "z:\\foo" */
-            }
-            return 2; /* Directory-relative "z:foo" */
-        }
-        return 0; /* Completely relative */
     }
 }

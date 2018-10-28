@@ -39,6 +39,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 
 import org.appwork.loggingv3.LogV3;
 import org.appwork.storage.simplejson.Ignore;
@@ -206,5 +207,15 @@ public class ClassCache {
      */
     public static void put(final Class<?> class1, final ClassCache stackTraceElementClassCache) {
         CACHE.put(class1, stackTraceElementClassCache);
+    }
+
+    /**
+     * @return
+     */
+    public Set<String> getKeys() {
+        HashSet<String> ret = new HashSet<String>();
+        ret.addAll(getterMap.keySet());
+        ret.addAll(setterMap.keySet());
+        return ret;
     }
 }

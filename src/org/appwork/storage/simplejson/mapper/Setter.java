@@ -71,6 +71,17 @@ public class Setter {
         this.type = m.getGenericParameterTypes()[0];
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        // TODO Auto-generated method stub
+        return method.toString();
+    }
+
     public String getKey() {
         return this.key;
     }

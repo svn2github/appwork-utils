@@ -46,12 +46,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPOutputStream;
 
 import org.appwork.exceptions.WTFException;
+import org.appwork.loggingv3.LogV3;
 import org.appwork.net.protocol.http.HTTPConstants;
 import org.appwork.net.protocol.http.HTTPConstants.ResponseCode;
 import org.appwork.remoteapi.annotations.AllowResponseAccess;
@@ -70,7 +72,6 @@ import org.appwork.storage.TypeRef;
 import org.appwork.utils.Application;
 import org.appwork.utils.IO;
 import org.appwork.utils.Regex;
-import org.appwork.loggingv3.LogV3;
 import org.appwork.utils.net.ChunkedOutputStream;
 import org.appwork.utils.net.HTTPHeader;
 import org.appwork.utils.net.httpserver.HttpConnection.HttpConnectionType;
@@ -574,6 +575,18 @@ public class RemoteAPI implements HttpRequestHandler {
     protected InterfaceHandler<RemoteAPIInterface> getInterfaceByNamespace(String namespace) {
         final InterfaceHandler<RemoteAPIInterface> ret = this.interfaces.get(namespace);
         return ret;
+    }
+
+    public ArrayList<Class<? extends RemoteAPIInterface>> listInterfaces() {
+        synchronized (interfaces) {
+            HashSet<Class<? extends RemoteAPIInterface>> ret = new HashSet<Class<? extends RemoteAPIInterface>>();
+            for (Entry<String, InterfaceHandler<RemoteAPIInterface>> es : interfaces.entrySet()) {
+                for (Class<RemoteAPIInterface> iface : es.getValue().getInterfaceClasses()) {
+                    ret.add(iface);
+                }
+            }
+            return new ArrayList<Class<? extends RemoteAPIInterface>>(ret);
+        }
     }
 
     /**

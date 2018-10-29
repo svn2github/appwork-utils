@@ -42,6 +42,7 @@ import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -187,7 +188,12 @@ public class JSonStorage {
             }
         } else if (gType instanceof ParameterizedType) {
             final ParameterizedType ptype = (ParameterizedType) gType;
-            final Type raw = ((ParameterizedType) gType).getRawType();
+            final Type raw = ptype.getRawType();
+            ((Class) raw).getTypeParameters();
+            Type[] actualTypes = ptype.getActualTypeArguments();
+            // for (int i = 0; i < actualTypes.length; i++) {
+            // typeMap.put(gis[i], actualTypes[i]);
+            // }
             JSonStorage.canStoreIntern(raw, path, allowNonStorableObjects, dupeID);
             for (final Type t : ptype.getActualTypeArguments()) {
                 JSonStorage.canStoreIntern(t, path + "(" + t + ")", allowNonStorableObjects, dupeID);
@@ -197,6 +203,9 @@ public class JSonStorage {
             final GenericArrayType atype = (GenericArrayType) gType;
             final Type t = atype.getGenericComponentType();
             JSonStorage.canStoreIntern(t, path + "[" + t + "]", allowNonStorableObjects, dupeID);
+            return;
+        } else if (gType instanceof TypeVariable) {
+            // type veriables are checked one layer above
             return;
         } else {
             throw new InvalidTypeException(gType, "Generic Type Structure not implemented: " + gType.getClass() + " in " + path);

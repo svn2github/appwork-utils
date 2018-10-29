@@ -412,4 +412,20 @@ public class StringUtils {
         }
         return defaultMessage.substring(0, max) + postfox;
     }
+
+    /**
+     * @param name
+     * @return
+     */
+    public static String toCamelCase(String name, boolean firstUpper) {
+        StringBuilder sb = new StringBuilder();
+        for (String p : name.split("[\\_\\-\\s]+")) {
+            sb.append(p.substring(0, 1).toUpperCase(Locale.ENGLISH) + p.substring(1));
+        }
+        if (firstUpper) {
+            return sb.substring(0, 1).toUpperCase(Locale.ENGLISH) + sb.substring(1);
+        } else {
+            return sb.substring(0, 1).toLowerCase(Locale.ENGLISH) + sb.substring(1);
+        }
+    }
 }

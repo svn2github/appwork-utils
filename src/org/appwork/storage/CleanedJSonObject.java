@@ -3,6 +3,7 @@ package org.appwork.storage;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -145,7 +146,7 @@ public class CleanedJSonObject {
         return JSonStorage.serializeToJson(map);
     }
 
-    protected Object toMap() {
+    public Object toMap() {
         try {
             // System.out.println(this.toString());
             if (this.object == null) {
@@ -166,31 +167,12 @@ public class CleanedJSonObject {
                 return ret;
             } else if (this.object instanceof Map) {
                 final HashMap<String, Object> map = new HashMap<String, Object>();
-                for (Entry<String, Object> es : map.entrySet()) {
+                for (Entry<String, Object> es : ((Map<String, Object>) object).entrySet()) {
                     map.put(es.getKey(), new CleanedJSonObject(es.getKey(), es.getValue(), this).toMap());
                 }
                 return map;
             } else if (this.object instanceof Storable) {
-                final HashMap<String, Object> map = new HashMap<String, Object>();
-                Object obj = null;
-                final Constructor<?> c = this.object.getClass().getDeclaredConstructor(new Class[] {});
-                c.setAccessible(true);
-                final Object empty = c.newInstance();
-                for (final GetterSetter gs : getGettersSetteres(this.object.getClass())) {
-                    if ("class".equals(gs.getKey())) {
-                        continue;
-                    }
-                    obj = new CleanedJSonObject(gs.getKey(), gs.get(this.object), this).toMap();
-                    if (this.equals(obj, gs.get(empty))) {
-                        continue;
-                    }
-                    // if (obj instanceof Storable) {
-                    map.put(Character.toLowerCase(gs.getKey().charAt(0)) + gs.getKey().substring(1), obj);
-                    // } else {
-                    // map.put(Character.toLowerCase(gs.getKey().charAt(0)) + gs.getKey().substring(1), obj);
-                    // }
-                }
-                return map;
+                return storableToMap();
             } else {
                 return this.object;
             }
@@ -198,5 +180,28 @@ public class CleanedJSonObject {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
+    }
+
+    public HashMap<String, Object> storableToMap() throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+        final HashMap<String, Object> map = new HashMap<String, Object>();
+        Object obj = null;
+        final Constructor<?> c = this.object.getClass().getDeclaredConstructor(new Class[] {});
+        c.setAccessible(true);
+        final Object empty = c.newInstance();
+        for (final GetterSetter gs : getGettersSetteres(this.object.getClass())) {
+            if ("class".equals(gs.getKey())) {
+                continue;
+            }
+            obj = new CleanedJSonObject(gs.getKey(), gs.get(this.object), this).toMap();
+            if (this.equals(obj, gs.get(empty))) {
+                continue;
+            }
+            // if (obj instanceof Storable) {
+            map.put(Character.toLowerCase(gs.getKey().charAt(0)) + gs.getKey().substring(1), obj);
+            // } else {
+            // map.put(Character.toLowerCase(gs.getKey().charAt(0)) + gs.getKey().substring(1), obj);
+            // }
+        }
+        return map;
     }
 }

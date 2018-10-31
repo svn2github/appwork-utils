@@ -243,4 +243,18 @@ public class Exceptions {
         }
         return sb.toString();
     }
+
+    public static String stacktraceElementToThrownAtString(StackTraceElement source) {
+        String sourceString = source.getClassName();
+        if (StringUtils.isNotEmpty(source.getFileName()) && source.getLineNumber() >= 0) {
+            int li = sourceString.lastIndexOf(".");
+            if (li > 0) {
+                sourceString = sourceString.substring(0, li) + " (" + source.getFileName() + ":" + source.getLineNumber() + ")";
+            } else {
+                sourceString = "DEBUG" + sourceString;
+            }
+        }
+        sourceString += "." + source.getMethodName();
+        return sourceString;
+    }
 }

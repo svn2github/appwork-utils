@@ -38,6 +38,7 @@ import java.util.Date;
 
 import org.appwork.loggingv3.simple.Formatter;
 import org.appwork.loggingv3.simple.LogRecord2;
+import org.appwork.utils.Exceptions;
 import org.appwork.utils.StringUtils;
 
 /**
@@ -76,16 +77,7 @@ public class SimpleFormatter implements Formatter {
         // long t = System.currentTimeMillis();
         String message = record.message == null ? "" : record.message;
         StackTraceElement source = record.getThrownAt();
-        String sourceString = source.getClassName();
-        if (StringUtils.isNotEmpty(source.getFileName()) && source.getLineNumber() >= 0) {
-            int li = sourceString.lastIndexOf(".");
-            if (li > 0) {
-                sourceString = sourceString.substring(0, li) + " (" + source.getFileName() + ":" + source.getLineNumber() + ")";
-            } else {
-                sourceString = "DEBUG" + sourceString;
-            }
-        }
-        sourceString += "." + source.getMethodName();
+        String sourceString = Exceptions.stacktraceElementToThrownAtString(source);
         String pre = "--" + fillPre(String.valueOf(record.thread.getId()), " ", threadID) + fillPost("(" + abbr(record.thread.getName(), maxThreadNameLength) + ")", " ", threadName) + " " + fillPre(longTimestamp.format(new Date(record.timestamp)), " ", timestamp) + " - " + fillPost("" + abbr(String.valueOf(sourceString) + "", maxSourceStringLength), " ", thrownAt) + " > ";
         int line = 0;
         int preLength = pre.length();

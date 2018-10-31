@@ -31,72 +31,24 @@
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
-package org.appwork.utils.os;
+package org.appwork.utils.os.test;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.util.prefs.Preferences;
-
-import org.appwork.utils.StringUtils;
+import javax.security.auth.login.LoginException;
 
 /**
- * @author Thomas
- * @date 14.10.2018
+ * @author Daniel Wilhelm
+ * @date 31.10.2018
  *
  */
-public class WindowsUtils {
-    public static final String SID_LOCAL_SYSTEM  = "S-1-5-18";
-    public static final String SID_USER          = "S-1-5-32-545";
-    public static final String SID_EVERYBODYY    = "S-1-1-0";
-    public static final String SID_ADMINISTRATOR = "S-1-5-32-544";
-
-    /**
-     * Returns true, of the current user is part of the Administrators group. <br>
-     * WARNING: This does NOT Mean that the process has admin priviledges. use {@link #hasCurrentProcessAdminPriviledges()} instead <br>
-     * Also check {@link #isCurrentUserPartOfGroup(String)}
-     *
-     * @return
-     */
-    public static boolean isAdmin() {
-        return isCurrentUserPartOfGroup(SID_ADMINISTRATOR);
-    }
-
-    /**
-     * Tests if the current user is part of a SID group (e.g. {@link #SID_EVERYBODYY})
-     *
-     * @param sid
-     * @return
-     */
-    public static boolean isCurrentUserPartOfGroup(String sid) {
-        String groups[] = (new com.sun.security.auth.module.NTSystem()).getGroupIDs();
-        for (String group : groups) {
-            if (StringUtils.equals(sid, group)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static boolean hasCurrentProcessAdminPriviledges() {
-        if (!isAdmin()) {
-            return false;
-        }
-        PrintStream oldSTream = System.err;
-        System.setErr(new PrintStream(new ByteArrayOutputStream()));
-        // this might throw this error:
-        // Sep 14, 2018 12:58:42 PM java.util.prefs.WindowsPreferences openKey
-        // WARNING: Could not open windows registry node Software\JavaSoft\Prefs at root 0x80000002. Windows RegOpenKey(...) returned error
-        // code 5.
-        Preferences prefs = Preferences.systemRoot();
+public class WindowsUtilsTest {
+    public static void main(String[] args) throws LoginException {
+        com.sun.security.auth.module.NTLoginModule loginContext = new com.sun.security.auth.module.NTLoginModule();
         try {
-            prefs.put("foo", "bar"); // SecurityException on Windows
-            prefs.remove("foo");
-            prefs.flush(); // BackingStoreException on Linux
-            return true;
-        } catch (Exception e) {
-            return false;
-        } finally {
-            System.setErr(oldSTream);
+            loginContext.login();
+            System.out.println("You are real!");
+            // Subject subject = loginContext.getSubject();
+        } catch (LoginException e) {
+            System.err.append("Authentication failed: ").println(e.getMessage());
         }
     }
 }

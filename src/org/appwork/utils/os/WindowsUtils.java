@@ -35,8 +35,11 @@ package org.appwork.utils.os;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.prefs.Preferences;
 
+import org.appwork.exceptions.WTFException;
 import org.appwork.utils.StringUtils;
 
 /**
@@ -68,13 +71,28 @@ public class WindowsUtils {
      * @return
      */
     public static boolean isCurrentUserPartOfGroup(String sid) {
-        String groups[] = (new com.sun.security.auth.module.NTSystem()).getGroupIDs();
-        for (String group : groups) {
-            if (StringUtils.equals(sid, group)) {
-                return true;
+        try {
+            final Class<?> ntSystemClass = Class.forName("com.sun.security.auth.module.NTSystem");
+            final Object ntSystem = ntSystemClass.newInstance();
+            final Method getGroupIDs = ntSystemClass.getDeclaredMethod("getGroupIDs", new Class[0]);
+            final String groups[] = (String[]) getGroupIDs.invoke(ntSystem, new Object[0]);
+            for (final String group : groups) {
+                if (StringUtils.equals(sid, group)) {
+                    return true;
+                }
             }
+            return false;
+        } catch (ClassNotFoundException e) {
+            throw new WTFException(e);
+        } catch (NoSuchMethodException e) {
+            throw new WTFException(e);
+        } catch (InvocationTargetException e) {
+            throw new WTFException(e);
+        } catch (IllegalAccessException e) {
+            throw new WTFException(e);
+        } catch (InstantiationException e) {
+            throw new WTFException(e);
         }
-        return false;
     }
 
     public static boolean hasCurrentProcessAdminPriviledges() {

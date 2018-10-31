@@ -494,7 +494,7 @@ public class DesktopSupportWindows extends DesktopSupportJavaDesktop {
         return ((c >= 'a') && (c <= 'z')) || ((c >= 'A') && (c <= 'Z'));
     }
 
-    private final char SLASH = File.separatorChar;// AccessController.doPrivileged(new GetPropertyAction("file.separator")).charAt(0);
+    private final char SLASH = File.separatorChar;
 
     /*
      * (non-Javadoc) from java.io.WinNTFileSystem.prefixLength(String);

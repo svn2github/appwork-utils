@@ -33,6 +33,8 @@
  * ==================================================================================================================================================== */
 package org.appwork.utils.os.test;
 
+import java.lang.reflect.Method;
+
 import javax.security.auth.login.LoginException;
 
 /**
@@ -41,13 +43,15 @@ import javax.security.auth.login.LoginException;
  *
  */
 public class WindowsUtilsTest {
-    public static void main(String[] args) throws LoginException {
-        com.sun.security.auth.module.NTLoginModule loginContext = new com.sun.security.auth.module.NTLoginModule();
+    public static void main(String[] args) throws LoginException, ClassNotFoundException {
+        final Class<?> loginContextClass = Class.forName("com.sun.security.auth.module.NTLoginModule");
         try {
-            loginContext.login();
+            final Object loginContext = loginContextClass.newInstance();
+            final Method login = loginContextClass.getDeclaredMethod("login", new Class[0]);
+            login.invoke(loginContext, new Object[0]);
             System.out.println("You are real!");
             // Subject subject = loginContext.getSubject();
-        } catch (LoginException e) {
+        } catch (Exception e) {
             System.err.append("Authentication failed: ").println(e.getMessage());
         }
     }

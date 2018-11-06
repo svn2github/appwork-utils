@@ -146,50 +146,50 @@ public class JSonMapper {
     public JSonNode create(final Object obj) throws MapperException {
         try {
             if (obj == null) {
-                return new JSonValue(null);
+                return createJsonValue(null);
             }
             final Class<? extends Object> clazz = obj.getClass();
             TypeMapper<?> mapper;
             if (clazz.isPrimitive()) {
                 if (clazz == boolean.class) {
-                    return new JSonValue((Boolean) obj);
+                    return createJsonValue((Boolean) obj);
                 } else if (clazz == char.class) {
-                    return new JSonValue(0 + ((Character) obj).charValue());
+                    return createJsonValue(0 + ((Character) obj).charValue());
                 } else if (clazz == byte.class) {
-                    return new JSonValue(((Byte) obj).longValue());
+                    return createJsonValue(((Byte) obj).longValue());
                 } else if (clazz == short.class) {
-                    return new JSonValue(((Short) obj).longValue());
+                    return createJsonValue(((Short) obj).longValue());
                 } else if (clazz == int.class) {
-                    return new JSonValue(((Integer) obj).longValue());
+                    return createJsonValue(((Integer) obj).longValue());
                 } else if (clazz == long.class) {
-                    return new JSonValue(((Long) obj).longValue());
+                    return createJsonValue(((Long) obj).longValue());
                 } else if (clazz == float.class) {
-                    return new JSonValue(((Float) obj).doubleValue());
+                    return createJsonValue(((Float) obj).doubleValue());
                 } else if (clazz == double.class) {
-                    return new JSonValue(((Double) obj).doubleValue());
+                    return createJsonValue(((Double) obj).doubleValue());
                 } else {
                     throw new MapperException("Unknown Primitive Type: " + clazz);
                 }
             } else if (clazz.isEnum() || Enum.class.isAssignableFrom(clazz)) {
-                return new JSonValue(obj + "");
+                return createJsonValue(obj + "");
             } else if (obj instanceof Boolean) {
-                return new JSonValue(((Boolean) obj).booleanValue());
+                return createJsonValue(((Boolean) obj).booleanValue());
             } else if (obj instanceof Character) {
-                return new JSonValue(0 + ((Character) obj).charValue());
+                return createJsonValue(0 + ((Character) obj).charValue());
             } else if (obj instanceof Byte) {
-                return new JSonValue(((Byte) obj).longValue());
+                return createJsonValue(((Byte) obj).longValue());
             } else if (obj instanceof Short) {
-                return new JSonValue(((Short) obj).longValue());
+                return createJsonValue(((Short) obj).longValue());
             } else if (obj instanceof Integer) {
-                return new JSonValue(((Integer) obj).longValue());
+                return createJsonValue(((Integer) obj).longValue());
             } else if (obj instanceof Long) {
-                return new JSonValue(((Long) obj).longValue());
+                return createJsonValue(((Long) obj).longValue());
             } else if (obj instanceof Float) {
-                return new JSonValue(((Float) obj).doubleValue());
+                return createJsonValue(((Float) obj).doubleValue());
             } else if (obj instanceof Double) {
-                return new JSonValue(((Double) obj).doubleValue());
+                return createJsonValue(((Double) obj).doubleValue());
             } else if (obj instanceof String) {
-                return new JSonValue((String) obj);
+                return createJsonValue((String) obj);
             } else if (obj instanceof Map) {
                 final JSonObject ret = new JSonObject();
                 Entry<Object, Object> next;
@@ -214,7 +214,7 @@ public class JSonMapper {
                 }
                 return ret;
             } else if (obj instanceof Class) {
-                return new JSonValue(((Class<?>) obj).getName());
+                return createJsonValue(((Class<?>) obj).getName());
             } else if ((mapper = typeMapper.get(clazz)) != null) {
                 return mapper.map(obj);
             } else/* if (obj instanceof Storable) */ {
@@ -236,6 +236,30 @@ public class JSonMapper {
         } catch (final NoSuchMethodException e) {
             throw new MapperException(e);
         }
+    }
+
+    /**
+     * @param doubleValue
+     * @return
+     */
+    protected JSonValue createJsonValue(double doubleValue) {
+        return new JSonValue(doubleValue);
+    }
+
+    protected JSonValue createJsonValue(long longValue) {
+        return new JSonValue(longValue);
+    }
+
+    protected JSonValue createJsonValue(boolean value) {
+        return new JSonValue(value);
+    }
+
+    /**
+     * @param name
+     * @return
+     */
+    protected JSonValue createJsonValue(String value) {
+        return new JSonValue(value);
     }
 
     public boolean isIgnoreIllegalArgumentMappings() {

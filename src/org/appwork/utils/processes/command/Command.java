@@ -95,6 +95,7 @@ public class Command {
      * @param lineHandler
      */
     public Command setLineHandler(LineHandler lineHandler) {
+        checkRunning();
         this.lineHandler = lineHandler;
         return this;
     }

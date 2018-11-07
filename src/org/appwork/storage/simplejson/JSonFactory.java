@@ -45,12 +45,18 @@ public class JSonFactory {
     private final StringBuilder sb2;
     private int                 counter;
     private String              debug;
+    private final boolean       naNAllowed;
 
     public JSonFactory(final String json) {
+        this(json, false);
+    }
+
+    public JSonFactory(final String json, boolean naNAllowed) {
         str = json;
         sb = new StringBuilder();
         sb2 = new StringBuilder();
         counter = 0;
+        this.naNAllowed = naNAllowed;
     }
 
     private ParserException bam(final String expected) {
@@ -210,12 +216,12 @@ public class JSonFactory {
         boolean pointFound = false;
         boolean potFound = false;
         c = getChar();
-        if (c == '+' || c == '-' || Character.isDigit(c)) {
+        if (c == '+' || c == '-' || Character.isDigit(c) || (naNAllowed && (c == 'N' || c == 'a'))) {
             sb.append(c);
             while (global + 1 < str.length()) {
                 global++;
                 c = getChar();
-                if (Character.isDigit(c) || !pointFound && c == '.' || pointFound && c == 'e' || pointFound && c == 'E' || potFound && c == '+' || potFound && c == '-') {
+                if (Character.isDigit(c) || !pointFound && c == '.' || pointFound && c == 'e' || pointFound && c == 'E' || potFound && c == '+' || potFound && c == '-' || (naNAllowed && (c == 'N' || c == 'a'))) {
                     if (c == '.') {
                         pointFound = true;
                     } else if (pointFound && (c == 'e' || c == 'E')) {
@@ -231,6 +237,9 @@ public class JSonFactory {
             if (pointFound) {
                 return new JSonValue(Double.parseDouble(sb.toString()));
             } else {
+                if (naNAllowed && "NaN".equals(sb.toString())) {
+                    return new JSonValue(Double.NaN);
+                }
                 return new JSonValue(Long.parseLong(sb.toString()));
             }
         } else {
@@ -260,7 +269,7 @@ public class JSonFactory {
                 }
                 global++;
                 skipWhiteSpace();
-                ret.put(key, parseValue());
+                ret.put(mapKey(key), parseValue());
                 skipWhiteSpace();
                 if (global >= str.length()) {
                     throw bam("} or , expected");
@@ -284,6 +293,14 @@ public class JSonFactory {
             skipWhiteSpace();
             c = getChar();
         }
+    }
+
+    /**
+     * @param key
+     * @return
+     */
+    protected String mapKey(String key) {
+        return key;
     }
 
     private JSonValue parseString() throws ParserException {

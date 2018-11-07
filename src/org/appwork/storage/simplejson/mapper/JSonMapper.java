@@ -477,7 +477,8 @@ public class JSonMapper {
                         JSonNode value;
                         Object v;
                         for (Entry<String, JSonNode> es : obj.entrySet()) {
-                            Setter s = cc.getSetter(es.getKey());
+                            String key = es.getKey();
+                            Setter s = getSetterByKey(cc, key);
                             if (s == null) {
                                 onClassFieldMissing(inst, es.getKey(), es.getValue());
                                 continue;
@@ -535,6 +536,10 @@ public class JSonMapper {
         } finally {
         }
         return null;
+    }
+
+    protected Setter getSetterByKey(final ClassCache cc, String key) {
+        return cc.getSetter(key);
     }
 
     /**

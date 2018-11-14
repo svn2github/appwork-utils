@@ -280,4 +280,11 @@ public class Command {
         builder.environment().put(key, value);
         return this;
     }
+
+    /**
+     *
+     */
+    public void destroy() {
+        process.destroy();
+    }
 }

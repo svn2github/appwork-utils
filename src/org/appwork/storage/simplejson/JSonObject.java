@@ -43,7 +43,12 @@ import org.appwork.utils.StringUtils;
  * @author thomas
  *
  */
-public class JSonObject extends HashMap<String, JSonNode> implements JSonNode {
+public class JSonObject extends HashMap<String, JSonNode>implements JSonNode {
+    protected String          close                    = "\r\n}";
+    protected String          keyValueDeliminator      = " : ";
+    protected String          empty                    = "{}";
+    protected String          open                     = "{\r\n";
+    protected String          fieldDeliminator         = ",\r\n";
     /**
      *
      */
@@ -88,10 +93,10 @@ public class JSonObject extends HashMap<String, JSonNode> implements JSonNode {
 
     public String toPrettyString() {
         if (size() == 0) {
-            return "{}";
+            return empty;
         }
         final StringBuilder sb = new StringBuilder();
-        sb.append("{\r\n");
+        sb.append(open);
         int keyLength = 0;
         for (java.util.Map.Entry<String, JSonNode> es : entrySet()) {
             keyLength = Math.max(JSonUtils.escape(es.getKey()).length() + 2/* quotes */, keyLength);
@@ -99,11 +104,11 @@ public class JSonObject extends HashMap<String, JSonNode> implements JSonNode {
         Map.Entry<String, JSonNode> next;
         for (final Iterator<Map.Entry<String, JSonNode>> it = this.entrySet().iterator(); it.hasNext();) {
             if (sb.length() > 3) {
-                sb.append(",\r\n");
+                sb.append(fieldDeliminator);
             }
             next = it.next();
             sb.append(PRETTY_PRINT_LAYER_INSET + StringUtils.fillPost("\"" + JSonUtils.escape(next.getKey()) + "\"", " ", keyLength));
-            sb.append(" : ");
+            sb.append(keyValueDeliminator);
             String value = next.getValue().toPrettyString();
             String[] lines = value.split("[\r\n]+");
             boolean first = true;
@@ -120,7 +125,7 @@ public class JSonObject extends HashMap<String, JSonNode> implements JSonNode {
                 sb.append(value);
             }
         }
-        sb.append("\r\n}");
+        sb.append(close);
         return sb.toString();
     }
 }

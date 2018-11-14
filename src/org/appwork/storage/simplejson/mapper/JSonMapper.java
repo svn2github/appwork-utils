@@ -191,7 +191,7 @@ public class JSonMapper {
             } else if (obj instanceof String) {
                 return createJsonValue((String) obj);
             } else if (obj instanceof Map) {
-                final JSonObject ret = new JSonObject();
+                final JSonObject ret = createJsonObject();
                 Entry<Object, Object> next;
                 for (final Iterator<Entry<Object, Object>> it = ((Map<Object, Object>) obj).entrySet().iterator(); it.hasNext();) {
                     next = it.next();
@@ -219,7 +219,7 @@ public class JSonMapper {
                 return mapper.map(obj);
             } else/* if (obj instanceof Storable) */ {
                 final ClassCache cc = ClassCache.getClassCache(clazz);
-                final JSonObject ret = new JSonObject();
+                final JSonObject ret = createJsonObject();
                 for (final Getter g : cc.getGetter()) {
                     ret.put(g.getKey(), create(g.getValue(obj)));
                 }
@@ -236,6 +236,14 @@ public class JSonMapper {
         } catch (final NoSuchMethodException e) {
             throw new MapperException(e);
         }
+    }
+
+    /**
+     * @return
+     */
+    protected JSonObject createJsonObject() {
+        // TODO Auto-generated method stub
+        return new JSonObject();
     }
 
     /**

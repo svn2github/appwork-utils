@@ -40,7 +40,7 @@ import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPOutputStream;
 
 import org.appwork.net.protocol.http.HTTPConstants;
-import org.appwork.net.protocol.http.HTTPConstants.ResponseCode;
+import org.appwork.net.protocol.http.ResponseCodeInterface;
 import org.appwork.remoteapi.RemoteAPIRequest.REQUESTTYPE;
 import org.appwork.utils.Application;
 import org.appwork.utils.net.ChunkedOutputStream;
@@ -93,7 +93,7 @@ public class RemoteAPIResponse implements HttpResponseInterface {
         return this.remoteAPI;
     }
 
-    public ResponseCode getResponseCode() {
+    public ResponseCodeInterface getResponseCode() {
         return this.response.getResponseCode();
     }
 
@@ -159,7 +159,7 @@ public class RemoteAPIResponse implements HttpResponseInterface {
      * @param responseCode
      *            the responseCode to set
      */
-    public void setResponseCode(final ResponseCode responseCode) {
+    public void setResponseCode(final ResponseCodeInterface responseCode) {
         this.response.setResponseCode(responseCode);
     }
 }

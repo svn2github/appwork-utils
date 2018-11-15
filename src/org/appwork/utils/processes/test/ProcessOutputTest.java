@@ -39,40 +39,26 @@ import java.io.IOException;
 import org.appwork.utils.Application;
 import org.appwork.utils.ide.IDEUtils;
 import org.appwork.utils.os.CrossSystem;
-import org.appwork.utils.processes.command.AbstractLineHandler;
+import org.appwork.utils.processes.ProcessOutput;
 import org.appwork.utils.processes.command.Command;
+import org.appwork.utils.processes.command.ProcessOutputHandler;
 
 /**
  * @author Thomas
  * @date 18.10.2018
  *
  */
-public class LineReadingTest {
+public class ProcessOutputTest {
     public static void main(String[] args) throws IOException, InterruptedException, ClassNotFoundException {
         Application.setApplication(".tests");
-        if (false) {
-            File projectRoot = IDEUtils.getProjectFolder();
-            Command command = new Command("cat", "/home/daniel/workspaceBuild/jdlog_9829264433151.txt", LineReadingTestProcess.class.getName());
-            command.setOutputHandler(new AbstractLineHandler() {
-                @Override
-                public void handleLine(String line, Object caller) {
-                    System.out.println(line);
-                }
-            });
-            command.start(true);
-            command.waitFor();
-        } else {
-            File projectRoot = IDEUtils.getProjectFolder();
-            Command command = new Command(CrossSystem.getJavaBinary(), "-cp", new File(projectRoot, "bin").getAbsolutePath(), LineReadingTestProcess.class.getName());
-            command.setOutputHandler(new AbstractLineHandler() {
-                @Override
-                public void handleLine(String line, Object caller) {
-                    System.out.println(line);
-                }
-            });
-            command.start(true);
-            command.waitFor();
-        }
+        File projectRoot = IDEUtils.getProjectFolder();
+        Command command = new Command(CrossSystem.getJavaBinary(), "-cp", new File(projectRoot, "bin").getAbsolutePath(), LineReadingTestProcess.class.getName());
+        ProcessOutputHandler po;
+        command.setOutputHandler(po = new ProcessOutputHandler());
+        command.start(true);
+        command.waitFor();
+        ProcessOutput out = po.getResult();
+        System.out.println(out);
         // ProcessBuilderFactory.runCommand(ProcessBuilderFactory.create(CrossSystem.getJavaBinary(), "-cp", new File(projectRoot,
         // "bin").getAbsolutePath(), LineReadingTestProcess.class.getName()), new NullOutputStream(), new NullOutputStream());
         ;

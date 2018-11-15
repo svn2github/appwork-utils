@@ -73,6 +73,10 @@ public class HttpServer implements Runnable, HTTPBridge {
     }
 
     protected Runnable createConnectionHandler(final Socket clientSocket) throws IOException {
+        return createPlainHttpConnection(clientSocket);
+    }
+
+    protected HttpConnection createPlainHttpConnection(Socket clientSocket) throws IOException {
         return new HttpConnection(this, clientSocket);
     }
 

@@ -38,6 +38,7 @@ import java.io.OutputStream;
 
 import org.appwork.net.protocol.http.HTTPConstants;
 import org.appwork.net.protocol.http.HTTPConstants.ResponseCode;
+import org.appwork.net.protocol.http.ResponseCodeInterface;
 import org.appwork.utils.net.HTTPHeader;
 import org.appwork.utils.net.HeaderCollection;
 import org.appwork.utils.net.httpserver.HttpConnection.ConnectionHook;
@@ -52,7 +53,7 @@ public class HttpResponse implements HttpResponseInterface {
     public static final byte[]                 NEWLINE       = "\r\n".getBytes();
     public static final byte[]                 HTTP11        = "HTTP/1.1 ".getBytes();
     public static final byte[]                 _0            = "0".getBytes();
-    private ResponseCode                       responseCode  = ResponseCode.SUCCESS_NO_CONTENT;
+    private ResponseCodeInterface              responseCode  = ResponseCode.SUCCESS_NO_CONTENT;
     protected final RawHttpConnectionInterface connection;
     protected OutputStream                     outputStream  = null;
     protected boolean                          asyncResponse = false;
@@ -102,7 +103,7 @@ public class HttpResponse implements HttpResponseInterface {
     /**
      * @return the responseCode
      */
-    public ResponseCode getResponseCode() {
+    public ResponseCodeInterface getResponseCode() {
         return this.responseCode;
     }
 
@@ -117,7 +118,7 @@ public class HttpResponse implements HttpResponseInterface {
      * @param responseCode
      *            the responseCode to set
      */
-    public void setResponseCode(final ResponseCode responseCode) {
+    public void setResponseCode(final ResponseCodeInterface responseCode) {
         this.responseCode = responseCode;
     }
 

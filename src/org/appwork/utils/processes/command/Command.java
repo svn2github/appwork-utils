@@ -35,18 +35,13 @@ package org.appwork.utils.processes.command;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.appwork.loggingv3.LogV3;
 import org.appwork.utils.logging2.LogInterface;
-import org.appwork.utils.net.LineParsingInputStream;
-import org.appwork.utils.net.LineParsingOutputStream.NEWLINE;
 import org.appwork.utils.parser.ShellParser;
-import org.appwork.utils.processes.LineHandler;
 import org.appwork.utils.processes.ProcessBuilderFactory;
 
 /**
@@ -56,7 +51,7 @@ import org.appwork.utils.processes.ProcessBuilderFactory;
  */
 public class Command {
     public final ProcessBuilder builder;
-    private LineHandler         lineHandler;
+    private OutputHandler       lineHandler;
     private Process             process;
     private int                 exitCode;
 
@@ -94,103 +89,14 @@ public class Command {
     /**
      * @param lineHandler
      */
-    public Command setLineHandler(LineHandler lineHandler) {
+    public Command setOutputHandler(OutputHandler lineHandler) {
         checkRunning();
         this.lineHandler = lineHandler;
         return this;
     }
 
-    private interface AsyncTask {
-        public void waitFor() throws IOException, InterruptedException;
-
-        public void start();
-
-        /**
-         *
-         */
-        public void interrupt();
-    }
-
-    public class LineReaderThread extends Thread implements AsyncTask {
-        private final LineParsingInputStream is;
-        private volatile boolean             processIsDead;
-
-        /**
-         * @param lh
-         * @param inputStream
-         * @throws UnsupportedEncodingException
-         * @throws InterruptedException
-         */
-        public LineReaderThread(final String name, final LineHandler lineHandler, final InputStream inputStream) throws UnsupportedEncodingException, InterruptedException {
-            super(name);
-            setDaemon(true);
-            this.is = new LineParsingInputStream(inputStream, getCharset()) {
-                @Override
-                protected void onNextLine(NEWLINE newLine, long line, StringBuilder sb, int startIndex, int endIndex) {
-                    lineHandler.handleLine(sb.substring(startIndex, endIndex), LineReaderThread.this);
-                }
-            };
-        }
-
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Thread#run()
-         */
-        @Override
-        public void run() {
-            final byte[] buf = new byte[8192];
-            while (true) {
-                try {
-                    final int read = is.read(buf);
-                    if (read <= 0) {
-                        if (processIsDead) {
-                            return;
-                        } else {
-                            Thread.sleep(50);
-                        }
-                    }
-                } catch (IOException e) {
-                    if (!processIsDead) {
-                        logger.log(e);
-                    }
-                } catch (InterruptedException e) {
-                    return;
-                }
-            }
-        }
-
-        @Override
-        public void interrupt() {
-            try {
-                is.close();
-            } catch (IOException e) {
-                logger.exception("Swallowed Exception closeing Command Reader", e);
-            } finally {
-                super.interrupt();
-            }
-        }
-
-        /**
-         * @throws InterruptedException
-         * @throws IOException
-         *
-         */
-        public void waitFor() throws InterruptedException {
-            processIsDead = true;
-            try {
-                while (isAlive() && is.available() > 0) {
-                    Thread.sleep(50);
-                }
-                interrupt();
-            } catch (IOException e) {
-                logger.exception("Swallowed Exception closeing Command Reader", e);
-            }
-        }
-    }
-
-    private List<AsyncTask> asyncTasks = new ArrayList<AsyncTask>();
-    private Charset         charset;
+    private List<AsyncInputStreamHandler> asyncTasks = new ArrayList<AsyncInputStreamHandler>();
+    private Charset                       charset;
 
     public Command setCharset(Charset charset) {
         checkRunning();
@@ -212,12 +118,12 @@ public class Command {
         if (closeOutputStream) {
             process.getOutputStream().close();
         }
-        final LineHandler lh = lineHandler;
+        final OutputHandler lh = lineHandler;
         if (lh != null) {
-            asyncTasks.add(new LineReaderThread("STD", lh, process.getInputStream()));
-            asyncTasks.add(new LineReaderThread("ERR", lh, process.getErrorStream()));
+            asyncTasks.add(lh.createAsyncStreamHandler(new CommandStdInputStream(process.getInputStream()), getCharset()));
+            asyncTasks.add(lh.createAsyncStreamHandler(new CommandErrInputStream(process.getErrorStream()), getCharset()));
         }
-        for (final AsyncTask task : asyncTasks) {
+        for (final AsyncInputStreamHandler task : asyncTasks) {
             task.start();
         }
         return this;
@@ -239,12 +145,15 @@ public class Command {
                 exitCode = process.waitFor();
                 return exitCode;
             } finally {
-                for (AsyncTask task : asyncTasks) {
+                if (lineHandler != null) {
+                    lineHandler.onExitCode(exitCode);
+                }
+                for (AsyncInputStreamHandler task : asyncTasks) {
                     task.waitFor();
                 }
             }
         } catch (InterruptedException e) {
-            for (AsyncTask task : asyncTasks) {
+            for (AsyncInputStreamHandler task : asyncTasks) {
                 task.interrupt();
             }
             throw e;

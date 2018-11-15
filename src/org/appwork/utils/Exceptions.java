@@ -54,6 +54,7 @@ public class Exceptions {
      * @param class1
      * @return
      */
+    @SafeVarargs
     public static boolean containsInstanceOf(final Throwable e, final Class<? extends Throwable>... classes) {
         if (classes != null) {
             for (final Class<? extends Throwable> class1 : classes) {

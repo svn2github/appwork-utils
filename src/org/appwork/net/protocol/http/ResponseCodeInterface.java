@@ -31,50 +31,17 @@
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
-package org.appwork.utils.processes.test;
-
-import java.io.File;
-import java.io.IOException;
-
-import org.appwork.utils.Application;
-import org.appwork.utils.ide.IDEUtils;
-import org.appwork.utils.os.CrossSystem;
-import org.appwork.utils.processes.command.AbstractLineHandler;
-import org.appwork.utils.processes.command.Command;
+package org.appwork.net.protocol.http;
 
 /**
  * @author Thomas
- * @date 18.10.2018
+ * @date 15.11.2018
  *
  */
-public class LineReadingTest {
-    public static void main(String[] args) throws IOException, InterruptedException, ClassNotFoundException {
-        Application.setApplication(".tests");
-        if (false) {
-            File projectRoot = IDEUtils.getProjectFolder();
-            Command command = new Command("cat", "/home/daniel/workspaceBuild/jdlog_9829264433151.txt", LineReadingTestProcess.class.getName());
-            command.setOutputHandler(new AbstractLineHandler() {
-                @Override
-                public void handleLine(String line, Object caller) {
-                    System.out.println(line);
-                }
-            });
-            command.start(true);
-            command.waitFor();
-        } else {
-            File projectRoot = IDEUtils.getProjectFolder();
-            Command command = new Command(CrossSystem.getJavaBinary(), "-cp", new File(projectRoot, "bin").getAbsolutePath(), LineReadingTestProcess.class.getName());
-            command.setOutputHandler(new AbstractLineHandler() {
-                @Override
-                public void handleLine(String line, Object caller) {
-                    System.out.println(line);
-                }
-            });
-            command.start(true);
-            command.waitFor();
-        }
-        // ProcessBuilderFactory.runCommand(ProcessBuilderFactory.create(CrossSystem.getJavaBinary(), "-cp", new File(projectRoot,
-        // "bin").getAbsolutePath(), LineReadingTestProcess.class.getName()), new NullOutputStream(), new NullOutputStream());
-        ;
-    }
+public interface ResponseCodeInterface {
+    public byte[] getBytes();
+
+    public int getCode();
+
+    public String getDescription();
 }

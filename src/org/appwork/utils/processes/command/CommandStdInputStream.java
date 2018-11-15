@@ -31,32 +31,21 @@
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
-package org.appwork.utils.processes;
+package org.appwork.utils.processes.command;
 
-import org.appwork.utils.logging2.LogInterface;
+import java.io.FilterInputStream;
+import java.io.InputStream;
 
 /**
  * @author Thomas
- * @date 18.10.2018
+ * @date 08.11.2018
  *
  */
-public class LogLineHandler implements LineHandler {
-    private LogInterface logger;
-
+public class CommandStdInputStream extends FilterInputStream {
     /**
-     * @param logger
+     * @param in
      */
-    public LogLineHandler(LogInterface logger) {
-        this.logger = logger;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.appwork.utils.processes.LineHandler#handleLine(java.lang.String, java.lang.Object)
-     */
-    @Override
-    public void handleLine(String line, Object caller) {
-        logger.info(line);
+    protected CommandStdInputStream(InputStream in) {
+        super(in);
     }
 }

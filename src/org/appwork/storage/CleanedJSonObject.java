@@ -142,11 +142,11 @@ public class CleanedJSonObject {
         if (false) {
             return JSonStorage.serializeToJson(this.object);
         }
-        final Object map = this.toMap();
+        final Object map = this.getCleanedData();
         return JSonStorage.serializeToJson(map);
     }
 
-    public Object toMap() {
+    public Object getCleanedData() {
         try {
             // System.out.println(this.toString());
             if (this.object == null) {
@@ -156,19 +156,19 @@ public class CleanedJSonObject {
                 final ArrayList<Object> ret = new ArrayList<Object>();
                 int i = 0;
                 for (final Object o : (Collection) this.object) {
-                    ret.add(new CleanedJSonObject("[" + i++ + "]", o, this).toMap());
+                    ret.add(new CleanedJSonObject("[" + i++ + "]", o, this).getCleanedData());
                 }
                 return ret;
             } else if (this.object.getClass().isArray()) {
                 final ArrayList<Object> ret = new ArrayList<Object>();
                 for (int i = 0; i < Array.getLength(this.object); i++) {
-                    ret.add(new CleanedJSonObject("[" + i + "]", Array.get(this.object, i), this).toMap());
+                    ret.add(new CleanedJSonObject("[" + i + "]", Array.get(this.object, i), this).getCleanedData());
                 }
                 return ret;
             } else if (this.object instanceof Map) {
                 final HashMap<String, Object> map = new HashMap<String, Object>();
                 for (Entry<String, Object> es : ((Map<String, Object>) object).entrySet()) {
-                    map.put(es.getKey(), new CleanedJSonObject(es.getKey(), es.getValue(), this).toMap());
+                    map.put(es.getKey(), new CleanedJSonObject(es.getKey(), es.getValue(), this).getCleanedData());
                 }
                 return map;
             } else if (this.object instanceof Storable) {
@@ -192,7 +192,7 @@ public class CleanedJSonObject {
             if ("class".equals(gs.getKey())) {
                 continue;
             }
-            obj = new CleanedJSonObject(gs.getKey(), gs.get(this.object), this).toMap();
+            obj = new CleanedJSonObject(gs.getKey(), gs.get(this.object), this).getCleanedData();
             if (this.equals(obj, gs.get(empty))) {
                 continue;
             }

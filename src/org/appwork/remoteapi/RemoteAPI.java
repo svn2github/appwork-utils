@@ -437,11 +437,7 @@ public class RemoteAPI implements HttpRequestHandler {
         // }
         RemoteAPIRequest ret;
         try {
-            // first ask the implementation itself
-            ret = remoteAPIMethod.getInterfaceHandler().createRemoteAPIRequestObject(request, preData, remoteAPIMethod, parsedParameters);
-            if (ret == null) {
-                ret = this.createRemoteAPIRequestObject(request, preData, remoteAPIMethod.getMethodName(), remoteAPIMethod.getInterfaceHandler(), parsedParameters);
-            }
+            ret = this.createRemoteAPIRequestObject(request, preData, remoteAPIMethod.getMethodName(), remoteAPIMethod.getInterfaceHandler(), parsedParameters);
         } catch (final IOException e) {
             throw new BasicRemoteAPIException(e);
         }

@@ -43,7 +43,7 @@ import org.appwork.utils.StringUtils;
  * @author thomas
  *
  */
-public class JSonObject extends HashMap<String, JSonNode>implements JSonNode {
+public class JSonObject extends HashMap<String, JSonNode> implements JSonNode {
     protected String          close                    = "\r\n}";
     protected String          keyValueDeliminator      = " : ";
     protected String          empty                    = "{}";
@@ -81,14 +81,16 @@ public class JSonObject extends HashMap<String, JSonNode>implements JSonNode {
                 sb.append(",");
             }
             next = it.next();
-            sb.append("\"");
-            sb.append(JSonUtils.escape(next.getKey()));
-            sb.append("\"");
+            sb.append(toStringKey(next.getKey()));
             sb.append(":");
             sb.append(next.getValue().toString());
         }
         sb.append("}");
         return sb.toString();
+    }
+
+    protected String toStringKey(String key) {
+        return "\"" + JSonUtils.escape(key) + "\"";
     }
 
     public String toPrettyString() {
@@ -107,7 +109,7 @@ public class JSonObject extends HashMap<String, JSonNode>implements JSonNode {
                 sb.append(fieldDeliminator);
             }
             next = it.next();
-            sb.append(PRETTY_PRINT_LAYER_INSET + StringUtils.fillPost("\"" + JSonUtils.escape(next.getKey()) + "\"", " ", keyLength));
+            sb.append(PRETTY_PRINT_LAYER_INSET + StringUtils.fillPost(toStringKey(next.getKey()), " ", keyLength));
             sb.append(keyValueDeliminator);
             String value = next.getValue().toPrettyString();
             String[] lines = value.split("[\r\n]+");

@@ -33,6 +33,8 @@
  * ==================================================================================================================================================== */
 package org.appwork.utils.net;
 
+import org.appwork.utils.net.httpconnection.HTTPConnection;
+
 /**
  * @author daniel
  *
@@ -41,7 +43,16 @@ public class DownloadProgress {
     private long loaded = 0;
     private long total  = 0;
 
-    public void onConnect() {
+    public void onConnect(HTTPConnection connection) {
+    }
+
+    public void onConnected(HTTPConnection connection) {
+    }
+
+    public void onException(HTTPConnection connection, Throwable exception) {
+    }
+
+    public void onDisconnected(HTTPConnection connection) {
     }
 
     public void setLoaded(long loaded) {

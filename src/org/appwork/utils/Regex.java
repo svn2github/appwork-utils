@@ -50,7 +50,7 @@ public class Regex {
         if (arg == null) {
             return new String[] {};
         } else {
-            final String[] temp = arg.split("[\r\n]{1,2}");
+            final String[] temp = arg.split("(\r\n|\r|\n)");
             final int tempLength = temp.length;
             final String[] output = new String[tempLength];
             for (int i = 0; i < tempLength; i++) {

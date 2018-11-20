@@ -33,6 +33,8 @@
  * ==================================================================================================================================================== */
 package org.appwork.utils.net;
 
+import java.io.IOException;
+
 import org.appwork.utils.net.httpconnection.HTTPConnection;
 
 /**
@@ -43,10 +45,10 @@ public class DownloadProgress {
     private long loaded = 0;
     private long total  = 0;
 
-    public void onConnect(HTTPConnection connection) {
+    public void onConnect(HTTPConnection connection) throws IOException {
     }
 
-    public void onConnected(HTTPConnection connection) {
+    public void onConnected(HTTPConnection connection) throws IOException {
     }
 
     public void onException(HTTPConnection connection, Throwable exception) {

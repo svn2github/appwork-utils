@@ -35,7 +35,6 @@ package org.appwork.utils.net.BasicHTTP;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
-import java.io.EOFException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -143,9 +142,6 @@ public class BasicHTTP implements Interruptible {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             this.download(url, progress, maxSize, baos, -1);
-            // if(getProxy()==null||getProxy().equals(HTTPProxy.NONE)) {
-            // throw new IOException("Direct is pfui!");
-            // }
         } catch (final BasicHTTPException e) {
             throw e;
         } catch (final InterruptedException e) {
@@ -237,7 +233,7 @@ public class BasicHTTP implements Interruptible {
                                 }
                             }
                             if (redirectTimeoutTimeStamp > 0 && System.currentTimeMillis() >= redirectTimeoutTimeStamp) {
-                                throw new IOException("RedirectTimeout reached!");
+                                throw new RedirectTimeoutException(connection);
                             }
                             if (this.connection.getResponseCode() == 302) {
                                 Thread.sleep(100);
@@ -247,14 +243,14 @@ public class BasicHTTP implements Interruptible {
                             this.download(new URL(URLHelper.parseLocation(url, red)), progress, maxSize, baos, resumePosition, redirectTimeoutTimeStamp);
                             return;
                         }
-                        throw new IOException("Redirect with ResponseCode " + this.connection.getResponseCode() + " but no location header!");
+                        throw new InvalidRedirectException(connection);
                     }
                     this.checkResponseCode();
                     input = this.connection.getInputStream();
                     if (this.connection.getCompleteContentLength() >= 0) {
                         /* contentLength is known */
                         if (maxSize > 0 && this.connection.getCompleteContentLength() > maxSize) {
-                            throw new IOException("Max size exeeded!");
+                            throw new BadResponseLengthException(connection, maxSize);
                         }
                         if (progress != null) {
                             progress.setTotal(this.connection.getCompleteContentLength());
@@ -290,7 +286,7 @@ public class BasicHTTP implements Interruptible {
                             }
                             loaded += len;
                             if (maxSize > 0 && loaded > maxSize) {
-                                throw new IOException("Max size exeeded!");
+                                throw new BadResponseLengthException(connection, maxSize);
                             }
                             if (progress != null) {
                                 progress.increaseLoaded(len);
@@ -299,7 +295,7 @@ public class BasicHTTP implements Interruptible {
                     }
                     if (this.connection.getCompleteContentLength() >= 0) {
                         if (loaded != this.connection.getCompleteContentLength()) {
-                            throw new EOFException("Incomplete download! " + loaded + " from " + this.connection.getCompleteContentLength());
+                            throw new IncompleteResponseException(connection, loaded);
                         }
                     }
                 } catch (final ReadIOException e) {
@@ -325,14 +321,6 @@ public class BasicHTTP implements Interruptible {
                     } catch (final Throwable e) {
                         e.printStackTrace();
                     }
-                    try {
-                        this.connection.disconnect();
-                    } catch (final Throwable e) {
-                    } finally {
-                        if (progress != null) {
-                            progress.onDisconnected(connection);
-                        }
-                    }
                 }
             } catch (InterruptedException e) {
                 if (progress != null) {
@@ -344,6 +332,17 @@ public class BasicHTTP implements Interruptible {
                     progress.onException(connection, e);
                 }
                 throw e;
+            } finally {
+                if (connection != null) {
+                    try {
+                        this.connection.disconnect();
+                    } catch (final Throwable e) {
+                    } finally {
+                        if (progress != null) {
+                            progress.onDisconnected(connection);
+                        }
+                    }
+                }
             }
         }
     }
@@ -709,9 +708,6 @@ public class BasicHTTP implements Interruptible {
                             }
                             break;
                         } catch (final UnknownHostException e) {
-                            if (uploadProgress != null) {
-                                uploadProgress.onException(connection, e);
-                            }
                             if (++lookupTry > 3) {
                                 throw e;
                             }
@@ -786,7 +782,7 @@ public class BasicHTTP implements Interruptible {
                     }
                     if (this.connection.getCompleteContentLength() >= 0) {
                         if (loaded != this.connection.getCompleteContentLength()) {
-                            throw new EOFException("Incomplete download! " + loaded + " from " + this.connection.getCompleteContentLength());
+                            throw new IncompleteResponseException(connection, loaded);
                         }
                     }
                     return;
@@ -812,14 +808,6 @@ public class BasicHTTP implements Interruptible {
                         }
                     } catch (final Throwable e) {
                     }
-                    try {
-                        this.connection.disconnect();
-                    } catch (final Throwable e) {
-                    } finally {
-                        if (uploadProgress != null) {
-                            uploadProgress.onDisconnected(connection);
-                        }
-                    }
                 }
             } catch (InterruptedException e) {
                 if (uploadProgress != null) {
@@ -831,6 +819,17 @@ public class BasicHTTP implements Interruptible {
                     uploadProgress.onException(connection, e);
                 }
                 throw e;
+            } finally {
+                if (connection != null) {
+                    try {
+                        this.connection.disconnect();
+                    } catch (final Throwable e) {
+                    } finally {
+                        if (uploadProgress != null) {
+                            uploadProgress.onDisconnected(connection);
+                        }
+                    }
+                }
             }
         }
     }

@@ -42,7 +42,7 @@ import org.appwork.utils.net.httpconnection.HTTPConnection;
  *
  */
 public class BadRangeResponse extends IOException {
-    private final HTTPConnection connection;
+    protected final HTTPConnection connection;
 
     public HTTPConnection getConnection() {
         return connection;
@@ -52,7 +52,6 @@ public class BadRangeResponse extends IOException {
      * @param connection
      */
     public BadRangeResponse(final HTTPConnection connection) {
-        super("Got Non Range Response for a Range Request");
         this.connection = connection;
     }
 }

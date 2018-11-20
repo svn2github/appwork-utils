@@ -288,6 +288,20 @@ public class HTTPConnectionUtils {
         return bigbuffer;
     }
 
+    public static long[] parseRequestRange(HTTPConnection connection) {
+        final String requestRange = connection != null ? connection.getRequestProperty(HTTPConstants.HEADER_REQUEST_RANGE) : null;
+        final String from = new Regex(requestRange, "bytes\\s*=\\s*(\\d*)-").getMatch(0);
+        final String to = new Regex(requestRange, "bytes\\s*=\\s*.*?-\\s*(\\d*)").getMatch(0);
+        final long[] ret = new long[] { -1l, -1l };
+        if (StringUtils.isNotEmpty(from)) {
+            ret[0] = Long.parseLong(from);
+        }
+        if (StringUtils.isNotEmpty(to)) {
+            ret[1] = Long.parseLong(to);
+        }
+        return ret;
+    }
+
     public static long[] parseContentRange(final HTTPConnection httpConnection) {
         final String contentRange = httpConnection != null ? httpConnection.getHeaderField(HTTPConstants.HEADER_RESPONSE_CONTENT_RANGE) : null;
         if (contentRange != null) {

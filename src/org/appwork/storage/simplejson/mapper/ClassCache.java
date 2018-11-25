@@ -54,19 +54,50 @@ public class ClassCache {
     private static final Object[]                      EMPTY_OBJECT = new Object[] {};
     private static final Class<?>[]                    EMPTY_TYPES  = new Class[] {};
 
+    protected static ClassCache create(final Class<? extends Object> clazz) throws SecurityException, NoSuchMethodException {
+        return create(clazz, null);
+    }
+
+    public static class Rules {
+        private Class<?> breakAtClass;
+
+        /**
+         * @return the breakAtClass
+         */
+        public Class<?> getBreakAtClass() {
+            return breakAtClass;
+        }
+
+        /**
+         * @param breakAtClass
+         *            the breakAtClass to set
+         */
+        public void setBreakAtClass(Class<?> breakAtClass) {
+            this.breakAtClass = breakAtClass;
+        }
+
+        public Rules breakAtClass(Class<?> breakAtClass) {
+            this.breakAtClass = breakAtClass;
+            return this;
+        }
+    }
+
     /**
      * @param clazz
      * @return
      * @throws NoSuchMethodException
      * @throws SecurityException
      */
-    protected static ClassCache create(final Class<? extends Object> clazz) throws SecurityException, NoSuchMethodException {
+    public static ClassCache create(final Class<? extends Object> clazz, Rules rules) throws SecurityException, NoSuchMethodException {
         final ClassCache cc = new ClassCache(clazz);
         Getter g;
         Setter s;
         Class<? extends Object> cls = clazz;
         final HashSet<String> ignores = new HashSet<String>();
         do {
+            if (rules != null && rules.getBreakAtClass() == cls) {
+                break;
+            }
             final Ignores ig = cls.getAnnotation(Ignores.class);
             if (ig != null) {
                 for (final String i : ig.value()) {

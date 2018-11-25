@@ -218,7 +218,7 @@ public class JSonMapper {
             } else if ((mapper = typeMapper.get(clazz)) != null) {
                 return mapper.map(obj);
             } else/* if (obj instanceof Storable) */ {
-                final ClassCache cc = ClassCache.getClassCache(clazz);
+                final ClassCache cc = getClassCache(clazz);
                 final JSonObject ret = createJsonObject();
                 for (final Getter g : cc.getGetter()) {
                     ret.put(g.getKey(), create(g.getValue(obj)));
@@ -236,6 +236,10 @@ public class JSonMapper {
         } catch (final NoSuchMethodException e) {
             throw new MapperException(e);
         }
+    }
+
+    public ClassCache getClassCache(final Class<? extends Object> clazz) throws NoSuchMethodException {
+        return ClassCache.getClassCache(clazz);
     }
 
     /**

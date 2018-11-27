@@ -80,6 +80,7 @@ public class JSonStorage {
     /* default key for encrypted json */
     static public byte[]                              KEY         = new byte[] { 0x01, 0x02, 0x11, 0x01, 0x01, 0x54, 0x01, 0x01, 0x01, 0x01, 0x12, 0x01, 0x01, 0x01, 0x22, 0x01 };
     private static final HashMap<File, AtomicInteger> LOCKS       = new HashMap<File, AtomicInteger>();
+
     static {
         /* shutdown hook to save all open Storages */
         ShutdownController.getInstance().addShutdownEvent(new ShutdownEvent() {
@@ -119,6 +120,41 @@ public class JSonStorage {
         JSonStorage.canStoreIntern(gType, gType.toString(), allowNonStorableObjects, dupeID);
     }
 
+    public static void canStore(final Type gType, final CanStoreRules rules) throws InvalidTypeException {
+        HashSet<Object> dupeID = new HashSet<Object>();
+        JSonStorage.canStoreIntern(gType, gType.toString(), rules, dupeID);
+    }
+
+    private static void canStoreIntern(final Type gType, final String path, final boolean allowNonStorableObjects, HashSet<Object> dupeID) throws InvalidTypeException {
+        CanStoreRules rules = new CanStoreRules() {
+            @Override
+            public boolean canStore(Type gType) {
+                return allowNonStorableObjects;
+            }
+
+            @Override
+            public boolean isFollowSuperClass(Type sc) {
+                // TODO Auto-generated method stub
+                return false;
+            }
+        };
+        canStoreIntern(gType, path, rules, dupeID);
+    }
+
+    public static interface CanStoreRules {
+        /**
+         * @param gType
+         * @return
+         */
+        boolean canStore(Type gType);
+
+        /**
+         * @param sc
+         * @return
+         */
+        boolean isFollowSuperClass(Type sc);
+    }
+
     /**
      * @param gType
      * @param allowNonStorableObjects
@@ -127,12 +163,12 @@ public class JSonStorage {
      * @param string
      * @throws InvalidTypeException
      */
-    private static void canStoreIntern(final Type gType, final String path, final boolean allowNonStorableObjects, HashSet<Object> dupeID) throws InvalidTypeException {
+    private static void canStoreIntern(final Type gType, final String path, CanStoreRules rules, HashSet<Object> dupeID) throws InvalidTypeException {
         if (!dupeID.add(gType)) {
             return;
         }
         if (gType == Object.class) {
-            if (allowNonStorableObjects) {
+            if (rules.canStore(gType)) {
                 return;
             }
             throw new InvalidTypeException(gType, "Cannot store Object: " + path);
@@ -153,7 +189,7 @@ public class JSonStorage {
             }
             if (type.isArray()) {
                 final Class<?> arrayType = type.getComponentType();
-                JSonStorage.canStoreIntern(arrayType, path + "[" + arrayType + "]", allowNonStorableObjects, dupeID);
+                JSonStorage.canStoreIntern(arrayType, path + "[" + arrayType + "]", rules, dupeID);
                 return;
             }
             // we need an empty constructor
@@ -166,7 +202,7 @@ public class JSonStorage {
             if (HashSet.class.isAssignableFrom(type)) {
                 return;
             }
-            if (Storable.class.isAssignableFrom(type) || allowNonStorableObjects) {
+            if (Storable.class.isAssignableFrom(type) || rules.canStore(type)) {
                 try {
                     type.getDeclaredConstructor(new Class[] {});
                     for (final Method m : type.getDeclaredMethods()) {
@@ -174,12 +210,16 @@ public class JSonStorage {
                             if (m.getParameterTypes().length > 0) {
                                 throw new InvalidTypeException(gType, "Getter " + path + "." + m + " has parameters.");
                             }
-                            JSonStorage.canStoreIntern(m.getGenericReturnType(), path + "->" + m.getGenericReturnType(), allowNonStorableObjects, dupeID);
+                            JSonStorage.canStoreIntern(m.getGenericReturnType(), path + "->" + m.getGenericReturnType(), rules, dupeID);
                         } else if (m.getName().startsWith("set")) {
                             if (m.getParameterTypes().length != 1) {
                                 throw new InvalidTypeException(gType, "Setter " + path + "." + m + " has != 1 Parameters.");
                             }
                         }
+                    }
+                    Type sc = type.getGenericSuperclass();
+                    if (sc != null && rules.isFollowSuperClass(sc)) {
+                        canStoreIntern(sc, path + "<<<" + sc.getTypeName(), rules, dupeID);
                     }
                     return;
                 } catch (final NoSuchMethodException e) {
@@ -194,15 +234,15 @@ public class JSonStorage {
             // for (int i = 0; i < actualTypes.length; i++) {
             // typeMap.put(gis[i], actualTypes[i]);
             // }
-            JSonStorage.canStoreIntern(raw, path, allowNonStorableObjects, dupeID);
+            JSonStorage.canStoreIntern(raw, path, rules, dupeID);
             for (final Type t : ptype.getActualTypeArguments()) {
-                JSonStorage.canStoreIntern(t, path + "(" + t + ")", allowNonStorableObjects, dupeID);
+                JSonStorage.canStoreIntern(t, path + "(" + t + ")", rules, dupeID);
             }
             return;
         } else if (gType instanceof GenericArrayType) {
             final GenericArrayType atype = (GenericArrayType) gType;
             final Type t = atype.getGenericComponentType();
-            JSonStorage.canStoreIntern(t, path + "[" + t + "]", allowNonStorableObjects, dupeID);
+            JSonStorage.canStoreIntern(t, path + "[" + t + "]", rules, dupeID);
             return;
         } else if (gType instanceof TypeVariable) {
             // type veriables are checked one layer above

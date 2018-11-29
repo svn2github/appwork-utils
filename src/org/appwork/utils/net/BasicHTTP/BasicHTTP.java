@@ -146,12 +146,6 @@ public class BasicHTTP implements Interruptible {
             throw e;
         } catch (final InterruptedException e) {
             throw e;
-        } catch (final Exception e) {
-            if (baos.size() > 0) {
-                throw new BasicHTTPException(this.connection, new ReadIOException(e));
-            } else {
-                throw new BasicHTTPException(this.connection, new WriteIOException(e));
-            }
         } finally {
             try {
                 baos.close();

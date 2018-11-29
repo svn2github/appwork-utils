@@ -228,11 +228,6 @@ public class JSonStorage {
         } else if (gType instanceof ParameterizedType) {
             final ParameterizedType ptype = (ParameterizedType) gType;
             final Type raw = ptype.getRawType();
-            ((Class) raw).getTypeParameters();
-            Type[] actualTypes = ptype.getActualTypeArguments();
-            // for (int i = 0; i < actualTypes.length; i++) {
-            // typeMap.put(gis[i], actualTypes[i]);
-            // }
             JSonStorage.canStoreIntern(raw, path, rules, dupeID);
             for (final Type t : ptype.getActualTypeArguments()) {
                 JSonStorage.canStoreIntern(t, path + "(" + t + ")", rules, dupeID);

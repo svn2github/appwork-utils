@@ -80,7 +80,6 @@ public class JSonStorage {
     /* default key for encrypted json */
     static public byte[]                              KEY         = new byte[] { 0x01, 0x02, 0x11, 0x01, 0x01, 0x54, 0x01, 0x01, 0x01, 0x01, 0x12, 0x01, 0x01, 0x01, 0x22, 0x01 };
     private static final HashMap<File, AtomicInteger> LOCKS       = new HashMap<File, AtomicInteger>();
-
     static {
         /* shutdown hook to save all open Storages */
         ShutdownController.getInstance().addShutdownEvent(new ShutdownEvent() {
@@ -219,7 +218,7 @@ public class JSonStorage {
                     }
                     Type sc = type.getGenericSuperclass();
                     if (sc != null && rules.isFollowSuperClass(sc)) {
-                        canStoreIntern(sc, path + "<<<" + sc.getTypeName(), rules, dupeID);
+                        canStoreIntern(sc, path + "<<<" + sc, rules, dupeID);
                     }
                     return;
                 } catch (final NoSuchMethodException e) {

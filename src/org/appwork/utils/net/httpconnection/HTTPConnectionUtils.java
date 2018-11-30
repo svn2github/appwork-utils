@@ -350,8 +350,7 @@ public class HTTPConnectionUtils {
                  */
                 return new long[] { 0, Long.parseLong(range[0]), Long.parseLong(range[1]) };
             } else {
-                /* unknown range header format! */
-                System.out.println(contentRange + " format is unknown!");
+                org.appwork.loggingv3.LogV3.info("parseContentRange: format is unknown: " + contentRange);
                 return null;
             }
         } else {

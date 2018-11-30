@@ -328,9 +328,9 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
 
     @Override
     public long getCompleteContentLength() {
-        final long[] ret = this.getRange();
-        if (ret != null && ret[2] > 0) {
-            return ret[2];
+        final long[] range = this.getRange();
+        if (range != null) {
+            return range[2];
         } else {
             return this.getContentLength();
         }

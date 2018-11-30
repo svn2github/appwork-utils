@@ -1187,7 +1187,7 @@ public class HTTPConnectionImpl implements HTTPConnection {
     @Override
     public long getCompleteContentLength() {
         final long[] ranges = this.getRange();
-        if (ranges != null && ranges[2] >= 0) {
+        if (ranges != null) {
             return ranges[2];
         } else {
             return this.getContentLength();

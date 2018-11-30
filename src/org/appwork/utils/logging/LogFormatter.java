@@ -50,7 +50,6 @@ public class LogFormatter extends SimpleFormatter {
      * For thread controlled logs
      */
     private int              lastThreadID;
-
     /**
      * Dateformat to convert timestamp to a readable format
      */
@@ -62,22 +61,17 @@ public class LogFormatter extends SimpleFormatter {
     public synchronized String format(final LogRecord record) {
         /* clear StringBuilder buffer */
         sb.setLength(0);
-
         // Minimize memory allocations here.
         this.date.setTime(record.getMillis());
-
         final String message = getMessage(record);
         final int th = record.getThreadID();
-
         if (th != this.lastThreadID) {
             sb.append(NEWLINE);
             sb.append("THREAD: ");
             sb.append(th);
-
             sb.append(NEWLINE);
         }
         this.lastThreadID = th;
-
         sb.append(record.getThreadID());
         sb.append('|');
         sb.append(record.getLoggerName());
@@ -96,7 +90,6 @@ public class LogFormatter extends SimpleFormatter {
             sb.append(record.getSourceMethodName());
             sb.append(')');
         }
-
         sb.append(" ] -> ");
         sb.append(message);
         sb.append(NEWLINE);

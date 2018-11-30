@@ -639,6 +639,9 @@ public class JSonStorage {
     }
 
     public static void setMapper(final JSONMapper mapper) {
+        if (mapper == null) {
+            throw new IllegalArgumentException("mapper is null");
+        }
         JSonStorage.JSON_MAPPER = mapper;
     }
 

@@ -53,6 +53,7 @@ import org.appwork.utils.formatter.HexFormatter;
 import org.appwork.utils.net.LimitedInputStream;
 import org.appwork.utils.net.UploadProgress;
 import org.appwork.utils.net.BasicHTTP.BasicHTTP;
+import org.appwork.utils.net.BasicHTTP.BasicHTTPException;
 import org.appwork.utils.net.httpconnection.HTTPConnection;
 
 public abstract class Upload {
@@ -127,7 +128,6 @@ public abstract class Upload {
         if (fetchOnline == false && this.remoteSize > 0) {
             return this.remoteSize;
         }
-        final BasicHTTP shttp = this.getBasicHTTP();
         HTTPConnection con = null;
         try {
             final HashMap<String, String> header = new HashMap<String, String>();
@@ -139,7 +139,9 @@ public abstract class Upload {
             checkLocal();
             header.put(HTTPConstants.HEADER_RESPONSE_CONTENT_RANGE, "bytes */" + getLocalSize());
             this.checkInterrupted();
-            con = shttp.openPostConnection(this.getUploadURL(), null, new ByteArrayInputStream(new byte[0]), header, 0);
+            URL url = this.getUploadURL();
+            ByteArrayInputStream is = new ByteArrayInputStream(new byte[0]);
+            con = post(header, url, is, 0, null);
             // LogV3.info("GRZ Open Connection " + (System.currentTimeMillis() - tt));
             this.parseResponse(con);
             return this.remoteSize;
@@ -149,6 +151,13 @@ public abstract class Upload {
             } catch (final Throwable e) {
             }
         }
+    }
+
+    protected HTTPConnection post(final HashMap<String, String> header, URL url, InputStream is, long uploadSize, UploadProgress uploadProgress) throws BasicHTTPException, InterruptedException {
+        HTTPConnection con;
+        final BasicHTTP shttp = this.getBasicHTTP();
+        con = shttp.openPostConnection(url, uploadProgress, is, header, uploadSize);
+        return con;
     }
 
     /**
@@ -282,7 +291,6 @@ public abstract class Upload {
     }
 
     public boolean uploadChunk() throws FileNotFoundException, IOException, InterruptedException, NoSuchAlgorithmException {
-        final BasicHTTP shttp = this.getBasicHTTP();
         InputStream is = null;
         HTTPConnection con = null;
         final UploadProgress uploadProgress = this.getUploadProgress();
@@ -326,7 +334,8 @@ public abstract class Upload {
             header.put(HTTPConstants.HEADER_REQUEST_CONTENT_TYPE, "application/octet-stream");
             header.put(HTTPConstants.HEADER_RESPONSE_CONTENT_RANGE, "bytes " + remoteSize + "-" + rangeEnd + "/" + getLocalSize());
             this.checkInterrupted();
-            con = shttp.openPostConnection(this.getUploadURL(), uploadProgress, dis, header, uploadSize);
+            URL url = this.getUploadURL();
+            con = post(header, url, dis, uploadSize, uploadProgress);
             // LogV3.info("UC Open Connection " + (System.currentTimeMillis() - tt));
             this.parseResponse(con);
             final String remoteHash = new String(IO.readStream(1024, con.getInputStream()), "UTF-8");

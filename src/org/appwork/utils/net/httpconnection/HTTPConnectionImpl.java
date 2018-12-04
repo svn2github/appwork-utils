@@ -198,11 +198,11 @@ public class HTTPConnectionImpl implements HTTPConnection {
     protected static final HashMap<String, LinkedList<KeepAliveSocketStream>> KEEPALIVEPOOL         = new HashMap<String, LinkedList<KeepAliveSocketStream>>();
     protected static final Object                                             LOCK                  = new Object();
     protected static final DelayedRunnable                                    KEEPALIVECLEANUPTIMER = new DelayedRunnable(10000, 30000) {
-        @Override
-        public void delayedrun() {
-            cleanupKeepAlivePools();
-        }
-    };
+                                                                                                        @Override
+                                                                                                        public void delayedrun() {
+                                                                                                            cleanupKeepAlivePools();
+                                                                                                        }
+                                                                                                    };
 
     private static final void cleanupKeepAlivePools() {
         synchronized (HTTPConnectionImpl.LOCK) {

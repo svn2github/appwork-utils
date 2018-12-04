@@ -11,6 +11,20 @@ public class InterruptibleThread extends Thread {
         super(string);
     }
 
+    public InterruptibleThread() {
+        super();
+    }
+
+    public InterruptibleThread startThread() {
+        start();
+        return this;
+    }
+
+    public InterruptibleThread joinThread() throws InterruptedException {
+        join();
+        return this;
+    }
+
     /**
      * @param runnable
      * @param string

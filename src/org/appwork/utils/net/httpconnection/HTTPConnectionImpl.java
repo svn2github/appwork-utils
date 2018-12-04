@@ -72,6 +72,7 @@ import org.appwork.utils.Application;
 import org.appwork.utils.KeyValueStringEntry;
 import org.appwork.utils.Regex;
 import org.appwork.utils.StringUtils;
+import org.appwork.utils.encoding.URLDecoderFixer;
 import org.appwork.utils.net.Base64InputStream;
 import org.appwork.utils.net.ChunkedInputStream;
 import org.appwork.utils.net.CountingOutputStream;
@@ -1315,7 +1316,7 @@ public class HTTPConnectionImpl implements HTTPConnection {
                 }
                 for (KeyValueStringEntry p : query.list()) {
                     try {
-                        sb.append("   " + org.appwork.utils.StringUtils.fillPost(p.getKey() == null ? "" : p.getKey(), " ", max)).append(" : ").append(query.getDecoded(p.getKey())).append("\r\n");
+                        sb.append("   " + org.appwork.utils.StringUtils.fillPost(p.getKey() == null ? "" : p.getKey(), " ", max)).append(" : ").append(URLDecoderFixer.decode(p.getValue(), "UTF-8")).append("\r\n");
                     } catch (UnsupportedEncodingException e) {
                         LogV3.logger(HTTPConnectionImpl.class).exception("Error during toString", e);
                     }

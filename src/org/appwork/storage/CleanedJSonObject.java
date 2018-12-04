@@ -74,58 +74,64 @@ public class CleanedJSonObject {
     /**
      * @return
      */
-    public static Collection<GetterSetter> getGettersSetteres(Class<?> clazz) {
-        Collection<GetterSetter> ret = GETTER_SETTER_CACHE.get(clazz);
-        if (ret != null) {
-            return ret;
-        }
-        final Class<?> org = clazz;
+    public Collection<GetterSetter> getGettersSetteres(Class<?> clazz) {
         synchronized (GETTER_SETTER_CACHE) {
-            ret = GETTER_SETTER_CACHE.get(clazz);
+            Collection<GetterSetter> ret = GETTER_SETTER_CACHE.get(clazz);
             if (ret != null) {
                 return ret;
             }
-            final HashMap<String, GetterSetter> map = new HashMap<String, GetterSetter>();
-            while (clazz != null) {
-                for (final Method m : clazz.getDeclaredMethods()) {
-                    String key = null;
-                    boolean getter = false;
-                    if (m.getName().startsWith("is") && isBoolean(m.getReturnType()) && m.getParameterTypes().length == 0) {
-                        key = m.getName().substring(2);
-                        getter = true;
-                    } else if (m.getName().startsWith("get") && m.getParameterTypes().length == 0) {
-                        key = m.getName().substring(3);
-                        getter = true;
-                    } else if (m.getName().startsWith("set") && m.getParameterTypes().length == 1) {
-                        key = m.getName().substring(3);
-                        getter = false;
-                    }
-                    if (isNotEmpty(key)) {
-                        final String unmodifiedKey = key;
-                        key = createKey(key);
-                        GetterSetter v = map.get(key);
-                        if (v == null) {
-                            v = new GetterSetter(key);
-                            map.put(key, v);
-                        }
-                        if (getter) {
-                            v.setGetter(m);
-                        } else {
-                            v.setSetter(m);
-                        }
-                        Field field;
-                        try {
-                            field = clazz.getField(unmodifiedKey.substring(0, 1).toLowerCase(Locale.ENGLISH) + unmodifiedKey.substring(1));
-                            v.setField(field);
-                        } catch (final NoSuchFieldException e) {
-                        }
-                    }
+            final Class<?> org = clazz;
+            synchronized (GETTER_SETTER_CACHE) {
+                ret = GETTER_SETTER_CACHE.get(clazz);
+                if (ret != null) {
+                    return ret;
                 }
-                clazz = clazz.getSuperclass();
+                final HashMap<String, GetterSetter> map = new HashMap<String, GetterSetter>();
+                while (clazz != null) {
+                    for (final Method m : clazz.getDeclaredMethods()) {
+                        String key = null;
+                        boolean getter = false;
+                        if (m.getName().startsWith("is") && isBoolean(m.getReturnType()) && m.getParameterTypes().length == 0) {
+                            key = m.getName().substring(2);
+                            getter = true;
+                        } else if (m.getName().startsWith("get") && m.getParameterTypes().length == 0) {
+                            key = m.getName().substring(3);
+                            getter = true;
+                        } else if (m.getName().startsWith("set") && m.getParameterTypes().length == 1) {
+                            key = m.getName().substring(3);
+                            getter = false;
+                        }
+                        if (isNotEmpty(key)) {
+                            final String unmodifiedKey = key;
+                            key = createKey(key);
+                            GetterSetter v = map.get(key);
+                            if (v == null) {
+                                v = new GetterSetter(key);
+                                map.put(key, v);
+                            }
+                            if (getter) {
+                                v.setGetter(m);
+                            } else {
+                                v.setSetter(m);
+                            }
+                            Field field;
+                            try {
+                                field = clazz.getField(unmodifiedKey.substring(0, 1).toLowerCase(Locale.ENGLISH) + unmodifiedKey.substring(1));
+                                v.setField(field);
+                            } catch (final NoSuchFieldException e) {
+                            }
+                        }
+                    }
+                    clazz = getSuperClass(clazz);
+                }
+                GETTER_SETTER_CACHE.put(org, map.values());
+                return GETTER_SETTER_CACHE.get(org);
             }
-            GETTER_SETTER_CACHE.put(org, map.values());
-            return GETTER_SETTER_CACHE.get(org);
         }
+    }
+
+    protected Class<?> getSuperClass(Class<?> clazz) {
+        return clazz.getSuperclass();
     }
 
     public boolean equals(final Object pass, final Object pass2) {

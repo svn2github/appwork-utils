@@ -57,6 +57,20 @@ import org.appwork.utils.net.BasicHTTP.BasicHTTPException;
 import org.appwork.utils.net.httpconnection.HTTPConnection;
 
 public abstract class Upload {
+    /**
+     * @author Thomas
+     * @date 04.12.2018
+     *
+     */
+    public class EtagNotAvailableAtTheServer extends FileNotFoundException {
+        /**
+         * @param s
+         */
+        public EtagNotAvailableAtTheServer(String s) {
+            super(s);
+        }
+    }
+
     protected String     eTag                     = null;
     protected final File file;
     protected long       uploadChunkSize          = -1;
@@ -124,7 +138,16 @@ public abstract class Upload {
         }
     }
 
-    public long getRemoteSize(final boolean fetchOnline) throws IOException, InterruptedException {
+    public long getRemoteSize(final boolean fetchOnline) throws IOException, EtagNotAvailableAtTheServer, InterruptedException {
+        try {
+            return getRemoteSizeIntern(fetchOnline);
+        } catch (EtagNotAvailableAtTheServer e) {
+            setETag(null);
+            return getRemoteSizeIntern(fetchOnline);
+        }
+    }
+
+    protected long getRemoteSizeIntern(final boolean fetchOnline) throws IOException, InterruptedException, BasicHTTPException {
         if (fetchOnline == false && this.remoteSize > 0) {
             return this.remoteSize;
         }
@@ -186,7 +209,7 @@ public abstract class Upload {
 
     protected void parseResponse(final HTTPConnection con) throws IOException {
         if (con.getResponseCode() == 404) {
-            throw new FileNotFoundException("Remote file does not exist: " + this.eTag);
+            throw new EtagNotAvailableAtTheServer("Remote file does not exist: " + this.eTag);
         }
         if (con.getResponseCode() == 308 || con.getResponseCode() == 200) {
             this.eTag = con.getHeaderField(HTTPConstants.HEADER_ETAG);

@@ -74,14 +74,14 @@ public class ProgressDialog extends AbstractDialog<Integer> implements ProgressI
         public String getLabelString();
     }
 
-    private Thread               executer;
-    private final ProgressGetter getter;
-    private final String         message;
-    private Timer                updater;
-    private long                 waitForTermination = 20000;
-    protected Throwable          throwable          = null;
-    private JLabel               lbl;
-    protected JTextPane          textField;
+    private Thread                 executer;
+    protected final ProgressGetter getter;
+    private final String           message;
+    private Timer                  updater;
+    private long                   waitForTermination = 20000;
+    protected Throwable            throwable          = null;
+    private JLabel                 lbl;
+    protected JTextPane            textField;
 
     /**
      * @param progressGetter

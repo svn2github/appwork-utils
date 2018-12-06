@@ -235,13 +235,13 @@ public class ProcessBuilderFactory {
             returnCode = process.waitFor();
             stdReader.onProcessDead();
             errorReader.onProcessDead();
-            System.out.println("Process returned: " + returnCode);
+            // System.out.println("Process returned: " + returnCode);
             while (stdReader.isAlive()) {
-                System.out.println("Wait for Process-Reader-Std");
+                // System.out.println("Wait for Process-Reader-Std");
                 stdReader.join(10000);
             }
             while (errorReader.isAlive()) {
-                System.out.println("Wait fo Process-Reader-Error");
+                // System.out.println("Wait fo Process-Reader-Error");
                 errorReader.join(10000);
             }
             return returnCode;

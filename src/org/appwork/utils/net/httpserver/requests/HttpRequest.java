@@ -179,14 +179,16 @@ public abstract class HttpRequest implements HttpRequestInterface {
      * @return
      */
     public String getActuallRemoteAddress() {
-        List<String> addresses = getRemoteAddress();
+        final List<String> addresses = getRemoteAddress();
         if (addresses == null || addresses.size() == 0) {
             return null;
+        } else {
+            if (addresses.size() == 1) {
+                return addresses.get(0);
+            } else {
+                return addresses.get(1);
+            }
         }
-        if (addresses.size() == 1) {
-            return addresses.get(0);
-        }
-        return addresses.get(1);
     }
 
     /**

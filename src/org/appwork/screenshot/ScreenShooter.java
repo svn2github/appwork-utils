@@ -1,5 +1,5 @@
 /**
- * 
+ *
  * ====================================================================================================================================================
  *         "AppWork Utilities" License
  *         The "AppWork Utilities" will be called [The Product] from now on.
@@ -7,16 +7,16 @@
  *         Copyright (c) 2009-2015, AppWork GmbH <e-mail@appwork.org>
  *         Schwabacher Straße 117
  *         90763 Fürth
- *         Germany   
+ *         Germany
  * === Preamble ===
  *     This license establishes the terms under which the [The Product] Source Code & Binary files may be used, copied, modified, distributed, and/or redistributed.
  *     The intent is that the AppWork GmbH is able to provide their utilities library for free to non-commercial projects whereas commercial usage is only permitted after obtaining a commercial license.
  *     These terms apply to all files that have the [The Product] License header (IN the file), a <filename>.license or <filename>.info (like mylib.jar.info) file that contains a reference to this license.
- * 	
+ *
  * === 3rd Party Licences ===
  *     Some parts of the [The Product] use or reference 3rd party libraries and classes. These parts may have different licensing conditions. Please check the *.license and *.info files of included libraries
- *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header. 	
- * 	
+ *     to ensure that they are compatible to your use-case. Further more, some *.java have their own license. In this case, they have their license terms in the java file header.
+ *
  * === Definition: Commercial Usage ===
  *     If anybody or any organization is generating income (directly or indirectly) by using [The Product] or if there's any commercial interest or aspect in what you are doing, we consider this as a commercial usage.
  *     If your use-case is neither strictly private nor strictly educational, it is commercial. If you are unsure whether your use-case is commercial or not, consider it as commercial or contact us.
@@ -25,9 +25,9 @@
  *     If you want to use [The Product] in a commercial way (see definition above), you have to obtain a paid license from AppWork GmbH.
  *     Contact AppWork for further details: <e-mail@appwork.org>
  * === Non-Commercial Usage ===
- *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the 
+ *     If there is no commercial usage (see definition above), you may use [The Product] under the terms of the
  *     "GNU Affero General Public License" (http://www.gnu.org/licenses/agpl-3.0.en.html).
- * 	
+ *
  *     If the AGPL does not fit your needs, please contact us. We'll find a solution.
  * ====================================================================================================================================================
  * ==================================================================================================================================================== */
@@ -80,7 +80,6 @@ import org.appwork.utils.swing.dialog.DialogClosedException;
  *
  */
 public class ScreenShooter extends JWindow implements MouseListener, MouseMotionListener {
-
     private static final long    serialVersionUID = 3184465232251321247L;
     /**
      * Size of the Mag Glass
@@ -91,9 +90,7 @@ public class ScreenShooter extends JWindow implements MouseListener, MouseMotion
      */
     private static final int     FACTOR           = 5;
     private static final int     SCALED_SIZE      = ScreenShooter.SIZE / ScreenShooter.FACTOR;
-
     protected static final int   FPS              = 50;
-
     private static ScreenShooter layover;
 
     /**
@@ -103,10 +100,8 @@ public class ScreenShooter extends JWindow implements MouseListener, MouseMotion
      * @throws AWTException
      */
     public static ScreenShooter create() throws AWTException {
-
         final GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
         final GraphicsDevice[] screens = ge.getScreenDevices();
-
         // for (final GraphicsDevice screen : screens) {
         int xMax = 0;
         int xMin = 0;
@@ -132,15 +127,11 @@ public class ScreenShooter extends JWindow implements MouseListener, MouseMotion
             g2 = img.createGraphics();
             complete = img;
         }
-
         // we create a normal screenshot and a grayed screenshot
         // final BufferedImage completeGrayed = new BufferedImage(xMax - xMin,
         // yMax - yMin, Transparency.TRANSLUCENT);
-
         final VolatileImage completeGrayed = ge.getDefaultScreenDevice().getDefaultConfiguration().createCompatibleVolatileImage(xMax - xMin, yMax - yMin);
-
         Graphics2D g2gray = completeGrayed.createGraphics();
-
         for (final GraphicsDevice screen : screens) {
             final DisplayMode dm = screen.getDisplayMode();
             // bounds are used to gete the position and size of this screen in
@@ -165,14 +156,12 @@ public class ScreenShooter extends JWindow implements MouseListener, MouseMotion
         g2 = null;
         g2gray = null;
         final ScreenShooter layover = new ScreenShooter(xMin, yMin, xMax, yMax);
-
         layover.setImage(complete, completeGrayed);
         return layover;
     }
 
     public static void main(final String[] args) throws AWTException, InterruptedException {
         new EDTHelper<ScreenShooter>() {
-
             @Override
             public ScreenShooter edtRun() {
                 try {
@@ -184,12 +173,9 @@ public class ScreenShooter extends JWindow implements MouseListener, MouseMotion
                 ScreenShooter.layover.start();
                 return null;
             }
-
         }.waitForEDT();
-
         final BufferedImage screenshot = ScreenShooter.layover.getScreenshot();
         if (screenshot != null) {
-
             try {
                 Dialog.getInstance().showConfirmDialog(0, "", "", new ImageIcon(screenshot), null, null);
             } catch (final DialogClosedException e) {
@@ -199,24 +185,18 @@ public class ScreenShooter extends JWindow implements MouseListener, MouseMotion
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-
         }
         System.exit(0);
-
     }
 
     private Image             image;
-
     private boolean           isDragging = false;
     private Point             dragStart;
     private Point             dragEnd;
-
     private Image             grayedImage;
-
     private final Rectangle[] bounds;
     private BufferedImage     screenshot;
     private final JFrame      frame;
-
     private Point             mouse;
     private boolean           disposed   = false;
     private int               xMin;
@@ -233,17 +213,14 @@ public class ScreenShooter extends JWindow implements MouseListener, MouseMotion
         // we extends from a JFrame because JWindow cannot get focus and this
         // cannot listen on key events
         // this.setUndecorated(true);
-
         this.addMouseListener(this);
         // we need an extra frame to listen for keyevents. jwindow cannot catch
         // key events
         this.frame = new JFrame();
         this.frame.addKeyListener(new KeyListener() {
-
             @Override
             public void keyPressed(final KeyEvent e) {
                 // TODO Auto-generated method stub
-
             }
 
             @Override
@@ -256,15 +233,12 @@ public class ScreenShooter extends JWindow implements MouseListener, MouseMotion
             @Override
             public void keyTyped(final KeyEvent e) {
                 // TODO Auto-generated method stub
-
             }
         });
         this.frame.setUndecorated(false);
         // this.frame.setSize(0, 0);
-
         // see
         // http://www.javalobby.org/forums/thread.jspa?threadID=16867&tstart=0
-
         final GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
         final GraphicsDevice[] screens = ge.getScreenDevices();
         // store screen device bounds to find current screen later easily
@@ -272,7 +246,6 @@ public class ScreenShooter extends JWindow implements MouseListener, MouseMotion
         for (int i = 0; i < this.bounds.length; i++) {
             this.bounds[i] = screens[i].getDefaultConfiguration().getBounds();
         }
-
     }
 
     /**
@@ -285,7 +258,6 @@ public class ScreenShooter extends JWindow implements MouseListener, MouseMotion
             this.dragEnd = null;
         } else {
             new EDTRunner() {
-
                 @Override
                 protected void runInEDT() {
                     ScreenShooter.this.frame.setVisible(false);
@@ -294,7 +266,6 @@ public class ScreenShooter extends JWindow implements MouseListener, MouseMotion
                     ScreenShooter.this.dispose();
                 }
             };
-
         }
     }
 
@@ -308,7 +279,6 @@ public class ScreenShooter extends JWindow implements MouseListener, MouseMotion
      * @return
      */
     private Point convertToMagnifier(final Point mag, final Point p) {
-
         final int tx = (p.x - this.mouse.x) * ScreenShooter.FACTOR + this.mouse.x + mag.x + ScreenShooter.SIZE / 2 - this.mouse.x;
         final int ty = (p.y - this.mouse.y) * ScreenShooter.FACTOR + this.mouse.y + mag.y + ScreenShooter.SIZE / 2 - this.mouse.y;
         return new Point(tx, ty);
@@ -383,7 +353,6 @@ public class ScreenShooter extends JWindow implements MouseListener, MouseMotion
                     // y correct
                     return r;
                 }
-
             }
         }
         return null;
@@ -410,7 +379,6 @@ public class ScreenShooter extends JWindow implements MouseListener, MouseMotion
      * @return
      */
     private Point getMagnifierPosition() {
-
         final Rectangle bounds = this.getDeviceBounds();
         if (bounds == null) {
             return null;
@@ -441,7 +409,7 @@ public class ScreenShooter extends JWindow implements MouseListener, MouseMotion
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
      */
     @Override
@@ -461,16 +429,14 @@ public class ScreenShooter extends JWindow implements MouseListener, MouseMotion
                     ScreenShooter.this.dispose();
                 }
             }.start();
-
         } else if (!this.isDragging) {
-
             this.startDrag();
         }
     }
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see java.awt.event.MouseMotionListener#mouseDragged(java.awt.event.MouseEvent )
      */
     @Override
@@ -480,29 +446,27 @@ public class ScreenShooter extends JWindow implements MouseListener, MouseMotion
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent)
      */
     @Override
     public void mouseEntered(final MouseEvent e) {
         // TODO Auto-generated method stub
-
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.awt.event.MouseListener#mouseExited(java.awt.event.MouseEvent)
-     */
-    @Override
-    public void mouseExited(final MouseEvent e) {
-        // TODO Auto-generated method stub
-
     }
 
     /*
      * (non-Javadoc)
      *
+     * @see java.awt.event.MouseListener#mouseExited(java.awt.event.MouseEvent)
+     */
+    @Override
+    public void mouseExited(final MouseEvent e) {
+        // TODO Auto-generated method stub
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.awt.event.MouseMotionListener#mouseMoved(java.awt.event.MouseEvent)
      */
     @Override
@@ -513,25 +477,23 @@ public class ScreenShooter extends JWindow implements MouseListener, MouseMotion
             final PointerInfo pi = MouseInfo.getPointerInfo();
             this.mouse = pi.getLocation();
         }
-
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.awt.event.MouseListener#mousePressed(java.awt.event.MouseEvent)
      */
     @Override
     public void mousePressed(final MouseEvent e) {
         if (e.isPopupTrigger() || e.getButton() == MouseEvent.BUTTON3) {
-
             this.cancel();
         }
     }
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see java.awt.event.MouseListener#mouseReleased(java.awt.event.MouseEvent)
      */
     @Override
@@ -539,12 +501,11 @@ public class ScreenShooter extends JWindow implements MouseListener, MouseMotion
         if (e.isPopupTrigger() || e.getButton() == MouseEvent.BUTTON3) {
             return;
         }
-
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.awt.Window#paint(java.awt.Graphics)
      */
     @Override
@@ -563,7 +524,6 @@ public class ScreenShooter extends JWindow implements MouseListener, MouseMotion
         final Point pos = this.getMagnifierPosition();
         // draw and resize the mag image
         gb.drawImage(this.image, pos.x, pos.y, pos.x + ScreenShooter.SIZE, pos.y + ScreenShooter.SIZE, this.mouse.x - ScreenShooter.SCALED_SIZE / 2, this.mouse.y - ScreenShooter.SCALED_SIZE / 2, this.mouse.x + ScreenShooter.SCALED_SIZE / 2, this.mouse.y + ScreenShooter.SCALED_SIZE / 2, Color.BLACK, null);
-
         // Draws the black alpha cross
         Composite comp = gb.getComposite();
         gb.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.3f));
@@ -574,10 +534,8 @@ public class ScreenShooter extends JWindow implements MouseListener, MouseMotion
         gb.drawLine(pos.x + ScreenShooter.SIZE / 2 + 2, pos.y + 2, pos.x + ScreenShooter.SIZE / 2 + 2, pos.y + ScreenShooter.SIZE / 2 - 3);
         gb.drawLine(pos.x + ScreenShooter.SIZE / 2 + 2, pos.y + ScreenShooter.SIZE / 2 + 7, pos.x + ScreenShooter.SIZE / 2 + 2, pos.y + ScreenShooter.SIZE - 2);
         gb.setComposite(comp);
-
         //
         if (this.isDragging) {
-
             // Paint the blue selection rectangle in the mag.
             final int startX = Math.min(this.dragStart.x, this.mouse.x);
             final int startY = Math.min(this.dragStart.y, this.mouse.y);
@@ -592,10 +550,8 @@ public class ScreenShooter extends JWindow implements MouseListener, MouseMotion
             final int width = Math.min(ScreenShooter.SIZE / 2 + (x == pos.x ? ScreenShooter.FACTOR : 0), end.x - start.x);
             final int height = Math.min(ScreenShooter.SIZE / 2 + (y == pos.y ? ScreenShooter.FACTOR : 0), end.y - start.y);
             gb.drawRect(x, y, width, height);
-
             comp = gb.getComposite();
             gb.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.1f));
-
             gb.fillRect(x, y, width, height);
             gb.setComposite(comp);
             // if we are dragging we paint a white area to paint the selected
@@ -608,15 +564,11 @@ public class ScreenShooter extends JWindow implements MouseListener, MouseMotion
             final String dimension = _AWU.T.Layover_size(Math.abs(this.mouse.x - this.dragStart.x) + 1, Math.abs(this.mouse.y - this.dragStart.y) + 1);
             gb.getFontMetrics().stringWidth(dimension);
             gb.drawString(dimension, pos.x + 5, pos.y + ScreenShooter.SIZE - 3);
-
         }
-
         // paint black border
-
         gb.setColor(Color.BLACK);
         gb.setStroke(new BasicStroke(1));
         gb.drawRect(pos.x, pos.y, ScreenShooter.SIZE, ScreenShooter.SIZE);
-
     }
 
     /**
@@ -627,7 +579,6 @@ public class ScreenShooter extends JWindow implements MouseListener, MouseMotion
         this.image = complete;
         this.grayedImage = completeGrayed;
         this.setSize(complete.getWidth(null), complete.getHeight(null));
-
     }
 
     /**
@@ -635,7 +586,6 @@ public class ScreenShooter extends JWindow implements MouseListener, MouseMotion
      */
     public void start() {
         new EDTHelper<Object>() {
-
             @Override
             public Object edtRun() {
                 // avoid that this frame shows up
@@ -648,18 +598,16 @@ public class ScreenShooter extends JWindow implements MouseListener, MouseMotion
                 ScreenShooter.this.requestFocus();
                 ScreenShooter.this.requestFocusInWindow();
                 ScreenShooter.this.createBufferStrategy(2);
-
                 // invisible cursor
                 final int[] pixels = new int[16 * 16];
                 final Image image = Toolkit.getDefaultToolkit().createImage(new MemoryImageSource(16, 16, pixels, 0, 16));
                 final Cursor transparentCursor = Toolkit.getDefaultToolkit().createCustomCursor(image, new Point(0, 0), "invisibleCursor");
                 ScreenShooter.this.setCursor(transparentCursor);
-                // it might happen, that our window looses focus and does not
+                // it might happen, that our window loses focus and does not
                 // lsten to mousevents any more. This timer kills the window if
                 // there is no mousemove for >15 seconds
                 ScreenShooter.this.addMouseMotionListener(ScreenShooter.this);
                 ScreenShooter.this.mouseMoved(null);
-
                 // this.timer.start();
                 new Thread("Asynchpainter") {
                     @Override
@@ -674,17 +622,14 @@ public class ScreenShooter extends JWindow implements MouseListener, MouseMotion
                             // TODO Auto-generated catch block
                             e.printStackTrace();
                         }
-
                         while (!ScreenShooter.this.disposed) {
                             t = System.currentTimeMillis();
                             // if (ScreenShooter.this.mouse != oldMouse) {
                             ScreenShooter.this.updateGUI(ScreenShooter.this.getBufferStrategy());
-
                             // }
                             // oldMouse = ScreenShooter.this.mouse;
                             try {
                                 final long wait = frame - (System.currentTimeMillis() - t);
-
                                 if (wait > 0) {
                                     Thread.sleep(wait);
                                 }
@@ -692,14 +637,12 @@ public class ScreenShooter extends JWindow implements MouseListener, MouseMotion
                                 // TODO Auto-generated catch block
                                 e.printStackTrace();
                             }
-
                         }
                     }
                 }.start();
                 return null;
             }
         }.getReturnValue();
-
     }
 
     /**
@@ -731,7 +674,6 @@ public class ScreenShooter extends JWindow implements MouseListener, MouseMotion
             gb = (Graphics2D) bufferStrategy.getDrawGraphics();
             final Point tempDrag = this.dragStart;
             if (this.isDragging && tempDrag != null) {
-
                 final int startX = Math.min(tempDrag.x, this.mouse.x);
                 final int startY = Math.min(tempDrag.y, this.mouse.y);
                 // draw grayed image over full screen
@@ -753,9 +695,7 @@ public class ScreenShooter extends JWindow implements MouseListener, MouseMotion
                 gb.drawImage(this.image, 0, 0, null);
                 // draw dashed cross
                 this.drawBigCross(gb);
-
             }
-
             this.paintMagnifier(gb);
             // paint the position marker
             String str = this.mouse.y + " px";
@@ -793,7 +733,6 @@ public class ScreenShooter extends JWindow implements MouseListener, MouseMotion
                 // marker reached right margin. we dock here
                 x = db.x + db.width - width - 5;
             }
-
             // avoid that marker overlap at the bottom right corner. set X
             // marker to
             // top if x and y markers share the same y position
@@ -809,12 +748,10 @@ public class ScreenShooter extends JWindow implements MouseListener, MouseMotion
                 gb.drawRect(x, db.y + db.height - height - 5, width, height);
                 gb.drawString(str, x + 5, db.y + db.height - 10);
             }
-
             try {
                 bufferStrategy.show();
             } catch (final Exception e) {
             }
-
         } catch (final Exception e) {
             e.printStackTrace();
         } finally {
@@ -824,5 +761,4 @@ public class ScreenShooter extends JWindow implements MouseListener, MouseMotion
             }
         }
     }
-
 }

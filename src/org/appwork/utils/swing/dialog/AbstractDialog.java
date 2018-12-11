@@ -1712,7 +1712,7 @@ public abstract class AbstractDialog<T> implements ActionListener, WindowListene
      * @param b
      */
     public void setVisible(final boolean b) {
-        this.onSetVisible(b);
+        // this.onSetVisible(b);
         new EDTRunner() {
             @Override
             protected void runInEDT() {

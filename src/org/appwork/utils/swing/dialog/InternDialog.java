@@ -38,7 +38,6 @@ import java.awt.Image;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.appwork.resources.AWIcon;
 import org.appwork.swing.ExtJDialog;
 import org.appwork.utils.os.CrossSystem;
 import org.appwork.utils.swing.EDTRunner;
@@ -56,6 +55,7 @@ public class InternDialog<T> extends ExtJDialog {
     private static final long       serialVersionUID = 1L;
 
     public void setVisible(boolean b) {
+        dialogModel.onSetVisible(b);
         super.setVisible(b);
         // ((JFrame) owner).setVisible(true);
     }

@@ -115,15 +115,15 @@ public class Hash {
     }
 
     public static byte[] getHashBytes(final InputStream is, final String type, final long maxRead, boolean closeStream) throws InterruptedException {
+        final InputStream inputStream;
+        if (maxRead < 0) {
+            inputStream = is;
+        } else {
+            inputStream = new LimitedInputStream(is, maxRead);
+        }
         try {
             final MessageDigest md = MessageDigest.getInstance(type);
             final byte[] buf = new byte[32767];
-            final InputStream inputStream;
-            if (maxRead < 0) {
-                inputStream = is;
-            } else {
-                inputStream = new LimitedInputStream(is, maxRead);
-            }
             while (true) {
                 if (Thread.interrupted()) {
                     throw new InterruptedException();
@@ -146,7 +146,7 @@ public class Hash {
         } finally {
             if (closeStream) {
                 try {
-                    is.close();
+                    inputStream.close();
                 } catch (IOException ignore) {
                 }
             }

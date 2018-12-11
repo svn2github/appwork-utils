@@ -39,5 +39,5 @@ package org.appwork.utils;
  *
  */
 public class DebugMode {
-    public static boolean TRUE_IN_IDE_ELSE_FALSE = Application.isJared(null);
+    public static boolean TRUE_IN_IDE_ELSE_FALSE = !Application.isJared(null);
 }

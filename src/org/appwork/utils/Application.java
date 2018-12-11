@@ -71,7 +71,7 @@ import org.appwork.utils.os.CrossSystem;
  *
  */
 public class Application {
-    private static Boolean IS_JARED = null;
+    private static Boolean              IS_JARED      = null;
     static {
         if (System.getProperty("NO_SYSOUT_REDIRECT") == null) {
             Application.redirectOutputStreams();
@@ -571,7 +571,7 @@ public class Application {
             org.appwork.loggingv3.LogV3.warning("Java 1.6 Update 18 has a serious bug in garbage collector!");
             /*
              * java 1.6 update 18 has a bug in garbage collector, causes java crashes
-             *
+             * 
              * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6847956
              */
             return true;
@@ -594,7 +594,7 @@ public class Application {
             org.appwork.loggingv3.LogV3.warning("freezing AppKit thread bug");
             /*
              * http://bugs.java.com/view_bug.do?bug_id=8025588
-             *
+             * 
              * Frozen AppKit thread
              */
             return true;
@@ -659,7 +659,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see java.io.OutputStream#write(int)
          */
         @Override
@@ -681,7 +681,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see java.io.OutputStream#write(byte[])
          */
         @Override
@@ -703,7 +703,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see java.io.OutputStream#write(byte[], int, int)
          */
         @Override
@@ -725,7 +725,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see java.io.OutputStream#flush()
          */
         @Override
@@ -745,7 +745,7 @@ public class Application {
 
         /*
          * (non-Javadoc)
-         *
+         * 
          * @see java.io.OutputStream#close()
          */
         @Override

@@ -114,7 +114,7 @@ public class Hash {
         }
     }
 
-    public static byte[] getHashBytes(final InputStream is, final String type, final long maxRead, boolean closeStream) throws InterruptedException {
+    public static byte[] getHashBytes(final InputStream is, final String type, final long maxRead, boolean closeStream) throws IOException, InterruptedException {
         final InputStream inputStream;
         if (maxRead < 0) {
             inputStream = is;
@@ -138,11 +138,9 @@ public class Hash {
             final byte[] digest = md.digest();
             return digest;
         } catch (final IOException e) {
-            e.printStackTrace();
-            return null;
+            throw e;
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-            return null;
+            throw new IOException(e);
         } finally {
             if (closeStream) {
                 try {
@@ -154,7 +152,11 @@ public class Hash {
     }
 
     public static String getHash(final InputStream is, final String type, final long maxRead, boolean closeStream) throws InterruptedException {
-        return HexFormatter.byteArrayToHex(getHashBytes(is, type, maxRead, closeStream));
+        try {
+            return HexFormatter.byteArrayToHex(getHashBytes(is, type, maxRead, closeStream));
+        } catch (IOException e) {
+            return null;
+        }
     }
 
     /**

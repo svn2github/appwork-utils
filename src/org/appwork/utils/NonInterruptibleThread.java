@@ -48,6 +48,16 @@ public class NonInterruptibleThread extends Thread {
     protected NonInterruptibleThread() {
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Thread#start()
+     */
+    @Override
+    public synchronized void start() {
+        super.start();
+    }
+
     public static <T, E extends Exception> T execute(final NonInterruptibleRunnable<T, E> run) throws E {
         if (Thread.currentThread() instanceof NonInterruptibleThread) {
             return run.run();
@@ -81,9 +91,9 @@ public class NonInterruptibleThread extends Thread {
                 Thread.currentThread().interrupt();
             }
             if (exception.get() != null) {
-                throw exception.get();
+                throw Exceptions.addSuppressed(exception.get(), new Exception());
             } else if (runtimeException.get() != null) {
-                throw runtimeException.get();
+                throw Exceptions.addSuppressed(runtimeException.get(), new Exception());
             } else {
                 return ret.get();
             }

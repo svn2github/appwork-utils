@@ -66,7 +66,7 @@ import org.appwork.shutdown.ShutdownEvent;
 import org.appwork.shutdown.ShutdownRequest;
 import org.appwork.utils.Application;
 import org.appwork.utils.IO;
-import org.appwork.utils.Regex;
+import org.appwork.utils.IO.SYNC;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.reflection.Clazz;
 
@@ -312,6 +312,11 @@ public class JSonStorage {
         return lock;
     }
 
+    @Deprecated
+    /**
+     * @deprecated don't mix JSON and IO
+     *
+     */
     public static <E> E restoreFrom(final File file, final boolean plain, final byte[] key, final TypeRef<E> type, final E def) {
         final Object lock = JSonStorage.requestLock(file);
         synchronized (lock) {
@@ -344,8 +349,12 @@ public class JSonStorage {
         }
     }
 
+    @Deprecated
     /**
-     * restores a store json object
+     * @deprecated don't mix JSON and IO
+     *
+     *
+     *             restores a store json object
      *
      * @param <E>
      * @param string
@@ -362,6 +371,11 @@ public class JSonStorage {
         return JSonStorage.restoreFrom(Application.getResource(string), plain, JSonStorage.KEY, type, def);
     }
 
+    @Deprecated
+    /**
+     * @deprecated don't mix JSON and IO
+     *
+     */
     public static <E> E restoreFromFile(final File file, final E def) {
         final E ret = JSonStorage.restoreFrom(file, true, null, null, def);
         if (ret == null) {
@@ -370,6 +384,11 @@ public class JSonStorage {
         return ret;
     }
 
+    @Deprecated
+    /**
+     * @deprecated don't mix JSON and IO
+     *
+     */
     public static <E> E restoreFromFile(final String relPath, final E def) {
         final boolean plain = relPath.toLowerCase().endsWith(".json");
         return JSonStorage.restoreFrom(Application.getResource(relPath), plain, JSonStorage.KEY, null, def);
@@ -430,11 +449,10 @@ public class JSonStorage {
         return cipher.doFinal(data);
     }
 
+    @Deprecated
     /**
-     * @param <T>
-     * @param string
-     * @param class1
-     * @throws IOException
+     * @deprecated use public static <E> E restoreFromString(final String string, final TypeRef<E> type) {
+     *
      */
     public static <T> T restoreFromString(final String string, final Class<T> class1) throws StorageException {
         try {
@@ -516,6 +534,11 @@ public class JSonStorage {
         org.appwork.loggingv3.LogV3.finer("ENDED Saving Storage");
     }
 
+    @Deprecated
+    /**
+     * @deprecated use IO.secureWrite instead
+     *
+     */
     public static void saveTo(final File file, final boolean plain, final byte[] key, final String json) throws StorageException {
         try {
             saveTo(file, plain, key, json.getBytes("UTF-8"));
@@ -524,91 +547,22 @@ public class JSonStorage {
         }
     }
 
-    public static void saveTo(final File file, final boolean plain, final byte[] key, final byte[] data) throws StorageException {
-        final Object lock = JSonStorage.requestLock(file);
-        synchronized (lock) {
-            final File tmp = new File(file.getAbsolutePath() + ".tmp");
-            try {
-                tmp.getParentFile().mkdirs();
-                tmp.delete();
-                if (plain) {
-                    /* uncrypted */
-                    IO.writeToFile(tmp, data);
-                } else {
-                    /* encrypted */
-                    IO.writeToFile(tmp, encryptByteArray(data, key, key));
-                }
-                if (file.exists()) {
-                    if (!file.delete()) {
-                        throw new StorageException("Could not overwrite file: " + file.getAbsolutePath());
-                    }
-                }
-                if (!tmp.renameTo(file)) {
-                    throw new StorageException("Could not rename file: " + tmp + " to " + file);
-                }
-            } catch (final Exception e) {
-                throw new StorageException("Can not write to " + tmp.getAbsolutePath(), e);
-            } finally {
-                JSonStorage.unLock(file);
-            }
-        }
-    }
-
+    @Deprecated
     /**
-     * @param file
-     * @param packageData
+     * @deprecated use IO.secureWrite instead
+     *
      */
-    public static void saveTo(final File file, final Object packageData) {
-        final boolean plain = file.getName().toLowerCase().endsWith(".json");
-        JSonStorage.saveTo(file, plain, JSonStorage.KEY, JSonStorage.serializeToJsonByteArray(packageData));
-    }
-
-    /**
-     * @param pathname
-     * @param json
-     * @throws StorageException
-     */
-    public static void saveTo(final String pathname, final String jsonString) throws StorageException {
-        JSonStorage.saveTo(pathname, jsonString, JSonStorage.KEY);
-    }
-
-    public static void saveTo(final String pathName, final String jsonString, final byte[] key) {
-        try {
-            saveTo(pathName, jsonString.getBytes("UTF-8"), key);
-        } catch (final IOException e) {
-            throw new StorageException(e);
-        }
-    }
-
-    public static void saveTo(final String pathname, final byte[] jsonBytes) throws StorageException {
-        JSonStorage.saveTo(pathname, jsonBytes, JSonStorage.KEY);
-    }
-
-    public static void saveTo(final String pathname, final byte[] jsonBytes, final byte[] key) {
-        final File file = Application.getResource(pathname);
+    public static void saveTo(final File file, final boolean plain, final byte[] key, byte[] data) throws StorageException {
         final Object lock = JSonStorage.requestLock(file);
         synchronized (lock) {
             try {
-                final File tmp = new File(file.getParentFile(), file.getName() + ".tmp");
-                tmp.getParentFile().mkdirs();
-                tmp.delete();
-                if (new Regex(pathname, ".+\\.json").matches()) {
-                    /* uncrypted */
-                    IO.writeToFile(tmp, jsonBytes);
-                } else {
-                    /* encrypted */
-                    IO.writeToFile(tmp, encryptByteArray(jsonBytes, key, key));
+                file.getParentFile().mkdirs();
+                if (!plain) {
+                    data = encryptByteArray(data, key, key);
                 }
-                if (file.exists()) {
-                    if (!file.delete()) {
-                        throw new StorageException("Could not overwrite file: " + file);
-                    }
-                }
-                if (!tmp.renameTo(file)) {
-                    throw new StorageException("Could not rename file: " + tmp + " to " + file);
-                }
+                IO.secureWrite(file, data, SYNC.NONE);
             } catch (final Exception e) {
-                throw new StorageException(e);
+                throw new StorageException("Can not write to " + file.getAbsolutePath(), e);
             } finally {
                 JSonStorage.unLock(file);
             }
@@ -645,20 +599,11 @@ public class JSonStorage {
         JSonStorage.JSON_MAPPER = mapper;
     }
 
+    @Deprecated
     /**
-     * @param string
-     * @param list
-     */
-    public static void storeTo(final String string, final Object list) {
-        try {
-            JSonStorage.saveTo(string, JSonStorage.serializeToJsonByteArray(list));
-        } catch (final Exception e) {
-            throw new StorageException(e);
-        }
-    }
-
-    /**
-     * This method throws Exceptions
+     * @deprecated ..check usage and give a better name.
+     * 
+     *             This method throws Exceptions
      *
      * @param string
      * @param type

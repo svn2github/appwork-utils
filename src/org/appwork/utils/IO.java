@@ -154,7 +154,6 @@ public class IO {
                     }
                 }
             } catch (final IOException e) {
-               
                 throw e;
             } finally {
                 try {
@@ -594,6 +593,7 @@ public class IO {
     }
 
     public static void secureWrite(final File file, final byte[] bytes, final SYNC sync) throws IOException {
+        // System.out.println("DO");
         final File bac = new File(file.getAbsolutePath() + ".bac");
         if (file.getParentFile().exists() == false) {
             file.getParentFile().mkdirs();
@@ -607,8 +607,19 @@ public class IO {
             if (file.exists() && file.delete() == false) {
                 throw new IOException("could not remove " + file);
             }
-            if (!bac.renameTo(file)) {
-                throw new IOException("COuld not rename " + bac + " to " + file);
+            long t = System.currentTimeMillis();
+            int i = 0;
+            while (!bac.renameTo(file)) {
+                i++;
+                try {
+                    Thread.sleep(i * 10);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new IOException("Interrupt during write not rename " + bac + " to " + file.exists());
+                }
+                if (System.currentTimeMillis() - t > 1000) {
+                    throw new IOException("COuld not rename " + bac + " to " + file.exists());
+                }
             }
             deleteFile = false;
         } finally {

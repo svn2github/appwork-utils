@@ -40,18 +40,24 @@ import java.lang.reflect.Type;
 
 import org.appwork.storage.JSONMapper;
 import org.appwork.storage.JSonMapperException;
+import org.appwork.storage.JsonDeSerializer;
 import org.appwork.storage.JsonSerializer;
 import org.appwork.storage.TypeRef;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.node.NullNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 
 /**
  * @author thomas
@@ -70,6 +76,33 @@ public class JacksonMapper implements JSONMapper {
         mapper.configure(SerializationFeature.INDENT_OUTPUT, true);// needed as MyJDownloader Clients may use regex and fail because of
         // changed ident
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.appwork.storage.JSONMapper#addDeSerializer(java.lang.Class, org.appwork.storage.JsonDeSerializer)
+     */
+    @Override
+    public <T> void addDeSerializer(Class<T> clazz, final JsonDeSerializer<T> jsonDeSerializer) {
+        final SimpleModule mod = new SimpleModule("MyModule", new Version(1, 0, 0, null));
+        mod.addDeserializer(clazz, new com.fasterxml.jackson.databind.JsonDeserializer<T>() {
+            // @Override
+            // public void serialize(final T arg0, final JsonGenerator jgen, final SerializerProvider arg2) throws IOException,
+            // JsonProcessingException {
+            // jgen.writeRawValue(jsonSerializer.toJSonString(arg0));
+            // }
+            @Override
+            public T deserialize(JsonParser jp, DeserializationContext arg1) throws IOException, JsonProcessingException {
+                JsonNode node = jp.getCodec().readTree(jp);
+                if (node instanceof NullNode) {
+                    return jsonDeSerializer.toObject(null);
+                } else {
+                    return jsonDeSerializer.toObject(((TextNode) node).asText());
+                }
+            }
+        });
+        mapper.registerModule(mod);
     }
 
     /**

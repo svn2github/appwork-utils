@@ -80,6 +80,7 @@ public class JSonStorage {
     /* default key for encrypted json */
     static public byte[]                              KEY         = new byte[] { 0x01, 0x02, 0x11, 0x01, 0x01, 0x54, 0x01, 0x01, 0x01, 0x01, 0x12, 0x01, 0x01, 0x01, 0x22, 0x01 };
     private static final HashMap<File, AtomicInteger> LOCKS       = new HashMap<File, AtomicInteger>();
+
     static {
         /* shutdown hook to save all open Storages */
         ShutdownController.getInstance().addShutdownEvent(new ShutdownEvent() {
@@ -128,7 +129,7 @@ public class JSonStorage {
         CanStoreRules rules = new CanStoreRules() {
             @Override
             public boolean canStore(Type gType) {
-                return allowNonStorableObjects;
+                return allowNonStorableObjects && gType == Object.class;
             }
 
             @Override
@@ -162,8 +163,11 @@ public class JSonStorage {
      * @param string
      * @throws InvalidTypeException
      */
-    private static void canStoreIntern(final Type gType, final String path, CanStoreRules rules, HashSet<Object> dupeID) throws InvalidTypeException {
+    public static void canStoreIntern(final Type gType, final String path, CanStoreRules rules, HashSet<Object> dupeID) throws InvalidTypeException {
         if (!dupeID.add(gType)) {
+            return;
+        }
+        if (rules.canStore(gType)) {
             return;
         }
         if (gType == Object.class) {
@@ -201,7 +205,7 @@ public class JSonStorage {
             if (HashSet.class.isAssignableFrom(type)) {
                 return;
             }
-            if (Storable.class.isAssignableFrom(type) || rules.canStore(type)) {
+            if (Storable.class.isAssignableFrom(type)) {
                 try {
                     type.getDeclaredConstructor(new Class[] {});
                     for (final Method m : type.getDeclaredMethods()) {
@@ -602,7 +606,7 @@ public class JSonStorage {
     @Deprecated
     /**
      * @deprecated ..check usage and give a better name.
-     * 
+     *
      *             This method throws Exceptions
      *
      * @param string

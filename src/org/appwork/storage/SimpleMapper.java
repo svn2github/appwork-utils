@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -56,6 +57,22 @@ public class SimpleMapper implements JSONMapper {
 
     public SimpleMapper() {
         mapper = new JSonMapper() {
+            /*
+             * (non-Javadoc)
+             *
+             * @see org.appwork.storage.simplejson.mapper.JSonMapper#jsonToObject(org.appwork.storage.simplejson.JSonNode,
+             * java.lang.reflect.Type)
+             */
+            @Override
+            public Object jsonToObject(JSonNode json, Type type) throws MapperException {
+                for (final JsonDeSerializerEntry se : deSerializer) {
+                    if (type instanceof Class && se.clazz.isAssignableFrom((Class) type)) {
+                        return se.deSerializer.toObject(json.toString());
+                    }
+                }
+                return super.jsonToObject(json, type);
+            }
+
             @Override
             public JSonNode create(final Object obj) throws MapperException {
                 for (final JsonSerializerEntry se : serializer) {
@@ -97,7 +114,27 @@ public class SimpleMapper implements JSONMapper {
         final protected Class<?>       clazz;
     }
 
-    private final List<JsonSerializerEntry> serializer = new CopyOnWriteArrayList<JsonSerializerEntry>();
+    class JsonDeSerializerEntry {
+        /**
+         * @param <T>
+         * @param clazz2
+         * @param jsonSerializer
+         */
+        public <T> JsonDeSerializerEntry(final Class<T> clazz2, final JsonDeSerializer<T> jsonDeSerializer) {
+            clazz = clazz2;
+            deSerializer = jsonDeSerializer;
+        }
+
+        final protected JsonDeSerializer deSerializer;
+        final protected Class<?>         clazz;
+    }
+
+    private final List<JsonSerializerEntry>   serializer   = new CopyOnWriteArrayList<JsonSerializerEntry>();
+    private final List<JsonDeSerializerEntry> deSerializer = new CopyOnWriteArrayList<JsonDeSerializerEntry>();
+
+    public <T> void addDeSerializer(final Class<T> clazz, final JsonDeSerializer<T> jsonDeSerializer) {
+        deSerializer.add(new JsonDeSerializerEntry(clazz, jsonDeSerializer));
+    }
 
     /**
      * @param jsonSerializer

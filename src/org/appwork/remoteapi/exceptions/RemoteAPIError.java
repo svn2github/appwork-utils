@@ -39,6 +39,13 @@ import org.appwork.net.protocol.http.HTTPConstants.ResponseCode;
  * @author Thomas
  *
  */
+/**
+ * WARNING!: NEVER EVER CHANGE THE NAMES OF THIS ENUM. They are used as identifier in the remoteAPI. This would break frontends
+ * 
+ * @author Thomas
+ * @date 04.01.2019
+ *
+ */
 public enum RemoteAPIError implements APIError {
     SESSION(ResponseCode.ERROR_FORBIDDEN),
     API_COMMAND_NOT_FOUND(ResponseCode.ERROR_NOT_FOUND),

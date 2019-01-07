@@ -321,7 +321,6 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
             this.validateKeys(cryptedStorage);
         }
         try {
-            org.appwork.loggingv3.LogV3.finer("Init StorageHandler for Interface:" + configInterface.getName() + "|Path:" + this.path);
             this.parseInterface();
         } catch (final InterfaceParseException e) {
             throw e;

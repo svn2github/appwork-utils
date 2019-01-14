@@ -118,12 +118,12 @@ public class JSonStorage {
      * @throws InvalidTypeException
      */
     public static void canStore(final Type gType, final AllowNonStorableObjects allowNonStorableObjects) throws InvalidTypeException {
-        HashSet<Object> dupeID = new HashSet<Object>();
+        final HashSet<Object> dupeID = new HashSet<Object>();
         JSonStorage.canStoreIntern(gType, gType.toString(), allowNonStorableObjects, dupeID);
     }
 
     public static void canStore(final Type gType, final CanStoreRules rules) throws InvalidTypeException {
-        HashSet<Object> dupeID = new HashSet<Object>();
+        final HashSet<Object> dupeID = new HashSet<Object>();
         JSonStorage.canStoreIntern(gType, gType.toString(), rules, dupeID);
     }
 
@@ -142,7 +142,6 @@ public class JSonStorage {
 
             @Override
             public boolean isFollowSuperClass(Type sc) {
-                // TODO Auto-generated method stub
                 return false;
             }
         };

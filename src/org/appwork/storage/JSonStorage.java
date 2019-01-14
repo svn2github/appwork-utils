@@ -47,10 +47,12 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.crypto.BadPaddingException;
@@ -61,6 +63,7 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.appwork.remoteapi.annotations.AllowNonStorableObjects;
 import org.appwork.shutdown.ShutdownController;
 import org.appwork.shutdown.ShutdownEvent;
 import org.appwork.shutdown.ShutdownRequest;
@@ -80,7 +83,6 @@ public class JSonStorage {
     /* default key for encrypted json */
     static public byte[]                              KEY         = new byte[] { 0x01, 0x02, 0x11, 0x01, 0x01, 0x54, 0x01, 0x01, 0x01, 0x01, 0x12, 0x01, 0x01, 0x01, 0x22, 0x01 };
     private static final HashMap<File, AtomicInteger> LOCKS       = new HashMap<File, AtomicInteger>();
-
     static {
         /* shutdown hook to save all open Storages */
         ShutdownController.getInstance().addShutdownEvent(new ShutdownEvent() {
@@ -115,7 +117,7 @@ public class JSonStorage {
      *
      * @throws InvalidTypeException
      */
-    public static void canStore(final Type gType, final boolean allowNonStorableObjects) throws InvalidTypeException {
+    public static void canStore(final Type gType, final AllowNonStorableObjects allowNonStorableObjects) throws InvalidTypeException {
         HashSet<Object> dupeID = new HashSet<Object>();
         JSonStorage.canStoreIntern(gType, gType.toString(), allowNonStorableObjects, dupeID);
     }
@@ -125,11 +127,17 @@ public class JSonStorage {
         JSonStorage.canStoreIntern(gType, gType.toString(), rules, dupeID);
     }
 
-    private static void canStoreIntern(final Type gType, final String path, final boolean allowNonStorableObjects, HashSet<Object> dupeID) throws InvalidTypeException {
-        CanStoreRules rules = new CanStoreRules() {
+    private static void canStoreIntern(final Type gType, final String path, final AllowNonStorableObjects allowNonStorableObjects, HashSet<Object> dupeID) throws InvalidTypeException {
+        final Set<Class<?>> allowNonStorable;
+        if (allowNonStorableObjects != null && allowNonStorableObjects.clazz() != null && allowNonStorableObjects.clazz().length > 0) {
+            allowNonStorable = new HashSet<Class<?>>(Arrays.asList(allowNonStorableObjects.clazz()));
+        } else {
+            allowNonStorable = null;
+        }
+        final CanStoreRules rules = new CanStoreRules() {
             @Override
             public boolean canStore(Type gType) {
-                return allowNonStorableObjects && gType == Object.class;
+                return allowNonStorable != null && allowNonStorable.contains(gType);
             }
 
             @Override

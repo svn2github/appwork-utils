@@ -396,7 +396,7 @@ public class InterfaceHandler<T> {
                 continue;
             } else {
                 try {
-                    JSonStorage.canStore(t, m.getAnnotation(AllowNonStorableObjects.class) != null);
+                    JSonStorage.canStore(t, m.getAnnotation(AllowNonStorableObjects.class));
                 } catch (final InvalidTypeException e) {
                     throw new ParseException("Parameter " + t + " of " + m + " is invalid", e);
                 }
@@ -426,7 +426,7 @@ public class InterfaceHandler<T> {
                         }
                     }
                     if (!found) {
-                        JSonStorage.canStore(m.getGenericReturnType(), m.getAnnotation(AllowNonStorableObjects.class) != null);
+                        JSonStorage.canStore(m.getGenericReturnType(), m.getAnnotation(AllowNonStorableObjects.class));
                     }
                 } catch (final InvalidTypeException e) {
                     final AllowStorage allow = m.getAnnotation(AllowStorage.class);

@@ -51,6 +51,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.appwork.exceptions.WTFException;
 import org.appwork.loggingv3.LogV3;
+import org.appwork.remoteapi.annotations.AllowNonStorableObjects;
 import org.appwork.scheduler.DelayedRunnable;
 import org.appwork.shutdown.ShutdownController;
 import org.appwork.shutdown.ShutdownEvent;
@@ -886,7 +887,7 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
                             }
                         }
                         if (!found) {
-                            JSonStorage.canStore(m.getGenericReturnType(), false);
+                            JSonStorage.canStore(m.getGenericReturnType(), (AllowNonStorableObjects) null);
                         }
                     } catch (final InvalidTypeException e) {
                         final AllowStorage allow = m.getAnnotation(AllowStorage.class);
@@ -934,7 +935,7 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
                         continue;
                     }
                     try {
-                        JSonStorage.canStore(m.getGenericReturnType(), false);
+                        JSonStorage.canStore(m.getGenericReturnType(), (AllowNonStorableObjects) null);
                     } catch (final InvalidTypeException e) {
                         this.error(new InterfaceParseException(e));
                         keyGetterMap.remove(key);
@@ -970,7 +971,7 @@ public class StorageHandler<T extends ConfigInterface> implements InvocationHand
                         continue;
                     }
                     try {
-                        JSonStorage.canStore(m.getGenericParameterTypes()[0], false);
+                        JSonStorage.canStore(m.getGenericParameterTypes()[0], (AllowNonStorableObjects) null);
                     } catch (final InvalidTypeException e) {
                         final AllowStorage allow = m.getAnnotation(AllowStorage.class);
                         boolean found = false;

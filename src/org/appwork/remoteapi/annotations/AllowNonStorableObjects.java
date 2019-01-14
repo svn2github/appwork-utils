@@ -40,10 +40,11 @@ import java.lang.annotation.Target;
 
 /**
  * @author daniel
- * 
+ *
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.METHOD })
 @HiddenForHelpDocs
 public @interface AllowNonStorableObjects {
+    Class<?>[] clazz() default Object.class;
 }

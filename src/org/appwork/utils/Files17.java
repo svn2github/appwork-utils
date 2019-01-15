@@ -54,46 +54,53 @@ public class Files17 {
 
     public static File guessRoot(File file, boolean throwException) throws IOException {
         if (JVMVersion.get() >= JVMVersion.JAVA17 && JVMVersion.get() < JVMVersion.JAVA19) {
-            LogV3.logger(Files17.class).info("Guess Root for " + file);
-            FileStore fileFileStore = null;
-            File existingFile = file;
-            while (existingFile != null) {
-                if (existingFile.exists()) {
-                    try {
-                        fileFileStore = Files.getFileStore(existingFile.toPath());
-                        break;
-                    } catch (InvalidPathException e) {
-                        // wrong locale, java.nio.file.InvalidPathException: Malformed input or input contains unmappable characters
-                        if (throwException) {
-                            throw e;
-                        } else {
+            final long startTimeStamp = System.currentTimeMillis();
+            try {
+                FileStore fileFileStore = null;
+                File existingFile = file;
+                while (existingFile != null) {
+                    if (existingFile.exists()) {
+                        try {
+                            fileFileStore = Files.getFileStore(existingFile.toPath());
                             break;
-                        }
-                    } catch (IOException e) {
-                        // https://bugs.openjdk.java.net/browse/JDK-8165852
-                        // https://bugs.openjdk.java.net/browse/JDK-8166162
-                        if (throwException) {
-                            throw e;
-                        } else {
-                            if (!StringUtils.containsIgnoreCase(e.getMessage(), "mount point not found")) {
+                        } catch (InvalidPathException e) {
+                            // wrong locale, java.nio.file.InvalidPathException: Malformed input or input contains unmappable characters
+                            if (throwException) {
                                 throw e;
                             } else {
                                 break;
                             }
+                        } catch (IOException e) {
+                            // https://bugs.openjdk.java.net/browse/JDK-8165852
+                            // https://bugs.openjdk.java.net/browse/JDK-8166162
+                            if (throwException) {
+                                throw e;
+                            } else {
+                                if (!StringUtils.containsIgnoreCase(e.getMessage(), "mount point not found")) {
+                                    throw e;
+                                } else {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    existingFile = existingFile.getParentFile();
+                }
+                if (fileFileStore != null) {
+                    for (final FileStore fileStore : FileSystems.getDefault().getFileStores()) {
+                        if (fileStore.equals(fileFileStore)) {
+                            final Path fileStorePath = getPath(fileStore);
+                            if (fileStorePath != null) {
+                                LogV3.logger(Files17.class).info("guessRoot:" + file + "|root:" + fileStorePath + "|duration:" + (System.currentTimeMillis() - startTimeStamp));
+                                return fileStorePath.toFile();
+                            }
                         }
                     }
                 }
-                existingFile = existingFile.getParentFile();
-            }
-            if (fileFileStore != null) {
-                for (final FileStore fileStore : FileSystems.getDefault().getFileStores()) {
-                    if (fileStore.equals(fileFileStore)) {
-                        final Path fileStorePath = getPath(fileStore);
-                        if (fileStorePath != null) {
-                            return fileStorePath.toFile();
-                        }
-                    }
-                }
+                LogV3.logger(Files17.class).info("guessRoot:" + file + "|failed|duration:" + (System.currentTimeMillis() - startTimeStamp));
+            } catch (final IOException e) {
+                LogV3.logger(Files17.class).info("guessRoot:" + file + "|exception:" + e + "|duration:" + (System.currentTimeMillis() - startTimeStamp));
+                throw e;
             }
         }
         return null;

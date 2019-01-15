@@ -76,6 +76,7 @@ import org.appwork.utils.encoding.URLDecoderFixer;
 import org.appwork.utils.net.Base64InputStream;
 import org.appwork.utils.net.ChunkedInputStream;
 import org.appwork.utils.net.CountingOutputStream;
+import org.appwork.utils.net.EmptyInputStream;
 import org.appwork.utils.net.LimitedInputStream;
 import org.appwork.utils.net.PublicSuffixList;
 import org.appwork.utils.net.SocketFactory;
@@ -199,11 +200,11 @@ public class HTTPConnectionImpl implements HTTPConnection {
     protected static final HashMap<String, LinkedList<KeepAliveSocketStream>> KEEPALIVEPOOL         = new HashMap<String, LinkedList<KeepAliveSocketStream>>();
     protected static final Object                                             LOCK                  = new Object();
     protected static final DelayedRunnable                                    KEEPALIVECLEANUPTIMER = new DelayedRunnable(10000, 30000) {
-                                                                                                        @Override
-                                                                                                        public void delayedrun() {
-                                                                                                            cleanupKeepAlivePools();
-                                                                                                        }
-                                                                                                    };
+        @Override
+        public void delayedrun() {
+            cleanupKeepAlivePools();
+        }
+    };
 
     private static final void cleanupKeepAlivePools() {
         synchronized (HTTPConnectionImpl.LOCK) {
@@ -347,7 +348,8 @@ public class HTTPConnectionImpl implements HTTPConnection {
         if (socketStream != null) {
             final Socket socket = socketStream.getSocket();
             if (socket != null && this.isKeepAlivedEnabled() && this.isKeepAliveOK() && socket.isConnected() && !socket.isClosed() && socket.isInputShutdown() == false && socket.isOutputShutdown() == false) {
-                if (this.inputStream != null && this.inputStream instanceof StreamValidEOF && ((StreamValidEOF) this.inputStream).isValidEOF()) {
+                final InputStream rawInputStream = getRawInputStream();
+                if (rawInputStream != null && rawInputStream instanceof StreamValidEOF && ((StreamValidEOF) rawInputStream).isValidEOF()) {
                     if (!this.isRequiresOutputStream() || ((CountingOutputStream) this.outputStream).transferedBytes() == this.postTodoLength) {
                         socket.setKeepAlive(true);
                         synchronized (HTTPConnectionImpl.LOCK) {
@@ -1234,6 +1236,10 @@ public class HTTPConnectionImpl implements HTTPConnection {
         return ret;
     }
 
+    protected InputStream getRawInputStream() {
+        return inputStream;
+    }
+
     public InputStream getInputStream() throws IOException {
         if (!isLegacyConnectEnabled() && !isConnectionSocketValid()) {
             throw new IllegalStateException("not connected!");
@@ -1243,33 +1249,37 @@ public class HTTPConnectionImpl implements HTTPConnection {
         final int code = this.getResponseCode();
         if (this.isOK() || code == 404 || code == 403 || code == 416 || code == 401) {
             if (this.convertedInputStream == null) {
-                if (this.contentDecoded && !RequestMethod.HEAD.equals(this.getRequestMethod())) {
+                InputStream rawInputStream = getRawInputStream();
+                if (contentDecoded && getContentLength() == 0) {
+                    // Content-Length is 0, return EmptyInputStream
+                    this.convertedInputStream = new EmptyInputStream();
+                } else if (this.contentDecoded && !RequestMethod.HEAD.equals(this.getRequestMethod())) {
                     final String encodingTransfer = this.getHeaderField("Content-Transfer-Encoding");
                     if ("base64".equalsIgnoreCase(encodingTransfer)) {
                         /* base64 encoded content */
-                        this.inputStream = new Base64InputStream(this.inputStream);
+                        rawInputStream = new Base64InputStream(rawInputStream);
                     }
                     /* we convert different content-encodings to normal inputstream */
                     final String encoding = this.getHeaderField("Content-Encoding");
                     if (encoding == null || encoding.length() == 0 || "none".equalsIgnoreCase(encoding)) {
                         /* no encoding */
-                        this.convertedInputStream = this.inputStream;
+                        this.convertedInputStream = rawInputStream;
                     } else if ("gzip".equalsIgnoreCase(encoding)) {
                         /* gzip encoding */
-                        this.convertedInputStream = new GZIPInputStream(this.inputStream);
+                        this.convertedInputStream = new GZIPInputStream(rawInputStream);
                     } else if ("deflate".equalsIgnoreCase(encoding)) {
                         /* deflate encoding */
-                        this.convertedInputStream = new java.util.zip.InflaterInputStream(this.inputStream, new java.util.zip.Inflater(true));
+                        this.convertedInputStream = new java.util.zip.InflaterInputStream(rawInputStream, new java.util.zip.Inflater(true));
                     } else {
                         /* unsupported */
                         this.contentDecoded = false;
-                        this.convertedInputStream = this.inputStream;
+                        this.convertedInputStream = rawInputStream;
                     }
                 } else {
                     /*
                      * use original inputstream OR LimitedInputStream from HeadRequest
                      */
-                    this.convertedInputStream = this.inputStream;
+                    this.convertedInputStream = rawInputStream;
                 }
             }
             return this.convertedInputStream;
@@ -1361,7 +1371,7 @@ public class HTTPConnectionImpl implements HTTPConnection {
             }
         }
         sb.append("----------------Request-------------------------\r\n");
-        if (this.inputStream != null) {
+        if (getRawInputStream() != null) {
             sb.append(this.httpMethod.toString()).append(' ').append(this.httpPath).append(" HTTP/1.1\r\n");
             final Iterator<Entry<String, String>> it = this.getRequestProperties().entrySet().iterator();
             while (it.hasNext()) {
@@ -1408,7 +1418,7 @@ public class HTTPConnectionImpl implements HTTPConnection {
         final StringBuilder sb = new StringBuilder();
         sb.append("----------------Response Information------------\r\n");
         try {
-            if (this.inputStream != null) {
+            if (getRawInputStream() != null) {
                 final long lconnectTime = getConnectTime();
                 if (lconnectTime >= 0) {
                     sb.append("Connection-Time: ").append(lconnectTime + "ms").append("\r\n");

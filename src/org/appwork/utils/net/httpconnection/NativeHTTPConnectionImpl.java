@@ -57,6 +57,7 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSession;
 
+import org.appwork.net.protocol.http.HTTPConstants;
 import org.appwork.utils.StringUtils;
 import org.appwork.utils.net.CountingOutputStream;
 import org.appwork.utils.net.EmptyInputStream;
@@ -396,36 +397,32 @@ public class NativeHTTPConnectionImpl implements HTTPConnection {
         if (this.isOK() || code == 404 || code == 403 || code == 416 || code == 401) {
             if (this.convertedInputStream == null) {
                 final InputStream rawInputStream = getRawInputStream();
-                if (contentDecoded && getContentLength() == 0) {
-                    // Content-Length is 0, return EmptyInputStream
-                    this.convertedInputStream = new EmptyInputStream();
-                } else if (this.contentDecoded && !RequestMethod.HEAD.equals(this.getRequestMethod())) {
-                    /**
-                     * disabled because it is unknown if httpurlconnection transparently handles transfer-encoding as it already handles
-                     * chunked transfer-encoding
-                     *
-                     */
-                    // final String encodingTransfer =
-                    // this.getHeaderField("Content-Transfer-Encoding");
-                    // if ("base64".equalsIgnoreCase(encodingTransfer)) {
-                    // /* base64 encoded content */
-                    // this.inputStream = new Base64InputStream(this.inputStream);
-                    // }
-                    /* we convert different content-encodings to normal inputstream */
-                    final String encoding = this.getHeaderField("Content-Encoding");
-                    if (encoding == null || encoding.length() == 0 || "none".equalsIgnoreCase(encoding)) {
-                        /* no encoding */
-                        this.convertedInputStream = rawInputStream;
-                    } else if ("gzip".equalsIgnoreCase(encoding)) {
-                        /* gzip encoding */
-                        this.convertedInputStream = new GZIPInputStream(rawInputStream);
-                    } else if ("deflate".equalsIgnoreCase(encoding)) {
-                        /* deflate encoding */
-                        this.convertedInputStream = new java.util.zip.InflaterInputStream(rawInputStream, new java.util.zip.Inflater(true));
+                if (this.contentDecoded && !RequestMethod.HEAD.equals(this.getRequestMethod())) {
+                    if (getContentLength() == 0) {
+                        // Content-Length is 0, return EmptyInputStream
+                        this.convertedInputStream = new EmptyInputStream();
                     } else {
-                        /* unsupported */
-                        this.contentDecoded = false;
-                        this.convertedInputStream = rawInputStream;
+                        /**
+                         * java.net.HttpURLConnection transparently handles Content-Transfer-Encoding as it already handles chunked
+                         * Transfer-Encoding
+                         *
+                         */
+                        /* we convert different content-encodings to normal inputstream */
+                        final String encoding = this.getHeaderField(HTTPConstants.HEADER_RESPONSE_CONTENT_ENCODING);
+                        if (encoding == null || encoding.length() == 0 || "none".equalsIgnoreCase(encoding) || "identity".equalsIgnoreCase(encoding)) {
+                            /* no encoding */
+                            this.convertedInputStream = rawInputStream;
+                        } else if ("gzip".equalsIgnoreCase(encoding)) {
+                            /* gzip encoding */
+                            this.convertedInputStream = new GZIPInputStream(rawInputStream);
+                        } else if ("deflate".equalsIgnoreCase(encoding)) {
+                            /* deflate encoding */
+                            this.convertedInputStream = new java.util.zip.InflaterInputStream(rawInputStream, new java.util.zip.Inflater(true));
+                        } else {
+                            /* unsupported */
+                            this.contentDecoded = false;
+                            this.convertedInputStream = rawInputStream;
+                        }
                     }
                 } else {
                     /* use original inputstream */

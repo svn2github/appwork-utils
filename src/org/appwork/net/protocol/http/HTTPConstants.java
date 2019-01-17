@@ -289,10 +289,11 @@ public class HTTPConstants {
     /**
      * In case we have dynamic content-length or content-length is not known in advance
      */
-    public static final String HEADER_RESPONSE_TRANSFER_ENCODING             = "Transfer-Encoding";
+    public static final String HEADER_RESPONSE_CONTENT_TRANSFER_ENCODING     = "Content-Transfer-Encoding";    // https://www.w3.org/Protocols/rfc1341/5_Content-Transfer-Encoding.html
+    public static final String HEADER_RESPONSE_TRANSFER_ENCODING             = "Transfer-Encoding";            // https://tools.ietf.org/html/rfc2616#section-3.6
     public static final String HEADER_RESPONSE_TRANSFER_ENCODING_CHUNKED     = "chunked";
     public static final String HEADER_RESPONSE_ACCEPT_RANGES                 = "Accept-Ranges";
-    public static final String HEADER_RESPONSE_CONTENT_ENCODING              = "Content-Encoding";
+    public static final String HEADER_RESPONSE_CONTENT_ENCODING              = "Content-Encoding";             // https://tools.ietf.org/html/rfc2616#section-3.5
     public static final String HEADER_RESPONSE_LOCATION                      = "Location";
     public static final String HEADER_RESPONSE_SERVER                        = "Server";
     public static final String HEADER_RESPONSE_ACCESS_CONTROL_ALLOW_ORIGIN   = "Access-Control-Allow-Origin";

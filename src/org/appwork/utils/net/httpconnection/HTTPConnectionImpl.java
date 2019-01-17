@@ -1250,30 +1250,32 @@ public class HTTPConnectionImpl implements HTTPConnection {
         if (this.isOK() || code == 404 || code == 403 || code == 416 || code == 401) {
             if (this.convertedInputStream == null) {
                 InputStream rawInputStream = getRawInputStream();
-                if (contentDecoded && getContentLength() == 0) {
-                    // Content-Length is 0, return EmptyInputStream
-                    this.convertedInputStream = new EmptyInputStream();
-                } else if (this.contentDecoded && !RequestMethod.HEAD.equals(this.getRequestMethod())) {
-                    final String encodingTransfer = this.getHeaderField("Content-Transfer-Encoding");
-                    if ("base64".equalsIgnoreCase(encodingTransfer)) {
-                        /* base64 encoded content */
-                        rawInputStream = new Base64InputStream(rawInputStream);
-                    }
-                    /* we convert different content-encodings to normal inputstream */
-                    final String encoding = this.getHeaderField("Content-Encoding");
-                    if (encoding == null || encoding.length() == 0 || "none".equalsIgnoreCase(encoding)) {
-                        /* no encoding */
-                        this.convertedInputStream = rawInputStream;
-                    } else if ("gzip".equalsIgnoreCase(encoding)) {
-                        /* gzip encoding */
-                        this.convertedInputStream = new GZIPInputStream(rawInputStream);
-                    } else if ("deflate".equalsIgnoreCase(encoding)) {
-                        /* deflate encoding */
-                        this.convertedInputStream = new java.util.zip.InflaterInputStream(rawInputStream, new java.util.zip.Inflater(true));
+                if (this.contentDecoded && !RequestMethod.HEAD.equals(this.getRequestMethod())) {
+                    if (getContentLength() == 0) {
+                        // Content-Length is 0, return EmptyInputStream
+                        this.convertedInputStream = new EmptyInputStream();
                     } else {
-                        /* unsupported */
-                        this.contentDecoded = false;
-                        this.convertedInputStream = rawInputStream;
+                        final String encodingTransfer = this.getHeaderField(HTTPConstants.HEADER_RESPONSE_CONTENT_TRANSFER_ENCODING);
+                        if ("base64".equalsIgnoreCase(encodingTransfer)) {
+                            /* base64 encoded content */
+                            rawInputStream = new Base64InputStream(rawInputStream);
+                        }
+                        /* we convert different content-encodings to normal inputstream */
+                        final String encoding = this.getHeaderField(HTTPConstants.HEADER_RESPONSE_CONTENT_ENCODING);
+                        if (encoding == null || encoding.length() == 0 || "none".equalsIgnoreCase(encoding) || "identity".equalsIgnoreCase(encoding)) {
+                            /* no encoding */
+                            this.convertedInputStream = rawInputStream;
+                        } else if ("gzip".equalsIgnoreCase(encoding)) {
+                            /* gzip encoding */
+                            this.convertedInputStream = new GZIPInputStream(rawInputStream);
+                        } else if ("deflate".equalsIgnoreCase(encoding)) {
+                            /* deflate encoding */
+                            this.convertedInputStream = new java.util.zip.InflaterInputStream(rawInputStream, new java.util.zip.Inflater(true));
+                        } else {
+                            /* unsupported */
+                            this.contentDecoded = false;
+                            this.convertedInputStream = rawInputStream;
+                        }
                     }
                 } else {
                     /*

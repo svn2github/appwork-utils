@@ -137,7 +137,7 @@ public class JSonStorage {
         final CanStoreRules rules = new CanStoreRules() {
             @Override
             public boolean canStore(Type gType) {
-                return allowNonStorable != null && allowNonStorable.contains(gType);
+                return allowNonStorable != null;// && allowNonStorable.contains(gType);
             }
 
             @Override

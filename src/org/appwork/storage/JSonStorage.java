@@ -137,7 +137,7 @@ public class JSonStorage {
         final CanStoreRules rules = new CanStoreRules() {
             @Override
             public boolean canStore(Type gType) {
-                return allowNonStorable != null;// && allowNonStorable.contains(gType);
+                return allowNonStorable != null && allowNonStorable.contains(gType);
             }
 
             @Override
@@ -178,10 +178,9 @@ public class JSonStorage {
             return;
         }
         if (gType == Object.class) {
-            if (rules.canStore(gType)) {
-                return;
+            if (!rules.canStore(gType)) {
+                throw new InvalidTypeException(gType, "Cannot store Object: " + path);
             }
-            throw new InvalidTypeException(gType, "Cannot store Object: " + path);
         }
         if (gType instanceof Class) {
             final Class<?> type = (Class<?>) gType;

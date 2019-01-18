@@ -173,16 +173,15 @@ public class JSonStorage {
     public static void canStoreIntern(final Type gType, final String path, CanStoreRules rules, HashSet<Object> dupeID) throws InvalidTypeException {
         if (!dupeID.add(gType)) {
             return;
-        }
-        if (rules.canStore(gType)) {
+        } else if (rules.canStore(gType)) {
             return;
-        }
-        if (gType == Object.class) {
-            if (!rules.canStore(gType)) {
+        } else if (gType == Object.class) {
+            if (rules.canStore(gType)) {
+                return;
+            } else {
                 throw new InvalidTypeException(gType, "Cannot store Object: " + path);
             }
-        }
-        if (gType instanceof Class) {
+        } else if (gType instanceof Class) {
             final Class<?> type = (Class<?>) gType;
             if (type == void.class) {
                 throw new InvalidTypeException(gType, "Void is not accepted: " + path);
